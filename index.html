@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG System - A vida imita GURPS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('Cris2.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 140, 0, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(255, 69, 0, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            background: linear-gradient(45deg, #ffd700, #ff8c00, #ff4500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.8rem;
+            font-style: italic;
+            margin-bottom: 40px;
+            color: #e0e0e0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            max-width: 800px;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #ccc;
+            animation: fadeIn 1.5s ease;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 50px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff8c00, #ff4500);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #ff4500, #ff8c00);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(255, 69, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #ff8c00;
+            border: 3px solid #ff8c00;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 140, 0, 0.1);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(255, 140, 0, 0.3);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .feature {
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .feature:hover {
+            transform: translateY(-10px);
+            background: rgba(40, 40, 50, 0.8);
+            border-color: rgba(255, 140, 0, 0.5);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #ff8c00;
+            background: linear-gradient(45deg, #ff8c00, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: #ffd700;
+        }
+
+        .feature p {
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        .system-description {
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            border-left: 5px solid #ff8c00;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 2s ease;
+        }
+
+        .system-description h2 {
+            color: #ff8c00;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .system-description p {
+            color: #e0e0e0;
+            line-height: 1.7;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            animation: fadeIn 2.5s ease;
+        }
+
+        /* Animações */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 1024px) {
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.8rem;
+            }
+            
+            .header p {
+                font-size: 1.4rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                justify-content: center;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .system-description {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RPG SYSTEM</h1>
+            <p>A vida imita GURPS</p>
+        </div>
+        
+        <div class="tagline">
+            <p>Um sistema completo de RPG que combina a profundidade do GURPS com uma interface moderna e intuitiva. Crie personagens únicos, viva aventuras épicas e compartilhe histórias inesquecíveis.</p>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="register.html" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i>
+                Cadastre-se
+            </a>
+            <a href="login.html" class="btn btn-secondary">
+                <i class="fas fa-sign-in-alt"></i>
+                Entrar
+            </a>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-dice-d20"></i>
+                <h3>Sistema Completo</h3>
+                <p>Regras detalhadas de RPG baseadas no GURPS, com suporte para diversos cenários e estilos de jogo.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-users"></i>
+                <h3>Multijogador</h3>
+                <p>Jogue com amigos em tempo real, com sistema de chat integrado e gerenciamento de grupo.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-dragon"></i>
+                <h3>Mundo Épico</h3>
+                <p>Explore mundos ricos e detalhados, com histórias cativantes e desafios memoráveis.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Personagens Únicos</h3>
+                <p>Sistema de criação de personagens completo com atributos, vantagens, desvantagens e perícias.</p>
+            </div>
+        </div>
+        
+        <div class="system-description">
+            <h2>O que é o RPG System?</h2>
+            <p>O RPG System é uma plataforma moderna que traz a experiência do GURPS (Generic Universal RolePlaying System) para o ambiente digital. Desenvolvido para jogadores e mestres que buscam profundidade estratégica e flexibilidade narrativa.</p>
+            
+            <p>Com nosso sistema, você pode criar personagens complexos usando pontos de experiência, escolher entre centenas de vantagens e desvantagens, desenvolver perícias específicas e equipar seu herói com itens únicos. Tudo isso em uma interface intuitiva que facilita o gerenciamento durante as sessões de jogo.</p>
+            
+            <p>Os mestres têm acesso a ferramentas poderosas para criar encontres, gerenciar NPCs, controlar a progressão da campanha e muito mais. A integração em tempo real permite que todos os jogadores vejam as atualizações instantaneamente.</p>
+            
+            <p>Junte-se à nossa comunidade e descubra um novo modo de viver aventuras épicas!</p>
+        </div>
+        
+        <div class="footer">
+            <p>RPG System &copy; 2024 - Desenvolvido para amantes de RPG</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Verificar se o usuário já está logado
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                // Redirecionar para a home se já estiver logado
+                window.location.href = 'home.html';
+            }
+        }
+        
+        // Verificar autenticação ao carregar a página
+        document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+</body>
+</html>
