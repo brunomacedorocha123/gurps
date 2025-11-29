@@ -177,6 +177,16 @@ function atualizarCustos() {
 // ===== INICIALIZAÇÃO =====
 
 function inicializarAtributos() {
+    // Remove o loading e mostra o conteúdo
+    const atributosTab = document.getElementById('atributos');
+    if (atributosTab) {
+        atributosTab.innerHTML = atributosTab.innerHTML.replace('loading', '');
+        const loadingElement = atributosTab.querySelector('.loading');
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
+    }
+    
     configurarEventListeners();
     atualizarAtributos();
 }
@@ -250,21 +260,28 @@ window.carregarDadosAtributos = carregarDadosAtributos;
 
 // Inicialização quando a aba for carregada
 document.addEventListener('DOMContentLoaded', function() {
-    // Aguarda a aba de atributos ser ativada
+    // Inicializa imediatamente se a aba já estiver ativa
+    const atributosTab = document.getElementById('atributos');
+    if (atributosTab && atributosTab.classList.contains('active')) {
+        inicializarAtributos();
+    }
+    
+    // Observa mudanças nas abas
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const atributosTab = document.getElementById('atributos');
-                if (atributosTab.classList.contains('active')) {
-                    inicializarAtributos();
-                    observer.disconnect();
+                const tab = mutation.target;
+                if (tab.id === 'atributos' && tab.classList.contains('active')) {
+                    setTimeout(() => {
+                        inicializarAtributos();
+                    }, 100);
                 }
             }
         });
     });
     
-    const atributosTab = document.getElementById('atributos');
-    if (atributosTab) {
-        observer.observe(atributosTab, { attributes: true });
-    }
+    // Observa todas as abas
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        observer.observe(tab, { attributes: true });
+    });
 });
