@@ -1,9 +1,9 @@
-// caracteristicas-altura-peso.js
+// caracteristicas-altura-peso.js - VERSÃO COMPLETA CORRIGIDA
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
         this.peso = 70;
-        this.stBase = 10;
+        this.stBase = 10; // Valor inicial, será atualizado
         
         // Tabelas oficiais do GURPS
         this.heightRanges = {
@@ -42,6 +42,7 @@ class SistemaAlturaPeso {
         this.carregarDadosSalvos();
         this.configurarEventos();
         this.configurarObservadores();
+        this.atualizarSTReal(); // Busca ST real imediatamente
         this.calcularValoresIniciais();
         this.atualizarDisplay();
         this.inicializado = true;
@@ -82,14 +83,30 @@ class SistemaAlturaPeso {
     }
 
     configurarObservadores() {
-        // Observar mudanças no ST
+        // Observar mudanças no ST dos atributos - CORREÇÃO PRINCIPAL
         document.addEventListener('atributosAlterados', (e) => {
+            console.log('🎯 Evento atributosAlterados recebido:', e.detail);
             if (e.detail && e.detail.ST !== undefined) {
                 this.stBase = e.detail.ST;
                 this.calcularValoresBase();
                 this.atualizarDisplay();
+                this.salvarDados();
             }
         });
+
+        // Também observar mudanças específicas no input ST
+        const inputST = document.getElementById('ST');
+        if (inputST) {
+            inputST.addEventListener('change', (e) => {
+                this.atualizarSTReal();
+            });
+            inputST.addEventListener('input', (e) => {
+                clearTimeout(this.stTimeout);
+                this.stTimeout = setTimeout(() => {
+                    this.atualizarSTReal();
+                }, 500);
+            });
+        }
 
         // Observar mudanças nas características físicas
         document.addEventListener('caracteristicasFisicasAlteradas', (e) => {
@@ -99,6 +116,46 @@ class SistemaAlturaPeso {
                 this.atualizarDisplay();
             }
         });
+
+        // Tentar pegar ST real imediatamente se disponível
+        setTimeout(() => this.atualizarSTReal(), 1000);
+    }
+
+    // NOVO MÉTODO: Buscar ST real do sistema de atributos
+    atualizarSTReal() {
+        // Método 1: Tentar pegar do input ST diretamente
+        const inputST = document.getElementById('ST');
+        if (inputST && inputST.value) {
+            const stValor = parseInt(inputST.value);
+            if (!isNaN(stValor) && stValor !== this.stBase) {
+                console.log('📊 ST atualizado via input:', stValor);
+                this.stBase = stValor;
+                this.calcularValoresBase();
+                this.atualizarDisplay();
+                return;
+            }
+        }
+
+        // Método 2: Tentar pegar do sistema de atributos
+        if (typeof obterDadosAtributos === 'function') {
+            try {
+                const dadosAtributos = obterDadosAtributos();
+                if (dadosAtributos && dadosAtributos.ST && dadosAtributos.ST !== this.stBase) {
+                    console.log('📊 ST atualizado via sistema:', dadosAtributos.ST);
+                    this.stBase = dadosAtributos.ST;
+                    this.calcularValoresBase();
+                    this.atualizarDisplay();
+                }
+            } catch (error) {
+                console.log('❌ Erro ao obter ST do sistema:', error);
+            }
+        }
+
+        // Método 3: Disparar evento para solicitar ST atual
+        const evento = new CustomEvent('solicitarST', {
+            detail: { origem: 'sistemaAlturaPeso' }
+        });
+        document.dispatchEvent(evento);
     }
 
     ajustarAltura(variacao) {
@@ -122,6 +179,7 @@ class SistemaAlturaPeso {
         this.calcularPesoIdeal();
         this.atualizarDisplay();
         this.salvarDados();
+        this.notificarSistemaPrincipal();
     }
 
     ajustarPeso(variacao) {
@@ -144,6 +202,7 @@ class SistemaAlturaPeso {
         
         this.atualizarDisplay();
         this.salvarDados();
+        this.notificarSistemaPrincipal();
     }
 
     calcularValoresIniciais() {
@@ -152,13 +211,56 @@ class SistemaAlturaPeso {
     }
 
     calcularValoresBase() {
+        console.log('📐 Calculando valores base para ST:', this.stBase);
+        
         // Encontrar a faixa do ST atual
         this.stRange = this.encontrarFaixaST(this.stBase);
         this.alturaMedia = this.stRange ? this.stRange.media : 1.70;
         this.pesoMedio = this.stRange ? this.calcularPesoMedio() : 70;
+        
+        console.log('📐 Valores calculados:', {
+            stRange: this.stRange,
+            alturaMedia: this.alturaMedia,
+            pesoMedio: this.pesoMedio
+        });
     }
 
     encontrarFaixaST(st) {
+        // Para ST acima de 14, usar fórmula de extrapolação
+        if (st > 14) {
+            const baseST = 14;
+            const baseAltura = this.heightRanges[14].media;
+            const basePeso = this.weightRanges[14].media;
+            
+            const alturaExtra = (st - baseST) * 0.05; // +5cm por ST acima de 14
+            const pesoExtra = (st - baseST) * 10; // +10kg por ST acima de 14
+            
+            return {
+                min: this.heightRanges[14].min + alturaExtra,
+                max: this.heightRanges[14].max + alturaExtra,
+                media: baseAltura + alturaExtra,
+                pesoMedia: basePeso + pesoExtra
+            };
+        }
+        
+        // Para ST abaixo de 6, usar fórmula de extrapolação
+        if (st < 6) {
+            const baseST = 6;
+            const baseAltura = this.heightRanges[6].media;
+            const basePeso = this.weightRanges[6].media;
+            
+            const alturaReducao = (baseST - st) * 0.05; // -5cm por ST abaixo de 6
+            const pesoReducao = (baseST - st) * 5; // -5kg por ST abaixo de 6
+            
+            return {
+                min: this.heightRanges[6].min - alturaReducao,
+                max: this.heightRanges[6].max - alturaReducao,
+                media: baseAltura - alturaReducao,
+                pesoMedia: basePeso - pesoReducao
+            };
+        }
+        
+        // ST entre 6 e 14 - usar tabela
         for (let stValue in this.heightRanges) {
             const stNum = parseInt(stValue);
             if (st === stNum) {
@@ -168,6 +270,7 @@ class SistemaAlturaPeso {
                 };
             }
         }
+        
         return null;
     }
 
@@ -178,13 +281,11 @@ class SistemaAlturaPeso {
 
     calcularPesoIdeal() {
         // Peso ideal baseado na altura (fórmula simplificada do GURPS)
-        // BMI aproximado para personagem médio
         const alturaCm = this.altura * 100;
-        const bmiIdeal = 22; // BMI médio saudável
         this.pesoIdeal = Math.round((alturaCm - 100) * 0.9); // Fórmula simplificada
         
         // Ajustar pelo multiplicador das características físicas
-        this.pesoAjustado = Math.round(this.pesoIdeal * this.multiplicadorPeso);
+        this.calcularPesoAjustado();
     }
 
     calcularPesoAjustado() {
@@ -214,13 +315,13 @@ class SistemaAlturaPeso {
         let status, classe;
         
         if (Math.abs(percentual) < 5) {
-            status = "Na média para ST";
+            status = "Na média para ST " + this.stBase;
             classe = "normal";
         } else if (percentual > 0) {
-            status = `Alto (+${Math.abs(percentual).toFixed(1)}%)`;
+            status = `Alto (+${Math.abs(percentual).toFixed(1)}%) para ST ${this.stBase}`;
             classe = "acima";
         } else {
-            status = `Baixo (-${Math.abs(percentual).toFixed(1)}%)`;
+            status = `Baixo (-${Math.abs(percentual).toFixed(1)}%) para ST ${this.stBase}`;
             classe = "abaixo";
         }
 
@@ -318,8 +419,13 @@ class SistemaAlturaPeso {
                 const dados = JSON.parse(dadosSalvos);
                 if (dados.altura !== undefined) this.altura = dados.altura;
                 if (dados.peso !== undefined) this.peso = dados.peso;
+                if (dados.stBase !== undefined) this.stBase = dados.stBase;
                 
-                console.log('✅ Dados de altura/peso carregados:', { altura: this.altura, peso: this.peso });
+                console.log('✅ Dados de altura/peso carregados:', { 
+                    altura: this.altura, 
+                    peso: this.peso, 
+                    stBase: this.stBase 
+                });
             }
         } catch (error) {
             console.log('❌ Erro ao carregar dados de altura/peso:', error);
@@ -399,7 +505,8 @@ class SistemaAlturaPeso {
             valido: alturaValida && pesoValido,
             altura: this.altura,
             peso: this.peso,
-            mensagem: `Altura: ${this.altura}m, Peso: ${this.peso}kg`,
+            stBase: this.stBase,
+            mensagem: `ST: ${this.stBase}, Altura: ${this.altura}m, Peso: ${this.peso}kg`,
             sugestoes: this.sugerirAjustes()
         };
     }
@@ -472,3 +579,12 @@ document.addEventListener('caracteristicasCarregadas', function() {
 window.ajustarAltura = (variacao) => sistemaAlturaPeso.ajustarAltura(variacao);
 window.ajustarPeso = (variacao) => sistemaAlturaPeso.ajustarPeso(variacao);
 window.validarAlturaPeso = () => sistemaAlturaPeso.validarAlturaPeso();
+
+// Event listener para solicitação de ST
+document.addEventListener('solicitarST', function(e) {
+    if (e.detail.origem === 'sistemaAlturaPeso') {
+        if (sistemaAlturaPeso) {
+            sistemaAlturaPeso.atualizarSTReal();
+        }
+    }
+});

@@ -141,12 +141,8 @@ class SistemaRiqueza {
     }
 
     formatarMoeda(valor) {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(valor);
-    }
-
+    return `$${valor.toLocaleString('en-US')}`;
+}
     obterNivelPorPontos(pontos) {
         return Object.values(this.niveisRiqueza).find(nivel => nivel.pontos === pontos);
     }

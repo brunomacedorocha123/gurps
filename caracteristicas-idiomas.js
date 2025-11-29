@@ -1,4 +1,4 @@
-// caracteristicas-idiomas.js
+// caracteristicas-idiomas.js - VERSÃO CORRIGIDA
 class SistemaIdiomas {
     constructor() {
         this.idiomaMaterno = {
@@ -26,7 +26,6 @@ class SistemaIdiomas {
         ];
 
         this.inicializado = false;
-        this.inicializar();
     }
     
     inicializar() {
@@ -41,10 +40,25 @@ class SistemaIdiomas {
     }
     
     configurarEventos() {
-        // Evento do botão adicionar idioma
+        console.log('🔧 Configurando eventos de idiomas...');
+        
+        // Evento do botão adicionar idioma - CORREÇÃO PRINCIPAL
         const btnAdicionar = document.getElementById('btnAdicionarIdioma');
+        console.log('Botão adicionar encontrado:', !!btnAdicionar);
+        
         if (btnAdicionar) {
-            btnAdicionar.addEventListener('click', () => this.adicionarIdioma());
+            // Remove event listeners antigos para evitar duplicação
+            btnAdicionar.replaceWith(btnAdicionar.cloneNode(true));
+            const novoBtn = document.getElementById('btnAdicionarIdioma');
+            
+            novoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🎯 Botão clicado!');
+                this.adicionarIdioma();
+            });
+        } else {
+            console.error('❌ Botão btnAdicionarIdioma não encontrado!');
         }
         
         // Evento do idioma materno
@@ -57,29 +71,54 @@ class SistemaIdiomas {
             });
         }
         
-        // Eventos dos selects de nível
-        const selectFala = document.getElementById('novoIdiomaFala');
-        const selectEscrita = document.getElementById('novoIdiomaEscrita');
-        
-        if (selectFala) {
-            selectFala.addEventListener('change', () => this.atualizarPreviewCusto());
-        }
-        if (selectEscrita) {
-            selectEscrita.addEventListener('change', () => this.atualizarPreviewCusto());
-        }
+        // Eventos dos selects de nível - CORREÇÃO: usar event delegation
+        document.addEventListener('change', (e) => {
+            if (e.target.id === 'novoIdiomaFala' || e.target.id === 'novoIdiomaEscrita') {
+                this.atualizarPreviewCusto();
+            }
+        });
 
         // Evento do input do novo idioma (Enter para adicionar)
         const inputNovoIdioma = document.getElementById('novoIdiomaNome');
         if (inputNovoIdioma) {
             inputNovoIdioma.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
+                    e.preventDefault();
                     this.adicionarIdioma();
                 }
             });
         }
+
+        // Event delegation para remoção de idiomas
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-remove-idioma')) {
+                const idiomaId = parseInt(e.target.closest('.btn-remove-idioma').dataset.id);
+                this.removerIdioma(idiomaId);
+            }
+        });
+
+        // Event delegation para edição de nomes
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('editar-idioma-nome')) {
+                const idiomaId = parseInt(e.target.dataset.id);
+                this.atualizarIdioma(idiomaId, 'nome', e.target.value);
+            }
+        });
+
+        // Event delegation para edição de níveis
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('editar-idioma-fala')) {
+                const idiomaId = parseInt(e.target.dataset.id);
+                this.atualizarIdioma(idiomaId, 'nivelFala', parseInt(e.target.value));
+            }
+            if (e.target.classList.contains('editar-idioma-escrita')) {
+                const idiomaId = parseInt(e.target.dataset.id);
+                this.atualizarIdioma(idiomaId, 'nivelEscrita', parseInt(e.target.value));
+            }
+        });
     }
     
-    // ✅ ATUALIZAR PREVIEW DO CUSTO
+    // ✅ ATUALIZAR PREVIEW DO CUSTO - CORRIGIDO
     atualizarPreviewCusto() {
         const selectFala = document.getElementById('novoIdiomaFala');
         const selectEscrita = document.getElementById('novoIdiomaEscrita');
@@ -92,19 +131,21 @@ class SistemaIdiomas {
             const preview = document.getElementById('custoIdiomaPreview');
             if (preview) {
                 preview.textContent = `+${custo} pts`;
-                preview.style.color = custo > 0 ? '#27ae60' : '#7f8c8d';
+                preview.style.color = custo > 0 ? '#ffd700' : '#95a5a6';
                 preview.style.fontWeight = 'bold';
             }
         }
     }
     
-    // ✅ ADICIONAR IDIOMA
+    // ✅ ADICIONAR IDIOMA - COMPLETAMENTE REFAZIDO
     adicionarIdioma() {
-        console.log('➕ Adicionando idioma...');
+        console.log('➕ Tentando adicionar idioma...');
         
         // ✅ PEGAR NOME DIGITADO
         const inputNome = document.getElementById('novoIdiomaNome');
         const nomeDigitado = inputNome ? inputNome.value.trim() : '';
+        
+        console.log('Nome digitado:', nomeDigitado);
         
         if (!nomeDigitado) {
             this.mostrarMensagem('Por favor, digite um nome para o idioma!', 'erro');
@@ -124,6 +165,8 @@ class SistemaIdiomas {
         
         const nivelFala = selectFala ? parseInt(selectFala.value) : 2;
         const nivelEscrita = selectEscrita ? parseInt(selectEscrita.value) : 0;
+        
+        console.log('Níveis selecionados:', { nivelFala, nivelEscrita });
         
         // ✅ CALCULAR CUSTO
         const custoTotal = this.calcularCustoIdioma(nivelFala, nivelEscrita);
@@ -146,6 +189,10 @@ class SistemaIdiomas {
             inputNome.focus();
         }
         
+        // ✅ RESETAR SELECTS PARA VALORES PADRÃO
+        if (selectFala) selectFala.value = '2';
+        if (selectEscrita) selectEscrita.value = '0';
+        
         this.atualizarPreviewCusto();
         this.atualizarTudo();
         this.salvarDados();
@@ -163,14 +210,19 @@ class SistemaIdiomas {
     }
 
     mostrarMensagem(mensagem, tipo) {
-        // Implementação simples de mensagem - pode ser melhorada com UI
         console.log(`${tipo.toUpperCase()}: ${mensagem}`);
         
-        // Poderia adicionar um toast notification aqui
+        // Remove mensagem anterior se existir
         const existingMessage = document.getElementById('idiomaMessage');
         if (existingMessage) {
             existingMessage.remove();
         }
+        
+        const cores = {
+            sucesso: '#27ae60',
+            erro: '#e74c3c',
+            aviso: '#f39c12'
+        };
         
         const messageDiv = document.createElement('div');
         messageDiv.id = 'idiomaMessage';
@@ -184,8 +236,9 @@ class SistemaIdiomas {
             color: white;
             font-weight: bold;
             z-index: 1000;
-            background: ${tipo === 'erro' ? '#e74c3c' : '#27ae60'};
+            background: ${cores[tipo] || '#3498db'};
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideInRight 0.3s ease;
         `;
         
         document.body.appendChild(messageDiv);
@@ -250,25 +303,30 @@ class SistemaIdiomas {
     
     atualizarCardIdiomas() {
         const card = document.getElementById('card-idiomas-info');
-        if (!card) return;
+        if (!card) {
+            console.log('❌ card-idiomas-info não encontrado');
+            return;
+        }
         
         const pontos = this.calcularPontosIdiomas();
         const total = this.idiomasAdicionais.length;
         
         let html = `
             <div style="margin-bottom: 8px;">
-                <strong>Materno:</strong> ${this.idiomaMaterno.nome}
+                <strong style="color: #ffd700;">Materno:</strong> 
+                <span style="color: #ccc;">${this.idiomaMaterno.nome}</span>
             </div>
             <div style="margin-bottom: 8px;">
-                <strong>Adicionais:</strong> ${total} idioma${total !== 1 ? 's' : ''}
+                <strong style="color: #ffd700;">Adicionais:</strong> 
+                <span style="color: #ccc;">${total} idioma${total !== 1 ? 's' : ''}</span>
             </div>
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; font-weight: bold; color: #27ae60;">
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 215, 0, 0.3); font-weight: bold; color: #ffd700;">
                 Total: ${pontos} pts
             </div>
         `;
 
         if (total > 0) {
-            html += `<div style="font-size: 11px; margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; max-height: 60px; overflow-y: auto;">`;
+            html += `<div style="font-size: 11px; margin-top: 8px; border-top: 1px solid rgba(255, 215, 0, 0.3); padding-top: 8px; max-height: 60px; overflow-y: auto;">`;
             this.idiomasAdicionais.forEach(idioma => {
                 const nivelFala = this.obterTextoNivel(idioma.nivelFala, 'fala');
                 const nivelEscrita = this.obterTextoNivel(idioma.nivelEscrita, 'escrita');
@@ -276,7 +334,7 @@ class SistemaIdiomas {
                     ? nivelFala
                     : `F:${nivelFala.substr(0,3)} E:${nivelEscrita.substr(0,3)}`;
                     
-                html += `<div style="margin-bottom: 2px;">• ${idioma.nome} <small>(${nivelTexto})</small></div>`;
+                html += `<div style="margin-bottom: 2px; color: #ccc;">• ${idioma.nome} <small style="color: #95a5a6;">(${nivelTexto})</small></div>`;
             });
             html += `</div>`;
         }
@@ -286,7 +344,10 @@ class SistemaIdiomas {
     
     atualizarListaAdquiridos() {
         const container = document.getElementById('idiomas-adquiridos');
-        if (!container) return;
+        if (!container) {
+            console.log('❌ idiomas-adquiridos não encontrado');
+            return;
+        }
         
         const totalElement = document.getElementById('totalIdiomas');
         if (totalElement) {
@@ -294,34 +355,57 @@ class SistemaIdiomas {
         }
 
         if (this.idiomasAdicionais.length === 0) {
-            container.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Nenhum idioma adicional</div>';
+            container.innerHTML = '<div style="text-align: center; color: #95a5a6; padding: 20px; font-style: italic;">Nenhum idioma adicional</div>';
             return;
         }
         
         container.innerHTML = this.idiomasAdicionais.map(idioma => {
             const nivelFala = this.obterTextoNivel(idioma.nivelFala, 'fala');
             const nivelEscrita = this.obterTextoNivel(idioma.nivelEscrita, 'escrita');
-            let nivelTexto = nivelFala;
-            
-            if (idioma.nivelFala !== idioma.nivelEscrita) {
-                nivelTexto = `Fala: ${nivelFala}, Escrita: ${nivelEscrita}`;
-            }
             
             return `
-                <div class="idioma-item">
-                    <div class="idioma-info">
+                <div class="idioma-item" style="background: rgba(40, 40, 50, 0.8); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                    <div style="flex: 1;">
                         <input type="text" 
                                value="${idioma.nome}" 
                                placeholder="Nome do idioma"
-                               onchange="sistemaIdiomas.atualizarIdioma(${idioma.id}, 'nome', this.value)"
-                               style="border: 1px solid #ddd; padding: 4px 8px; border-radius: 4px; margin-bottom: 5px; width: 100%;">
-                        <div class="idioma-niveis">
-                            <small>${nivelTexto}</small>
+                               class="editar-idioma-nome"
+                               data-id="${idioma.id}"
+                               style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 4px; padding: 8px; color: #ffd700; width: 100%; margin-bottom: 8px;">
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div>
+                                <label style="color: #ccc; font-size: 12px; display: block; margin-bottom: 4px;">🗣️ Fala:</label>
+                                <select class="editar-idioma-fala" data-id="${idioma.id}"
+                                        style="width: 100%; padding: 6px; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px; background: rgba(255,255,255,0.1); color: #ffd700;">
+                                    ${this.niveisFala.map(nivel => `
+                                        <option value="${nivel.valor}" ${nivel.valor === idioma.nivelFala ? 'selected' : ''}>
+                                            ${nivel.nome} (${nivel.custo} pts)
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label style="color: #ccc; font-size: 12px; display: block; margin-bottom: 4px;">📝 Escrita:</label>
+                                <select class="editar-idioma-escrita" data-id="${idioma.id}"
+                                        style="width: 100%; padding: 6px; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px; background: rgba(255,255,255,0.1); color: #ffd700;">
+                                    ${this.niveisEscrita.map(nivel => `
+                                        <option value="${nivel.valor}" ${nivel.valor === idioma.nivelEscrita ? 'selected' : ''}>
+                                            ${nivel.nome} (${nivel.custo} pts)
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <div class="idioma-actions">
-                        <span class="idioma-pontos">+${idioma.custoTotal}</span>
-                        <button onclick="sistemaIdiomas.removerIdioma(${idioma.id})" class="btn-remove">
+                    
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="color: ${idioma.custoTotal > 0 ? '#ffd700' : '#95a5a6'}; font-weight: bold; background: rgba(255,215,0,0.1); padding: 4px 8px; border-radius: 4px;">
+                            +${idioma.custoTotal}
+                        </span>
+                        <button class="btn-remove-idioma" data-id="${idioma.id}"
+                                style="background: #e74c3c; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                             🗑️
                         </button>
                     </div>
@@ -337,16 +421,6 @@ class SistemaIdiomas {
             badge.textContent = pontos >= 0 ? `+${pontos} pts` : `${pontos} pts`;
             badge.style.background = pontos > 0 ? '#27ae60' : '#95a5a6';
         }
-    }
-    
-    gerarOpcoesNivel(nivelSelecionado, tipo) {
-        const niveis = tipo === 'fala' ? this.niveisFala : this.niveisEscrita;
-        
-        return niveis.map(nivel => `
-            <option value="${nivel.valor}" ${nivel.valor === nivelSelecionado ? 'selected' : ''}>
-                ${nivel.nome} (${nivel.custo} pts)
-            </option>
-        `).join('');
     }
     
     obterTextoNivel(nivel, tipo) {
@@ -438,8 +512,16 @@ class SistemaIdiomas {
     }
 }
 
-// INICIALIZAÇÃO E EXPORTAÇÃO
+// INICIALIZAÇÃO E EXPORTAÇÃO - CORRIGIDA
 let sistemaIdiomas;
+
+// Inicialização segura
+function inicializarSistemaIdiomas() {
+    if (!sistemaIdiomas) {
+        sistemaIdiomas = new SistemaIdiomas();
+    }
+    sistemaIdiomas.inicializar();
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     sistemaIdiomas = new SistemaIdiomas();
@@ -451,11 +533,21 @@ window.sistemaIdiomas = sistemaIdiomas;
 
 // Event listener para quando a aba características for carregada
 document.addEventListener('caracteristicasCarregadas', function() {
-    if (sistemaIdiomas) {
-        sistemaIdiomas.inicializar();
-    }
+    console.log('🎯 Carregando sistema de idiomas...');
+    inicializarSistemaIdiomas();
 });
 
 // Funções globais para uso no HTML
-window.adicionarIdioma = () => sistemaIdiomas.adicionarIdioma();
-window.removerIdioma = (id) => sistemaIdiomas.removerIdioma(id);
+window.adicionarIdioma = () => {
+    if (sistemaIdiomas) {
+        sistemaIdiomas.adicionarIdioma();
+    } else {
+        console.error('Sistema de idiomas não inicializado');
+    }
+};
+
+window.removerIdioma = (id) => {
+    if (sistemaIdiomas) {
+        sistemaIdiomas.removerIdioma(id);
+    }
+};
