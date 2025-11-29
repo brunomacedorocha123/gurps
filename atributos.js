@@ -1,5 +1,5 @@
 // ===== SISTEMA DE ATRIBUTOS - GURPS =====
-// Versão 2.0 - Com Sistema de Bônus Manuais
+// Versão 3.0 - Sistema Completo e Funcional
 
 // Tabelas de referência
 const danoTable = {
@@ -114,7 +114,7 @@ function atualizarAtributos() {
 }
 
 function calcularAtributosSecundarios(ST, DX, IQ, HT) {
-    // Atualiza apenas as bases
+    // Atualiza apenas as bases (mantém os cálculos automáticos)
     document.getElementById('PVBase').textContent = ST;
     document.getElementById('PFBase').textContent = HT;
     document.getElementById('VontadeBase').textContent = IQ;
@@ -216,8 +216,9 @@ function atualizarTotaisComBonus() {
 }
 
 function atualizarBonus(atributo, valor) {
-    personagem.bonus[atributo] = parseInt(valor) || 0;
-    atualizarEstiloBonusInput(atributo, valor);
+    const numValor = parseInt(valor) || 0;
+    personagem.bonus[atributo] = numValor;
+    atualizarEstiloBonusInput(atributo, numValor);
     atualizarTotaisComBonus();
 }
 
@@ -277,6 +278,9 @@ function configurarEventListeners() {
             input.addEventListener('change', () => {
                 atualizarBonus(atributo, input.value);
             });
+            
+            // Inicializa o estilo do input
+            atualizarEstiloBonusInput(atributo, input.value);
         }
     });
 }
@@ -358,4 +362,23 @@ document.addEventListener('DOMContentLoaded', function() {
             inicializarAtributos();
         }, 100);
     }
+    
+    // Observa mudanças nas abas
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const tab = mutation.target;
+                if (tab.id === 'atributos' && tab.classList.contains('active')) {
+                    setTimeout(() => {
+                        inicializarAtributos();
+                    }, 100);
+                }
+            }
+        });
+    });
+    
+    // Observa todas as abas
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        observer.observe(tab, { attributes: true });
+    });
 });
