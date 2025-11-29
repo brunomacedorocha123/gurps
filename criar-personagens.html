@@ -9,6 +9,7 @@
     <!-- No head do criar-personagem.html -->
 <link rel="stylesheet" href="style-atributos.css">
 <link rel="stylesheet" href="style-caracteristicas.css">
+<link rel="stylesheet" href="style-vantagens.css">
     <style>
         * {
             margin: 0;
@@ -817,13 +818,134 @@
 
     </div>
 </div>
-
-        <!-- ABA VANTAGENS -->
-        <div id="vantagens" class="tab-content">
-            <div class="loading">
-                <div class="spinner"></div>
+<!-- ABA VANTAGENS -->
+<div id="vantagens" class="tab-content">
+    <div class="atributos-container">
+        <!-- CARD DE RESUMO DE PONTOS -->
+        <div class="pontos-section">
+            <div class="ponto-card">
+                <h3>Vantagens</h3>
+                <div class="ponto-valor" id="total-vantagens">+0</div>
+            </div>
+            <div class="ponto-card gastos">
+                <h3>Desvantagens</h3>
+                <div class="ponto-valor" id="total-desvantagens">-0</div>
+            </div>
+            <div class="ponto-card gastos">
+                <h3>Peculiaridades</h3>
+                <div class="ponto-valor" id="total-peculiaridades">-0</div>
+            </div>
+            <div class="ponto-card saldo">
+                <h3>Saldo Total</h3>
+                <div class="ponto-valor" id="saldo-total">0</div>
             </div>
         </div>
+
+        <!-- SEÇÃO VANTAGENS -->
+        <h2 class="secao-titulo">Vantagens</h2>
+        <div class="cards-grid principais-grid">
+            <!-- CARD VANTAGENS DISPONÍVEIS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>🎯 Vantagens Disponíveis</h3>
+                </div>
+                
+                <!-- SISTEMA DE BUSCA -->
+                <div class="busca-container">
+                    <input type="text" id="busca-vantagens" placeholder="Buscar vantagens..." class="atributo-input">
+                    <select id="categoria-vantagens" class="atributo-input">
+                        <option value="">Todas as Categorias</option>
+                        <option value="mental">Mental/Sobrenatural</option>
+                        <option value="fisica">Física</option>
+                        <option value="supers">Supers</option>
+                        <option value="social">Social</option>
+                    </select>
+                </div>
+
+                <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
+                <div class="lista-container" id="lista-vantagens">
+                    <div class="lista-vazia">Carregando vantagens...</div>
+                </div>
+            </div>
+
+            <!-- CARD VANTAGENS ADQUIRIDAS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>✅ Vantagens Adquiridas</h3>
+                    <div class="custo-pontos" id="total-vantagens-adquiridas">0 pts</div>
+                </div>
+                
+                <div class="lista-container" id="vantagens-adquiridas">
+                    <div class="lista-vazia">Nenhuma vantagem adquirida</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO DESVANTAGENS -->
+        <h2 class="secao-titulo">Desvantagens</h2>
+        <div class="cards-grid principais-grid">
+            <!-- CARD DESVANTAGENS DISPONÍVEIS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>⚠️ Desvantagens Disponíveis</h3>
+                </div>
+                
+                <!-- SISTEMA DE BUSCA -->
+                <div class="busca-container">
+                    <input type="text" id="busca-desvantagens" placeholder="Buscar desvantagens..." class="atributo-input">
+                    <select id="categoria-desvantagens" class="atributo-input">
+                        <option value="">Todas as Categorias</option>
+                        <option value="mental">Mental/Sobrenatural</option>
+                        <option value="fisica">Física</option>
+                        <option value="supers">Supers</option>
+                        <option value="social">Social</option>
+                    </select>
+                </div>
+
+                <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
+                <div class="lista-container" id="lista-desvantagens">
+                    <div class="lista-vazia">Carregando desvantagens...</div>
+                </div>
+            </div>
+
+            <!-- CARD DESVANTAGENS ADQUIRIDAS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>❌ Desvantagens Adquiridas</h3>
+                    <div class="custo-pontos" id="total-desvantagens-adquiridas">0 pts</div>
+                </div>
+                
+                <div class="lista-container" id="desvantagens-adquiridas">
+                    <div class="lista-vazia">Nenhuma desvantagem adquirida</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO PECULIARIDADES -->
+        <h2 class="secao-titulo">Peculiaridades</h2>
+        <div class="cards-grid secundarios-grid">
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>🏷️ Peculiaridades</h3>
+                    <div class="custo-pontos" id="contador-peculiaridades">0/5</div>
+                </div>
+                
+                <!-- FORMULÁRIO PARA ADICIONAR -->
+                <div class="peculiaridade-form">
+                    <input type="text" id="nova-peculiaridade" placeholder="Digite uma peculiaridade (max 30 caracteres)" 
+                           maxlength="30" class="atributo-input">
+                    <div class="contador-chars"><span id="contador-chars">0</span>/30</div>
+                    <button id="btn-adicionar-peculiaridade" class="btn-controle" disabled>+</button>
+                </div>
+
+                <!-- LISTA DE PECULIARIDADES -->
+                <div class="lista-container" id="lista-peculiaridades">
+                    <div class="lista-vazia">Nenhuma peculiaridade adicionada</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- ABA PERÍCIAS -->
         <div id="pericias" class="tab-content">
@@ -1195,5 +1317,6 @@
 <script src="caracteristicas-idiomas.js"></script>
 <script src="caracteristicas-fisicas.js"></script>
 <script src="caracteristicas-altura-peso.js"></script>
+<script src="vantagens.js"></script>
 </body>
 </html>
