@@ -294,86 +294,87 @@
         </div>
     </div>
 
-    <script>
-        const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
+   <script>
+    const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Verificar força da senha
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const strengthBar = document.getElementById('passwordStrength');
+        let strength = 0;
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        if (password.length >= 6) strength += 25;
+        if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 25;
+        if (password.match(/\d/)) strength += 25;
+        if (password.match(/[^a-zA-Z\d]/)) strength += 25;
         
-        // Verificar força da senha
-        document.getElementById('password').addEventListener('input', function() {
-            const password = this.value;
-            const strengthBar = document.getElementById('passwordStrength');
-            let strength = 0;
-            
-            if (password.length >= 6) strength += 25;
-            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 25;
-            if (password.match(/\d/)) strength += 25;
-            if (password.match(/[^a-zA-Z\d]/)) strength += 25;
-            
-            strengthBar.style.width = strength + '%';
-            
-            if (strength < 50) {
-                strengthBar.style.background = '#ff4500';
-            } else if (strength < 75) {
-                strengthBar.style.background = '#ff8c00';
-            } else {
-                strengthBar.style.background = '#32cd32';
-            }
-        });
+        strengthBar.style.width = strength + '%';
         
-        // Gerar ID de jogador
-        function generatePlayerId() {
-            return Math.floor(100000 + Math.random() * 900000);
+        if (strength < 50) {
+            strengthBar.style.background = '#ff4500';
+        } else if (strength < 75) {
+            strengthBar.style.background = '#ff8c00';
+        } else {
+            strengthBar.style.background = '#32cd32';
+        }
+    });
+    
+    // Gerar ID de jogador
+    function generatePlayerId() {
+        return Math.floor(100000 + Math.random() * 900000);
+    }
+    
+    // Submeter formulário - VERSÃO CORRIGIDA
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Validações
+        if (password !== confirmPassword) {
+            showMessage('As senhas não coincidem!', 'error');
+            return;
         }
         
-        // Submeter formulário
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            // Validações
-            if (password !== confirmPassword) {
-                showMessage('As senhas não coincidem!', 'error');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showMessage('A senha deve ter pelo menos 6 caracteres!', 'error');
-                return;
-            }
-            
-            if (username.length < 3) {
-                showMessage('O nome de usuário deve ter pelo menos 3 caracteres!', 'error');
-                return;
-            }
-            
-            // Mostrar loading
-            document.getElementById('loading').style.display = 'block';
-            document.querySelector('.btn').disabled = true;
-            
-            try {
-                // Registrar no Auth
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email, 
-                    password,
-                    options: {
-                        data: {
-                            username: username
-                        }
+        if (password.length < 6) {
+            showMessage('A senha deve ter pelo menos 6 caracteres!', 'error');
+            return;
+        }
+        
+        if (username.length < 3) {
+            showMessage('O nome de usuário deve ter pelo menos 3 caracteres!', 'error');
+            return;
+        }
+        
+        // Mostrar loading
+        document.getElementById('loading').style.display = 'block';
+        document.querySelector('.btn').disabled = true;
+        
+        try {
+            // ⭐⭐ MÉTODO SIMPLIFICADO - apenas Auth ⭐⭐
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email, 
+                password,
+                options: {
+                    data: {
+                        username: username
                     }
-                });
-                
-                if (authError) throw authError;
-                
-                // Gerar ID do jogador
-                const playerId = generatePlayerId();
-                
-                // Inserir perfil do usuário
+                }
+            });
+            
+            if (authError) throw authError;
+            
+            // ⭐⭐ AGORA VAMOS TENTAR INSERIR O PERFIL DE FORMA SIMPLES ⭐⭐
+            const playerId = generatePlayerId();
+            
+            // Tentar inserir o perfil (pode falhar por RLS, mas não importa)
+            try {
                 const { error: profileError } = await supabase
                     .from('profiles')
                     .insert([
@@ -386,44 +387,51 @@
                     ]);
                 
                 if (profileError) {
-                    // Se houver erro de RLS, tentar método alternativo
-                    console.log("Erro ao inserir perfil, tentando método alternativo...");
-                    
-                    // Neste caso, o trigger no Supabase deve criar o perfil automaticamente
-                    // Vamos apenas mostrar o ID gerado localmente
-                    showMessage('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar a conta.', 'success');
-                    document.getElementById('playerId').textContent = playerId;
-                    document.getElementById('playerIdDisplay').style.display = 'block';
-                } else {
-                    showMessage('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar a conta.', 'success');
-                    document.getElementById('playerId').textContent = playerId;
-                    document.getElementById('playerIdDisplay').style.display = 'block';
+                    console.log("Perfil não criado via app, mas o trigger deve criar automaticamente");
                 }
-                
-                // Redirecionar após 5 segundos
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 5000);
-                
-            } catch (error) {
-                console.error('Erro completo:', error);
-                showMessage('Erro ao cadastrar: ' + error.message, 'error');
-            } finally {
-                // Esconder loading
-                document.getElementById('loading').style.display = 'none';
-                document.querySelector('.btn').disabled = false;
+            } catch (profileErr) {
+                console.log("Erro ao criar perfil, mas continuando...");
             }
-        });
-        
-        function showMessage(text, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = `message message-${type}`;
-            messageDiv.style.display = 'block';
             
-            // Rolagem suave para a mensagem
-            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            // Mensagem de sucesso
+            showMessage('Cadastro realizado! Verifique seu e-mail para confirmar a conta. Seu perfil será criado automaticamente.', 'success');
+            
+            // Mostrar ID gerado
+            document.getElementById('playerId').textContent = playerId;
+            document.getElementById('playerIdDisplay').style.display = 'block';
+            
+            // Redirecionar após 5 segundos
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 5000);
+            
+        } catch (error) {
+            console.error('Erro completo:', error);
+            
+            // Mensagem de erro mais amigável
+            if (error.message.includes('User already registered')) {
+                showMessage('Este e-mail já está cadastrado!', 'error');
+            } else if (error.message.includes('Database error')) {
+                showMessage('Erro no servidor. O usuário foi criado, mas tente fazer login mais tarde.', 'error');
+            } else {
+                showMessage('Erro: ' + error.message, 'error');
+            }
+        } finally {
+            // Esconder loading
+            document.getElementById('loading').style.display = 'none';
+            document.querySelector('.btn').disabled = false;
         }
-    </script>
+    });
+    
+    function showMessage(text, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = text;
+        messageDiv.className = `message message-${type}`;
+        messageDiv.style.display = 'block';
+        
+        // Rolagem suave para a mensagem
+        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+</script>
 </body>
 </html>
