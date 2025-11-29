@@ -115,6 +115,7 @@
     font-size: 0.95em;
 }
 
+/* ===== CORREÇÃO DOS DROPDOWNS (SELECT) ===== */
 .form-select {
     width: 100%;
     padding: 10px 12px;
@@ -124,12 +125,53 @@
     background: rgba(255, 255, 255, 0.1);
     color: #ffd700;
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
+/* Estilo para as options - FUNDO PRETO E LETRAS AMARELAS */
+.form-select option {
+    background: #1e1e28 !important;
+    color: #ffd700 !important;
+    padding: 10px !important;
+    border: none !important;
+}
+
+/* Estilo quando o select está aberto */
 .form-select:focus {
     outline: none;
     border-color: #ff8c00;
     box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+}
+
+/* Hover nas options */
+.form-select option:hover {
+    background: #ff8c00 !important;
+    color: #1e1e28 !important;
+}
+
+/* Option selecionada */
+.form-select option:checked {
+    background: #ff8c00 !important;
+    color: #1e1e28 !important;
+    font-weight: bold;
+}
+
+/* Garantir que todos os selects usem essas cores */
+#nivelAparencia option,
+#nivelRiqueza option,
+#novoIdiomaFala option,
+#novoIdiomaEscrita option {
+    background: #1e1e28 !important;
+    color: #ffd700 !important;
+}
+
+/* Hover específico para os selects principais */
+#nivelAparencia option:hover,
+#nivelRiqueza option:hover,
+#novoIdiomaFala option:hover,
+#novoIdiomaEscrita option:hover {
+    background: #ff8c00 !important;
+    color: #1e1e28 !important;
 }
 
 .form-input {
@@ -337,7 +379,7 @@
     gap: 10px;
 }
 
-.idioma-pontos {
+.idioma-custo {
     color: #ffd700;
     font-weight: bold;
     font-size: 1.1em;
@@ -347,7 +389,7 @@
     border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
-.btn-remove {
+.btn-remove-idioma {
     background: #e74c3c;
     color: white;
     border: none;
@@ -361,7 +403,7 @@
     transition: all 0.3s ease;
 }
 
-.btn-remove:hover {
+.btn-remove-idioma:hover {
     background: #c0392b;
     transform: scale(1.1);
 }
@@ -391,13 +433,13 @@
 }
 
 .caracteristica-info strong {
-    color: #ffd700; /* CORRIGIDO: estava branco no branco */
+    color: #ffd700;
     display: block;
     margin-bottom: 4px;
 }
 
 .caracteristica-info small {
-    color: #95a5a6; /* CORRIGIDO: estava cinza claro */
+    color: #95a5a6;
     font-size: 0.85em;
 }
 
@@ -446,7 +488,7 @@
 
 .caracteristica-selecionada .efeitos {
     font-size: 0.85em;
-    color: #27ae60; /* CORRIGIDO: estava verde escuro */
+    color: #27ae60;
     margin-top: 4px;
 }
 
