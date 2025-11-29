@@ -313,12 +313,178 @@
             <!-- Conteúdo será preenchido via JavaScript -->
         </div>
 
-        <!-- ABA ATRIBUTOS -->
-        <div id="atributos" class="tab-content">
-            <div class="loading">
-                <div class="spinner"></div>
+       <!-- ABA ATRIBUTOS -->
+<div id="atributos" class="tab-content">
+    <div class="atributos-container">
+        <!-- Seção de Pontos -->
+        <div class="pontos-section">
+            <div class="ponto-card total">
+                <h3>Pontos Totais</h3>
+                <div class="ponto-valor" id="pontosTotais">150</div>
+            </div>
+            <div class="ponto-card gastos">
+                <h3>Pontos Gastos</h3>
+                <div class="ponto-valor" id="pontosGastos">0</div>
+            </div>
+            <div class="ponto-card saldo">
+                <h3>Saldo Disponível</h3>
+                <div class="ponto-valor" id="pontosSaldo">150</div>
             </div>
         </div>
+
+        <!-- Atributos Principais -->
+        <div class="atributos-principais">
+            <h2 class="secao-titulo">Atributos Principais</h2>
+            <div class="cards-grid">
+                <!-- ST -->
+                <div class="atributo-card">
+                    <div class="atributo-header">
+                        <h3>FORÇA (ST)</h3>
+                        <span class="custo-pontos" id="custoST">0</span>
+                    </div>
+                    <div class="atributo-controles">
+                        <button class="btn-controle" onclick="alterarAtributo('ST', -1)">-</button>
+                        <input type="number" id="ST" class="atributo-input" value="10" min="1" max="40">
+                        <button class="btn-controle" onclick="alterarAtributo('ST', 1)">+</button>
+                    </div>
+                    <div class="atributo-desc">Custo: 10 pontos por nível</div>
+                </div>
+
+                <!-- DX -->
+                <div class="atributo-card">
+                    <div class="atributo-header">
+                        <h3>DESTREZA (DX)</h3>
+                        <span class="custo-pontos" id="custoDX">0</span>
+                    </div>
+                    <div class="atributo-controles">
+                        <button class="btn-controle" onclick="alterarAtributo('DX', -1)">-</button>
+                        <input type="number" id="DX" class="atributo-input" value="10" min="1" max="40">
+                        <button class="btn-controle" onclick="alterarAtributo('DX', 1)">+</button>
+                    </div>
+                    <div class="atributo-desc">Custo: 20 pontos por nível</div>
+                </div>
+
+                <!-- IQ -->
+                <div class="atributo-card">
+                    <div class="atributo-header">
+                        <h3>INTELIGÊNCIA (IQ)</h3>
+                        <span class="custo-pontos" id="custoIQ">0</span>
+                    </div>
+                    <div class="atributo-controles">
+                        <button class="btn-controle" onclick="alterarAtributo('IQ', -1)">-</button>
+                        <input type="number" id="IQ" class="atributo-input" value="10" min="1" max="40">
+                        <button class="btn-controle" onclick="alterarAtributo('IQ', 1)">+</button>
+                    </div>
+                    <div class="atributo-desc">Custo: 20 pontos por nível</div>
+                </div>
+
+                <!-- HT -->
+                <div class="atributo-card">
+                    <div class="atributo-header">
+                        <h3>VIGOR (HT)</h3>
+                        <span class="custo-pontos" id="custoHT">0</span>
+                    </div>
+                    <div class="atributo-controles">
+                        <button class="btn-controle" onclick="alterarAtributo('HT', -1)">-</button>
+                        <input type="number" id="HT" class="atributo-input" value="10" min="1" max="40">
+                        <button class="btn-controle" onclick="alterarAtributo('HT', 1)">+</button>
+                    </div>
+                    <div class="atributo-desc">Custo: 10 pontos por nível</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Atributos Secundários -->
+        <div class="atributos-secundarios">
+            <h2 class="secao-titulo">Atributos Secundários</h2>
+            <div class="cards-grid secundarios-grid">
+                <!-- PV -->
+                <div class="secundario-card">
+                    <h3>PONTOS DE VIDA (PV)</h3>
+                    <div class="secundario-valor" id="PV">10</div>
+                    <div class="secundario-desc">Baseado em ST</div>
+                </div>
+
+                <!-- PF -->
+                <div class="secundario-card">
+                    <h3>PONTOS DE FADIGA (PF)</h3>
+                    <div class="secundario-valor" id="PF">10</div>
+                    <div class="secundario-desc">Baseado em HT</div>
+                </div>
+
+                <!-- Vontade -->
+                <div class="secundario-card">
+                    <h3>VONTADE</h3>
+                    <div class="secundario-valor" id="Vontade">10</div>
+                    <div class="secundario-desc">Baseado em IQ</div>
+                </div>
+
+                <!-- Percepção -->
+                <div class="secundario-card">
+                    <h3>PERCEPÇÃO</h3>
+                    <div class="secundario-valor" id="Percepcao">10</div>
+                    <div class="secundario-desc">Baseado em IQ</div>
+                </div>
+
+                <!-- Deslocamento -->
+                <div class="secundario-card">
+                    <h3>DESLOCAMENTO</h3>
+                    <div class="secundario-valor" id="Deslocamento">5.00</div>
+                    <div class="secundario-desc">(DX + HT) / 4</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sistema de Combate -->
+        <div class="combate-section">
+            <h2 class="secao-titulo">Sistema de Combate</h2>
+            <div class="cards-grid combate-grid">
+                <!-- Dano Base -->
+                <div class="combate-card">
+                    <h3>DANO BÁSICO</h3>
+                    <div class="dano-container">
+                        <div class="dano-tipo">
+                            <span class="dano-label">GDP:</span>
+                            <span class="dano-valor" id="danoGDP">1d-2</span>
+                        </div>
+                        <div class="dano-tipo">
+                            <span class="dano-label">GEB:</span>
+                            <span class="dano-valor" id="danoGEB">1d</span>
+                        </div>
+                    </div>
+                    <div class="combate-desc">Baseado em ST</div>
+                </div>
+
+                <!-- Níveis de Carga -->
+                <div class="combate-card">
+                    <h3>NÍVEIS DE CARGA</h3>
+                    <div class="carga-container">
+                        <div class="carga-item">
+                            <span class="carga-label">Nenhuma:</span>
+                            <span class="carga-valor" id="cargaNenhuma">10.0</span>
+                        </div>
+                        <div class="carga-item">
+                            <span class="carga-label">Leve:</span>
+                            <span class="carga-valor" id="cargaLeve">20.0</span>
+                        </div>
+                        <div class="carga-item">
+                            <span class="carga-label">Média:</span>
+                            <span class="carga-valor" id="cargaMedia">30.0</span>
+                        </div>
+                        <div class="carga-item">
+                            <span class="carga-label">Pesada:</span>
+                            <span class="carga-valor" id="cargaPesada">60.0</span>
+                        </div>
+                        <div class="carga-item">
+                            <span class="carga-label">Muito Pesada:</span>
+                            <span class="carga-valor" id="cargaMuitoPesada">100.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- ABA CARACTERÍSTICAS -->
         <div id="caracteristicas" class="tab-content">
