@@ -899,32 +899,83 @@
                 // Ativa a aba clicada
                 this.classList.add('active');
                 const tabId = this.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
+                const tabContent = document.getElementById(tabId);
                 
-                // Carrega o conteúdo da aba se necessário
-                carregarConteudoAba(tabId);
-                
-                // Inicializa os atributos se for a aba de atributos
-                if (tabId === 'atributos' && typeof inicializarAtributos === 'function') {
-                    setTimeout(() => {
-                        inicializarAtributos();
-                    }, 100);
+                if (tabContent) {
+                    tabContent.classList.add('active');
+                    
+                    // Carrega o conteúdo da aba se necessário
+                    carregarConteudoAba(tabId);
+                    
+                    // Inicializa sistemas específicos de cada aba
+                    inicializarSistemasAba(tabId);
                 }
             });
         });
     }
 
+    // Inicializar sistemas específicos de cada aba
+    function inicializarSistemasAba(abaId) {
+        switch(abaId) {
+            case 'atributos':
+                if (typeof inicializarAtributos === 'function') {
+                    setTimeout(() => {
+                        inicializarAtributos();
+                    }, 100);
+                }
+                break;
+                
+            case 'caracteristicas':
+                // Dispara evento para sistemas de características
+                const eventoCaracteristicas = new CustomEvent('caracteristicasCarregadas');
+                document.dispatchEvent(eventoCaracteristicas);
+                
+                // Inicializa sistemas de características se existirem
+                setTimeout(() => {
+                    if (window.sistemaAparencia && typeof window.sistemaAparencia.inicializar === 'function') {
+                        window.sistemaAparencia.inicializar();
+                    }
+                    if (window.sistemaRiqueza && typeof window.sistemaRiqueza.inicializar === 'function') {
+                        window.sistemaRiqueza.inicializar();
+                    }
+                    if (window.sistemaIdiomas && typeof window.sistemaIdiomas.inicializar === 'function') {
+                        window.sistemaIdiomas.inicializar();
+                    }
+                }, 200);
+                break;
+                
+            case 'vantagens':
+                // Sistema de vantagens será inicializado aqui
+                break;
+                
+            case 'pericias':
+                // Sistema de perícias será inicializado aqui
+                break;
+                
+            case 'equipamento':
+                // Sistema de equipamento será inicializado aqui
+                break;
+        }
+    }
+
     // Configurar event listeners
     function configurarEventListeners() {
         // Botões do header
-        document.getElementById('btnSalvar').addEventListener('click', salvarPersonagem);
-        document.getElementById('btnExcluir').addEventListener('click', solicitarExclusao);
-        document.getElementById('btnSair').addEventListener('click', sairSemSalvar);
+        const btnSalvar = document.getElementById('btnSalvar');
+        const btnExcluir = document.getElementById('btnExcluir');
+        const btnSair = document.getElementById('btnSair');
+        
+        if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
+        if (btnExcluir) btnExcluir.addEventListener('click', solicitarExclusao);
+        if (btnSair) btnSair.addEventListener('click', sairSemSalvar);
         
         // Nome do personagem
-        document.getElementById('charName').addEventListener('input', function() {
-            personagemAtual.nome = this.value;
-        });
+        const charName = document.getElementById('charName');
+        if (charName) {
+            charName.addEventListener('input', function() {
+                personagemAtual.nome = this.value;
+            });
+        }
     }
 
     // Carregar personagem da URL (se estiver editando)
@@ -940,26 +991,36 @@
         }
     }
 
-    // Carregar conteúdo da aba - CORRIGIDA
+    // Carregar conteúdo da aba - CORRIGIDA (NÃO SUBSTITUI CONTEÚDO EXISTENTE)
     function carregarConteudoAba(abaId) {
         const abaContent = document.getElementById(abaId);
+        
+        if (!abaContent) return;
         
         // Se já carregou, não carrega novamente
         if (abaContent.getAttribute('data-loaded') === 'true') {
             return;
         }
 
-        // Para a aba de atributos, não substituir o conteúdo
-        if (abaId === 'atributos') {
+        // Apenas para abas que realmente precisam de carregamento dinâmico
+        // NÃO substitui o conteúdo de abas que já têm HTML
+        const abasComConteudoEstatico = ['atributos', 'caracteristicas', 'vantagens', 'pericias', 'equipamento'];
+        
+        if (abasComConteudoEstatico.includes(abaId)) {
+            // Estas abas já têm seu próprio HTML, apenas marca como carregada
             abaContent.setAttribute('data-loaded', 'true');
             return;
         }
 
-        // Para outras abas, simula carregamento
+        // Apenas para abas que realmente não têm conteúdo
         setTimeout(() => {
-            if (abaId !== 'atributos') {
-                abaContent.innerHTML = `<h2>Conteúdo da aba ${abaId} em desenvolvimento</h2>
-                                       <p>Esta funcionalidade será implementada em breve.</p>`;
+            if (abaContent.innerHTML.trim() === '' || abaContent.querySelector('.loading')) {
+                abaContent.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <h2>Conteúdo da aba ${abaId} em desenvolvimento</h2>
+                        <p>Esta funcionalidade será implementada em breve.</p>
+                    </div>
+                `;
                 abaContent.setAttribute('data-loaded', 'true');
             }
         }, 500);
@@ -975,37 +1036,51 @@
                 return;
             }
 
-            // Atualiza os dados dos atributos antes de salvar
-            if (typeof obterDadosAtributos === 'function') {
-                const dadosAtributos = obterDadosAtributos();
-                personagemAtual.forca = dadosAtributos.ST;
-                personagemAtual.destreza = dadosAtributos.DX;
-                personagemAtual.inteligencia = dadosAtributos.IQ;
-                personagemAtual.saude = dadosAtributos.HT;
-                personagemAtual.pontos_gastos = dadosAtributos.PontosGastos;
-            }
-
-            const dadosSalvar = {
+            // Coleta dados de todos os sistemas antes de salvar
+            const dadosCompletos = {
                 ...personagemAtual,
                 user_id: session.user.id,
                 updated_at: new Date().toISOString()
             };
+
+            // Atualiza os dados dos atributos se o sistema existir
+            if (typeof obterDadosAtributos === 'function') {
+                const dadosAtributos = obterDadosAtributos();
+                dadosCompletos.forca = dadosAtributos.ST;
+                dadosCompletos.destreza = dadosAtributos.DX;
+                dadosCompletos.inteligencia = dadosAtributos.IQ;
+                dadosCompletos.saude = dadosAtributos.HT;
+                dadosCompletos.pontos_gastos = dadosAtributos.PontosGastos;
+            }
+
+            // Coleta dados de características se os sistemas existirem
+            if (window.sistemaAparencia && typeof window.sistemaAparencia.exportarDados === 'function') {
+                dadosCompletos.aparencia = window.sistemaAparencia.exportarDados();
+            }
+            
+            if (window.sistemaRiqueza && typeof window.sistemaRiqueza.exportarDados === 'function') {
+                dadosCompletos.riqueza = window.sistemaRiqueza.exportarDados();
+            }
+            
+            if (window.sistemaIdiomas && typeof window.sistemaIdiomas.exportarDados === 'function') {
+                dadosCompletos.idiomas = window.sistemaIdiomas.exportarDados();
+            }
 
             let resultado;
             if (personagemAtual.id) {
                 // Atualizar existente
                 resultado = await supabase
                     .from('characters')
-                    .update(dadosSalvar)
+                    .update(dadosCompletos)
                     .eq('id', personagemAtual.id);
             } else {
                 // Criar novo
                 resultado = await supabase
                     .from('characters')
-                    .insert([dadosSalvar])
+                    .insert([dadosCompletos])
                     .select();
                 
-                if (resultado.data) {
+                if (resultado.data && resultado.data[0]) {
                     personagemAtual.id = resultado.data[0].id;
                 }
             }
@@ -1016,6 +1091,7 @@
             window.location.href = 'personagens.html';
 
         } catch (error) {
+            console.error('Erro ao salvar personagem:', error);
             alert('Erro ao salvar personagem: ' + error.message);
         }
     }
@@ -1032,20 +1108,39 @@
             if (error) throw error;
 
             personagemAtual = personagem;
-            document.getElementById('charName').value = personagem.nome;
+            
+            // Atualiza o nome do personagem
+            const charName = document.getElementById('charName');
+            if (charName) {
+                charName.value = personagem.nome || 'Personagem Sem Nome';
+            }
             
             // Carrega os dados nos atributos se a função existir
             if (typeof carregarDadosAtributos === 'function') {
                 carregarDadosAtributos({
-                    ST: personagem.forca,
-                    DX: personagem.destreza,
-                    IQ: personagem.inteligencia,
-                    HT: personagem.saude
+                    ST: personagem.forca || 10,
+                    DX: personagem.destreza || 10,
+                    IQ: personagem.inteligencia || 10,
+                    HT: personagem.saude || 10
                 });
             }
             
+            // Carrega dados de características se existirem
+            if (personagem.aparencia && window.sistemaAparencia && typeof window.sistemaAparencia.carregarDados === 'function') {
+                window.sistemaAparencia.carregarDados({ aparencia: personagem.aparencia });
+            }
+            
+            if (personagem.riqueza && window.sistemaRiqueza && typeof window.sistemaRiqueza.carregarDados === 'function') {
+                window.sistemaRiqueza.carregarDados({ riqueza: personagem.riqueza });
+            }
+            
+            if (personagem.idiomas && window.sistemaIdiomas && typeof window.sistemaIdiomas.carregarDados === 'function') {
+                window.sistemaIdiomas.carregarDados(personagem.idiomas);
+            }
+            
         } catch (error) {
-            alert('Erro ao carregar personagem');
+            console.error('Erro ao carregar personagem:', error);
+            alert('Erro ao carregar personagem: ' + error.message);
         }
     }
 
@@ -1076,7 +1171,8 @@
             window.location.href = 'personagens.html';
 
         } catch (error) {
-            alert('Erro ao excluir personagem');
+            console.error('Erro ao excluir personagem:', error);
+            alert('Erro ao excluir personagem: ' + error.message);
         }
     }
 
@@ -1086,9 +1182,18 @@
             window.location.href = 'personagens.html';
         }
     }
+
+    // Função auxiliar para verificar se elemento existe
+    function elementoExiste(seletor) {
+        return document.querySelector(seletor) !== null;
+    }
 </script>
     <!-- Antes do </body> do criar-personagem.html -->
 <script src="atributos.js"></script>
 <script src="caracteristicas-aparencia.js"></script>
+<script src="caracteristicas-riqueza.js"></script>
+<script src="caracteristicas-idiomas.js"></script>
+<script src="caracteristicas-fisicas.js"></script>
+<script src="caracteristicas-altura-peso.js"></script>
 </body>
 </html>
