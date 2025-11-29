@@ -1,4 +1,5 @@
 // ===== vantagens.js - SISTEMA 100% FUNCIONAL CORRIGIDO =====
+// ===== CORREÇÕES: Aptidão Mágica (valores) e Aliados (frequência) =====
 
 // ===== CATÁLOGO COMPLETO CORRIGIDO =====
 const catalogoVantagens = {
@@ -273,7 +274,7 @@ class SistemaVantagens {
         this.fecharModal();
         this.vantagemAtualModal = vantagem;
         
-        // Resetar nível para Aptidão Mágica
+        // CORREÇÃO: Resetar nível para Aptidão Mágica começando em 0
         if (vantagem.template === 'niveis') {
             this.nivelAtualModal = vantagem.nome === "Aptidão Mágica" ? 0 : 1;
         }
@@ -327,11 +328,12 @@ class SistemaVantagens {
         `;
     }
 
-    // CONTINUA NO PRÓXIMO COMENTÁRIO - Modal de níveis CORRIGIDO
-        criarModalComNiveis(nome, vantagem) {
+    criarModalComNiveis(nome, vantagem) {
         const isAptidaoMagica = nome === "Aptidão Mágica";
         const nivelMinimo = isAptidaoMagica ? 0 : 1;
         const nivelInicial = this.nivelAtualModal;
+        
+        // CORREÇÃO: Cálculo correto da Aptidão Mágica
         const custoInicial = this.calcularCustoNivel(vantagem, nivelInicial);
 
         let limitacoesHTML = '';
@@ -396,7 +398,7 @@ class SistemaVantagens {
         return "Nível";
     }
 
-    // CÁLCULO CORRETO DA APTIDÃO MÁGICA
+    // CORREÇÃO: CÁLCULO CORRETO DA APTIDÃO MÁGICA
     calcularCustoNivel(vantagem, nivel) {
         if (vantagem.nome === "Aptidão Mágica") {
             // CORRETO: Nível 0 = 5 pontos, cada nível adicional +10 pontos
@@ -535,7 +537,6 @@ class SistemaVantagens {
         this.mostrarFeedback(`${nome} nível ${this.nivelAtualModal} adquirido por ${custo} pontos!`);
     }
 
-    // CONTINUA NO PRÓXIMO COMENTÁRIO - Modal de Aliados CORRIGIDO (sem multiplicador de frequência)
         criarModalComOpcoes(nome, vantagem) {
         const opcoesHTML = vantagem.opcoes.map((opcao, index) => `
             <div class="opcao-item">
@@ -737,13 +738,14 @@ class SistemaVantagens {
         `;
     }
 
+    // CORREÇÃO: CÁLCULO DOS ALIADOS SEM MULTIPLICADOR DE FREQUÊNCIA
     calcularCustoAliados() {
         const modal = document.querySelector('.modal-content');
         if (!modal) return;
 
         const dados = catalogoVantagens.Aliados.dadosAliados;
         
-        // Custo base do poder - FREQUÊNCIA NÃO MULTIPLICA (CORREÇÃO)
+        // Custo base do poder - FREQUÊNCIA NÃO MULTIPLICA (CORREÇÃO APLICADA)
         const poderSelecionado = modal.querySelector('input[name="poder"]:checked');
         const poderIndex = parseInt(poderSelecionado.value);
         let custo = dados.poderes[poderIndex].custo;
@@ -801,7 +803,7 @@ class SistemaVantagens {
         const limitacoes = Array.from(modal.querySelectorAll('input[name="limitacao"]:checked'))
             .map(lim => lim.dataset.nome);
 
-        // Calcular custo final - FREQUÊNCIA NÃO MULTIPLICA (CORREÇÃO)
+        // Calcular custo final - FREQUÊNCIA NÃO MULTIPLICA (CORREÇÃO APLICADA)
         let custo = poder.custo; // Base do poder
         
         // Aplicar grupo
@@ -858,8 +860,7 @@ class SistemaVantagens {
         this.mostrarFeedback(`Aliados adquiridos por ${custo} pontos!`);
     }
 
-    // CONTINUA NO PRÓXIMO COMENTÁRIO - Sistema de peculiaridades e interface
-        adquirirVantagem(nome, custo) {
+    adquirirVantagem(nome, custo) {
         const vantagemAdquirida = {
             nome: nome,
             custo: custo,
@@ -1261,7 +1262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.head.appendChild(style);
         }
 
-        console.log('✅ Sistema de Vantagens 100% FUNCIONAL!');
+        console.log('✅ Sistema de Vantagens 100% FUNCIONAL com correções aplicadas!');
     } catch (error) {
         console.error('❌ Erro ao inicializar sistema:', error);
     }
