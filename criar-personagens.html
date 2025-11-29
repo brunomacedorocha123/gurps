@@ -337,7 +337,7 @@
         <!-- Atributos Principais -->
         <div class="atributos-principais">
             <h2 class="secao-titulo">Atributos Principais</h2>
-            <div class="cards-grid">
+            <div class="cards-grid principais-grid">
                 <!-- ST -->
                 <div class="atributo-card">
                     <div class="atributo-header">
@@ -403,35 +403,90 @@
                 <!-- PV -->
                 <div class="secundario-card">
                     <h3>PONTOS DE VIDA (PV)</h3>
-                    <div class="secundario-valor" id="PV">10</div>
+                    <div class="secundario-base">
+                        <span class="base-label">Base:</span>
+                        <span class="base-valor" id="PVBase">10</span>
+                    </div>
+                    <div class="bonus-section">
+                        <span class="bonus-label">Bônus/Redutor:</span>
+                        <input type="number" id="bonusPV" class="bonus-input" value="0" min="-10" max="10">
+                    </div>
+                    <div class="secundario-total">
+                        <span class="total-label">Total:</span>
+                        <span class="total-valor" id="PVTotal">10</span>
+                    </div>
                     <div class="secundario-desc">Baseado em ST</div>
                 </div>
 
                 <!-- PF -->
                 <div class="secundario-card">
                     <h3>PONTOS DE FADIGA (PF)</h3>
-                    <div class="secundario-valor" id="PF">10</div>
+                    <div class="secundario-base">
+                        <span class="base-label">Base:</span>
+                        <span class="base-valor" id="PFBase">10</span>
+                    </div>
+                    <div class="bonus-section">
+                        <span class="bonus-label">Bônus/Redutor:</span>
+                        <input type="number" id="bonusPF" class="bonus-input" value="0" min="-10" max="10">
+                    </div>
+                    <div class="secundario-total">
+                        <span class="total-label">Total:</span>
+                        <span class="total-valor" id="PFTotal">10</span>
+                    </div>
                     <div class="secundario-desc">Baseado em HT</div>
                 </div>
 
                 <!-- Vontade -->
                 <div class="secundario-card">
                     <h3>VONTADE</h3>
-                    <div class="secundario-valor" id="Vontade">10</div>
+                    <div class="secundario-base">
+                        <span class="base-label">Base:</span>
+                        <span class="base-valor" id="VontadeBase">10</span>
+                    </div>
+                    <div class="bonus-section">
+                        <span class="bonus-label">Bônus/Redutor:</span>
+                        <input type="number" id="bonusVontade" class="bonus-input" value="0" min="-10" max="10">
+                    </div>
+                    <div class="secundario-total">
+                        <span class="total-label">Total:</span>
+                        <span class="total-valor" id="VontadeTotal">10</span>
+                    </div>
                     <div class="secundario-desc">Baseado em IQ</div>
                 </div>
 
                 <!-- Percepção -->
                 <div class="secundario-card">
                     <h3>PERCEPÇÃO</h3>
-                    <div class="secundario-valor" id="Percepcao">10</div>
+                    <div class="secundario-base">
+                        <span class="base-label">Base:</span>
+                        <span class="base-valor" id="PercepcaoBase">10</span>
+                    </div>
+                    <div class="bonus-section">
+                        <span class="bonus-label">Bônus/Redutor:</span>
+                        <input type="number" id="bonusPercepcao" class="bonus-input" value="0" min="-10" max="10">
+                    </div>
+                    <div class="secundario-total">
+                        <span class="total-label">Total:</span>
+                        <span class="total-valor" id="PercepcaoTotal">10</span>
+                    </div>
                     <div class="secundario-desc">Baseado em IQ</div>
                 </div>
 
                 <!-- Deslocamento -->
                 <div class="secundario-card">
                     <h3>DESLOCAMENTO</h3>
-                    <div class="secundario-valor" id="Deslocamento">5.00</div>
+                    <div class="secundario-base">
+                        <span class="base-label">Base:</span>
+                        <span class="base-valor" id="DeslocamentoBase">5.00</span>
+                    </div>
+                    <div class="bonus-section">
+                        <span class="bonus-label">Bônus/Redutor:</span>
+                        <input type="number" id="bonusDeslocamento" class="bonus-input" value="0" min="-5" max="5" step="0.25">
+                    </div>
+                    <div class="secundario-total">
+                        <span class="total-label">Total:</span>
+                        <span class="total-valor" id="DeslocamentoTotal">5.00</span>
+                    </div>
                     <div class="secundario-desc">(DX + HT) / 4</div>
                 </div>
             </div>
@@ -487,7 +542,6 @@
         </div>
     </div>
 </div>
-
         <!-- ABA CARACTERÍSTICAS -->
         <div id="caracteristicas" class="tab-content">
             <div class="loading">
