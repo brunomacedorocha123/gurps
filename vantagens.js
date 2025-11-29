@@ -398,15 +398,20 @@ class SistemaVantagens {
         return "Nível";
     }
 
-    // CORREÇÃO: CÁLCULO CORRETO DA APTIDÃO MÁGICA
     calcularCustoNivel(vantagem, nivel) {
-        if (vantagem.nome === "Aptidão Mágica") {
-            // CORRETO: Nível 0 = 5 pontos, cada nível adicional +10 pontos
-            return nivel === 0 ? 5 : 5 + (10 * nivel);
-        }
-        // Para Duro de Matar
+    if (vantagem.nome === "Aptidão Mágica") {
+        // CORRETO: Nível 0 = 5 pontos, cada nível adicional +10 pontos
+        return nivel === 0 ? 5 : 5 + (10 * nivel);
+    }
+    
+    if (vantagem.nome === "Duro de Matar") {
+        // Para Duro de Matar usa custoBase
         return vantagem.custoBase * nivel;
     }
+    
+    // Fallback seguro
+    return 0;
+}
 
     criarLimitacoesAptidaoMagica() {
         const vantagem = this.vantagemAtualModal;
