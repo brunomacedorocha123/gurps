@@ -540,201 +540,230 @@
     </main>
 
     <script>
-        // Configuração do Supabase
-        const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        // Estado global do personagem
-        let personagemAtual = {
-            id: null,
-            nome: 'Novo Personagem',
-            pontos_totais: 150,
-            pontos_gastos: 0,
-            forca: 10,
-            destreza: 10,
-            inteligencia: 10,
-            saude: 10,
-            // Outros campos serão adicionados
-        };
+    // Configuração do Supabase
+    const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Estado global do personagem
+    let personagemAtual = {
+        id: null,
+        nome: 'Novo Personagem',
+        pontos_totais: 150,
+        pontos_gastos: 0,
+        forca: 10,
+        destreza: 10,
+        inteligencia: 10,
+        saude: 10,
+    };
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            inicializarNavegacaoAbas();
-            configurarEventListeners();
-            carregarPersonagemDaURL();
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+        inicializarNavegacaoAbas();
+        configurarEventListeners();
+        carregarPersonagemDaURL();
+    });
+
+    // Navegação entre abas - CORRIGIDA
+    function inicializarNavegacaoAbas() {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active de todos
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Ativa a aba clicada
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                
+                // Carrega o conteúdo da aba se necessário
+                carregarConteudoAba(tabId);
+                
+                // Inicializa os atributos se for a aba de atributos
+                if (tabId === 'atributos' && typeof inicializarAtributos === 'function') {
+                    setTimeout(() => {
+                        inicializarAtributos();
+                    }, 100);
+                }
+            });
         });
+    }
 
-        // Navegação entre abas
-        function inicializarNavegacaoAbas() {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Remove active de todos
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    
-                    // Ativa a aba clicada
-                    this.classList.add('active');
-                    const tabId = this.getAttribute('data-tab');
-                    document.getElementById(tabId).classList.add('active');
-                    
-                    // Carrega o conteúdo da aba se necessário
-                    carregarConteudoAba(tabId);
-                });
-            });
+    // Configurar event listeners
+    function configurarEventListeners() {
+        // Botões do header
+        document.getElementById('btnSalvar').addEventListener('click', salvarPersonagem);
+        document.getElementById('btnExcluir').addEventListener('click', solicitarExclusao);
+        document.getElementById('btnSair').addEventListener('click', sairSemSalvar);
+        
+        // Nome do personagem
+        document.getElementById('charName').addEventListener('input', function() {
+            personagemAtual.nome = this.value;
+        });
+    }
+
+    // Carregar personagem da URL (se estiver editando)
+    function carregarPersonagemDaURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const personagemId = urlParams.get('id');
+        
+        if (personagemId) {
+            carregarPersonagemExistente(personagemId);
+        } else {
+            // Novo personagem - carrega dashboard
+            carregarConteudoAba('dashboard');
+        }
+    }
+
+    // Carregar conteúdo da aba - CORRIGIDA
+    function carregarConteudoAba(abaId) {
+        const abaContent = document.getElementById(abaId);
+        
+        // Se já carregou, não carrega novamente
+        if (abaContent.getAttribute('data-loaded') === 'true') {
+            return;
         }
 
-        // Configurar event listeners
-        function configurarEventListeners() {
-            // Botões do header
-            document.getElementById('btnSalvar').addEventListener('click', salvarPersonagem);
-            document.getElementById('btnExcluir').addEventListener('click', solicitarExclusao);
-            document.getElementById('btnSair').addEventListener('click', sairSemSalvar);
-            
-            // Nome do personagem
-            document.getElementById('charName').addEventListener('input', function() {
-                personagemAtual.nome = this.value;
-            });
+        // Para a aba de atributos, não substituir o conteúdo
+        if (abaId === 'atributos') {
+            abaContent.setAttribute('data-loaded', 'true');
+            return;
         }
 
-        // Carregar personagem da URL (se estiver editando)
-        function carregarPersonagemDaURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const personagemId = urlParams.get('id');
-            
-            if (personagemId) {
-                carregarPersonagemExistente(personagemId);
-            } else {
-                // Novo personagem - carrega dashboard
-                carregarConteudoAba('dashboard');
-            }
-        }
-
-        // Carregar conteúdo da aba
-        function carregarConteudoAba(abaId) {
-            const abaContent = document.getElementById(abaId);
-            
-            // Se já carregou, não carrega novamente
-            if (abaContent.getAttribute('data-loaded') === 'true') {
-                return;
-            }
-
-            // Simula carregamento
-            setTimeout(() => {
+        // Para outras abas, simula carregamento
+        setTimeout(() => {
+            if (abaId !== 'atributos') {
                 abaContent.innerHTML = `<h2>Conteúdo da aba ${abaId} em desenvolvimento</h2>
                                        <p>Esta funcionalidade será implementada em breve.</p>`;
                 abaContent.setAttribute('data-loaded', 'true');
-            }, 500);
-        }
-
-        // Salvar personagem
-        async function salvarPersonagem() {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                
-                if (!session) {
-                    alert('Você precisa estar logado para salvar!');
-                    return;
-                }
-
-                const dadosSalvar = {
-                    ...personagemAtual,
-                    user_id: session.user.id,
-                    updated_at: new Date().toISOString()
-                };
-
-                let resultado;
-                if (personagemAtual.id) {
-                    // Atualizar existente
-                    resultado = await supabase
-                        .from('characters')
-                        .update(dadosSalvar)
-                        .eq('id', personagemAtual.id);
-                } else {
-                    // Criar novo
-                    resultado = await supabase
-                        .from('characters')
-                        .insert([dadosSalvar])
-                        .select();
-                    
-                    if (resultado.data) {
-                        personagemAtual.id = resultado.data[0].id;
-                    }
-                }
-
-                if (resultado.error) throw resultado.error;
-
-                alert('Personagem salvo com sucesso!');
-                window.location.href = 'personagens.html';
-
-            } catch (error) {
-                console.error('Erro ao salvar:', error);
-                alert('Erro ao salvar personagem: ' + error.message);
             }
-        }
+        }, 500);
+    }
 
-        // Carregar personagem existente
-        async function carregarPersonagemExistente(personagemId) {
-            try {
-                const { data: personagem, error } = await supabase
-                    .from('characters')
-                    .select('*')
-                    .eq('id', personagemId)
-                    .single();
-
-                if (error) throw error;
-
-                personagemAtual = personagem;
-                document.getElementById('charName').value = personagem.nome;
-                
-                alert('Personagem carregado! ID: ' + personagemId);
-
-            } catch (error) {
-                console.error('Erro ao carregar personagem:', error);
-                alert('Erro ao carregar personagem');
-            }
-        }
-
-        // Solicitar exclusão
-        function solicitarExclusao() {
-            if (confirm('Tem certeza que deseja excluir este personagem?\nEsta ação não pode ser desfeita!')) {
-                excluirPersonagem();
-            }
-        }
-
-        // Excluir personagem
-        async function excluirPersonagem() {
-            if (!personagemAtual.id) {
-                // Personagem novo não salvo
-                window.location.href = 'personagens.html';
+    // Salvar personagem
+    async function salvarPersonagem() {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                alert('Você precisa estar logado para salvar!');
                 return;
             }
 
-            try {
-                const { error } = await supabase
+            // Atualiza os dados dos atributos antes de salvar
+            if (typeof obterDadosAtributos === 'function') {
+                const dadosAtributos = obterDadosAtributos();
+                personagemAtual.forca = dadosAtributos.ST;
+                personagemAtual.destreza = dadosAtributos.DX;
+                personagemAtual.inteligencia = dadosAtributos.IQ;
+                personagemAtual.saude = dadosAtributos.HT;
+                personagemAtual.pontos_gastos = dadosAtributos.PontosGastos;
+            }
+
+            const dadosSalvar = {
+                ...personagemAtual,
+                user_id: session.user.id,
+                updated_at: new Date().toISOString()
+            };
+
+            let resultado;
+            if (personagemAtual.id) {
+                // Atualizar existente
+                resultado = await supabase
                     .from('characters')
-                    .delete()
+                    .update(dadosSalvar)
                     .eq('id', personagemAtual.id);
-
-                if (error) throw error;
-
-                alert('Personagem excluído com sucesso!');
-                window.location.href = 'personagens.html';
-
-            } catch (error) {
-                console.error('Erro ao excluir:', error);
-                alert('Erro ao excluir personagem');
+            } else {
+                // Criar novo
+                resultado = await supabase
+                    .from('characters')
+                    .insert([dadosSalvar])
+                    .select();
+                
+                if (resultado.data) {
+                    personagemAtual.id = resultado.data[0].id;
+                }
             }
+
+            if (resultado.error) throw resultado.error;
+
+            alert('Personagem salvo com sucesso!');
+            window.location.href = 'personagens.html';
+
+        } catch (error) {
+            alert('Erro ao salvar personagem: ' + error.message);
+        }
+    }
+
+    // Carregar personagem existente
+    async function carregarPersonagemExistente(personagemId) {
+        try {
+            const { data: personagem, error } = await supabase
+                .from('characters')
+                .select('*')
+                .eq('id', personagemId)
+                .single();
+
+            if (error) throw error;
+
+            personagemAtual = personagem;
+            document.getElementById('charName').value = personagem.nome;
+            
+            // Carrega os dados nos atributos se a função existir
+            if (typeof carregarDadosAtributos === 'function') {
+                carregarDadosAtributos({
+                    ST: personagem.forca,
+                    DX: personagem.destreza,
+                    IQ: personagem.inteligencia,
+                    HT: personagem.saude
+                });
+            }
+            
+        } catch (error) {
+            alert('Erro ao carregar personagem');
+        }
+    }
+
+    // Solicitar exclusão
+    function solicitarExclusao() {
+        if (confirm('Tem certeza que deseja excluir este personagem?\nEsta ação não pode ser desfeita!')) {
+            excluirPersonagem();
+        }
+    }
+
+    // Excluir personagem
+    async function excluirPersonagem() {
+        if (!personagemAtual.id) {
+            // Personagem novo não salvo
+            window.location.href = 'personagens.html';
+            return;
         }
 
-        // Sair sem salvar
-        function sairSemSalvar() {
-            if (confirm('Sair sem salvar as alterações?')) {
-                window.location.href = 'personagens.html';
-            }
+        try {
+            const { error } = await supabase
+                .from('characters')
+                .delete()
+                .eq('id', personagemAtual.id);
+
+            if (error) throw error;
+
+            alert('Personagem excluído com sucesso!');
+            window.location.href = 'personagens.html';
+
+        } catch (error) {
+            alert('Erro ao excluir personagem');
         }
-    </script>
+    }
+
+    // Sair sem salvar
+    function sairSemSalvar() {
+        if (confirm('Sair sem salvar as alterações?')) {
+            window.location.href = 'personagens.html';
+        }
+    }
+</script>
     <!-- Antes do </body> do criar-personagem.html -->
 <script src="atributos.js"></script>
 </body>
