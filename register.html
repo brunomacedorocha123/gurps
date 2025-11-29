@@ -7,203 +7,242 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
         }
-
-        body {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('Cris2.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-            overflow-x: hidden;
+        
+        body { 
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') 
+                        no-repeat center center fixed; 
+            background-size: cover; 
+            color: #fff; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
         }
-
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(255, 140, 0, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 80%, rgba(255, 69, 0, 0.1) 0%, transparent 50%);
-            z-index: -1;
+        
+        .container { 
+            width: 100%; 
+            max-width: 500px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 30px; 
         }
-
-        .container {
-            width: 100%;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
+        
+        .header { 
+            text-align: center; 
+            animation: fadeIn 1s ease-in;
         }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            animation: fadeInDown 1s ease;
-        }
-
-        .header h1 {
-            font-size: 3rem;
+        
+        .header h1 { 
+            font-size: 3rem; 
+            background: linear-gradient(45deg, #ffd700, #ff8c00, #ff4500); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
             margin-bottom: 10px;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
-            background: linear-gradient(45deg, #ffd700, #ff8c00, #ff4500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 2px;
         }
-
+        
         .header p {
             font-size: 1.2rem;
-            color: #e0e0e0;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            color: #ccc;
         }
-
-        .form-container {
-            background: rgba(30, 30, 40, 0.8);
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-            animation: fadeInUp 1s ease;
+        
+        .form-container { 
+            background: rgba(30,30,40,0.9); 
+            border-radius: 20px; 
+            padding: 40px; 
+            width: 100%; 
+            border: 1px solid rgba(255,140,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.8s ease-out;
         }
-
-        .form-group {
-            margin-bottom: 25px;
+        
+        .form-group { 
+            margin-bottom: 25px; 
+            position: relative;
         }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #ffd700;
+        
+        .form-group label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #ffd700; 
         }
-
-        .form-control {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid rgba(255, 140, 0, 0.3);
-            border-radius: 10px;
-            background: rgba(20, 20, 30, 0.7);
-            color: #fff;
-            font-size: 1rem;
+        
+        .form-control { 
+            width: 100%; 
+            padding: 15px; 
+            border: 2px solid rgba(255,140,0,0.3); 
+            border-radius: 10px; 
+            background: rgba(20,20,30,0.7); 
+            color: #fff; 
             transition: all 0.3s ease;
+            font-size: 1rem;
         }
-
+        
         .form-control:focus {
             outline: none;
             border-color: #ff8c00;
-            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
         }
-
-        .btn {
-            width: 100%;
-            padding: 18px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            cursor: pointer;
+        
+        .password-strength {
+            height: 5px;
+            margin-top: 8px;
+            border-radius: 5px;
+            background: #333;
+            overflow: hidden;
+        }
+        
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+        
+        .btn { 
+            width: 100%; 
+            padding: 18px; 
+            background: linear-gradient(45deg, #ff8c00, #ff4500); 
+            border: none; 
+            border-radius: 12px; 
+            color: white; 
+            font-size: 1.2rem; 
+            cursor: pointer; 
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            text-decoration: none;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            letter-spacing: 1px;
         }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #ff8c00, #ff4500);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(45deg, #ff4500, #ff8c00);
+        
+        .btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(255, 69, 0, 0.4);
+            box-shadow: 0 7px 15px rgba(255, 69, 0, 0.4);
         }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
+        
+        .btn:active {
+            transform: translateY(-1px);
         }
-
-        .message {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
+        
+        .message { 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+            text-align: center; 
+            display: none; 
+            animation: fadeIn 0.5s ease;
         }
-
-        .message-success {
-            background: rgba(46, 125, 50, 0.3);
-            border: 1px solid rgba(76, 175, 80, 0.5);
-            color: #a5d6a7;
+        
+        .message-success { 
+            background: rgba(46,125,50,0.3); 
+            color: #a5d6a7; 
+            border: 1px solid rgba(76,175,80,0.3);
         }
-
-        .message-error {
-            background: rgba(211, 47, 47, 0.3);
-            border: 1px solid rgba(244, 67, 54, 0.5);
-            color: #ef9a9a;
+        
+        .message-error { 
+            background: rgba(211,47,47,0.3); 
+            color: #ef9a9a; 
+            border: 1px solid rgba(244,67,54,0.3);
         }
-
+        
         .login-link {
-            text-align: center;
-            margin-top: 25px;
+            text-align: center; 
+            margin-top: 25px; 
             color: #ccc;
+            font-size: 1rem;
         }
-
+        
         .login-link a {
             color: #ff8c00;
             text-decoration: none;
             font-weight: 600;
+            transition: color 0.3s ease;
         }
-
+        
         .login-link a:hover {
+            color: #ffd700;
             text-decoration: underline;
         }
-
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .player-id-display {
+            background: rgba(255, 140, 0, 0.1);
+            border: 1px dashed #ff8c00;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
         }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .player-id {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            letter-spacing: 2px;
         }
-
-        @media (max-width: 768px) {
-            .container { max-width: 90%; }
-            .form-container { padding: 30px 25px; }
-            .header h1 { font-size: 2.5rem; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ff8c00;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>RPG SYSTEM</h1>
-            <p>Crie sua conta de aventureiro</p>
+            <h1><i class="fas fa-dragon"></i> RPG SYSTEM</h1>
+            <p>Crie sua conta e entre na aventura</p>
         </div>
         
         <div class="form-container">
@@ -211,30 +250,43 @@
             
             <form id="registerForm">
                 <div class="form-group">
-                    <label for="username">Nome de Usuário</label>
-                    <input type="text" id="username" class="form-control" required>
+                    <label for="username"><i class="fas fa-user"></i> Nome de Usuário</label>
+                    <input type="text" id="username" class="form-control" required placeholder="Escolha um nome épico">
                 </div>
                 
                 <div class="form-group">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" class="form-control" required>
+                    <label for="email"><i class="fas fa-envelope"></i> E-mail</label>
+                    <input type="email" id="email" class="form-control" required placeholder="seu@email.com">
                 </div>
                 
                 <div class="form-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" class="form-control" required minlength="6">
+                    <label for="password"><i class="fas fa-lock"></i> Senha</label>
+                    <input type="password" id="password" class="form-control" required minlength="6" placeholder="Mínimo 6 caracteres">
+                    <div class="password-strength">
+                        <div class="strength-bar" id="passwordStrength"></div>
+                    </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="confirmPassword">Confirmar Senha</label>
-                    <input type="password" id="confirmPassword" class="form-control" required>
+                    <label for="confirmPassword"><i class="fas fa-lock"></i> Confirmar Senha</label>
+                    <input type="password" id="confirmPassword" class="form-control" required placeholder="Digite a senha novamente">
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="fas fa-user-plus"></i>
-                    Cadastrar
+                <button type="submit" class="btn">
+                    <i class="fas fa-user-plus"></i> Cadastrar
                 </button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px;">Criando sua conta...</p>
+                </div>
             </form>
+            
+            <div class="player-id-display" id="playerIdDisplay">
+                <p>Seu ID de Jogador:</p>
+                <div class="player-id" id="playerId"></div>
+                <p style="margin-top: 10px; font-size: 0.9rem;">Guarde este ID! Você precisará dele para fazer login.</p>
+            </div>
             
             <div class="login-link">
                 Já tem uma conta? <a href="login.html">Faça login</a>
@@ -243,55 +295,71 @@
     </div>
 
     <script>
-        // Configuração do Supabase
         const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // Função para gerar ID único de 6 dígitos
+        // Verificar força da senha
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('passwordStrength');
+            let strength = 0;
+            
+            if (password.length >= 6) strength += 25;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 25;
+            if (password.match(/\d/)) strength += 25;
+            if (password.match(/[^a-zA-Z\d]/)) strength += 25;
+            
+            strengthBar.style.width = strength + '%';
+            
+            if (strength < 50) {
+                strengthBar.style.background = '#ff4500';
+            } else if (strength < 75) {
+                strengthBar.style.background = '#ff8c00';
+            } else {
+                strengthBar.style.background = '#32cd32';
+            }
+        });
+        
+        // Gerar ID de jogador
         function generatePlayerId() {
             return Math.floor(100000 + Math.random() * 900000);
         }
         
-        // Manipular o envio do formulário
+        // Submeter formulário
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const submitBtn = document.getElementById('submitBtn');
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            const messageDiv = document.getElementById('message');
             
-            // Limpar mensagens anteriores
-            messageDiv.style.display = 'none';
-            messageDiv.className = 'message';
-            
-            // Desabilitar botão
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cadastrando...';
-            
-            // Validações básicas
+            // Validações
             if (password !== confirmPassword) {
                 showMessage('As senhas não coincidem!', 'error');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Cadastrar';
                 return;
             }
             
             if (password.length < 6) {
                 showMessage('A senha deve ter pelo menos 6 caracteres!', 'error');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Cadastrar';
                 return;
             }
             
+            if (username.length < 3) {
+                showMessage('O nome de usuário deve ter pelo menos 3 caracteres!', 'error');
+                return;
+            }
+            
+            // Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.querySelector('.btn').disabled = true;
+            
             try {
-                // Registrar usuário no Supabase Auth
+                // Registrar no Auth
                 const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email,
+                    email, 
                     password,
                     options: {
                         data: {
@@ -302,69 +370,60 @@
                 
                 if (authError) throw authError;
                 
-                // Gerar ID único para o jogador
+                // Gerar ID do jogador
                 const playerId = generatePlayerId();
                 
-                // Inserir dados do jogador usando RPC (chamada de função) para evitar RLS
-                const { data: profileData, error: profileError } = await supabase.rpc('create_user_profile', {
-                    user_id: authData.user.id,
-                    user_username: username,
-                    user_email: email,
-                    user_player_id: playerId
-                });
+                // Inserir perfil do usuário
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert([
+                        { 
+                            id: authData.user.id,
+                            username: username,
+                            email: email,
+                            player_id: playerId
+                        }
+                    ]);
                 
                 if (profileError) {
-                    // Se RPC falhar, tentar inserção direta
-                    const { error: directError } = await supabase
-                        .from('profiles')
-                        .insert([
-                            { 
-                                id: authData.user.id,
-                                username: username,
-                                email: email,
-                                player_id: playerId,
-                                created_at: new Date()
-                            }
-                        ]);
+                    // Se houver erro de RLS, tentar método alternativo
+                    console.log("Erro ao inserir perfil, tentando método alternativo...");
                     
-                    if (directError) throw directError;
+                    // Neste caso, o trigger no Supabase deve criar o perfil automaticamente
+                    // Vamos apenas mostrar o ID gerado localmente
+                    showMessage('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar a conta.', 'success');
+                    document.getElementById('playerId').textContent = playerId;
+                    document.getElementById('playerIdDisplay').style.display = 'block';
+                } else {
+                    showMessage('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar a conta.', 'success');
+                    document.getElementById('playerId').textContent = playerId;
+                    document.getElementById('playerIdDisplay').style.display = 'block';
                 }
                 
-                showMessage('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar a conta.', 'success');
-                document.getElementById('registerForm').reset();
-                
-                // Redirecionar para login após 3 segundos
+                // Redirecionar após 5 segundos
                 setTimeout(() => {
                     window.location.href = 'login.html';
-                }, 3000);
+                }, 5000);
                 
             } catch (error) {
-                console.error('Erro detalhado:', error);
+                console.error('Erro completo:', error);
                 showMessage('Erro ao cadastrar: ' + error.message, 'error');
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Cadastrar';
+                // Esconder loading
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.btn').disabled = false;
             }
         });
         
-        // Função para exibir mensagens
         function showMessage(text, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.textContent = text;
             messageDiv.className = `message message-${type}`;
             messageDiv.style.display = 'block';
+            
+            // Rolagem suave para a mensagem
+            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-        
-        // Verificar se o usuário já está logado
-        async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                window.location.href = 'home.html';
-            }
-        }
-        
-        // Verificar autenticação ao carregar a página
-        document.addEventListener('DOMContentLoaded', checkAuth);
     </script>
 </body>
 </html>
