@@ -66,13 +66,16 @@
 /* Grid de Cards */
 .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
     margin-bottom: 30px;
 }
 
+.principais-grid {
+    grid-template-columns: repeat(4, 1fr);
+}
+
 .secundarios-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 .combate-grid {
@@ -84,7 +87,7 @@
     background: rgba(30, 30, 40, 0.9);
     border: 1px solid rgba(255, 140, 0, 0.2);
     border-radius: 12px;
-    padding: 25px;
+    padding: 20px;
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
     position: relative;
@@ -117,21 +120,21 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .atributo-header h3 {
     color: #ffd700;
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin: 0;
 }
 
 .custo-pontos {
     background: rgba(255, 140, 0, 0.2);
     color: #ff8c00;
-    padding: 4px 12px;
+    padding: 4px 10px;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     border: 1px solid rgba(255, 140, 0, 0.3);
 }
@@ -140,18 +143,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    margin-bottom: 15px;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
 .btn-controle {
     background: linear-gradient(45deg, #ff8c00, #ffd700);
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     color: #1e1e28;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
     display: flex;
@@ -174,11 +177,11 @@
     border: 2px solid rgba(255, 140, 0, 0.3);
     border-radius: 8px;
     color: #ffd700;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: bold;
     text-align: center;
-    width: 80px;
-    height: 50px;
+    width: 70px;
+    height: 45px;
     padding: 5px;
     transition: all 0.3s ease;
 }
@@ -191,51 +194,119 @@
 
 .atributo-desc {
     color: #ccc;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     text-align: center;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 /* Cards de Atributos Secundários */
 .secundario-card {
     background: rgba(40, 40, 50, 0.8);
-    border: 1px solid rgba(52, 152, 219, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.3);
     border-radius: 12px;
     padding: 20px;
-    text-align: center;
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
 }
 
 .secundario-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(52, 152, 219, 0.6);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
 }
 
 .secundario-card h3 {
-    color: #3498db;
+    color: #ffd700;
     font-size: 1rem;
     margin-bottom: 15px;
+    text-align: center;
     font-weight: 600;
 }
 
-.secundario-valor {
-    color: #3498db;
-    font-size: 2rem;
-    font-weight: bold;
+.secundario-calculado {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     margin-bottom: 10px;
+}
+
+.valor-base, .valor-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+}
+
+.base-label, .total-label {
+    color: #ccc;
+    font-size: 0.8rem;
+}
+
+.base-valor, .total-valor {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.total-valor {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.bonus-input-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bonus-label {
+    color: #ccc;
+    font-size: 0.8rem;
+}
+
+.bonus-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 6px;
+    color: #ffd700;
+    font-size: 0.9rem;
+    text-align: center;
+    width: 70px;
+    height: 30px;
+    padding: 2px 5px;
+    transition: all 0.3s ease;
+}
+
+.bonus-input:focus {
+    outline: none;
+    border-color: #ffd700;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+
+.bonus-input.positivo {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.1);
+}
+
+.bonus-input.negativo {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
 }
 
 .secundario-desc {
     color: #95a5a6;
     font-size: 0.8rem;
+    text-align: center;
+    margin-top: 10px;
 }
 
 /* Cards de Combate */
 .combate-card {
     background: rgba(40, 40, 50, 0.8);
-    border: 1px solid rgba(231, 76, 60, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.3);
     border-radius: 12px;
     padding: 25px;
     backdrop-filter: blur(10px);
@@ -244,12 +315,12 @@
 
 .combate-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(231, 76, 60, 0.6);
-    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.2);
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
 }
 
 .combate-card h3 {
-    color: #e74c3c;
+    color: #ffd700;
     font-size: 1.1rem;
     margin-bottom: 20px;
     text-align: center;
@@ -275,13 +346,13 @@
 }
 
 .dano-valor {
-    color: #e74c3c;
+    color: #ffd700;
     font-size: 1.3rem;
     font-weight: bold;
-    background: rgba(231, 76, 60, 0.1);
+    background: rgba(255, 215, 0, 0.1);
     padding: 8px 15px;
     border-radius: 8px;
-    border: 1px solid rgba(231, 76, 60, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .carga-container {
@@ -310,7 +381,7 @@
 }
 
 .carga-valor {
-    color: #e74c3c;
+    color: #ffd700;
     font-weight: 600;
     font-size: 0.9rem;
 }
@@ -323,6 +394,12 @@
 }
 
 /* Responsividade */
+@media (max-width: 1024px) {
+    .principais-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
     .atributos-container {
         padding: 15px;
@@ -333,18 +410,25 @@
         gap: 10px;
     }
     
-    .cards-grid {
+    .principais-grid {
         grid-template-columns: 1fr;
-        gap: 15px;
+    }
+    
+    .secundarios-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .combate-grid {
+        grid-template-columns: 1fr;
     }
     
     .atributo-card {
-        padding: 20px;
+        padding: 15px;
     }
     
     .atributo-header {
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
         text-align: center;
     }
     
@@ -353,14 +437,14 @@
     }
     
     .atributo-input {
-        width: 70px;
-        height: 45px;
-        font-size: 1.3rem;
+        width: 60px;
+        height: 40px;
+        font-size: 1.2rem;
     }
     
     .btn-controle {
-        width: 35px;
-        height: 35px;
+        width: 32px;
+        height: 32px;
         font-size: 1rem;
     }
     
@@ -393,15 +477,16 @@
     }
     
     .atributo-card {
-        padding: 15px;
+        padding: 12px;
     }
     
     .atributo-header h3 {
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
     
-    .secundario-valor {
-        font-size: 1.5rem;
+    .bonus-input {
+        width: 60px;
+        font-size: 0.8rem;
     }
     
     .dano-valor {
