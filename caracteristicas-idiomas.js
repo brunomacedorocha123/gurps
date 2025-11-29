@@ -1,4 +1,4 @@
-// caracteristicas-idiomas.js - VERSÃO CORRIGIDA E SIMPLIFICADA
+// caracteristicas-idiomas.js - VERSÃO SEM SALVAMENTO AUTOMÁTICO
 class SistemaIdiomas {
     constructor() {
         this.idiomaMaterno = {
@@ -30,7 +30,6 @@ class SistemaIdiomas {
     inicializar() {
         if (this.inicializado) return;
         
-        this.carregarDadosSalvos();
         this.configurarEventos();
         this.atualizarPreviewCusto();
         this.atualizarDisplay();
@@ -43,15 +42,6 @@ class SistemaIdiomas {
         if (btnAdicionar) {
             btnAdicionar.addEventListener('click', () => {
                 this.adicionarIdioma();
-            });
-        }
-        
-        // Input do idioma materno
-        const inputMaterno = document.getElementById('idiomaMaternoNome');
-        if (inputMaterno) {
-            inputMaterno.addEventListener('input', (e) => {
-                this.idiomaMaterno.nome = e.target.value;
-                this.salvarDados();
             });
         }
         
@@ -76,10 +66,11 @@ class SistemaIdiomas {
             });
         }
         
-        // Event delegation para remoção de idiomas
+        // Event delegation para remoção de idiomas - CORRIGIDO
         document.addEventListener('click', (e) => {
             if (e.target.closest('.btn-remove-idioma')) {
-                const idiomaId = parseInt(e.target.closest('.btn-remove-idioma').dataset.id);
+                const button = e.target.closest('.btn-remove-idioma');
+                const idiomaId = parseInt(button.dataset.id);
                 this.removerIdioma(idiomaId);
             }
         });
@@ -142,7 +133,6 @@ class SistemaIdiomas {
         
         this.atualizarPreviewCusto();
         this.atualizarDisplay();
-        this.salvarDados();
     }
 
     idiomaJaExiste(nome) {
@@ -152,9 +142,9 @@ class SistemaIdiomas {
     }
     
     removerIdioma(id) {
+        // CORREÇÃO: Filtrar o array para remover o idioma
         this.idiomasAdicionais = this.idiomasAdicionais.filter(i => i.id !== id);
         this.atualizarDisplay();
-        this.salvarDados();
     }
     
     calcularCustoIdioma(nivelFala, nivelEscrita) {
@@ -227,38 +217,8 @@ class SistemaIdiomas {
         const nivelObj = niveis.find(n => n.valor === nivel);
         return nivelObj ? nivelObj.nome : 'Desconhecido';
     }
-    
-    carregarDadosSalvos() {
-        try {
-            const dadosSalvos = localStorage.getItem('sistemaIdiomas_data');
-            if (dadosSalvos) {
-                const dados = JSON.parse(dadosSalvos);
-                if (dados.idiomaMaterno) {
-                    this.idiomaMaterno = dados.idiomaMaterno;
-                    const inputMaterno = document.getElementById('idiomaMaternoNome');
-                    if (inputMaterno) inputMaterno.value = this.idiomaMaterno.nome;
-                }
-                if (dados.idiomasAdicionais) {
-                    this.idiomasAdicionais = dados.idiomasAdicionais;
-                }
-            }
-        } catch (error) {
-            // Silencioso
-        }
-    }
 
-    salvarDados() {
-        try {
-            const dadosParaSalvar = {
-                idiomaMaterno: this.idiomaMaterno,
-                idiomasAdicionais: this.idiomasAdicionais
-            };
-            localStorage.setItem('sistemaIdiomas_data', JSON.stringify(dadosParaSalvar));
-        } catch (error) {
-            // Silencioso
-        }
-    }
-
+    // MÉTODOS PARA SALVAMENTO MANUAL (quando você quiser)
     exportarDados() {
         return {
             idiomaMaterno: this.idiomaMaterno,
@@ -282,13 +242,12 @@ class SistemaIdiomas {
     }
 }
 
-// INICIALIZAÇÃO SIMPLES
+// INICIALIZAÇÃO
 let sistemaIdiomas;
 
 document.addEventListener('DOMContentLoaded', function() {
     sistemaIdiomas = new SistemaIdiomas();
     
-    // Inicializar quando a aba estiver ativa
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
@@ -309,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// FUNÇÕES GLOBAIS
+// FUNÇÃO GLOBAL
 window.adicionarIdioma = () => {
     if (sistemaIdiomas) {
         sistemaIdiomas.adicionarIdioma();
