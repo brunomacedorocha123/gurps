@@ -75,7 +75,7 @@
 }
 
 .secundarios-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .combate-grid {
@@ -223,48 +223,46 @@
     font-weight: 600;
 }
 
-.secundario-calculado {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
-.valor-base, .valor-total {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
-}
-
-.base-label, .total-label {
-    color: #ccc;
-    font-size: 0.8rem;
-}
-
-.base-valor, .total-valor {
-    color: #ffd700;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.total-valor {
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-.bonus-input-container {
+.secundario-base, .secundario-total {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 0;
+    margin-bottom: 5px;
+}
+
+.base-label, .total-label {
+    color: #ccc;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.base-valor {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.total-valor {
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.bonus-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    margin: 8px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .bonus-label {
     color: #ccc;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .bonus-input {
@@ -273,34 +271,38 @@
     border-radius: 6px;
     color: #ffd700;
     font-size: 0.9rem;
+    font-weight: 600;
     text-align: center;
-    width: 70px;
-    height: 30px;
-    padding: 2px 5px;
+    width: 80px;
+    height: 32px;
+    padding: 2px 8px;
     transition: all 0.3s ease;
 }
 
 .bonus-input:focus {
     outline: none;
     border-color: #ffd700;
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
 }
 
 .bonus-input.positivo {
     border-color: #27ae60;
-    background: rgba(39, 174, 96, 0.1);
+    background: rgba(39, 174, 96, 0.15);
+    color: #27ae60;
 }
 
 .bonus-input.negativo {
     border-color: #e74c3c;
-    background: rgba(231, 76, 60, 0.1);
+    background: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
 }
 
 .secundario-desc {
     color: #95a5a6;
     font-size: 0.8rem;
     text-align: center;
-    margin-top: 10px;
+    margin-top: 12px;
+    font-style: italic;
 }
 
 /* Cards de Combate */
@@ -391,6 +393,7 @@
     font-size: 0.8rem;
     text-align: center;
     margin-top: 15px;
+    font-style: italic;
 }
 
 /* Responsividade */
@@ -450,6 +453,10 @@
     
     .secundario-card, .combate-card {
         padding: 15px;
+    }
+    
+    .bonus-input {
+        width: 70px;
     }
     
     .dano-container {
