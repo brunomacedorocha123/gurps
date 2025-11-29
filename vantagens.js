@@ -1,6 +1,6 @@
-// ===== vantagens.js - SISTEMA COMPLETO 100% =====
+// ===== vantagens.js - SISTEMA COMPLETO 100% CORRIGIDO =====
 
-// ===== CATÁLOGO COMPLETO DE VANTAGENS =====
+// ===== CATÁLOGO COMPLETO CORRIGIDO =====
 const catalogoVantagens = {
     "Ambidestria": {
         custo: 5,
@@ -20,12 +20,12 @@ const catalogoVantagens = {
     },
 
     "Aptidão Mágica": {
-        custoBase: 10,
-        custoBaseZero: 5,
         categoria: "mental",
         descricao: "Habilidade com magia. Nível 0 detecta magia, níveis superiores facilitam magias.",
         template: "niveis",
         maxNiveis: 5,
+        // CUSTO CORRIGIDO: Nível 0 = 5 pontos, cada nível adicional +10 pontos
+        detalhes: "Nível 0: detecta objetos encantados. Níveis 1+: bônus em aprendizado e uso de magia.",
         limitacoes: [
             { nome: "Canção", desconto: 40, descricao: "Tem que cantar para fazer magia" },
             { nome: "Dança", desconto: 40, descricao: "Precisa de movimentos corporais" },
@@ -35,8 +35,7 @@ const catalogoVantagens = {
             { nome: "Musical", desconto: 50, descricao: "Precisa de instrumento musical" },
             { nome: "Solitária", desconto: 40, descricao: "Penalidade com pessoas próximas" },
             { nome: "Uma Única Escola", desconto: 40, descricao: "Só uma escola de magia" }
-        ],
-        detalhes: "Nível 0: detecta objetos encantados. Níveis 1+: bônus em aprendizado e uso de magia."
+        ]
     },
 
     "Abençoado": {
@@ -96,10 +95,10 @@ const catalogoVantagens = {
                 { porcentagem: 150, custo: 10 }
             ],
             frequencias: [
-                { nome: "Quase sempre (15 ou menos)", valor: 15, multiplicador: 1 },
-                { nome: "Frequentemente (12 ou menos)", valor: 12, multiplicador: 1 },
-                { nome: "Ocasionalmente (9 ou menos)", valor: 9, multiplicador: 0.5 },
-                { nome: "Raramente (6 ou menos)", valor: 6, multiplicador: 0.25 }
+                { nome: "Quase sempre (15 ou menos)", valor: 15 },
+                { nome: "Frequentemente (12 ou menos)", valor: 12 },
+                { nome: "Ocasionalmente (9 ou menos)", valor: 9 },
+                { nome: "Raramente (6 ou menos)", valor: 6 }
             ],
             grupos: [
                 { tamanho: "6-10", multiplicador: 6 },
@@ -120,13 +119,14 @@ const catalogoVantagens = {
     }
 };
 
-// ===== SISTEMA PRINCIPAL COMPLETO =====
+// ===== SISTEMA PRINCIPAL COMPLETO CORRIGIDO =====
 class SistemaVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
         this.peculiaridades = [];
         this.termoBusca = '';
         this.filtroCategoria = '';
+        this.nivelAtualModal = 0; // Para controle de níveis com setas
         this.inicializar();
     }
 
@@ -251,8 +251,10 @@ class SistemaVantagens {
             case 'simples':
                 return `${vantagem.custo} pontos`;
             case 'niveis':
-                const custoBase = vantagem.custoBase || vantagem.custoBaseZero;
-                return `${custoBase}/nível`;
+                if (vantagem.nome === "Aptidão Mágica") {
+                    return "5+10/nível"; // CORRIGIDO
+                }
+                return `${vantagem.custoBase}/nível`;
             case 'opcoes':
                 const custos = vantagem.opcoes.map(op => op.custo);
                 return `${Math.min(...custos)}-${Math.max(...custos)} pontos`;
@@ -278,6 +280,9 @@ class SistemaVantagens {
         if (!vantagem) return;
 
         this.fecharModal();
+
+        // Resetar nível atual para o modal
+        this.nivelAtualModal = vantagem.nome === "Aptidão Mágica" ? 0 : 1;
 
         let modalHTML = '';
         
@@ -329,47 +334,17 @@ class SistemaVantagens {
         `;
     }
 
-    // CONTINUA NO PRÓXIMO COMENTÁRIO - vou implementar os modais restantes
+    // CONTINUA NO PRÓXIMO COMENTÁRIO - vou implementar o modal de níveis CORRIGIDO
         criarModalComNiveis(nome, vantagem) {
         const isAptidaoMagica = nome === "Aptidão Mágica";
-        let nivelHTML = '';
-        const nivelInicial = isAptidaoMagica ? 0 : 1;
-        
-        for (let i = nivelInicial; i <= vantagem.maxNiveis; i++) {
-            const custo = this.calcularCustoNivel(vantagem, i);
-            const checked = i === nivelInicial ? 'checked' : '';
-            nivelHTML += `
-                <div class="nivel-opcao">
-                    <input type="radio" name="nivel" id="nivel${i}" value="${i}" ${checked}
-                           onchange="sistemaVantagens.atualizarCustoModal()">
-                    <label for="nivel${i}">
-                        <span class="nivel-nome">${isAptidaoMagica && i === 0 ? 'Nível 0 (Consciência)' : `Nível ${i}`}</span>
-                        <span class="nivel-custo">${custo} pontos</span>
-                    </label>
-                </div>
-            `;
-        }
+        const nivelMinimo = isAptidaoMagica ? 0 : 1;
+        const nivelInicial = this.nivelAtualModal;
+        const custoInicial = this.calcularCustoNivel(vantagem, nivelInicial);
 
         let limitacoesHTML = '';
         if (isAptidaoMagica && vantagem.limitacoes) {
-            limitacoesHTML = `
-                <div class="modal-secao">
-                    <h4>Limitações (Opcional)</h4>
-                    <div class="limitacoes-lista">
-                        ${vantagem.limitacoes.map(lim => `
-                            <label class="limitacao-item">
-                                <input type="checkbox" name="limitacao" value="${lim.desconto}" 
-                                       data-nome="${lim.nome}" onchange="sistemaVantagens.atualizarCustoModal()">
-                                <span class="limitacao-nome">${lim.nome} (${lim.desconto}%)</span>
-                                <span class="limitacao-desc">${lim.descricao}</span>
-                            </label>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+            limitacoesHTML = this.criarLimitacoesAptidaoMagica(vantagem);
         }
-
-        const custoInicial = this.calcularCustoNivel(vantagem, nivelInicial);
 
         return `
             <div class="modal-overlay" onclick="sistemaVantagens.fecharModal()">
@@ -383,10 +358,24 @@ class SistemaVantagens {
                             <strong>Categoria:</strong> ${this.formatarCategoria(vantagem.categoria)}
                         </div>
                         
-                        <div class="modal-secao">
-                            <h4>Selecione o Nível</h4>
-                            <div class="niveis-lista">
-                                ${nivelHTML}
+                        <!-- CONTROLE DE NÍVEIS COM SETAS - CORRIGIDO -->
+                        <div class="controle-niveis">
+                            <div class="nivel-display">
+                                <button class="btn-nivel" onclick="sistemaVantagens.alterarNivel(-1)" 
+                                        ${nivelInicial <= nivelMinimo ? 'disabled' : ''}>−</button>
+                                
+                                <div class="nivel-info">
+                                    <div class="nivel-valor" id="valorNivel">${nivelInicial}</div>
+                                    <div class="nivel-tipo">${this.getTipoNivel(nome, nivelInicial)}</div>
+                                </div>
+                                
+                                <button class="btn-nivel" onclick="sistemaVantagens.alterarNivel(1)" 
+                                        ${nivelInicial >= vantagem.maxNiveis ? 'disabled' : ''}>+</button>
+                            </div>
+                            
+                            <div class="nivel-custo-display">
+                                <strong>Custo: <span id="custoNivelAtual">${custoInicial}</span> pontos</strong>
+                                ${isAptidaoMagica && nivelInicial > 0 ? `<br><small>(5 pontos base + ${10 * nivelInicial} por níveis)</small>` : ''}
                             </div>
                         </div>
 
@@ -407,28 +396,84 @@ class SistemaVantagens {
         `;
     }
 
+    getTipoNivel(nomeVantagem, nivel) {
+        if (nomeVantagem === "Aptidão Mágica") {
+            return nivel === 0 ? "Nível 0 (Consciência)" : "Nível";
+        }
+        return "Nível";
+    }
+
+    // CÁLCULO DE CUSTO CORRIGIDO PARA APTIDÃO MÁGICA
     calcularCustoNivel(vantagem, nivel) {
         if (vantagem.nome === "Aptidão Mágica") {
-            return nivel === 0 ? vantagem.custoBaseZero : vantagem.custoBase * nivel;
+            // CORREÇÃO: Nível 0 = 5 pontos, cada nível adicional +10 pontos
+            return nivel === 0 ? 5 : 5 + (10 * nivel);
         }
+        // Para outras vantagens com níveis (Duro de Matar)
         return vantagem.custoBase * nivel;
+    }
+
+    criarLimitacoesAptidaoMagica(vantagem) {
+        return `
+            <div class="modal-secao">
+                <h4>Limitações (Opcional - apenas para níveis 1+)</h4>
+                <div class="limitacoes-lista">
+                    ${vantagem.limitacoes.map(lim => `
+                        <label class="limitacao-item">
+                            <input type="checkbox" name="limitacao" value="${lim.desconto}" 
+                                   data-nome="${lim.nome}" onchange="sistemaVantagens.atualizarCustoModal()">
+                            <span class="limitacao-nome">${lim.nome} (${lim.desconto}%)</span>
+                            <span class="limitacao-desc">${lim.descricao}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // CONTROLE DE NÍVEIS COM SETAS
+    alterarNivel(delta) {
+        const modal = document.querySelector('.modal-content');
+        if (!modal) return;
+
+        const nomeVantagem = modal.querySelector('h3').textContent;
+        const vantagem = catalogoVantagens[nomeVantagem];
+        const nivelMinimo = nomeVantagem === "Aptidão Mágica" ? 0 : 1;
+        
+        this.nivelAtualModal += delta;
+        
+        // Validar limites
+        if (this.nivelAtualModal < nivelMinimo) this.nivelAtualModal = nivelMinimo;
+        if (this.nivelAtualModal > vantagem.maxNiveis) this.nivelAtualModal = vantagem.maxNiveis;
+
+        // Atualizar interface
+        const valorNivel = modal.querySelector('#valorNivel');
+        const btnMenos = modal.querySelector('.btn-nivel:first-child');
+        const btnMais = modal.querySelector('.btn-nivel:last-child');
+        const tipoNivel = modal.querySelector('.nivel-tipo');
+        
+        valorNivel.textContent = this.nivelAtualModal;
+        tipoNivel.textContent = this.getTipoNivel(nomeVantagem, this.nivelAtualModal);
+        
+        // Atualizar botões
+        btnMenos.disabled = this.nivelAtualModal <= nivelMinimo;
+        btnMais.disabled = this.nivelAtualModal >= vantagem.maxNiveis;
+        
+        // Atualizar custo
+        this.atualizarCustoModal();
     }
 
     atualizarCustoModal() {
         const modal = document.querySelector('.modal-content');
         if (!modal) return;
 
-        const nivelSelecionado = modal.querySelector('input[name="nivel"]:checked');
-        if (!nivelSelecionado) return;
-
-        const nivel = parseInt(nivelSelecionado.value);
         const nomeVantagem = modal.querySelector('h3').textContent;
         const vantagem = catalogoVantagens[nomeVantagem];
         
-        let custo = this.calcularCustoNivel(vantagem, nivel);
+        let custo = this.calcularCustoNivel(vantagem, this.nivelAtualModal);
 
-        // Aplicar limitações se for Aptidão Mágica
-        if (nomeVantagem === "Aptidão Mágica" && nivel > 0) {
+        // Aplicar limitações apenas para Aptidão Mágica nível 1+
+        if (nomeVantagem === "Aptidão Mágica" && this.nivelAtualModal > 0) {
             const limitacoes = modal.querySelectorAll('input[name="limitacao"]:checked');
             let descontoTotal = 0;
             limitacoes.forEach(lim => {
@@ -436,31 +481,32 @@ class SistemaVantagens {
             });
             
             if (descontoTotal > 0) {
-                custo = Math.floor(custo * (1 - descontoTotal / 100));
+                // Aplicar desconto apenas sobre a parte dos níveis (não sobre os 5 pontos base)
+                const custoBase = 5;
+                const custoNiveis = 10 * this.nivelAtualModal;
+                const custoComDesconto = custoBase + Math.floor(custoNiveis * (1 - descontoTotal / 100));
+                custo = custoComDesconto;
             }
         }
 
+        // Atualizar displays
+        const custoNivelElement = document.getElementById('custoNivelAtual');
         const custoFinalElement = document.getElementById('custoFinalModal');
-        if (custoFinalElement) {
-            custoFinalElement.textContent = custo;
-        }
+        
+        if (custoNivelElement) custoNivelElement.textContent = custo;
+        if (custoFinalElement) custoFinalElement.textContent = custo;
     }
 
     adquirirVantagemNivel(nome) {
         const modal = document.querySelector('.modal-content');
-        const nivelSelecionado = modal.querySelector('input[name="nivel"]:checked');
-        
-        if (!nivelSelecionado) return;
-
-        const nivel = parseInt(nivelSelecionado.value);
         const vantagem = catalogoVantagens[nome];
-        let custo = this.calcularCustoNivel(vantagem, nivel);
+        let custo = this.calcularCustoNivel(vantagem, this.nivelAtualModal);
 
-        // Aplicar limitações se for Aptidão Mágica
-        if (nome === "Aptidão Mágica" && nivel > 0) {
+        // Coletar limitações se for Aptidão Mágica nível 1+
+        let limitacoesAplicadas = [];
+        if (nome === "Aptidão Mágica" && this.nivelAtualModal > 0) {
             const limitacoes = modal.querySelectorAll('input[name="limitacao"]:checked');
             let descontoTotal = 0;
-            const limitacoesAplicadas = [];
             
             limitacoes.forEach(lim => {
                 descontoTotal += parseInt(lim.value);
@@ -468,17 +514,22 @@ class SistemaVantagens {
             });
             
             if (descontoTotal > 0) {
-                custo = Math.floor(custo * (1 - descontoTotal / 100));
+                const custoBase = 5;
+                const custoNiveis = 10 * this.nivelAtualModal;
+                custo = custoBase + Math.floor(custoNiveis * (1 - descontoTotal / 100));
             }
         }
 
-        const nomeExibicao = nivel === 0 ? `${nome} (Nível 0)` : `${nome} (Nível ${nivel})`;
+        const nomeExibicao = this.nivelAtualModal === 0 ? 
+            `${nome} (Nível 0)` : 
+            `${nome} (Nível ${this.nivelAtualModal}${limitacoesAplicadas.length > 0 ? ` - ${limitacoesAplicadas.join(', ')}` : ''})`;
 
         const vantagemAdquirida = {
             nome: nomeExibicao,
             custo: custo,
             tipo: 'nivel',
-            nivel: nivel,
+            nivel: this.nivelAtualModal,
+            limitacoes: limitacoesAplicadas,
             data: new Date().toISOString()
         };
 
@@ -486,9 +537,12 @@ class SistemaVantagens {
         this.fecharModal();
         this.atualizarInterface();
         this.salvarDados();
+        
+        this.mostrarFeedback(`${nome} nível ${this.nivelAtualModal} adquirido por ${custo} pontos!`);
     }
 
-    criarModalComOpcoes(nome, vantagem) {
+    // CONTINUA NO PRÓXIMO COMENTÁRIO - vou implementar o modal de Aliados CORRIGIDO
+        criarModalComOpcoes(nome, vantagem) {
         const opcoesHTML = vantagem.opcoes.map((opcao, index) => `
             <div class="opcao-item">
                 <input type="radio" name="opcao" id="opcao${index}" value="${index}" 
@@ -555,12 +609,14 @@ class SistemaVantagens {
         this.fecharModal();
         this.atualizarInterface();
         this.salvarDados();
+        
+        this.mostrarFeedback(`${nome}: ${opcao.nome} adquirido por ${opcao.custo} pontos!`);
     }
 
-    // CONTINUA NO PRÓXIMO COMENTÁRIO - vou implementar o modal complexo de Aliados
-        criarModalAliados(nome, vantagem) {
+    criarModalAliados(nome, vantagem) {
         const dados = vantagem.dadosAliados;
-        
+        const custoBase = dados.poderes[0].custo;
+
         const poderesHTML = dados.poderes.map((poder, index) => `
             <div class="opcao-item">
                 <input type="radio" name="poder" id="poder${index}" value="${index}" ${index === 0 ? 'checked' : ''}
@@ -576,8 +632,7 @@ class SistemaVantagens {
 
         const frequenciasHTML = dados.frequencias.map((freq, index) => `
             <div class="opcao-item">
-                <input type="radio" name="frequencia" id="freq${index}" value="${index}" ${index === 0 ? 'checked' : ''}
-                       onchange="sistemaVantagens.calcularCustoAliados()">
+                <input type="radio" name="frequencia" id="freq${index}" value="${index}" ${index === 0 ? 'checked' : ''}>
                 <label for="freq${index}">
                     <div class="opcao-header">
                         <span class="opcao-nome">${freq.nome}</span>
@@ -588,7 +643,7 @@ class SistemaVantagens {
 
         const gruposHTML = dados.grupos.map((grupo, index) => `
             <div class="opcao-item">
-                <input type="radio" name="grupo" id="grupo${index}" value="${index}" ${index === 0 ? 'checked' : ''}
+                <input type="radio" name="grupo" id="grupo${index}" value="${index}" 
                        onchange="sistemaVantagens.calcularCustoAliados()">
                 <label for="grupo${index}">
                     <div class="opcao-header">
@@ -616,8 +671,6 @@ class SistemaVantagens {
                 <span class="limitacao-desc">${lim.descricao}</span>
             </label>
         `).join('');
-
-        const custoBase = dados.poderes[0].custo;
 
         return `
             <div class="modal-overlay" onclick="sistemaVantagens.fecharModal()">
@@ -654,6 +707,7 @@ class SistemaVantagens {
                                     <label for="grupoSingle">
                                         <div class="opcao-header">
                                             <span class="opcao-nome">Aliado Único</span>
+                                            <span class="opcao-custo">×1</span>
                                         </div>
                                     </label>
                                 </div>
@@ -696,18 +750,14 @@ class SistemaVantagens {
 
         const dados = catalogoVantagens.Aliados.dadosAliados;
         
-        // Custo base do poder
+        // Custo base do poder (CORREÇÃO: frequência NÃO multiplica)
         const poderSelecionado = modal.querySelector('input[name="poder"]:checked');
         const poderIndex = parseInt(poderSelecionado.value);
         let custo = dados.poderes[poderIndex].custo;
 
-        // Aplicar frequência
-        const frequenciaSelecionada = modal.querySelector('input[name="frequencia"]:checked');
-        const freqIndex = parseInt(frequenciaSelecionada.value);
-        const multiplicadorFreq = dados.frequencias[freqIndex].multiplicador;
-        custo *= multiplicadorFreq;
+        // CORREÇÃO: Frequência NÃO afeta custo, apenas determina teste de aparição
 
-        // Aplicar grupo
+        // Aplicar grupo (se selecionado)
         const grupoSelecionado = modal.querySelector('input[name="grupo"]:checked');
         const grupoIndex = parseInt(grupoSelecionado.value);
         if (grupoIndex >= 0) {
@@ -760,8 +810,10 @@ class SistemaVantagens {
         const limitacoes = Array.from(modal.querySelectorAll('input[name="limitacao"]:checked'))
             .map(lim => lim.dataset.nome);
 
-        // Calcular custo final
-        let custo = poder.custo * frequencia.multiplicador;
+        // Calcular custo final (CORREÇÃO: frequência NÃO multiplica)
+        let custo = poder.custo; // Base do poder
+        
+        // Aplicar grupo
         if (grupo) custo *= grupo.multiplicador;
         
         // Aplicar modificadores percentuais
@@ -781,6 +833,8 @@ class SistemaVantagens {
         let nomeAliados = "Aliados";
         if (grupo) {
             nomeAliados += ` (Grupo ${grupo.tamanho})`;
+        } else {
+            nomeAliados += ` (Único)`;
         }
         nomeAliados += ` - ${poder.porcentagem}% - ${frequencia.nome.split(' (')[0]}`;
         
@@ -809,9 +863,11 @@ class SistemaVantagens {
         this.fecharModal();
         this.atualizarInterface();
         this.salvarDados();
+        
+        this.mostrarFeedback(`Aliados adquiridos por ${custo} pontos!`);
     }
 
-    // CONTINUA NO PRÓXIMO COMENTÁRIO - vou implementar o restante do sistema
+    // CONTINUA NO PRÓXIMO COMENTÁRIO - vou implementar o resto do sistema
         adquirirVantagem(nome, custo) {
         const vantagemAdquirida = {
             nome: nome,
@@ -825,8 +881,7 @@ class SistemaVantagens {
         this.atualizarInterface();
         this.salvarDados();
         
-        // Feedback visual
-        this.mostrarFeedback(`Vantagem "${nome}" adquirida por ${custo} pontos!`);
+        this.mostrarFeedback(`"${nome}" adquirida por ${custo} pontos!`);
     }
 
     fecharModal() {
@@ -834,6 +889,7 @@ class SistemaVantagens {
         if (modal) {
             modal.remove();
         }
+        this.nivelAtualModal = 0; // Resetar nível
     }
 
     inicializarEventosModal() {
@@ -849,11 +905,6 @@ class SistemaVantagens {
             }
         };
         document.addEventListener('keydown', keyHandler);
-
-        // Atualizar custo para modais que precisam
-        if (modal.querySelector('input[name="nivel"]') || modal.querySelector('input[name="poder"]')) {
-            this.atualizarCustoModal();
-        }
     }
 
     // ===== SISTEMA DE PECULIARIDADES =====
@@ -863,16 +914,17 @@ class SistemaVantagens {
         
         if (!contador || !btnAdicionar) return;
 
-        contador.textContent = texto.length;
+        const comprimento = texto.length;
+        contador.textContent = comprimento;
         
         // Atualizar classes do contador
         contador.className = 'contador-chars';
-        if (texto.length > 25) {
+        if (comprimento > 25) {
             contador.classList.add('aviso');
         }
         
         // Habilitar/desabilitar botão
-        btnAdicionar.disabled = texto.length === 0 || texto.length > 30;
+        btnAdicionar.disabled = comprimento === 0 || comprimento > 30;
     }
 
     adicionarPeculiaridade() {
@@ -880,7 +932,7 @@ class SistemaVantagens {
         const texto = input.value.trim();
         
         if (texto.length === 0 || texto.length > 30) {
-            this.mostrarFeedback('A peculiaridade deve ter entre 1 e 30 caracteres!', 'erro');
+            this.mostrarFeedback('Peculiaridade deve ter entre 1 e 30 caracteres!', 'erro');
             return;
         }
         
@@ -906,23 +958,27 @@ class SistemaVantagens {
         this.atualizarInterface();
         this.salvarDados();
         
-        this.mostrarFeedback(`Peculiaridade "${texto}" adicionada! -1 ponto`);
+        this.mostrarFeedback(`"${texto}" adicionada! -1 ponto`);
     }
 
     removerPeculiaridade(index) {
+        if (index < 0 || index >= this.peculiaridades.length) return;
+        
         const peculiaridade = this.peculiaridades[index];
         this.peculiaridades.splice(index, 1);
         this.atualizarInterface();
         this.salvarDados();
-        this.mostrarFeedback(`Peculiaridade "${peculiaridade.texto}" removida!`);
+        this.mostrarFeedback(`"${peculiaridade.texto}" removida!`);
     }
 
     removerVantagem(index) {
+        if (index < 0 || index >= this.vantagensAdquiridas.length) return;
+        
         const vantagem = this.vantagensAdquiridas[index];
         this.vantagensAdquiridas.splice(index, 1);
         this.atualizarInterface();
         this.salvarDados();
-        this.mostrarFeedback(`Vantagem "${vantagem.nome}" removida! ${vantagem.custo} pontos recuperados.`);
+        this.mostrarFeedback(`"${vantagem.nome}" removida! ${vantagem.custo} pontos recuperados.`);
     }
 
     // ===== ATUALIZAÇÃO DA INTERFACE =====
@@ -955,7 +1011,7 @@ class SistemaVantagens {
                     <div class="item-custo">${vantagem.custo} pts</div>
                 </div>
                 <div class="item-detalhes">
-                    <small>Tipo: ${vantagem.tipo} • Adquirida: ${new Date(vantagem.data).toLocaleDateString()}</small>
+                    <small>Tipo: ${vantagem.tipo} • Adquirida: ${new Date(vantagem.data).toLocaleDateString('pt-BR')}</small>
                 </div>
                 <div class="item-acoes">
                     <button class="btn-remover" onclick="sistemaVantagens.removerVantagem(${index})" 
@@ -999,26 +1055,22 @@ class SistemaVantagens {
         const totalPeculiaridades = this.peculiaridades.length * -1;
         const saldoTotal = totalVantagens + totalPeculiaridades;
 
-        // Atualizar elementos se existirem
-        const elementos = {
-            'total-vantagens': `+${totalVantagens}`,
-            'total-peculiaridades': `${totalPeculiaridades}`,
-            'saldo-total': saldoTotal
+        // Atualizar elementos
+        const atualizarElemento = (id, valor) => {
+            const elemento = document.getElementById(id);
+            if (elemento) elemento.textContent = valor;
         };
 
-        Object.entries(elementos).forEach(([id, valor]) => {
-            const elemento = document.getElementById(id);
-            if (elemento) {
-                elemento.textContent = valor;
-                
-                // Destacar saldo negativo
-                if (id === 'saldo-total' && valor < 0) {
-                    elemento.style.color = '#e74c3c';
-                } else if (id === 'saldo-total') {
-                    elemento.style.color = '#27ae60';
-                }
-            }
-        });
+        atualizarElemento('total-vantagens', `+${totalVantagens}`);
+        atualizarElemento('total-peculiaridades', `${totalPeculiaridades}`);
+        atualizarElemento('saldo-total', saldoTotal);
+
+        // Destacar saldo
+        const saldoElement = document.getElementById('saldo-total');
+        if (saldoElement) {
+            saldoElement.style.color = saldoTotal < 0 ? '#e74c3c' : '#27ae60';
+            saldoElement.style.fontWeight = 'bold';
+        }
     }
 
     // ===== SISTEMA DE FEEDBACK =====
@@ -1032,38 +1084,41 @@ class SistemaVantagens {
         const feedback = document.createElement('div');
         feedback.className = `feedback-mensagem feedback-${tipo}`;
         feedback.textContent = mensagem;
-        feedback.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            z-index: 1001;
-            animation: slideInRight 0.3s ease;
-            max-width: 300px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        `;
-
-        if (tipo === 'sucesso') {
-            feedback.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
-        } else {
-            feedback.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
-        }
+        
+        // Adicionar estilos inline
+        Object.assign(feedback.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            color: 'white',
+            fontWeight: '600',
+            zIndex: '1001',
+            animation: 'slideInRight 0.3s ease',
+            maxWidth: '300px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            background: tipo === 'sucesso' 
+                ? 'linear-gradient(45deg, #27ae60, #2ecc71)' 
+                : 'linear-gradient(45deg, #e74c3c, #c0392b)'
+        });
 
         document.body.appendChild(feedback);
 
         // Auto-remover após 3 segundos
         setTimeout(() => {
             feedback.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => feedback.remove(), 300);
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.remove();
+                }
+            }, 300);
         }, 3000);
     }
 
     // ===== UTILITÁRIOS =====
     limparDados() {
-        if (confirm('Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.')) {
+        if (confirm('Tem certeza que deseja limpar TODOS os dados? Esta ação não pode ser desfeita.')) {
             this.vantagensAdquiridas = [];
             this.peculiaridades = [];
             localStorage.removeItem('vantagensDados');
@@ -1081,18 +1136,55 @@ class SistemaVantagens {
                 peculiaridades: this.peculiaridades.length * -1,
                 saldo: this.vantagensAdquiridas.reduce((sum, v) => sum + v.custo, 0) + (this.peculiaridades.length * -1)
             },
-            exportadoEm: new Date().toISOString()
+            exportadoEm: new Date().toISOString(),
+            versao: '1.0'
         };
 
-        const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `vantagens-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        try {
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vantagens-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.mostrarFeedback('Dados exportados com sucesso!');
+        } catch (error) {
+            this.mostrarFeedback('Erro ao exportar dados!', 'erro');
+            console.error('Erro na exportação:', error);
+        }
+    }
+
+    importarDados(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const dados = JSON.parse(e.target.result);
+                
+                if (dados.vantagens && dados.peculiaridades) {
+                    this.vantagensAdquiridas = dados.vantagens;
+                    this.peculiaridades = dados.peculiaridades;
+                    this.atualizarInterface();
+                    this.salvarDados();
+                    this.mostrarFeedback('Dados importados com sucesso!');
+                } else {
+                    this.mostrarFeedback('Arquivo inválido!', 'erro');
+                }
+            } catch (error) {
+                this.mostrarFeedback('Erro ao importar arquivo!', 'erro');
+                console.error('Erro na importação:', error);
+            }
+        };
+        reader.readAsText(file);
         
-        this.mostrarFeedback('Dados exportados com sucesso!');
+        // Limpar input
+        event.target.value = '';
     }
 }
 
@@ -1104,37 +1196,97 @@ document.addEventListener('DOMContentLoaded', function() {
         sistemaVantagens = new SistemaVantagens();
         
         // Adicionar estilos de animação para feedback
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOutRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-            .btn-remover.pequeno {
-                padding: 2px 6px;
-                font-size: 0.7rem;
-                min-height: auto;
-            }
-            .item-detalhes {
-                color: #888;
-                font-size: 0.8rem;
-                margin-top: 5px;
-            }
-            .peculiaridade-info {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-        `;
-        document.head.appendChild(style);
+        if (!document.querySelector('#estilos-animacao')) {
+            const style = document.createElement('style');
+            style.id = 'estilos-animacao';
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+                .btn-remover.pequeno {
+                    padding: 2px 6px;
+                    font-size: 0.7rem;
+                    min-height: auto;
+                }
+                .item-detalhes {
+                    color: #888;
+                    font-size: 0.8rem;
+                    margin-top: 5px;
+                }
+                .peculiaridade-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .controle-niveis {
+                    text-align: center;
+                    margin: 20px 0;
+                    padding: 20px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 8px;
+                    border: 1px solid rgba(255, 140, 0, 0.2);
+                }
+                .nivel-display {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 20px;
+                    margin-bottom: 15px;
+                }
+                .btn-nivel {
+                    width: 40px;
+                    height: 40px;
+                    border: 2px solid #ff8c00;
+                    background: rgba(255, 140, 0, 0.1);
+                    color: #ffd700;
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                }
+                .btn-nivel:hover:not(:disabled) {
+                    background: rgba(255, 140, 0, 0.3);
+                    transform: scale(1.1);
+                }
+                .btn-nivel:disabled {
+                    opacity: 0.3;
+                    cursor: not-allowed;
+                }
+                .nivel-info {
+                    text-align: center;
+                }
+                .nivel-valor {
+                    font-size: 2rem;
+                    font-weight: bold;
+                    color: #ffd700;
+                }
+                .nivel-tipo {
+                    font-size: 0.9rem;
+                    color: #ccc;
+                    margin-top: 5px;
+                }
+                .nivel-custo-display {
+                    font-size: 1.1rem;
+                    color: #27ae60;
+                    font-weight: 600;
+                }
+                .nivel-custo-display small {
+                    color: #888;
+                    font-size: 0.8rem;
+                }
+            `;
+            document.head.appendChild(style);
+        }
 
-        console.log('Sistema de Vantagens inicializado com sucesso!');
+        console.log('✅ Sistema de Vantagens inicializado com sucesso!');
     } catch (error) {
-        console.error('Erro ao inicializar sistema:', error);
+        console.error('❌ Erro ao inicializar sistema:', error);
     }
 });
 
@@ -1151,9 +1303,13 @@ function exportarDadosVantagens() {
     }
 }
 
-function buscarVantagens(termo) {
+function importarDadosVantagens(event) {
     if (sistemaVantagens) {
-        sistemaVantagens.termoBusca = termo.toLowerCase();
-        sistemaVantagens.filtrarVantagens();
+        sistemaVantagens.importarDados(event);
     }
+}
+
+// Função global para o input de arquivo
+function triggerImport() {
+    document.getElementById('import-file').click();
 }
