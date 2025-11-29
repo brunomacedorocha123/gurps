@@ -111,6 +111,9 @@ function atualizarAtributos() {
     calcularPontos();
     atualizarCustos();
     atualizarTotaisComBonus();
+    
+    // DISPARAR EVENTO PARA OUTROS SISTEMAS
+    dispararEventoAtributosAlterados();
 }
 
 function calcularAtributosSecundarios(ST, DX, IQ, HT) {
@@ -233,6 +236,20 @@ function atualizarEstiloBonusInput(atributo, valor) {
             input.classList.add('negativo');
         }
     }
+}
+
+// ===== EVENTOS PARA INTEGRAÇÃO =====
+
+function dispararEventoAtributosAlterados() {
+    const evento = new CustomEvent('atributosAlterados', {
+        detail: {
+            ST: personagem.atributos.ST,
+            DX: personagem.atributos.DX, 
+            IQ: personagem.atributos.IQ,
+            HT: personagem.atributos.HT
+        }
+    });
+    document.dispatchEvent(evento);
 }
 
 // ===== INICIALIZAÇÃO =====
