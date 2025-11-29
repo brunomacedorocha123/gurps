@@ -1,9 +1,9 @@
-// caracteristicas-altura-peso.js - VERSÃO LIMPA
+// caracteristicas-altura-peso.js - VERSÃO COMPLETA CORRIGIDA
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
         this.peso = 70;
-        this.stBase = 10;
+        this.stBase = this.obterSTReal(); // AGORA PEGA ST REAL!
         
         // Tabelas oficiais do GURPS
         this.heightRanges = {
@@ -34,6 +34,24 @@ class SistemaAlturaPeso {
         this.inicializado = false;
     }
 
+    obterSTReal() {
+        // Método 1: Pegar direto do input ST
+        const inputST = document.getElementById('ST');
+        if (inputST && inputST.value) {
+            return parseInt(inputST.value) || 10;
+        }
+        
+        // Método 2: Pegar do sistema de atributos
+        if (typeof obterDadosAtributos === 'function') {
+            try {
+                const dados = obterDadosAtributos();
+                return dados.ST || 10;
+            } catch (error) {}
+        }
+        
+        return 10; // Valor padrão se não encontrar
+    }
+
     inicializar() {
         if (this.inicializado) return;
         
@@ -47,6 +65,7 @@ class SistemaAlturaPeso {
     }
 
     configurarObservadores() {
+        // Escutar mudanças nos atributos
         document.addEventListener('atributosAlterados', (e) => {
             if (e.detail && e.detail.ST !== undefined) {
                 this.stBase = e.detail.ST;
@@ -56,6 +75,7 @@ class SistemaAlturaPeso {
             }
         });
 
+        // Monitorar input ST diretamente
         const inputST = document.getElementById('ST');
         if (inputST) {
             inputST.addEventListener('change', () => {
@@ -65,10 +85,11 @@ class SistemaAlturaPeso {
                 clearTimeout(this.stTimeout);
                 this.stTimeout = setTimeout(() => {
                     this.atualizarSTReal();
-                }, 500);
+                }, 300);
             });
         }
 
+        // Escutar características físicas
         document.addEventListener('caracteristicasFisicasAlteradas', (e) => {
             if (e.detail && e.detail.multiplicadorPeso !== undefined) {
                 this.multiplicadorPeso = e.detail.multiplicadorPeso;
@@ -77,30 +98,17 @@ class SistemaAlturaPeso {
             }
         });
 
+        // Forçar atualização inicial
         setTimeout(() => this.atualizarSTReal(), 100);
     }
 
     atualizarSTReal() {
-        const inputST = document.getElementById('ST');
-        if (inputST && inputST.value) {
-            const stValor = parseInt(inputST.value);
-            if (!isNaN(stValor) && stValor !== this.stBase) {
-                this.stBase = stValor;
-                this.calcularValoresBase();
-                this.atualizarDisplay();
-                return;
-            }
-        }
-
-        if (typeof obterDadosAtributos === 'function') {
-            try {
-                const dadosAtributos = obterDadosAtributos();
-                if (dadosAtributos && dadosAtributos.ST && dadosAtributos.ST !== this.stBase) {
-                    this.stBase = dadosAtributos.ST;
-                    this.calcularValoresBase();
-                    this.atualizarDisplay();
-                }
-            } catch (error) {}
+        const stReal = this.obterSTReal();
+        if (stReal !== this.stBase) {
+            this.stBase = stReal;
+            this.calcularValoresBase();
+            this.atualizarDisplay();
+            this.salvarDados();
         }
     }
 
