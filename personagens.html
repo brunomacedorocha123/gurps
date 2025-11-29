@@ -238,6 +238,16 @@
             background: rgba(76, 175, 80, 0.3);
         }
 
+        .btn-excluir {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-excluir:hover {
+            background: rgba(231, 76, 60, 0.3);
+        }
+
         /* Estado Vazio */
         .empty-state {
             text-align: center;
@@ -261,7 +271,8 @@
             margin-bottom: 25px;
             font-size: 1.1rem;
         }
-                /* Responsividade - Mobile First */
+
+        /* Responsividade - Mobile First */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -459,7 +470,7 @@
     <main class="main-content">
         <div class="page-header">
             <h1 class="page-title">Meus Personagens</h1>
-            <button class="btn-novo-personagem" id="btnNovoPersonagem">
+            <button class="btn-novo-personagem" id="btnNovoPersonagem" onclick="criarNovoPersonagem()">
                 <i class="fas fa-plus"></i>
                 Novo Personagem
             </button>
@@ -496,7 +507,8 @@
             </div>
         </div>
     </div>
-        <script>
+
+    <script>
         // Configuração do Supabase
         const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
@@ -515,12 +527,14 @@
 
         // Configurar event listeners
         function configurarEventListeners() {
-            // Botão novo personagem
-            document.getElementById('btnNovoPersonagem').addEventListener('click', criarNovoPersonagem);
-            
             // Modal de exclusão
             document.getElementById('btnConfirmarExcluir').addEventListener('click', confirmarExclusao);
             document.getElementById('btnCancelarExcluir').addEventListener('click', fecharModal);
+        }
+
+        // Criar novo personagem
+        function criarNovoPersonagem() {
+            window.location.href = 'criar-personagem.html';
         }
 
         // Carregar personagens do usuário
@@ -612,19 +626,13 @@
                             <i class="fas fa-file-alt"></i>
                             Resumo
                         </button>
-                        <button class="btn-acao" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3);" 
-                                onclick="solicitarExclusao('${personagem.id}', '${escapeHtml(personagem.nome || 'Personagem Sem Nome')}')">
+                        <button class="btn-acao btn-excluir" onclick="solicitarExclusao('${personagem.id}', '${escapeHtml(personagem.nome || 'Personagem Sem Nome')}')">
                             <i class="fas fa-trash"></i>
                             Excluir
                         </button>
                     </div>
                 </div>
             `).join('');
-        }
-
-        // Criar novo personagem
-        function criarNovoPersonagem() {
-            window.location.href = 'criar-personagem.html';
         }
 
         // Editar personagem existente
