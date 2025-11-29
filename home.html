@@ -93,6 +93,29 @@
             justify-content: center;
             font-weight: bold;
             cursor: pointer;
+            position: relative;
+        }
+
+        /* Botão Logout */
+        .logout-btn {
+            background: rgba(231, 76, 60, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
         }
 
         /* Navigation */
@@ -349,6 +372,12 @@
             .user-menu {
                 width: 100%;
                 justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .logout-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
             }
         }
     </style>
@@ -365,6 +394,10 @@
                 ID do Jogador: <span id="playerId">#------</span>
             </div>
             <div class="user-menu">
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sair
+                </button>
                 <div class="user-avatar" id="userAvatar">
                     <i class="fas fa-user"></i>
                 </div>
@@ -428,10 +461,9 @@
             <div class="card">
                 <h2>Atalhos Rápidos</h2>
                 <div class="quick-actions">
-                  <a href="personagens.html" class="action-btn">
-    <i class="fas fa-user-plus"></i>
-    Criar Personagem
-</a>
+                    <a href="personagens.html" class="action-btn">
+                        <i class="fas fa-user-plus"></i>
+                        Criar Personagem
                     </a>
                     <a href="meus-personagens.html" class="action-btn">
                         <i class="fas fa-users"></i>
@@ -454,9 +486,9 @@
             <div class="section-card">
                 <div class="section-header">
                     <h2>Personagens Ativos</h2>
-                  <a href="personagens.html" class="btn">
-    <i class="fas fa-plus"></i> Criar Personagem
-</a>
+                    <a href="personagens.html" class="btn">
+                        <i class="fas fa-plus"></i> Criar Personagem
+                    </a>
                 </div>
                 <div class="empty-state">
                     <i class="fas fa-users"></i>
@@ -506,6 +538,24 @@
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
+        // Função de Logout
+        async function handleLogout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    console.error('Erro ao fazer logout:', error);
+                    alert('Erro ao sair. Tente novamente.');
+                    return;
+                }
+                
+                // Redirecionar para a página de login
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Erro no logout:', error);
+                alert('Erro ao sair. Tente novamente.');
+            }
+        }
+        
         // Carregar dados do usuário
         async function loadUserData() {
             const { data: { session } } = await supabase.auth.getSession();
@@ -540,6 +590,9 @@
             const initials = profile.username.charAt(0).toUpperCase();
             document.getElementById('userAvatar').innerHTML = initials;
         }
+        
+        // Configurar evento do botão de logout
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
         
         // Verificar autenticação e carregar dados
         document.addEventListener('DOMContentLoaded', loadUserData);
