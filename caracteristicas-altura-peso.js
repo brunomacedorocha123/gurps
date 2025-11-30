@@ -1,4 +1,4 @@
-// caracteristicas-altura-peso.js - VERSÃO COMPLETA E FUNCIONAL
+// caracteristicas-altura-peso.js - VERSÃO 100% COMPLETA
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
@@ -31,49 +31,26 @@ class SistemaAlturaPeso {
         };
     }
 
-    aplicarRegrasCaracteristicas() {
+    obterMultiplicadoresCaracteristicas() {
         if (!window.sistemaCaracteristicasFisicas) {
             return { multiplicadorPeso: 1.0, alturaLimitada: null, caracteristicaAtiva: null };
         }
         
         const caracteristicas = window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas;
-        let multiplicadorPeso = 1.0;
-        let alturaLimitada = null;
-        let caracteristicaAtiva = null;
-
-        caracteristicas.forEach(carac => {
-            switch(carac.tipo) {
-                case 'magro':
-                    multiplicadorPeso = 0.67;
-                    caracteristicaAtiva = carac;
-                    break;
-                case 'acima-peso':
-                    multiplicadorPeso = 1.3;
-                    caracteristicaAtiva = carac;
-                    break;
-                case 'gordo':
-                    multiplicadorPeso = 1.5;
-                    caracteristicaAtiva = carac;
-                    break;
-                case 'muito-gordo':
-                    multiplicadorPeso = 2.0;
-                    caracteristicaAtiva = carac;
-                    break;
-                case 'nanismo':
-                    alturaLimitada = 1.32;
-                    caracteristicaAtiva = carac;
-                    break;
-                case 'gigantismo':
-                    caracteristicaAtiva = carac;
-                    break;
-            }
-        });
-
-        return { multiplicadorPeso, alturaLimitada, caracteristicaAtiva };
+        
+        const caracteristicaPeso = caracteristicas.find(c => c.pesoMultiplicador && c.pesoMultiplicador !== 1.0);
+        const temNanismo = caracteristicas.find(c => c.tipo === 'nanismo');
+        const caracteristicaAtiva = caracteristicaPeso || temNanismo || null;
+        
+        return {
+            multiplicadorPeso: caracteristicaPeso ? caracteristicaPeso.pesoMultiplicador : 1.0,
+            alturaLimitada: temNanismo ? 1.32 : null,
+            caracteristicaAtiva: caracteristicaAtiva
+        };
     }
 
     aplicarLimitesAltura() {
-        const regras = this.aplicarRegrasCaracteristicas();
+        const regras = this.obterMultiplicadoresCaracteristicas();
         
         if (regras.alturaLimitada && this.altura > regras.alturaLimitada) {
             this.altura = regras.alturaLimitada;
@@ -87,7 +64,7 @@ class SistemaAlturaPeso {
 
     obterFaixaPesoAjustada(st) {
         const faixaOriginal = this.obterFaixaPeso(st);
-        const regras = this.aplicarRegrasCaracteristicas();
+        const regras = this.obterMultiplicadoresCaracteristicas();
         
         return {
             min: faixaOriginal.min * regras.multiplicadorPeso,
@@ -101,15 +78,18 @@ class SistemaAlturaPeso {
     verificarConformidadeST() {
         const faixaAltura = this.obterFaixaAltura(this.stBase);
         const faixaPesoAjustada = this.obterFaixaPesoAjustada(this.stBase);
-        const regras = this.aplicarRegrasCaracteristicas();
+        const regras = this.obterMultiplicadoresCaracteristicas();
         
-        const alturaValida = this.altura >= faixaAltura.min && this.altura <= faixaAltura.max;
+        const alturaValida = regras.alturaLimitada ? 
+            this.altura <= regras.alturaLimitada : 
+            this.altura >= faixaAltura.min && this.altura <= faixaAltura.max;
+            
         const pesoValido = this.peso >= faixaPesoAjustada.min && this.peso <= faixaPesoAjustada.max;
 
         let mensagemAltura, mensagemPeso;
 
         if (regras.alturaLimitada) {
-            mensagemAltura = `Nanismo: Altura limitada a ${regras.alturaLimitada}m`;
+            mensagemAltura = `Nanismo: Altura ${this.altura}m`;
         } else {
             mensagemAltura = alturaValida ? 
                 `Dentro da faixa para ST ${this.stBase}` : 
@@ -121,7 +101,7 @@ class SistemaAlturaPeso {
         if (regras.caracteristicaAtiva && regras.multiplicadorPeso !== 1.0) {
             const nomeCarac = regras.caracteristicaAtiva.nome;
             mensagemPeso = pesoValido ? 
-                `${nomeCarac}: Dentro da faixa ajustada` : 
+                `${nomeCarac}: Dentro da faixa` : 
                 this.peso < faixaPesoAjustada.min ? 
                     `${nomeCarac}: Abaixo do mínimo (${faixaPesoAjustada.min.toFixed(1)}kg)` :
                     `${nomeCarac}: Acima do máximo (${faixaPesoAjustada.max.toFixed(1)}kg)`;
@@ -264,7 +244,7 @@ class SistemaAlturaPeso {
             inputAltura.addEventListener('change', () => {
                 let novaAltura = parseFloat(inputAltura.value);
                 
-                const regras = this.aplicarRegrasCaracteristicas();
+                const regras = this.obterMultiplicadoresCaracteristicas();
                 if (regras.alturaLimitada && novaAltura > regras.alturaLimitada) {
                     novaAltura = regras.alturaLimitada;
                     inputAltura.value = novaAltura.toFixed(2);
@@ -283,7 +263,7 @@ class SistemaAlturaPeso {
 
     atualizarDisplay() {
         const conformidade = this.verificarConformidadeST();
-        const regras = this.aplicarRegrasCaracteristicas();
+        const regras = this.obterMultiplicadoresCaracteristicas();
         
         this.atualizarStatusAltura(conformidade, regras);
         this.atualizarStatusPeso(conformidade, regras);
@@ -410,7 +390,7 @@ class SistemaAlturaPeso {
     ajustarAltura(variacao) {
         let novaAltura = this.altura + variacao;
         
-        const regras = this.aplicarRegrasCaracteristicas();
+        const regras = this.obterMultiplicadoresCaracteristicas();
         if (regras.alturaLimitada && novaAltura > regras.alturaLimitada) {
             novaAltura = regras.alturaLimitada;
         }
