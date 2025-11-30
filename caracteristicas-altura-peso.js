@@ -1,4 +1,4 @@
-// caracteristicas-altura-peso.js - VERSÃO COMPLETA COM PONTE
+// caracteristicas-altura-peso.js - VERSÃO COMPLETA COM ATUALIZAÇÃO VISUAL
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
@@ -29,6 +29,41 @@ class SistemaAlturaPeso {
             13: { min: 77.5, max: 122.5 },
             14: { min: 85.0, max: 135.0 }
         };
+    }
+
+    // 🔧 NOVOS MÉTODOS PARA ATUALIZAÇÃO VISUAL
+    forcarRenderizacaoVisual() {
+        console.log("🎨 Forçando renderização visual completa");
+        
+        // 1. Atualizar todos os elementos
+        this.atualizarDisplay();
+        
+        // 2. Forçar visibilidade das desvantagens
+        this.atualizarVisibilidadeDesvantagens();
+    }
+
+    atualizarVisibilidadeDesvantagens() {
+        const container = document.getElementById('desvantagensAtivas');
+        const caracteristicas = this.obterCaracteristicasAtivas();
+        
+        if (!container) return;
+        
+        if (caracteristicas.length > 0) {
+            container.style.display = 'block';
+            // Animação suave
+            container.style.opacity = '1';
+            container.style.transition = 'all 0.3s ease';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    forcarAtualizacaoDOM() {
+        // Truque para forçar reflow/repaint
+        const element = document.getElementById('statusFisico');
+        if (element) {
+            void element.offsetWidth;
+        }
     }
 
     // MÉTODO SIMPLIFICADO PARA OBTER CARACTERÍSTICAS
@@ -110,6 +145,9 @@ class SistemaAlturaPeso {
         this.atualizarStatusPeso(conformidade);
         this.atualizarInfoFisica(conformidade);
         this.atualizarDesvantagensAtivas();
+        
+        // ✅ Garantir que o DOM foi atualizado
+        this.forcarAtualizacaoDOM();
     }
 
     atualizarStatusGeral(conformidade) {

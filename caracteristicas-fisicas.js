@@ -1,4 +1,4 @@
-// caracteristicas-fisicas.js - VERSÃO COMPLETA COM PONTE
+// caracteristicas-fisicas.js - VERSÃO MELHORADA COM ATUALIZAÇÃO VISUAL
 window.ponteCaracteristicas = {
     caracteristicasAtivas: [],
     
@@ -6,8 +6,32 @@ window.ponteCaracteristicas = {
         console.log("🔄 PONTE: Atualizando características", caracteristicas);
         this.caracteristicasAtivas = caracteristicas;
         
+        // ✅ SOLUÇÃO DEFINITIVA: Forçar atualização visual completa
         if (window.sistemaAlturaPeso) {
+            // 1. Atualizar display lógico
             window.sistemaAlturaPeso.atualizarDisplay();
+            
+            // 2. Chamar método de renderização visual se existir
+            if (window.sistemaAlturaPeso.forcarRenderizacaoVisual) {
+                window.sistemaAlturaPeso.forcarRenderizacaoVisual();
+            }
+            
+            // 3. Forçar eventos nos inputs para trigger visual
+            setTimeout(() => {
+                const inputAltura = document.getElementById('altura');
+                const inputPeso = document.getElementById('peso');
+                
+                if (inputAltura) {
+                    const event = new Event('input', { bubbles: true });
+                    inputAltura.dispatchEvent(event);
+                }
+                if (inputPeso) {
+                    const event = new Event('input', { bubbles: true });
+                    inputPeso.dispatchEvent(event);
+                }
+                
+                console.log("🎨 Atualização visual forçada!");
+            }, 100);
         }
     },
     
