@@ -1,4 +1,4 @@
-// caracteristicas-altura-peso.js - VERSÃO COMPLETA COM DESVANTAGENS
+// caracteristicas-altura-peso.js - VERSÃO 100% FUNCIONAL
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
@@ -31,43 +31,41 @@ class SistemaAlturaPeso {
         };
     }
 
-    // === MÉTODOS PARA DESVANTAGENS ATIVAS ===
+    // MÉTODO CORRIGIDO: Detectar características ativas
     obterMultiplicadoresCaracteristicas() {
-        if (!window.sistemaCaracteristicasFisicas) {
-            return { 
-                multiplicadorPeso: 1.0, 
-                alturaLimitada: null, 
-                caracteristicasAtivas: []
-            };
-        }
-        
-        const caracteristicas = window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas;
         let multiplicadorPeso = 1.0;
         let alturaLimitada = null;
         const caracteristicasAtivas = [];
 
-        // Processar cada característica
-        caracteristicas.forEach(carac => {
-            caracteristicasAtivas.push(carac);
+        // Acesso direto e seguro às características
+        if (window.sistemaCaracteristicasFisicas) {
+            const sistema = window.sistemaCaracteristicasFisicas;
             
-            switch(carac.tipo) {
-                case 'magro':
-                    multiplicadorPeso = 0.67;
-                    break;
-                case 'acima-peso':
-                    multiplicadorPeso = 1.3;
-                    break;
-                case 'gordo':
-                    multiplicadorPeso = 1.5;
-                    break;
-                case 'muito-gordo':
-                    multiplicadorPeso = 2.0;
-                    break;
-                case 'nanismo':
-                    alturaLimitada = 1.32;
-                    break;
+            if (sistema.caracteristicasSelecionadas && sistema.caracteristicasSelecionadas.length > 0) {
+                sistema.caracteristicasSelecionadas.forEach(carac => {
+                    caracteristicasAtivas.push(carac);
+                    
+                    // APLICAR CADA CARACTERÍSTICA
+                    switch(carac.tipo) {
+                        case 'magro':
+                            multiplicadorPeso = 0.67;
+                            break;
+                        case 'acima-peso':
+                            multiplicadorPeso = 1.3;
+                            break;
+                        case 'gordo':
+                            multiplicadorPeso = 1.5;
+                            break;
+                        case 'muito-gordo':
+                            multiplicadorPeso = 2.0;
+                            break;
+                        case 'nanismo':
+                            alturaLimitada = 1.32;
+                            break;
+                    }
+                });
             }
-        });
+        }
 
         return {
             multiplicadorPeso,
@@ -93,9 +91,12 @@ class SistemaAlturaPeso {
         const faixaOriginal = this.obterFaixaPeso(st);
         const regras = this.obterMultiplicadoresCaracteristicas();
         
+        const minAjustado = faixaOriginal.min * regras.multiplicadorPeso;
+        const maxAjustado = faixaOriginal.max * regras.multiplicadorPeso;
+        
         return {
-            min: faixaOriginal.min * regras.multiplicadorPeso,
-            max: faixaOriginal.max * regras.multiplicadorPeso,
+            min: minAjustado,
+            max: maxAjustado,
             original: faixaOriginal,
             multiplicador: regras.multiplicadorPeso,
             caracteristicasAtivas: regras.caracteristicasAtivas
@@ -108,21 +109,18 @@ class SistemaAlturaPeso {
         
         if (!container || !lista) return;
         
-        if (!window.sistemaCaracteristicasFisicas || 
-            !window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas ||
-            window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas.length === 0) {
-            
+        const regras = this.obterMultiplicadoresCaracteristicas();
+        
+        if (regras.caracteristicasAtivas.length === 0) {
             container.style.display = 'none';
             return;
         }
         
-        const caracteristicas = window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas;
-        
-        // Mostrar container
+        // MOSTRAR CONTAINER
         container.style.display = 'block';
         
-        // Gerar lista de desvantagens
-        lista.innerHTML = caracteristicas.map(carac => {
+        // GERAR LISTA DE DESVANTAGENS
+        lista.innerHTML = regras.caracteristicasAtivas.map(carac => {
             let icone, descricao, efeito;
             
             switch(carac.tipo) {
@@ -177,7 +175,6 @@ class SistemaAlturaPeso {
         }).join('');
     }
 
-    // === MÉTODOS EXISTENTES ATUALIZADOS ===
     verificarConformidadeST() {
         const faixaAltura = this.obterFaixaAltura(this.stBase);
         const faixaPesoAjustada = this.obterFaixaPesoAjustada(this.stBase);
@@ -316,6 +313,7 @@ class SistemaAlturaPeso {
             }
         });
 
+        // EVENTO CRÍTICO: Escutar mudanças nas características físicas
         document.addEventListener('caracteristicasFisicasAlteradas', () => {
             this.aplicarLimitesAltura();
             this.atualizarDisplay();
@@ -372,7 +370,7 @@ class SistemaAlturaPeso {
         this.atualizarStatusPeso(conformidade, regras);
         this.atualizarInfoFisica(conformidade, regras);
         this.atualizarStatusGeral(conformidade, regras);
-        this.atualizarDesvantagensAtivas(); // NOVO: Atualizar desvantagens
+        this.atualizarDesvantagensAtivas();
     }
 
     atualizarStatusAltura(conformidade, regras) {
@@ -562,7 +560,7 @@ class SistemaAlturaPeso {
     }
 }
 
-// === INICIALIZAÇÃO GLOBAL ===
+// INICIALIZAÇÃO GLOBAL
 let sistemaAlturaPeso;
 
 document.addEventListener('DOMContentLoaded', function() {
