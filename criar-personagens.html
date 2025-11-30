@@ -6,12 +6,10 @@
     <title>Criar Personagem - RPG System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- No head do criar-personagem.html -->
-<link rel="stylesheet" href="style-atributos.css">
-<link rel="stylesheet" href="style-caracteristicas.css">
-<link rel="stylesheet" href="style-vantagens.css">
-<link rel="stylesheet" href="style-pericias.css">
-
+    <link rel="stylesheet" href="style-atributos.css">
+    <link rel="stylesheet" href="style-caracteristicas.css">
+    <link rel="stylesheet" href="style-vantagens.css">
+    <link rel="stylesheet" href="style-pericias.css">
     <style>
         * {
             margin: 0;
@@ -316,737 +314,728 @@
             <div class="loading">
                 <div class="spinner"></div>
             </div>
-            <!-- Conteúdo será preenchido via JavaScript -->
         </div>
 
-       <!-- ABA ATRIBUTOS -->
-<div id="atributos" class="tab-content">
-    <div class="atributos-container">
-        <!-- Seção de Pontos -->
-        <div class="pontos-section">
-            <div class="ponto-card total">
-                <h3>Pontos Totais</h3>
-                <div class="ponto-valor" id="pontosTotais">150</div>
-            </div>
-            <div class="ponto-card gastos">
-                <h3>Pontos Gastos</h3>
-                <div class="ponto-valor" id="pontosGastos">0</div>
-            </div>
-            <div class="ponto-card saldo">
-                <h3>Saldo Disponível</h3>
-                <div class="ponto-valor" id="pontosSaldo">150</div>
+        <!-- ABA ATRIBUTOS -->
+        <div id="atributos" class="tab-content">
+            <div class="atributos-container">
+                <!-- Seção de Pontos -->
+                <div class="pontos-section">
+                    <div class="ponto-card total">
+                        <h3>Pontos Totais</h3>
+                        <div class="ponto-valor" id="pontosTotais">150</div>
+                    </div>
+                    <div class="ponto-card gastos">
+                        <h3>Pontos Gastos</h3>
+                        <div class="ponto-valor" id="pontosGastos">0</div>
+                    </div>
+                    <div class="ponto-card saldo">
+                        <h3>Saldo Disponível</h3>
+                        <div class="ponto-valor" id="pontosSaldo">150</div>
+                    </div>
+                </div>
+
+                <!-- Atributos Principais -->
+                <div class="atributos-principais">
+                    <h2 class="secao-titulo">Atributos Principais</h2>
+                    <div class="cards-grid principais-grid">
+                        <!-- ST -->
+                        <div class="atributo-card">
+                            <div class="atributo-header">
+                                <h3>FORÇA (ST)</h3>
+                                <span class="custo-pontos" id="custoST">0</span>
+                            </div>
+                            <div class="atributo-controles">
+                                <button class="btn-controle" onclick="alterarAtributo('ST', -1)">-</button>
+                                <input type="number" id="ST" class="atributo-input" value="10" min="1" max="40">
+                                <button class="btn-controle" onclick="alterarAtributo('ST', 1)">+</button>
+                            </div>
+                            <div class="atributo-desc">Custo: 10 pontos por nível</div>
+                        </div>
+
+                        <!-- DX -->
+                        <div class="atributo-card">
+                            <div class="atributo-header">
+                                <h3>DESTREZA (DX)</h3>
+                                <span class="custo-pontos" id="custoDX">0</span>
+                            </div>
+                            <div class="atributo-controles">
+                                <button class="btn-controle" onclick="alterarAtributo('DX', -1)">-</button>
+                                <input type="number" id="DX" class="atributo-input" value="10" min="1" max="40">
+                                <button class="btn-controle" onclick="alterarAtributo('DX', 1)">+</button>
+                            </div>
+                            <div class="atributo-desc">Custo: 20 pontos por nível</div>
+                        </div>
+
+                        <!-- IQ -->
+                        <div class="atributo-card">
+                            <div class="atributo-header">
+                                <h3>INTELIGÊNCIA (IQ)</h3>
+                                <span class="custo-pontos" id="custoIQ">0</span>
+                            </div>
+                            <div class="atributo-controles">
+                                <button class="btn-controle" onclick="alterarAtributo('IQ', -1)">-</button>
+                                <input type="number" id="IQ" class="atributo-input" value="10" min="1" max="40">
+                                <button class="btn-controle" onclick="alterarAtributo('IQ', 1)">+</button>
+                            </div>
+                            <div class="atributo-desc">Custo: 20 pontos por nível</div>
+                        </div>
+
+                        <!-- HT -->
+                        <div class="atributo-card">
+                            <div class="atributo-header">
+                                <h3>VIGOR (HT)</h3>
+                                <span class="custo-pontos" id="custoHT">0</span>
+                            </div>
+                            <div class="atributo-controles">
+                                <button class="btn-controle" onclick="alterarAtributo('HT', -1)">-</button>
+                                <input type="number" id="HT" class="atributo-input" value="10" min="1" max="40">
+                                <button class="btn-controle" onclick="alterarAtributo('HT', 1)">+</button>
+                            </div>
+                            <div class="atributo-desc">Custo: 10 pontos por nível</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Atributos Secundários -->
+                <div class="atributos-secundarios">
+                    <h2 class="secao-titulo">Atributos Secundários</h2>
+                    <div class="cards-grid secundarios-grid">
+                        <!-- PV -->
+                        <div class="secundario-card">
+                            <h3>PONTOS DE VIDA (PV)</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="PVBase">10</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusPV" class="bonus-input" value="0" min="-10" max="10">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="PVTotal">10</span>
+                            </div>
+                            <div class="secundario-desc">Baseado em ST</div>
+                        </div>
+
+                        <!-- PF -->
+                        <div class="secundario-card">
+                            <h3>PONTOS DE FADIGA (PF)</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="PFBase">10</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusPF" class="bonus-input" value="0" min="-10" max="10">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="PFTotal">10</span>
+                            </div>
+                            <div class="secundario-desc">Baseado em HT</div>
+                        </div>
+
+                        <!-- Vontade -->
+                        <div class="secundario-card">
+                            <h3>VONTADE</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="VontadeBase">10</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusVontade" class="bonus-input" value="0" min="-10" max="10">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="VontadeTotal">10</span>
+                            </div>
+                            <div class="secundario-desc">Baseado em IQ</div>
+                        </div>
+
+                        <!-- Percepção -->
+                        <div class="secundario-card">
+                            <h3>PERCEPÇÃO</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="PercepcaoBase">10</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusPercepcao" class="bonus-input" value="0" min="-10" max="10">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="PercepcaoTotal">10</span>
+                            </div>
+                            <div class="secundario-desc">Baseado em IQ</div>
+                        </div>
+
+                        <!-- Deslocamento -->
+                        <div class="secundario-card">
+                            <h3>DESLOCAMENTO</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="DeslocamentoBase">5.00</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusDeslocamento" class="bonus-input" value="0" min="-5" max="5" step="0.25">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="DeslocamentoTotal">5.00</span>
+                            </div>
+                            <div class="secundario-desc">(DX + HT) / 4</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sistema de Combate -->
+                <div class="combate-section">
+                    <h2 class="secao-titulo">Sistema de Combate</h2>
+                    <div class="cards-grid combate-grid">
+                        <!-- Dano Base -->
+                        <div class="combate-card">
+                            <h3>DANO BÁSICO</h3>
+                            <div class="dano-container">
+                                <div class="dano-tipo">
+                                    <span class="dano-label">GDP:</span>
+                                    <span class="dano-valor" id="danoGDP">1d-2</span>
+                                </div>
+                                <div class="dano-tipo">
+                                    <span class="dano-label">GEB:</span>
+                                    <span class="dano-valor" id="danoGEB">1d</span>
+                                </div>
+                            </div>
+                            <div class="combate-desc">Baseado em ST</div>
+                        </div>
+
+                        <!-- Níveis de Carga -->
+                        <div class="combate-card">
+                            <h3>NÍVEIS DE CARGA</h3>
+                            <div class="carga-container">
+                                <div class="carga-item">
+                                    <span class="carga-label">Nenhuma:</span>
+                                    <span class="carga-valor" id="cargaNenhuma">10.0</span>
+                                </div>
+                                <div class="carga-item">
+                                    <span class="carga-label">Leve:</span>
+                                    <span class="carga-valor" id="cargaLeve">20.0</span>
+                                </div>
+                                <div class="carga-item">
+                                    <span class="carga-label">Média:</span>
+                                    <span class="carga-valor" id="cargaMedia">30.0</span>
+                                </div>
+                                <div class="carga-item">
+                                    <span class="carga-label">Pesada:</span>
+                                    <span class="carga-valor" id="cargaPesada">60.0</span>
+                                </div>
+                                <div class="carga-item">
+                                    <span class="carga-label">Muito Pesada:</span>
+                                    <span class="carga-valor" id="cargaMuitoPesada">100.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Atributos Principais -->
-        <div class="atributos-principais">
-            <h2 class="secao-titulo">Atributos Principais</h2>
-            <div class="cards-grid principais-grid">
-                <!-- ST -->
-                <div class="atributo-card">
-                    <div class="atributo-header">
-                        <h3>FORÇA (ST)</h3>
-                        <span class="custo-pontos" id="custoST">0</span>
-                    </div>
-                    <div class="atributo-controles">
-                        <button class="btn-controle" onclick="alterarAtributo('ST', -1)">-</button>
-                        <input type="number" id="ST" class="atributo-input" value="10" min="1" max="40">
-                        <button class="btn-controle" onclick="alterarAtributo('ST', 1)">+</button>
-                    </div>
-                    <div class="atributo-desc">Custo: 10 pontos por nível</div>
-                </div>
-
-                <!-- DX -->
-                <div class="atributo-card">
-                    <div class="atributo-header">
-                        <h3>DESTREZA (DX)</h3>
-                        <span class="custo-pontos" id="custoDX">0</span>
-                    </div>
-                    <div class="atributo-controles">
-                        <button class="btn-controle" onclick="alterarAtributo('DX', -1)">-</button>
-                        <input type="number" id="DX" class="atributo-input" value="10" min="1" max="40">
-                        <button class="btn-controle" onclick="alterarAtributo('DX', 1)">+</button>
-                    </div>
-                    <div class="atributo-desc">Custo: 20 pontos por nível</div>
-                </div>
-
-                <!-- IQ -->
-                <div class="atributo-card">
-                    <div class="atributo-header">
-                        <h3>INTELIGÊNCIA (IQ)</h3>
-                        <span class="custo-pontos" id="custoIQ">0</span>
-                    </div>
-                    <div class="atributo-controles">
-                        <button class="btn-controle" onclick="alterarAtributo('IQ', -1)">-</button>
-                        <input type="number" id="IQ" class="atributo-input" value="10" min="1" max="40">
-                        <button class="btn-controle" onclick="alterarAtributo('IQ', 1)">+</button>
-                    </div>
-                    <div class="atributo-desc">Custo: 20 pontos por nível</div>
-                </div>
-
-                <!-- HT -->
-                <div class="atributo-card">
-                    <div class="atributo-header">
-                        <h3>VIGOR (HT)</h3>
-                        <span class="custo-pontos" id="custoHT">0</span>
-                    </div>
-                    <div class="atributo-controles">
-                        <button class="btn-controle" onclick="alterarAtributo('HT', -1)">-</button>
-                        <input type="number" id="HT" class="atributo-input" value="10" min="1" max="40">
-                        <button class="btn-controle" onclick="alterarAtributo('HT', 1)">+</button>
-                    </div>
-                    <div class="atributo-desc">Custo: 10 pontos por nível</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Atributos Secundários -->
-        <div class="atributos-secundarios">
-            <h2 class="secao-titulo">Atributos Secundários</h2>
-            <div class="cards-grid secundarios-grid">
-                <!-- PV -->
-                <div class="secundario-card">
-                    <h3>PONTOS DE VIDA (PV)</h3>
-                    <div class="secundario-base">
-                        <span class="base-label">Base:</span>
-                        <span class="base-valor" id="PVBase">10</span>
-                    </div>
-                    <div class="bonus-section">
-                        <span class="bonus-label">Bônus/Redutor:</span>
-                        <input type="number" id="bonusPV" class="bonus-input" value="0" min="-10" max="10">
-                    </div>
-                    <div class="secundario-total">
-                        <span class="total-label">Total:</span>
-                        <span class="total-valor" id="PVTotal">10</span>
-                    </div>
-                    <div class="secundario-desc">Baseado em ST</div>
-                </div>
-
-                <!-- PF -->
-                <div class="secundario-card">
-                    <h3>PONTOS DE FADIGA (PF)</h3>
-                    <div class="secundario-base">
-                        <span class="base-label">Base:</span>
-                        <span class="base-valor" id="PFBase">10</span>
-                    </div>
-                    <div class="bonus-section">
-                        <span class="bonus-label">Bônus/Redutor:</span>
-                        <input type="number" id="bonusPF" class="bonus-input" value="0" min="-10" max="10">
-                    </div>
-                    <div class="secundario-total">
-                        <span class="total-label">Total:</span>
-                        <span class="total-valor" id="PFTotal">10</span>
-                    </div>
-                    <div class="secundario-desc">Baseado em HT</div>
-                </div>
-
-                <!-- Vontade -->
-                <div class="secundario-card">
-                    <h3>VONTADE</h3>
-                    <div class="secundario-base">
-                        <span class="base-label">Base:</span>
-                        <span class="base-valor" id="VontadeBase">10</span>
-                    </div>
-                    <div class="bonus-section">
-                        <span class="bonus-label">Bônus/Redutor:</span>
-                        <input type="number" id="bonusVontade" class="bonus-input" value="0" min="-10" max="10">
-                    </div>
-                    <div class="secundario-total">
-                        <span class="total-label">Total:</span>
-                        <span class="total-valor" id="VontadeTotal">10</span>
-                    </div>
-                    <div class="secundario-desc">Baseado em IQ</div>
-                </div>
-
-                <!-- Percepção -->
-                <div class="secundario-card">
-                    <h3>PERCEPÇÃO</h3>
-                    <div class="secundario-base">
-                        <span class="base-label">Base:</span>
-                        <span class="base-valor" id="PercepcaoBase">10</span>
-                    </div>
-                    <div class="bonus-section">
-                        <span class="bonus-label">Bônus/Redutor:</span>
-                        <input type="number" id="bonusPercepcao" class="bonus-input" value="0" min="-10" max="10">
-                    </div>
-                    <div class="secundario-total">
-                        <span class="total-label">Total:</span>
-                        <span class="total-valor" id="PercepcaoTotal">10</span>
-                    </div>
-                    <div class="secundario-desc">Baseado em IQ</div>
-                </div>
-
-                <!-- Deslocamento -->
-                <div class="secundario-card">
-                    <h3>DESLOCAMENTO</h3>
-                    <div class="secundario-base">
-                        <span class="base-label">Base:</span>
-                        <span class="base-valor" id="DeslocamentoBase">5.00</span>
-                    </div>
-                    <div class="bonus-section">
-                        <span class="bonus-label">Bônus/Redutor:</span>
-                        <input type="number" id="bonusDeslocamento" class="bonus-input" value="0" min="-5" max="5" step="0.25">
-                    </div>
-                    <div class="secundario-total">
-                        <span class="total-label">Total:</span>
-                        <span class="total-valor" id="DeslocamentoTotal">5.00</span>
-                    </div>
-                    <div class="secundario-desc">(DX + HT) / 4</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sistema de Combate -->
-        <div class="combate-section">
-            <h2 class="secao-titulo">Sistema de Combate</h2>
-            <div class="cards-grid combate-grid">
-                <!-- Dano Base -->
-                <div class="combate-card">
-                    <h3>DANO BÁSICO</h3>
-                    <div class="dano-container">
-                        <div class="dano-tipo">
-                            <span class="dano-label">GDP:</span>
-                            <span class="dano-valor" id="danoGDP">1d-2</span>
-                        </div>
-                        <div class="dano-tipo">
-                            <span class="dano-label">GEB:</span>
-                            <span class="dano-valor" id="danoGEB">1d</span>
-                        </div>
-                    </div>
-                    <div class="combate-desc">Baseado em ST</div>
-                </div>
-
-                <!-- Níveis de Carga -->
-                <div class="combate-card">
-                    <h3>NÍVEIS DE CARGA</h3>
-                    <div class="carga-container">
-                        <div class="carga-item">
-                            <span class="carga-label">Nenhuma:</span>
-                            <span class="carga-valor" id="cargaNenhuma">10.0</span>
-                        </div>
-                        <div class="carga-item">
-                            <span class="carga-label">Leve:</span>
-                            <span class="carga-valor" id="cargaLeve">20.0</span>
-                        </div>
-                        <div class="carga-item">
-                            <span class="carga-label">Média:</span>
-                            <span class="carga-valor" id="cargaMedia">30.0</span>
-                        </div>
-                        <div class="carga-item">
-                            <span class="carga-label">Pesada:</span>
-                            <span class="carga-valor" id="cargaPesada">60.0</span>
-                        </div>
-                        <div class="carga-item">
-                            <span class="carga-label">Muito Pesada:</span>
-                            <span class="carga-valor" id="cargaMuitoPesada">100.0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
         <!-- ABA CARACTERÍSTICAS -->
-<div id="caracteristicas" class="tab-content">
-    <div class="caracteristicas-container">
-        
-        <!-- CARDS SUPERIORES - APARÊNCIA E RIQUEZA -->
-        <div class="caracteristicas-grid">
-            
-            <!-- CARD APARÊNCIA FÍSICA -->
-            <div class="caracteristica-card">
-                <div class="card-header">
-                    <i class="fas fa-user"></i>
-                    <h3>Aparência Física</h3>
-                    <span class="pontos-badge" id="pontosAparencia">0 pts</span>
-                </div>
-                <div class="card-content">
-                    <div class="select-group">
-                        <label>Nível de Aparência:</label>
-                        <select id="nivelAparencia" class="form-select">
-                            <option value="-24">Horrendo [-24 pts]</option>
-                            <option value="-20">Monstruoso [-20 pts]</option>
-                            <option value="-16">Hediondo [-16 pts]</option>
-                            <option value="-8">Feio [-8 pts]</option>
-                            <option value="-4">Sem Atrativos [-4 pts]</option>
-                            <option value="0" selected>Comum [0 pts]</option>
-                            <option value="4">Atraente [+4 pts]</option>
-                            <option value="12">Elegante [+12 pts]</option>
-                            <option value="16">Muito Elegante [+16 pts]</option>
-                            <option value="20">Lindo [+20 pts]</option>
-                        </select>
-                    </div>
-                    <div class="info-display" id="displayAparencia">
-                        <strong>Comum</strong>
-                        <br><small>Reação: +0</small>
-                        <br><small>Aparência padrão, sem modificadores</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CARD NÍVEL DE RIQUEZA -->
-            <div class="caracteristica-card">
-                <div class="card-header">
-                    <i class="fas fa-coins"></i>
-                    <h3>Nível de Riqueza</h3>
-                    <span class="pontos-badge" id="pontosRiqueza">0 pts</span>
-                </div>
-                <div class="card-content">
-                    <div class="select-group">
-                        <label>Nível de Riqueza:</label>
-                        <select id="nivelRiqueza" class="form-select">
-                            <option value="-25">Falido [-25 pts]</option>
-                            <option value="-25">Pobre [-25 pts]</option>
-                            <option value="-10">Batalhador [-10 pts]</option>
-                            <option value="0" selected>Médio [0 pts]</option>
-                            <option value="10">Confortável [+10 pts]</option>
-                            <option value="20">Rico [+20 pts]</option>
-                            <option value="30">Muito Rico [+30 pts]</option>
-                            <option value="50">Podre de Rico [+50 pts]</option>
-                        </select>
-                    </div>
-                    <div class="info-display" id="displayRiqueza">
-                        <strong>Médio</strong>
-                        <br><small>Multiplicador: 1x</small>
-                        <br><small>Nível de recursos pré-definido padrão</small>
-                    </div>
-                    <div class="renda-info">
-                        <small>Renda Mensal Estimada: <span id="rendaMensal">$1.000</span></small>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- CARD IDIOMAS -->
-        <div class="caracteristica-card full-width">
-            <div class="card-header">
-                <i class="fas fa-globe"></i>
-                <h3>Idiomas</h3>
-                <span class="pontos-badge" id="pontosIdiomas">0 pts</span>
-            </div>
-            <div class="card-content">
-                
-                <!-- IDIOMA MATERNO -->
-                <div class="idioma-section">
-                    <h4>Idioma Materno</h4>
-                    <div class="idioma-materno">
-                        <input type="text" id="idiomaMaternoNome" value="Comum" placeholder="Nome do idioma materno" class="form-input">
-                        <span class="nivel-info">Nativo (0 pts)</span>
-                    </div>
-                </div>
-
-                <!-- ADICIONAR NOVO IDIOMA -->
-                <div class="idioma-section">
-                    <h4>Adicionar Idioma</h4>
-                    <div class="add-idioma-form">
-                        <input type="text" id="novoIdiomaNome" placeholder="Digite o nome do idioma" class="form-input">
-                        
-                        <div class="niveis-container">
-                            <div class="nivel-group">
-                                <label>🗣️ Nível de Fala:</label>
-                                <select id="novoIdiomaFala" class="form-select">
-                                    <option value="0">Nenhum (0 pts)</option>
-                                    <option value="2" selected>Rudimentar (2 pts)</option>
-                                    <option value="4">Sotaque (4 pts)</option>
-                                    <option value="6">Nativo (6 pts)</option>
+        <div id="caracteristicas" class="tab-content">
+            <div class="caracteristicas-container">
+                <!-- CARDS SUPERIORES - APARÊNCIA E RIQUEZA -->
+                <div class="caracteristicas-grid">
+                    <!-- CARD APARÊNCIA FÍSICA -->
+                    <div class="caracteristica-card">
+                        <div class="card-header">
+                            <i class="fas fa-user"></i>
+                            <h3>Aparência Física</h3>
+                            <span class="pontos-badge" id="pontosAparencia">0 pts</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="select-group">
+                                <label>Nível de Aparência:</label>
+                                <select id="nivelAparencia" class="form-select">
+                                    <option value="-24">Horrendo [-24 pts]</option>
+                                    <option value="-20">Monstruoso [-20 pts]</option>
+                                    <option value="-16">Hediondo [-16 pts]</option>
+                                    <option value="-8">Feio [-8 pts]</option>
+                                    <option value="-4">Sem Atrativos [-4 pts]</option>
+                                    <option value="0" selected>Comum [0 pts]</option>
+                                    <option value="4">Atraente [+4 pts]</option>
+                                    <option value="12">Elegante [+12 pts]</option>
+                                    <option value="16">Muito Elegante [+16 pts]</option>
+                                    <option value="20">Lindo [+20 pts]</option>
                                 </select>
+                            </div>
+                            <div class="info-display" id="displayAparencia">
+                                <strong>Comum</strong>
+                                <br><small>Reação: +0</small>
+                                <br><small>Aparência padrão, sem modificadores</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD NÍVEL DE RIQUEZA -->
+                    <div class="caracteristica-card">
+                        <div class="card-header">
+                            <i class="fas fa-coins"></i>
+                            <h3>Nível de Riqueza</h3>
+                            <span class="pontos-badge" id="pontosRiqueza">0 pts</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="select-group">
+                                <label>Nível de Riqueza:</label>
+                                <select id="nivelRiqueza" class="form-select">
+                                    <option value="-25">Falido [-25 pts]</option>
+                                    <option value="-25">Pobre [-25 pts]</option>
+                                    <option value="-10">Batalhador [-10 pts]</option>
+                                    <option value="0" selected>Médio [0 pts]</option>
+                                    <option value="10">Confortável [+10 pts]</option>
+                                    <option value="20">Rico [+20 pts]</option>
+                                    <option value="30">Muito Rico [+30 pts]</option>
+                                    <option value="50">Podre de Rico [+50 pts]</option>
+                                </select>
+                            </div>
+                            <div class="info-display" id="displayRiqueza">
+                                <strong>Médio</strong>
+                                <br><small>Multiplicador: 1x</small>
+                                <br><small>Nível de recursos pré-definido padrão</small>
+                            </div>
+                            <div class="renda-info">
+                                <small>Renda Mensal Estimada: <span id="rendaMensal">$1.000</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD IDIOMAS -->
+                <div class="caracteristica-card full-width">
+                    <div class="card-header">
+                        <i class="fas fa-globe"></i>
+                        <h3>Idiomas</h3>
+                        <span class="pontos-badge" id="pontosIdiomas">0 pts</span>
+                    </div>
+                    <div class="card-content">
+                        <!-- IDIOMA MATERNO -->
+                        <div class="idioma-section">
+                            <h4>Idioma Materno</h4>
+                            <div class="idioma-materno">
+                                <input type="text" id="idiomaMaternoNome" value="Comum" placeholder="Nome do idioma materno" class="form-input">
+                                <span class="nivel-info">Nativo (0 pts)</span>
+                            </div>
+                        </div>
+
+                        <!-- ADICIONAR NOVO IDIOMA -->
+                        <div class="idioma-section">
+                            <h4>Adicionar Idioma</h4>
+                            <div class="add-idioma-form">
+                                <input type="text" id="novoIdiomaNome" placeholder="Digite o nome do idioma" class="form-input">
+                                
+                                <div class="niveis-container">
+                                    <div class="nivel-group">
+                                        <label>🗣️ Nível de Fala:</label>
+                                        <select id="novoIdiomaFala" class="form-select">
+                                            <option value="0">Nenhum (0 pts)</option>
+                                            <option value="2" selected>Rudimentar (2 pts)</option>
+                                            <option value="4">Sotaque (4 pts)</option>
+                                            <option value="6">Nativo (6 pts)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="nivel-group">
+                                        <label>📝 Nível de Escrita:</label>
+                                        <select id="novoIdiomaEscrita" class="form-select">
+                                            <option value="0" selected>Nenhum (0 pts)</option>
+                                            <option value="2">Rudimentar (1 pt)</option>
+                                            <option value="4">Sotaque (2 pts)</option>
+                                            <option value="6">Nativo (3 pts)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="add-idioma-actions">
+                                    <span class="custo-preview">Custo: <span id="custoIdiomaPreview">+2 pts</span></span>
+                                    <button id="btnAdicionarIdioma" class="btn-primary">
+                                        <i class="fas fa-plus"></i> Adicionar Idioma
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LISTA DE IDIOMAS ADICIONAIS -->
+                        <div class="idioma-section">
+                            <h4>Idiomas Adicionais <small>(<span id="totalIdiomas">0</span> idiomas)</small></h4>
+                            <div id="listaIdiomasAdicionais" class="idiomas-lista">
+                                <div class="empty-state">
+                                    Nenhum idioma adicional adicionado
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARACTERÍSTICAS FÍSICAS E ALTURA/PESO -->
+                <div class="caracteristicas-grid">
+                    <!-- CARD CARACTERÍSTICAS FÍSICAS -->
+                    <div class="caracteristica-card">
+                        <div class="card-header">
+                            <i class="fas fa-weight"></i>
+                            <h3>Características Físicas</h3>
+                            <span class="pontos-badge" id="pontosCaracteristicas">0 pts</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="caracteristicas-lista">
+                                <div class="caracteristica-item" data-tipo="magro">
+                                    <div class="caracteristica-info">
+                                        <strong>Magro</strong>
+                                        <small>-5 pts | Peso: 67% do normal</small>
+                                    </div>
+                                    <button class="btn-add-caracteristica">Adicionar</button>
+                                </div>
+                                
+                                <div class="caracteristica-item" data-tipo="acima-peso">
+                                    <div class="caracteristica-info">
+                                        <strong>Acima do Peso</strong>
+                                        <small>-1 pt | Peso: 130% do normal</small>
+                                    </div>
+                                    <button class="btn-add-caracteristica">Adicionar</button>
+                                </div>
+                                
+                                <div class="caracteristica-item" data-tipo="gordo">
+                                    <div class="caracteristica-info">
+                                        <strong>Gordo</strong>
+                                        <small>-3 pts | Peso: 150% do normal</small>
+                                    </div>
+                                    <button class="btn-add-caracteristica">Adicionar</button>
+                                </div>
+                                
+                                <div class="caracteristica-item" data-tipo="muito-gordo">
+                                    <div class="caracteristica-info">
+                                        <strong>Muito Gordo</strong>
+                                        <small>-5 pts | Peso: 200% do normal</small>
+                                    </div>
+                                    <button class="btn-add-caracteristica">Adicionar</button>
+                                </div>
+                                
+                                <div class="caracteristica-item" data-tipo="nanismo">
+                                    <div class="caracteristica-info">
+                                        <strong>Nanismo</strong>
+                                        <small>-15 pts | MT -1, -1 Deslocamento</small>
+                                    </div>
+                                    <button class="btn-add-caracteristica">Adicionar</button>
+                                </div>
+                                
+                                <div class="caracteristica-item" data-tipo="gigantismo">
+                                    <div class="caracteristica-info">
+                                        <strong>Gigantismo</strong>
+                                        <small>0 pts | MT +1, +1 Deslocamento</small>
+                                    </div>
+                                    <button class="btn-add-caracteristica">Adicionar</button>
+                                </div>
                             </div>
                             
-                            <div class="nivel-group">
-                                <label>📝 Nível de Escrita:</label>
-                                <select id="novoIdiomaEscrita" class="form-select">
-                                    <option value="0" selected>Nenhum (0 pts)</option>
-                                    <option value="2">Rudimentar (1 pt)</option>
-                                    <option value="4">Sotaque (2 pts)</option>
-                                    <option value="6">Nativo (3 pts)</option>
-                                </select>
+                            <!-- CARACTERÍSTICAS SELECIONADAS -->
+                            <div id="caracteristicasSelecionadas" class="caracteristicas-selecionadas">
+                                <!-- Dinâmico - características adicionadas aparecem aqui -->
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD ALTURA E PESO -->
+                    <div class="caracteristica-card">
+                        <div class="card-header">
+                            <i class="fas fa-ruler-combined"></i>
+                            <h3>Altura e Peso</h3>
+                            <span class="status-badge" id="statusFisico">Normal</span>
+                        </div>
+                        <div class="card-content">
+                            <!-- CONTROLES ALTURA -->
+                            <div class="fisica-control">
+                                <label>📏 Altura (metros):</label>
+                                <div class="controle-numerico">
+                                    <button class="btn-controle" onclick="ajustarAltura(-0.01)">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" id="altura" value="1.70" step="0.01" min="1.30" max="2.50" class="fisica-input">
+                                    <button class="btn-controle" onclick="ajustarAltura(0.01)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div id="statusAltura" class="status-info"></div>
+                            </div>
+
+                            <!-- CONTROLES PESO -->
+                            <div class="fisica-control">
+                                <label>⚖️ Peso (kg):</label>
+                                <div class="controle-numerico">
+                                    <button class="btn-controle" onclick="ajustarPeso(-1)">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" id="peso" value="70" step="1" min="30" max="200" class="fisica-input">
+                                    <button class="btn-controle" onclick="ajustarPeso(1)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div id="statusPeso" class="status-info"></div>
+                            </div>
+
+                            <!-- INFO BASE ST -->
+                            <div class="fisica-info">
+                                <div class="info-row">
+                                    <span>ST Base:</span>
+                                    <strong id="stBase">10</strong>
+                                </div>
+                                <div class="info-row">
+                                    <span>Altura Média:</span>
+                                    <span id="alturaMedia">1.70m</span>
+                                </div>
+                                <div class="info-row">
+                                    <span>Peso Médio:</span>
+                                    <span id="pesoMedio">70kg</span>
+                                </div>
+                                <div class="info-row">
+                                    <span>Modificador Característica:</span>
+                                    <span id="modificadorPeso">1.0x</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA VANTAGENS -->
+        <div id="vantagens" class="tab-content">
+            <div class="atributos-container">
+                <!-- CARD DE RESUMO DE PONTOS -->
+                <div class="pontos-section">
+                    <div class="ponto-card">
+                        <h3>Vantagens</h3>
+                        <div class="ponto-valor" id="total-vantagens">+0</div>
+                    </div>
+                    <div class="ponto-card gastos">
+                        <h3>Desvantagens</h3>
+                        <div class="ponto-valor" id="total-desvantagens">-0</div>
+                    </div>
+                    <div class="ponto-card gastos">
+                        <h3>Peculiaridades</h3>
+                        <div class="ponto-valor" id="total-peculiaridades">-0</div>
+                    </div>
+                    <div class="ponto-card saldo">
+                        <h3>Saldo Total</h3>
+                        <div class="ponto-valor" id="saldo-total">0</div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO VANTAGENS -->
+                <h2 class="secao-titulo">Vantagens</h2>
+                <div class="cards-grid principais-grid">
+                    <!-- CARD VANTAGENS DISPONÍVEIS -->
+                    <div class="atributo-card">
+                        <div class="atributo-header">
+                            <h3>🎯 Vantagens Disponíveis</h3>
                         </div>
                         
-                        <div class="add-idioma-actions">
-                            <span class="custo-preview">Custo: <span id="custoIdiomaPreview">+2 pts</span></span>
-                            <button id="btnAdicionarIdioma" class="btn-primary">
-                                <i class="fas fa-plus"></i> Adicionar Idioma
-                            </button>
+                        <!-- SISTEMA DE BUSCA -->
+                        <div class="busca-container">
+                            <input type="text" id="busca-vantagens" placeholder="Buscar vantagens..." class="atributo-input">
+                            <select id="categoria-vantagens" class="atributo-input">
+                                <option value="">Todas as Categorias</option>
+                                <option value="mental">Mental/Sobrenatural</option>
+                                <option value="fisica">Física</option>
+                                <option value="supers">Supers</option>
+                                <option value="social">Social</option>
+                            </select>
+                        </div>
+
+                        <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
+                        <div class="lista-container" id="lista-vantagens">
+                            <div class="lista-vazia">Carregando vantagens...</div>
                         </div>
                     </div>
-                </div>
 
-                <!-- LISTA DE IDIOMAS ADICIONAIS -->
-                <div class="idioma-section">
-                    <h4>Idiomas Adicionais <small>(<span id="totalIdiomas">0</span> idiomas)</small></h4>
-                    <div id="listaIdiomasAdicionais" class="idiomas-lista">
-                        <div class="empty-state">
-                            Nenhum idioma adicional adicionado
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- CARACTERÍSTICAS FÍSICAS E ALTURA/PESO -->
-        <div class="caracteristicas-grid">
-            
-            <!-- CARD CARACTERÍSTICAS FÍSICAS -->
-            <div class="caracteristica-card">
-                <div class="card-header">
-                    <i class="fas fa-weight"></i>
-                    <h3>Características Físicas</h3>
-                    <span class="pontos-badge" id="pontosCaracteristicas">0 pts</span>
-                </div>
-                <div class="card-content">
-                    <div class="caracteristicas-lista">
-                        <div class="caracteristica-item" data-tipo="magro">
-                            <div class="caracteristica-info">
-                                <strong>Magro</strong>
-                                <small>-5 pts | Peso: 67% do normal</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
+                    <!-- CARD VANTAGENS ADQUIRIDAS -->
+                    <div class="atributo-card">
+                        <div class="atributo-header">
+                            <h3>✅ Vantagens Adquiridas</h3>
+                            <div class="custo-pontos" id="total-vantagens-adquiridas">0 pts</div>
                         </div>
                         
-                        <div class="caracteristica-item" data-tipo="acima-peso">
-                            <div class="caracteristica-info">
-                                <strong>Acima do Peso</strong>
-                                <small>-1 pt | Peso: 130% do normal</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
+                        <div class="lista-container" id="vantagens-adquiridas">
+                            <div class="lista-vazia">Nenhuma vantagem adquirida</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO DESVANTAGENS -->
+                <h2 class="secao-titulo">Desvantagens</h2>
+                <div class="cards-grid principais-grid">
+                    <!-- CARD DESVANTAGENS DISPONÍVEIS -->
+                    <div class="atributo-card">
+                        <div class="atributo-header">
+                            <h3>⚠️ Desvantagens Disponíveis</h3>
                         </div>
                         
-                        <div class="caracteristica-item" data-tipo="gordo">
-                            <div class="caracteristica-info">
-                                <strong>Gordo</strong>
-                                <small>-3 pts | Peso: 150% do normal</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
+                        <!-- SISTEMA DE BUSCA -->
+                        <div class="busca-container">
+                            <input type="text" id="busca-desvantagens" placeholder="Buscar desvantagens..." class="atributo-input">
+                            <select id="categoria-desvantagens" class="atributo-input">
+                                <option value="">Todas as Categorias</option>
+                                <option value="mental">Mental/Sobrenatural</option>
+                                <option value="fisica">Física</option>
+                                <option value="supers">Supers</option>
+                                <option value="social">Social</option>
+                            </select>
+                        </div>
+
+                        <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
+                        <div class="lista-container" id="lista-desvantagens">
+                            <div class="lista-vazia">Carregando desvantagens...</div>
+                        </div>
+                    </div>
+
+                    <!-- CARD DESVANTAGENS ADQUIRIDAS -->
+                    <div class="atributo-card">
+                        <div class="atributo-header">
+                            <h3>❌ Desvantagens Adquiridas</h3>
+                            <div class="custo-pontos" id="total-desvantagens-adquiridas">0 pts</div>
                         </div>
                         
-                        <div class="caracteristica-item" data-tipo="muito-gordo">
-                            <div class="caracteristica-info">
-                                <strong>Muito Gordo</strong>
-                                <small>-5 pts | Peso: 200% do normal</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
+                        <div class="lista-container" id="desvantagens-adquiridas">
+                            <div class="lista-vazia">Nenhuma desvantagem adquirida</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO PECULIARIDADES -->
+                <h2 class="secao-titulo">Peculiaridades</h2>
+                <div class="cards-grid secundarios-grid">
+                    <div class="atributo-card">
+                        <div class="atributo-header">
+                            <h3>🏷️ Peculiaridades</h3>
+                            <div class="custo-pontos" id="contador-peculiaridades">0/5</div>
                         </div>
                         
-                        <div class="caracteristica-item" data-tipo="nanismo">
-                            <div class="caracteristica-info">
-                                <strong>Nanismo</strong>
-                                <small>-15 pts | MT -1, -1 Deslocamento</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
+                        <!-- FORMULÁRIO PARA ADICIONAR -->
+                        <div class="peculiaridade-form">
+                            <input type="text" id="nova-peculiaridade" placeholder="Digite uma peculiaridade (max 30 caracteres)" 
+                                   maxlength="30" class="atributo-input">
+                            <div class="contador-chars"><span id="contador-chars">0</span>/30</div>
+                            <button id="btn-adicionar-peculiaridade" class="btn-controle" disabled>+</button>
+                        </div>
+
+                        <!-- LISTA DE PECULIARIDADES -->
+                        <div class="lista-container" id="lista-peculiaridades">
+                            <div class="lista-vazia">Nenhuma peculiaridade adicionada</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA PERÍCIAS -->
+        <div id="pericias" class="tab-content">
+            <div class="atributos-container">
+                <!-- CARD DE RESUMO DE PONTOS -->
+                <div class="pontos-section">
+                    <div class="ponto-card">
+                        <h3>Perícias</h3>
+                        <div class="ponto-valor" id="total-pericias">+0</div>
+                    </div>
+                    <div class="ponto-card gastos">
+                        <h3>Pontos Gastos</h3>
+                        <div class="ponto-valor" id="total-pericias-adquiridas">0 pts</div>
+                    </div>
+                    <div class="ponto-card saldo">
+                        <h3>Saldo Disponível</h3>
+                        <div class="ponto-valor" id="saldo-total-pericias">150</div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO PERÍCIAS -->
+                <h2 class="secao-titulo">Perícias</h2>
+                <div class="cards-grid principais-grid">
+                    <!-- CARD PERÍCIAS DISPONÍVEIS -->
+                    <div class="atributo-card">
+                        <div class="atributo-header">
+                            <h3>🎯 Perícias Disponíveis</h3>
                         </div>
                         
-                        <div class="caracteristica-item" data-tipo="gigantismo">
-                            <div class="caracteristica-info">
-                                <strong>Gigantismo</strong>
-                                <small>0 pts | MT +1, +1 Deslocamento</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
+                        <!-- SISTEMA DE BUSCA -->
+                        <div class="busca-container">
+                            <input type="text" id="busca-pericias" placeholder="Buscar perícias..." class="atributo-input">
+                            <select id="categoria-pericias" class="atributo-input">
+                                <option value="Todas">Todas as Categorias</option>
+                                <option value="Combate">Combate</option>
+                                <option value="DX">Destreza (DX)</option>
+                                <option value="HT">Vigor (HT)</option>
+                                <option value="PERC">Percepção (PERC)</option>
+                                <option value="IQ">Inteligência (IQ)</option>
+                            </select>
+                            <select id="subcategoria-pericias" class="atributo-input">
+                                <option value="Todas">Todas Subcategorias</option>
+                            </select>
                         </div>
-                    </div>
-                    
-                    <!-- CARACTERÍSTICAS SELECIONADAS -->
-                    <div id="caracteristicasSelecionadas" class="caracteristicas-selecionadas">
-                        <!-- Dinâmico - características adicionadas aparecem aqui -->
-                    </div>
-                </div>
-            </div>
 
-            <!-- CARD ALTURA E PESO -->
-            <div class="caracteristica-card">
-                <div class="card-header">
-                    <i class="fas fa-ruler-combined"></i>
-                    <h3>Altura e Peso</h3>
-                    <span class="status-badge" id="statusFisico">Normal</span>
-                </div>
-                <div class="card-content">
-                    
-                    <!-- CONTROLES ALTURA -->
-                    <div class="fisica-control">
-                        <label>📏 Altura (metros):</label>
-                        <div class="controle-numerico">
-                            <button class="btn-controle" onclick="ajustarAltura(-0.01)">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="number" id="altura" value="1.70" step="0.01" min="1.30" max="2.50" class="fisica-input">
-                            <button class="btn-controle" onclick="ajustarAltura(0.01)">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div id="statusAltura" class="status-info"></div>
-                    </div>
-
-                    <!-- CONTROLES PESO -->
-                    <div class="fisica-control">
-                        <label>⚖️ Peso (kg):</label>
-                        <div class="controle-numerico">
-                            <button class="btn-controle" onclick="ajustarPeso(-1)">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="number" id="peso" value="70" step="1" min="30" max="200" class="fisica-input">
-                            <button class="btn-controle" onclick="ajustarPeso(1)">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div id="statusPeso" class="status-info"></div>
-                    </div>
-
-                    <!-- INFO BASE ST -->
-                    <div class="fisica-info">
-                        <div class="info-row">
-                            <span>ST Base:</span>
-                            <strong id="stBase">10</strong>
-                        </div>
-                        <div class="info-row">
-                            <span>Altura Média:</span>
-                            <span id="alturaMedia">1.70m</span>
-                        </div>
-                        <div class="info-row">
-                            <span>Peso Médio:</span>
-                            <span id="pesoMedio">70kg</span>
-                        </div>
-                        <div class="info-row">
-                            <span>Modificador Característica:</span>
-                            <span id="modificadorPeso">1.0x</span>
+                        <!-- LISTA DE PERÍCIAS DISPONÍVEIS -->
+                        <div class="lista-container" id="lista-pericias">
+                            <div class="lista-vazia">Carregando perícias...</div>
                         </div>
                     </div>
 
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-</div>
-<!-- ABA VANTAGENS - VERSÃO COMPLETA -->
-<div id="vantagens" class="tab-content">
-    <div class="atributos-container">
-        <!-- CARD DE RESUMO DE PONTOS -->
-        <div class="pontos-section">
-            <div class="ponto-card">
-                <h3>Vantagens</h3>
-                <div class="ponto-valor" id="total-vantagens">+0</div>
-            </div>
-            <div class="ponto-card gastos">
-                <h3>Desvantagens</h3>
-                <div class="ponto-valor" id="total-desvantagens">-0</div>
-            </div>
-            <div class="ponto-card gastos">
-                <h3>Peculiaridades</h3>
-                <div class="ponto-valor" id="total-peculiaridades">-0</div>
-            </div>
-            <div class="ponto-card saldo">
-                <h3>Saldo Total</h3>
-                <div class="ponto-valor" id="saldo-total">0</div>
-            </div>
-        </div>
-
-        <!-- SEÇÃO VANTAGENS -->
-        <h2 class="secao-titulo">Vantagens</h2>
-        <div class="cards-grid principais-grid">
-            <!-- CARD VANTAGENS DISPONÍVEIS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>🎯 Vantagens Disponíveis</h3>
-                </div>
-                
-                <!-- SISTEMA DE BUSCA -->
-                <div class="busca-container">
-                    <input type="text" id="busca-vantagens" placeholder="Buscar vantagens..." class="atributo-input">
-                    <select id="categoria-vantagens" class="atributo-input">
-                        <option value="">Todas as Categorias</option>
-                        <option value="mental">Mental/Sobrenatural</option>
-                        <option value="fisica">Física</option>
-                        <option value="supers">Supers</option>
-                        <option value="social">Social</option>
-                    </select>
-                </div>
-
-                <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
-                <div class="lista-container" id="lista-vantagens">
-                    <!-- As vantagens serão carregadas via JavaScript -->
-                </div>
-            </div>
-
-            <!-- CARD VANTAGENS ADQUIRIDAS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>✅ Vantagens Adquiridas</h3>
-                    <div class="custo-pontos" id="total-vantagens-adquiridas">0 pts</div>
-                </div>
-                
-                <div class="lista-container" id="vantagens-adquiridas">
-                    <div class="lista-vazia">Nenhuma vantagem adquirida</div>
+                    <!-- CARD PERÍCIAS ADQUIRIDAS -->
+                    <div class="atributo-card">
+                        <div class="atributo-header">
+                            <h3>✅ Perícias Adquiridas</h3>
+                            <div class="custo-pontos" id="total-pericias-adquiridas">0 pts</div>
+                        </div>
+                        
+                        <div class="lista-container" id="pericias-adquiridas">
+                            <div class="lista-vazia">Nenhuma perícia adquirida</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- SEÇÃO DESVANTAGENS -->
-        <h2 class="secao-titulo">Desvantagens</h2>
-        <div class="cards-grid principais-grid">
-            <!-- CARD DESVANTAGENS DISPONÍVEIS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>⚠️ Desvantagens Disponíveis</h3>
+        <!-- MODAL PARA VANTAGENS/DESVANTAGENS -->
+        <div id="modal-vantagem" class="modal">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <div class="modal-header">
+                    <h3 id="modal-titulo">Selecionar Item</h3>
                 </div>
-                
-                <!-- SISTEMA DE BUSCA -->
-                <div class="busca-container">
-                    <input type="text" id="busca-desvantagens" placeholder="Buscar desvantagens..." class="atributo-input">
-                    <select id="categoria-desvantagens" class="atributo-input">
-                        <option value="">Todas as Categorias</option>
-                        <option value="mental">Mental/Sobrenatural</option>
-                        <option value="fisica">Física</option>
-                        <option value="supers">Supers</option>
-                        <option value="social">Social</option>
-                    </select>
+                <div id="modal-corpo">
+                    <!-- Conteúdo dinâmico será inserido aqui -->
                 </div>
-
-                <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
-                <div class="lista-container" id="lista-desvantagens">
-                    <!-- As desvantagens serão carregadas via JavaScript -->
-                </div>
-            </div>
-
-            <!-- CARD DESVANTAGENS ADQUIRIDAS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>❌ Desvantagens Adquiridas</h3>
-                    <div class="custo-pontos" id="total-desvantagens-adquiridas">0 pts</div>
-                </div>
-                
-                <div class="lista-container" id="desvantagens-adquiridas">
-                    <div class="lista-vazia">Nenhuma desvantagem adquirida</div>
+                <div class="modal-actions">
+                    <button class="btn btn-cancelar">Cancelar</button>
+                    <button class="btn btn-confirmar" disabled>Confirmar</button>
                 </div>
             </div>
         </div>
 
-        <!-- SEÇÃO PECULIARIDADES -->
-        <h2 class="secao-titulo">Peculiaridades</h2>
-        <div class="cards-grid secundarios-grid">
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>🏷️ Peculiaridades</h3>
-                    <div class="custo-pontos" id="contador-peculiaridades">0/5</div>
+        <!-- MODAL PARA PERÍCIAS -->
+        <div id="modal-pericia" class="modal">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <div class="modal-header">
+                    <h3 id="modal-titulo-pericia">Selecionar Perícia</h3>
                 </div>
-                
-                <!-- FORMULÁRIO PARA ADICIONAR -->
-                <div class="peculiaridade-form">
-                    <input type="text" id="nova-peculiaridade" placeholder="Digite uma peculiaridade (max 30 caracteres)" 
-                           maxlength="30" class="atributo-input">
-                    <div class="contador-chars"><span id="contador-chars">0</span>/30</div>
-                    <button id="btn-adicionar-peculiaridade" class="btn-controle" disabled>+</button>
+                <div id="modal-corpo-pericia">
+                    <!-- Conteúdo dinâmico será inserido aqui -->
                 </div>
-
-                <!-- LISTA DE PECULIARIDADES -->
-                <div class="lista-container" id="lista-peculiaridades">
-                    <div class="lista-vazia">Nenhuma peculiaridade adicionada</div>
+                <div class="modal-actions">
+                    <button class="btn btn-cancelar">Cancelar</button>
+                    <button class="btn btn-confirmar" disabled>Confirmar</button>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- MODAL PARA VANTAGENS/DESVANTAGENS -->
-<div id="modal-vantagem" class="modal">
-    <div class="modal-content">
-        <span class="modal-close">&times;</span>
-        <div class="modal-header">
-            <h3 id="modal-titulo">Selecionar Item</h3>
-        </div>
-        <div id="modal-corpo">
-            <!-- Conteúdo dinâmico será inserido aqui -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-cancelar">Cancelar</button>
-            <button class="btn btn-confirmar" disabled>Confirmar</button>
-        </div>
-    </div>
-</div>
-        
-<!-- ABA PERÍCIAS - VERSÃO COMPLETA -->
-<div id="pericias" class="tab-content">
-    <div class="atributos-container">
-        <!-- CARD DE RESUMO DE PONTOS -->
-        <div class="pontos-section">
-            <div class="ponto-card">
-                <h3>Perícias</h3>
-                <div class="ponto-valor" id="total-pericias">+0</div>
-            </div>
-            <div class="ponto-card gastos">
-                <h3>Pontos Gastos</h3>
-                <div class="ponto-valor" id="total-pericias-adquiridas">0 pts</div>
-            </div>
-            <div class="ponto-card saldo">
-                <h3>Saldo Disponível</h3>
-                <div class="ponto-valor" id="saldo-total-pericias">150</div>
-            </div>
-        </div>
-
-        <!-- SEÇÃO PERÍCIAS -->
-        <h2 class="secao-titulo">Perícias</h2>
-        <div class="cards-grid principais-grid">
-            <!-- CARD PERÍCIAS DISPONÍVEIS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>🎯 Perícias Disponíveis</h3>
-                </div>
-                
-                <!-- SISTEMA DE BUSCA -->
-                <div class="busca-container">
-                    <input type="text" id="busca-pericias" placeholder="Buscar perícias..." class="atributo-input">
-                    <select id="categoria-pericias" class="atributo-input">
-                        <option value="Todas">Todas as Categorias</option>
-                        <option value="Combate">Combate</option>
-                        <option value="DX">Destreza (DX)</option>
-                        <option value="HT">Vigor (HT)</option>
-                        <option value="PERC">Percepção (PERC)</option>
-                        <option value="IQ">Inteligência (IQ)</option>
-                    </select>
-                    <select id="subcategoria-pericias" class="atributo-input">
-                        <option value="Todas">Todas Subcategorias</option>
-                    </select>
-                </div>
-
-                <!-- LISTA DE PERÍCIAS DISPONÍVEIS -->
-                <div class="lista-container" id="lista-pericias">
-                    <div class="lista-vazia">Carregando perícias...</div>
-                </div>
-            </div>
-
-            <!-- CARD PERÍCIAS ADQUIRIDAS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>✅ Perícias Adquiridas</h3>
-                    <div class="custo-pontos" id="total-pericias-adquiridas">0 pts</div>
-                </div>
-                
-                <div class="lista-container" id="pericias-adquiridas">
-                    <div class="lista-vazia">Nenhuma perícia adquirida</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL PARA PERÍCIAS -->
-<div id="modal-pericia" class="modal">
-    <div class="modal-content">
-        <span class="modal-close">&times;</span>
-        <div class="modal-header">
-            <h3 id="modal-titulo-pericia">Selecionar Perícia</h3>
-        </div>
-        <div id="modal-corpo-pericia">
-            <!-- Conteúdo dinâmico será inserido aqui -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-cancelar">Cancelar</button>
-            <button class="btn btn-confirmar" disabled>Confirmar</button>
-        </div>
-    </div>
-</div>
 
         <!-- ABA TÉCNICAS -->
         <div id="tecnicas" class="tab-content">
@@ -1104,7 +1093,7 @@
         carregarPersonagemDaURL();
     });
 
-    // Navegação entre abas - CORRIGIDA
+    // Navegação entre abas
     function inicializarNavegacaoAbas() {
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1119,9 +1108,6 @@
                 
                 if (tabContent) {
                     tabContent.classList.add('active');
-                    
-                    // Carrega o conteúdo da aba se necessário
-                    carregarConteudoAba(tabId);
                     
                     // Inicializa sistemas específicos de cada aba
                     inicializarSistemasAba(tabId);
@@ -1145,19 +1131,6 @@
                 // Dispara evento para sistemas de características
                 const eventoCaracteristicas = new CustomEvent('caracteristicasCarregadas');
                 document.dispatchEvent(eventoCaracteristicas);
-                
-                // Inicializa sistemas de características se existirem
-                setTimeout(() => {
-                    if (window.sistemaAparencia && typeof window.sistemaAparencia.inicializar === 'function') {
-                        window.sistemaAparencia.inicializar();
-                    }
-                    if (window.sistemaRiqueza && typeof window.sistemaRiqueza.inicializar === 'function') {
-                        window.sistemaRiqueza.inicializar();
-                    }
-                    if (window.sistemaIdiomas && typeof window.sistemaIdiomas.inicializar === 'function') {
-                        window.sistemaIdiomas.inicializar();
-                    }
-                }, 200);
                 break;
                 
             case 'vantagens':
@@ -1166,10 +1139,11 @@
                 
             case 'pericias':
                 // Sistema de perícias será inicializado aqui
-                break;
-                
-            case 'equipamento':
-                // Sistema de equipamento será inicializado aqui
+                if (typeof inicializarSistemaPericias === 'function') {
+                    setTimeout(() => {
+                        inicializarSistemaPericias();
+                    }, 100);
+                }
                 break;
         }
     }
@@ -1201,45 +1175,7 @@
         
         if (personagemId) {
             carregarPersonagemExistente(personagemId);
-        } else {
-            // Novo personagem - carrega dashboard
-            carregarConteudoAba('dashboard');
         }
-    }
-
-    // Carregar conteúdo da aba - CORRIGIDA (NÃO SUBSTITUI CONTEÚDO EXISTENTE)
-    function carregarConteudoAba(abaId) {
-        const abaContent = document.getElementById(abaId);
-        
-        if (!abaContent) return;
-        
-        // Se já carregou, não carrega novamente
-        if (abaContent.getAttribute('data-loaded') === 'true') {
-            return;
-        }
-
-        // Apenas para abas que realmente precisam de carregamento dinâmico
-        // NÃO substitui o conteúdo de abas que já têm HTML
-        const abasComConteudoEstatico = ['atributos', 'caracteristicas', 'vantagens', 'pericias', 'equipamento'];
-        
-        if (abasComConteudoEstatico.includes(abaId)) {
-            // Estas abas já têm seu próprio HTML, apenas marca como carregada
-            abaContent.setAttribute('data-loaded', 'true');
-            return;
-        }
-
-        // Apenas para abas que realmente não têm conteúdo
-        setTimeout(() => {
-            if (abaContent.innerHTML.trim() === '' || abaContent.querySelector('.loading')) {
-                abaContent.innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <h2>Conteúdo da aba ${abaId} em desenvolvimento</h2>
-                        <p>Esta funcionalidade será implementada em breve.</p>
-                    </div>
-                `;
-                abaContent.setAttribute('data-loaded', 'true');
-            }
-        }, 500);
     }
 
     // Salvar personagem
@@ -1267,19 +1203,6 @@
                 dadosCompletos.inteligencia = dadosAtributos.IQ;
                 dadosCompletos.saude = dadosAtributos.HT;
                 dadosCompletos.pontos_gastos = dadosAtributos.PontosGastos;
-            }
-
-            // Coleta dados de características se os sistemas existirem
-            if (window.sistemaAparencia && typeof window.sistemaAparencia.exportarDados === 'function') {
-                dadosCompletos.aparencia = window.sistemaAparencia.exportarDados();
-            }
-            
-            if (window.sistemaRiqueza && typeof window.sistemaRiqueza.exportarDados === 'function') {
-                dadosCompletos.riqueza = window.sistemaRiqueza.exportarDados();
-            }
-            
-            if (window.sistemaIdiomas && typeof window.sistemaIdiomas.exportarDados === 'function') {
-                dadosCompletos.idiomas = window.sistemaIdiomas.exportarDados();
             }
 
             let resultado;
@@ -1341,19 +1264,6 @@
                 });
             }
             
-            // Carrega dados de características se existirem
-            if (personagem.aparencia && window.sistemaAparencia && typeof window.sistemaAparencia.carregarDados === 'function') {
-                window.sistemaAparencia.carregarDados({ aparencia: personagem.aparencia });
-            }
-            
-            if (personagem.riqueza && window.sistemaRiqueza && typeof window.sistemaRiqueza.carregarDados === 'function') {
-                window.sistemaRiqueza.carregarDados({ riqueza: personagem.riqueza });
-            }
-            
-            if (personagem.idiomas && window.sistemaIdiomas && typeof window.sistemaIdiomas.carregarDados === 'function') {
-                window.sistemaIdiomas.carregarDados(personagem.idiomas);
-            }
-            
         } catch (error) {
             console.error('Erro ao carregar personagem:', error);
             alert('Erro ao carregar personagem: ' + error.message);
@@ -1398,25 +1308,22 @@
             window.location.href = 'personagens.html';
         }
     }
+    </script>
 
-    // Função auxiliar para verificar se elemento existe
-    function elementoExiste(seletor) {
-        return document.querySelector(seletor) !== null;
-    }
-</script>
-<script src="atributos.js"></script>
-<script src="caracteristicas-fisicas.js"></script>
-<script src="caracteristicas-altura-peso.js"></script>
-<script src="caracteristicas-aparencia.js"></script>
-<script src="caracteristicas-riqueza.js"></script>
-<script src="caracteristicas-idiomas.js"></script>
+    <script src="atributos.js"></script>
+    <script src="caracteristicas-fisicas.js"></script>
+    <script src="caracteristicas-altura-peso.js"></script>
+    <script src="caracteristicas-aparencia.js"></script>
+    <script src="caracteristicas-riqueza.js"></script>
+    <script src="caracteristicas-idiomas.js"></script>
 
-<!-- SISTEMA DE PERÍCIAS -->
-<script src="pericias-catalogo.js"></script>
-<script src="pericias-sistema.js"></script>
+    <!-- SISTEMA DE PERÍCIAS -->
+    <script src="pericias-catalogo.js"></script>
+    <script src="pericias-sistema.js"></script>
 
-<!-- SISTEMA DE VANTAGENS -->
-<script src="vantagens-catalogo.js"></script>
-<script src="vantagens.js"></script>
+    <!-- SISTEMA DE VANTAGENS -->
+    <script src="vantagens-catalogo.js"></script>
+    <script src="vantagens.js"></script>
+
 </body>
 </html>
