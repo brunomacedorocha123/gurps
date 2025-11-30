@@ -1,4 +1,4 @@
-// ===== SISTEMA DE PERÍCIAS - VERSÃO DEFINITIVA CORRIGIDA =====
+// ===== SISTEMA DE PERÍCIAS - VERSÃO DEFINITIVA =====
 
 let estadoPericias = {
     adquiridas: [],
@@ -8,10 +8,7 @@ let estadoPericias = {
 // CARREGAR PERÍCIAS NA LISTA
 function carregarPericias() {
     const lista = document.getElementById('lista-pericias');
-    if (!lista) {
-        console.log('Lista de perícias não encontrada');
-        return;
-    }
+    if (!lista) return;
 
     if (!window.catalogoPericias || Object.keys(window.catalogoPericias).length === 0) {
         lista.innerHTML = '<div class="lista-vazia">Carregando catálogo de perícias...</div>';
@@ -104,32 +101,24 @@ function atualizarFiltrosPericias() {
     carregarPericiasFiltradas(termo, categoria, subcategoria);
 }
 
-// CALCULAR CUSTO DA PERÍCIA - LÓGICA CORRETA GURPS
+// CALCULAR CUSTO DA PERÍCIA - TABELA DO SEU PROJETO ANTERIOR
 function calcularCustoPericia(nivel, dificuldade) {
-    const config = {
-        "Fácil": { base: 1, redutorMax: 0 },
-        "Média": { base: 2, redutorMax: 1 },
-        "Difícil": { base: 4, redutorMax: 2 },
-        "Muito Difícil": { base: 8, redutorMax: 3 }
+    const tabelaBonus = {
+        'Fácil': { 1: 0, 2: 1, 4: 2, 8: 3, 12: 4, 16: 5, 20: 6, 24: 7, 28: 8, 32: 9, 36: 10, 40: 11 },
+        'Média': { 1: -1, 2: 0, 4: 1, 8: 2, 12: 3, 16: 4, 20: 5, 24: 6, 28: 7, 32: 8, 36: 9, 40: 10 },
+        'Difícil': { 1: -2, 2: -1, 4: 0, 8: 1, 12: 2, 16: 3, 20: 4, 24: 5, 28: 6, 32: 7, 36: 8, 40: 9 },
+        'Muito Difícil': { 1: -3, 2: -2, 4: -1, 8: 0, 12: 1, 16: 2, 20: 3, 24: 4, 28: 5, 32: 6, 36: 7, 40: 8 }
     };
     
-    const conf = config[dificuldade] || config["Média"];
+    const bonusTable = tabelaBonus[dificuldade] || tabelaBonus['Média'];
     
-    // Se for redutor (nível negativo)
-    if (nivel < 0) {
-        const redutor = Math.abs(nivel);
-        if (redutor > conf.redutorMax) return 0;
-        
-        // Progressão de custos para redutores
-        if (conf.base === 1) return 1; // Fácil sempre 1 ponto
-        return Math.pow(2, redutor - 1); // 1, 2, 4 para redutores
+    for (const [pontos, bonus] of Object.entries(bonusTable)) {
+        if (bonus === nivel) {
+            return parseInt(pontos);
+        }
     }
     
-    // Se for nível base ou positivo
-    if (nivel === 0) return conf.base;
-    
-    // Níveis positivos: base + 4 por nível adicional
-    return conf.base + (nivel * 4);
+    return 0;
 }
 
 // OBTER INFORMAÇÕES DE REDUTORES
@@ -150,10 +139,7 @@ function abrirModalPericia(pericia) {
     const corpo = document.getElementById('modal-corpo-pericia');
     const btnConfirmar = modal?.querySelector('.btn-confirmar');
     
-    if (!modal || !titulo || !corpo || !btnConfirmar) {
-        console.error('Elementos do modal não encontrados');
-        return;
-    }
+    if (!modal || !titulo || !corpo || !btnConfirmar) return;
     
     const atributos = obterAtributosAtuais();
     const valorAtributo = atributos[pericia.atributo] || 10;
@@ -202,7 +188,7 @@ function abrirModalPericia(pericia) {
         const nhAtual = valorAtributo + nivel;
         
         nhFinal.textContent = nhAtual;
-        nivelRelativo.textContent = nivel >= 0 ? `+${nivel}` : nivel;
+        nivelRelativo.textContent = nivel >= 0 ? `+${nivel}` : `${nivel}`;
         custo.textContent = custoAtual;
         
         btnConfirmar.disabled = custoAtual <= 0;
@@ -426,5 +412,3 @@ window.inicializarSistemaPericias = inicializarSistemaPericias;
 window.removerPericia = removerPericia;
 window.carregarPericias = carregarPericias;
 window.atualizarFiltrosPericias = atualizarFiltrosPericias;
-
-console.log('✅ Sistema de perícias carregado e pronto!');
