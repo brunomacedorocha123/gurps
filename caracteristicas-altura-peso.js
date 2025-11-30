@@ -1,4 +1,4 @@
-// caracteristicas-altura-peso.js - VERSÃO COMPLETA COM RECONHECIMENTO DE CARACTERÍSTICAS
+// caracteristicas-altura-peso.js - VERSÃO COMPLETA E FUNCIONAL
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
@@ -6,7 +6,6 @@ class SistemaAlturaPeso {
         this.stBase = 10;
         this.inicializado = false;
 
-        // TABELAS OFICIAIS DO GURPS
         this.alturaPorST = {
             6: { min: 1.30, max: 1.55 },
             7: { min: 1.38, max: 1.63 },
@@ -32,9 +31,6 @@ class SistemaAlturaPeso {
         };
     }
 
-    // ==== MÉTODOS NOVOS PARA RECONHECER CARACTERÍSTICAS FÍSICAS ====
-
-    // 1. DETECTAR E APLICAR REGRAS DAS CARACTERÍSTICAS
     aplicarRegrasCaracteristicas() {
         if (!window.sistemaCaracteristicasFisicas) {
             return { multiplicadorPeso: 1.0, alturaLimitada: null, caracteristicaAtiva: null };
@@ -45,32 +41,30 @@ class SistemaAlturaPeso {
         let alturaLimitada = null;
         let caracteristicaAtiva = null;
 
-        // Verificar CADA característica e aplicar SUA regra específica
         caracteristicas.forEach(carac => {
             switch(carac.tipo) {
                 case 'magro':
-                    multiplicadorPeso = 0.67; // 2/3 do peso
+                    multiplicadorPeso = 0.67;
                     caracteristicaAtiva = carac;
                     break;
                 case 'acima-peso':
-                    multiplicadorPeso = 1.3; // 130% do peso
+                    multiplicadorPeso = 1.3;
                     caracteristicaAtiva = carac;
                     break;
                 case 'gordo':
-                    multiplicadorPeso = 1.5; // 150% do peso
+                    multiplicadorPeso = 1.5;
                     caracteristicaAtiva = carac;
                     break;
                 case 'muito-gordo':
-                    multiplicadorPeso = 2.0; // Peso dobrado
+                    multiplicadorPeso = 2.0;
                     caracteristicaAtiva = carac;
                     break;
                 case 'nanismo':
-                    alturaLimitada = 1.32; // Altura máxima para nanismo
+                    alturaLimitada = 1.32;
                     caracteristicaAtiva = carac;
                     break;
                 case 'gigantismo':
                     caracteristicaAtiva = carac;
-                    // Gigantismo não muda multiplicador, mas afeta altura
                     break;
             }
         });
@@ -78,7 +72,6 @@ class SistemaAlturaPeso {
         return { multiplicadorPeso, alturaLimitada, caracteristicaAtiva };
     }
 
-    // 2. APLICAR LIMITES DE ALTURA BASEADO NAS CARACTERÍSTICAS
     aplicarLimitesAltura() {
         const regras = this.aplicarRegrasCaracteristicas();
         
@@ -86,13 +79,12 @@ class SistemaAlturaPeso {
             this.altura = regras.alturaLimitada;
             const inputAltura = document.getElementById('altura');
             if (inputAltura) inputAltura.value = this.altura.toFixed(2);
-            return true; // Indica que houve alteração
+            return true;
         }
         
         return false;
     }
 
-    // 3. OBTER FAIXA DE PESO AJUSTADA PELAS CARACTERÍSTICAS
     obterFaixaPesoAjustada(st) {
         const faixaOriginal = this.obterFaixaPeso(st);
         const regras = this.aplicarRegrasCaracteristicas();
@@ -106,7 +98,6 @@ class SistemaAlturaPeso {
         };
     }
 
-    // ==== MÉTODO PRINCIPAL ATUALIZADO ====
     verificarConformidadeST() {
         const faixaAltura = this.obterFaixaAltura(this.stBase);
         const faixaPesoAjustada = this.obterFaixaPesoAjustada(this.stBase);
@@ -115,7 +106,6 @@ class SistemaAlturaPeso {
         const alturaValida = this.altura >= faixaAltura.min && this.altura <= faixaAltura.max;
         const pesoValido = this.peso >= faixaPesoAjustada.min && this.peso <= faixaPesoAjustada.max;
 
-        // Mensagens específicas para cada característica
         let mensagemAltura, mensagemPeso;
 
         if (regras.alturaLimitada) {
@@ -156,7 +146,6 @@ class SistemaAlturaPeso {
         };
     }
 
-    // ==== MÉTODOS EXISTENTES (MANTIDOS) ====
     obterFaixaAltura(st) {
         if (st >= 6 && st <= 14) {
             return this.alturaPorST[st];
@@ -226,30 +215,24 @@ class SistemaAlturaPeso {
         return 10;
     }
 
-    // CONTINUA NO PRÓXIMO COMENTÁRIO...
-        // ==== MÉTODOS DE CONTROLE E DISPLAY ====
     inicializar() {
         if (this.inicializado) return;
         
         this.carregarDadosSalvos();
         this.configurarEventos();
         this.forcarAtualizacaoST();
-        
-        // ✅ APLICAR REGRAS DE CARACTERÍSTICAS AO INICIAR
         this.aplicarLimitesAltura();
         this.atualizarDisplay();
         this.inicializado = true;
     }
 
     configurarEventos() {
-        // Eventos existentes
         document.addEventListener('atributosAlterados', (e) => {
             if (e.detail && e.detail.ST !== undefined) {
                 this.atualizarST(e.detail.ST);
             }
         });
 
-        // ✅ NOVO EVENTO: Escutar mudanças nas características físicas
         document.addEventListener('caracteristicasFisicasAlteradas', () => {
             this.aplicarLimitesAltura();
             this.atualizarDisplay();
@@ -281,7 +264,6 @@ class SistemaAlturaPeso {
             inputAltura.addEventListener('change', () => {
                 let novaAltura = parseFloat(inputAltura.value);
                 
-                // ✅ VERIFICAR NANISMO AO MUDAR ALTURA
                 const regras = this.aplicarRegrasCaracteristicas();
                 if (regras.alturaLimitada && novaAltura > regras.alturaLimitada) {
                     novaAltura = regras.alturaLimitada;
@@ -299,7 +281,6 @@ class SistemaAlturaPeso {
         }
     }
 
-    // ==== MÉTODOS DE ATUALIZAÇÃO DE DISPLAY ====
     atualizarDisplay() {
         const conformidade = this.verificarConformidadeST();
         const regras = this.aplicarRegrasCaracteristicas();
@@ -350,7 +331,6 @@ class SistemaAlturaPeso {
     atualizarInfoFisica(conformidade, regras) {
         this.atualizarElemento('stBase', this.stBase);
         
-        // Altura
         if (regras.alturaLimitada) {
             this.atualizarElemento('alturaFaixa', `1.32m (Nanismo)`);
         } else {
@@ -358,7 +338,6 @@ class SistemaAlturaPeso {
                 `${conformidade.faixaAltura.min}m - ${conformidade.faixaAltura.max}m`);
         }
         
-        // Peso
         if (regras.caracteristicaAtiva && regras.multiplicadorPeso !== 1.0) {
             const nome = regras.caracteristicaAtiva.nome;
             this.atualizarElemento('pesoFaixa', 
@@ -368,7 +347,6 @@ class SistemaAlturaPeso {
                 `${conformidade.faixaPesoOriginal.min}kg - ${conformidade.faixaPesoOriginal.max}kg`);
         }
         
-        // Status
         if (regras.alturaLimitada) {
             this.atualizarElemento('modificadorPeso', 'Nanismo Ativo');
         } else if (regras.caracteristicaAtiva && regras.multiplicadorPeso !== 1.0) {
@@ -399,7 +377,6 @@ class SistemaAlturaPeso {
         }
     }
 
-    // ==== MÉTODOS EXISTENTES (MANTIDOS) ====
     atualizarElemento(id, valor) {
         const elemento = document.getElementById(id);
         if (elemento) elemento.textContent = valor;
@@ -433,7 +410,6 @@ class SistemaAlturaPeso {
     ajustarAltura(variacao) {
         let novaAltura = this.altura + variacao;
         
-        // ✅ VERIFICAR NANISMO
         const regras = this.aplicarRegrasCaracteristicas();
         if (regras.alturaLimitada && novaAltura > regras.alturaLimitada) {
             novaAltura = regras.alturaLimitada;
@@ -502,7 +478,6 @@ class SistemaAlturaPeso {
     }
 }
 
-// ==== INICIALIZAÇÃO GLOBAL (MANTIDA) ====
 let sistemaAlturaPeso;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -535,7 +510,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// ==== EXPORTAÇÃO PARA USO GLOBAL (MANTIDA) ====
 window.SistemaAlturaPeso = SistemaAlturaPeso;
 window.sistemaAlturaPeso = sistemaAlturaPeso;
 
