@@ -1,573 +1,394 @@
-// vantagens.js - SISTEMA COMPLETO DE VANTAGENS E DESVANTAGENS
+// vantagens.js - SÓ A LÓGICA DO CARALHO
 
-// DADOS DAS VANTAGENS
-const vantagensData = [
-    {
-        id: "abençoado",
-        nome: "Abençoado",
-        custo: 10,
-        categoria: "mental",
-        descricao: "O personagem está sintonizado com um deus, senhor demoníaco, grande espírito, poder cósmico, etc. Recebe visões ou presságios sobre eventos futuros após comungar por uma hora.",
-        tipo: "vantagem"
-    },
-    {
-        id: "muito_abençoado",
-        nome: "Muito Abençoado", 
-        custo: 20,
-        categoria: "mental",
-        descricao: "Funciona como Abençoado, mas com bônus de +5 no teste de IQ e bônus de reação de +2 dos seguidores.",
-        tipo: "vantagem"
-    },
-    {
-        id: "feitos_heroicos",
-        nome: "Feitos Heroicos",
-        custo: 10,
-        categoria: "mental", 
-        descricao: "Uma vez por sessão, pode adicionar 1 dado à ST, DX ou HT por 3d segundos.",
-        tipo: "vantagem"
-    },
-    {
-        id: "ambidestria",
-        nome: "Ambidestria",
-        custo: 5,
-        categoria: "fisica",
-        descricao: "Capaz de lutar e manusear igualmente bem com qualquer uma das mãos. Não sofre penalidade de -4 por usar a mão inábil.",
-        tipo: "vantagem"
-    },
-    {
-        id: "aptidão_mágica",
-        nome: "Aptidão Mágica",
-        custo: "5+10/nível",
-        categoria: "mental",
-        descricao: "Nível 0: Detecta magia (5 pts). Níveis 1+: +1 em IQ para aprender magias, reduz tempo de aprendizado (10 pts/nível).",
-        tipo: "vantagem"
+class SistemaVantagens {
+    constructor() {
+        this.vantagensAdquiridas = [];
+        this.desvantagensAdquiridas = [];
+        this.peculiaridades = [];
+        
+        // Vai pegar os dados dos catálogos depois
+        this.catalogoVantagens = window.VANTAGENS_CATALOGO || {};
+        this.catalogoDesvantagens = window.DESVANTAGENS_CATALOGO || {};
     }
-];
 
-// DADOS DAS DESVANTAGENS  
-const desvantagensData = [
-    {
-        id: "alcoolismo",
-        nome: "Alcoolismo",
-        custo: -15,
-        categoria: "mental",
-        descricao: "Vício em álcool. Teste de Vontade para resistir quando vê álcool. Se falhar: bebedeira de 2d horas + ressaca.",
-        tipo: "desvantagem",
-        variante: {
-            ilegal: -20
-        }
-    },
-    {
-        id: "altruísmo",
-        nome: "Altruísmo", 
-        custo: -5,
-        categoria: "mental",
-        descricao: "Coloca outros na frente de si mesmo. Teste de Autocontrole para priorizar próprias necessidades.",
-        tipo: "desvantagem"
-    },
-    {
-        id: "barulhento",
-        nome: "Barulhento",
-        custo: -2,
-        categoria: "fisica",
-        descricao: "Faz barulho constante. Cada nível: +2 para outros ouvirem, -2 em Furtividade. Máximo 5 níveis.",
-        tipo: "desvantagem",
-        porNivel: true
+    // INICIALIZAR SISTEMA
+    inicializar() {
+        this.configurarEventListeners();
+        this.carregarDados();
+        this.atualizarTudo();
+        console.log('Sistema de Vantagens Inicializado!');
     }
-];
 
-// VARIÁVEIS GLOBAIS
-let vantagensAdquiridas = [];
-let desvantagensAdquiridas = [];
-let peculiaridades = [];
-
-// FUNÇÃO PRINCIPAL - INICIALIZAÇÃO
-function inicializarVantagens() {
-    carregarVantagens();
-    carregarDesvantagens();
-    configurarEventListeners();
-    atualizarResumoPontos();
-}
-
-// CARREGAR LISTA DE VANTAGENS
-function carregarVantagens() {
-    const lista = document.getElementById('lista-vantagens');
-    
-    if (vantagensData.length === 0) {
-        lista.innerHTML = '<div class="lista-vazia">Nenhuma vantagem disponível</div>';
-        return;
+    // CONFIGURAR EVENTOS
+    configurarEventListeners() {
+        // Busca vantagens
+        document.getElementById('busca-vantagens')?.addEventListener('input', () => this.filtrarVantagens());
+        document.getElementById('categoria-vantagens')?.addEventListener('change', () => this.filtrarVantagens());
+        
+        // Busca desvantagens
+        document.getElementById('busca-desvantagens')?.addEventListener('input', () => this.filtrarDesvantagens());
+        document.getElementById('categoria-desvantagens')?.addEventListener('change', () => this.filtrarDesvantagens());
+        
+        // Peculiaridades
+        document.getElementById('nova-peculiaridade')?.addEventListener('input', () => this.atualizarContadorPeculiaridade());
+        document.getElementById('btn-adicionar-peculiaridade')?.addEventListener('click', () => this.adicionarPeculiaridade());
+        
+        // Cliques dinâmicos
+        document.addEventListener('click', (e) => this.manipularClique(e));
     }
-    
-    lista.innerHTML = '';
-    
-    vantagensData.forEach(vantagem => {
-        const item = criarItemLista(vantagem, 'vantagem');
-        lista.appendChild(item);
-    });
-}
 
-// CARREGAR LISTA DE DESVANTAGENS
-function carregarDesvantagens() {
-    const lista = document.getElementById('lista-desvantagens');
-    
-    if (desvantagensData.length === 0) {
-        lista.innerHTML = '<div class="lista-vazia">Nenhuma desvantagem disponível</div>';
-        return;
-    }
-    
-    lista.innerHTML = '';
-    
-    desvantagensData.forEach(desvantagem => {
-        const item = criarItemLista(desvantagem, 'desvantagem');
-        lista.appendChild(item);
-    });
-}
-
-// CRIAR ITEM DA LISTA (DISponíveis)
-function criarItemLista(item, tipo) {
-    const div = document.createElement('div');
-    div.className = 'lista-item';
-    
-    const custoTexto = typeof item.custo === 'string' ? item.custo : 
-                      item.custo > 0 ? `+${item.custo}` : item.custo;
-    
-    div.innerHTML = `
-        <div class="item-info">
-            <strong>${item.nome}</strong>
-            <div class="item-custo">${custoTexto} pts</div>
-            <div class="item-descricao">${item.descricao}</div>
-        </div>
-        <button class="btn-adicionar" data-id="${item.id}" data-tipo="${tipo}">
-            ${tipo === 'vantagem' ? '+' : '-'}
-        </button>
-    `;
-    
-    return div;
-}
-
-// CONFIGURAR EVENT LISTENERS
-function configurarEventListeners() {
-    // Busca de vantagens
-    document.getElementById('busca-vantagens').addEventListener('input', filtrarVantagens);
-    document.getElementById('categoria-vantagens').addEventListener('change', filtrarVantagens);
-    
-    // Busca de desvantagens
-    document.getElementById('busca-desvantagens').addEventListener('input', filtrarDesvantagens);
-    document.getElementById('categoria-desvantagens').addEventListener('change', filtrarDesvantagens);
-    
-    // Peculiaridades
-    document.getElementById('nova-peculiaridade').addEventListener('input', atualizarContadorPeculiaridade);
-    document.getElementById('btn-adicionar-peculiaridade').addEventListener('click', adicionarPeculiaridade);
-    
-    // Delegation para botões de adicionar/remover
-    document.addEventListener('click', function(e) {
+    // MANIPULAR CLICKS
+    manipularClique(e) {
         if (e.target.classList.contains('btn-adicionar')) {
             const id = e.target.dataset.id;
             const tipo = e.target.dataset.tipo;
-            
-            if (tipo === 'vantagem') {
-                adicionarVantagem(id);
-            } else {
-                adicionarDesvantagem(id);
-            }
+            this.adicionarItem(id, tipo);
         }
         
         if (e.target.classList.contains('btn-remover')) {
             const id = e.target.dataset.id;
             const tipo = e.target.dataset.tipo;
+            this.removerItem(id, tipo);
+        }
+    }
+
+    // FILTRAR VANTAGENS
+    filtrarVantagens() {
+        const termo = document.getElementById('busca-vantagens').value.toLowerCase();
+        const categoria = document.getElementById('categoria-vantagens').value;
+        
+        const vantagensFiltradas = Object.values(this.catalogoVantagens).filter(v => {
+            const matchTermo = v.nome.toLowerCase().includes(termo) || 
+                              (v.descricao && v.descricao.toLowerCase().includes(termo));
+            const matchCategoria = !categoria || v.categoria === categoria;
+            return matchTermo && matchCategoria;
+        });
+        
+        this.mostrarVantagens(vantagensFiltradas);
+    }
+
+    // FILTRAR DESVANTAGENS
+    filtrarDesvantagens() {
+        const termo = document.getElementById('busca-desvantagens').value.toLowerCase();
+        const categoria = document.getElementById('categoria-desvantagens').value;
+        
+        const desvantagensFiltradas = Object.values(this.catalogoDesvantagens).filter(d => {
+            const matchTermo = d.nome.toLowerCase().includes(termo) || 
+                              (d.descricao && d.descricao.toLowerCase().includes(termo));
+            const matchCategoria = !categoria || d.categoria === categoria;
+            return matchTermo && matchCategoria;
+        });
+        
+        this.mostrarDesvantagens(desvantagensFiltradas);
+    }
+
+    // MOSTRAR VANTAGENS NA LISTA
+    mostrarVantagens(vantagens) {
+        const lista = document.getElementById('lista-vantagens');
+        if (!lista) return;
+        
+        lista.innerHTML = '';
+        
+        if (vantagens.length === 0) {
+            lista.innerHTML = '<div class="lista-vazia">Nenhuma vantagem encontrada</div>';
+            return;
+        }
+        
+        vantagens.forEach(vantagem => {
+            const item = this.criarItemLista(vantagem, 'vantagem');
+            lista.appendChild(item);
+        });
+    }
+
+    // MOSTRAR DESVANTAGENS NA LISTA
+    mostrarDesvantagens(desvantagens) {
+        const lista = document.getElementById('lista-desvantagens');
+        if (!lista) return;
+        
+        lista.innerHTML = '';
+        
+        if (desvantagens.length === 0) {
+            lista.innerHTML = '<div class="lista-vazia">Nenhuma desvantagem encontrada</div>';
+            return;
+        }
+        
+        desvantagens.forEach(desvantagem => {
+            const item = this.criarItemLista(desvantagem, 'desvantagem');
+            lista.appendChild(item);
+        });
+    }
+
+    // CRIAR ITEM DA LISTA
+    criarItemLista(item, tipo) {
+        const div = document.createElement('div');
+        div.className = 'lista-item';
+        
+        const custoTexto = typeof item.custo === 'string' ? item.custo : 
+                          item.custo > 0 ? `+${item.custo}` : item.custo;
+        
+        div.innerHTML = `
+            <div class="item-info">
+                <strong>${item.nome}</strong>
+                <div class="item-custo">${custoTexto} pts</div>
+                ${item.descricao ? `<div class="item-descricao">${item.descricao}</div>` : ''}
+            </div>
+            <button class="btn-adicionar" data-id="${item.id}" data-tipo="${tipo}">
+                ${tipo === 'vantagem' ? '+' : '-'}
+            </button>
+        `;
+        
+        return div;
+    }
+
+    // ADICIONAR ITEM (vantagem/desvantagem)
+    adicionarItem(id, tipo) {
+        const catalogo = tipo === 'vantagem' ? this.catalogoVantagens : this.catalogoDesvantagens;
+        const lista = tipo === 'vantagem' ? this.vantagensAdquiridas : this.desvantagensAdquiridas;
+        
+        const item = catalogo[id];
+        if (!item || lista.find(i => i.id === id)) return;
+        
+        // Se for variável, abrir modal de configuração
+        if (item.custo === 'variavel') {
+            this.abrirModalConfiguracao(item, tipo);
+        } else {
+            // Item simples - adicionar direto
+            lista.push({...item});
+            this.atualizarTudo();
+        }
+    }
+
+    // REMOVER ITEM
+    removerItem(id, tipo) {
+        if (tipo === 'vantagem') {
+            this.vantagensAdquiridas = this.vantagensAdquiridas.filter(v => v.id !== id);
+        } else if (tipo === 'desvantagem') {
+            this.desvantagensAdquiridas = this.desvantagensAdquiridas.filter(d => d.id !== id);
+        } else if (tipo === 'peculiaridade') {
+            this.peculiaridades.splice(parseInt(id), 1);
+        }
+        
+        this.atualizarTudo();
+    }
+
+    // PECULIARIDADES
+    atualizarContadorPeculiaridade() {
+        const input = document.getElementById('nova-peculiaridade');
+        const contador = document.getElementById('contador-chars');
+        const botao = document.getElementById('btn-adicionar-peculiaridade');
+        
+        if (!input || !contador || !botao) return;
+        
+        const texto = input.value;
+        const count = texto.length;
+        
+        contador.textContent = count;
+        botao.disabled = !(count > 0 && count <= 30 && this.peculiaridades.length < 5);
+    }
+
+    adicionarPeculiaridade() {
+        const input = document.getElementById('nova-peculiaridade');
+        const texto = input.value.trim();
+        
+        if (texto.length === 0 || texto.length > 30 || this.peculiaridades.length >= 5) {
+            return;
+        }
+        
+        this.peculiaridades.push(texto);
+        input.value = '';
+        this.atualizarContadorPeculiaridade();
+        this.atualizarTudo();
+    }
+
+    // ATUALIZAR LISTAS ADQUIRIDAS
+    atualizarListasAdquiridas() {
+        this.atualizarListaVantagensAdquiridas();
+        this.atualizarListaDesvantagensAdquiridas();
+        this.atualizarListaPeculiaridades();
+    }
+
+    atualizarListaVantagensAdquiridas() {
+        const lista = document.getElementById('vantagens-adquiridas');
+        const totalElement = document.getElementById('total-vantagens-adquiridas');
+        
+        if (!lista || !totalElement) return;
+        
+        if (this.vantagensAdquiridas.length === 0) {
+            lista.innerHTML = '<div class="lista-vazia">Nenhuma vantagem adquirida</div>';
+            totalElement.textContent = '0 pts';
+            return;
+        }
+        
+        lista.innerHTML = '';
+        let totalPontos = 0;
+        
+        this.vantagensAdquiridas.forEach(vantagem => {
+            const custo = typeof vantagem.custo === 'string' ? 0 : vantagem.custo;
+            totalPontos += custo;
             
-            if (tipo === 'vantagem') {
-                removerVantagem(id);
-            } else if (tipo === 'desvantagem') {
-                removerDesvantagem(id);
-            } else if (tipo === 'peculiaridade') {
-                removerPeculiaridade(id);
+            const item = document.createElement('div');
+            item.className = 'item-adquirido';
+            item.innerHTML = `
+                <div class="item-info">
+                    <strong>${vantagem.nome}</strong>
+                    <div class="item-custo">+${custo} pts</div>
+                </div>
+                <button class="btn-remover" data-id="${vantagem.id}" data-tipo="vantagem">×</button>
+            `;
+            lista.appendChild(item);
+        });
+        
+        totalElement.textContent = `${totalPontos} pts`;
+    }
+
+    atualizarListaDesvantagensAdquiridas() {
+        const lista = document.getElementById('desvantagens-adquiridas');
+        const totalElement = document.getElementById('total-desvantagens-adquiridas');
+        
+        if (!lista || !totalElement) return;
+        
+        if (this.desvantagensAdquiridas.length === 0) {
+            lista.innerHTML = '<div class="lista-vazia">Nenhuma desvantagem adquirida</div>';
+            totalElement.textContent = '0 pts';
+            return;
+        }
+        
+        lista.innerHTML = '';
+        let totalPontos = 0;
+        
+        this.desvantagensAdquiridas.forEach(desvantagem => {
+            const custo = typeof desvantagem.custo === 'string' ? 0 : Math.abs(desvantagem.custo);
+            totalPontos += custo;
+            
+            const item = document.createElement('div');
+            item.className = 'item-adquirido';
+            item.innerHTML = `
+                <div class="item-info">
+                    <strong>${desvantagem.nome}</strong>
+                    <div class="item-custo">-${custo} pts</div>
+                </div>
+                <button class="btn-remover" data-id="${desvantagem.id}" data-tipo="desvantagem">×</button>
+            `;
+            lista.appendChild(item);
+        });
+        
+        totalElement.textContent = `${totalPontos} pts`;
+    }
+
+    atualizarListaPeculiaridades() {
+        const lista = document.getElementById('lista-peculiaridades');
+        const contador = document.getElementById('contador-peculiaridades');
+        
+        if (!lista || !contador) return;
+        
+        contador.textContent = `${this.peculiaridades.length}/5`;
+        
+        if (this.peculiaridades.length === 0) {
+            lista.innerHTML = '<div class="lista-vazia">Nenhuma peculiaridade adicionada</div>';
+            return;
+        }
+        
+        lista.innerHTML = '';
+        
+        this.peculiaridades.forEach((peculiaridade, index) => {
+            const item = document.createElement('div');
+            item.className = 'item-adquirido';
+            item.innerHTML = `
+                <div class="item-info">
+                    <strong>${peculiaridade}</strong>
+                    <div class="item-custo">-1 pts</div>
+                </div>
+                <button class="btn-remover" data-id="${index}" data-tipo="peculiaridade">×</button>
+            `;
+            lista.appendChild(item);
+        });
+    }
+
+    // CALCULAR PONTOS
+    calcularPontosVantagens() {
+        return this.vantagensAdquiridas.reduce((total, vantagem) => {
+            const custo = typeof vantagem.custo === 'string' ? 0 : vantagem.custo;
+            return total + custo;
+        }, 0);
+    }
+
+    calcularPontosDesvantagens() {
+        return this.desvantagensAdquiridas.reduce((total, desvantagem) => {
+            const custo = typeof desvantagem.custo === 'string' ? 0 : Math.abs(desvantagem.custo);
+            return total + custo;
+        }, 0);
+    }
+
+    calcularPontosPeculiaridades() {
+        return this.peculiaridades.length;
+    }
+
+    // ATUALIZAR RESUMO DE PONTOS
+    atualizarResumoPontos() {
+        const pontosVantagens = this.calcularPontosVantagens();
+        const pontosDesvantagens = this.calcularPontosDesvantagens();
+        const pontosPeculiaridades = this.calcularPontosPeculiaridades();
+        const saldoTotal = pontosVantagens - pontosDesvantagens - pontosPeculiaridades;
+        
+        // Atualizar displays
+        const totalVantagens = document.getElementById('total-vantagens');
+        const totalDesvantagens = document.getElementById('total-desvantagens');
+        const totalPeculiaridades = document.getElementById('total-peculiaridades');
+        const saldoTotalElement = document.getElementById('saldo-total');
+        
+        if (totalVantagens) totalVantagens.textContent = `+${pontosVantagens}`;
+        if (totalDesvantagens) totalDesvantagens.textContent = `-${pontosDesvantagens}`;
+        if (totalPeculiaridades) totalPeculiaridades.textContent = `-${pontosPeculiaridades}`;
+        if (saldoTotalElement) {
+            saldoTotalElement.textContent = saldoTotal;
+            saldoTotalElement.style.color = saldoTotal > 0 ? '#27ae60' : saldoTotal < 0 ? '#e74c3c' : '#ffd700';
+        }
+    }
+
+    // ATUALIZAR TUDO
+    atualizarTudo() {
+        this.atualizarListasAdquiridas();
+        this.atualizarResumoPontos();
+        this.salvarDados();
+    }
+
+    // MODAL DE CONFIGURAÇÃO (para itens variáveis)
+    abrirModalConfiguracao(item, tipo) {
+        // Implementar modais específicos para cada item variável
+        console.log(`Abrir modal para: ${item.nome} (${tipo})`);
+        // TODO: Implementar modais para Abençoado, Barulhento, etc.
+    }
+
+    // SALVAR/CARREGAR DADOS
+    salvarDados() {
+        const dados = {
+            vantagens: this.vantagensAdquiridas,
+            desvantagens: this.desvantagensAdquiridas,
+            peculiaridades: this.peculiaridades,
+            timestamp: new Date().toISOString()
+        };
+        
+        localStorage.setItem('gurpsVantagens', JSON.stringify(dados));
+    }
+
+    carregarDados() {
+        const dadosSalvos = localStorage.getItem('gurpsVantagens');
+        
+        if (dadosSalvos) {
+            try {
+                const dados = JSON.parse(dadosSalvos);
+                this.vantagensAdquiridas = dados.vantagens || [];
+                this.desvantagensAdquiridas = dados.desvantagens || [];
+                this.peculiaridades = dados.peculiaridades || [];
+            } catch (e) {
+                console.error('Erro ao carregar dados:', e);
             }
         }
-    });
-}
-
-// FUNÇÕES DE FILTRO
-function filtrarVantagens() {
-    const termo = document.getElementById('busca-vantagens').value.toLowerCase();
-    const categoria = document.getElementById('categoria-vantagens').value;
-    
-    const vantagensFiltradas = vantagensData.filter(v => {
-        const matchTermo = v.nome.toLowerCase().includes(termo) || 
-                          v.descricao.toLowerCase().includes(termo);
-        const matchCategoria = !categoria || v.categoria === categoria;
-        
-        return matchTermo && matchCategoria;
-    });
-    
-    const lista = document.getElementById('lista-vantagens');
-    lista.innerHTML = '';
-    
-    if (vantagensFiltradas.length === 0) {
-        lista.innerHTML = '<div class="lista-vazia">Nenhuma vantagem encontrada</div>';
-        return;
-    }
-    
-    vantagensFiltradas.forEach(vantagem => {
-        const item = criarItemLista(vantagem, 'vantagem');
-        lista.appendChild(item);
-    });
-}
-
-function filtrarDesvantagens() {
-    const termo = document.getElementById('busca-desvantagens').value.toLowerCase();
-    const categoria = document.getElementById('categoria-desvantagens').value;
-    
-    const desvantagensFiltradas = desvantagensData.filter(d => {
-        const matchTermo = d.nome.toLowerCase().includes(termo) || 
-                          d.descricao.toLowerCase().includes(termo);
-        const matchCategoria = !categoria || d.categoria === categoria;
-        
-        return matchTermo && matchCategoria;
-    });
-    
-    const lista = document.getElementById('lista-desvantagens');
-    lista.innerHTML = '';
-    
-    if (desvantagensFiltradas.length === 0) {
-        lista.innerHTML = '<div class="lista-vazia">Nenhuma desvantagem encontrada</div>';
-        return;
-    }
-    
-    desvantagensFiltradas.forEach(desvantagem => {
-        const item = criarItemLista(desvantagem, 'desvantagem');
-        lista.appendChild(item);
-    });
-}
-
-// FUNÇÕES PARA ADICIONAR VANTAGENS/DESVANTAGENS
-function adicionarVantagem(id) {
-    const vantagem = vantagensData.find(v => v.id === id);
-    if (!vantagem || vantagensAdquiridas.find(v => v.id === id)) return;
-    
-    vantagensAdquiridas.push({...vantagem});
-    atualizarListaVantagensAdquiridas();
-    atualizarResumoPontos();
-}
-
-function adicionarDesvantagem(id) {
-    const desvantagem = desvantagensData.find(d => d.id === id);
-    if (!desvantagem || desvantagensAdquiridas.find(d => d.id === id)) return;
-    
-    // Para desvantagens por nível, criar com nível 1
-    const desvantagemAdicionar = {...desvantagem};
-    if (desvantagemAdicionar.porNivel) {
-        desvantagemAdicionar.nivel = 1;
-        desvantagemAdicionar.custoAtual = desvantagemAdicionar.custo;
-    }
-    
-    desvantagensAdquiridas.push(desvantagemAdicionar);
-    atualizarListaDesvantagensAdquiridas();
-    atualizarResumoPontos();
-}
-
-function removerVantagem(id) {
-    vantagensAdquiridas = vantagensAdquiridas.filter(v => v.id !== id);
-    atualizarListaVantagensAdquiridas();
-    atualizarResumoPontos();
-}
-
-function removerDesvantagem(id) {
-    desvantagensAdquiridas = desvantagensAdquiridas.filter(d => d.id !== id);
-    atualizarListaDesvantagensAdquiridas();
-    atualizarResumoPontos();
-}
-
-// ATUALIZAR LISTAS ADQUIRIDAS
-function atualizarListaVantagensAdquiridas() {
-    const lista = document.getElementById('vantagens-adquiridas');
-    const totalElement = document.getElementById('total-vantagens-adquiridas');
-    
-    if (vantagensAdquiridas.length === 0) {
-        lista.innerHTML = '<div class="lista-vazia">Nenhuma vantagem adquirida</div>';
-        totalElement.textContent = '0 pts';
-        return;
-    }
-    
-    lista.innerHTML = '';
-    let totalPontos = 0;
-    
-    vantagensAdquiridas.forEach(vantagem => {
-        const custo = typeof vantagem.custo === 'string' ? 0 : vantagem.custo;
-        totalPontos += custo;
-        
-        const item = document.createElement('div');
-        item.className = 'item-adquirido';
-        item.innerHTML = `
-            <div class="item-info">
-                <strong>${vantagem.nome}</strong>
-                <div class="item-custo">+${custo} pts</div>
-            </div>
-            <button class="btn-remover" data-id="${vantagem.id}" data-tipo="vantagem">×</button>
-        `;
-        lista.appendChild(item);
-    });
-    
-    totalElement.textContent = `${totalPontos} pts`;
-}
-
-function atualizarListaDesvantagensAdquiridas() {
-    const lista = document.getElementById('desvantagens-adquiridas');
-    const totalElement = document.getElementById('total-desvantagens-adquiridas');
-    
-    if (desvantagensAdquiridas.length === 0) {
-        lista.innerHTML = '<div class="lista-vazia">Nenhuma desvantagem adquirida</div>';
-        totalElement.textContent = '0 pts';
-        return;
-    }
-    
-    lista.innerHTML = '';
-    let totalPontos = 0;
-    
-    desvantagensAdquiridas.forEach(desvantagem => {
-        const custo = desvantagem.porNivel ? 
-                     (desvantagem.custoAtual || desvantagem.custo) : 
-                     desvantagem.custo;
-        totalPontos += custo;
-        
-        const nivelTexto = desvantagem.porNivel ? ` (Nível ${desvantagem.nivel || 1})` : '';
-        
-        const item = document.createElement('div');
-        item.className = 'item-adquirido';
-        item.innerHTML = `
-            <div class="item-info">
-                <strong>${desvantagem.nome}${nivelTexto}</strong>
-                <div class="item-custo">${custo} pts</div>
-            </div>
-            <button class="btn-remover" data-id="${desvantagem.id}" data-tipo="desvantagem">×</button>
-        `;
-        lista.appendChild(item);
-    });
-    
-    totalElement.textContent = `${totalPontos} pts`;
-}
-
-// SISTEMA DE PECULIARIDADES
-function atualizarContadorPeculiaridade() {
-    const input = document.getElementById('nova-peculiaridade');
-    const contador = document.getElementById('contador-chars');
-    const botao = document.getElementById('btn-adicionar-peculiaridade');
-    
-    const texto = input.value;
-    const count = texto.length;
-    
-    contador.textContent = count;
-    
-    // Habilitar/desabilitar botão
-    const podeAdicionar = count > 0 && count <= 30 && peculiaridades.length < 5;
-    botao.disabled = !podeAdicionar;
-    
-    // Atualizar cor do contador
-    if (count > 30) {
-        contador.style.color = '#e74c3c';
-    } else if (count > 25) {
-        contador.style.color = '#f39c12';
-    } else {
-        contador.style.color = '#ffd700';
     }
 }
 
-function adicionarPeculiaridade() {
-    const input = document.getElementById('nova-peculiaridade');
-    const texto = input.value.trim();
-    
-    if (texto.length === 0 || texto.length > 30) {
-        return;
-    }
-    
-    if (peculiaridades.length >= 5) {
-        alert('Máximo de 5 peculiaridades atingido!');
-        return;
-    }
-    
-    // Verificar se já existe
-    if (peculiaridades.includes(texto)) {
-        alert('Esta peculiaridade já foi adicionada!');
-        return;
-    }
-    
-    peculiaridades.push(texto);
-    input.value = '';
-    atualizarContadorPeculiaridade();
-    atualizarListaPeculiaridades();
-    atualizarResumoPontos();
-}
-
-function removerPeculiaridade(index) {
-    peculiaridades.splice(index, 1);
-    atualizarListaPeculiaridades();
-    atualizarResumoPontos();
-}
-
-function atualizarListaPeculiaridades() {
-    const lista = document.getElementById('lista-peculiaridades');
-    const contador = document.getElementById('contador-peculiaridades');
-    
-    contador.textContent = `${peculiaridades.length}/5`;
-    
-    if (peculiaridades.length === 0) {
-        lista.innerHTML = '<div class="lista-vazia">Nenhuma peculiaridade adicionada</div>';
-        return;
-    }
-    
-    lista.innerHTML = '';
-    
-    peculiaridades.forEach((peculiaridade, index) => {
-        const item = document.createElement('div');
-        item.className = 'item-adquirido';
-        item.innerHTML = `
-            <div class="item-info">
-                <strong>${peculiaridade}</strong>
-                <div class="item-custo">-1 pts</div>
-            </div>
-            <button class="btn-remover" data-id="${index}" data-tipo="peculiaridade">×</button>
-        `;
-        lista.appendChild(item);
-    });
-}
-
-// CÁLCULO DE PONTOS
-function calcularPontosVantagens() {
-    return vantagensAdquiridas.reduce((total, vantagem) => {
-        const custo = typeof vantagem.custo === 'string' ? 0 : vantagem.custo;
-        return total + custo;
-    }, 0);
-}
-
-function calcularPontosDesvantagens() {
-    return desvantagensAdquiridas.reduce((total, desvantagem) => {
-        const custo = desvantagem.porNivel ? 
-                     (desvantagem.custoAtual || desvantagem.custo) : 
-                     desvantagem.custo;
-        return total + Math.abs(custo); // Usar valor absoluto para display
-    }, 0);
-}
-
-function calcularPontosPeculiaridades() {
-    return peculiaridades.length; // -1 ponto cada
-}
-
-function atualizarResumoPontos() {
-    const pontosVantagens = calcularPontosVantagens();
-    const pontosDesvantagens = calcularPontosDesvantagens();
-    const pontosPeculiaridades = calcularPontosPeculiaridades();
-    const saldoTotal = pontosVantagens - pontosDesvantagens - pontosPeculiaridades;
-    
-    // Atualizar displays
-    document.getElementById('total-vantagens').textContent = `+${pontosVantagens}`;
-    document.getElementById('total-desvantagens').textContent = `-${pontosDesvantagens}`;
-    document.getElementById('total-peculiaridades').textContent = `-${pontosPeculiaridades}`;
-    document.getElementById('saldo-total').textContent = saldoTotal;
-    
-    // Atualizar cor do saldo
-    const saldoElement = document.getElementById('saldo-total');
-    if (saldoTotal > 0) {
-        saldoElement.style.color = '#27ae60';
-    } else if (saldoTotal < 0) {
-        saldoElement.style.color = '#e74c3c';
-    } else {
-        saldoElement.style.color = '#ffd700';
-    }
-}
-
-// INICIALIZAÇÃO AVANÇADA PARA VANTAGENS COMPLEXAS
-function configurarVantagemEspecial(vantagemId) {
-    // Para vantagens como Aliados, Aptidão Mágica, etc.
-    // Esta função pode ser expandida para lidar com vantagens complexas
-    switch (vantagemId) {
-        case 'aptidão_mágica':
-            // Poderia abrir um modal para selecionar nível
-            console.log('Configurando Aptidão Mágica...');
-            break;
-        case 'aliados':
-            // Configuração complexa de aliados
-            console.log('Configurando Aliados...');
-            break;
-    }
-}
-
-// FUNÇÃO PARA SALVAR/CARREGAR DADOS
-function salvarVantagens() {
-    const dados = {
-        vantagens: vantagensAdquiridas,
-        desvantagens: desvantagensAdquiridas,
-        peculiaridades: peculiaridades,
-        timestamp: new Date().toISOString()
-    };
-    
-    localStorage.setItem('gurpsVantagens', JSON.stringify(dados));
-    console.log('Vantagens salvas!', dados);
-}
-
-function carregarVantagens() {
-    const dadosSalvos = localStorage.getItem('gurpsVantagens');
-    
-    if (dadosSalvos) {
-        try {
-            const dados = JSON.parse(dadosSalvos);
-            vantagensAdquiridas = dados.vantagens || [];
-            desvantagensAdquiridas = dados.desvantagens || [];
-            peculiaridades = dados.peculiaridades || [];
-            
-            console.log('Vantagens carregadas!', dados);
-        } catch (e) {
-            console.error('Erro ao carregar vantagens:', e);
-        }
-    }
-    
-    // Atualizar interfaces
-    atualizarListaVantagensAdquiridas();
-    atualizarListaDesvantagensAdquiridas();
-    atualizarListaPeculiaridades();
-    atualizarResumoPontos();
-}
-
-// INICIALIZAÇÃO COMPLETA
+// INICIALIZAR SISTEMA
 document.addEventListener('DOMContentLoaded', function() {
-    // Carregar dados salvos primeiro
-    carregarVantagens();
-    
-    // Inicializar sistema
-    inicializarVantagens();
-    
-    // Salvar automaticamente quando a página for fechada/atualizada
-    window.addEventListener('beforeunload', salvarVantagens);
-    
-    // Salvar periodicamente (a cada 30 segundos)
-    setInterval(salvarVantagens, 30000);
-    
-    console.log('Sistema de Vantagens inicializado!');
+    window.sistemaVantagens = new SistemaVantagens();
+    window.sistemaVantagens.inicializar();
 });
-
-// FUNÇÕES DE UTILIDADE PARA DESENVOLVIMENTO
-function debugVantagens() {
-    console.log('=== DEBUG VANTAGENS ===');
-    console.log('Vantagens Adquiridas:', vantagensAdquiridas);
-    console.log('Desvantagens Adquiridas:', desvantagensAdquiridas);
-    console.log('Peculiaridades:', peculiaridades);
-    console.log('Pontos Vantagens:', calcularPontosVantagens());
-    console.log('Pontos Desvantagens:', calcularPontosDesvantagens());
-    console.log('Pontos Peculiaridades:', calcularPontosPeculiaridades());
-    console.log('Saldo Total:', calcularPontosVantagens() - calcularPontosDesvantagens() - calcularPontosPeculiaridades());
-}
-
-// Exportar para uso global (se necessário)
-if (typeof window !== 'undefined') {
-    window.SistemaVantagens = {
-        inicializarVantagens,
-        adicionarVantagem,
-        removerVantagem,
-        adicionarDesvantagem,
-        removerDesvantagem,
-        adicionarPeculiaridade,
-        removerPeculiaridade,
-        salvarVantagens,
-        carregarVantagens,
-        debugVantagens
-    };
-}
