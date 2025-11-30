@@ -1309,20 +1309,18 @@
         return document.querySelector(seletor) !== null;
     }
 </script>
-    <!-- Antes do </body> do criar-personagem.html -->
-<!-- PRIMEIRO: Catálogos (dados) -->
+  
 <script src="catalogo-vantagens.js"></script>
-<script src="catalogo-desvantagens.js"></script>
 
-<!-- DEPOIS: Sistema (lógica que usa os catálogos) -->
-<script src="vantagens.js"></script>
-
-<!-- POR ÚLTIMO: Outros sistemas -->
+<!-- SEGUNDO: Sistemas básicos -->
 <script src="atributos.js"></script>
+<script src="caracteristicas-fisicas.js"></script>
+<script src="caracteristicas-altura-peso.js"></script>
 <script src="caracteristicas-aparencia.js"></script>
 <script src="caracteristicas-riqueza.js"></script>
 <script src="caracteristicas-idiomas.js"></script>
-<script src="caracteristicas-fisicas.js"></script>
-<script src="caracteristicas-altura-peso.js"></script>
+
+<!-- TERCEIRO: Sistema de Vantagens (depende dos anteriores) -->
+<script src="vantagens.js"></script>
 </body>
 </html>
