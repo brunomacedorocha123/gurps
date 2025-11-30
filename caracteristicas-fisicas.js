@@ -1,4 +1,4 @@
-// caracteristicas-fisicas.js - VERSÃO COMPLETA E FUNCIONAL
+// caracteristicas-fisicas.js - VERSÃO COMPLETA COM EVENTO FUNCIONAL
 class SistemaCaracteristicasFisicas {
     constructor() {
         this.caracteristicas = {
@@ -99,7 +99,6 @@ class SistemaCaracteristicasFisicas {
     }
 
     configurarEventos() {
-        // Configurar eventos dos botões
         this.configurarEventosBotoes();
     }
 
@@ -145,7 +144,7 @@ class SistemaCaracteristicasFisicas {
         
         this.atualizarDisplay();
         this.salvarDados();
-        this.notificarAlturaPeso();
+        this.notificarAlturaPeso(); // ✅ EVENTO CRÍTICO
         
         this.mostrarMensagem(`"${caracteristicaObj.nome}" adicionada!`, 'sucesso');
         
@@ -176,28 +175,33 @@ class SistemaCaracteristicasFisicas {
             
             this.atualizarDisplay();
             this.salvarDados();
-            this.notificarAlturaPeso();
+            this.notificarAlturaPeso(); // ✅ EVENTO CRÍTICO
             
             this.mostrarMensagem(`"${caracteristicaRemovida.nome}" removida!`, 'sucesso');
         }
     }
 
-    // MÉTODO CRÍTICO: Notificar sistema altura/peso
+    // ✅ MÉTODO CRÍTICO CORRIGIDO: Notificar sistema altura/peso
     notificarAlturaPeso() {
+        // DISPARAR EVENTO CORRETAMENTE
         const evento = new CustomEvent('caracteristicasFisicasAlteradas', {
             detail: {
-                pontos: this.calcularPontosTotais(),
-                multiplicadorPeso: this.getMultiplicadorPeso(),
-                modificadores: this.getModificadores(),
-                caracteristicas: this.caracteristicasSelecionadas.map(c => c.tipo),
-                caracteristicasSelecionadas: this.caracteristicasSelecionadas
+                caracteristicas: this.caracteristicasSelecionadas
             }
         });
         document.dispatchEvent(evento);
         
+        // CHAMADA DIRETA DE FALLBACK - GARANTIR QUE FUNCIONE
         if (window.sistemaAlturaPeso && typeof window.sistemaAlturaPeso.atualizarDisplay === 'function') {
             window.sistemaAlturaPeso.atualizarDisplay();
         }
+        
+        // FORÇAR ATUALIZAÇÃO IMEDIATA
+        setTimeout(() => {
+            if (window.sistemaAlturaPeso && typeof window.sistemaAlturaPeso.atualizarDisplay === 'function') {
+                window.sistemaAlturaPeso.atualizarDisplay();
+            }
+        }, 100);
     }
 
     atualizarDisplay() {
@@ -376,6 +380,7 @@ class SistemaCaracteristicasFisicas {
     }
 }
 
+// INICIALIZAÇÃO GLOBAL
 let sistemaCaracteristicasFisicas;
 document.addEventListener('DOMContentLoaded', function() {
     sistemaCaracteristicasFisicas = new SistemaCaracteristicasFisicas();
