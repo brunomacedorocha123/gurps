@@ -1,4 +1,4 @@
-// caracteristicas-altura-peso.js - VERSÃO COMPLETA COM REGRAS DE NANISMO
+// caracteristicas-altura-peso.js - VERSÃO 100% FUNCIONAL
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
@@ -33,21 +33,49 @@ class SistemaAlturaPeso {
         };
     }
 
-    // MÉTODO CORRIGIDO: Aplicar TODAS as regras do nanismo
-    aplicarRegrasNanismo() {
-        if (!window.sistemaCaracteristicasFisicas) return false;
+    // MÉTODO PRINCIPAL: Aplicar todas as regras especiais
+    aplicarRegrasEspeciais() {
+        console.log('🎯 Aplicando regras especiais de características físicas...');
         
-        const caracteristicasAtivas = window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas;
-        const temNanismo = caracteristicasAtivas.some(c => c.tipo === 'nanismo');
+        const temNanismo = this.temNanismo();
+        const temGigantismo = this.temGigantismo();
         
-        if (!temNanismo) return false;
+        let regrasAplicadas = false;
 
-        console.log('🎯 Aplicando regras do Nanismo...');
+        if (temNanismo) {
+            console.log('📏 Nanismo detectado - aplicando regras');
+            regrasAplicadas = this.aplicarRegrasNanismo() || regrasAplicadas;
+        }
+
+        if (temGigantismo) {
+            console.log('📏 Gigantismo detectado - aplicando regras');
+            regrasAplicadas = this.aplicarRegrasGigantismo() || regrasAplicadas;
+        }
+
+        if (regrasAplicadas) {
+            this.atualizarDisplay();
+            this.salvarDados();
+        }
+
+        return regrasAplicadas;
+    }
+
+    // MÉTODO: Aplicar regras do nanismo
+    aplicarRegrasNanismo() {
+        console.log('🔧 Aplicando regras específicas do Nanismo');
+
+        let alteracoes = false;
 
         // REGRA 1: Altura máxima de 1.32m
         if (this.altura > 1.32) {
-            console.log('📏 Nanismo: Limitando altura para 1.32m');
-            this.definirAltura(1.32, true);
+            console.log('📏 Nanismo: Limitando altura de', this.altura, 'para 1.32m');
+            this.altura = 1.32;
+            alteracoes = true;
+            
+            const inputAltura = document.getElementById('altura');
+            if (inputAltura) {
+                inputAltura.value = '1.32';
+            }
         }
 
         // REGRA 2: Peso baseado na PRIMEIRA LINHA da tabela (ST 6) com -15%
@@ -55,38 +83,45 @@ class SistemaAlturaPeso {
         const pesoNanismo = Math.round(pesoBaseST6 * 0.85); // -15% = 38kg
         
         if (this.peso !== pesoNanismo) {
-            console.log('⚖️ Nanismo: Ajustando peso para', pesoNanismo + 'kg (ST 6 -15%)');
-            this.definirPeso(pesoNanismo, true);
+            console.log('⚖️ Nanismo: Ajustando peso de', this.peso, 'para', pesoNanismo + 'kg (ST 6 -15%)');
+            this.peso = pesoNanismo;
+            alteracoes = true;
+            
+            const inputPeso = document.getElementById('peso');
+            if (inputPeso) {
+                inputPeso.value = pesoNanismo.toString();
+            }
         }
 
-        // REGRA 3: Altura média baseada na PRIMEIRA LINHA (ST 6)
-        this.alturaMedia = this.heightRanges[6].media; // 1.43m
+        if (alteracoes) {
+            this.mostrarMensagemNanismo();
+        }
 
-        this.mostrarMensagemNanismo();
-        return true;
+        return alteracoes;
     }
 
-    // MÉTODO CORRIGIDO: Aplicar regras do gigantismo
+    // MÉTODO: Aplicar regras do gigantismo
     aplicarRegrasGigantismo() {
-        if (!window.sistemaCaracteristicasFisicas) return false;
-        
-        const caracteristicasAtivas = window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas;
-        const temGigantismo = caracteristicasAtivas.some(c => c.tipo === 'gigantismo');
-        
-        if (!temGigantismo) return false;
+        console.log('🔧 Aplicando regras específicas do Gigantismo');
 
-        console.log('🎯 Aplicando regras do Gigantismo...');
+        let alteracoes = false;
 
         // Altura mínima para gigantismo
         if (this.altura < 1.90) {
-            console.log('📏 Gigantismo: Ajustando altura mínima para 1.90m');
-            this.definirAltura(1.90, true);
+            console.log('📏 Gigantismo: Ajustando altura de', this.altura, 'para 1.90m');
+            this.altura = 1.90;
+            alteracoes = true;
+            
+            const inputAltura = document.getElementById('altura');
+            if (inputAltura) {
+                inputAltura.value = '1.90';
+            }
         }
 
-        return true;
+        return alteracoes;
     }
 
-    // MÉTODO ATUALIZADO: Mostrar mensagem específica do nanismo
+    // MÉTODO: Mostrar mensagem do nanismo
     mostrarMensagemNanismo() {
         const existingMessage = document.getElementById('nanismoMessage');
         if (existingMessage) {
@@ -98,7 +133,7 @@ class SistemaAlturaPeso {
         messageDiv.innerHTML = `
             🎯 <strong>Nanismo Ativo</strong><br>
             • Altura limitada: 1.32m<br>
-            • Peso ajustado: ST 6 -15%<br>
+            • Peso ajustado: 38kg (ST 6 -15%)<br>
             • MT -1, Deslocamento -1
         `;
         messageDiv.style.cssText = `
@@ -124,6 +159,29 @@ class SistemaAlturaPeso {
                 messageDiv.parentNode.removeChild(messageDiv);
             }
         }, 5000);
+    }
+
+    // MÉTODOS AUXILIARES
+    temNanismo() {
+        if (!window.sistemaCaracteristicasFisicas) {
+            console.log('⚠️ sistemaCaracteristicasFisicas não disponível');
+            return false;
+        }
+        
+        const temNanismo = window.sistemaCaracteristicasFisicas.temNanismo 
+            ? window.sistemaCaracteristicasFisicas.temNanismo()
+            : window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas?.some(c => c.tipo === 'nanismo');
+        
+        console.log('🔍 Verificando nanismo:', temNanismo);
+        return temNanismo;
+    }
+
+    temGigantismo() {
+        if (!window.sistemaCaracteristicasFisicas) return false;
+        
+        return window.sistemaCaracteristicasFisicas.temGigantismo 
+            ? window.sistemaCaracteristicasFisicas.temGigantismo()
+            : window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas?.some(c => c.tipo === 'gigantismo');
     }
 
     obterSTReal() {
@@ -161,6 +219,10 @@ class SistemaAlturaPeso {
         this.configurarEventos();
         this.forcarAtualizacaoST();
         this.calcularValoresIniciais();
+        
+        // APLICAR REGRAS AO INICIALIZAR
+        this.aplicarRegrasEspeciais();
+        
         this.atualizarDisplay();
         this.inicializado = true;
         
@@ -173,6 +235,12 @@ class SistemaAlturaPeso {
             if (e.detail && e.detail.ST !== undefined) {
                 this.atualizarST(e.detail.ST);
             }
+        });
+
+        // ESCUTAR CARACTERÍSTICAS FÍSICAS - CRÍTICO!
+        document.addEventListener('caracteristicasFisicasAlteradas', (e) => {
+            console.log('🎯 Evento caracteristicasFisicasAlteradas recebido:', e.detail);
+            this.aplicarRegrasEspeciais();
         });
 
         // Monitorar input ST
@@ -188,51 +256,13 @@ class SistemaAlturaPeso {
                     this.forcarAtualizacaoST();
                 }, 500);
             });
-            
-            this.configurarObserverST(inputST);
         }
 
         // Eventos dos controles de altura/peso
         this.configurarEventosControles();
 
-        // Escutar características físicas - ATUALIZADO
-        document.addEventListener('caracteristicasFisicasAlteradas', (e) => {
-            if (e.detail && e.detail.multiplicadorPeso !== undefined) {
-                this.multiplicadorPeso = e.detail.multiplicadorPeso;
-                this.calcularPesoAjustado();
-                
-                // APLICAR REGRAS ESPECÍFICAS
-                this.aplicarRegrasEspeciais();
-                
-                this.atualizarDisplay();
-            }
-        });
-
         // Verificação periódica
         this.iniciarVerificacaoPeriodica();
-    }
-
-    // NOVO MÉTODO: Aplicar todas as regras especiais
-    aplicarRegrasEspeciais() {
-        const nanismoAtivo = this.aplicarRegrasNanismo();
-        const gigantismoAtivo = this.aplicarRegrasGigantismo();
-        
-        return nanismoAtivo || gigantismoAtivo;
-    }
-
-    configurarObserverST(inputST) {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-                    this.forcarAtualizacaoST();
-                }
-            });
-        });
-        
-        observer.observe(inputST, { 
-            attributes: true, 
-            attributeFilter: ['value'] 
-        });
     }
 
     configurarEventosControles() {
@@ -241,7 +271,16 @@ class SistemaAlturaPeso {
         
         if (inputAltura) {
             inputAltura.addEventListener('change', () => {
-                this.definirAltura(parseFloat(inputAltura.value));
+                // VERIFICAR LIMITES ANTES DE DEFINIR
+                let novaAltura = parseFloat(inputAltura.value);
+                
+                if (this.temNanismo() && novaAltura > 1.32) {
+                    this.mostrarMensagemNanismo();
+                    novaAltura = 1.32;
+                    inputAltura.value = '1.32';
+                }
+                
+                this.definirAltura(novaAltura);
             });
         }
         
@@ -267,12 +306,7 @@ class SistemaAlturaPeso {
         this.stBase = novoST;
         this.calcularValoresBase();
         this.calcularPesoIdeal();
-        
-        // VERIFICAR SE PRECISA APLICAR REGRAS ESPECIAIS
-        if (!this.aplicarRegrasEspeciais()) {
-            this.atualizarDisplay();
-        }
-        
+        this.atualizarDisplay();
         this.salvarDados();
         this.atualizarInputsFisicos();
     }
@@ -298,29 +332,25 @@ class SistemaAlturaPeso {
     }
 
     ajustarAltura(variacao) {
-        const novaAltura = this.altura + variacao;
+        let novaAltura = this.altura + variacao;
+        
+        // VERIFICAR LIMITES
+        if (this.temNanismo() && novaAltura > 1.32) {
+            this.mostrarMensagemNanismo();
+            novaAltura = 1.32;
+        }
+        
+        if (this.temGigantismo() && novaAltura < 1.90) {
+            novaAltura = 1.90;
+        }
+        
         this.definirAltura(novaAltura);
     }
 
-    // MÉTODO ATUALIZADO: definirAltura com verificação de regras
-    definirAltura(novaAltura, forcar = false) {
-        // Se não for forçado por regras, verificar limites
-        if (!forcar) {
-            // Verificar se há nanismo ativo
-            if (this.temNanismo() && novaAltura > 1.32) {
-                this.mostrarMensagemNanismo();
-                novaAltura = 1.32;
-            }
-            
-            // Verificar se há gigantismo ativo
-            if (this.temGigantismo() && novaAltura < 1.90) {
-                novaAltura = 1.90;
-            }
-            
-            // Limites gerais
-            if (novaAltura < 1.30) novaAltura = 1.30;
-            if (novaAltura > 2.50) novaAltura = 2.50;
-        }
+    definirAltura(novaAltura) {
+        // Aplicar limites gerais
+        if (novaAltura < 1.30) novaAltura = 1.30;
+        if (novaAltura > 2.50) novaAltura = 2.50;
         
         this.altura = parseFloat(novaAltura.toFixed(2));
         
@@ -336,24 +366,21 @@ class SistemaAlturaPeso {
     }
 
     ajustarPeso(variacao) {
-        const novoPeso = this.peso + variacao;
+        let novoPeso = this.peso + variacao;
+        
+        // VERIFICAR LIMITES DO NANISMO
+        if (this.temNanismo()) {
+            const pesoNanismo = Math.round(this.weightRanges[6].media * 0.85);
+            novoPeso = pesoNanismo;
+        }
+        
         this.definirPeso(novoPeso);
     }
 
-    // MÉTODO ATUALIZADO: definirPeso com verificação de regras
-    definirPeso(novoPeso, forcar = false) {
-        // Se não for forçado por regras, verificar limites
-        if (!forcar) {
-            // Verificar se há nanismo ativo - usar peso específico
-            if (this.temNanismo()) {
-                const pesoNanismo = Math.round(this.weightRanges[6].media * 0.85);
-                novoPeso = pesoNanismo;
-            }
-            
-            // Limites gerais
-            if (novoPeso < 30) novoPeso = 30;
-            if (novoPeso > 200) novoPeso = 200;
-        }
+    definirPeso(novoPeso) {
+        // Aplicar limites gerais
+        if (novoPeso < 30) novoPeso = 30;
+        if (novoPeso > 200) novoPeso = 200;
         
         this.peso = parseInt(novoPeso);
         
@@ -365,19 +392,6 @@ class SistemaAlturaPeso {
         this.atualizarDisplay();
         this.salvarDados();
         this.notificarSistemaPrincipal();
-    }
-
-    // MÉTODOS AUXILIARES
-    temNanismo() {
-        if (!window.sistemaCaracteristicasFisicas) return false;
-        return window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas
-            .some(c => c.tipo === 'nanismo');
-    }
-
-    temGigantismo() {
-        if (!window.sistemaCaracteristicasFisicas) return false;
-        return window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas
-            .some(c => c.tipo === 'gigantismo');
     }
 
     calcularValoresIniciais() {
@@ -460,9 +474,6 @@ class SistemaAlturaPeso {
     }
 
     atualizarDisplay() {
-        // APLICAR REGRAS ESPECIAIS ANTES DE ATUALIZAR
-        this.aplicarRegrasEspeciais();
-        
         this.atualizarStatusAltura();
         this.atualizarStatusPeso();
         this.atualizarInfoFisica();
@@ -507,7 +518,7 @@ class SistemaAlturaPeso {
         let status, classe;
         
         if (this.temNanismo()) {
-            status = "Nanismo: Peso base ST 6 -15%";
+            status = "Nanismo: Peso base ST 6 -15% (38kg)";
             classe = "abaixo";
         } else {
             const diferenca = this.peso - this.pesoAjustado;
