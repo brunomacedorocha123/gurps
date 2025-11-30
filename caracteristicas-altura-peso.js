@@ -1,4 +1,4 @@
-// caracteristicas-altura-peso.js - VERSÃO COMPLETA E FUNCIONAL
+// caracteristicas-altura-peso.js - VERSÃO COMPLETA COM PONTE
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
@@ -31,23 +31,20 @@ class SistemaAlturaPeso {
         };
     }
 
-    // MÉTODO SIMPLIFICADO E DIRETO
-    obterCaracteristicaAtiva() {
-        if (!window.sistemaCaracteristicasFisicas) return null;
-        
-        const sistema = window.sistemaCaracteristicasFisicas;
-        if (!sistema.caracteristicasSelecionadas || sistema.caracteristicasSelecionadas.length === 0) {
-            return null;
+    // MÉTODO SIMPLIFICADO PARA OBTER CARACTERÍSTICAS
+    obterCaracteristicasAtivas() {
+        // ✅ BUSCAR DA PONTE GLOBAL
+        if (window.ponteCaracteristicas) {
+            return window.ponteCaracteristicas.obterCaracteristicasAtivas();
         }
-        
-        // PEGAR A PRIMEIRA CARACTERÍSTICA (não misturamos)
-        return sistema.caracteristicasSelecionadas[0];
+        return [];
     }
 
     obterMultiplicadorPeso() {
-        const caracteristica = this.obterCaracteristicaAtiva();
-        if (!caracteristica) return 1.0;
+        const caracteristicas = this.obterCaracteristicasAtivas();
+        if (caracteristicas.length === 0) return 1.0;
         
+        const caracteristica = caracteristicas[0];
         switch(caracteristica.tipo) {
             case 'magro': return 0.67;
             case 'acima-peso': return 1.3;
@@ -58,8 +55,8 @@ class SistemaAlturaPeso {
     }
 
     temNanismo() {
-        const caracteristica = this.obterCaracteristicaAtiva();
-        return caracteristica && caracteristica.tipo === 'nanismo';
+        const caracteristicas = this.obterCaracteristicasAtivas();
+        return caracteristicas.some(c => c.tipo === 'nanismo');
     }
 
     aplicarLimitesAltura() {
@@ -76,7 +73,7 @@ class SistemaAlturaPeso {
         const faixaAltura = this.obterFaixaAltura(this.stBase);
         const faixaPeso = this.obterFaixaPeso(this.stBase);
         const multiplicador = this.obterMultiplicadorPeso();
-        const caracteristica = this.obterCaracteristicaAtiva();
+        const caracteristicas = this.obterCaracteristicasAtivas();
         const temNanismo = this.temNanismo();
         
         const faixaPesoAjustada = {
@@ -88,6 +85,8 @@ class SistemaAlturaPeso {
                             this.altura >= faixaAltura.min && this.altura <= faixaAltura.max;
         const pesoValido = this.peso >= faixaPesoAjustada.min && this.peso <= faixaPesoAjustada.max;
 
+        const caracteristicaAtiva = caracteristicas.length > 0 ? caracteristicas[0] : null;
+
         return {
             alturaValida,
             pesoValido,
@@ -95,7 +94,7 @@ class SistemaAlturaPeso {
             faixaPeso: faixaPesoAjustada,
             faixaPesoOriginal: faixaPeso,
             multiplicadorPeso: multiplicador,
-            caracteristicaAtiva: caracteristica,
+            caracteristicaAtiva,
             temNanismo,
             dentroDaFaixa: alturaValida && pesoValido
         };
@@ -104,17 +103,15 @@ class SistemaAlturaPeso {
     atualizarDisplay() {
         const conformidade = this.verificarConformidadeST();
         
-        // ATUALIZAR STATUS GERAL - MOSTRAR NOME DA DESVANTAGEM
-        this.atualizarStatusGeral(conformidade);
+        console.log("🎯 Altura/Peso - Display atualizado:", conformidade);
         
-        // ATUALIZAR DEMAIS ELEMENTOS
+        this.atualizarStatusGeral(conformidade);
         this.atualizarStatusAltura(conformidade);
         this.atualizarStatusPeso(conformidade);
         this.atualizarInfoFisica(conformidade);
         this.atualizarDesvantagensAtivas();
     }
 
-    // ✅ MÉTODO CRÍTICO: Status mostra nome da desvantagem
     atualizarStatusGeral(conformidade) {
         const statusFisico = document.getElementById('statusFisico');
         if (!statusFisico) return;
@@ -123,7 +120,6 @@ class SistemaAlturaPeso {
             statusFisico.textContent = "Nanismo";
             statusFisico.style.background = "#e74c3c";
         } else if (conformidade.caracteristicaAtiva) {
-            // MOSTRAR O NOME DA DESVANTAGEM
             statusFisico.textContent = conformidade.caracteristicaAtiva.nome;
             statusFisico.style.background = "#f39c12";
         } else if (conformidade.dentroDaFaixa) {
@@ -218,68 +214,68 @@ class SistemaAlturaPeso {
         
         if (!container || !lista) return;
         
-        const caracteristica = this.obterCaracteristicaAtiva();
+        const caracteristicas = this.obterCaracteristicasAtivas();
         
-        if (!caracteristica) {
+        if (caracteristicas.length === 0) {
             container.style.display = 'none';
             return;
         }
         
-        // MOSTRAR CONTAINER
         container.style.display = 'block';
         
-        // GERAR LISTA DE DESVANTAGENS
-        let icone, descricao, efeito;
-        
-        switch(caracteristica.tipo) {
-            case 'magro':
-                icone = '⚖️';
-                descricao = 'Magro';
-                efeito = 'Peso = 2/3 do normal (×0.67)';
-                break;
-            case 'acima-peso':
-                icone = '⚖️';
-                descricao = 'Acima do Peso';
-                efeito = 'Peso = 130% do normal (×1.3)';
-                break;
-            case 'gordo':
-                icone = '⚖️';
-                descricao = 'Gordo';
-                efeito = 'Peso = 150% do normal (×1.5)';
-                break;
-            case 'muito-gordo':
-                icone = '⚖️';
-                descricao = 'Muito Gordo';
-                efeito = 'Peso = 200% do normal (×2.0)';
-                break;
-            case 'nanismo':
-                icone = '📏';
-                descricao = 'Nanismo';
-                efeito = 'Altura máxima: 1.32m';
-                break;
-            case 'gigantismo':
-                icone = '📏';
-                descricao = 'Gigantismo';
-                efeito = 'Altura acima do máximo racial';
-                break;
-            default:
-                icone = '🔹';
-                descricao = caracteristica.nome;
-                efeito = caracteristica.efeitos;
-        }
-        
-        lista.innerHTML = `
-            <div class="desvantagem-item">
-                <div class="desvantagem-icone">${icone}</div>
-                <div class="desvantagem-info">
-                    <strong>${descricao}</strong>
-                    <small>${efeito}</small>
+        lista.innerHTML = caracteristicas.map(carac => {
+            let icone, descricao, efeito;
+            
+            switch(carac.tipo) {
+                case 'magro':
+                    icone = '⚖️';
+                    descricao = 'Magro';
+                    efeito = 'Peso = 2/3 do normal (×0.67)';
+                    break;
+                case 'acima-peso':
+                    icone = '⚖️';
+                    descricao = 'Acima do Peso';
+                    efeito = 'Peso = 130% do normal (×1.3)';
+                    break;
+                case 'gordo':
+                    icone = '⚖️';
+                    descricao = 'Gordo';
+                    efeito = 'Peso = 150% do normal (×1.5)';
+                    break;
+                case 'muito-gordo':
+                    icone = '⚖️';
+                    descricao = 'Muito Gordo';
+                    efeito = 'Peso = 200% do normal (×2.0)';
+                    break;
+                case 'nanismo':
+                    icone = '📏';
+                    descricao = 'Nanismo';
+                    efeito = 'Altura máxima: 1.32m';
+                    break;
+                case 'gigantismo':
+                    icone = '📏';
+                    descricao = 'Gigantismo';
+                    efeito = 'Altura acima do máximo racial';
+                    break;
+                default:
+                    icone = '🔹';
+                    descricao = carac.nome;
+                    efeito = carac.efeitos;
+            }
+            
+            return `
+                <div class="desvantagem-item">
+                    <div class="desvantagem-icone">${icone}</div>
+                    <div class="desvantagem-info">
+                        <strong>${descricao}</strong>
+                        <small>${efeito}</small>
+                    </div>
+                    <div class="desvantagem-pontos">
+                        ${carac.pontos >= 0 ? '+' : ''}${carac.pontos}
+                    </div>
                 </div>
-                <div class="desvantagem-pontos">
-                    ${caracteristica.pontos >= 0 ? '+' : ''}${caracteristica.pontos}
-                </div>
-            </div>
-        `;
+            `;
+        }).join('');
     }
 
     obterFaixaAltura(st) {
@@ -367,12 +363,6 @@ class SistemaAlturaPeso {
             if (e.detail && e.detail.ST !== undefined) {
                 this.atualizarST(e.detail.ST);
             }
-        });
-
-        // ✅ EVENTO CRÍTICO: Escutar mudanças nas características físicas
-        document.addEventListener('caracteristicasFisicasAlteradas', () => {
-            this.aplicarLimitesAltura();
-            this.atualizarDisplay();
         });
 
         const inputST = document.getElementById('ST');
@@ -517,7 +507,6 @@ class SistemaAlturaPeso {
     }
 }
 
-// INICIALIZAÇÃO GLOBAL
 let sistemaAlturaPeso;
 
 document.addEventListener('DOMContentLoaded', function() {

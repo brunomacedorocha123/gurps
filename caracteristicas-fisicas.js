@@ -1,4 +1,21 @@
-// caracteristicas-fisicas.js - VERSÃO COMPLETA COM EVENTO FUNCIONAL
+// caracteristicas-fisicas.js - VERSÃO COMPLETA COM PONTE
+window.ponteCaracteristicas = {
+    caracteristicasAtivas: [],
+    
+    atualizarDoCardEsquerda: function(caracteristicas) {
+        console.log("🔄 PONTE: Atualizando características", caracteristicas);
+        this.caracteristicasAtivas = caracteristicas;
+        
+        if (window.sistemaAlturaPeso) {
+            window.sistemaAlturaPeso.atualizarDisplay();
+        }
+    },
+    
+    obterCaracteristicasAtivas: function() {
+        return this.caracteristicasAtivas;
+    }
+};
+
 class SistemaCaracteristicasFisicas {
     constructor() {
         this.caracteristicas = {
@@ -95,6 +112,10 @@ class SistemaCaracteristicasFisicas {
         this.carregarDadosSalvos();
         this.configurarEventos();
         this.atualizarDisplay();
+        
+        // ✅ INICIALIZAR PONTE COM DADOS EXISTENTES
+        window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
+        
         this.inicializado = true;
     }
 
@@ -144,7 +165,9 @@ class SistemaCaracteristicasFisicas {
         
         this.atualizarDisplay();
         this.salvarDados();
-        this.notificarAlturaPeso(); // ✅ EVENTO CRÍTICO
+        
+        // ✅ COMUNICAÇÃO CRÍTICA: Atualizar ponte global
+        window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
         
         this.mostrarMensagem(`"${caracteristicaObj.nome}" adicionada!`, 'sucesso');
         
@@ -175,33 +198,12 @@ class SistemaCaracteristicasFisicas {
             
             this.atualizarDisplay();
             this.salvarDados();
-            this.notificarAlturaPeso(); // ✅ EVENTO CRÍTICO
+            
+            // ✅ COMUNICAÇÃO CRÍTICA: Atualizar ponte global
+            window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
             
             this.mostrarMensagem(`"${caracteristicaRemovida.nome}" removida!`, 'sucesso');
         }
-    }
-
-    // ✅ MÉTODO CRÍTICO CORRIGIDO: Notificar sistema altura/peso
-    notificarAlturaPeso() {
-        // DISPARAR EVENTO CORRETAMENTE
-        const evento = new CustomEvent('caracteristicasFisicasAlteradas', {
-            detail: {
-                caracteristicas: this.caracteristicasSelecionadas
-            }
-        });
-        document.dispatchEvent(evento);
-        
-        // CHAMADA DIRETA DE FALLBACK - GARANTIR QUE FUNCIONE
-        if (window.sistemaAlturaPeso && typeof window.sistemaAlturaPeso.atualizarDisplay === 'function') {
-            window.sistemaAlturaPeso.atualizarDisplay();
-        }
-        
-        // FORÇAR ATUALIZAÇÃO IMEDIATA
-        setTimeout(() => {
-            if (window.sistemaAlturaPeso && typeof window.sistemaAlturaPeso.atualizarDisplay === 'function') {
-                window.sistemaAlturaPeso.atualizarDisplay();
-            }
-        }, 100);
     }
 
     atualizarDisplay() {
@@ -380,7 +382,6 @@ class SistemaCaracteristicasFisicas {
     }
 }
 
-// INICIALIZAÇÃO GLOBAL
 let sistemaCaracteristicasFisicas;
 document.addEventListener('DOMContentLoaded', function() {
     sistemaCaracteristicasFisicas = new SistemaCaracteristicasFisicas();
