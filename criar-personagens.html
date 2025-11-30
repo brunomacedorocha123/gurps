@@ -964,12 +964,88 @@
         </div>
     </div>
 </div>
-        <!-- ABA PERÍCIAS -->
-        <div id="pericias" class="tab-content">
-            <div class="loading">
-                <div class="spinner"></div>
+        
+<!-- ABA PERÍCIAS - VERSÃO COMPLETA -->
+<div id="pericias" class="tab-content">
+    <div class="atributos-container">
+        <!-- CARD DE RESUMO DE PONTOS -->
+        <div class="pontos-section">
+            <div class="ponto-card">
+                <h3>Perícias</h3>
+                <div class="ponto-valor" id="total-pericias">+0</div>
+            </div>
+            <div class="ponto-card gastos">
+                <h3>Pontos Gastos</h3>
+                <div class="ponto-valor" id="total-pericias-adquiridas">0 pts</div>
+            </div>
+            <div class="ponto-card saldo">
+                <h3>Saldo Disponível</h3>
+                <div class="ponto-valor" id="saldo-total-pericias">150</div>
             </div>
         </div>
+
+        <!-- SEÇÃO PERÍCIAS -->
+        <h2 class="secao-titulo">Perícias</h2>
+        <div class="cards-grid principais-grid">
+            <!-- CARD PERÍCIAS DISPONÍVEIS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>🎯 Perícias Disponíveis</h3>
+                </div>
+                
+                <!-- SISTEMA DE BUSCA -->
+                <div class="busca-container">
+                    <input type="text" id="busca-pericias" placeholder="Buscar perícias..." class="atributo-input">
+                    <select id="categoria-pericias" class="atributo-input">
+                        <option value="Todas">Todas as Categorias</option>
+                        <option value="Combate">Combate</option>
+                        <option value="DX">Destreza (DX)</option>
+                        <option value="HT">Vigor (HT)</option>
+                        <option value="PERC">Percepção (PERC)</option>
+                        <option value="IQ">Inteligência (IQ)</option>
+                    </select>
+                    <select id="subcategoria-pericias" class="atributo-input">
+                        <option value="Todas">Todas Subcategorias</option>
+                    </select>
+                </div>
+
+                <!-- LISTA DE PERÍCIAS DISPONÍVEIS -->
+                <div class="lista-container" id="lista-pericias">
+                    <div class="lista-vazia">Carregando perícias...</div>
+                </div>
+            </div>
+
+            <!-- CARD PERÍCIAS ADQUIRIDAS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>✅ Perícias Adquiridas</h3>
+                    <div class="custo-pontos" id="total-pericias-adquiridas">0 pts</div>
+                </div>
+                
+                <div class="lista-container" id="pericias-adquiridas">
+                    <div class="lista-vazia">Nenhuma perícia adquirida</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA PERÍCIAS -->
+<div id="modal-pericia" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div class="modal-header">
+            <h3 id="modal-titulo-pericia">Selecionar Perícia</h3>
+        </div>
+        <div id="modal-corpo-pericia">
+            <!-- Conteúdo dinâmico será inserido aqui -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-cancelar">Cancelar</button>
+            <button class="btn btn-confirmar" disabled>Confirmar</button>
+        </div>
+    </div>
+</div>
 
         <!-- ABA TÉCNICAS -->
         <div id="tecnicas" class="tab-content">
