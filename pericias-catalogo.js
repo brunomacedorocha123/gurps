@@ -1,7 +1,8 @@
 // ===== CATÁLOGO DE PERÍCIAS - GURPS =====
 // Versão 3.0 - Catálogo Completo com Todas as Armas
 
-const catalogoPericias = {
+// CORREÇÃO PRINCIPAL: Exportar diretamente para window
+window.catalogoPericias = {
     // PERÍCIAS DE COMBATE (Base DX) - CATÁLOGO COMPLETO
     "Combate": [
         // ===== ESGRIMA =====
@@ -285,6 +286,26 @@ const catalogoPericias = {
             descricao: "Proezas de ginástica, cambalhotas, rolamentos.",
             prereq: "DX-6",
             categoria: "DX"
+        },
+        {
+            id: "atletismo",
+            nome: "Atletismo",
+            atributo: "DX",
+            dificuldade: "Fácil",
+            custoBase: 1,
+            descricao: "Correr, saltar, escalar e outras atividades físicas.",
+            prereq: "DX-4",
+            categoria: "DX"
+        },
+        {
+            id: "furtividade",
+            nome: "Furtividade",
+            atributo: "DX",
+            dificuldade: "Média",
+            custoBase: 2,
+            descricao: "Mover-se silenciosamente e passar despercebido.",
+            prereq: "DX-5",
+            categoria: "DX"
         }
     ],
 
@@ -298,6 +319,26 @@ const catalogoPericias = {
             custoBase: 1,
             descricao: "Socializar e festejar. Sucesso concede +2 em reação.",
             prereq: "HT-4", 
+            categoria: "HT"
+        },
+        {
+            id: "natacao",
+            nome: "Natação",
+            atributo: "HT",
+            dificuldade: "Fácil",
+            custoBase: 1,
+            descricao: "Nadar em diferentes condições aquáticas.",
+            prereq: "HT-4",
+            categoria: "HT"
+        },
+        {
+            id: "sobrevivencia",
+            nome: "Sobrevivência",
+            atributo: "HT",
+            dificuldade: "Média",
+            custoBase: 2,
+            descricao: "Sobreviver em ambientes selvagens e hostis.",
+            prereq: "HT-5",
             categoria: "HT"
         }
     ],
@@ -313,6 +354,26 @@ const catalogoPericias = {
             descricao: "Encontrar objetos úteis que outros não localizam.",
             prereq: "PERC-4",
             categoria: "PERC"
+        },
+        {
+            id: "observacao",
+            nome: "Observação",
+            atributo: "PERC",
+            dificuldade: "Média",
+            custoBase: 2,
+            descricao: "Perceber detalhes importantes no ambiente.",
+            prereq: "PERC-5",
+            categoria: "PERC"
+        },
+        {
+            id: "rastreamento",
+            nome: "Rastreamento",
+            atributo: "PERC",
+            dificuldade: "Média",
+            custoBase: 2,
+            descricao: "Seguir trilhas e rastros de criaturas/pessoas.",
+            prereq: "PERC-5",
+            categoria: "PERC"
         }
     ],
 
@@ -327,6 +388,36 @@ const catalogoPericias = {
             descricao: "Comprar e vender. Bônus em testes de reação comerciais.",
             prereq: "IQ-5",
             categoria: "IQ"
+        },
+        {
+            id: "diplomacia",
+            nome: "Diplomacia",
+            atributo: "IQ",
+            dificuldade: "Difícil",
+            custoBase: 4,
+            descricao: "Negociar e resolver conflitos diplomaticamente.",
+            prereq: "IQ-6",
+            categoria: "IQ"
+        },
+        {
+            id: "primeiros-socorros",
+            nome: "Primeiros Socorros",
+            atributo: "IQ",
+            dificuldade: "Média",
+            custoBase: 2,
+            descricao: "Tratar ferimentos e estabilizar pacientes.",
+            prereq: "IQ-5",
+            categoria: "IQ"
+        },
+        {
+            id: "estrategia",
+            nome: "Estratégia",
+            atributo: "IQ",
+            dificuldade: "Difícil",
+            custoBase: 4,
+            descricao: "Planejar e executar estratégias militares.",
+            prereq: "IQ-6",
+            categoria: "IQ"
         }
     ]
 };
@@ -335,8 +426,8 @@ const catalogoPericias = {
 
 function obterTodasPericias() {
     const todas = [];
-    for (const categoria in catalogoPericias) {
-        todas.push(...catalogoPericias[categoria]);
+    for (const categoria in window.catalogoPericias) {
+        todas.push(...window.catalogoPericias[categoria]);
     }
     return todas;
 }
@@ -375,7 +466,7 @@ function obterPericiaPorId(id) {
 }
 
 function obterCategorias() {
-    return Object.keys(catalogoPericias);
+    return Object.keys(window.catalogoPericias);
 }
 
 function obterSubcategorias(categoria = "") {
@@ -394,8 +485,10 @@ function obterSubcategorias(categoria = "") {
 }
 
 // ===== EXPORTAÇÃO PARA USO NO SISTEMA PRINCIPAL =====
-window.catalogoPericias = catalogoPericias;
 window.buscarPericias = buscarPericias;
 window.obterPericiaPorId = obterPericiaPorId;
 window.obterCategorias = obterCategorias;
 window.obterSubcategorias = obterSubcategorias;
+window.obterTodasPericias = obterTodasPericias;
+
+console.log('✅ Catálogo de perícias carregado com', obterTodasPericias().length, 'perícias disponíveis');
