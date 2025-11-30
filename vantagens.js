@@ -1,4 +1,4 @@
-// vantagens.js - SÓ A LÓGICA DO CARALHO
+// vantagens.js - SISTEMA COMPLETO E FUNCIONAL
 
 class SistemaVantagens {
     constructor() {
@@ -6,32 +6,62 @@ class SistemaVantagens {
         this.desvantagensAdquiridas = [];
         this.peculiaridades = [];
         
-        // Vai pegar os dados dos catálogos depois
+        // Pega os catálogos (que devem ser carregados ANTES)
         this.catalogoVantagens = window.VANTAGENS_CATALOGO || {};
         this.catalogoDesvantagens = window.DESVANTAGENS_CATALOGO || {};
     }
 
     // INICIALIZAR SISTEMA
     inicializar() {
+        console.log('Iniciando Sistema de Vantagens...');
         this.configurarEventListeners();
         this.carregarDados();
+        this.carregarCatalogos();
         this.atualizarTudo();
         console.log('Sistema de Vantagens Inicializado!');
+    }
+
+    // CARREGAR CATÁLOGOS INICIAIS
+    carregarCatalogos() {
+        console.log('Carregando catálogos...');
+        this.mostrarVantagens(Object.values(this.catalogoVantagens));
+        this.mostrarDesvantagens(Object.values(this.catalogoDesvantagens));
     }
 
     // CONFIGURAR EVENTOS
     configurarEventListeners() {
         // Busca vantagens
-        document.getElementById('busca-vantagens')?.addEventListener('input', () => this.filtrarVantagens());
-        document.getElementById('categoria-vantagens')?.addEventListener('change', () => this.filtrarVantagens());
+        const buscaVantagens = document.getElementById('busca-vantagens');
+        const categoriaVantagens = document.getElementById('categoria-vantagens');
+        
+        if (buscaVantagens) {
+            buscaVantagens.addEventListener('input', () => this.filtrarVantagens());
+        }
+        if (categoriaVantagens) {
+            categoriaVantagens.addEventListener('change', () => this.filtrarVantagens());
+        }
         
         // Busca desvantagens
-        document.getElementById('busca-desvantagens')?.addEventListener('input', () => this.filtrarDesvantagens());
-        document.getElementById('categoria-desvantagens')?.addEventListener('change', () => this.filtrarDesvantagens());
+        const buscaDesvantagens = document.getElementById('busca-desvantagens');
+        const categoriaDesvantagens = document.getElementById('categoria-desvantagens');
+        
+        if (buscaDesvantagens) {
+            buscaDesvantagens.addEventListener('input', () => this.filtrarDesvantagens());
+        }
+        if (categoriaDesvantagens) {
+            categoriaDesvantagens.addEventListener('change', () => this.filtrarDesvantagens());
+        }
         
         // Peculiaridades
-        document.getElementById('nova-peculiaridade')?.addEventListener('input', () => this.atualizarContadorPeculiaridade());
-        document.getElementById('btn-adicionar-peculiaridade')?.addEventListener('click', () => this.adicionarPeculiaridade());
+        const novaPeculiaridade = document.getElementById('nova-peculiaridade');
+        const btnPeculiaridade = document.getElementById('btn-adicionar-peculiaridade');
+        
+        if (novaPeculiaridade) {
+            novaPeculiaridade.addEventListener('input', () => this.atualizarContadorPeculiaridade());
+        }
+        if (btnPeculiaridade) {
+            btnPeculiaridade.addEventListener('click', () => this.adicionarPeculiaridade());
+        }
         
         // Cliques dinâmicos
         document.addEventListener('click', (e) => this.manipularClique(e));
@@ -85,7 +115,10 @@ class SistemaVantagens {
     // MOSTRAR VANTAGENS NA LISTA
     mostrarVantagens(vantagens) {
         const lista = document.getElementById('lista-vantagens');
-        if (!lista) return;
+        if (!lista) {
+            console.error('Elemento lista-vantagens não encontrado!');
+            return;
+        }
         
         lista.innerHTML = '';
         
@@ -103,7 +136,10 @@ class SistemaVantagens {
     // MOSTRAR DESVANTAGENS NA LISTA
     mostrarDesvantagens(desvantagens) {
         const lista = document.getElementById('lista-desvantagens');
-        if (!lista) return;
+        if (!lista) {
+            console.error('Elemento lista-desvantagens não encontrado!');
+            return;
+        }
         
         lista.innerHTML = '';
         
@@ -146,14 +182,26 @@ class SistemaVantagens {
         const lista = tipo === 'vantagem' ? this.vantagensAdquiridas : this.desvantagensAdquiridas;
         
         const item = catalogo[id];
-        if (!item || lista.find(i => i.id === id)) return;
+        if (!item) {
+            console.error('Item não encontrado:', id);
+            return;
+        }
+        
+        if (lista.find(i => i.id === id)) {
+            console.log('Item já adicionado:', id);
+            return;
+        }
         
         // Se for variável, abrir modal de configuração
         if (item.custo === 'variavel') {
             this.abrirModalConfiguracao(item, tipo);
         } else {
             // Item simples - adicionar direto
-            lista.push({...item});
+            const itemParaAdicionar = {
+                ...item,
+                idUnico: `${item.id}_${Date.now()}` // ID único para remoção
+            };
+            lista.push(itemParaAdicionar);
             this.atualizarTudo();
         }
     }
@@ -161,9 +209,9 @@ class SistemaVantagens {
     // REMOVER ITEM
     removerItem(id, tipo) {
         if (tipo === 'vantagem') {
-            this.vantagensAdquiridas = this.vantagensAdquiridas.filter(v => v.id !== id);
+            this.vantagensAdquiridas = this.vantagensAdquiridas.filter(v => v.idUnico !== id);
         } else if (tipo === 'desvantagem') {
-            this.desvantagensAdquiridas = this.desvantagensAdquiridas.filter(d => d.id !== id);
+            this.desvantagensAdquiridas = this.desvantagensAdquiridas.filter(d => d.idUnico !== id);
         } else if (tipo === 'peculiaridade') {
             this.peculiaridades.splice(parseInt(id), 1);
         }
@@ -190,7 +238,13 @@ class SistemaVantagens {
         const input = document.getElementById('nova-peculiaridade');
         const texto = input.value.trim();
         
-        if (texto.length === 0 || texto.length > 30 || this.peculiaridades.length >= 5) {
+        if (texto.length === 0 || texto.length > 30) {
+            alert('Peculiaridade deve ter entre 1 e 30 caracteres!');
+            return;
+        }
+        
+        if (this.peculiaridades.length >= 5) {
+            alert('Máximo de 5 peculiaridades atingido!');
             return;
         }
         
@@ -233,7 +287,7 @@ class SistemaVantagens {
                     <strong>${vantagem.nome}</strong>
                     <div class="item-custo">+${custo} pts</div>
                 </div>
-                <button class="btn-remover" data-id="${vantagem.id}" data-tipo="vantagem">×</button>
+                <button class="btn-remover" data-id="${vantagem.idUnico}" data-tipo="vantagem">×</button>
             `;
             lista.appendChild(item);
         });
@@ -267,7 +321,7 @@ class SistemaVantagens {
                     <strong>${desvantagem.nome}</strong>
                     <div class="item-custo">-${custo} pts</div>
                 </div>
-                <button class="btn-remover" data-id="${desvantagem.id}" data-tipo="desvantagem">×</button>
+                <button class="btn-remover" data-id="${desvantagem.idUnico}" data-tipo="desvantagem">×</button>
             `;
             lista.appendChild(item);
         });
@@ -354,9 +408,9 @@ class SistemaVantagens {
 
     // MODAL DE CONFIGURAÇÃO (para itens variáveis)
     abrirModalConfiguracao(item, tipo) {
-        // Implementar modais específicos para cada item variável
         console.log(`Abrir modal para: ${item.nome} (${tipo})`);
         // TODO: Implementar modais para Abençoado, Barulhento, etc.
+        alert(`Configuração para ${item.nome} - Em desenvolvimento`);
     }
 
     // SALVAR/CARREGAR DADOS
