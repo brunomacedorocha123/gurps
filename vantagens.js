@@ -146,6 +146,7 @@ class SistemaVantagens {
                 this.peculiaridades = dados.peculiaridades || [];
             }
         } catch (e) {
+            console.error('Erro ao carregar dados:', e);
         }
     }
 
@@ -157,6 +158,7 @@ class SistemaVantagens {
             };
             localStorage.setItem('vantagensDados', JSON.stringify(dados));
         } catch (e) {
+            console.error('Erro ao salvar dados:', e);
         }
     }
 
@@ -239,7 +241,10 @@ class SistemaVantagens {
                 return `${vantagem.custo} pontos`;
             case 'niveis':
                 if (vantagem.nome === "Aptidão Mágica") {
-                    return "5+10/nível";
+                    return "5 (nível 0) +10/nível";
+                }
+                if (vantagem.nome === "Duro de Matar") {
+                    return "2/nível";
                 }
                 return `${vantagem.custoBase}/nível`;
             case 'opcoes':
@@ -269,6 +274,7 @@ class SistemaVantagens {
         this.fecharModal();
         this.vantagemAtualModal = vantagem;
         
+        // CORREÇÃO: Definir nível inicial correto
         if (vantagem.template === 'niveis') {
             this.nivelAtualModal = vantagem.nome === "Aptidão Mágica" ? 0 : 1;
         }
@@ -325,9 +331,10 @@ class SistemaVantagens {
     criarModalComNiveis(nome, vantagem) {
         const isAptidaoMagica = nome === "Aptidão Mágica";
         const nivelMinimo = isAptidaoMagica ? 0 : 1;
-        const nivelInicial = this.nivelAtualModal;
+        // CORREÇÃO: Garantir nível inicial correto
+        this.nivelAtualModal = nivelMinimo;
         
-        const custoInicial = this.calcularCustoNivel(vantagem, nivelInicial);
+        const custoInicial = this.calcularCustoNivel(vantagem, this.nivelAtualModal);
 
         let limitacoesHTML = '';
         if (isAptidaoMagica && vantagem.limitacoes) {
@@ -349,20 +356,20 @@ class SistemaVantagens {
                         <div class="controle-niveis">
                             <div class="nivel-display">
                                 <button class="btn-nivel" onclick="sistemaVantagens.alterarNivel(-1)" 
-                                        ${nivelInicial <= nivelMinimo ? 'disabled' : ''}>−</button>
+                                        ${this.nivelAtualModal <= nivelMinimo ? 'disabled' : ''}>−</button>
                                 
                                 <div class="nivel-info">
-                                    <div class="nivel-valor">${nivelInicial}</div>
-                                    <div class="nivel-tipo">${this.getTipoNivel(nome, nivelInicial)}</div>
+                                    <div class="nivel-valor">${this.nivelAtualModal}</div>
+                                    <div class="nivel-tipo">${this.getTipoNivel(nome, this.nivelAtualModal)}</div>
                                 </div>
                                 
                                 <button class="btn-nivel" onclick="sistemaVantagens.alterarNivel(1)" 
-                                        ${nivelInicial >= vantagem.maxNiveis ? 'disabled' : ''}>+</button>
+                                        ${this.nivelAtualModal >= vantagem.maxNiveis ? 'disabled' : ''}>+</button>
                             </div>
                             
                             <div class="nivel-custo-display">
                                 <strong>Custo: <span id="custoNivelAtual">${custoInicial}</span> pontos</strong>
-                                ${isAptidaoMagica && nivelInicial > 0 ? `<br><small>(5 pontos base + ${10 * nivelInicial} por níveis)</small>` : ''}
+                                ${isAptidaoMagica && this.nivelAtualModal > 0 ? `<br><small>(5 pontos base + ${10 * this.nivelAtualModal} por níveis)</small>` : ''}
                             </div>
                         </div>
 
@@ -390,20 +397,24 @@ class SistemaVantagens {
         return "Nível";
     }
 
- // ===== CORREÇÃO FINAL - SEPARAÇÃO CLARA =====
-calcularCustoNivel(vantagem, nivel) {
-    // APTIDÃO MÁGICA: 5 pontos base + 10 por nível
-    if (vantagem.nome === "Aptidão Mágica") {
-        return nivel === 0 ? 5 : 5 + (10 * nivel);
+    // ===== CORREÇÃO FINAL - CÁLCULO DE CUSTOS CORRETO =====
+    calcularCustoNivel(vantagem, nivel) {
+        // APTIDÃO MÁGICA: 5 pontos base + 10 por nível
+        if (vantagem.nome === "Aptidão Mágica") {
+            if (nivel === 0) {
+                return 5; // Nível 0 custa 5 pontos
+            } else {
+                return 5 + (10 * nivel); // Nível 1: 15, Nível 2: 25, etc.
+            }
+        }
+        
+        // DURO DE MATAR: 2 pontos por nível  
+        if (vantagem.nome === "Duro de Matar") {
+            return 2 * nivel; // Nível 1: 2, Nível 2: 4, etc.
+        }
+        
+        return 0;
     }
-    
-    // DURO DE MATAR: 2 pontos por nível  
-    if (vantagem.nome === "Duro de Matar") {
-        return 2 * nivel;
-    }
-    
-    return 0;
-}
 
     criarLimitacoesAptidaoMagica() {
         const vantagem = this.vantagemAtualModal;
@@ -1202,6 +1213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
     } catch (error) {
+        console.error('Erro na inicialização:', error);
     }
 });
 
