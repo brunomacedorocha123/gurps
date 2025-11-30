@@ -746,68 +746,65 @@
                         </div>
                     </div>
 
-                    <!-- CARD ALTURA E PESO -->
-                    <div class="caracteristica-card">
-                        <div class="card-header">
-                            <i class="fas fa-ruler-combined"></i>
-                            <h3>Altura e Peso</h3>
-                            <span class="status-badge" id="statusFisico">Normal</span>
-                        </div>
-                        <div class="card-content">
-                            <!-- CONTROLES ALTURA -->
-                            <div class="fisica-control">
-                                <label>📏 Altura (metros):</label>
-                                <div class="controle-numerico">
-                                    <button class="btn-controle" onclick="ajustarAltura(-0.01)">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <input type="number" id="altura" value="1.70" step="0.01" min="1.30" max="2.50" class="fisica-input">
-                                    <button class="btn-controle" onclick="ajustarAltura(0.01)">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                                <div id="statusAltura" class="status-info"></div>
-                            </div>
+                  <!-- CARD ALTURA E PESO -->
+<div class="caracteristica-card">
+    <div class="card-header">
+        <i class="fas fa-ruler-combined"></i>
+        <h3>Altura e Peso</h3>
+        <span class="status-badge" id="statusFisico">Normal</span>
+    </div>
+    <div class="card-content">
+        <!-- CONTROLES ALTURA -->
+        <div class="fisica-control">
+            <label>📏 Altura (metros):</label>
+            <div class="controle-numerico">
+                <button class="btn-controle" onclick="ajustarAltura(-0.01)">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <input type="number" id="altura" value="1.70" step="0.01" min="1.30" max="2.50" class="fisica-input">
+                <button class="btn-controle" onclick="ajustarAltura(0.01)">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div id="statusAltura" class="status-info"></div>
+        </div>
 
-                            <!-- CONTROLES PESO -->
-                            <div class="fisica-control">
-                                <label>⚖️ Peso (kg):</label>
-                                <div class="controle-numerico">
-                                    <button class="btn-controle" onclick="ajustarPeso(-1)">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <input type="number" id="peso" value="70" step="1" min="30" max="200" class="fisica-input">
-                                    <button class="btn-controle" onclick="ajustarPeso(1)">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                                <div id="statusPeso" class="status-info"></div>
-                            </div>
+        <!-- CONTROLES PESO -->
+        <div class="fisica-control">
+            <label>⚖️ Peso (kg):</label>
+            <div class="controle-numerico">
+                <button class="btn-controle" onclick="ajustarPeso(-1)">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <input type="number" id="peso" value="70" step="1" min="30" max="200" class="fisica-input">
+                <button class="btn-controle" onclick="ajustarPeso(1)">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div id="statusPeso" class="status-info"></div>
+        </div>
 
-                            <!-- INFO BASE ST -->
-                            <div class="fisica-info">
-                                <div class="info-row">
-                                    <span>ST Base:</span>
-                                    <strong id="stBase">10</strong>
-                                </div>
-                                <div class="info-row">
-                                    <span>Altura Média:</span>
-                                    <span id="alturaMedia">1.70m</span>
-                                </div>
-                                <div class="info-row">
-                                    <span>Peso Médio:</span>
-                                    <span id="pesoMedio">70kg</span>
-                                </div>
-                                <div class="info-row">
-                                    <span>Modificador Característica:</span>
-                                    <span id="modificadorPeso">1.0x</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- INFO BASE ST - CORRIGIDO -->
+        <div class="fisica-info">
+            <div class="info-row">
+                <span>ST Base:</span>
+                <strong id="stBase">10</strong>
+            </div>
+            <div class="info-row">
+                <span>Faixa de Altura (ST):</span>
+                <span id="alturaFaixa">1.58m - 1.83m</span>
+            </div>
+            <div class="info-row">
+                <span>Faixa de Peso (ST):</span>
+                <span id="pesoFaixa">57.5kg - 87.5kg</span>
+            </div>
+            <div class="info-row">
+                <span>Status:</span>
+                <span id="modificadorPeso">Dentro da faixa</span>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- ABA VANTAGENS -->
         <div id="vantagens" class="tab-content">
