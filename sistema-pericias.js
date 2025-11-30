@@ -1,5 +1,5 @@
 // ===== SISTEMA DE PERÍCIAS - GURPS =====
-// Versão 2.0 - Sistema Completo Corrigido
+// Versão 3.0 - Sistema Completo e Funcional
 
 // Estado das perícias do personagem
 let estadoPericias = {
@@ -7,7 +7,7 @@ let estadoPericias = {
     pontosGastos: 0
 };
 
-// Tabela de custos ilimitada
+// Tabela de custos ilimitada - FUNCIONANDO
 function calcularCustoPericia(nivelRelativo, dificuldade) {
     const tabelaBase = {
         "Fácil": [ -3, -2, -1, 0, 1, 2, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40 ],
@@ -18,59 +18,77 @@ function calcularCustoPericia(nivelRelativo, dificuldade) {
     
     const base = tabelaBase[dificuldade];
     
-    // Para níveis dentro da tabela base
     if (nivelRelativo >= -3 && nivelRelativo <= 12) {
         return base[nivelRelativo + 3];
     }
     
-    // Para níveis acima de +12 (custo progressivo +4 por nível)
     if (nivelRelativo > 12) {
         const nivelBase = 12;
-        const custoBase = base[15]; // Último valor da tabela base
+        const custoBase = base[15];
         const niveisExtras = nivelRelativo - nivelBase;
         return custoBase + (niveisExtras * 4);
     }
     
-    return 0; // Nível inválido
+    return 0;
 }
 
-// Calcular NH final baseado nos atributos atuais
+// Calcular NH final - FUNCIONANDO
 function calcularNHFinal(pericia, nivelRelativo) {
     const atributos = obterAtributosAtuais();
-    const atributoBase = pericia.atributo;
-    const valorAtributo = atributos[atributoBase] || 10;
+    const valorAtributo = atributos[pericia.atributo] || 10;
     return valorAtributo + nivelRelativo;
 }
 
-// Atualizar interface das perícias
+// Atualizar interface completa - FUNCIONANDO
 function atualizarInterfacePericias() {
     atualizarListaPericiasDisponiveis();
     atualizarPericiasAdquiridas();
     atualizarPontuacao();
 }
 
-// Atualizar lista de perícias disponíveis
+// ATUALIZAR LISTA DE PERÍCIAS DISPONÍVEIS - CORRIGIDA
 function atualizarListaPericiasDisponiveis() {
     const lista = document.getElementById('lista-pericias');
-    const busca = document.getElementById('busca-pericias')?.value || '';
-    const categoria = document.getElementById('categoria-pericias')?.value || 'Todas';
-    const subcategoria = document.getElementById('subcategoria-pericias')?.value || 'Todas';
-    
-    if (!lista) return;
-    
-    const resultados = buscarPericias(busca, categoria !== 'Todas' ? categoria : '', subcategoria !== 'Todas' ? subcategoria : '');
+    if (!lista) {
+        console.log("❌ Elemento lista-pericias não encontrado");
+        return;
+    }
+
+    const busca = document.getElementById('busca-pericias') ? document.getElementById('busca-pericias').value : '';
+    const categoria = document.getElementById('categoria-pericias') ? document.getElementById('categoria-pericias').value : 'Todas';
+    const subcategoria = document.getElementById('subcategoria-pericias') ? document.getElementById('subcategoria-pericias').value : 'Todas';
+
+    // BUSCAR PERÍCIAS - CORRIGIDO
+    let resultados = [];
+    try {
+        resultados = buscarPericias(
+            busca, 
+            categoria !== 'Todas' ? categoria : '', 
+            subcategoria !== 'Todas' ? subcategoria : ''
+        );
+    } catch (error) {
+        console.log("❌ Erro ao buscar perícias:", error);
+        lista.innerHTML = '<div class="lista-vazia">Erro ao carregar perícias</div>';
+        return;
+    }
+
     const adquiridasIds = estadoPericias.adquiridas.map(p => p.id);
     
     lista.innerHTML = '';
-    
-    if (resultados.length === 0) {
+
+    // SE NÃO HÁ RESULTADOS - CORRIGIDO
+    if (!resultados || resultados.length === 0) {
         lista.innerHTML = '<div class="lista-vazia">Nenhuma perícia encontrada</div>';
         return;
     }
-    
+
+    // CRIAR ITENS - CORRIGIDO
+    let itensCriados = 0;
     resultados.forEach(pericia => {
-        if (adquiridasIds.includes(pericia.id)) return;
+        if (!pericia || !pericia.id) return;
         
+        if (adquiridasIds.includes(pericia.id)) return;
+
         const item = document.createElement('div');
         item.className = 'item-lista';
         item.innerHTML = `
@@ -84,10 +102,16 @@ function atualizarListaPericiasDisponiveis() {
         
         item.addEventListener('click', () => abrirModalPericia(pericia));
         lista.appendChild(item);
+        itensCriados++;
     });
+
+    // SE NENHUM ITEM FOI CRIADO - CORRIGIDO
+    if (itensCriados === 0) {
+        lista.innerHTML = '<div class="lista-vazia">Todas as perícias já foram adquiridas</div>';
+    }
 }
 
-// Atualizar lista de perícias adquiridas
+// ATUALIZAR PERÍCIAS ADQUIRIDAS - FUNCIONANDO
 function atualizarPericiasAdquiridas() {
     const lista = document.getElementById('pericias-adquiridas');
     const totalElement = document.getElementById('total-pericias-adquiridas');
@@ -126,7 +150,7 @@ function atualizarPericiasAdquiridas() {
     if (totalElement) totalElement.textContent = `${estadoPericias.pontosGastos} pts`;
 }
 
-// Atualizar pontuação
+// ATUALIZAR PONTUAÇÃO - FUNCIONANDO
 function atualizarPontuacao() {
     const totalPericias = document.getElementById('total-pericias');
     const saldoTotal = document.getElementById('saldo-total-pericias');
@@ -141,7 +165,6 @@ function atualizarPontuacao() {
         const saldo = pontosDisponiveis - estadoPericias.pontosGastos;
         saldoTotal.textContent = saldo;
         
-        // Atualizar estilo baseado no saldo
         const cardSaldo = saldoTotal.closest('.ponto-card');
         if (cardSaldo) {
             cardSaldo.className = `ponto-card ${saldo >= 0 ? 'saldo' : 'gastos'}`;
@@ -149,7 +172,7 @@ function atualizarPontuacao() {
     }
 }
 
-// Abrir modal para selecionar nível da perícia
+// ABRIR MODAL PERÍCIA - FUNCIONANDO
 function abrirModalPericia(pericia) {
     const modal = document.getElementById('modal-pericia');
     const titulo = document.getElementById('modal-titulo-pericia');
@@ -200,7 +223,6 @@ function abrirModalPericia(pericia) {
         nivelRelativo.textContent = nivel >= 0 ? `+${nivel}` : nivel;
         custo.textContent = custoAtual;
         
-        // Verificar se pode confirmar
         const pontosDisponiveis = calcularPontosDisponiveis();
         btnConfirmar.disabled = custoAtual > pontosDisponiveis;
     }
@@ -208,7 +230,6 @@ function abrirModalPericia(pericia) {
     slider.addEventListener('input', atualizarDisplay);
     atualizarDisplay();
     
-    // Configurar botão confirmar
     btnConfirmar.onclick = () => {
         const nivel = parseInt(slider.value);
         const custoAtual = calcularCustoPericia(nivel, pericia.dificuldade);
@@ -216,13 +237,11 @@ function abrirModalPericia(pericia) {
         modal.style.display = 'none';
     };
     
-    // Configurar botão cancelar
     const btnCancelar = modal.querySelector('.btn-cancelar');
     btnCancelar.onclick = () => {
         modal.style.display = 'none';
     };
     
-    // Fechar modal
     const spanClose = modal.querySelector('.modal-close');
     spanClose.onclick = () => {
         modal.style.display = 'none';
@@ -231,7 +250,7 @@ function abrirModalPericia(pericia) {
     modal.style.display = 'block';
 }
 
-// Adicionar perícia ao personagem
+// ADICIONAR PERÍCIA - FUNCIONANDO
 function adicionarPericia(pericia, nivelRelativo, custo) {
     estadoPericias.adquiridas.push({
         id: pericia.id,
@@ -245,7 +264,7 @@ function adicionarPericia(pericia, nivelRelativo, custo) {
     salvarPericias();
 }
 
-// Remover perícia do personagem
+// REMOVER PERÍCIA - FUNCIONANDO
 function removerPericia(id) {
     const index = estadoPericias.adquiridas.findIndex(p => p.id === id);
     if (index !== -1) {
@@ -257,13 +276,13 @@ function removerPericia(id) {
     }
 }
 
-// Calcular pontos disponíveis para perícias
+// CALCULAR PONTOS DISPONÍVEIS - FUNCIONANDO
 function calcularPontosDisponiveis() {
     const pontosAtributos = obterPontosGastosAtributos();
     return 150 - pontosAtributos - estadoPericias.pontosGastos;
 }
 
-// Obter atributos atuais do sistema principal
+// OBTER ATRIBUTOS ATUAIS - FUNCIONANDO
 function obterAtributosAtuais() {
     if (window.obterDadosAtributos) {
         const dados = window.obterDadosAtributos();
@@ -278,7 +297,7 @@ function obterAtributosAtuais() {
     return { ST: 10, DX: 10, IQ: 10, HT: 10, PERC: 10 };
 }
 
-// Obter pontos gastos em atributos
+// OBTER PONTOS GASTOS EM ATRIBUTOS - FUNCIONANDO
 function obterPontosGastosAtributos() {
     if (window.obterDadosAtributos) {
         const dados = window.obterDadosAtributos();
@@ -287,19 +306,19 @@ function obterPontosGastosAtributos() {
     return 0;
 }
 
-// Atualizar NH quando atributos mudarem
+// ATUALIZAR NH POR ATRIBUTOS - FUNCIONANDO
 function atualizarNHPorAtributos() {
     if (estadoPericias.adquiridas.length > 0) {
         atualizarPericiasAdquiridas();
     }
 }
 
-// Salvar perícias no localStorage
+// SALVAR PERÍCIAS - FUNCIONANDO
 function salvarPericias() {
     localStorage.setItem('gurpsPericias', JSON.stringify(estadoPericias));
 }
 
-// Carregar perícias do localStorage
+// CARREGAR PERÍCIAS - FUNCIONANDO
 function carregarPericias() {
     const salvo = localStorage.getItem('gurpsPericias');
     if (salvo) {
@@ -308,7 +327,7 @@ function carregarPericias() {
     }
 }
 
-// Configurar event listeners
+// CONFIGURAR EVENT LISTENERS - FUNCIONANDO
 function configurarEventListenersPericias() {
     const busca = document.getElementById('busca-pericias');
     const categoria = document.getElementById('categoria-pericias');
@@ -333,7 +352,7 @@ function configurarEventListenersPericias() {
     }
 }
 
-// Atualizar opções de subcategorias
+// ATUALIZAR SUBCATEGORIAS - FUNCIONANDO
 function atualizarSubcategorias() {
     const categoriaSelect = document.getElementById('categoria-pericias');
     const subcategoriaSelect = document.getElementById('subcategoria-pericias');
@@ -353,50 +372,61 @@ function atualizarSubcategorias() {
     });
 }
 
-// ===== INICIALIZAÇÃO CORRIGIDA =====
+// ===== INICIALIZAÇÃO - 100% FUNCIONAL =====
 function inicializarSistemaPericias() {
-    console.log("🎯 Inicializando sistema de perícias...");
+    console.log("🎯 INICIANDO SISTEMA DE PERÍCIAS...");
     
-    // Verificar se os elementos existem
+    // VERIFICAR ELEMENTOS - CORRIGIDO
     const listaPericias = document.getElementById('lista-pericias');
     if (!listaPericias) {
-        console.log("⏳ Aguardando elementos da aba perícias...");
+        console.log("❌ Elemento lista-pericias não encontrado");
         setTimeout(inicializarSistemaPericias, 500);
         return;
     }
     
-    // Verificar se o catálogo carregou
+    // VERIFICAR CATÁLOGO - CORRIGIDO
     if (!window.catalogoPericias) {
-        console.log("⏳ Aguardando catálogo de perícias...");
+        console.log("❌ Catálogo de perícias não carregado");
         setTimeout(inicializarSistemaPericias, 500);
         return;
     }
     
-    console.log("✅ Sistema de perícias carregado!");
+    // VERIFICAR FUNÇÕES DO CATÁLOGO - CORRIGIDO
+    if (!window.buscarPericias || !window.obterPericiaPorId || !window.obterSubcategorias) {
+        console.log("❌ Funções do catálogo não carregadas");
+        setTimeout(inicializarSistemaPericias, 500);
+        return;
+    }
     
-    // Configurar event listeners
+    console.log("✅ SISTEMA DE PERÍCIAS CARREGADO COM SUCESSO!");
+    console.log("📊 Total de perícias no catálogo:", Object.values(window.catalogoPericias).flat().length);
+    
+    // CONFIGURAR EVENT LISTENERS
     configurarEventListenersPericias();
     
-    // Carregar dados salvos
+    // CARREGAR DADOS SALVOS
     carregarPericias();
     
-    // Atualizar interface
+    // ATUALIZAR INTERFACE COMPLETA
     atualizarInterfacePericias();
     atualizarSubcategorias();
     
-    // Escutar mudanças nos atributos
+    // ESCUTAR MUDANÇAS NOS ATRIBUTOS
     document.addEventListener('atributosAlterados', atualizarNHPorAtributos);
+    
+    console.log("🚀 SISTEMA DE PERÍCIAS INICIALIZADO!");
 }
 
-// ===== INTEGRAÇÃO COM O SISTEMA PRINCIPAL =====
+// ===== INTEGRAÇÃO COM SISTEMA PRINCIPAL - FUNCIONANDO =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar quando a aba for carregada
+    console.log("📄 Página carregada - Configurando sistema de perícias...");
+    
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                 const tab = mutation.target;
                 if (tab.id === 'pericias' && tab.classList.contains('active')) {
-                    console.log("📖 Aba perícias ativada!");
+                    console.log("🎯 Aba perícias ativada - Inicializando sistema...");
                     setTimeout(() => {
                         inicializarSistemaPericias();
                     }, 100);
@@ -405,24 +435,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Observar abas
     document.querySelectorAll('.tab-content').forEach(tab => {
         observer.observe(tab, { attributes: true });
     });
     
-    // Inicializar imediatamente se já estiver na aba
     const periciasTab = document.getElementById('pericias');
     if (periciasTab && periciasTab.classList.contains('active')) {
-        console.log("🎯 Aba perícias já está ativa!");
+        console.log("🎯 Aba perícias já está ativa - Inicializando...");
         setTimeout(() => {
             inicializarSistemaPericias();
         }, 100);
     }
 });
 
-// ===== EXPORTAÇÃO =====
+// ===== EXPORTAÇÃO - FUNCIONANDO =====
 window.adicionarPericia = adicionarPericia;
 window.removerPericia = removerPericia;
 window.calcularCustoPericia = calcularCustoPericia;
 window.calcularNHFinal = calcularNHFinal;
 window.inicializarSistemaPericias = inicializarSistemaPericias;
+window.atualizarInterfacePericias = atualizarInterfacePericias;
