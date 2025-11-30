@@ -1,4 +1,4 @@
-// caracteristicas-fisicas.js
+// caracteristicas-fisicas.js - VERSÃO 100% COMPLETA
 class SistemaCaracteristicasFisicas {
     constructor() {
         this.caracteristicas = {
@@ -92,7 +92,6 @@ class SistemaCaracteristicasFisicas {
     inicializar() {
         if (this.inicializado) return;
         
-        console.log('💪 Inicializando Sistema de Características Físicas...');
         this.carregarDadosSalvos();
         this.configurarEventos();
         this.atualizarDisplay();
@@ -100,7 +99,6 @@ class SistemaCaracteristicasFisicas {
     }
 
     configurarEventos() {
-        // Configurar eventos dos botões de adicionar características
         document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const tipo = e.target.closest('.caracteristica-item').dataset.tipo;
@@ -108,28 +106,33 @@ class SistemaCaracteristicasFisicas {
             });
         });
 
-        // Observar mudanças no ST para atualizar cálculos de peso
-        document.addEventListener('atributosAlterados', (e) => {
-            if (e.detail && e.detail.ST !== undefined) {
-                this.atualizarDisplay();
-            }
+        this.configurarEventosBotoes();
+    }
+
+    configurarEventosBotoes() {
+        document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tipo = e.target.dataset.tipo;
+                const jaSelecionada = this.caracteristicasSelecionadas.find(c => c.tipo === tipo);
+                
+                if (jaSelecionada) {
+                    this.removerCaracteristica(jaSelecionada.id);
+                } else {
+                    this.adicionarCaracteristica(tipo);
+                }
+            });
         });
     }
 
     adicionarCaracteristica(tipo) {
         const caracteristica = this.caracteristicas[tipo];
-        if (!caracteristica) {
-            console.error('Característica não encontrada:', tipo);
-            return;
-        }
+        if (!caracteristica) return;
 
-        // Verificar se já está selecionada
         if (this.caracteristicasSelecionadas.find(c => c.tipo === tipo)) {
             this.mostrarMensagem(`"${this.formatarNome(tipo)}" já está selecionada!`, 'aviso');
             return;
         }
 
-        // Remover características conflitantes
         this.removerCaracteristicasConflitantes(tipo);
 
         const caracteristicaObj = {
@@ -148,7 +151,7 @@ class SistemaCaracteristicasFisicas {
         
         this.atualizarDisplay();
         this.salvarDados();
-        this.notificarSistemaPrincipal();
+        this.notificarAlturaPeso();
         
         this.mostrarMensagem(`"${caracteristicaObj.nome}" adicionada!`, 'sucesso');
         
@@ -179,9 +182,26 @@ class SistemaCaracteristicasFisicas {
             
             this.atualizarDisplay();
             this.salvarDados();
-            this.notificarSistemaPrincipal();
+            this.notificarAlturaPeso();
             
             this.mostrarMensagem(`"${caracteristicaRemovida.nome}" removida!`, 'sucesso');
+        }
+    }
+
+    notificarAlturaPeso() {
+        const evento = new CustomEvent('caracteristicasFisicasAlteradas', {
+            detail: {
+                pontos: this.calcularPontosTotais(),
+                multiplicadorPeso: this.getMultiplicadorPeso(),
+                modificadores: this.getModificadores(),
+                caracteristicas: this.caracteristicasSelecionadas.map(c => c.tipo),
+                caracteristicasSelecionadas: this.caracteristicasSelecionadas
+            }
+        });
+        document.dispatchEvent(evento);
+        
+        if (window.sistemaAlturaPeso && typeof window.sistemaAlturaPeso.atualizarDisplay === 'function') {
+            window.sistemaAlturaPeso.atualizarDisplay();
         }
     }
 
@@ -214,23 +234,7 @@ class SistemaCaracteristicasFisicas {
             `;
         }).join('');
 
-        // Reconfigurar eventos dos botões
         this.configurarEventosBotoes();
-    }
-
-    configurarEventosBotoes() {
-        document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tipo = e.target.dataset.tipo;
-                const jaSelecionada = this.caracteristicasSelecionadas.find(c => c.tipo === tipo);
-                
-                if (jaSelecionada) {
-                    this.removerCaracteristica(jaSelecionada.id);
-                } else {
-                    this.adicionarCaracteristica(tipo);
-                }
-            });
-        });
     }
 
     atualizarCaracteristicasSelecionadas() {
@@ -323,8 +327,6 @@ class SistemaCaracteristicasFisicas {
     }
 
     mostrarMensagem(mensagem, tipo) {
-        console.log(`${tipo.toUpperCase()}: ${mensagem}`);
-        
         const cores = {
             sucesso: '#27ae60',
             erro: '#e74c3c',
@@ -332,9 +334,7 @@ class SistemaCaracteristicasFisicas {
         };
         
         const existingMessage = document.getElementById('caracteristicaMessage');
-        if (existingMessage) {
-            existingMessage.remove();
-        }
+        if (existingMessage) existingMessage.remove();
         
         const messageDiv = document.createElement('div');
         messageDiv.id = 'caracteristicaMessage';
@@ -355,13 +355,10 @@ class SistemaCaracteristicasFisicas {
         document.body.appendChild(messageDiv);
         
         setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.parentNode.removeChild(messageDiv);
-            }
+            if (messageDiv.parentNode) messageDiv.parentNode.removeChild(messageDiv);
         }, 3000);
     }
 
-    // SISTEMA DE SALVAMENTO
     carregarDadosSalvos() {
         try {
             const dadosSalvos = localStorage.getItem('sistemaCaracteristicasFisicas_data');
@@ -370,93 +367,23 @@ class SistemaCaracteristicasFisicas {
                 if (dados.caracteristicasSelecionadas) {
                     this.caracteristicasSelecionadas = dados.caracteristicasSelecionadas;
                 }
-                console.log('✅ Dados de características físicas carregados:', this.caracteristicasSelecionadas.length, 'características');
             }
-        } catch (error) {
-            console.log('❌ Erro ao carregar dados de características físicas:', error);
-        }
+        } catch (error) {}
     }
 
     salvarDados() {
         try {
             const dadosParaSalvar = {
-                caracteristicasSelecionadas: this.caracteristicasSelecionadas,
-                ultimaAtualizacao: new Date().toISOString()
+                caracteristicasSelecionadas: this.caracteristicasSelecionadas
             };
             localStorage.setItem('sistemaCaracteristicasFisicas_data', JSON.stringify(dadosParaSalvar));
-        } catch (error) {
-            console.log('❌ Erro ao salvar dados de características físicas:', error);
-        }
-    }
-
-    notificarSistemaPrincipal() {
-        if (window.sistemaCaracteristicas && typeof window.sistemaCaracteristicas.atualizarPontosTotais === 'function') {
-            window.sistemaCaracteristicas.atualizarPontosTotais();
-        }
-        
-        const evento = new CustomEvent('caracteristicasFisicasAlteradas', {
-            detail: {
-                pontos: this.calcularPontosTotais(),
-                multiplicadorPeso: this.getMultiplicadorPeso(),
-                modificadores: this.getModificadores(),
-                caracteristicas: this.caracteristicasSelecionadas.map(c => c.tipo)
-            }
-        });
-        document.dispatchEvent(evento);
-    }
-
-    // MÉTODOS PARA INTEGRAÇÃO
-    exportarDados() {
-        return {
-            caracteristicasSelecionadas: this.caracteristicasSelecionadas,
-            pontosTotais: this.calcularPontosTotais(),
-            multiplicadorPeso: this.getMultiplicadorPeso(),
-            modificadores: this.getModificadores()
-        };
-    }
-
-    carregarDados(dados) {
-        if (dados.caracteristicasSelecionadas) {
-            this.caracteristicasSelecionadas = dados.caracteristicasSelecionadas;
-            this.atualizarDisplay();
-        }
-    }
-
-    // VALIDAÇÕES
-    validarCaracteristicas() {
-        const pontos = this.calcularPontosTotais();
-        return {
-            valido: true,
-            pontos: pontos,
-            totalCaracteristicas: this.caracteristicasSelecionadas.length,
-            mensagem: `Características Físicas: ${this.caracteristicasSelecionadas.length} selecionada(s) (${pontos >= 0 ? '+' : ''}${pontos} pts)`
-        };
-    }
-
-    // LIMPAR TODAS AS CARACTERÍSTICAS
-    limparTodas() {
-        this.caracteristicasSelecionadas = [];
-        this.atualizarDisplay();
-        this.salvarDados();
-        this.notificarSistemaPrincipal();
-        this.mostrarMensagem('Todas as características físicas foram removidas!', 'sucesso');
+        } catch (error) {}
     }
 }
 
-// INICIALIZAÇÃO E EXPORTAÇÃO
 let sistemaCaracteristicasFisicas;
-
 document.addEventListener('DOMContentLoaded', function() {
     sistemaCaracteristicasFisicas = new SistemaCaracteristicasFisicas();
 });
-
-// TORNAR DISPONÍVEL GLOBALMENTE
 window.SistemaCaracteristicasFisicas = SistemaCaracteristicasFisicas;
 window.sistemaCaracteristicasFisicas = sistemaCaracteristicasFisicas;
-
-// Event listener para quando a aba características for carregada
-document.addEventListener('caracteristicasCarregadas', function() {
-    if (sistemaCaracteristicasFisicas) {
-        sistemaCaracteristicasFisicas.inicializar();
-    }
-});
