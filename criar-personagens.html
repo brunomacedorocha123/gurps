@@ -9,6 +9,7 @@
     <!-- No head do criar-personagem.html -->
 <link rel="stylesheet" href="style-atributos.css">
 <link rel="stylesheet" href="style-caracteristicas.css">
+<link rel="stylesheet" href="style-vantagens.css">
 
     <style>
         * {
@@ -946,6 +947,23 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL PARA VANTAGENS/DESVANTAGENS -->
+<div id="modal-vantagem" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div class="modal-header">
+            <h3 id="modal-titulo">Selecionar Item</h3>
+        </div>
+        <div id="modal-corpo">
+            <!-- Conteúdo dinâmico será inserido aqui -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-cancelar">Cancelar</button>
+            <button class="btn btn-confirmar" disabled>Confirmar</button>
+        </div>
+    </div>
+</div>
         <!-- ABA PERÍCIAS -->
         <div id="pericias" class="tab-content">
             <div class="loading">
@@ -1309,15 +1327,13 @@
         return document.querySelector(seletor) !== null;
     }
 </script>
-  
-<script src="catalogo-vantagens.js"></script>
-
-<!-- SEGUNDO: Sistemas básicos -->
-<script src="atributos.js"></script>
+  <script src="atributos.js"></script>
 <script src="caracteristicas-fisicas.js"></script>
 <script src="caracteristicas-altura-peso.js"></script>
 <script src="caracteristicas-aparencia.js"></script>
 <script src="caracteristicas-riqueza.js"></script>
 <script src="caracteristicas-idiomas.js"></script>
+<script src="vantagens-catalogo.js"></script>
+<script src="vantagens.js"></script>
 </body>
 </html>
