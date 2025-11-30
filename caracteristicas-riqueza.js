@@ -10,7 +10,7 @@ class SistemaRiqueza {
                 icone: "fas fa-skull-crossbones"
             },
             "pobre": { 
-                pontos: -25, 
+                pontos: -15, 
                 multiplicador: 0.2, 
                 descricao: "1/5 da riqueza média da sociedade",
                 recursos: "Muito limitados",
