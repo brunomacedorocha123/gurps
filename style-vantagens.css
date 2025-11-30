@@ -326,36 +326,74 @@
     transform: scale(1.1);
 }
 
-/* PECULIARIDADES */
+/* PECULIARIDADES - VERSÃO CORRIGIDA */
 .peculiaridade-form {
     padding: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.contador-chars {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #95a5a6;
-    font-size: 0.8em;
-}
-
-#btn-adicionar-peculiaridade {
-    margin-top: 10px;
+/* INPUT BEM GRANDE E CONFORTAVEL */
+#nova-peculiaridade {
     width: 100%;
+    padding: 20px; /* Mais padding */
+    border: 2px solid rgba(255, 140, 0, 0.3);
+    border-radius: 10px;
+    font-size: 1.1em; /* Texto maior */
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffd700;
+    transition: all 0.3s ease;
+    min-height: 80px; /* ALTURA MÍNIMA BEM MAIOR */
+    resize: vertical; /* Permite puxar para aumentar */
+    box-sizing: border-box;
+    line-height: 1.5; /* Espaçamento entre linhas */
+}
+
+#nova-peculiaridade:focus {
+    outline: none;
+    border-color: #ff8c00;
+    box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
+    min-height: 100px; /* Fica ainda maior no foco */
+}
+
+#nova-peculiaridade::placeholder {
+    color: rgba(255, 215, 0, 0.6);
+    font-size: 1em;
+}
+
+/* CONTADOR ABAIXO DO INPUT */
+.contador-chars {
+    text-align: right;
+    color: #95a5a6;
+    font-size: 0.9em;
+    margin-top: -5px;
+}
+
+.contador-chars span {
+    color: #ffd700;
+    font-weight: 600;
+}
+
+/* BOTÃO BEM POSICIONADO */
+#btn-adicionar-peculiaridade {
+    width: 100%;
+    padding: 15px; /* Botão maior também */
+    font-size: 1.2em;
+    margin-top: 10px;
 }
 
 .btn-controle {
     background: linear-gradient(45deg, #ff8c00, #ffd700);
     color: #1e1e28;
     border: none;
-    padding: 10px 20px;
+    padding: 15px 20px;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 1.1em;
 }
 
 .btn-controle:hover:not(:disabled) {
