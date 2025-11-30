@@ -1,4 +1,4 @@
-// caracteristicas-altura-peso.js - VERSÃO COM DETECÇÃO DO ST
+// caracteristicas-altura-peso.js - VERSÃO COM MODIFICADORES DE PESO
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
@@ -32,56 +32,57 @@ class SistemaAlturaPeso {
         };
     }
 
-    // MÉTODO MELHORADO: Obter ST em tempo real
-    obterSTReal() {
-        // Método 1: Tentar pegar do input ST diretamente
-        const inputST = document.getElementById('ST');
-        if (inputST && inputST.value) {
-            const st = parseInt(inputST.value);
-            if (!isNaN(st) && st >= 1 && st <= 40) {
-                return st;
-            }
-        }
-        
-        // Método 2: Tentar pegar do sistema de atributos
-        if (typeof obterDadosAtributos === 'function') {
-            try {
-                const dados = obterDadosAtributos();
-                if (dados.ST && dados.ST >= 1 && dados.ST <= 40) {
-                    return dados.ST;
-                }
-            } catch (error) {
-                // Silencioso
-            }
-        }
-        
-        return 10; // Fallback seguro
-    }
-
-    // MÉTODO MELHORADO: Verificar conformidade
+    // MÉTODO MELHORADO: Verificar conformidade com modificadores
     verificarConformidadeST() {
         const faixaAltura = this.obterFaixaAltura(this.stBase);
         const faixaPeso = this.obterFaixaPeso(this.stBase);
         
+        // Aplicar modificador de peso se houver característica física
+        const multiplicadorPeso = this.getMultiplicadorPeso();
+        const faixaPesoAjustada = {
+            min: faixaPeso.min * multiplicadorPeso,
+            max: faixaPeso.max * multiplicadorPeso
+        };
+        
         const alturaValida = this.altura >= faixaAltura.min && this.altura <= faixaAltura.max;
-        const pesoValido = this.peso >= faixaPeso.min && this.peso <= faixaPeso.max;
+        const pesoValido = this.peso >= faixaPesoAjustada.min && this.peso <= faixaPesoAjustada.max;
 
         return {
             alturaValida,
             pesoValido,
             faixaAltura,
-            faixaPeso,
+            faixaPeso: faixaPesoAjustada, // Retorna a faixa AJUSTADA
+            faixaPesoOriginal: faixaPeso, // Mantém a original para referência
+            multiplicadorPeso,
             mensagemAltura: alturaValida ? 
                 `Dentro da faixa para ST ${this.stBase}` : 
                 this.altura < faixaAltura.min ? 
                     `Abaixo do mínimo (${faixaAltura.min}m)` :
                     `Acima do máximo (${faixaAltura.max}m)`,
             mensagemPeso: pesoValido ? 
-                `Dentro da faixa para ST ${this.stBase}` : 
-                this.peso < faixaPeso.min ? 
-                    `Abaixo do mínimo (${faixaPeso.min}kg)` :
-                    `Acima do máximo (${faixaPeso.max}kg)`
+                `Dentro da faixa ajustada para ST ${this.stBase}` : 
+                this.peso < faixaPesoAjustada.min ? 
+                    `Abaixo do mínimo ajustado (${faixaPesoAjustada.min.toFixed(1)}kg)` :
+                    `Acima do máximo ajustado (${faixaPesoAjustada.max.toFixed(1)}kg)`
         };
+    }
+
+    // MÉTODO: Obter multiplicador de peso das características físicas
+    getMultiplicadorPeso() {
+        if (!window.sistemaCaracteristicasFisicas) return 1.0;
+        
+        const caracteristicasAtivas = window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas;
+        const caracteristicaPeso = caracteristicasAtivas.find(c => c.pesoMultiplicador);
+        
+        return caracteristicaPeso ? caracteristicaPeso.pesoMultiplicador : 1.0;
+    }
+
+    // MÉTODO: Obter nome da característica de peso ativa
+    getCaracteristicaPesoAtiva() {
+        if (!window.sistemaCaracteristicasFisicas) return null;
+        
+        const caracteristicasAtivas = window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas;
+        return caracteristicasAtivas.find(c => c.pesoMultiplicador);
     }
 
     obterFaixaAltura(st) {
@@ -136,7 +137,7 @@ class SistemaAlturaPeso {
         return { min: 30, max: 200 };
     }
 
-    // MÉTODO SIMPLIFICADO: Apenas aplicar limite do nanismo
+    // MÉTODO: Aplicar regras do nanismo (altura fixa)
     aplicarRegrasNanismo() {
         if (!this.temNanismo()) return false;
 
@@ -158,6 +159,25 @@ class SistemaAlturaPeso {
         return window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas?.some(c => c.tipo === 'nanismo');
     }
 
+    obterSTReal() {
+        const inputST = document.getElementById('ST');
+        if (inputST && inputST.value) {
+            const st = parseInt(inputST.value);
+            if (!isNaN(st) && st >= 1 && st <= 40) return st;
+        }
+        
+        if (typeof obterDadosAtributos === 'function') {
+            try {
+                const dados = obterDadosAtributos();
+                if (dados.ST && dados.ST >= 1 && dados.ST <= 40) return dados.ST;
+            } catch (error) {
+                // Silencioso
+            }
+        }
+        
+        return 10;
+    }
+
     inicializar() {
         if (this.inicializado) return;
         
@@ -168,24 +188,24 @@ class SistemaAlturaPeso {
         this.inicializado = true;
     }
 
-    // MÉTODO CRÍTICO: Configurar detecção do ST
     configurarEventos() {
-        // Escutar mudanças nos atributos do sistema principal
+        // Escutar mudanças nos atributos
         document.addEventListener('atributosAlterados', (e) => {
             if (e.detail && e.detail.ST !== undefined) {
                 this.atualizarST(e.detail.ST);
             }
         });
 
-        // Monitorar input ST diretamente
+        // ESCUTAR CARACTERÍSTICAS FÍSICAS - IMPORTANTE!
+        document.addEventListener('caracteristicasFisicasAlteradas', () => {
+            this.aplicarRegrasNanismo();
+            this.atualizarDisplay(); // Atualiza as faixas de peso
+        });
+
+        // Monitorar input ST
         const inputST = document.getElementById('ST');
         if (inputST) {
-            // Evento change (quando o usuário termina de editar)
-            inputST.addEventListener('change', () => {
-                this.forcarAtualizacaoST();
-            });
-            
-            // Evento input (em tempo real)
+            inputST.addEventListener('change', () => this.forcarAtualizacaoST());
             inputST.addEventListener('input', () => {
                 clearTimeout(this.stInputTimeout);
                 this.stInputTimeout = setTimeout(() => {
@@ -194,20 +214,10 @@ class SistemaAlturaPeso {
             });
         }
 
-        // Escutar características físicas
-        document.addEventListener('caracteristicasFisicasAlteradas', () => {
-            this.aplicarRegrasNanismo();
-            this.atualizarDisplay();
-        });
-
-        // Configurar controles de altura/peso
         this.configurarEventosControles();
-
-        // Verificação periódica de segurança
         this.iniciarVerificacaoPeriodica();
     }
 
-    // Verificação periódica para garantir que o ST está correto
     iniciarVerificacaoPeriodica() {
         setInterval(() => {
             const stAtual = this.obterSTReal();
@@ -286,13 +296,15 @@ class SistemaAlturaPeso {
         this.salvarDados();
     }
 
+    // MÉTODO DE DISPLAY ATUALIZADO
     atualizarDisplay() {
         const conformidade = this.verificarConformidadeST();
         const temNanismo = this.temNanismo();
+        const caracteristicaPeso = this.getCaracteristicaPesoAtiva();
         
         this.atualizarStatusAltura(conformidade, temNanismo);
-        this.atualizarStatusPeso(conformidade, temNanismo);
-        this.atualizarInfoFisica(conformidade, temNanismo);
+        this.atualizarStatusPeso(conformidade, temNanismo, caracteristicaPeso);
+        this.atualizarInfoFisica(conformidade, temNanismo, caracteristicaPeso);
         this.atualizarStatusGeral(conformidade, temNanismo);
     }
 
@@ -314,7 +326,7 @@ class SistemaAlturaPeso {
         statusAltura.innerHTML = `<span class="status-info ${classe}">${status}</span>`;
     }
 
-    atualizarStatusPeso(conformidade, temNanismo) {
+    atualizarStatusPeso(conformidade, temNanismo, caracteristicaPeso) {
         const statusPeso = document.getElementById('statusPeso');
         if (!statusPeso) return;
 
@@ -323,6 +335,10 @@ class SistemaAlturaPeso {
         if (temNanismo) {
             status = "Nanismo: Peso livre";
             classe = "normal";
+        } else if (caracteristicaPeso) {
+            status = `${caracteristicaPeso.nome}: ${conformidade.mensagemPeso}`;
+            classe = conformidade.pesoValido ? "normal" : 
+                    this.peso < conformidade.faixaPeso.min ? "abaixo" : "acima";
         } else {
             status = conformidade.mensagemPeso;
             classe = conformidade.pesoValido ? "normal" : 
@@ -332,20 +348,34 @@ class SistemaAlturaPeso {
         statusPeso.innerHTML = `<span class="status-info ${classe}">${status}</span>`;
     }
 
-    atualizarInfoFisica(conformidade, temNanismo) {
+    atualizarInfoFisica(conformidade, temNanismo, caracteristicaPeso) {
         this.atualizarElemento('stBase', this.stBase);
         
+        // Altura - não é afetada por características de peso
         this.atualizarElemento('alturaFaixa', 
             temNanismo ? '1.32m (Nanismo)' : 
             `${conformidade.faixaAltura.min}m - ${conformidade.faixaAltura.max}m`);
         
-        this.atualizarElemento('pesoFaixa', 
-            temNanismo ? 'Livre' : 
-            `${conformidade.faixaPeso.min}kg - ${conformidade.faixaPeso.max}kg`);
+        // Peso - mostra faixa ajustada se houver característica
+        if (caracteristicaPeso) {
+            const multiplicador = caracteristicaPeso.pesoMultiplicador;
+            const faixaOriginal = conformidade.faixaPesoOriginal;
+            this.atualizarElemento('pesoFaixa', 
+                `${(faixaOriginal.min * multiplicador).toFixed(1)}kg - ${(faixaOriginal.max * multiplicador).toFixed(1)}kg (${caracteristicaPeso.nome})`);
+        } else {
+            this.atualizarElemento('pesoFaixa', 
+                `${conformidade.faixaPesoOriginal.min}kg - ${conformidade.faixaPesoOriginal.max}kg`);
+        }
         
-        this.atualizarElemento('modificadorPeso', 
-            temNanismo ? 'Nanismo Ativo' : 
-            (conformidade.alturaValida && conformidade.pesoValido) ? 'Dentro da faixa' : 'Fora da faixa');
+        // Status
+        if (temNanismo) {
+            this.atualizarElemento('modificadorPeso', 'Nanismo Ativo');
+        } else if (caracteristicaPeso) {
+            this.atualizarElemento('modificadorPeso', `${caracteristicaPeso.nome} (${caracteristicaPeso.pesoMultiplicador}x)`);
+        } else {
+            this.atualizarElemento('modificadorPeso', 
+                (conformidade.alturaValida && conformidade.pesoValido) ? 'Dentro da faixa' : 'Fora da faixa');
+        }
     }
 
     atualizarElemento(id, valor) {
