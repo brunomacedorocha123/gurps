@@ -390,23 +390,19 @@ class SistemaVantagens {
         return "Nível";
     }
 
- // ===== CORREÇÃO DESESPERADA =====
+ // ===== CORREÇÃO FINAL - SEPARAÇÃO CLARA =====
 calcularCustoNivel(vantagem, nivel) {
-    // SE A VANTAGEM NÃO EXISTIR, USA O NOME DIRETO
-    if (!vantagem || !vantagem.nome) {
-        return 5 + (10 * nivel); // CHUTA QUE É APTIDÃO MÁGICA
-    }
-    
-    // SE CHEGOU ATÉ AQUI, TENTA IDENTIFICAR PELO NOME
+    // APTIDÃO MÁGICA: 5 pontos base + 10 por nível
     if (vantagem.nome === "Aptidão Mágica") {
-        return 5 + (10 * nivel);
+        return nivel === 0 ? 5 : 5 + (10 * nivel);
     }
     
+    // DURO DE MATAR: 2 pontos por nível  
     if (vantagem.nome === "Duro de Matar") {
-        return vantagem.custoBase * nivel;
+        return 2 * nivel;
     }
     
-    return vantagem.custoBase ? vantagem.custoBase * nivel : 0;
+    return 0;
 }
 
     criarLimitacoesAptidaoMagica() {
