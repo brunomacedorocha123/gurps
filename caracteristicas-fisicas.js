@@ -1,4 +1,4 @@
-// caracteristicas-fisicas.js - VERSÃO MELHORADA COM ATUALIZAÇÃO VISUAL
+// caracteristicas-fisicas.js - VERSÃO COMPLETA COM ATUALIZAÇÃO VISUAL IMEDIATA
 window.ponteCaracteristicas = {
     caracteristicasAtivas: [],
     
@@ -6,39 +6,141 @@ window.ponteCaracteristicas = {
         console.log("🔄 PONTE: Atualizando características", caracteristicas);
         this.caracteristicasAtivas = caracteristicas;
         
-        // ✅ SOLUÇÃO DEFINITIVA: Forçar atualização visual completa
-        if (window.sistemaAlturaPeso) {
-            // 1. Atualizar display lógico
-            window.sistemaAlturaPeso.atualizarDisplay();
-            
-            // 2. Chamar método de renderização visual se existir
-            if (window.sistemaAlturaPeso.forcarRenderizacaoVisual) {
-                window.sistemaAlturaPeso.forcarRenderizacaoVisual();
-            }
-            
-            // 3. Forçar eventos nos inputs para trigger visual
-            setTimeout(() => {
-                const inputAltura = document.getElementById('altura');
-                const inputPeso = document.getElementById('peso');
-                
-                if (inputAltura) {
-                    const event = new Event('input', { bubbles: true });
-                    inputAltura.dispatchEvent(event);
-                }
-                if (inputPeso) {
-                    const event = new Event('input', { bubbles: true });
-                    inputPeso.dispatchEvent(event);
-                }
-                
-                console.log("🎨 Atualização visual forçada!");
-            }, 100);
-        }
+        // ✅ SOLUÇÃO DEFINITIVA: Atualizar visualmente IMEDIATAMENTE
+        this.atualizarCardAlturaPesoVisualmente(caracteristicas);
     },
     
     obterCaracteristicasAtivas: function() {
         return this.caracteristicasAtivas;
+    },
+    
+    // ✅ MÉTODO QUE ATUALIZA VISUALMENTE NA HORA
+    atualizarCardAlturaPesoVisualmente: function(caracteristicas) {
+        console.log("🎨 Atualizando card altura/peso VISUALMENTE");
+        
+        if (caracteristicas.length === 0) {
+            // Nenhuma característica - voltar ao normal
+            this.limparCardAlturaPeso();
+            return;
+        }
+        
+        const caracteristica = caracteristicas[0];
+        const multiplicador = this.obterMultiplicador(caracteristica.tipo);
+        
+        // ✅ ATUALIZAR STATUS FÍSICO (IMEDIATAMENTE)
+        const statusFisico = document.getElementById('statusFisico');
+        if (statusFisico) {
+            statusFisico.textContent = caracteristica.nome;
+            statusFisico.style.background = "#f39c12";
+        }
+        
+        // ✅ ATUALIZAR FAIXA DE PESO (IMEDIATAMENTE)
+        const pesoFaixa = document.getElementById('pesoFaixa');
+        if (pesoFaixa && window.sistemaAlturaPeso) {
+            const st = window.sistemaAlturaPeso.stBase || 10;
+            const faixa = window.sistemaAlturaPeso.obterFaixaPeso(st);
+            pesoFaixa.textContent = `${(faixa.min * multiplicador).toFixed(1)}kg - ${(faixa.max * multiplicador).toFixed(1)}kg (${caracteristica.nome})`;
+        }
+        
+        // ✅ ATUALIZAR MODIFICADOR (IMEDIATAMENTE)
+        const modificador = document.getElementById('modificadorPeso');
+        if (modificador) {
+            modificador.textContent = `${caracteristica.nome} (${multiplicador}x)`;
+        }
+        
+        // ✅ MOSTRAR DESVANTAGENS ATIVAS (IMEDIATAMENTE)
+        this.mostrarDesvantagensAtivas(caracteristicas);
+        
+        console.log("✅ Card altura/peso atualizado VISUALMENTE!");
+    },
+    
+    limparCardAlturaPeso: function() {
+        // Voltar ao estado normal
+        const statusFisico = document.getElementById('statusFisico');
+        if (statusFisico) {
+            statusFisico.textContent = "Normal";
+            statusFisico.style.background = "#27ae60";
+        }
+        
+        const pesoFaixa = document.getElementById('pesoFaixa');
+        if (pesoFaixa && window.sistemaAlturaPeso) {
+            const st = window.sistemaAlturaPeso.stBase || 10;
+            const faixa = window.sistemaAlturaPeso.obterFaixaPeso(st);
+            pesoFaixa.textContent = `${faixa.min}kg - ${faixa.max}kg`;
+        }
+        
+        const modificador = document.getElementById('modificadorPeso');
+        if (modificador) {
+            modificador.textContent = 'Dentro da faixa';
+        }
+        
+        const container = document.getElementById('desvantagensAtivas');
+        if (container) {
+            container.style.display = 'none';
+        }
+    },
+    
+    mostrarDesvantagensAtivas: function(caracteristicas) {
+        const container = document.getElementById('desvantagensAtivas');
+        const lista = document.getElementById('listaDesvantagens');
+        
+        if (!container || !lista) return;
+        
+        container.style.display = 'block';
+        
+        const caracteristica = caracteristicas[0];
+        let icone, descricao, efeito;
+        
+        switch(caracteristica.tipo) {
+            case 'magro':
+                icone = '⚖️'; descricao = 'Magro'; efeito = 'Peso = 2/3 do normal (×0.67)';
+                break;
+            case 'acima-peso':
+                icone = '⚖️'; descricao = 'Acima do Peso'; efeito = 'Peso = 130% do normal (×1.3)';
+                break;
+            case 'gordo':
+                icone = '⚖️'; descricao = 'Gordo'; efeito = 'Peso = 150% do normal (×1.5)';
+                break;
+            case 'muito-gordo':
+                icone = '⚖️'; descricao = 'Muito Gordo'; efeito = 'Peso = 200% do normal (×2.0)';
+                break;
+            case 'nanismo':
+                icone = '📏'; descricao = 'Nanismo'; efeito = 'Altura máxima: 1.32m';
+                break;
+            default:
+                icone = '🔹'; descricao = caracteristica.nome; efeito = caracteristica.efeitos;
+        }
+        
+        lista.innerHTML = `
+            <div class="desvantagem-item">
+                <div class="desvantagem-icone">${icone}</div>
+                <div class="desvantagem-info">
+                    <strong>${descricao}</strong>
+                    <small>${efeito}</small>
+                </div>
+                <div class="desvantagem-pontos">
+                    ${caracteristica.pontos >= 0 ? '+' : ''}${caracteristica.pontos}
+                </div>
+            </div>
+        `;
+    },
+    
+    obterMultiplicador: function(tipo) {
+        switch(tipo) {
+            case 'magro': return 0.67;
+            case 'acima-peso': return 1.3;
+            case 'gordo': return 1.5;
+            case 'muito-gordo': return 2.0;
+            default: return 1.0;
+        }
     }
 };
+
+// ⚠️ O RESTO DO SEU CÓDIGO EXISTENTE PERMANECE AQUI ⚠️
+class SistemaCaracteristicasFisicas {
+    // ... TODO O SEU CÓDIGO EXISTENTE DA CLASSE AQUI ...
+    // NÃO APAGAR NADA DA CLASSE, SÓ A PONTE FOI SUBSTITUÍDA
+}
 
 class SistemaCaracteristicasFisicas {
     constructor() {
