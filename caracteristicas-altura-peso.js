@@ -1,12 +1,11 @@
-// caracteristicas-altura-peso.js - VERSÃO COMPLETAMENTE CORRIGIDA
+// caracteristicas-altura-peso.js - VERSÃO COM LIMITE DE NANISMO
 class SistemaAlturaPeso {
     constructor() {
         this.altura = 1.70;
         this.peso = 70;
-        this.stBase = 10; // Inicial com 10, será atualizado
+        this.stBase = 10;
         this.multiplicadorPeso = 1.0;
         this.inicializado = false;
-        this.caracteristicasAtivas = [];
 
         // Tabelas oficiais do GURPS
         this.heightRanges = {
@@ -34,9 +33,63 @@ class SistemaAlturaPeso {
         };
     }
 
-    // MÉTODO COMPLETAMENTE REFEITO - 100% CONFIÁVEL
+    // MÉTODO NOVO: Verificar limites de características físicas
+    verificarLimitesCaracteristicas() {
+        if (!window.sistemaCaracteristicasFisicas) return;
+        
+        const caracteristicasAtivas = window.sistemaCaracteristicasFisicas.caracteristicasSelecionadas;
+        const temNanismo = caracteristicasAtivas.some(c => c.tipo === 'nanismo');
+        
+        // APLICAR LIMITE DE NANISMO
+        if (temNanismo && this.altura > 1.32) {
+            console.log('📏 Nanismo detectado: Limitando altura para 1.32m');
+            this.definirAltura(1.32);
+            this.mostrarMensagemLimite('Nanismo', '1.32m');
+        }
+        
+        // (Opcional) Futuramente adicionar outros limites aqui
+        const temGigantismo = caracteristicasAtivas.some(c => c.tipo === 'gigantismo');
+        if (temGigantismo && this.altura < 1.90) {
+            console.log('📏 Gigantismo detectado: Ajustando altura mínima para 1.90m');
+            this.definirAltura(1.90);
+            this.mostrarMensagemLimite('Gigantismo', '1.90m');
+        }
+    }
+
+    // MÉTODO NOVO: Mostrar mensagem de limite
+    mostrarMensagemLimite(caracteristica, limite) {
+        const existingMessage = document.getElementById('limiteMessage');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.id = 'limiteMessage';
+        messageDiv.innerHTML = `🎯 <strong>${caracteristica}:</strong> Altura limitada a ${limite}`;
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            background: #f39c12;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-left: 4px solid #e74c3c;
+        `;
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 4000);
+    }
+
     obterSTReal() {
-        // Método 1: Tentar pegar do input ST diretamente
         const inputST = document.getElementById('ST');
         if (inputST && inputST.value) {
             const st = parseInt(inputST.value);
@@ -45,7 +98,6 @@ class SistemaAlturaPeso {
             }
         }
         
-        // Método 2: Tentar pegar do sistema de atributos
         if (typeof obterDadosAtributos === 'function') {
             try {
                 const dados = obterDadosAtributos();
@@ -57,12 +109,11 @@ class SistemaAlturaPeso {
             }
         }
         
-        // Método 3: Tentar do estado do personagem
         if (typeof personagem !== 'undefined' && personagem.atributos && personagem.atributos.ST) {
             return personagem.atributos.ST;
         }
         
-        return 10; // Fallback seguro
+        return 10;
     }
 
     inicializar() {
@@ -79,7 +130,6 @@ class SistemaAlturaPeso {
         console.log('✅ Sistema Altura/Peso inicializado com ST:', this.stBase);
     }
 
-    // CONFIGURAÇÃO DE EVENTOS COMPLETAMENTE REVISADA
     configurarEventos() {
         // Escutar mudanças nos atributos do sistema principal
         document.addEventListener('atributosAlterados', (e) => {
@@ -89,16 +139,14 @@ class SistemaAlturaPeso {
             }
         });
 
-        // Monitorar input ST diretamente com múltiplas camadas
+        // Monitorar input ST diretamente
         const inputST = document.getElementById('ST');
         if (inputST) {
-            // Evento change (confiável)
             inputST.addEventListener('change', () => {
                 console.log('📝 Input ST change:', inputST.value);
                 this.forcarAtualizacaoST();
             });
             
-            // Evento input com debounce
             inputST.addEventListener('input', () => {
                 clearTimeout(this.stInputTimeout);
                 this.stInputTimeout = setTimeout(() => {
@@ -107,18 +155,21 @@ class SistemaAlturaPeso {
                 }, 500);
             });
             
-            // Observer para mudanças de valor programáticas
             this.configurarObserverST(inputST);
         }
 
         // Eventos dos controles de altura/peso
         this.configurarEventosControles();
 
-        // Escutar características físicas
+        // Escutar características físicas - MODIFICADO PARA INCLUIR VERIFICAÇÃO DE LIMITES
         document.addEventListener('caracteristicasFisicasAlteradas', (e) => {
             if (e.detail && e.detail.multiplicadorPeso !== undefined) {
                 this.multiplicadorPeso = e.detail.multiplicadorPeso;
                 this.calcularPesoAjustado();
+                
+                // NOVO: Verificar limites quando características mudam
+                this.verificarLimitesCaracteristicas();
+                
                 this.atualizarDisplay();
             }
         });
@@ -161,7 +212,6 @@ class SistemaAlturaPeso {
     }
 
     iniciarVerificacaoPeriodica() {
-        // Verificação de segurança a cada 2 segundos
         setInterval(() => {
             const stAtual = this.obterSTReal();
             if (stAtual !== this.stBase) {
@@ -171,7 +221,6 @@ class SistemaAlturaPeso {
         }, 2000);
     }
 
-    // ATUALIZAÇÃO DE ST - MÉTODO PRINCIPAL CORRIGIDO
     atualizarST(novoST) {
         if (novoST === this.stBase) return;
         
@@ -182,7 +231,6 @@ class SistemaAlturaPeso {
         this.atualizarDisplay();
         this.salvarDados();
         
-        // Atualizar inputs se necessário
         this.atualizarInputsFisicos();
     }
 
@@ -208,13 +256,13 @@ class SistemaAlturaPeso {
         }
     }
 
-    // MÉTODOS DE CONTROLE (mantidos da versão anterior)
     ajustarAltura(variacao) {
         const novaAltura = this.altura + variacao;
         this.definirAltura(novaAltura);
     }
 
     definirAltura(novaAltura) {
+        // APLICAR LIMITES GERAIS
         if (novaAltura < 1.30) novaAltura = 1.30;
         if (novaAltura > 2.50) novaAltura = 2.50;
         
@@ -252,7 +300,6 @@ class SistemaAlturaPeso {
         this.notificarSistemaPrincipal();
     }
 
-    // CÁLCULOS (mantidos da versão anterior)
     calcularValoresIniciais() {
         this.calcularValoresBase();
         this.calcularPesoIdeal();
@@ -325,8 +372,10 @@ class SistemaAlturaPeso {
         this.pesoAjustado = Math.round(this.pesoIdeal * this.multiplicadorPeso);
     }
 
-    // DISPLAY (mantido da versão anterior)
     atualizarDisplay() {
+        // NOVO: Verificar limites antes de atualizar
+        this.verificarLimitesCaracteristicas();
+        
         this.atualizarStatusAltura();
         this.atualizarStatusPeso();
         this.atualizarInfoFisica();
@@ -412,7 +461,6 @@ class SistemaAlturaPeso {
         }
     }
 
-    // PERSISTÊNCIA (mantido da versão anterior)
     carregarDadosSalvos() {
         try {
             const dadosSalvos = localStorage.getItem('sistemaAlturaPeso_data');
@@ -487,13 +535,12 @@ class SistemaAlturaPeso {
     }
 }
 
-// INICIALIZAÇÃO GLOBAL CORRIGIDA
+// INICIALIZAÇÃO GLOBAL
 let sistemaAlturaPeso;
 
 document.addEventListener('DOMContentLoaded', function() {
     sistemaAlturaPeso = new SistemaAlturaPeso();
     
-    // Inicializar imediatamente se a aba estiver ativa
     const caracteristicasTab = document.getElementById('caracteristicas');
     if (caracteristicasTab && caracteristicasTab.classList.contains('active')) {
         setTimeout(() => {
@@ -501,7 +548,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     }
     
-    // Observar mudanças de aba
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
