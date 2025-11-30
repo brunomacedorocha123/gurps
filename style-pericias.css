@@ -1,13 +1,13 @@
-/* ===== SISTEMA DE PERÍCIAS - CSS COMPLETO E COMPATÍVEL ===== */
+/* ===== SISTEMA DE PERÍCIAS - CSS COMPLETO E CORRIGIDO ===== */
 
-/* Container principal - MESMA CLASSE DO HTML */
+/* Container principal */
 .atributos-container {
     padding: 20px;
     max-width: 1400px;
     margin: 0 auto;
 }
 
-/* Seção de pontos - MESMAS CLASSES DO HTML */
+/* Seção de pontos */
 .pontos-section {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -70,7 +70,7 @@
     color: #27ae60;
 }
 
-/* Títulos das seções - MESMA CLASSE */
+/* Títulos das seções */
 .secao-titulo {
     color: #ffd700;
     font-size: 1.8em;
@@ -80,7 +80,7 @@
     text-align: center;
 }
 
-/* Grid principal - MESMAS CLASSES */
+/* Grid principal */
 .cards-grid {
     display: grid;
     gap: 25px;
@@ -95,7 +95,7 @@
     grid-template-columns: 1fr;
 }
 
-/* Cards de perícias - MESMAS CLASSES DO HTML */
+/* Cards de perícias */
 .atributo-card {
     background: rgba(30, 30, 40, 0.9);
     border: 1px solid rgba(255, 140, 0, 0.2);
@@ -129,7 +129,7 @@
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
-/* Header dos cards - MESMA CLASSE */
+/* Header dos cards */
 .atributo-header {
     background: linear-gradient(135deg, rgba(40, 40, 50, 0.9), rgba(50, 50, 65, 0.9));
     color: #ffd700;
@@ -157,7 +157,7 @@
     border: 1px solid rgba(39, 174, 96, 0.3);
 }
 
-/* Sistema de busca - MESMAS CLASSES */
+/* Sistema de busca */
 .busca-container {
     padding: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -166,7 +166,7 @@
     flex-wrap: wrap;
 }
 
-/* Inputs e selects - MESMAS CLASSES */
+/* Inputs e selects */
 .atributo-input {
     flex: 1;
     min-width: 150px;
@@ -189,7 +189,7 @@
     color: rgba(255, 215, 0, 0.6);
 }
 
-/* Selects personalizados - MESMA CLASSE */
+/* Selects personalizados */
 .atributo-input select {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffd700' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
@@ -219,7 +219,7 @@
     font-weight: bold;
 }
 
-/* Lista de itens - MESMA CLASSE */
+/* Lista de itens */
 .lista-container {
     max-height: 400px;
     overflow-y: auto;
@@ -234,7 +234,7 @@
     font-size: 0.95em;
 }
 
-/* Itens da lista - MESMA CLASSE */
+/* Itens da lista */
 .item-lista {
     background: rgba(40, 40, 50, 0.8);
     border: 1px solid rgba(255, 140, 0, 0.3);
@@ -252,11 +252,14 @@
     transform: translateX(5px);
 }
 
+/* HEADER CORRIGIDO - SEM SOBREPOSIÇÃO */
 .item-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 8px;
+    position: relative;
+    min-height: 32px;
 }
 
 .item-nome {
@@ -264,8 +267,11 @@
     font-weight: 600;
     font-size: 1.1em;
     margin: 0;
+    flex: 1;
+    padding-right: 100px; /* Espaço para custo e botão */
 }
 
+/* Custo normal (lista disponível) */
 .item-custo {
     background: rgba(39, 174, 96, 0.8);
     color: white;
@@ -274,6 +280,10 @@
     font-size: 0.8em;
     font-weight: 600;
     border: 1px solid rgba(39, 174, 96, 0.3);
+    position: absolute;
+    top: 0;
+    right: 40px;
+    z-index: 2;
 }
 
 .item-descricao {
@@ -307,17 +317,27 @@
     border: 1px solid rgba(155, 89, 182, 0.3);
 }
 
-/* Itens adquiridos - MESMA CLASSE */
+/* ITENS ADQUIRIDOS - CORRIGIDO SEM SOBREPOSIÇÃO */
 .item-adquirido {
     background: rgba(39, 174, 96, 0.15);
     border-color: rgba(39, 174, 96, 0.4);
+    position: relative;
 }
 
+.item-adquirido .item-header {
+    padding-right: 80px; /* Espaço reservado para os elementos da direita */
+}
+
+/* Custo em itens adquiridos */
 .item-adquirido .item-custo {
     background: rgba(39, 174, 96, 0.9);
+    position: absolute;
+    top: 0;
+    right: 45px; /* Mais para a direita */
+    z-index: 2;
 }
 
-/* Botão remover - MESMA CLASSE */
+/* Botão remover - CORRIGIDO SEM SOBREPOSIÇÃO */
 .btn-remover {
     background: #e74c3c;
     color: white;
@@ -332,8 +352,9 @@
     font-size: 0.8em;
     transition: all 0.3s ease;
     position: absolute;
-    top: 10px;
-    right: 45px;
+    top: 0;
+    right: 10px; /* Mais para a esquerda */
+    z-index: 3;
 }
 
 .btn-remover:hover {
@@ -341,7 +362,13 @@
     transform: scale(1.1);
 }
 
-/* Modal de perícias - MESMAS CLASSES DO HTML */
+.item-adquirido .item-categoria {
+    background: rgba(39, 174, 96, 0.3);
+    color: #27ae60;
+    border-color: rgba(39, 174, 96, 0.4);
+}
+
+/* Modal de perícias */
 .modal {
     display: none;
     position: fixed;
@@ -457,11 +484,21 @@
     border: 2px solid #ffd700;
 }
 
+.nivel-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    color: #95a5a6;
+    font-size: 0.8em;
+}
+
 .nivel-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .nivel-valor {
@@ -472,6 +509,19 @@
 .custo-total {
     color: #27ae60;
     font-weight: 600;
+}
+
+.info-custos {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(255, 140, 0, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 140, 0, 0.2);
+}
+
+.info-custos small {
+    color: #ffd700;
+    font-size: 0.85em;
 }
 
 .modal-actions {
@@ -521,7 +571,7 @@
     box-shadow: none;
 }
 
-/* Scrollbar personalizado - MESMA CLASSE */
+/* Scrollbar personalizado */
 .lista-container::-webkit-scrollbar {
     width: 6px;
 }
@@ -540,7 +590,7 @@
     background: rgba(255, 140, 0, 0.7);
 }
 
-/* Responsividade - MESMAS REGRAS */
+/* Responsividade */
 @media (max-width: 1024px) {
     .principais-grid {
         grid-template-columns: 1fr;
@@ -580,6 +630,23 @@
         grid-template-columns: 1fr;
         gap: 10px;
     }
+    
+    /* Ajuste para mobile nos itens */
+    .item-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .item-adquirido .item-custo,
+    .btn-remover {
+        position: static;
+        margin-top: 5px;
+    }
+    
+    .item-nome {
+        padding-right: 0;
+    }
 }
 
 @media (max-width: 480px) {
@@ -597,5 +664,11 @@
         flex-direction: column;
         gap: 10px;
         text-align: center;
+    }
+    
+    .item-custo,
+    .btn-remover {
+        position: static;
+        align-self: flex-end;
     }
 }
