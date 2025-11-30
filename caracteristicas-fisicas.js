@@ -1,4 +1,4 @@
-// caracteristicas-fisicas.js - VERSÃO 100% COMPLETA
+// caracteristicas-fisicas.js - VERSÃO COMPLETA E FUNCIONAL
 class SistemaCaracteristicasFisicas {
     constructor() {
         this.caracteristicas = {
@@ -99,13 +99,7 @@ class SistemaCaracteristicasFisicas {
     }
 
     configurarEventos() {
-        document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tipo = e.target.closest('.caracteristica-item').dataset.tipo;
-                this.adicionarCaracteristica(tipo);
-            });
-        });
-
+        // Configurar eventos dos botões
         this.configurarEventosBotoes();
     }
 
@@ -188,6 +182,7 @@ class SistemaCaracteristicasFisicas {
         }
     }
 
+    // MÉTODO CRÍTICO: Notificar sistema altura/peso
     notificarAlturaPeso() {
         const evento = new CustomEvent('caracteristicasFisicasAlteradas', {
             detail: {
