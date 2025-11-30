@@ -391,23 +391,21 @@ class SistemaVantagens {
     }
 
     // === CORREÇÃO 100% FUNCIONAL DOS CUSTOS ===
-    calcularCustoNivel(vantagem, nivel) {
-        const nome = vantagem.nome;
-        
-        if (nome === "Aptidão Mágica") {
-            return nivel === 0 ? 5 : 5 + (10 * nivel);
-        }
-        
-        if (nome === "Duro de Matar") {
-            return vantagem.custoBase * nivel;
-        }
-        
-        if (vantagem.template === 'niveis' && vantagem.custoBase) {
-            return vantagem.custoBase * nivel;
-        }
-        
-        return vantagem.custoBase ? vantagem.custoBase * nivel : 0;
+ // ===== CORREÇÃO SÓ DA APTIDÃO MÁGICA =====
+calcularCustoNivel(vantagem, nivel) {
+    // APTIDÃO MÁGICA - CÁLCULO DIRETO
+    if (vantagem.nome === "Aptidão Mágica") {
+        return 5 + (10 * nivel);
     }
+    
+    // DURO DE MATAR - JÁ FUNCIONA (NÃO MEXE)
+    if (vantagem.nome === "Duro de Matar") {
+        return vantagem.custoBase * nivel;
+    }
+    
+    // OUTRAS - NÃO MEXE
+    return vantagem.custoBase ? vantagem.custoBase * nivel : 0;
+}
 
     criarLimitacoesAptidaoMagica() {
         const vantagem = this.vantagemAtualModal;
