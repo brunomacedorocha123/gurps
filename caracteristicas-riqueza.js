@@ -1,4 +1,4 @@
-// caracteristicas-riqueza.js
+// caracteristicas-riqueza.js - VERSÃO CORRIGIDA 100%
 class SistemaRiqueza {
     constructor() {
         this.niveisRiqueza = {
@@ -101,13 +101,13 @@ class SistemaRiqueza {
             // Calcular renda mensal
             const rendaMensal = this.calcularRendaMensal(valor);
             
-            // Atualizar display
+            // CORREÇÃO DAS CORES - usar cores do tema escuro
             display.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                    <i class="${nivel.icone}" style="color: #3498db;"></i>
-                    <strong style="color: #2c3e50;">${this.obterNomePorPontos(valor)}</strong>
+                    <i class="${nivel.icone}" style="color: #ff8c00;"></i>
+                    <strong style="color: #ffd700;">${this.obterNomePorPontos(valor)}</strong>
                 </div>
-                <div style="font-size: 0.9em; color: #7f8c8d;">
+                <div style="font-size: 0.9em; color: #ccc;">
                     <div>Multiplicador: ${nivel.multiplicador}x | Recursos: ${nivel.recursos}</div>
                     <div style="margin-top: 4px;">${nivel.descricao}</div>
                 </div>
@@ -141,8 +141,9 @@ class SistemaRiqueza {
     }
 
     formatarMoeda(valor) {
-    return `$${valor.toLocaleString('en-US')}`;
-}
+        return `$${valor.toLocaleString('en-US')}`;
+    }
+
     obterNivelPorPontos(pontos) {
         return Object.values(this.niveisRiqueza).find(nivel => nivel.pontos === pontos);
     }
