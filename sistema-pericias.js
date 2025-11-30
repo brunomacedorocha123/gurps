@@ -1,4 +1,4 @@
-// ===== SISTEMA DE PERÍCIAS - VERSÃO DEFINITIVA =====
+// ===== SISTEMA DE PERÍCIAS - VERSÃO DEFINITIVA CORRIGIDA =====
 
 let estadoPericias = {
     adquiridas: [],
@@ -101,31 +101,50 @@ function atualizarFiltrosPericias() {
     carregarPericiasFiltradas(termo, categoria, subcategoria);
 }
 
-// CALCULAR CUSTO DA PERÍCIA - TABELA DO SEU PROJETO ANTERIOR
+// CALCULAR CUSTO DA PERÍCIA - TABELA CORRIGIDA
 function calcularCustoPericia(nivel, dificuldade) {
-    const tabelaBonus = {
-        'Fácil': { 1: 0, 2: 1, 4: 2, 8: 3, 12: 4, 16: 5, 20: 6, 24: 7, 28: 8, 32: 9, 36: 10, 40: 11 },
-        'Média': { 1: -1, 2: 0, 4: 1, 8: 2, 12: 3, 16: 4, 20: 5, 24: 6, 28: 7, 32: 8, 36: 9, 40: 10 },
-        'Difícil': { 1: -2, 2: -1, 4: 0, 8: 1, 12: 2, 16: 3, 20: 4, 24: 5, 28: 6, 32: 7, 36: 8, 40: 9 },
-        'Muito Difícil': { 1: -3, 2: -2, 4: -1, 8: 0, 12: 1, 16: 2, 20: 3, 24: 4, 28: 5, 32: 6, 36: 7, 40: 8 }
+    const tabelaCustos = {
+        'Fácil': [
+            { nivel: -3, custo: 0 }, { nivel: -2, custo: 0 }, { nivel: -1, custo: 0 },
+            { nivel: 0, custo: 1 }, { nivel: 1, custo: 2 }, { nivel: 2, custo: 4 },
+            { nivel: 3, custo: 8 }, { nivel: 4, custo: 12 }, { nivel: 5, custo: 16 },
+            { nivel: 6, custo: 20 }, { nivel: 7, custo: 24 }, { nivel: 8, custo: 28 },
+            { nivel: 9, custo: 32 }, { nivel: 10, custo: 36 }
+        ],
+        'Média': [
+            { nivel: -3, custo: 0 }, { nivel: -2, custo: 0 }, 
+            { nivel: -1, custo: 1 }, { nivel: 0, custo: 2 }, { nivel: 1, custo: 4 },
+            { nivel: 2, custo: 8 }, { nivel: 3, custo: 12 }, { nivel: 4, custo: 16 },
+            { nivel: 5, custo: 20 }, { nivel: 6, custo: 24 }, { nivel: 7, custo: 28 },
+            { nivel: 8, custo: 32 }, { nivel: 9, custo: 36 }, { nivel: 10, custo: 40 }
+        ],
+        'Difícil': [
+            { nivel: -3, custo: 0 }, { nivel: -2, custo: 1 }, { nivel: -1, custo: 2 },
+            { nivel: 0, custo: 4 }, { nivel: 1, custo: 8 }, { nivel: 2, custo: 12 },
+            { nivel: 3, custo: 16 }, { nivel: 4, custo: 20 }, { nivel: 5, custo: 24 },
+            { nivel: 6, custo: 28 }, { nivel: 7, custo: 32 }, { nivel: 8, custo: 36 },
+            { nivel: 9, custo: 40 }, { nivel: 10, custo: 44 }
+        ],
+        'Muito Difícil': [
+            { nivel: -3, custo: 1 }, { nivel: -2, custo: 2 }, { nivel: -1, custo: 4 },
+            { nivel: 0, custo: 8 }, { nivel: 1, custo: 12 }, { nivel: 2, custo: 16 },
+            { nivel: 3, custo: 20 }, { nivel: 4, custo: 24 }, { nivel: 5, custo: 28 },
+            { nivel: 6, custo: 32 }, { nivel: 7, custo: 36 }, { nivel: 8, custo: 40 },
+            { nivel: 9, custo: 44 }, { nivel: 10, custo: 48 }
+        ]
     };
     
-    const bonusTable = tabelaBonus[dificuldade] || tabelaBonus['Média'];
+    const tabela = tabelaCustos[dificuldade] || tabelaCustos['Média'];
+    const entrada = tabela.find(item => item.nivel === nivel);
     
-    for (const [pontos, bonus] of Object.entries(bonusTable)) {
-        if (bonus === nivel) {
-            return parseInt(pontos);
-        }
-    }
-    
-    return 0;
+    return entrada ? entrada.custo : 0;
 }
 
-// OBTER INFORMAÇÕES DE REDUTORES
+// OBTER INFORMAÇÕES DE REDUTORES - ATUALIZADO
 function getInfoRedutores(dificuldade) {
     const infos = {
-        "Fácil": "1 ponto = Atributo+0",
-        "Média": "1 ponto = Atributo-1 | 2 pontos = Atributo+0",  
+        "Fácil": "1 ponto = Atributo+0 | 2 pontos = Atributo+1 | 4 pontos = Atributo+2",
+        "Média": "1 ponto = Atributo-1 | 2 pontos = Atributo+0 | 4 pontos = Atributo+1",  
         "Difícil": "1 ponto = Atributo-2 | 2 pontos = Atributo-1 | 4 pontos = Atributo+0",
         "Muito Difícil": "1 ponto = Atributo-3 | 2 pontos = Atributo-2 | 4 pontos = Atributo-1 | 8 pontos = Atributo+0"
     };
@@ -144,6 +163,11 @@ function abrirModalPericia(pericia) {
     const atributos = obterAtributosAtuais();
     const valorAtributo = atributos[pericia.atributo] || 10;
     
+    // Verificar se já existe esta perícia
+    const periciaExistente = estadoPericias.adquiridas.find(p => p.id === pericia.id);
+    const nivelAtual = periciaExistente ? periciaExistente.nivelRelativo : 0;
+    const custoAtual = periciaExistente ? periciaExistente.custo : 0;
+    
     titulo.textContent = pericia.nome;
     
     corpo.innerHTML = `
@@ -152,11 +176,12 @@ function abrirModalPericia(pericia) {
             <p><strong>Dificuldade:</strong> ${pericia.dificuldade}</p>
             <p><strong>Descrição:</strong> ${pericia.descricao}</p>
             ${pericia.prereq ? `<p><strong>Pré-requisito:</strong> ${pericia.prereq}</p>` : ''}
+            ${periciaExistente ? `<p class="info-existente"><strong>Já adquirida:</strong> Nível ${pericia.atributo}${nivelAtual >= 0 ? '+' : ''}${nivelAtual} (${custoAtual} pts)</p>` : ''}
         </div>
         
         <div class="modal-nivel">
             <h4>Selecionar Nível</h4>
-            <input type="range" id="nivel-pericia" class="nivel-slider" min="-3" max="10" value="0" step="1">
+            <input type="range" id="nivel-pericia" class="nivel-slider" min="-3" max="10" value="${nivelAtual}" step="1">
             <div class="nivel-labels">
                 <span>${pericia.atributo}-3</span>
                 <span>${pericia.atributo}+0</span>
@@ -164,11 +189,12 @@ function abrirModalPericia(pericia) {
             </div>
             <div class="nivel-info">
                 <div class="nivel-valor">
-                    NH: <span id="nh-final">${valorAtributo}</span> 
-                    (${pericia.atributo}<span id="nivel-relativo">+0</span>)
+                    NH: <span id="nh-final">${valorAtributo + nivelAtual}</span> 
+                    (${pericia.atributo}<span id="nivel-relativo">${nivelAtual >= 0 ? '+' : ''}${nivelAtual}</span>)
                 </div>
                 <div class="custo-total">
-                    Custo: <span id="custo-pericia">${pericia.custoBase}</span> pts
+                    Custo: <span id="custo-pericia">${custoAtual}</span> pts
+                    ${periciaExistente ? `<br><small>Custo adicional: <span id="custo-adicional">0</span> pts</small>` : ''}
                 </div>
             </div>
             <div class="info-custos">
@@ -181,17 +207,25 @@ function abrirModalPericia(pericia) {
     const nhFinal = corpo.querySelector('#nh-final');
     const nivelRelativo = corpo.querySelector('#nivel-relativo');
     const custo = corpo.querySelector('#custo-pericia');
+    const custoAdicional = corpo.querySelector('#custo-adicional');
     
     function atualizarDisplay() {
         const nivel = parseInt(slider.value);
-        const custoAtual = calcularCustoPericia(nivel, pericia.dificuldade);
+        const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
         const nhAtual = valorAtributo + nivel;
         
         nhFinal.textContent = nhAtual;
         nivelRelativo.textContent = nivel >= 0 ? `+${nivel}` : `${nivel}`;
-        custo.textContent = custoAtual;
+        custo.textContent = custoTotal;
         
-        btnConfirmar.disabled = custoAtual <= 0;
+        // Calcular custo adicional se já existir a perícia
+        if (periciaExistente && custoAdicional) {
+            const custoExtra = custoTotal - custoAtual;
+            custoAdicional.textContent = custoExtra >= 0 ? `+${custoExtra}` : custoExtra;
+            custoAdicional.style.color = custoExtra > 0 ? '#27ae60' : (custoExtra < 0 ? '#e74c3c' : '#666');
+        }
+        
+        btnConfirmar.disabled = custoTotal <= 0;
     }
     
     slider.addEventListener('input', atualizarDisplay);
@@ -199,10 +233,10 @@ function abrirModalPericia(pericia) {
     
     btnConfirmar.onclick = () => {
         const nivel = parseInt(slider.value);
-        const custoAtual = calcularCustoPericia(nivel, pericia.dificuldade);
+        const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
         
-        if (custoAtual > 0) {
-            adicionarPericia(pericia, nivel, custoAtual);
+        if (custoTotal > 0) {
+            adicionarPericia(pericia, nivel, custoTotal);
             modal.style.display = 'none';
         }
     };
@@ -219,7 +253,7 @@ function abrirModalPericia(pericia) {
     modal.style.display = 'block';
 }
 
-// ADICIONAR PERÍCIA
+// ADICIONAR PERÍCIA - MANTIDO CUMLATIVO
 function adicionarPericia(pericia, nivel, custo) {
     const indexExistente = estadoPericias.adquiridas.findIndex(p => p.id === pericia.id);
     
