@@ -350,118 +350,122 @@ class SistemaEquipamentos {
         this.notificarDashboard();
     }
 
-    abrirSubmenuQuantidade(itemId, elemento) {
-        const equipamento = this.obterEquipamentoPorId(itemId);
-        if (!equipamento) return;
+   abrirSubmenuQuantidade(itemId, elemento) {
+    const equipamento = this.obterEquipamentoPorId(itemId);
+    if (!equipamento) return;
 
-        this.itemCompraQuantidade = equipamento;
-        this.quantidadeAtual = 1;
+    this.itemCompraQuantidade = equipamento;
+    this.quantidadeAtual = 1;
 
-        const nomeItem = document.getElementById('quantidade-nome-item');
-        const custoUnitario = document.getElementById('quantidade-custo-unitario');
-        const pesoUnitario = document.getElementById('quantidade-peso-unitario');
-        
-        if (nomeItem) nomeItem.textContent = equipamento.nome;
-        if (custoUnitario) custoUnitario.textContent = `Custo: $${equipamento.custo}`;
-        if (pesoUnitario) pesoUnitario.textContent = `Peso: ${equipamento.peso} kg`;
+    const nomeItem = document.getElementById('quantidade-nome-item');
+    const custoUnitario = document.getElementById('quantidade-custo-unitario');
+    const pesoUnitario = document.getElementById('quantidade-peso-unitario');
+    
+    if (nomeItem) nomeItem.textContent = equipamento.nome;
+    if (custoUnitario) custoUnitario.textContent = `Custo: $${equipamento.custo}`;
+    if (pesoUnitario) pesoUnitario.textContent = `Peso: ${equipamento.peso} kg`;
 
-        const inputQuantidade = document.getElementById('input-quantidade');
-        if (inputQuantidade) {
-            inputQuantidade.value = this.quantidadeAtual;
-        }
-
-        this.atualizarTotaisQuantidade();
-
-        const submenu = document.getElementById('submenu-quantidade');
-        if (!submenu) return;
-
-        const rect = elemento.getBoundingClientRect();
-        submenu.style.top = `${rect.bottom + 5}px`;
-        submenu.style.left = `${rect.left}px`;
-        submenu.classList.add('aberto');
+    const inputQuantidade = document.getElementById('input-quantidade');
+    if (inputQuantidade) {
+        inputQuantidade.value = this.quantidadeAtual;
     }
 
-    aumentarQuantidade() {
-        this.quantidadeAtual = Math.min(this.quantidadeAtual + 1, 99);
-        const inputQuantidade = document.getElementById('input-quantidade');
-        if (inputQuantidade) {
-            inputQuantidade.value = this.quantidadeAtual;
-        }
-        this.atualizarTotaisQuantidade();
+    this.atualizarTotaisQuantidade();
+
+    const submenu = document.getElementById('submenu-quantidade');
+    if (!submenu) return;
+
+    submenu.style.top = '';
+    submenu.style.left = '';
+    submenu.classList.add('aberto');
+}
+
+aumentarQuantidade() {
+    this.quantidadeAtual = Math.min(this.quantidadeAtual + 1, 99);
+    const inputQuantidade = document.getElementById('input-quantidade');
+    if (inputQuantidade) {
+        inputQuantidade.value = this.quantidadeAtual;
+    }
+    this.atualizarTotaisQuantidade();
+}
+
+diminuirQuantidade() {
+    this.quantidadeAtual = Math.max(this.quantidadeAtual - 1, 1);
+    const inputQuantidade = document.getElementById('input-quantidade');
+    if (inputQuantidade) {
+        inputQuantidade.value = this.quantidadeAtual;
+    }
+    this.atualizarTotaisQuantidade();
+}
+
+atualizarTotaisQuantidade() {
+    if (!this.itemCompraQuantidade) return;
+
+    const custoTotal = this.itemCompraQuantidade.custo * this.quantidadeAtual;
+    const pesoTotal = this.itemCompraQuantidade.peso * this.quantidadeAtual;
+
+    const custoTotalElem = document.getElementById('quantidade-custo-total');
+    const pesoTotalElem = document.getElementById('quantidade-peso-total');
+    
+    if (custoTotalElem) custoTotalElem.textContent = `$${custoTotal}`;
+    if (pesoTotalElem) pesoTotalElem.textContent = `${pesoTotal.toFixed(1)} kg`;
+}
+
+confirmarCompraQuantidade() {
+    if (!this.itemCompraQuantidade) return;
+
+    const equipamento = this.itemCompraQuantidade;
+    const quantidade = this.quantidadeAtual;
+    const custoTotal = equipamento.custo * quantidade;
+    const pesoTotal = equipamento.peso * quantidade;
+
+    if (this.dinheiro < custoTotal) {
+        this.mostrarFeedback(`Dinheiro insuficiente! Necessário: $${custoTotal}`, 'erro');
+        return;
     }
 
-    diminuirQuantidade() {
-        this.quantidadeAtual = Math.max(this.quantidadeAtual - 1, 1);
-        const inputQuantidade = document.getElementById('input-quantidade');
-        if (inputQuantidade) {
-            inputQuantidade.value = this.quantidadeAtual;
-        }
-        this.atualizarTotaisQuantidade();
+    const itemExistente = this.equipamentosAdquiridos.find(item => 
+        item.id === equipamento.id && item.status === 'na-mochila' && !item.equipado
+    );
+
+    if (itemExistente) {
+        itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
+        itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
+    } else {
+        const novoEquipamento = {
+            ...equipamento,
+            quantidade: quantidade,
+            custoTotal: custoTotal,
+            adquiridoEm: new Date().toISOString(),
+            status: 'na-mochila',
+            equipado: false,
+            idUnico: this.gerarIdUnico()
+        };
+
+        this.equipamentosAdquiridos.push(novoEquipamento);
+        this.equipamentosEquipados.mochila.push(novoEquipamento);
     }
 
-    atualizarTotaisQuantidade() {
-        if (!this.itemCompraQuantidade) return;
+    this.dinheiro -= custoTotal;
+    this.salvarDados();
+    this.mostrarFeedback(`${quantidade}x ${equipamento.nome} comprado(s) com sucesso!`, 'sucesso');
+    
+    this.fecharSubmenuQuantidade();
+    this.atualizarInterface();
+    this.notificarDashboard();
+}
 
-        const custoTotal = this.itemCompraQuantidade.custo * this.quantidadeAtual;
-        const pesoTotal = this.itemCompraQuantidade.peso * this.quantidadeAtual;
-
-        const custoTotalElem = document.getElementById('quantidade-custo-total');
-        const pesoTotalElem = document.getElementById('quantidade-peso-total');
-        
-        if (custoTotalElem) custoTotalElem.textContent = `$${custoTotal}`;
-        if (pesoTotalElem) pesoTotalElem.textContent = `${pesoTotal.toFixed(1)} kg`;
+fecharSubmenuQuantidade() {
+    const submenu = document.getElementById('submenu-quantidade');
+    if (submenu) {
+        submenu.classList.remove('aberto');
+        setTimeout(() => {
+            submenu.style.display = 'none';
+        }, 300);
     }
-
-    confirmarCompraQuantidade() {
-        if (!this.itemCompraQuantidade) return;
-
-        const equipamento = this.itemCompraQuantidade;
-        const quantidade = this.quantidadeAtual;
-        const custoTotal = equipamento.custo * quantidade;
-        const pesoTotal = equipamento.peso * quantidade;
-
-        if (this.dinheiro < custoTotal) {
-            this.mostrarFeedback(`Dinheiro insuficiente! Necessário: $${custoTotal}`, 'erro');
-            return;
-        }
-
-        const itemExistente = this.equipamentosAdquiridos.find(item => 
-            item.id === equipamento.id && item.status === 'na-mochila' && !item.equipado
-        );
-
-        if (itemExistente) {
-            itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
-            itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
-        } else {
-            const novoEquipamento = {
-                ...equipamento,
-                quantidade: quantidade,
-                custoTotal: custoTotal,
-                adquiridoEm: new Date().toISOString(),
-                status: 'na-mochila',
-                equipado: false,
-                idUnico: this.gerarIdUnico()
-            };
-
-            this.equipamentosAdquiridos.push(novoEquipamento);
-            this.equipamentosEquipados.mochila.push(novoEquipamento);
-        }
-
-        this.dinheiro -= custoTotal;
-        this.salvarDados();
-        this.mostrarFeedback(`${quantidade}x ${equipamento.nome} comprado(s) com sucesso!`, 'sucesso');
-        
-        this.fecharSubmenuQuantidade();
-        this.atualizarInterface();
-        this.notificarDashboard();
-    }
-
-    fecharSubmenuQuantidade() {
-        const submenu = document.getElementById('submenu-quantidade');
-        if (submenu) submenu.classList.remove('aberto');
-        this.itemCompraQuantidade = null;
-        this.quantidadeAtual = 1;
-    }
+    this.itemCompraQuantidade = null;
+    this.quantidadeAtual = 1;
+}
         equiparItem(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
