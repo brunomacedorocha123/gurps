@@ -1,0 +1,810 @@
+/* ===== SISTEMA DE MAGIA - CSS COMPLETO ===== */
+
+/* Container principal */
+.container-principal {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ===== STATUS MÁGICO ===== */
+.status-cards-container {
+    margin-bottom: 30px;
+}
+
+.card-magia-status {
+    background: rgba(30, 30, 40, 0.9);
+    border: 2px solid rgba(100, 80, 255, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-magia-status::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6450ff, #8a7bff, #6450ff);
+}
+
+.card-magia-status h3 {
+    color: #8a7bff;
+    margin: 0 0 20px 0;
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.magia-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.magia-status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(40, 40, 50, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(100, 80, 255, 0.2);
+}
+
+.magia-status-item label {
+    color: #ffd700;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.magia-status-item input[type="number"] {
+    width: 60px;
+    padding: 6px 10px;
+    border: 1px solid rgba(100, 80, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffd700;
+    text-align: center;
+    font-weight: 600;
+}
+
+.magia-status-item span {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.magia-status-item.total {
+    background: rgba(100, 80, 255, 0.2);
+    border-color: rgba(100, 80, 255, 0.4);
+}
+
+.magia-status-item.total label {
+    color: #8a7bff;
+}
+
+.magia-status-item.total span {
+    color: #8a7bff;
+    font-size: 1.2em;
+}
+
+/* ===== SISTEMA DE AQUISIÇÃO ===== */
+.sistema-aquisicao-magia {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+/* Colunas */
+.catalog-column-magia,
+.acquired-column-magia {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Seções */
+.catalog-section-magia,
+.acquired-section-magia,
+.detalhes-magia-section {
+    background: rgba(30, 30, 40, 0.9);
+    border: 2px solid rgba(100, 80, 255, 0.2);
+    border-radius: 12px;
+    padding: 0;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.catalog-section-magia::before,
+.acquired-section-magia::before,
+.detalhes-magia-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6450ff, #8a7bff);
+}
+
+.catalog-section-magia h3,
+.acquired-section-magia h3 {
+    color: #8a7bff;
+    margin: 0;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, rgba(40, 40, 50, 0.9), rgba(50, 50, 65, 0.9));
+    border-bottom: 1px solid rgba(100, 80, 255, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3em;
+}
+
+.points-badge {
+    background: rgba(39, 174, 96, 0.8);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* ===== BUSCA E FILTROS ===== */
+.busca-magias {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid rgba(100, 80, 255, 0.3);
+    border-radius: 8px;
+    font-size: 0.95em;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffd700;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #6450ff;
+    box-shadow: 0 0 10px rgba(100, 80, 255, 0.3);
+}
+
+.search-input::placeholder {
+    color: rgba(255, 215, 0, 0.6);
+}
+
+/* Sistema de Filtros */
+.filtros-container-magia {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filtro-grupo {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filtro-header {
+    background: rgba(100, 80, 255, 0.2);
+    border: 1px solid rgba(100, 80, 255, 0.4);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: #ffd700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.filtro-header:hover {
+    background: rgba(100, 80, 255, 0.3);
+    border-color: #6450ff;
+}
+
+.filtro-submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(30, 30, 40, 0.95);
+    border: 1px solid rgba(100, 80, 255, 0.3);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+    backdrop-filter: blur(10px);
+}
+
+.filtro-submenu.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.filtro-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    transition: background 0.3s ease;
+    cursor: pointer;
+}
+
+.filtro-option:hover {
+    background: rgba(100, 80, 255, 0.2);
+}
+
+.filtro-option input[type="checkbox"] {
+    margin: 0;
+}
+
+.filtro-option label {
+    color: #ffd700;
+    cursor: pointer;
+    font-size: 0.9em;
+    flex: 1;
+}
+
+/* ===== LISTAS DE MAGIAS ===== */
+.catalog-list-magias,
+.acquired-list-magias {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.detalhes-magia-content {
+    padding: 20px;
+    min-height: 200px;
+}
+
+/* Estados vazios */
+.nenhuma-magia,
+.nenhuma-magia-aprendida,
+.nenhuma-magia-selecionada {
+    text-align: center;
+    color: #95a5a6;
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+.nenhuma-magia i,
+.nenhuma-magia-aprendida i,
+.nenhuma-magia-selecionada i {
+    font-size: 2em;
+    margin-bottom: 15px;
+    color: rgba(100, 80, 255, 0.5);
+}
+
+/* Itens de magia */
+.magia-item-catalogo {
+    background: rgba(40, 40, 50, 0.8);
+    border: 1px solid rgba(100, 80, 255, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.magia-item-catalogo:hover {
+    border-color: #6450ff;
+    background: rgba(100, 80, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.magia-item-catalogo.destaque {
+    background: rgba(39, 174, 96, 0.15);
+    border-color: rgba(39, 174, 96, 0.4);
+}
+
+.magia-nome {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+}
+
+.magia-info-rapida {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.magia-escola,
+.magia-classe,
+.magia-custo,
+.magia-nh {
+    background: rgba(100, 80, 255, 0.3);
+    color: #8a7bff;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+    border: 1px solid rgba(100, 80, 255, 0.3);
+}
+
+.magia-custo {
+    background: rgba(231, 76, 60, 0.3);
+    color: #e74c3c;
+    border-color: rgba(231, 76, 60, 0.3);
+}
+
+.magia-nh {
+    background: rgba(52, 152, 219, 0.3);
+    color: #3498db;
+    border-color: rgba(52, 152, 219, 0.3);
+}
+
+.magia-descricao-curta {
+    color: #ccc;
+    font-size: 0.9em;
+    line-height: 1.4;
+    margin-bottom: 10px;
+}
+
+.magia-controles {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Botões */
+.btn-aprender-magia,
+.btn-editar-magia,
+.btn-detalhes-magia,
+.btn-remover-magia {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 80px;
+}
+
+.btn-aprender-magia {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    color: white;
+}
+
+.btn-aprender-magia:hover {
+    background: linear-gradient(45deg, #219653, #27ae60);
+    transform: translateY(-2px);
+}
+
+.btn-editar-magia {
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+}
+
+.btn-editar-magia:hover {
+    background: linear-gradient(45deg, #2980b9, #21618c);
+    transform: translateY(-2px);
+}
+
+.btn-detalhes-magia {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffd700;
+    border: 1px solid rgba(255, 140, 0, 0.3);
+}
+
+.btn-detalhes-magia:hover {
+    background: rgba(255, 140, 0, 0.2);
+    border-color: #ff8c00;
+}
+
+.btn-remover-magia {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.btn-remover-magia:hover {
+    background: linear-gradient(45deg, #c0392b, #a93226);
+    transform: translateY(-2px);
+}
+
+/* ===== MAGIAS APRENDIDAS ===== */
+.magia-aprendida-item {
+    background: rgba(39, 174, 96, 0.15);
+    border: 1px solid rgba(39, 174, 96, 0.4);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.magia-aprendida-info {
+    margin-bottom: 10px;
+}
+
+.magia-aprendida-nome {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+.magia-aprendida-detalhes {
+    color: #27ae60;
+    font-size: 0.9em;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.magia-aprendida-controles {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ===== DETALHES DA MAGIA ===== */
+.magia-detalhes-completo {
+    color: #ccc;
+}
+
+.detalhe-header h4 {
+    color: #ffd700;
+    margin: 0 0 15px 0;
+    font-size: 1.3em;
+    border-bottom: 1px solid rgba(100, 80, 255, 0.3);
+    padding-bottom: 8px;
+}
+
+.detalhes-tecnicos {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.info-principal,
+.info-custos,
+.info-tecnica {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    padding: 15px;
+    background: rgba(40, 40, 50, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(100, 80, 255, 0.2);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-item strong {
+    color: #ffd700;
+}
+
+.info-item span {
+    color: #8a7bff;
+    font-weight: 600;
+}
+
+.descricao-completa {
+    padding: 15px;
+    background: rgba(40, 40, 50, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(100, 80, 255, 0.2);
+}
+
+.descricao-completa strong {
+    color: #ffd700;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.texto-descricao {
+    line-height: 1.6;
+    color: #ccc;
+}
+
+/* ===== MODAL DE COMPRA ===== */
+.modal-compra-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-compra {
+    background: rgba(30, 30, 40, 0.95);
+    border: 2px solid rgba(100, 80, 255, 0.3);
+    border-radius: 12px;
+    padding: 0;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-compra h3 {
+    color: #8a7bff;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(40, 40, 50, 0.9), rgba(50, 50, 65, 0.9));
+    border-bottom: 1px solid rgba(100, 80, 255, 0.3);
+    font-size: 1.4em;
+}
+
+.info-magia {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-magia strong {
+    color: #ffd700;
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.descricao {
+    color: #ccc;
+    line-height: 1.5;
+}
+
+.controles-compra {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.controle-pontos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.btn-controle {
+    background: rgba(100, 80, 255, 0.3);
+    border: 2px solid rgba(100, 80, 255, 0.5);
+    color: #ffd700;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-controle:hover {
+    background: rgba(100, 80, 255, 0.5);
+    border-color: #6450ff;
+    transform: scale(1.1);
+}
+
+.display-pontos {
+    color: #ffd700;
+    font-size: 1.4em;
+    font-weight: 700;
+    min-width: 120px;
+    text-align: center;
+}
+
+.nivel-calculado {
+    text-align: center;
+    color: #ccc;
+    padding: 10px;
+    background: rgba(100, 80, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(100, 80, 255, 0.2);
+}
+
+.nivel-calculado strong {
+    color: #ffd700;
+    font-size: 1.2em;
+}
+
+.nivel-calculado small {
+    display: block;
+    margin-top: 5px;
+    color: #95a5a6;
+    font-size: 0.85em;
+}
+
+.acoes-modal {
+    padding: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.btn-cancelar,
+.btn-comprar,
+.btn-remover {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancelar {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffd700;
+    border: 1px solid rgba(255, 140, 0, 0.3);
+}
+
+.btn-cancelar:hover {
+    background: rgba(255, 140, 0, 0.2);
+    border-color: #ff8c00;
+}
+
+.btn-comprar {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    color: white;
+}
+
+.btn-comprar:hover {
+    background: linear-gradient(45deg, #219653, #27ae60);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+}
+
+.btn-remover {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    color: white;
+    margin-right: auto;
+}
+
+.btn-remover:hover {
+    background: linear-gradient(45deg, #c0392b, #a93226);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 1024px) {
+    .sistema-aquisicao-magia {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .magia-status-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .container-principal {
+        padding: 15px;
+    }
+    
+    .magia-status-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filtros-container-magia {
+        flex-direction: column;
+    }
+    
+    .filtro-grupo {
+        min-width: 100%;
+    }
+    
+    .magia-controles,
+    .magia-aprendida-controles {
+        flex-direction: column;
+    }
+    
+    .acoes-modal {
+        flex-direction: column;
+    }
+    
+    .info-principal,
+    .info-custos,
+    .info-tecnica {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .magia-info-rapida {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .controle-pontos {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .display-pontos {
+        order: -1;
+    }
+}
+
+/* Scrollbar personalizado */
+.catalog-list-magias::-webkit-scrollbar,
+.acquired-list-magias::-webkit-scrollbar,
+.filtro-submenu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.catalog-list-magias::-webkit-scrollbar-track,
+.acquired-list-magias::-webkit-scrollbar-track,
+.filtro-submenu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.catalog-list-magias::-webkit-scrollbar-thumb,
+.acquired-list-magias::-webkit-scrollbar-thumb,
+.filtro-submenu::-webkit-scrollbar-thumb {
+    background: rgba(100, 80, 255, 0.5);
+    border-radius: 3px;
+}
+
+.catalog-list-magias::-webkit-scrollbar-thumb:hover,
+.acquired-list-magias::-webkit-scrollbar-thumb:hover,
+.filtro-submenu::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 80, 255, 0.7);
+}
