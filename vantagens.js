@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO 100% CORRIGIDA
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO SIMPLES
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -41,7 +41,6 @@ class GerenciadorVantagens {
         const div = document.createElement('div');
         div.className = `item-lista ${tipo}-item`;
         
-        // Mostrar custo base corretamente
         let custoDisplay = Math.abs(item.custo) || 'var';
         if (item.tipo === 'variavel') {
             custoDisplay = `${Math.abs(item.custoPorNivel || 2)} pts/nível`;
@@ -81,7 +80,6 @@ class GerenciadorVantagens {
 
         titulo.textContent = item.nome;
         
-        // Limpar evento anterior
         btnConfirmar.onclick = null;
 
         switch(item.tipo) {
@@ -154,7 +152,6 @@ class GerenciadorVantagens {
         const nivelBase = item.nivelBase || 1;
         const niveisMax = item.niveis || 10;
         const custoPorNivel = Math.abs(item.custoPorNivel || 2);
-        const custoInicial = nivelBase * custoPorNivel;
 
         let html = `
             <div class="modal-descricao">
@@ -173,26 +170,19 @@ class GerenciadorVantagens {
         html += `
                     </select>
                     <div class="nivel-info">
-                        <div class="info-linha">
-                            <span>Custo base: ${custoPorNivel} pts/nível</span>
-                        </div>
                         <div class="custo-total-container">
-                            <span>Custo total: </span>
-                            <span class="custo-total" id="custo-total">${custoInicial} pts</span>
-                        </div>
-                        <div class="custo-por-nivel-info" id="custo-por-nivel-info">
-                            <small>Cálculo: ${custoPorNivel} pts × ${nivelBase} = ${custoInicial} pts</small>
+                            <span>Custo: </span>
+                            <span class="custo-total" id="custo-total">${nivelBase * custoPorNivel} pts</span>
                         </div>
                     </div>
         `;
 
-        // Ampliações (se houver)
         if(item.ampliacoes && item.ampliacoes.length > 0) {
             html += `<div class="ampliacoes-section"><h4>Ampliações Opcionais:</h4>`;
             
             item.ampliacoes.forEach(ampliacao => {
                 const custoExtra = parseFloat(ampliacao.custoExtra) || 1.5;
-                const percentual = custoExtra * 100; // 150%
+                const percentual = custoExtra * 100;
                 
                 html += `
                     <div class="ampliacao-option">
@@ -212,80 +202,33 @@ class GerenciadorVantagens {
 
         html += `</div></div>`;
 
-        // Event listeners para cálculo dinâmico
         setTimeout(() => {
             const selectNivel = document.getElementById('nivel-vantagem');
             const custoTotal = document.getElementById('custo-total');
-            const custoPorNivelInfo = document.getElementById('custo-por-nivel-info');
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
             const calcularCusto = () => {
-                // 1. Pegar nível selecionado
                 const nivel = parseInt(selectNivel.value) || nivelBase;
-                
-                // 2. Calcular custo base SEM ampliação
-                const custoBaseSemAmpliacao = nivel * custoPorNivel;
-                
-                // 3. Verificar ampliações - CÁLCULO CORRETO
-                let custoFinal = custoBaseSemAmpliacao;
-                let custoPorNivelAtual = custoPorNivel;
+                let custo = nivel * custoPorNivel;
                 let ampliacoesAtivas = [];
-                let temAmpliacao = false;
                 
                 checkboxes.forEach(checkbox => {
                     if(checkbox.checked) {
-                        const percentualExtra = parseFloat(checkbox.dataset.custo) || 1.5; // 1.5 = 150%
-                        
-                        // CÁLCULO CORRETO: custoBase × (1 + percentualExtra)
-                        // Onde percentualExtra já é o multiplicador (1.5 para 150%)
-                        // Se custoBaseSemAmpliacao = 6 (3 níveis × 2)
-                        // Com 150%: 6 × (1 + 1.5) = 6 × 2.5 = 15 pontos
-                        custoFinal = custoBaseSemAmpliacao * (1 + percentualExtra);
-                        custoPorNivelAtual = custoPorNivel * (1 + percentualExtra);
+                        const percentualExtra = parseFloat(checkbox.dataset.custo) || 1.5;
+                        custo = custo * (1 + percentualExtra);
                         ampliacoesAtivas.push(checkbox.dataset.nome);
-                        temAmpliacao = true;
                     }
                 });
                 
-                // 4. Arredondar
-                custoFinal = Math.round(custoFinal);
-                custoPorNivelAtual = Math.round(custoPorNivelAtual * 100) / 100; // 2 casas decimais
+                custo = Math.round(custo);
+                custoTotal.textContent = `${custo} pts`;
                 
-                if (isNaN(custoFinal) || custoFinal < 0) {
-                    custoFinal = custoBaseSemAmpliacao;
-                    custoPorNivelAtual = custoPorNivel;
-                }
-                
-                // 5. Mostrar valores
-                custoTotal.textContent = `${custoFinal} pts`;
-                
-                // Mostrar cálculo detalhado
-                if (temAmpliacao) {
-                    custoPorNivelInfo.innerHTML = `
-                        <small style="color: #27ae60;">
-                            <strong>Cálculo com ampliação:</strong><br>
-                            ${custoPorNivel} pts/nível × (1 + ${checkboxes[0].dataset.custo}) = ${custoPorNivelAtual} pts/nível<br>
-                            ${custoPorNivelAtual} pts/nível × ${nivel} = <strong>${custoFinal} pts</strong>
-                        </small>
-                    `;
-                } else {
-                    custoPorNivelInfo.innerHTML = `
-                        <small>Cálculo: ${custoPorNivel} pts/nível × ${nivel} = ${custoFinal} pts</small>
-                    `;
-                }
-                
-                // Guardar informações para uso posterior
-                selectNivel.dataset.custoFinal = custoFinal;
+                selectNivel.dataset.custoFinal = custo;
                 selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
-                selectNivel.dataset.custoPorNivelAtual = custoPorNivelAtual;
-                
-                return custoFinal;
             };
 
-            // Inicializar cálculo
             calcularCusto();
 
-            // Adicionar listeners
             selectNivel.addEventListener('change', calcularCusto);
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', calcularCusto);
@@ -316,18 +259,12 @@ class GerenciadorVantagens {
         const selectNivel = document.getElementById('nivel-vantagem');
         const nivel = parseInt(selectNivel.value) || (item.nivelBase || 1);
         
-        // Usar o custo já calculado e armazenado
         let custoFinal = parseInt(selectNivel.dataset.custoFinal);
-        let custoPorNivelAtual = parseFloat(selectNivel.dataset.custoPorNivelAtual);
-        
         if (isNaN(custoFinal)) {
-            // Fallback: calcular novamente se necessário
             const custoPorNivel = Math.abs(item.custoPorNivel || 2);
             custoFinal = nivel * custoPorNivel;
-            custoPorNivelAtual = custoPorNivel;
         }
         
-        // Pegar ampliações selecionadas
         let ampliacoesSelecionadas = [];
         try {
             ampliacoesSelecionadas = JSON.parse(selectNivel.dataset.ampliacoes || '[]');
@@ -339,9 +276,7 @@ class GerenciadorVantagens {
             ...item,
             nivelSelecionado: nivel,
             custo: custoFinal,
-            custoPorNivelAtual: custoPorNivelAtual,
-            ampliacoesSelecionadas: ampliacoesSelecionadas,
-            custoPorNivel: item.custoPorNivel || 2
+            ampliacoesSelecionadas: ampliacoesSelecionadas
         };
 
         this.adicionarItem(itemCompleto, tipo);
@@ -357,9 +292,7 @@ class GerenciadorVantagens {
             tipo: item.tipo,
             variacao: item.variacaoSelecionada,
             nivel: item.nivelSelecionado,
-            custoPorNivelAtual: item.custoPorNivelAtual,
-            ampliacoes: item.ampliacoesSelecionadas,
-            custoPorNivel: item.custoPorNivel
+            ampliacoes: item.ampliacoesSelecionadas
         };
 
         if (tipo === 'vantagem') {
@@ -386,8 +319,7 @@ class GerenciadorVantagens {
             let infoExtra = '';
             
             if (item.nivel) {
-                const custoPorNivelDisplay = item.custoPorNivelAtual || item.custoPorNivel || 2;
-                infoExtra = `<div class="item-categoria">Nível ${item.nivel} (${custoPorNivelDisplay} pts/nível)</div>`;
+                infoExtra = `<div class="item-categoria">Nível ${item.nivel}</div>`;
             }
             
             if (item.variacao) {
