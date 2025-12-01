@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO CORRIGIDA
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO CORRIGIDA COM AMPLIAÇÕES
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -187,7 +187,7 @@ class GerenciadorVantagens {
             
             item.ampliacoes.forEach(ampliacao => {
                 const custoExtra = parseFloat(ampliacao.custoExtra) || 1.5;
-                const percentual = (custoExtra * 100) - 100;
+                const percentual = custoExtra * 100; // CORREÇÃO: 150% (não 50%)
                 
                 html += `
                     <div class="ampliacao-option">
@@ -197,6 +197,7 @@ class GerenciadorVantagens {
                         <label for="ampliacao-${ampliacao.id}">
                             <strong>${ampliacao.nome} (+${percentual}%)</strong>
                             <p>${ampliacao.descricao}</p>
+                            <small><em>Ex: nível 1 = ${custoPorNivel} → ${Math.round(custoPorNivel * custoExtra)} pts</em></small>
                         </label>
                     </div>
                 `;
@@ -220,24 +221,25 @@ class GerenciadorVantagens {
                 // 2. Calcular custo base: nível × custo por nível
                 const custoBase = nivel * custoPorNivel;
                 
-                // 3. Verificar ampliações
+                // 3. Verificar ampliações - CORREÇÃO AQUI
                 let custoFinal = custoBase;
                 let ampliacoesAtivas = [];
                 
                 checkboxes.forEach(checkbox => {
                     if(checkbox.checked) {
-                        const multiplicador = parseFloat(checkbox.dataset.custo) || 1;
-                        if (!isNaN(multiplicador)) {
-                            custoFinal = custoBase * multiplicador;
-                            ampliacoesAtivas.push(checkbox.dataset.nome);
-                        }
+                        const percentualExtra = parseFloat(checkbox.dataset.custo) || 1.5;
+                        
+                        // CORREÇÃO: custoFinal = custoBase + (custoBase × percentualExtra)
+                        // Exemplo: nível 3 = 6 pontos, com 150% = 6 + (6 × 1.5) = 6 + 9 = 15
+                        custoFinal = custoBase + (custoBase * percentualExtra);
+                        ampliacoesAtivas.push(checkbox.dataset.nome);
                     }
                 });
                 
                 // 4. Arredondar e mostrar
                 custoFinal = Math.round(custoFinal);
                 if (isNaN(custoFinal) || custoFinal < 0) {
-                    custoFinal = custoBase; // Fallback seguro
+                    custoFinal = custoBase;
                 }
                 
                 custoTotal.textContent = `${custoFinal} pts`;
