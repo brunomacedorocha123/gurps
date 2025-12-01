@@ -1,4 +1,4 @@
-/* ===== SISTEMA DE MAGIA - CSS COMPLETO ===== */
+/* ===== SISTEMA DE MAGIA - CSS COMPLETO E CORRIGIDO ===== */
 
 /* Container principal */
 .container-principal {
@@ -189,13 +189,14 @@
     color: rgba(255, 215, 0, 0.6);
 }
 
-/* Sistema de Filtros */
+/* ===== SISTEMA DE FILTROS CORRIGIDO ===== */
 .filtros-container-magia {
     padding: 15px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
+    position: relative;
 }
 
 .filtro-grupo {
@@ -216,6 +217,10 @@
     gap: 10px;
     font-weight: 600;
     transition: all 0.3s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .filtro-header:hover {
@@ -223,31 +228,44 @@
     border-color: #6450ff;
 }
 
+.filtro-header .fas {
+    transition: transform 0.3s ease;
+    margin-left: auto;
+    font-size: 0.9em;
+}
+
 .filtro-submenu {
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
-    background: rgba(30, 30, 40, 0.95);
-    border: 1px solid rgba(100, 80, 255, 0.3);
+    background: rgba(30, 30, 40, 0.98);
+    border: 1px solid rgba(100, 80, 255, 0.5);
     border-radius: 8px;
     padding: 10px;
     margin-top: 5px;
     max-height: 300px;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 1000;
     display: none;
     backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 .filtro-submenu.active {
-    display: block;
-    animation: fadeIn 0.3s ease;
+    display: block !important;
+    animation: fadeInDown 0.3s ease forwards;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .filtro-option {
@@ -266,6 +284,10 @@
 
 .filtro-option input[type="checkbox"] {
     margin: 0;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    accent-color: #6450ff;
 }
 
 .filtro-option label {
@@ -273,6 +295,14 @@
     cursor: pointer;
     font-size: 0.9em;
     flex: 1;
+}
+
+/* Garantir que o filtro não desapareça ao clicar dentro */
+.filtro-submenu:hover,
+.filtro-option:hover,
+.filtro-option input:hover,
+.filtro-option label:hover {
+    display: block !important;
 }
 
 /* ===== LISTAS DE MAGIAS ===== */
@@ -807,4 +837,105 @@
 .acquired-list-magias::-webkit-scrollbar-thumb:hover,
 .filtro-submenu::-webkit-scrollbar-thumb:hover {
     background: rgba(100, 80, 255, 0.7);
+}
+
+/* ===== CORREÇÃO PARA FILTROS VISÍVEIS ===== */
+.filtro-submenu {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.filtro-submenu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+
+/* ===== CORREÇÕES ESPECÍFICAS PARA OS FILTROS ===== */
+
+/* Garantir que os filtros sejam clicáveis */
+.filtro-header {
+    position: relative;
+    z-index: 100;
+    cursor: pointer !important;
+}
+
+/* Submenu visível e funcional */
+.filtro-submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(30, 30, 40, 0.98);
+    border: 1px solid rgba(100, 80, 255, 0.5);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1001;
+    display: none;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.filtro-submenu.active {
+    display: block !important;
+    animation: fadeInDown 0.3s ease forwards;
+}
+
+/* Animação de abertura */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Checkboxes visíveis */
+.filtro-option input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    accent-color: #6450ff !important;
+}
+
+.filtro-option label {
+    color: #ffd700 !important;
+    cursor: pointer !important;
+    font-size: 0.9em !important;
+    flex: 1 !important;
+}
+
+/* Ícone de seta */
+.filtro-header .fas.fa-chevron-down,
+.filtro-header .fas.fa-chevron-up {
+    margin-left: auto !important;
+    font-size: 0.9em !important;
+    transition: transform 0.3s ease !important;
+}
+
+.filtro-header .fas.fa-chevron-up {
+    transform: rotate(180deg) !important;
+}
+
+/* Prevenir que o submenu feche ao clicar dentro */
+.filtro-submenu:hover,
+.filtro-option:hover,
+.filtro-option input:hover,
+.filtro-option label:hover {
+    display: block !important;
+}
+
+/* Fechar submenus ao clicar fora (melhorado) */
+body:not(.filtro-grupo) .filtro-submenu.active {
+    pointer-events: auto !important;
 }

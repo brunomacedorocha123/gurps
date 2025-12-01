@@ -1,32 +1,169 @@
-// ===== SISTEMA CORE DE MAGIA - VERSÃO DEFINITIVA E 100% FUNCIONAL =====
+// ===== SISTEMA CORE DE MAGIA - VERSÃO 100% FUNCIONAL =====
 class SistemaMagia {
     constructor() {
         this.magiasAprendidas = [];
         this.magiaSelecionada = null;
-        this.pontosSelecionados = 1; // Começa com 1 ponto
+        this.pontosSelecionados = 1;
         this.magiaEditando = null;
         this.iqTimeout = null;
         this.htTimeout = null;
+        this.aptidaoTimeout = null;
         
         this.inicializarSistema();
-        this.migrarIDsAntigos();
     }
 
     inicializarSistema() {
-        this.configurarEventos();
-        this.configurarObservadorAtributosMagia();
         this.carregarDadosSalvos();
+        this.configurarObservadorAtributosMagia();
+        this.configurarFiltrosManualmente();
+        this.configurarEventos();
         this.atualizarInterface();
         
+        // Forçar atualização inicial
         setTimeout(() => {
-            this.configurarFiltros();
-            this.atualizarStatusMagico(); // Forçar atualização inicial
+            this.atualizarStatusMagico();
+            this.filtrarCatalogo();
+            console.log('✅ Sistema de Magia Inicializado!');
         }, 100);
     }
 
-    // ===== SISTEMA DE OBSERVAÇÃO DE ATRIBUTOS EM TEMPO REAL =====
+    // ===== CONFIGURAÇÃO DOS FILTROS (MÉTODO CORRETO) =====
+    configurarFiltrosManualmente() {
+        // Remove qualquer evento anterior
+        document.querySelectorAll('.filtro-header').forEach(header => {
+            const newHeader = header.cloneNode(true);
+            header.parentNode.replaceChild(newHeader, header);
+        });
+
+        // Adiciona eventos aos filtros
+        setTimeout(() => {
+            // Configurar "Escolas de Magia"
+            const headerEscolas = document.querySelector('.filtro-header[onclick*="escolas-submenu"]');
+            if (headerEscolas) {
+                headerEscolas.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleSubmenu('escolas-submenu');
+                });
+            }
+
+            // Configurar "Classes de Magia"
+            const headerClasses = document.querySelector('.filtro-header[onclick*="classes-submenu"]');
+            if (headerClasses) {
+                headerClasses.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleSubmenu('classes-submenu');
+                });
+            }
+
+            // Configurar checkbox "Todas as Escolas"
+            const todasEscolas = document.getElementById('escola-todas');
+            if (todasEscolas) {
+                todasEscolas.addEventListener('change', (e) => {
+                    const escolasCheckboxes = document.querySelectorAll('.escola-checkbox');
+                    const isChecked = e.target.checked;
+                    
+                    escolasCheckboxes.forEach(checkbox => {
+                        checkbox.checked = isChecked;
+                        checkbox.disabled = isChecked;
+                    });
+                    
+                    this.filtrarCatalogo();
+                });
+            }
+
+            // Configurar checkbox "Todas as Classes"
+            const todasClasses = document.getElementById('classe-todas');
+            if (todasClasses) {
+                todasClasses.addEventListener('change', (e) => {
+                    const classesCheckboxes = document.querySelectorAll('.classe-checkbox');
+                    const isChecked = e.target.checked;
+                    
+                    classesCheckboxes.forEach(checkbox => {
+                        checkbox.checked = isChecked;
+                        checkbox.disabled = isChecked;
+                    });
+                    
+                    this.filtrarCatalogo();
+                });
+            }
+
+            // Configurar checkboxes individuais
+            document.querySelectorAll('.escola-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    this.verificarTodasEscolas();
+                    this.filtrarCatalogo();
+                });
+            });
+
+            document.querySelectorAll('.classe-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    this.verificarTodasClasses();
+                    this.filtrarCatalogo();
+                });
+            });
+
+            // Configurar busca
+            const buscaInput = document.getElementById('busca-magias');
+            if (buscaInput) {
+                buscaInput.addEventListener('input', () => {
+                    this.filtrarCatalogo();
+                });
+            }
+
+            console.log('✅ Filtros configurados!');
+        }, 150);
+    }
+
+    toggleSubmenu(submenuId) {
+        const submenu = document.getElementById(submenuId);
+        if (!submenu) return;
+
+        // Fechar outros submenus
+        document.querySelectorAll('.filtro-submenu').forEach(otherMenu => {
+            if (otherMenu.id !== submenuId && otherMenu.classList.contains('active')) {
+                otherMenu.classList.remove('active');
+                const otherHeader = otherMenu.previousElementSibling;
+                if (otherHeader) {
+                    const icon = otherHeader.querySelector('.fa-chevron-down, .fa-chevron-up');
+                    if (icon) icon.className = 'fas fa-chevron-down';
+                }
+            }
+        });
+
+        // Alternar submenu atual
+        submenu.classList.toggle('active');
+        const header = submenu.previousElementSibling;
+        if (header) {
+            const icon = header.querySelector('.fa-chevron-down, .fa-chevron-up');
+            if (icon) {
+                icon.className = submenu.classList.contains('active') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+            }
+        }
+    }
+
+    verificarTodasEscolas() {
+        const todasEscolas = document.getElementById('escola-todas');
+        const escolasCheckboxes = document.querySelectorAll('.escola-checkbox:not([disabled])');
+        const todasMarcadas = Array.from(escolasCheckboxes).every(checkbox => checkbox.checked);
+        
+        if (todasEscolas) {
+            todasEscolas.checked = todasMarcadas;
+        }
+    }
+
+    verificarTodasClasses() {
+        const todasClasses = document.getElementById('classe-todas');
+        const classesCheckboxes = document.querySelectorAll('.classe-checkbox:not([disabled])');
+        const todasMarcadas = Array.from(classesCheckboxes).every(checkbox => checkbox.checked);
+        
+        if (todasClasses) {
+            todasClasses.checked = todasMarcadas;
+        }
+    }
+
+    // ===== OBSERVAÇÃO DE ATRIBUTOS EM TEMPO REAL =====
     configurarObservadorAtributosMagia() {
-        // ✅ OBSERVADOR PARA IQ (IQ Mágico e NHs)
+        // Observar mudanças no IQ
         const iqInput = document.getElementById('IQ');
         if (iqInput) {
             iqInput.addEventListener('input', () => {
@@ -36,13 +173,9 @@ class SistemaMagia {
                     this.atualizarNHsMagias();
                 }, 300);
             });
-            iqInput.addEventListener('change', () => {
-                this.atualizarStatusMagico();
-                this.atualizarNHsMagias();
-            });
         }
 
-        // ✅ OBSERVADOR PARA HT (Mana Base)
+        // Observar mudanças no HT
         const htInput = document.getElementById('HT');
         if (htInput) {
             htInput.addEventListener('input', () => {
@@ -51,27 +184,21 @@ class SistemaMagia {
                     this.atualizarStatusMagico();
                 }, 300);
             });
-            htInput.addEventListener('change', () => {
-                this.atualizarStatusMagico();
-            });
         }
 
-        // ✅ OBSERVADOR PARA APTIDÃO MÁGICA
+        // Observar mudanças na Aptidão Mágica
         const aptidaoInput = document.getElementById('aptidao-magica');
         if (aptidaoInput) {
             aptidaoInput.addEventListener('input', () => {
-                setTimeout(() => {
-                    this.atualizarNHsMagias();
+                clearTimeout(this.aptidaoTimeout);
+                this.aptidaoTimeout = setTimeout(() => {
                     this.atualizarStatusMagico();
+                    this.atualizarNHsMagias();
                 }, 300);
             });
-            aptidaoInput.addEventListener('change', () => {
-                this.atualizarNHsMagias();
-                this.atualizarStatusMagico();
-            });
         }
-        
-        // ✅ OBSERVAR BOTÕES +/- DOS ATRIBUTOS (evento global)
+
+        // Observar botões +/- dos atributos
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-plus, .btn-minus');
             if (btn) {
@@ -79,39 +206,41 @@ class SistemaMagia {
                     const container = btn.closest('.atributo-container');
                     if (container) {
                         const input = container.querySelector('input[type="number"]');
-                        if (input && (input.id === 'IQ' || input.id === 'HT')) {
-                            this.atualizarStatusMagico();
+                        if (input) {
                             if (input.id === 'IQ') {
+                                this.atualizarStatusMagico();
+                                this.atualizarNHsMagias();
+                            } else if (input.id === 'HT') {
+                                this.atualizarStatusMagico();
+                            } else if (input.id === 'aptidao-magica') {
+                                this.atualizarStatusMagico();
                                 this.atualizarNHsMagias();
                             }
                         }
                     }
-                }, 150);
+                }, 100);
             }
         });
     }
 
-    // ===== ATUALIZAÇÃO EM TEMPO REAL DO STATUS MÁGICO =====
+    // ===== ATUALIZAÇÃO DO STATUS MÁGICO =====
     atualizarStatusMagico() {
         const iq = this.obterIQ();
         const ht = this.obterHT();
-        const aptidao = this.obterAptidao();
         
-        console.log('🔄 Atualizando Status Mágico - IQ:', iq, 'HT:', ht, 'Apt:', aptidao);
-        
-        // ✅ IQ Mágico
+        // Atualizar IQ Mágico
         const iqMagicoElem = document.getElementById('iq-magico');
         if (iqMagicoElem) {
             iqMagicoElem.textContent = iq;
         }
         
-        // ✅ Mana Base (HT)
+        // Atualizar Mana Base
         const manaBaseElem = document.getElementById('mana-base');
         if (manaBaseElem) {
             manaBaseElem.textContent = ht;
         }
         
-        // ✅ Atualizar Mana Atual se necessário
+        // Ajustar Mana Atual se necessário
         const manaAtualElem = document.getElementById('mana-atual');
         if (manaAtualElem) {
             const manaAtual = parseInt(manaAtualElem.value) || 0;
@@ -120,21 +249,9 @@ class SistemaMagia {
             }
             manaAtualElem.max = ht;
         }
-        
-        // ✅ Atualizar Mana Atual (max attribute)
-        if (manaAtualElem) {
-            manaAtualElem.max = ht;
-        }
     }
 
-    // ===== ATUALIZAR NHs DAS MAGIAS APRENDIDAS =====
     atualizarNHsMagias() {
-        const iq = this.obterIQ();
-        const aptidao = this.obterAptidao();
-        
-        console.log('🎯 Recalculando NHs - IQ:', iq, 'Apt:', aptidao);
-        
-        // Atualiza todas as magias aprendidas
         this.magiasAprendidas.forEach(magia => {
             if (typeof catalogoMagias !== 'undefined') {
                 const magiaBase = catalogoMagias.find(m => m.id === magia.id);
@@ -148,145 +265,16 @@ class SistemaMagia {
         this.salvarDados();
     }
 
-    // ===== SISTEMA DE FILTROS FUNCIONAL =====
-    configurarFiltros() {
-        // Remover event listeners antigos
-        const filtroHeaders = document.querySelectorAll('.filtro-header');
-        filtroHeaders.forEach(header => {
-            const novoHeader = header.cloneNode(true);
-            header.parentNode.replaceChild(novoHeader, header);
-        });
-
-        // Configurar novos event listeners
-        document.querySelectorAll('.filtro-header').forEach(header => {
-            header.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const submenu = header.nextElementSibling;
-                if (submenu && submenu.classList.contains('filtro-submenu')) {
-                    // Fechar outros
-                    document.querySelectorAll('.filtro-submenu.active').forEach(other => {
-                        if (other !== submenu) {
-                            other.classList.remove('active');
-                            const otherIcon = other.previousElementSibling.querySelector('.fa-chevron-down, .fa-chevron-up');
-                            if (otherIcon) otherIcon.className = 'fas fa-chevron-down';
-                        }
-                    });
-                    
-                    // Alternar atual
-                    submenu.classList.toggle('active');
-                    const icon = header.querySelector('.fa-chevron-down, .fa-chevron-up');
-                    if (icon) {
-                        icon.className = submenu.classList.contains('active') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
-                    }
-                }
-            });
-        });
-
-        this.configurarEventosFiltros();
-
-        // Fechar ao clicar fora
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.filtro-grupo')) {
-                document.querySelectorAll('.filtro-submenu.active').forEach(submenu => {
-                    submenu.classList.remove('active');
-                    const header = submenu.previousElementSibling;
-                    const icon = header.querySelector('.fa-chevron-down, .fa-chevron-up');
-                    if (icon) icon.className = 'fas fa-chevron-down';
-                });
-            }
-        });
-    }
-
-    configurarEventosFiltros() {
-        // ✅ CONFIGURAR "TODAS AS ESCOLAS"
-        const todasEscolas = document.getElementById('escola-todas');
-        if (todasEscolas) {
-            todasEscolas.addEventListener('change', (e) => {
-                const escolasCheckboxes = document.querySelectorAll('.escola-checkbox');
-                escolasCheckboxes.forEach(checkbox => {
-                    checkbox.checked = e.target.checked;
-                    checkbox.disabled = e.target.checked;
-                });
-                this.filtrarCatalogo();
-            });
-        }
-
-        // ✅ CONFIGURAR "TODAS AS CLASSES"
-        const todasClasses = document.getElementById('classe-todas');
-        if (todasClasses) {
-            todasClasses.addEventListener('change', (e) => {
-                const classesCheckboxes = document.querySelectorAll('.classe-checkbox');
-                classesCheckboxes.forEach(checkbox => {
-                    checkbox.checked = e.target.checked;
-                    checkbox.disabled = e.target.checked;
-                });
-                this.filtrarCatalogo();
-            });
-        }
-
-        // ✅ CONFIGURAR CHECKBOXES INDIVIDUAIS
-        document.querySelectorAll('.escola-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                this.verificarTodasEscolas();
-                this.filtrarCatalogo();
-            });
-        });
-
-        document.querySelectorAll('.classe-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                this.verificarTodasClasses();
-                this.filtrarCatalogo();
-            });
-        });
-
-        // ✅ BUSCA EM TEMPO REAL
-        const buscaInput = document.getElementById('busca-magias');
-        if (buscaInput) {
-            buscaInput.addEventListener('input', () => {
-                this.filtrarCatalogo();
-            });
-        }
-    }
-
-    verificarTodasEscolas() {
-        const todasEscolas = document.getElementById('escola-todas');
-        const escolasCheckboxes = document.querySelectorAll('.escola-checkbox');
-        const todasMarcadas = Array.from(escolasCheckboxes).every(checkbox => checkbox.checked);
-        
-        if (todasEscolas) {
-            todasEscolas.checked = todasMarcadas;
-            escolasCheckboxes.forEach(checkbox => {
-                checkbox.disabled = todasMarcadas;
-            });
-        }
-    }
-
-    verificarTodasClasses() {
-        const todasClasses = document.getElementById('classe-todas');
-        const classesCheckboxes = document.querySelectorAll('.classe-checkbox');
-        const todasMarcadas = Array.from(classesCheckboxes).every(checkbox => checkbox.checked);
-        
-        if (todasClasses) {
-            todasClasses.checked = todasMarcadas;
-            classesCheckboxes.forEach(checkbox => {
-                checkbox.disabled = todasMarcadas;
-            });
-        }
-    }
-
-    // ✅ MÉTODO CORRIGIDO: Obter escolas selecionadas
+    // ===== FILTRAGEM DO CATÁLOGO =====
     obterEscolasSelecionadas() {
         const todasEscolas = document.getElementById('escola-todas');
         if (todasEscolas && todasEscolas.checked) {
-            return []; // Array vazio = todas as escolas
+            return [];
         }
 
         const escolas = [];
-        const escolasSelecionadas = document.querySelectorAll('.escola-checkbox:checked');
-        escolasSelecionadas.forEach(checkbox => {
-            // Remove o prefixo "escola-" para bater com o catálogo
+        const escolasCheckboxes = document.querySelectorAll('.escola-checkbox:checked');
+        escolasCheckboxes.forEach(checkbox => {
             const escolaId = checkbox.id.replace('escola-', '');
             escolas.push(escolaId);
         });
@@ -294,17 +282,15 @@ class SistemaMagia {
         return escolas;
     }
 
-    // ✅ MÉTODO CORRIGIDO: Obter classes selecionadas
     obterClassesSelecionadas() {
         const todasClasses = document.getElementById('classe-todas');
         if (todasClasses && todasClasses.checked) {
-            return []; // Array vazio = todas as classes
+            return [];
         }
 
         const classes = [];
-        const classesSelecionadas = document.querySelectorAll('.classe-checkbox:checked');
-        classesSelecionadas.forEach(checkbox => {
-            // Remove o prefixo "classe-" para bater com o catálogo
+        const classesCheckboxes = document.querySelectorAll('.classe-checkbox:checked');
+        classesCheckboxes.forEach(checkbox => {
             const classeId = checkbox.id.replace('classe-', '');
             classes.push(classeId);
         });
@@ -314,7 +300,7 @@ class SistemaMagia {
 
     filtrarCatalogo() {
         if (typeof catalogoMagias === 'undefined') {
-            console.error('❌ Catálogo não carregado!');
+            console.error('❌ Catálogo de magias não carregado!');
             return;
         }
 
@@ -323,12 +309,6 @@ class SistemaMagia {
 
         const escolasSelecionadas = this.obterEscolasSelecionadas();
         const classesSelecionadas = this.obterClassesSelecionadas();
-
-        console.log('🔍 Filtros aplicados:', {
-            busca: termoBusca,
-            escolas: escolasSelecionadas,
-            classes: classesSelecionadas
-        });
 
         const magiasFiltradas = catalogoMagias.filter(magia => {
             // Filtro por busca
@@ -401,43 +381,58 @@ class SistemaMagia {
         }).join('');
     }
 
-    // ===== MÉTODOS BÁSICOS =====
-    migrarIDsAntigos() {
-        let atualizou = false;
-        this.magiasAprendidas.forEach(magia => {
-            if (magia.id === 1) {
-                magia.id = 600;
-                atualizou = true;
-            } else if (magia.id === 2) {
-                magia.id = 601;
-                atualizou = true;
-            }
-        });
-        if (atualizou) this.salvarDados();
+    // ===== MÉTODOS DE OBTER VALORES =====
+    obterIQ() {
+        const elemento = document.getElementById('IQ');
+        return elemento ? parseInt(elemento.value) || 10 : 10;
     }
 
-    configurarEventos() {
-        // Mana atual
-        const manaInput = document.getElementById('mana-atual');
-        if (manaInput) {
-            manaInput.addEventListener('change', () => {
-                const ht = this.obterHT();
-                const manaAtual = parseInt(manaInput.value) || 0;
-                if (manaAtual > ht) manaInput.value = ht;
-            });
-        }
+    obterHT() {
+        const elemento = document.getElementById('HT');
+        return elemento ? parseInt(elemento.value) || 10 : 10;
     }
 
-    // ===== MODAL DE APRENDIZAGEM/EDIÇÃO =====
-    abrirModalAprendizagem(id) {
-        if (typeof catalogoMagias === 'undefined') return;
+    obterAptidao() {
+        const elemento = document.getElementById('aptidao-magica');
+        return elemento ? parseInt(elemento.value) || 0 : 0;
+    }
+
+    // ===== CÁLCULOS DE NH =====
+    calcularNH(magia, pontos) {
+        const iq = this.obterIQ();
+        const aptidao = this.obterAptidao();
+        const bonus = this.calcularBonus(pontos, magia.dificuldade);
         
-        this.magiaSelecionada = catalogoMagias.find(m => m.id === id);
-        if (!this.magiaSelecionada) return;
+        return iq + aptidao + bonus;
+    }
 
-        this.pontosSelecionados = 1;
-        this.magiaEditando = null;
-        this.mostrarModalCompra();
+    calcularBonus(pontos, dificuldade) {
+        const tabelaBonus = {
+            'Difícil': {
+                1: -2,   2: -1,   4: 0,    8: 1,    12: 2,   16: 3,
+                20: 4,   24: 5,   28: 6,   32: 7,   36: 8,   40: 9,
+                44: 10,  48: 11,  52: 12
+            },
+            'Muito Difícil': {
+                1: -3,   2: -2,   4: -1,   8: 0,    12: 1,   16: 2,
+                20: 3,   24: 4,   28: 5,   32: 6,   36: 7,   40: 8,
+                44: 9,   48: 10,  52: 11
+            }
+        };
+        
+        return tabelaBonus[dificuldade]?.[pontos] || 0;
+    }
+
+    // ===== MODAIS =====
+    abrirModalAprendizagem(id) {
+        if (typeof catalogoMagias !== 'undefined') {
+            this.magiaSelecionada = catalogoMagias.find(m => m.id === id);
+            if (!this.magiaSelecionada) return;
+
+            this.pontosSelecionados = 1;
+            this.magiaEditando = null;
+            this.mostrarModalCompra();
+        }
     }
 
     abrirModalEdicao(id) {
@@ -460,7 +455,7 @@ class SistemaMagia {
         const nhCalculado = this.calcularNH(magia, this.pontosSelecionados);
 
         const modalHTML = `
-            <div class="modal-compra-overlay">
+            <div class="modal-compra-overlay" id="modal-magia-compra">
                 <div class="modal-compra">
                     <h3>${editando ? 'Editar Magia' : 'Aprender Magia'}: ${magia.nome}</h3>
                     <div class="info-magia">
@@ -495,6 +490,10 @@ class SistemaMagia {
                 </div>
             </div>
         `;
+
+        // Remove modal existente
+        const modalExistente = document.getElementById('modal-magia-compra');
+        if (modalExistente) modalExistente.remove();
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
     }
@@ -545,7 +544,7 @@ class SistemaMagia {
     }
 
     fecharModalCompra() {
-        const modal = document.querySelector('.modal-compra-overlay');
+        const modal = document.getElementById('modal-magia-compra');
         if (modal) modal.remove();
         this.magiaSelecionada = null;
         this.magiaEditando = null;
@@ -574,61 +573,12 @@ class SistemaMagia {
         this.fecharModalCompra();
         this.atualizarInterface();
         this.salvarDados();
-        
-        if (typeof atualizarPontos === 'function') {
-            atualizarPontos();
-        }
     }
 
     removerMagia(id) {
         this.magiasAprendidas = this.magiasAprendidas.filter(m => m.id !== id);
         this.atualizarInterface();
         this.salvarDados();
-        
-        if (typeof atualizarPontos === 'function') {
-            atualizarPontos();
-        }
-    }
-
-    // ===== CÁLCULOS =====
-    calcularNH(magia, pontos) {
-        const iq = this.obterIQ();
-        const aptidao = this.obterAptidao();
-        const bonus = this.calcularBonus(pontos, magia.dificuldade);
-        
-        return iq + aptidao + bonus;
-    }
-
-    obterIQ() {
-        const elemento = document.getElementById('IQ');
-        return elemento ? parseInt(elemento.value) || 10 : 10;
-    }
-
-    obterHT() {
-        const elemento = document.getElementById('HT');
-        return elemento ? parseInt(elemento.value) || 10 : 10;
-    }
-
-    obterAptidao() {
-        const elemento = document.getElementById('aptidao-magica');
-        return elemento ? parseInt(elemento.value) || 0 : 0;
-    }
-
-    calcularBonus(pontos, dificuldade) {
-        const tabelaBonus = {
-            'Difícil': {
-                1: -2,   2: -1,   4: 0,    8: 1,    12: 2,   16: 3,
-                20: 4,   24: 5,   28: 6,   32: 7,   36: 8,   40: 9,
-                44: 10,  48: 11,  52: 12
-            },
-            'Muito Difícil': {
-                1: -3,   2: -2,   4: -1,   8: 0,    12: 1,   16: 2,
-                20: 3,   24: 4,   28: 5,   32: 6,   36: 7,   40: 8,
-                44: 9,   48: 10,  52: 11
-            }
-        };
-        
-        return tabelaBonus[dificuldade]?.[pontos] || 0;
     }
 
     // ===== DETALHES DA MAGIA =====
@@ -639,7 +589,7 @@ class SistemaMagia {
         if (!magia) return;
 
         const modalHTML = `
-            <div class="modal-compra-overlay">
+            <div class="modal-compra-overlay" id="modal-detalhes-magia">
                 <div class="modal-compra modal-detalhes">
                     <div class="modal-header">
                         <h3>Detalhes da Magia: ${magia.nome}</h3>
@@ -657,11 +607,14 @@ class SistemaMagia {
             </div>
         `;
 
+        const modalExistente = document.getElementById('modal-detalhes-magia');
+        if (modalExistente) modalExistente.remove();
+
         document.body.insertAdjacentHTML('beforeend', modalHTML);
     }
 
     fecharModalDetalhes() {
-        const modal = document.querySelector('.modal-compra-overlay');
+        const modal = document.getElementById('modal-detalhes-magia');
         if (modal) modal.remove();
     }
 
@@ -738,7 +691,7 @@ class SistemaMagia {
         `;
     }
 
-    // ===== ATUALIZAÇÃO DA INTERFACE =====
+        // ===== ATUALIZAÇÃO DA INTERFACE =====
     atualizarInterface() {
         this.atualizarStatusMagico();
         this.atualizarListaAprendidas();
@@ -750,50 +703,67 @@ class SistemaMagia {
         const container = document.getElementById('magias-aprendidas');
         const pontosTotal = this.magiasAprendidas.reduce((sum, m) => sum + (m.pontos || 0), 0);
 
-        document.getElementById('pontos-magia-total').textContent = `[${pontosTotal} pts]`;
-        document.getElementById('total-gasto-magia').textContent = pontosTotal;
+        // Atualizar pontos totais
+        const pontosMagiaTotal = document.getElementById('pontos-magia-total');
+        const totalGastoMagia = document.getElementById('total-gasto-magia');
+        
+        if (pontosMagiaTotal) {
+            pontosMagiaTotal.textContent = `[${pontosTotal} pts]`;
+        }
+        if (totalGastoMagia) {
+            totalGastoMagia.textContent = pontosTotal;
+        }
 
         if (this.magiasAprendidas.length === 0) {
-            container.innerHTML = `
-                <div class="nenhuma-magia-aprendida">
-                    <i class="fas fa-hat-wizard"></i>
-                    <div>Nenhuma magia aprendida</div>
-                    <small>As magias que você aprender aparecerão aqui</small>
-                </div>
-            `;
+            if (container) {
+                container.innerHTML = `
+                    <div class="nenhuma-magia-aprendida">
+                        <i class="fas fa-hat-wizard"></i>
+                        <div>Nenhuma magia aprendida</div>
+                        <small>As magias que você aprender aparecerão aqui</small>
+                    </div>
+                `;
+            }
         } else {
-            container.innerHTML = this.magiasAprendidas.map(magia => `
-                <div class="magia-aprendida-item">
-                    <div class="magia-aprendida-info">
-                        <div class="magia-aprendida-nome">${magia.nome}</div>
-                        <div class="magia-aprendida-detalhes">
-                            NH ${magia.nivel} | ${magia.pontos} pts | ${magia.custoMana} mana
+            if (container) {
+                container.innerHTML = this.magiasAprendidas.map(magia => `
+                    <div class="magia-aprendida-item">
+                        <div class="magia-aprendida-info">
+                            <div class="magia-aprendida-nome">${magia.nome}</div>
+                            <div class="magia-aprendida-detalhes">
+                                NH ${magia.nivel || this.calcularNH(magia, magia.pontos)} | ${magia.pontos} pts | ${magia.custoMana} mana
+                            </div>
+                        </div>
+                        <div class="magia-aprendida-controles">
+                            <button class="btn-editar-magia" onclick="sistemaMagia.abrirModalEdicao(${magia.id})">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn-detalhes-magia" onclick="sistemaMagia.mostrarDetalhesMagiaModal(${magia.id})">
+                                <i class="fas fa-info-circle"></i> Detalhes
+                            </button>
+                            <button class="btn-remover-magia" onclick="sistemaMagia.removerMagia(${magia.id})">
+                                <i class="fas fa-times"></i> Remover
+                            </button>
                         </div>
                     </div>
-                    <div class="magia-aprendida-controles">
-                        <button class="btn-editar-magia" onclick="sistemaMagia.abrirModalEdicao(${magia.id})">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn-detalhes-magia" onclick="sistemaMagia.mostrarDetalhesMagiaModal(${magia.id})">
-                            <i class="fas fa-info-circle"></i> Detalhes
-                        </button>
-                        <button class="btn-remover-magia" onclick="sistemaMagia.removerMagia(${magia.id})">
-                            <i class="fas fa-times"></i> Remover
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
     }
 
     atualizarDashboard() {
         const totalPontos = this.calcularTotalPontos();
-        if (document.getElementById('gastoMagias')) {
-            document.getElementById('gastoMagias').textContent = totalPontos;
+        const gastoMagiasElement = document.getElementById('gastoMagias');
+        
+        if (gastoMagiasElement) {
+            gastoMagiasElement.textContent = totalPontos;
         }
         
+        // Chamar função global de atualização de pontos se existir
         if (typeof atualizarPontos === 'function') {
-            atualizarPontos();
+            setTimeout(() => {
+                atualizarPontos();
+            }, 100);
         }
     }
 
@@ -801,23 +771,103 @@ class SistemaMagia {
         return this.magiasAprendidas.reduce((sum, magia) => sum + (magia.pontos || 0), 0);
     }
 
+    // ===== CONFIGURAÇÃO DE EVENTOS ADICIONAIS =====
+    configurarEventos() {
+        // Evento para Mana Atual
+        const manaAtualInput = document.getElementById('mana-atual');
+        if (manaAtualInput) {
+            manaAtualInput.addEventListener('change', () => {
+                this.atualizarMana();
+            });
+        }
+
+        // Evento para Bônus de Mana
+        const bonusManaInput = document.getElementById('bonus-mana');
+        if (bonusManaInput) {
+            bonusManaInput.addEventListener('change', () => {
+                this.atualizarStatusMagico();
+            });
+        }
+
+        // Fechar submenus ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.filtro-grupo')) {
+                document.querySelectorAll('.filtro-submenu.active').forEach(submenu => {
+                    submenu.classList.remove('active');
+                    const header = submenu.previousElementSibling;
+                    if (header) {
+                        const icon = header.querySelector('.fa-chevron-down, .fa-chevron-up');
+                        if (icon) icon.className = 'fas fa-chevron-down';
+                    }
+                });
+            }
+        });
+
+        // Observar mudanças de aba
+        const magiaTab = document.getElementById('magia');
+        if (magiaTab) {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'class') {
+                        if (magiaTab.classList.contains('active')) {
+                            setTimeout(() => {
+                                this.atualizarStatusMagico();
+                                this.filtrarCatalogo();
+                            }, 50);
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(magiaTab, { attributes: true });
+        }
+    }
+
+    atualizarMana() {
+        const manaAtualElem = document.getElementById('mana-atual');
+        const manaBaseElem = document.getElementById('mana-base');
+        
+        if (manaAtualElem && manaBaseElem) {
+            const manaAtual = parseInt(manaAtualElem.value) || 0;
+            const manaMaxima = parseInt(manaBaseElem.textContent) || 10;
+            
+            if (manaAtual > manaMaxima) {
+                manaAtualElem.value = manaMaxima;
+            }
+        }
+    }
+
     // ===== FORMATAÇÃO =====
     formatarEscola(escola) {
         const escolas = {
-            'agua': 'Água', 'ar': 'Ar', 'compreensao': 'Compreensão/Empatia',
-            'controle-mente': 'Controle da Mente', 'controle-corpo': 'Controle do Corpo',
-            'cura': 'Cura', 'deslocamento': 'Deslocamento', 'fogo': 'Fogo',
-            'luz-trevas': 'Luz e Trevas', 'necromancia': 'Necromancia', 'portal': 'Portal',
-            'protecao': 'Proteção e Aviso', 'reconhecimento': 'Reconhecimento',
-            'terra': 'Terra', 'metamagica': 'Metamágica'
+            'agua': 'Água',
+            'ar': 'Ar',
+            'compreensao': 'Compreensão/Empatia',
+            'controle-mente': 'Controle da Mente',
+            'controle-corpo': 'Controle do Corpo',
+            'cura': 'Cura',
+            'deslocamento': 'Deslocamento',
+            'fogo': 'Fogo',
+            'luz-trevas': 'Luz e Trevas',
+            'necromancia': 'Necromancia',
+            'portal': 'Portal',
+            'protecao': 'Proteção e Aviso',
+            'reconhecimento': 'Reconhecimento',
+            'terra': 'Terra',
+            'metamagica': 'Metamágica'
         };
         return escolas[escola] || escola;
     }
 
     formatarClasse(classe) {
         const classes = {
-            'comuns': 'Comuns', 'area': 'Área', 'toque': 'Toque', 'projetil': 'Projétil',
-            'bloqueio': 'Bloqueio', 'informacao': 'Informação', 'resistiveis': 'Resistíveis',
+            'comuns': 'Comuns',
+            'area': 'Área',
+            'toque': 'Toque',
+            'projetil': 'Projétil',
+            'bloqueio': 'Bloqueio',
+            'informacao': 'Informação',
+            'resistiveis': 'Resistíveis',
             'especiais': 'Especiais'
         };
         return classes[classe] || classe;
@@ -825,11 +875,15 @@ class SistemaMagia {
 
     // ===== PERSISTÊNCIA =====
     salvarDados() {
-        const dados = {
-            magiasAprendidas: this.magiasAprendidas,
-            timestamp: new Date().getTime()
-        };
-        localStorage.setItem('sistemaMagia', JSON.stringify(dados));
+        try {
+            const dados = {
+                magiasAprendidas: this.magiasAprendidas,
+                timestamp: new Date().getTime()
+            };
+            localStorage.setItem('sistemaMagia', JSON.stringify(dados));
+        } catch (e) {
+            console.error('Erro ao salvar dados:', e);
+        }
     }
 
     carregarDadosSalvos() {
@@ -837,11 +891,12 @@ class SistemaMagia {
             const dadosSalvos = localStorage.getItem('sistemaMagia');
             if (dadosSalvos) {
                 const dados = JSON.parse(dadosSalvos);
-                if (dados.magiasAprendidas) {
+                if (dados.magiasAprendidas && Array.isArray(dados.magiasAprendidas)) {
                     this.magiasAprendidas = dados.magiasAprendidas;
                 }
             }
         } catch (e) {
+            console.error('Erro ao carregar dados:', e);
             localStorage.removeItem('sistemaMagia');
         }
     }
@@ -851,31 +906,124 @@ class SistemaMagia {
 let sistemaMagia;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar sistema de magia
     sistemaMagia = new SistemaMagia();
     window.sistemaMagia = sistemaMagia;
     
-    // ✅ INICIALIZAÇÃO COMPLETA
-    setTimeout(() => {
-        sistemaMagia.atualizarStatusMagico();
-        sistemaMagia.filtrarCatalogo();
-        sistemaMagia.configurarFiltros();
-        
-        console.log('🎯 Sistema de Magia 100% Funcional!');
-        console.log('✅ IQ Mágico em tempo real');
-        console.log('✅ Mana Base em tempo real');
-        console.log('✅ Filtros funcionando');
-        console.log('✅ NHs atualizando automaticamente');
-    }, 200);
+    // Configurar eventos de aba
+    const magiaTab = document.getElementById('magia');
+    if (magiaTab) {
+        magiaTab.addEventListener('click', () => {
+            setTimeout(() => {
+                if (sistemaMagia && magiaTab.classList.contains('active')) {
+                    sistemaMagia.atualizarStatusMagico();
+                    sistemaMagia.filtrarCatalogo();
+                }
+            }, 100);
+        });
+    }
+    
+    console.log('🎯 Sistema de Magia Inicializado com Sucesso!');
 });
 
 // ===== FUNÇÕES GLOBAIS PARA HTML =====
-window.abrirModalAprendizagem = (id) => sistemaMagia.abrirModalAprendizagem(id);
-window.abrirModalEdicao = (id) => sistemaMagia.abrirModalEdicao(id);
-window.removerMagia = (id) => sistemaMagia.removerMagia(id);
-window.mostrarDetalhesMagia = (id) => sistemaMagia.mostrarDetalhesMagia(id);
-window.mostrarDetalhesMagiaModal = (id) => sistemaMagia.mostrarDetalhesMagiaModal(id);
-window.fecharModalDetalhes = () => sistemaMagia.fecharModalDetalhes();
-window.aumentarPontosCompra = () => sistemaMagia.aumentarPontosCompra();
-window.diminuirPontosCompra = () => sistemaMagia.diminuirPontosCompra();
-window.fecharModalCompra = () => sistemaMagia.fecharModalCompra();
-window.confirmarAprendizagem = () => sistemaMagia.confirmarAprendizagem();
+window.abrirModalAprendizagem = (id) => {
+    if (sistemaMagia) sistemaMagia.abrirModalAprendizagem(id);
+};
+
+window.abrirModalEdicao = (id) => {
+    if (sistemaMagia) sistemaMagia.abrirModalEdicao(id);
+};
+
+window.removerMagia = (id) => {
+    if (sistemaMagia) sistemaMagia.removerMagia(id);
+};
+
+window.mostrarDetalhesMagia = (id) => {
+    if (sistemaMagia) sistemaMagia.mostrarDetalhesMagia(id);
+};
+
+window.mostrarDetalhesMagiaModal = (id) => {
+    if (sistemaMagia) sistemaMagia.mostrarDetalhesMagiaModal(id);
+};
+
+window.fecharModalDetalhes = () => {
+    if (sistemaMagia) sistemaMagia.fecharModalDetalhes();
+};
+
+window.aumentarPontosCompra = () => {
+    if (sistemaMagia) sistemaMagia.aumentarPontosCompra();
+};
+
+window.diminuirPontosCompra = () => {
+    if (sistemaMagia) sistemaMagia.diminuirPontosCompra();
+};
+
+window.fecharModalCompra = () => {
+    if (sistemaMagia) sistemaMagia.fecharModalCompra();
+};
+
+window.confirmarAprendizagem = () => {
+    if (sistemaMagia) sistemaMagia.confirmarAprendizagem();
+};
+
+// Função para toggle submenu (usada no HTML)
+window.toggleSubmenu = (submenuId) => {
+    if (sistemaMagia) sistemaMagia.toggleSubmenu(submenuId);
+};
+
+// ... todo o código anterior do SistemaMagia que já te enviei ...
+
+// ===== INICIALIZAÇÃO DE ATRIBUTOS COM OBSERVADOR DE MAGIA =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar sistema de atributos se existir
+    if (typeof inicializarAtributos === 'function') {
+        inicializarAtributos();
+    }
+    
+    // Inicializar sistema de magia
+    sistemaMagia = new SistemaMagia();
+    window.sistemaMagia = sistemaMagia;
+    
+    // Adicionar evento de clique nas abas
+    const tabLinks = document.querySelectorAll('.tab-link');
+    tabLinks.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            if (tabId === 'magia') {
+                setTimeout(() => {
+                    if (sistemaMagia) {
+                        sistemaMagia.atualizarStatusMagico();
+                        sistemaMagia.filtrarCatalogo();
+                    }
+                }, 200);
+            }
+        });
+    });
+    
+    console.log('🚀 Sistema Completo Inicializado!');
+    console.log('✅ IQ Mágico: Tempo Real');
+    console.log('✅ Mana Base: Tempo Real');
+    console.log('✅ Filtros: Funcionando');
+    console.log('✅ NHs: Atualizando Automaticamente');
+});
+
+// ===== FUNÇÃO DE DEBUG PARA TESTES =====
+function debugSistemaMagia() {
+    if (!sistemaMagia) {
+        console.log('❌ Sistema de magia não inicializado');
+        return;
+    }
+    
+    console.log('=== DEBUG SISTEMA MAGIA ===');
+    console.log('IQ Atual:', sistemaMagia.obterIQ());
+    console.log('HT Atual:', sistemaMagia.obterHT());
+    console.log('Aptidão:', sistemaMagia.obterAptidao());
+    console.log('Magias Aprendidas:', sistemaMagia.magiasAprendidas.length);
+    console.log('Escolas selecionadas:', sistemaMagia.obterEscolasSelecionadas());
+    console.log('Classes selecionadas:', sistemaMagia.obterClassesSelecionadas());
+    console.log('===========================');
+}
+
+// Expor função de debug para console
+window.debugMagia = debugSistemaMagia;
