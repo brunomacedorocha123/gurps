@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO CORRIGIDA
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO FINAL CORRETA
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -180,7 +180,7 @@ class GerenciadorVantagens {
         if(item.ampliacoes && item.ampliacoes.length > 0) {
             html += `<div class="ampliacoes-section"><h4>Ampliações Opcionais:</h4>`;
             
-            item.ampliacoes.forEach(ampliacao => {
+            item.ampliacoes.forEach((ampliacao, index) => {
                 const custoMultiplicador = parseFloat(ampliacao.custoExtra) || 2.5;
                 const percentualAumento = (custoMultiplicador - 1) * 100;
                 
@@ -188,7 +188,8 @@ class GerenciadorVantagens {
                     <div class="ampliacao-option">
                         <input type="checkbox" id="ampliacao-${ampliacao.id}" 
                                data-multiplicador="${custoMultiplicador}" 
-                               data-nome="${ampliacao.nome}">
+                               data-nome="${ampliacao.nome}"
+                               class="ampliacao-checkbox">
                         <label for="ampliacao-${ampliacao.id}">
                             <strong>${ampliacao.nome} (+${percentualAumento}%)</strong>
                             <p>${ampliacao.descricao}</p>
@@ -205,36 +206,44 @@ class GerenciadorVantagens {
         setTimeout(() => {
             const selectNivel = document.getElementById('nivel-vantagem');
             const custoTotal = document.getElementById('custo-total');
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkboxes = document.querySelectorAll('.ampliacao-checkbox');
 
+            // FUNÇÃO CORRIGIDA - SEM LOOP INFINITO
             const calcularCusto = () => {
                 const nivel = parseInt(selectNivel.value) || nivelBase;
-                let custo = nivel * custoPorNivel;
+                let custoBase = nivel * custoPorNivel;
                 let ampliacoesAtivas = [];
                 
+                // Verifica cada checkbox UMA VEZ
                 checkboxes.forEach(checkbox => {
                     if(checkbox.checked) {
                         const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 2.5;
-                        custo = custo * multiplicador; // CORREÇÃO AQUI: multiplica por 2.5 (não por 1.5)
+                        // Aplica o multiplicador UMA VEZ
+                        custoBase = Math.round(custoBase * multiplicador);
                         ampliacoesAtivas.push(checkbox.dataset.nome);
                     }
                 });
                 
-                custo = Math.round(custo);
-                custoTotal.textContent = `${custo} pts`;
-                
-                selectNivel.dataset.custoFinal = custo;
+                custoTotal.textContent = `${custoBase} pts`;
+                selectNivel.dataset.custoFinal = custoBase;
                 selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
                 
-                // Log para debug
-                console.log(`Nível: ${nivel}, Custo base: ${nivel * custoPorNivel}, Custo final: ${custo}`);
+                console.log(`DEBUG: Nível ${nivel}, Custo base ${nivel * custoPorNivel}, Custo final ${custoBase}`);
             };
 
-            calcularCusto();
+            calcularCusto(); // Calcula inicial
 
-            selectNivel.addEventListener('change', calcularCusto);
+            // Event listeners CORRETOS
+            selectNivel.addEventListener('change', () => {
+                console.log('Nível alterado');
+                calcularCusto();
+            });
+            
             checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', calcularCusto);
+                checkbox.addEventListener('change', () => {
+                    console.log('Checkbox alterado');
+                    calcularCusto();
+                });
             });
 
         }, 100);
