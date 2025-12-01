@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO FINAL CORRETA
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO CORRIGIDA
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -208,42 +208,39 @@ class GerenciadorVantagens {
             const custoTotal = document.getElementById('custo-total');
             const checkboxes = document.querySelectorAll('.ampliacao-checkbox');
 
-            // FUNÇÃO CORRIGIDA - SEM LOOP INFINITO
+            // FUNÇÃO CORRIGIDA - SEM MULTIPLICAÇÃO CUMULATIVA
             const calcularCusto = () => {
                 const nivel = parseInt(selectNivel.value) || nivelBase;
                 let custoBase = nivel * custoPorNivel;
+                let multiplicadorTotal = 1.0;
                 let ampliacoesAtivas = [];
                 
-                // Verifica cada checkbox UMA VEZ
+                // Calcula o multiplicador total corretamente
                 checkboxes.forEach(checkbox => {
                     if(checkbox.checked) {
-                        const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 2.5;
-                        // Aplica o multiplicador UMA VEZ
-                        custoBase = Math.round(custoBase * multiplicador);
+                        const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
+                        multiplicadorTotal *= multiplicador; // Acumula multiplicadores
                         ampliacoesAtivas.push(checkbox.dataset.nome);
                     }
                 });
                 
-                custoTotal.textContent = `${custoBase} pts`;
-                selectNivel.dataset.custoFinal = custoBase;
+                // Aplica o multiplicador total UMA VEZ
+                const custoFinal = Math.round(custoBase * multiplicadorTotal);
+                
+                custoTotal.textContent = `${custoFinal} pts`;
+                selectNivel.dataset.custoFinal = custoFinal;
                 selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
                 
-                console.log(`DEBUG: Nível ${nivel}, Custo base ${nivel * custoPorNivel}, Custo final ${custoBase}`);
+                console.log(`DEBUG: Nível ${nivel}, Custo base ${custoBase}, Multiplicador ${multiplicadorTotal}, Custo final ${custoFinal}`);
             };
 
             calcularCusto(); // Calcula inicial
 
-            // Event listeners CORRETOS
-            selectNivel.addEventListener('change', () => {
-                console.log('Nível alterado');
-                calcularCusto();
-            });
+            // Event listeners
+            selectNivel.addEventListener('change', calcularCusto);
             
             checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', () => {
-                    console.log('Checkbox alterado');
-                    calcularCusto();
-                });
+                checkbox.addEventListener('change', calcularCusto);
             });
 
         }, 100);
@@ -271,10 +268,22 @@ class GerenciadorVantagens {
         const selectNivel = document.getElementById('nivel-vantagem');
         const nivel = parseInt(selectNivel.value) || (item.nivelBase || 1);
         
+        // Obtém o custo final calculado ou recalcula se necessário
         let custoFinal = parseInt(selectNivel.dataset.custoFinal);
-        if (isNaN(custoFinal)) {
+        if (isNaN(custoFinal) || custoFinal <= 0) {
             const custoPorNivel = Math.abs(item.custoPorNivel || 2);
             custoFinal = nivel * custoPorNivel;
+            
+            // Verifica ampliações se houver
+            const checkboxes = document.querySelectorAll('.ampliacao-checkbox:checked');
+            if (checkboxes.length > 0) {
+                let multiplicadorTotal = 1.0;
+                checkboxes.forEach(checkbox => {
+                    const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
+                    multiplicadorTotal *= multiplicador;
+                });
+                custoFinal = Math.round(custoFinal * multiplicadorTotal);
+            }
         }
         
         let ampliacoesSelecionadas = [];
@@ -295,11 +304,21 @@ class GerenciadorVantagens {
     }
 
     adicionarItem(item, tipo) {
+        // Garante que o custo seja um número válido
+        let custoCalculado = Math.abs(item.custo) || 0;
+        if (isNaN(custoCalculado) || custoCalculado <= 0) {
+            if (item.tipo === 'variavel') {
+                const nivel = item.nivelSelecionado || (item.nivelBase || 1);
+                const custoPorNivel = Math.abs(item.custoPorNivel || 2);
+                custoCalculado = nivel * custoPorNivel;
+            }
+        }
+
         const itemAdquirido = {
             id: item.id + '-' + Date.now(),
             baseId: item.id,
             nome: item.nome,
-            custo: item.custo,
+            custo: custoCalculado,
             descricao: item.descricao,
             tipo: item.tipo,
             variacao: item.variacaoSelecionada,
