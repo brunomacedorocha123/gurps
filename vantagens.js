@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO SIMPLES
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO CORRIGIDA
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -181,16 +181,16 @@ class GerenciadorVantagens {
             html += `<div class="ampliacoes-section"><h4>Ampliações Opcionais:</h4>`;
             
             item.ampliacoes.forEach(ampliacao => {
-                const custoExtra = parseFloat(ampliacao.custoExtra) || 1.5;
-                const percentual = custoExtra * 100;
+                const custoMultiplicador = parseFloat(ampliacao.custoExtra) || 2.5;
+                const percentualAumento = (custoMultiplicador - 1) * 100;
                 
                 html += `
                     <div class="ampliacao-option">
                         <input type="checkbox" id="ampliacao-${ampliacao.id}" 
-                               data-custo="${custoExtra}" 
+                               data-multiplicador="${custoMultiplicador}" 
                                data-nome="${ampliacao.nome}">
                         <label for="ampliacao-${ampliacao.id}">
-                            <strong>${ampliacao.nome} (+${percentual}%)</strong>
+                            <strong>${ampliacao.nome} (+${percentualAumento}%)</strong>
                             <p>${ampliacao.descricao}</p>
                         </label>
                     </div>
@@ -214,8 +214,8 @@ class GerenciadorVantagens {
                 
                 checkboxes.forEach(checkbox => {
                     if(checkbox.checked) {
-                        const percentualExtra = parseFloat(checkbox.dataset.custo) || 1.5;
-                        custo = custo * (1 + percentualExtra);
+                        const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 2.5;
+                        custo = custo * multiplicador; // CORREÇÃO AQUI: multiplica por 2.5 (não por 1.5)
                         ampliacoesAtivas.push(checkbox.dataset.nome);
                     }
                 });
@@ -225,6 +225,9 @@ class GerenciadorVantagens {
                 
                 selectNivel.dataset.custoFinal = custo;
                 selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
+                
+                // Log para debug
+                console.log(`Nível: ${nivel}, Custo base: ${nivel * custoPorNivel}, Custo final: ${custo}`);
             };
 
             calcularCusto();

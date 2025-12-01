@@ -1,4 +1,4 @@
-// CATÁLOGO DE VANTAGENS E DESVANTAGENS
+// CATÁLOGO DE VANTAGENS E DESVANTAGENS - VERSÃO CORRIGIDA
 const vantagensData = {
     // VANTAGENS
     vantagens: [
@@ -45,8 +45,8 @@ const vantagensData = {
                 {
                     id: "ampliada",
                     nome: "Ampliada",
-                    custoExtra: 1.5, // +150%
-                    descricao: "Permite combinar com Aptidão Mágica"
+                    custoExtra: 2.5, // CORRIGIDO: +150% (1 + 1.5 = 2.5)
+                    descricao: "Permite combinar com Aptidão Mágica. Custo aumentado em 150% (2,5× o custo normal)"
                 }
             ]
         }
