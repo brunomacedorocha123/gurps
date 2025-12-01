@@ -1,294 +1,165 @@
-// caracteristicas-fisicas.js - VERSÃO MOBILE COMPATIBLE
-window.ponteCaracteristicas = {
-    caracteristicasAtivas: [],
+// ✅ CORREÇÃO DE EMERGÊNCIA PARA OS BOTÕES FUNCIONAREM
+function corrigirBotoesCaracteristicas() {
+    console.log("🛠️ CORRIGINDO BOTÕES QUE NÃO FUNCIONAM");
     
-    atualizarDoCardEsquerda: function(caracteristicas) {
-        console.log("🔄 PONTE: Atualizando características", caracteristicas);
-        this.caracteristicasAtivas = caracteristicas;
-        
-        // ✅ SOLUÇÃO DEFINITIVA: Atualizar visualmente IMEDIATAMENTE
-        this.atualizarCardAlturaPesoVisualmente(caracteristicas);
-        
-        // ✅ DISPARAR EVENTO PARA MOBILE (importante!)
-        this.dispararEventoAtualizacao(caracteristicas);
-    },
+    // REMOVER todos os event listeners antigos
+    document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
+        // Clonar o botão para remover listeners antigos
+        const novoBotao = btn.cloneNode(true);
+        btn.parentNode.replaceChild(novoBotao, btn);
+    });
     
-    obterCaracteristicasAtivas: function() {
-        return this.caracteristicasAtivas || [];
-    },
-    
-    // ✅ MÉTODO QUE ATUALIZA VISUALMENTE NA HORA (OTIMIZADO PARA MOBILE)
-    atualizarCardAlturaPesoVisualmente: function(caracteristicas) {
-        console.log("🎨 Atualizando card altura/peso VISUALMENTE (Mobile)");
-        
-        // ✅ AGUARDAR UM POUCO PARA O DOM ESTAR PRONTO (MOBILE)
-        setTimeout(() => {
-            if (caracteristicas.length === 0) {
-                this.limparCardAlturaPeso();
+    // ADICIONAR novos event listeners CORRETOS
+    document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
+        // Evento CLICK (desktop)
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log("🎯 BOTÃO CLICADO:", this.dataset.tipo);
+            
+            const tipo = this.dataset.tipo;
+            if (!tipo) {
+                console.error("❌ Botão sem data-tipo!");
                 return;
             }
             
-            const caracteristica = caracteristicas[0];
-            const multiplicador = this.obterMultiplicador(caracteristica.tipo);
-            
-            // ✅ ATUALIZAR STATUS FÍSICO (COM FALLBACK PARA MOBILE)
-            this.atualizarElementoMobile('statusFisico', caracteristica.nome, "#f39c12");
-            
-            // ✅ ATUALIZAR FAIXA DE PESO
-            const pesoFaixa = document.getElementById('pesoFaixa');
-            if (pesoFaixa && window.sistemaAlturaPeso) {
-                try {
-                    const st = window.sistemaAlturaPeso.stBase || 10;
-                    const faixa = window.sistemaAlturaPeso.obterFaixaPeso(st);
-                    if (faixa && faixa.min && faixa.max) {
-                        pesoFaixa.textContent = `${(faixa.min * multiplicador).toFixed(1)}kg - ${(faixa.max * multiplicador).toFixed(1)}kg (${caracteristica.nome})`;
-                    }
-                } catch (e) {
-                    console.error("Erro ao calcular faixa de peso:", e);
-                }
-            }
-            
-            // ✅ ATUALIZAR MODIFICADOR
-            this.atualizarElementoMobile('modificadorPeso', `${caracteristica.nome} (${multiplicador}x)`);
-            
-            // ✅ MOSTRAR DESVANTAGENS ATIVAS
-            this.mostrarDesvantagensAtivas(caracteristicas);
-            
-            console.log("✅ Card altura/peso atualizado VISUALMENTE (Mobile)!");
-        }, 50); // Pequeno delay para mobile
-    },
-    
-    // ✅ MÉTODO ESPECÍFICO PARA MOBILE (com fallback)
-    atualizarElementoMobile: function(id, texto, cor = null) {
-        const elemento = document.getElementById(id);
-        if (elemento) {
-            elemento.textContent = texto;
-            if (cor) {
-                elemento.style.backgroundColor = cor;
-                elemento.style.transition = 'background-color 0.3s ease';
-            }
-        } else {
-            // Fallback: tenta novamente após um delay
-            setTimeout(() => {
-                const elementoNovo = document.getElementById(id);
-                if (elementoNovo) {
-                    elementoNovo.textContent = texto;
-                    if (cor) elementoNovo.style.backgroundColor = cor;
-                }
-            }, 100);
-        }
-    },
-    
-    limparCardAlturaPeso: function() {
-        // ✅ VOLTAR AO ESTADO NORMAL (OTIMIZADO PARA MOBILE)
-        setTimeout(() => {
-            this.atualizarElementoMobile('statusFisico', "Normal", "#27ae60");
-            
-            const pesoFaixa = document.getElementById('pesoFaixa');
-            if (pesoFaixa && window.sistemaAlturaPeso) {
-                try {
-                    const st = window.sistemaAlturaPeso.stBase || 10;
-                    const faixa = window.sistemaAlturaPeso.obterFaixaPeso(st);
-                    if (faixa && faixa.min && faixa.max) {
-                        pesoFaixa.textContent = `${faixa.min}kg - ${faixa.max}kg`;
-                    }
-                } catch (e) {
-                    console.error("Erro ao limpar faixa de peso:", e);
-                }
-            }
-            
-            this.atualizarElementoMobile('modificadorPeso', 'Dentro da faixa');
-            
-            const container = document.getElementById('desvantagensAtivas');
-            if (container) {
-                container.style.display = 'none';
-                container.style.opacity = '0';
-                container.style.transition = 'all 0.3s ease';
-            }
-        }, 50);
-    },
-    
-    mostrarDesvantagensAtivas: function(caracteristicas) {
-        const container = document.getElementById('desvantagensAtivas');
-        const lista = document.getElementById('listaDesvantagens');
-        
-        if (!container || !lista) {
-            // ✅ TENTAR NOVAMENTE PARA MOBILE
-            setTimeout(() => {
-                this.mostrarDesvantagensAtivas(caracteristicas);
-            }, 100);
-            return;
-        }
-        
-        container.style.display = 'block';
-        container.style.opacity = '1';
-        container.style.transition = 'all 0.3s ease';
-        
-        const caracteristica = caracteristicas[0];
-        let icone, descricao, efeito;
-        
-        switch(caracteristica.tipo) {
-            case 'magro':
-                icone = '⚖️'; descricao = 'Magro'; efeito = 'Peso = 2/3 do normal (×0.67)';
-                break;
-            case 'acima-peso':
-                icone = '⚖️'; descricao = 'Acima do Peso'; efeito = 'Peso = 130% do normal (×1.3)';
-                break;
-            case 'gordo':
-                icone = '⚖️'; descricao = 'Gordo'; efeito = 'Peso = 150% do normal (×1.5)';
-                break;
-            case 'muito-gordo':
-                icone = '⚖️'; descricao = 'Muito Gordo'; efeito = 'Peso = 200% do normal (×2.0)';
-                break;
-            case 'nanismo':
-                icone = '📏'; descricao = 'Nanismo'; efeito = 'Altura máxima: 1.32m';
-                break;
-            default:
-                icone = '🔹'; descricao = caracteristica.nome; efeito = caracteristica.efeitos;
-        }
-        
-        lista.innerHTML = `
-            <div class="desvantagem-item">
-                <div class="desvantagem-icone">${icone}</div>
-                <div class="desvantagem-info">
-                    <strong>${descricao}</strong>
-                    <small>${efeito}</small>
-                </div>
-                <div class="desvantagem-pontos">
-                    ${caracteristica.pontos >= 0 ? '+' : ''}${caracteristica.pontos}
-                </div>
-            </div>
-        `;
-        
-        // ✅ FORÇAR RE-LAYOUT PARA MOBILE
-        setTimeout(() => {
-            void container.offsetHeight;
-        }, 10);
-    },
-    
-    obterMultiplicador: function(tipo) {
-        switch(tipo) {
-            case 'magro': return 0.67;
-            case 'acima-peso': return 1.3;
-            case 'gordo': return 1.5;
-            case 'muito-gordo': return 2.0;
-            default: return 1.0;
-        }
-    },
-    
-    // ✅ NOVO: SISTEMA DE EVENTOS PARA MOBILE
-    dispararEventoAtualizacao: function(caracteristicas) {
-        // Evento Customizado
-        const evento = new CustomEvent('caracteristicasFisicasAlteradas', {
-            detail: { caracteristicas: caracteristicas },
-            bubbles: true,
-            cancelable: true
-        });
-        
-        document.dispatchEvent(evento);
-        
-        // Disparar também para o sistema altura/peso
-        if (window.sistemaAlturaPeso && typeof window.sistemaAlturaPeso.caracteristicasAtualizadas === 'function') {
-            window.sistemaAlturaPeso.caracteristicasAtualizadas(caracteristicas);
-        }
-    },
-    
-    // ✅ NOVO: VERIFICAR E RECONECTAR PONTE
-    verificarConexao: function() {
-        console.log("🔍 Verificando conexão da ponte...");
-        
-        // Verificar se o sistema altura/peso existe
-        if (!window.sistemaAlturaPeso) {
-            console.warn("⚠️ Sistema altura/peso não encontrado. Tentando recriar...");
-            
-            // Tentar inicializar novamente
-            setTimeout(() => {
-                if (window.SistemaAlturaPeso) {
-                    window.sistemaAlturaPeso = new window.SistemaAlturaPeso();
-                    window.sistemaAlturaPeso.inicializar();
-                    console.log("✅ Sistema altura/peso recriado");
-                }
-            }, 500);
-        }
-        
-        // Verificar elementos DOM
-        const elementosNecessarios = ['statusFisico', 'pesoFaixa', 'modificadorPeso'];
-        elementosNecessarios.forEach(id => {
-            const elemento = document.getElementById(id);
-            if (!elemento) {
-                console.warn(`⚠️ Elemento #${id} não encontrado no DOM`);
-            }
-        });
-        
-        return true;
-    },
-    
-    // ✅ NOVO: INICIALIZAÇÃO PARA MOBILE
-    inicializarParaMobile: function() {
-        console.log("📱 Inicializando ponte para mobile");
-        
-        // Aguardar carregamento completo
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                // Verificar conexão
-                this.verificarConexao();
+            // Chamar a função CORRETA do sistema
+            if (window.sistemaCaracteristicasFisicas) {
+                window.sistemaCaracteristicasFisicas.adicionarCaracteristica(tipo);
+            } else {
+                console.error("❌ Sistema de características não encontrado!");
                 
-                // Configurar eventos touch para mobile
-                this.configurarEventosMobile();
-                
-                // Atualizar visualização inicial
-                if (this.caracteristicasAtivas.length > 0) {
-                    this.atualizarCardAlturaPesoVisualmente(this.caracteristicasAtivas);
-                }
-                
-                console.log("✅ Ponte inicializada para mobile");
-            }, 300);
-        });
-        
-        // Fallback: se DOM já estiver carregado
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            setTimeout(() => {
-                this.verificarConexao();
-                this.configurarEventosMobile();
-            }, 100);
-        }
-    },
-    
-    // ✅ NOVO: CONFIGURAR EVENTOS PARA TOUCH (MOBILE)
-    configurarEventosMobile: function() {
-        // Substituir eventos de clique por touch para botões
-        document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
-            // Remover event listeners antigos para evitar duplicação
-            const btnClone = btn.cloneNode(true);
-            btn.parentNode.replaceChild(btnClone, btn);
-            
-            // Adicionar eventos touch e click
-            btnClone.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                this.classList.add('touched');
-            }, { passive: false });
-            
-            btnClone.addEventListener('touchend', function(e) {
-                e.preventDefault();
-                this.classList.remove('touched');
-                const tipo = this.dataset.tipo;
-                if (tipo && window.sistemaCaracteristicasFisicas) {
+                // Tentar recriar o sistema
+                if (window.SistemaCaracteristicasFisicas) {
+                    window.sistemaCaracteristicasFisicas = new window.SistemaCaracteristicasFisicas();
                     window.sistemaCaracteristicasFisicas.adicionarCaracteristica(tipo);
                 }
-            }, { passive: false });
-            
-            // Manter clique para desktop também
-            btnClone.addEventListener('click', function(e) {
-                const tipo = this.dataset.tipo;
-                if (tipo && window.sistemaCaracteristicasFisicas) {
-                    window.sistemaCaracteristicasFisicas.adicionarCaracteristica(tipo);
-                }
-            });
+            }
         });
-        
-        console.log("✅ Eventos mobile configurados");
+    });
+    
+    console.log("✅ Botões corrigidos!");
+}
+
+// ✅ EXECUTAR CORREÇÃO QUANDO A PÁGINA CARREGAR
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(corrigirBotoesCaracteristicas, 500);
+    
+    // Também corrigir quando a aba for mostrada
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const tab = mutation.target;
+                if (tab.id === 'caracteristicas' && tab.classList.contains('active')) {
+                    setTimeout(corrigirBotoesCaracteristicas, 100);
+                }
+            }
+        });
+    });
+    
+    // Observar mudanças na aba de características
+    const caracteristicasTab = document.getElementById('caracteristicas');
+    if (caracteristicasTab) {
+        observer.observe(caracteristicasTab, { attributes: true });
     }
-};
+});
+
+// ✅ TAMBÉM FORÇAR UMA INICIALIZAÇÃO MANUAL
+function forcarInicializacaoSistema() {
+    console.log("🚀 FORÇANDO INICIALIZAÇÃO DO SISTEMA");
+    
+    // Garantir que o sistema existe
+    if (!window.sistemaCaracteristicasFisicas) {
+        console.log("⚠️ Sistema não existe, criando...");
+        if (window.SistemaCaracteristicasFisicas) {
+            window.sistemaCaracteristicasFisicas = new window.SistemaCaracteristicasFisicas();
+        }
+    }
+    
+    // Garantir que a ponte existe
+    if (!window.ponteCaracteristicas) {
+        console.log("⚠️ Ponte não existe, criando...");
+        window.ponteCaracteristicas = {
+            caracteristicasAtivas: [],
+            atualizarDoCardEsquerda: function(c) { console.log("Ponte atualizada:", c); },
+            obterCaracteristicasAtivas: function() { return []; }
+        };
+    }
+    
+    // Corrigir botões imediatamente
+    setTimeout(corrigirBotoesCaracteristicas, 300);
+    
+    console.log("✅ Sistema forçado a inicializar");
+}
+
+// ✅ BOTÃO DE EMERGÊNCIA - Adicione no HTML para testar
+function adicionarBotaoEmergencia() {
+    const botaoEmergencia = document.createElement('button');
+    botaoEmergencia.textContent = "🚨 CORRIGIR BOTÕES";
+    botaoEmergencia.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #e74c3c;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        z-index: 9999;
+        font-weight: bold;
+    `;
+    botaoEmergencia.onclick = function() {
+        corrigirBotoesCaracteristicas();
+        forcarInicializacaoSistema();
+        alert("Botões corrigidos! Tente clicar novamente.");
+    };
+    
+    document.body.appendChild(botaoEmergencia);
+}
+
+// ✅ TESTE MANUAL - Adicione esta função para verificar se os eventos estão funcionando
+function testarBotao(tipo) {
+    console.log("🧪 TESTANDO BOTÃO:", tipo);
+    
+    if (window.sistemaCaracteristicasFisicas) {
+        const resultado = window.sistemaCaracteristicasFisicas.adicionarCaracteristica(tipo);
+        console.log("Resultado:", resultado);
+        
+        if (resultado) {
+            alert(`✅ "${resultado.nome}" adicionada com sucesso!`);
+        } else {
+            alert("❌ Erro ao adicionar característica");
+        }
+    } else {
+        alert("❌ Sistema de características não encontrado!");
+    }
+}
+
+// ✅ INICIALIZAR TUDO
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("📄 Página carregada - Iniciando correções...");
+    
+    // Adicionar botão de emergência
+    adicionarBotaoEmergencia();
+    
+    // Forçar inicialização
+    forcarInicializacaoSistema();
+    
+    // Teste automático após 2 segundos
+    setTimeout(() => {
+        console.log("🔍 Verificando estado do sistema...");
+        console.log("Sistema existe?", !!window.sistemaCaracteristicasFisicas);
+        console.log("Ponte existe?", !!window.ponteCaracteristicas);
+        console.log("Botões encontrados:", document.querySelectorAll('.btn-add-caracteristica').length);
+    }, 2000);
+});
+
+// ✅ EXPORTAR FUNÇÕES PARA O CONSOLE (para testar manualmente)
+window.corrigirBotoesCaracteristicas = corrigirBotoesCaracteristicas;
+window.forcarInicializacaoSistema = forcarInicializacaoSistema;
+window.testarBotao = testarBotao;
 
 // ✅ INICIALIZAR AUTOMATICAMENTE PARA MOBILE
 window.ponteCaracteristicas.inicializarParaMobile();
