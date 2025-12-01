@@ -163,7 +163,7 @@
     gap: 15px;
 }
 
-/* INPUTS E SELECTS - CORRIGIDOS PARA MOBILE */
+/* INPUTS E SELECTS */
 .atributo-input {
     flex: 1;
     padding: 12px 15px;
@@ -185,7 +185,7 @@
     color: rgba(255, 215, 0, 0.6);
 }
 
-/* CORREÇÃO DOS SELECTS - FUNDO PRETO COM LETRAS AMARELAS QUANDO ABERTO */
+/* ESTILO DOS SELECTS */
 .atributo-input select {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffd700' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
@@ -193,29 +193,6 @@
     background-position: right 15px center;
     background-size: 12px;
     padding-right: 40px;
-}
-
-/* ESTILO PARA O DROPDOWN ABERTO - FUNDO PRETO COM LETRAS AMARELAS */
-.atributo-input option {
-    background: #1e1e28 !important;
-    color: #ffd700 !important;
-    padding: 12px 15px !important;
-    border: none !important;
-    font-size: 0.95em;
-}
-
-/* Hover nas options - FUNDO LARANJA COM LETRAS PRETAS */
-.atributo-input option:hover,
-.atributo-input option:focus {
-    background: #ff8c00 !important;
-    color: #1e1e28 !important;
-}
-
-/* Option selecionada */
-.atributo-input option:checked {
-    background: #ff8c00 !important;
-    color: #1e1e28 !important;
-    font-weight: bold;
 }
 
 /* LISTA DE ITENS */
@@ -233,7 +210,7 @@
     font-size: 0.95em;
 }
 
-/* ITENS DA LISTA */
+/* ITENS DA LISTA - ESTILO BASE */
 .item-lista {
     background: rgba(40, 40, 50, 0.8);
     border: 1px solid rgba(255, 140, 0, 0.3);
@@ -251,11 +228,13 @@
     transform: translateX(5px);
 }
 
+/* AQUI ESTÁ A CORREÇÃO PRINCIPAL - ITEM HEADER UNIFICADO */
 .item-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 8px;
+    gap: 10px;
 }
 
 .item-nome {
@@ -263,6 +242,8 @@
     font-weight: 600;
     font-size: 1.1em;
     margin: 0;
+    flex: 1;
+    min-width: 0; /* Permite que o texto quebre corretamente */
 }
 
 .item-custo {
@@ -270,16 +251,19 @@
     color: white;
     padding: 4px 8px;
     border-radius: 12px;
-    font-size: 0.8em;
+    font-size: 0.85em;
     font-weight: 600;
     border: 1px solid rgba(39, 174, 96, 0.3);
+    flex-shrink: 0; /* Impede que encolha */
+    white-space: nowrap; /* Mantém em uma linha */
 }
 
 .item-descricao {
     color: #ccc;
     font-size: 0.9em;
     line-height: 1.4;
-    margin: 0;
+    margin: 8px 0 0 0;
+    word-break: break-word;
 }
 
 .item-categoria {
@@ -326,7 +310,7 @@
     transform: scale(1.1);
 }
 
-/* PECULIARIDADES - VERSÃO CORRIGIDA */
+/* PECULIARIDADES */
 .peculiaridade-form {
     padding: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -335,27 +319,27 @@
     gap: 10px;
 }
 
-/* INPUT BEM GRANDE E CONFORTAVEL */
+/* INPUT DE PECULIARIDADES */
 #nova-peculiaridade {
     width: 100%;
-    padding: 20px; /* Mais padding */
+    padding: 20px;
     border: 2px solid rgba(255, 140, 0, 0.3);
     border-radius: 10px;
-    font-size: 1.1em; /* Texto maior */
+    font-size: 1.1em;
     background: rgba(255, 255, 255, 0.1);
     color: #ffd700;
     transition: all 0.3s ease;
-    min-height: 80px; /* ALTURA MÍNIMA BEM MAIOR */
-    resize: vertical; /* Permite puxar para aumentar */
+    min-height: 80px;
+    resize: vertical;
     box-sizing: border-box;
-    line-height: 1.5; /* Espaçamento entre linhas */
+    line-height: 1.5;
 }
 
 #nova-peculiaridade:focus {
     outline: none;
     border-color: #ff8c00;
     box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
-    min-height: 100px; /* Fica ainda maior no foco */
+    min-height: 100px;
 }
 
 #nova-peculiaridade::placeholder {
@@ -363,7 +347,7 @@
     font-size: 1em;
 }
 
-/* CONTADOR ABAIXO DO INPUT */
+/* CONTADOR DE CARACTERES */
 .contador-chars {
     text-align: right;
     color: #95a5a6;
@@ -376,10 +360,10 @@
     font-weight: 600;
 }
 
-/* BOTÃO BEM POSICIONADO */
+/* BOTÃO ADICIONAR PECULIARIDADE */
 #btn-adicionar-peculiaridade {
     width: 100%;
-    padding: 15px; /* Botão maior também */
+    padding: 15px;
     font-size: 1.2em;
     margin-top: 10px;
 }
@@ -595,7 +579,8 @@
     font-weight: 600;
 }
 
-/* RESPONSIVIDADE */
+/* ===== RESPONSIVIDADE - CORREÇÕES ESPECÍFICAS ===== */
+
 @media (max-width: 1024px) {
     .principais-grid {
         grid-template-columns: 1fr;
@@ -611,17 +596,47 @@
         padding: 15px;
     }
     
+    /* CORREÇÃO PARA BUSCA - MESMO LAYOUT PARA VANTAGENS E DESVANTAGENS */
     .busca-container {
         flex-direction: column;
         gap: 10px;
+        padding: 15px;
     }
     
+    /* CORREÇÃO PARA HEADER DOS CARDS - MESMO LAYOUT */
     .atributo-header {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
+        padding: 15px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
     }
     
+    .atributo-header h3 {
+        font-size: 1.1em;
+        text-align: left;
+    }
+    
+    /* CORREÇÃO PRINCIPAL: ITEM HEADER NO MOBILE */
+    .item-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .item-nome {
+        font-size: 1em;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .item-custo {
+        font-size: 0.85em;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+    
+    /* MODAL NO MOBILE */
     .modal-content {
         margin: 10% auto;
         width: 95%;
@@ -642,23 +657,56 @@
         font-size: 1.5em;
     }
     
+    /* GARANTIR MESMO LAYOUT PARA TODOS OS ITENS */
+    .item-lista {
+        padding: 12px;
+    }
+    
     .item-header {
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
+        margin-bottom: 6px;
     }
     
+    .item-nome {
+        font-size: 0.95em;
+        line-height: 1.2;
+    }
+    
+    .item-custo {
+        font-size: 0.8em;
+        padding: 3px 6px;
+    }
+    
+    .item-descricao {
+        font-size: 0.85em;
+        margin-top: 6px;
+    }
+    
+    /* PECULIARIDADES */
     .peculiaridade-item {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
-        text-align: center;
+        text-align: left;
+        padding: 10px;
+        margin: 6px;
     }
     
+    .peculiaridade-texto {
+        font-size: 0.9em;
+    }
+    
+    /* CONTADOR */
     .contador-chars {
-        position: static;
-        transform: none;
         text-align: right;
         margin-top: 5px;
+    }
+    
+    /* BOTÃO REMOVER */
+    .btn-remover {
+        width: 26px;
+        height: 26px;
+        top: 10px;
+        right: 8px;
+        font-size: 0.7em;
     }
 }
 
@@ -679,4 +727,45 @@
 
 .lista-container::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 140, 0, 0.7);
+}
+
+/* CORREÇÃO FINAL - GARANTIR QUE DESVANTAGENS E VANTAGENS TENHAM EXATAMENTE O MESMO ESTILO */
+#lista-desvantagens .item-lista,
+#desvantagens-adquiridas .item-lista,
+#lista-vantagens .item-lista,
+#vantagens-adquiridas .item-lista {
+    display: block;
+}
+
+#lista-desvantagens .item-header,
+#desvantagens-adquiridas .item-header,
+#lista-vantagens .item-header,
+#vantagens-adquiridas .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/* ESTILO ESPECÍFICO PARA DESVANTAGENS (APENAS CORES DIFERENTES) */
+.desvantagem-item {
+    border-color: rgba(231, 76, 60, 0.3);
+}
+
+.desvantagem-item:hover {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.desvantagem-item .item-custo {
+    background: rgba(231, 76, 60, 0.8);
+    border-color: rgba(231, 76, 60, 0.3);
+}
+
+#desvantagens-adquiridas .item-adquirido {
+    background: rgba(231, 76, 60, 0.15);
+    border-color: rgba(231, 76, 60, 0.4);
+}
+
+#desvantagens-adquiridas .item-adquirido .item-custo {
+    background: rgba(231, 76, 60, 0.9);
 }
