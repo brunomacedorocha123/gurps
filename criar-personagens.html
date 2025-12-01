@@ -1298,14 +1298,665 @@ function toggleSubmenu(id) {
     }
 }
 </script>
-
-        <!-- ABA EQUIPAMENTO -->
-        <div id="equipamento" class="tab-content">
-            <div class="loading">
-                <div class="spinner"></div>
+<!-- ABA EQUIPAMENTO -->
+<div id="equipamento" class="tab-content">
+    <div class="equipamento-container">
+        
+        <!-- BANNER SUPERIOR COM STATUS -->
+        <div class="equipamento-banner">
+            <div class="banner-grid">
+                <!-- DINHEIRO -->
+                <div class="status-card">
+                    <div class="status-header">
+                        <i class="fas fa-coins"></i>
+                        <h4>Dinheiro</h4>
+                    </div>
+                    <div class="status-value" id="dinheiroEquipamento">$2.000</div>
+                    <div class="status-actions">
+                        <button class="btn-status" onclick="sistemaEquipamentos.abrirModalFinanceiro('receber')">
+                            <i class="fas fa-plus"></i> Receber
+                        </button>
+                        <button class="btn-status" onclick="sistemaEquipamentos.abrirModalFinanceiro('gastar')">
+                            <i class="fas fa-minus"></i> Gastar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- CARGA -->
+                <div class="status-card">
+                    <div class="status-header">
+                        <i class="fas fa-weight-hanging"></i>
+                        <h4>Carga</h4>
+                    </div>
+                    <div class="status-value">
+                        <span id="pesoAtual">0</span>/<span id="pesoMaximo">60</span> kg
+                    </div>
+                    <div class="status-info">
+                        <span id="nivelCarga" class="carga-leve">LEVE</span>
+                        <small id="penalidadesCarga">MOV +0 / DODGE +0</small>
+                    </div>
+                </div>
+                
+                <!-- MÃOS -->
+                <div class="status-card">
+                    <div class="status-header">
+                        <i class="fas fa-hands"></i>
+                        <h4>Mãos Livres</h4>
+                    </div>
+                    <div class="status-value" id="displayMaos">
+                        <span class="mao-livre">👐</span><span class="mao-livre">👐</span>
+                    </div>
+                    <div class="status-info">
+                        <small>2 mãos disponíveis</small>
+                    </div>
+                </div>
+                
+                <!-- MOCHILA -->
+                <div class="status-card">
+                    <div class="status-header">
+                        <i class="fas fa-backpack"></i>
+                        <h4>Mochila</h4>
+                    </div>
+                    <div class="status-value">
+                        <span id="contadorMochila">0</span> itens
+                    </div>
+                    <div class="status-actions">
+                        <button class="btn-status" id="btn-liberar-mochila">
+                            <i class="fas fa-suitcase"></i> Liberar
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
+        
+        <!-- SUB-ABAS DE EQUIPAMENTO -->
+        <div class="equipamento-subtabs">
+            <div class="subtabs-container">
+                <button class="subtab-btn active" data-subtab="catalogo">
+                    <i class="fas fa-store"></i>
+                    <span>Catálogo</span>
+                </button>
+                <button class="subtab-btn" data-subtab="inventario">
+                    <i class="fas fa-backpack"></i>
+                    <span>Inventário</span>
+                </button>
+                <button class="subtab-btn" data-subtab="deposito">
+                    <i class="fas fa-home"></i>
+                    <span>Depósito</span>
+                </button>
+                <button class="subtab-btn" data-subtab="criar">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Criar Item</span>
+                </button>
+                <button class="subtab-btn" data-subtab="financeiro">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Financeiro</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- CONTEÚDO DAS SUB-ABAS -->
+        <div class="equipamento-subcontent">
+            
+            <!-- SUB-ABA: CATÁLOGO -->
+            <div id="subtab-catalogo" class="subtab-content active">
+                <div class="catalogo-container">
+                    
+                    <!-- FILTROS DO CATÁLOGO -->
+                    <div class="catalogo-filtros">
+                        <div class="filtro-header">
+                            <i class="fas fa-filter"></i>
+                            <h4>Filtros</h4>
+                        </div>
+                        
+                        <div class="filtros-grid">
+                            <!-- ERA -->
+                            <div class="filtro-group">
+                                <label>Era:</label>
+                                <select id="filtro-era" class="filtro-select">
+                                    <option value="todas">Todas as Eras</option>
+                                    <option value="medieval">Medieval/Fantasia</option>
+                                    <option value="moderna">Moderna/Cyberpunk</option>
+                                </select>
+                            </div>
+                            
+                            <!-- TIPO DE EQUIPAMENTO -->
+                            <div class="filtro-group">
+                                <label>Tipo:</label>
+                                <select id="filtro-tipo" class="filtro-select">
+                                    <option value="todas">Todos os Tipos</option>
+                                    <option value="arma-cc">Armas Corpo-a-Corpo</option>
+                                    <option value="arma-dist">Armas à Distância</option>
+                                    <option value="armadura">Armaduras</option>
+                                    <option value="escudo">Escudos</option>
+                                    <option value="geral">Equipamentos Gerais</option>
+                                </select>
+                            </div>
+                            
+                            <!-- BUSCA -->
+                            <div class="filtro-group busca-group">
+                                <label>Buscar:</label>
+                                <div class="busca-input">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="busca-catalogo" placeholder="Nome do equipamento...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- LISTA DE CATEGORIAS -->
+                    <div class="categorias-container">
+                        
+                        <!-- ARMAS CORPO-A-CORPO -->
+                        <div class="categoria-section" data-category="armas-cc">
+                            <div class="categoria-header">
+                                <i class="fas fa-gavel"></i>
+                                <h3>Armas Corpo-a-Corpo</h3>
+                                <span class="categoria-count" id="count-armas-cc">6</span>
+                            </div>
+                            <div class="table-container">
+                                <!-- Tabela será preenchida pelo JavaScript -->
+                                <div class="loading-categoria">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Carregando armas...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ARMAS À DISTÂNCIA -->
+                        <div class="categoria-section" data-category="armas-dist">
+                            <div class="categoria-header">
+                                <i class="fas fa-bullseye"></i>
+                                <h3>Armas à Distância</h3>
+                                <span class="categoria-count" id="count-armas-dist">4</span>
+                            </div>
+                            <div class="table-container">
+                                <!-- Tabela será preenchida pelo JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- ARMADURAS -->
+                        <div class="categoria-section" data-category="armaduras">
+                            <div class="categoria-header">
+                                <i class="fas fa-shield-alt"></i>
+                                <h3>Armaduras</h3>
+                                <span class="categoria-count" id="count-armaduras">4</span>
+                            </div>
+                            <div class="table-container">
+                                <!-- Tabela será preenchida pelo JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- ESCUDOS -->
+                        <div class="categoria-section" data-category="escudos">
+                            <div class="categoria-header">
+                                <i class="fas fa-shield-virus"></i>
+                                <h3>Escudos</h3>
+                                <span class="categoria-count" id="count-escudos">4</span>
+                            </div>
+                            <div class="table-container">
+                                <!-- Tabela será preenchida pelo JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- EQUIPAMENTOS GERAIS -->
+                        <div class="categoria-section" data-category="geral">
+                            <div class="categoria-header">
+                                <i class="fas fa-campground"></i>
+                                <h3>Equipamentos Gerais</h3>
+                                <span class="categoria-count" id="count-geral">7</span>
+                            </div>
+                            <div class="table-container">
+                                <!-- Tabela será preenchida pelo JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SUB-ABA: INVENTÁRIO -->
+            <div id="subtab-inventario" class="subtab-content">
+                <div class="inventario-container">
+                    
+                    <!-- FILTROS DO INVENTÁRIO -->
+                    <div class="inventario-filtros">
+                        <div class="filtros-rapidos">
+                            <button class="filtro-btn active" data-filtro="todos">
+                                <i class="fas fa-list"></i> Todos
+                            </button>
+                            <button class="filtro-btn" data-filtro="equipados">
+                                <i class="fas fa-tshirt"></i> Equipados
+                            </button>
+                            <button class="filtro-btn" data-filtro="corpo">
+                                <i class="fas fa-user"></i> No Corpo
+                            </button>
+                            <button class="filtro-btn" data-filtro="mochila">
+                                <i class="fas fa-backpack"></i> Mochila
+                            </button>
+                        </div>
+                        
+                        <div class="inventario-info">
+                            <span><strong id="totalItensInventario">0</strong> itens no total</span>
+                            <span><strong id="pesoInventario">0</strong> kg de peso</span>
+                        </div>
+                    </div>
+                    
+                    <!-- LISTA DE EQUIPAMENTOS ADQUIRIDOS -->
+                    <div class="lista-inventario" id="lista-equipamentos-adquiridos">
+                        <div class="inventario-vazio">
+                            <i class="fas fa-inbox fa-3x"></i>
+                            <h4>Inventário Vazio</h4>
+                            <p>Adquira equipamentos no catálogo para começar</p>
+                            <button class="btn-ir-catalogo" onclick="alternarSubTab('catalogo')">
+                                <i class="fas fa-store"></i> Ir para Catálogo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SUB-ABA: DEPÓSITO -->
+            <div id="subtab-deposito" class="subtab-content">
+                <div class="deposito-container">
+                    
+                    <!-- CABEÇALHO DO DEPÓSITO -->
+                    <div class="deposito-header">
+                        <div class="deposito-info">
+                            <h3><i class="fas fa-home"></i> Depósito</h3>
+                            <p>Itens guardados não contam peso e não podem ser usados</p>
+                        </div>
+                        
+                        <div class="deposito-acoes">
+                            <button class="btn-deposito-acao" id="btn-guardar-tudo-deposito">
+                                <i class="fas fa-upload"></i> Guardar Tudo
+                            </button>
+                            <button class="btn-deposito-acao" id="btn-retirar-tudo-deposito">
+                                <i class="fas fa-download"></i> Retirar Tudo
+                            </button>
+                            <button class="btn-deposito-acao perigo" id="btn-limpar-deposito">
+                                <i class="fas fa-trash"></i> Limpar Depósito
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- RESUMO DO DEPÓSITO -->
+                    <div class="deposito-resumo">
+                        <div class="resumo-card">
+                            <i class="fas fa-boxes"></i>
+                            <div>
+                                <h4>Itens Guardados</h4>
+                                <span id="contador-deposito">0 itens</span>
+                            </div>
+                        </div>
+                        
+                        <div class="resumo-card">
+                            <i class="fas fa-weight-hanging"></i>
+                            <div>
+                                <h4>Peso Liberado</h4>
+                                <span id="peso-liberado">0 kg</span>
+                            </div>
+                        </div>
+                        
+                        <div class="resumo-card">
+                            <i class="fas fa-coins"></i>
+                            <div>
+                                <h4>Valor Total</h4>
+                                <span id="valor-deposito">$0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- LISTA DO DEPÓSITO -->
+                    <div class="lista-deposito" id="lista-deposito">
+                        <div class="deposito-vazio">
+                            <i class="fas fa-home fa-3x"></i>
+                            <h4>Depósito Vazio</h4>
+                            <p>Guarde itens do seu inventário aqui</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SUB-ABA: CRIAR ITEM -->
+            <div id="subtab-criar" class="subtab-content">
+                <div class="criar-container">
+                    <div class="criar-header">
+                        <h3><i class="fas fa-plus-circle"></i> Criar Item Personalizado</h3>
+                        <p>Crie equipamentos, armas, armaduras e itens mágicos personalizados</p>
+                    </div>
+                    
+                    <div class="criar-grid">
+                        <!-- FORMULÁRIO DE CRIAÇÃO -->
+                        <div class="criar-form">
+                            <div class="form-section">
+                                <h4><i class="fas fa-info-circle"></i> Informações Básicas</h4>
+                                
+                                <div class="form-group">
+                                    <label>Nome do Item:</label>
+                                    <input type="text" id="item-nome" placeholder="Ex: Espada Élfica" maxlength="50">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Tipo de Item:</label>
+                                    <select id="item-tipo" onchange="atualizarCamposPorTipo()">
+                                        <option value="geral">Equipamento Geral</option>
+                                        <option value="arma-cc">Arma Corpo-a-Corpo</option>
+                                        <option value="arma-dist">Arma à Distância</option>
+                                        <option value="armadura">Armadura</option>
+                                        <option value="escudo">Escudo</option>
+                                        <option value="consumivel">Consumível</option>
+                                        <option value="artefato">Artefato Mágico</option>
+                                        <option value="missao">Item de Missão</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group-duo">
+                                    <div class="form-group">
+                                        <label>Peso (kg):</label>
+                                        <input type="number" id="item-peso" value="1.0" step="0.1" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Custo ($):</label>
+                                        <input type="number" id="item-custo" value="0" min="0">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Era:</label>
+                                    <select id="item-era">
+                                        <option value="medieval">Medieval/Fantasia</option>
+                                        <option value="moderna">Moderna/Cyberpunk</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Descrição:</label>
+                                    <textarea id="item-descricao" rows="3" placeholder="Descreva o item..."></textarea>
+                                </div>
+                                
+                                <div class="form-group checkbox-group">
+                                    <input type="checkbox" id="item-magico" onchange="atualizarCamposMagicos()">
+                                    <label>Item Mágico?</label>
+                                </div>
+                                
+                                <!-- CAMPOS MÁGICOS (OCULTOS INICIALMENTE) -->
+                                <div id="campos-magicos" style="display: none;">
+                                    <div class="form-group">
+                                        <label>Efeito Mágico:</label>
+                                        <textarea id="item-efeito-magico" rows="2" placeholder="Descreva o efeito mágico..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- CAMPOS ESPECÍFICOS POR TIPO -->
+                            <div id="campos-especificos">
+                                <!-- Serão preenchidos dinamicamente -->
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button class="btn-cancelar" onclick="limparFormCriacao()">
+                                    <i class="fas fa-times"></i> Limpar
+                                </button>
+                                <button class="btn-confirmar" onclick="criarItemPersonalizado()">
+                                    <i class="fas fa-check"></i> Criar Item
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- PREVIEW DO ITEM -->
+                        <div class="criar-preview">
+                            <div class="preview-header">
+                                <h4><i class="fas fa-eye"></i> Preview do Item</h4>
+                            </div>
+                            <div class="preview-content" id="preview-conteudo">
+                                <div class="preview-vazio">
+                                    <i class="fas fa-cube fa-3x"></i>
+                                    <p>As informações do item aparecerão aqui</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SUB-ABA: FINANCEIRO -->
+            <div id="subtab-financeiro" class="subtab-content">
+                <div class="financeiro-container">
+                    
+                    <!-- RESUMO FINANCEIRO -->
+                    <div class="financeiro-resumo">
+                        <div class="resumo-card grande">
+                            <i class="fas fa-wallet"></i>
+                            <div>
+                                <h4>Dinheiro Disponível</h4>
+                                <span class="valor-grande" id="saldo-disponivel">$2.000</span>
+                            </div>
+                        </div>
+                        
+                        <div class="resumo-grid">
+                            <div class="resumo-card">
+                                <i class="fas fa-shopping-cart"></i>
+                                <div>
+                                    <h4>Investimento Total</h4>
+                                    <span id="investimento-total">$0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="resumo-card">
+                                <i class="fas fa-exchange-alt"></i>
+                                <div>
+                                    <h4>Valor de Revenda</h4>
+                                    <span id="valor-revenda">$0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="resumo-card">
+                                <i class="fas fa-weight-hanging"></i>
+                                <div>
+                                    <h4>Peso Total Itens</h4>
+                                    <span id="peso-total">0 kg</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TOP EQUIPAMENTOS -->
+                    <div class="top-equipamentos">
+                        <h4><i class="fas fa-crown"></i> Equipamentos Mais Valiosos</h4>
+                        <div class="top-lista" id="top-equipamentos">
+                            <div class="top-vazio">
+                                <i class="fas fa-inbox"></i>
+                                <p>Nenhum equipamento adquirido</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- HISTÓRICO DE TRANSAÇÕES -->
+                    <div class="historico-transacoes">
+                        <h4><i class="fas fa-history"></i> Histórico de Transações</h4>
+                        <div class="historico-lista" id="historico-transacoes">
+                            <div class="historico-vazio">
+                                <i class="fas fa-receipt"></i>
+                                <p>Nenhuma transação registrada</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- MODAL DE QUANTIDADE -->
+<div id="submenu-quantidade" class="modal-submenu">
+    <div class="submenu-content">
+        <h4 id="quantidade-nome-item">Nome do Item</h4>
+        <div class="quantidade-info">
+            <div><small id="quantidade-custo-unitario">Custo: $0</small></div>
+            <div><small id="quantidade-peso-unitario">Peso: 0 kg</small></div>
+        </div>
+        
+        <div class="quantidade-controls">
+            <button class="btn-quantidade" onclick="diminuirQuantidade()">
+                <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" id="input-quantidade" value="1" min="1" max="99">
+            <button class="btn-quantidade" onclick="aumentarQuantidade()">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        
+        <div class="quantidade-totais">
+            <div>Custo Total: <span id="quantidade-custo-total">$0</span></div>
+            <div>Peso Total: <span id="quantidade-peso-total">0 kg</span></div>
+        </div>
+        
+        <div class="quantidade-actions">
+            <button class="btn-cancelar" onclick="fecharSubmenuQuantidade()">
+                Cancelar
+            </button>
+            <button class="btn-confirmar" onclick="confirmarCompraQuantidade()">
+                Comprar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL FINANCEIRO -->
+<div id="modal-financeiro" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-financeiro-titulo">Transação Financeira</h3>
+            <button class="modal-close" onclick="fecharModalFinanceiro()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="saldo-info">
+                <h4>Saldo Atual</h4>
+                <div class="saldo-valor" id="saldo-modal">$2.000</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Valor da Transação:</label>
+                <input type="number" id="valor-transacao" placeholder="0" min="1">
+            </div>
+            
+            <div class="valores-rapidos">
+                <button class="btn-rapido" data-valor="10">$10</button>
+                <button class="btn-rapido" data-valor="50">$50</button>
+                <button class="btn-rapido" data-valor="100">$100</button>
+                <button class="btn-rapido" data-valor="500">$500</button>
+                <button class="btn-rapido" data-valor="1000">$1.000</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Motivo/Descrição:</label>
+                <input type="text" id="motivo-transacao" placeholder="Ex: Pagamento de missão, Compra de equipamento...">
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn-cancelar" onclick="fecharModalFinanceiro()">
+                Cancelar
+            </button>
+            <button class="btn-confirmar" onclick="confirmarTransacaoFinanceira()">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script inicial para navegação entre sub-abas
+document.addEventListener('DOMContentLoaded', function() {
+    // Navegação entre sub-abas
+    document.querySelectorAll('.subtab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
+            
+            this.classList.add('active');
+            const subtabId = this.getAttribute('data-subtab');
+            document.getElementById(`subtab-${subtabId}`).classList.add('active');
+        });
+    });
+    
+    // Alternar mochila
+    const btnLiberarMochila = document.getElementById('btn-liberar-mochila');
+    if (btnLiberarMochila) {
+        btnLiberarMochila.addEventListener('click', function() {
+            if (window.sistemaEquipamentos) {
+                window.sistemaEquipamentos.alternarMochila();
+            }
+        });
+    }
+});
+
+// Funções auxiliares (serão implementadas no equipamentos.js)
+function alternarSubTab(subtab) {
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
+    
+    document.querySelector(`[data-subtab="${subtab}"]`).classList.add('active');
+    document.getElementById(`subtab-${subtab}`).classList.add('active');
+}
+
+function atualizarCamposPorTipo() {
+    // Implementar no equipamentos.js
+}
+
+function atualizarCamposMagicos() {
+    // Implementar no equipamentos.js
+}
+
+function limparFormCriacao() {
+    // Implementar no equipamentos.js
+}
+
+function criarItemPersonalizado() {
+    // Implementar no equipamentos.js
+}
+
+// Funções do modal de quantidade
+function aumentarQuantidade() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.aumentarQuantidade();
+    }
+}
+
+function diminuirQuantidade() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.diminuirQuantidade();
+    }
+}
+
+function fecharSubmenuQuantidade() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.fecharSubmenuQuantidade();
+    }
+}
+
+function confirmarCompraQuantidade() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.confirmarCompraQuantidade();
+    }
+}
+
+// Funções do modal financeiro
+function fecharModalFinanceiro() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.fecharModalFinanceiro();
+    }
+}
+
+function confirmarTransacaoFinanceira() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.confirmarTransacaoFinanceira();
+    }
+}
+</script>
         <!-- ABA RESUMO -->
         <div id="resumo" class="tab-content">
             <div class="loading">
