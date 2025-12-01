@@ -1,4 +1,4 @@
-// caracteristicas-fisicas.js - VERSÃO COMPLETA COM ATUALIZAÇÃO VISUAL IMEDIATA
+// caracteristicas-fisicas.js - VERSÃO MOBILE COMPATIBLE
 window.ponteCaracteristicas = {
     caracteristicasAtivas: [],
     
@@ -8,85 +8,121 @@ window.ponteCaracteristicas = {
         
         // ✅ SOLUÇÃO DEFINITIVA: Atualizar visualmente IMEDIATAMENTE
         this.atualizarCardAlturaPesoVisualmente(caracteristicas);
+        
+        // ✅ DISPARAR EVENTO PARA MOBILE (importante!)
+        this.dispararEventoAtualizacao(caracteristicas);
     },
     
     obterCaracteristicasAtivas: function() {
-        return this.caracteristicasAtivas;
+        return this.caracteristicasAtivas || [];
     },
     
-    // ✅ MÉTODO QUE ATUALIZA VISUALMENTE NA HORA
+    // ✅ MÉTODO QUE ATUALIZA VISUALMENTE NA HORA (OTIMIZADO PARA MOBILE)
     atualizarCardAlturaPesoVisualmente: function(caracteristicas) {
-        console.log("🎨 Atualizando card altura/peso VISUALMENTE");
+        console.log("🎨 Atualizando card altura/peso VISUALMENTE (Mobile)");
         
-        if (caracteristicas.length === 0) {
-            // Nenhuma característica - voltar ao normal
-            this.limparCardAlturaPeso();
-            return;
+        // ✅ AGUARDAR UM POUCO PARA O DOM ESTAR PRONTO (MOBILE)
+        setTimeout(() => {
+            if (caracteristicas.length === 0) {
+                this.limparCardAlturaPeso();
+                return;
+            }
+            
+            const caracteristica = caracteristicas[0];
+            const multiplicador = this.obterMultiplicador(caracteristica.tipo);
+            
+            // ✅ ATUALIZAR STATUS FÍSICO (COM FALLBACK PARA MOBILE)
+            this.atualizarElementoMobile('statusFisico', caracteristica.nome, "#f39c12");
+            
+            // ✅ ATUALIZAR FAIXA DE PESO
+            const pesoFaixa = document.getElementById('pesoFaixa');
+            if (pesoFaixa && window.sistemaAlturaPeso) {
+                try {
+                    const st = window.sistemaAlturaPeso.stBase || 10;
+                    const faixa = window.sistemaAlturaPeso.obterFaixaPeso(st);
+                    if (faixa && faixa.min && faixa.max) {
+                        pesoFaixa.textContent = `${(faixa.min * multiplicador).toFixed(1)}kg - ${(faixa.max * multiplicador).toFixed(1)}kg (${caracteristica.nome})`;
+                    }
+                } catch (e) {
+                    console.error("Erro ao calcular faixa de peso:", e);
+                }
+            }
+            
+            // ✅ ATUALIZAR MODIFICADOR
+            this.atualizarElementoMobile('modificadorPeso', `${caracteristica.nome} (${multiplicador}x)`);
+            
+            // ✅ MOSTRAR DESVANTAGENS ATIVAS
+            this.mostrarDesvantagensAtivas(caracteristicas);
+            
+            console.log("✅ Card altura/peso atualizado VISUALMENTE (Mobile)!");
+        }, 50); // Pequeno delay para mobile
+    },
+    
+    // ✅ MÉTODO ESPECÍFICO PARA MOBILE (com fallback)
+    atualizarElementoMobile: function(id, texto, cor = null) {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.textContent = texto;
+            if (cor) {
+                elemento.style.backgroundColor = cor;
+                elemento.style.transition = 'background-color 0.3s ease';
+            }
+        } else {
+            // Fallback: tenta novamente após um delay
+            setTimeout(() => {
+                const elementoNovo = document.getElementById(id);
+                if (elementoNovo) {
+                    elementoNovo.textContent = texto;
+                    if (cor) elementoNovo.style.backgroundColor = cor;
+                }
+            }, 100);
         }
-        
-        const caracteristica = caracteristicas[0];
-        const multiplicador = this.obterMultiplicador(caracteristica.tipo);
-        
-        // ✅ ATUALIZAR STATUS FÍSICO (IMEDIATAMENTE)
-        const statusFisico = document.getElementById('statusFisico');
-        if (statusFisico) {
-            statusFisico.textContent = caracteristica.nome;
-            statusFisico.style.background = "#f39c12";
-        }
-        
-        // ✅ ATUALIZAR FAIXA DE PESO (IMEDIATAMENTE)
-        const pesoFaixa = document.getElementById('pesoFaixa');
-        if (pesoFaixa && window.sistemaAlturaPeso) {
-            const st = window.sistemaAlturaPeso.stBase || 10;
-            const faixa = window.sistemaAlturaPeso.obterFaixaPeso(st);
-            pesoFaixa.textContent = `${(faixa.min * multiplicador).toFixed(1)}kg - ${(faixa.max * multiplicador).toFixed(1)}kg (${caracteristica.nome})`;
-        }
-        
-        // ✅ ATUALIZAR MODIFICADOR (IMEDIATAMENTE)
-        const modificador = document.getElementById('modificadorPeso');
-        if (modificador) {
-            modificador.textContent = `${caracteristica.nome} (${multiplicador}x)`;
-        }
-        
-        // ✅ MOSTRAR DESVANTAGENS ATIVAS (IMEDIATAMENTE)
-        this.mostrarDesvantagensAtivas(caracteristicas);
-        
-        console.log("✅ Card altura/peso atualizado VISUALMENTE!");
     },
     
     limparCardAlturaPeso: function() {
-        // Voltar ao estado normal
-        const statusFisico = document.getElementById('statusFisico');
-        if (statusFisico) {
-            statusFisico.textContent = "Normal";
-            statusFisico.style.background = "#27ae60";
-        }
-        
-        const pesoFaixa = document.getElementById('pesoFaixa');
-        if (pesoFaixa && window.sistemaAlturaPeso) {
-            const st = window.sistemaAlturaPeso.stBase || 10;
-            const faixa = window.sistemaAlturaPeso.obterFaixaPeso(st);
-            pesoFaixa.textContent = `${faixa.min}kg - ${faixa.max}kg`;
-        }
-        
-        const modificador = document.getElementById('modificadorPeso');
-        if (modificador) {
-            modificador.textContent = 'Dentro da faixa';
-        }
-        
-        const container = document.getElementById('desvantagensAtivas');
-        if (container) {
-            container.style.display = 'none';
-        }
+        // ✅ VOLTAR AO ESTADO NORMAL (OTIMIZADO PARA MOBILE)
+        setTimeout(() => {
+            this.atualizarElementoMobile('statusFisico', "Normal", "#27ae60");
+            
+            const pesoFaixa = document.getElementById('pesoFaixa');
+            if (pesoFaixa && window.sistemaAlturaPeso) {
+                try {
+                    const st = window.sistemaAlturaPeso.stBase || 10;
+                    const faixa = window.sistemaAlturaPeso.obterFaixaPeso(st);
+                    if (faixa && faixa.min && faixa.max) {
+                        pesoFaixa.textContent = `${faixa.min}kg - ${faixa.max}kg`;
+                    }
+                } catch (e) {
+                    console.error("Erro ao limpar faixa de peso:", e);
+                }
+            }
+            
+            this.atualizarElementoMobile('modificadorPeso', 'Dentro da faixa');
+            
+            const container = document.getElementById('desvantagensAtivas');
+            if (container) {
+                container.style.display = 'none';
+                container.style.opacity = '0';
+                container.style.transition = 'all 0.3s ease';
+            }
+        }, 50);
     },
     
     mostrarDesvantagensAtivas: function(caracteristicas) {
         const container = document.getElementById('desvantagensAtivas');
         const lista = document.getElementById('listaDesvantagens');
         
-        if (!container || !lista) return;
+        if (!container || !lista) {
+            // ✅ TENTAR NOVAMENTE PARA MOBILE
+            setTimeout(() => {
+                this.mostrarDesvantagensAtivas(caracteristicas);
+            }, 100);
+            return;
+        }
         
         container.style.display = 'block';
+        container.style.opacity = '1';
+        container.style.transition = 'all 0.3s ease';
         
         const caracteristica = caracteristicas[0];
         let icone, descricao, efeito;
@@ -123,6 +159,11 @@ window.ponteCaracteristicas = {
                 </div>
             </div>
         `;
+        
+        // ✅ FORÇAR RE-LAYOUT PARA MOBILE
+        setTimeout(() => {
+            void container.offsetHeight;
+        }, 10);
     },
     
     obterMultiplicador: function(tipo) {
@@ -133,8 +174,124 @@ window.ponteCaracteristicas = {
             case 'muito-gordo': return 2.0;
             default: return 1.0;
         }
+    },
+    
+    // ✅ NOVO: SISTEMA DE EVENTOS PARA MOBILE
+    dispararEventoAtualizacao: function(caracteristicas) {
+        // Evento Customizado
+        const evento = new CustomEvent('caracteristicasFisicasAlteradas', {
+            detail: { caracteristicas: caracteristicas },
+            bubbles: true,
+            cancelable: true
+        });
+        
+        document.dispatchEvent(evento);
+        
+        // Disparar também para o sistema altura/peso
+        if (window.sistemaAlturaPeso && typeof window.sistemaAlturaPeso.caracteristicasAtualizadas === 'function') {
+            window.sistemaAlturaPeso.caracteristicasAtualizadas(caracteristicas);
+        }
+    },
+    
+    // ✅ NOVO: VERIFICAR E RECONECTAR PONTE
+    verificarConexao: function() {
+        console.log("🔍 Verificando conexão da ponte...");
+        
+        // Verificar se o sistema altura/peso existe
+        if (!window.sistemaAlturaPeso) {
+            console.warn("⚠️ Sistema altura/peso não encontrado. Tentando recriar...");
+            
+            // Tentar inicializar novamente
+            setTimeout(() => {
+                if (window.SistemaAlturaPeso) {
+                    window.sistemaAlturaPeso = new window.SistemaAlturaPeso();
+                    window.sistemaAlturaPeso.inicializar();
+                    console.log("✅ Sistema altura/peso recriado");
+                }
+            }, 500);
+        }
+        
+        // Verificar elementos DOM
+        const elementosNecessarios = ['statusFisico', 'pesoFaixa', 'modificadorPeso'];
+        elementosNecessarios.forEach(id => {
+            const elemento = document.getElementById(id);
+            if (!elemento) {
+                console.warn(`⚠️ Elemento #${id} não encontrado no DOM`);
+            }
+        });
+        
+        return true;
+    },
+    
+    // ✅ NOVO: INICIALIZAÇÃO PARA MOBILE
+    inicializarParaMobile: function() {
+        console.log("📱 Inicializando ponte para mobile");
+        
+        // Aguardar carregamento completo
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                // Verificar conexão
+                this.verificarConexao();
+                
+                // Configurar eventos touch para mobile
+                this.configurarEventosMobile();
+                
+                // Atualizar visualização inicial
+                if (this.caracteristicasAtivas.length > 0) {
+                    this.atualizarCardAlturaPesoVisualmente(this.caracteristicasAtivas);
+                }
+                
+                console.log("✅ Ponte inicializada para mobile");
+            }, 300);
+        });
+        
+        // Fallback: se DOM já estiver carregado
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(() => {
+                this.verificarConexao();
+                this.configurarEventosMobile();
+            }, 100);
+        }
+    },
+    
+    // ✅ NOVO: CONFIGURAR EVENTOS PARA TOUCH (MOBILE)
+    configurarEventosMobile: function() {
+        // Substituir eventos de clique por touch para botões
+        document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
+            // Remover event listeners antigos para evitar duplicação
+            const btnClone = btn.cloneNode(true);
+            btn.parentNode.replaceChild(btnClone, btn);
+            
+            // Adicionar eventos touch e click
+            btnClone.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.classList.add('touched');
+            }, { passive: false });
+            
+            btnClone.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                this.classList.remove('touched');
+                const tipo = this.dataset.tipo;
+                if (tipo && window.sistemaCaracteristicasFisicas) {
+                    window.sistemaCaracteristicasFisicas.adicionarCaracteristica(tipo);
+                }
+            }, { passive: false });
+            
+            // Manter clique para desktop também
+            btnClone.addEventListener('click', function(e) {
+                const tipo = this.dataset.tipo;
+                if (tipo && window.sistemaCaracteristicasFisicas) {
+                    window.sistemaCaracteristicasFisicas.adicionarCaracteristica(tipo);
+                }
+            });
+        });
+        
+        console.log("✅ Eventos mobile configurados");
     }
 };
+
+// ✅ INICIALIZAR AUTOMATICAMENTE PARA MOBILE
+window.ponteCaracteristicas.inicializarParaMobile();
 
 // ⚠️ O RESTO DO SEU CÓDIGO EXISTENTE PERMANECE AQUI ⚠️
 class SistemaCaracteristicasFisicas {

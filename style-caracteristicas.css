@@ -790,3 +790,93 @@
     font-weight: bold;
     border: 1px solid rgba(231, 76, 60, 0.3);
 }
+
+/* === CORREÇÕES ESPECÍFICAS PARA MOBILE === */
+
+/* Aumentar área de toque para botões */
+.btn-add-caracteristica,
+.btn-controle,
+.btn-primary {
+    min-height: 44px !important; /* Altura mínima para toque */
+    min-width: 44px !important;  /* Largura mínima para toque */
+    padding: 12px 20px !important;
+}
+
+/* Melhor feedback visual para toque */
+.btn-add-caracteristica:active,
+.btn-add-caracteristica.touched {
+    transform: scale(0.95) !important;
+    opacity: 0.8 !important;
+    transition: all 0.1s ease !important;
+}
+
+/* Ajustar cards para mobile */
+.caracteristica-item {
+    padding: 15px !important;
+    margin: 8px 0 !important;
+}
+
+/* Aumentar fonte para mobile */
+@media (max-width: 768px) {
+    .caracteristica-info strong {
+        font-size: 16px !important;
+    }
+    
+    .caracteristica-info small {
+        font-size: 14px !important;
+    }
+    
+    .desvantagem-info strong {
+        font-size: 15px !important;
+    }
+    
+    .desvantagem-info small {
+        font-size: 13px !important;
+    }
+}
+
+/* Prevenir zoom em inputs */
+.form-input,
+.fisica-input,
+.form-select {
+    font-size: 16px !important; /* Previne zoom no iOS */
+}
+
+/* Melhorar scroll em mobile */
+.idiomas-lista,
+.caracteristicas-lista {
+    -webkit-overflow-scrolling: touch !important; /* Scroll suave iOS */
+}
+
+/* Corrigir display de desvantagens no mobile */
+.desvantagens-ativas {
+    margin: 15px 0 !important;
+    padding: 15px !important;
+}
+
+.desvantagem-item {
+    padding: 15px !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 10px !important;
+}
+
+.desvantagem-icone {
+    font-size: 24px !important;
+    width: auto !important;
+}
+
+.desvantagem-info {
+    text-align: center !important;
+}
+
+/* Ajustar controles de altura/peso */
+.controle-numerico {
+    justify-content: center !important;
+    gap: 15px !important;
+}
+
+.fisica-input {
+    width: 100px !important;
+    font-size: 18px !important;
+}
