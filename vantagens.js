@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO CORRIGIDA COM AMPLIAÇÕES
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO 100% CORRIGIDA
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -173,10 +173,15 @@ class GerenciadorVantagens {
         html += `
                     </select>
                     <div class="nivel-info">
-                        <strong>Cálculo: ${custoPorNivel} pts × Nível</strong>
+                        <div class="info-linha">
+                            <span>Custo base: ${custoPorNivel} pts/nível</span>
+                        </div>
                         <div class="custo-total-container">
                             <span>Custo total: </span>
                             <span class="custo-total" id="custo-total">${custoInicial} pts</span>
+                        </div>
+                        <div class="custo-por-nivel-info" id="custo-por-nivel-info">
+                            <small>Cálculo: ${custoPorNivel} pts × ${nivelBase} = ${custoInicial} pts</small>
                         </div>
                     </div>
         `;
@@ -187,7 +192,7 @@ class GerenciadorVantagens {
             
             item.ampliacoes.forEach(ampliacao => {
                 const custoExtra = parseFloat(ampliacao.custoExtra) || 1.5;
-                const percentual = custoExtra * 100; // CORREÇÃO: 150% (não 50%)
+                const percentual = custoExtra * 100; // 150%
                 
                 html += `
                     <div class="ampliacao-option">
@@ -197,7 +202,6 @@ class GerenciadorVantagens {
                         <label for="ampliacao-${ampliacao.id}">
                             <strong>${ampliacao.nome} (+${percentual}%)</strong>
                             <p>${ampliacao.descricao}</p>
-                            <small><em>Ex: nível 1 = ${custoPorNivel} → ${Math.round(custoPorNivel * custoExtra)} pts</em></small>
                         </label>
                     </div>
                 `;
@@ -212,41 +216,68 @@ class GerenciadorVantagens {
         setTimeout(() => {
             const selectNivel = document.getElementById('nivel-vantagem');
             const custoTotal = document.getElementById('custo-total');
+            const custoPorNivelInfo = document.getElementById('custo-por-nivel-info');
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
             const calcularCusto = () => {
                 // 1. Pegar nível selecionado
                 const nivel = parseInt(selectNivel.value) || nivelBase;
                 
-                // 2. Calcular custo base: nível × custo por nível
-                const custoBase = nivel * custoPorNivel;
+                // 2. Calcular custo base SEM ampliação
+                const custoBaseSemAmpliacao = nivel * custoPorNivel;
                 
-                // 3. Verificar ampliações - CORREÇÃO AQUI
-                let custoFinal = custoBase;
+                // 3. Verificar ampliações - CÁLCULO CORRETO
+                let custoFinal = custoBaseSemAmpliacao;
+                let custoPorNivelAtual = custoPorNivel;
                 let ampliacoesAtivas = [];
+                let temAmpliacao = false;
                 
                 checkboxes.forEach(checkbox => {
                     if(checkbox.checked) {
-                        const percentualExtra = parseFloat(checkbox.dataset.custo) || 1.5;
+                        const percentualExtra = parseFloat(checkbox.dataset.custo) || 1.5; // 1.5 = 150%
                         
-                        // CORREÇÃO: custoFinal = custoBase + (custoBase × percentualExtra)
-                        // Exemplo: nível 3 = 6 pontos, com 150% = 6 + (6 × 1.5) = 6 + 9 = 15
-                        custoFinal = custoBase + (custoBase * percentualExtra);
+                        // CÁLCULO CORRETO: custoBase × (1 + percentualExtra)
+                        // Onde percentualExtra já é o multiplicador (1.5 para 150%)
+                        // Se custoBaseSemAmpliacao = 6 (3 níveis × 2)
+                        // Com 150%: 6 × (1 + 1.5) = 6 × 2.5 = 15 pontos
+                        custoFinal = custoBaseSemAmpliacao * (1 + percentualExtra);
+                        custoPorNivelAtual = custoPorNivel * (1 + percentualExtra);
                         ampliacoesAtivas.push(checkbox.dataset.nome);
+                        temAmpliacao = true;
                     }
                 });
                 
-                // 4. Arredondar e mostrar
+                // 4. Arredondar
                 custoFinal = Math.round(custoFinal);
+                custoPorNivelAtual = Math.round(custoPorNivelAtual * 100) / 100; // 2 casas decimais
+                
                 if (isNaN(custoFinal) || custoFinal < 0) {
-                    custoFinal = custoBase;
+                    custoFinal = custoBaseSemAmpliacao;
+                    custoPorNivelAtual = custoPorNivel;
                 }
                 
+                // 5. Mostrar valores
                 custoTotal.textContent = `${custoFinal} pts`;
+                
+                // Mostrar cálculo detalhado
+                if (temAmpliacao) {
+                    custoPorNivelInfo.innerHTML = `
+                        <small style="color: #27ae60;">
+                            <strong>Cálculo com ampliação:</strong><br>
+                            ${custoPorNivel} pts/nível × (1 + ${checkboxes[0].dataset.custo}) = ${custoPorNivelAtual} pts/nível<br>
+                            ${custoPorNivelAtual} pts/nível × ${nivel} = <strong>${custoFinal} pts</strong>
+                        </small>
+                    `;
+                } else {
+                    custoPorNivelInfo.innerHTML = `
+                        <small>Cálculo: ${custoPorNivel} pts/nível × ${nivel} = ${custoFinal} pts</small>
+                    `;
+                }
                 
                 // Guardar informações para uso posterior
                 selectNivel.dataset.custoFinal = custoFinal;
                 selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
+                selectNivel.dataset.custoPorNivelAtual = custoPorNivelAtual;
                 
                 return custoFinal;
             };
@@ -287,10 +318,13 @@ class GerenciadorVantagens {
         
         // Usar o custo já calculado e armazenado
         let custoFinal = parseInt(selectNivel.dataset.custoFinal);
+        let custoPorNivelAtual = parseFloat(selectNivel.dataset.custoPorNivelAtual);
+        
         if (isNaN(custoFinal)) {
             // Fallback: calcular novamente se necessário
             const custoPorNivel = Math.abs(item.custoPorNivel || 2);
             custoFinal = nivel * custoPorNivel;
+            custoPorNivelAtual = custoPorNivel;
         }
         
         // Pegar ampliações selecionadas
@@ -305,6 +339,7 @@ class GerenciadorVantagens {
             ...item,
             nivelSelecionado: nivel,
             custo: custoFinal,
+            custoPorNivelAtual: custoPorNivelAtual,
             ampliacoesSelecionadas: ampliacoesSelecionadas,
             custoPorNivel: item.custoPorNivel || 2
         };
@@ -322,6 +357,7 @@ class GerenciadorVantagens {
             tipo: item.tipo,
             variacao: item.variacaoSelecionada,
             nivel: item.nivelSelecionado,
+            custoPorNivelAtual: item.custoPorNivelAtual,
             ampliacoes: item.ampliacoesSelecionadas,
             custoPorNivel: item.custoPorNivel
         };
@@ -350,8 +386,8 @@ class GerenciadorVantagens {
             let infoExtra = '';
             
             if (item.nivel) {
-                const custoPorNivel = Math.abs(item.custoPorNivel || 2);
-                infoExtra = `<div class="item-categoria">Nível ${item.nivel} (${custoPorNivel} pts/nível)</div>`;
+                const custoPorNivelDisplay = item.custoPorNivelAtual || item.custoPorNivel || 2;
+                infoExtra = `<div class="item-categoria">Nível ${item.nivel} (${custoPorNivelDisplay} pts/nível)</div>`;
             }
             
             if (item.variacao) {
