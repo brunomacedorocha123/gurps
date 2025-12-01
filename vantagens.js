@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO CORRIGIDA
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -40,10 +40,17 @@ class GerenciadorVantagens {
     criarItemLista(item, tipo) {
         const div = document.createElement('div');
         div.className = `item-lista ${tipo}-item`;
+        
+        // Mostrar custo base corretamente
+        let custoDisplay = Math.abs(item.custo) || 'var';
+        if (item.tipo === 'variavel') {
+            custoDisplay = `${Math.abs(item.custoPorNivel || 2)} pts/nível`;
+        }
+        
         div.innerHTML = `
             <div class="item-header">
                 <div class="item-nome">${item.nome}</div>
-                <div class="item-custo">${Math.abs(item.custo)} pts</div>
+                <div class="item-custo">${custoDisplay}</div>
             </div>
             <div class="item-descricao">${item.descricao}</div>
             <div class="item-categoria">${this.getCategoriaNome(item.categoria)}</div>
@@ -132,7 +139,6 @@ class GerenciadorVantagens {
 
         html += `</div></div>`;
 
-        // Adicionar event listeners para os radios
         setTimeout(() => {
             document.querySelectorAll('input[name="variacao"]').forEach(radio => {
                 radio.addEventListener('change', (e) => {
@@ -145,8 +151,10 @@ class GerenciadorVantagens {
     }
 
     criarModalVariavel(item) {
-        const nivelInicial = item.nivelBase || 1;
-        const custoInicial = nivelInicial * item.custoPorNivel;
+        const nivelBase = item.nivelBase || 1;
+        const niveisMax = item.niveis || 10;
+        const custoPorNivel = Math.abs(item.custoPorNivel || 2);
+        const custoInicial = nivelBase * custoPorNivel;
 
         let html = `
             <div class="modal-descricao">
@@ -158,58 +166,98 @@ class GerenciadorVantagens {
                     <select id="nivel-vantagem" class="atributo-input">
         `;
 
-        for(let i = item.nivelBase; i <= item.niveis; i++) {
-            html += `<option value="${i}">${i}</option>`;
+        for(let i = nivelBase; i <= niveisMax; i++) {
+            html += `<option value="${i}">Nível ${i}</option>`;
         }
 
         html += `
                     </select>
                     <div class="nivel-info">
-                        <span>Custo por nível: ${Math.abs(item.custoPorNivel)} pts</span>
-                        <span class="custo-total" id="custo-total">${Math.abs(custoInicial)} pts</span>
+                        <strong>Cálculo: ${custoPorNivel} pts × Nível</strong>
+                        <div class="custo-total-container">
+                            <span>Custo total: </span>
+                            <span class="custo-total" id="custo-total">${custoInicial} pts</span>
+                        </div>
                     </div>
         `;
 
-        // Ampliações
-        if(item.ampliacoes) {
+        // Ampliações (se houver)
+        if(item.ampliacoes && item.ampliacoes.length > 0) {
+            html += `<div class="ampliacoes-section"><h4>Ampliações Opcionais:</h4>`;
+            
             item.ampliacoes.forEach(ampliacao => {
+                const custoExtra = parseFloat(ampliacao.custoExtra) || 1.5;
+                const percentual = (custoExtra * 100) - 100;
+                
                 html += `
                     <div class="ampliacao-option">
-                        <input type="checkbox" id="ampliacao-${ampliacao.id}" data-custo="${ampliacao.custoExtra}">
+                        <input type="checkbox" id="ampliacao-${ampliacao.id}" 
+                               data-custo="${custoExtra}" 
+                               data-nome="${ampliacao.nome}">
                         <label for="ampliacao-${ampliacao.id}">
-                            <strong>${ampliacao.nome} (+${(ampliacao.custoExtra * 100) - 100}%)</strong>
+                            <strong>${ampliacao.nome} (+${percentual}%)</strong>
                             <p>${ampliacao.descricao}</p>
                         </label>
                     </div>
                 `;
             });
+            
+            html += `</div>`;
         }
 
         html += `</div></div>`;
 
-        // Event listeners para cálculos dinâmicos
+        // Event listeners para cálculo dinâmico
         setTimeout(() => {
             const selectNivel = document.getElementById('nivel-vantagem');
             const custoTotal = document.getElementById('custo-total');
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
             const calcularCusto = () => {
-                let nivel = parseInt(selectNivel.value);
-                let custo = nivel * item.custoPorNivel;
+                // 1. Pegar nível selecionado
+                const nivel = parseInt(selectNivel.value) || nivelBase;
+                
+                // 2. Calcular custo base: nível × custo por nível
+                const custoBase = nivel * custoPorNivel;
+                
+                // 3. Verificar ampliações
+                let custoFinal = custoBase;
+                let ampliacoesAtivas = [];
                 
                 checkboxes.forEach(checkbox => {
                     if(checkbox.checked) {
-                        custo *= parseFloat(checkbox.dataset.custo);
+                        const multiplicador = parseFloat(checkbox.dataset.custo) || 1;
+                        if (!isNaN(multiplicador)) {
+                            custoFinal = custoBase * multiplicador;
+                            ampliacoesAtivas.push(checkbox.dataset.nome);
+                        }
                     }
                 });
-
-                custoTotal.textContent = Math.abs(Math.round(custo)) + ' pts';
+                
+                // 4. Arredondar e mostrar
+                custoFinal = Math.round(custoFinal);
+                if (isNaN(custoFinal) || custoFinal < 0) {
+                    custoFinal = custoBase; // Fallback seguro
+                }
+                
+                custoTotal.textContent = `${custoFinal} pts`;
+                
+                // Guardar informações para uso posterior
+                selectNivel.dataset.custoFinal = custoFinal;
+                selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
+                
+                return custoFinal;
             };
 
+            // Inicializar cálculo
+            calcularCusto();
+
+            // Adicionar listeners
             selectNivel.addEventListener('change', calcularCusto);
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', calcularCusto);
             });
+
         }, 100);
 
         return html;
@@ -232,24 +280,31 @@ class GerenciadorVantagens {
     }
 
     confirmarVariavel(item, tipo) {
-        const nivel = parseInt(document.getElementById('nivel-vantagem').value);
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const selectNivel = document.getElementById('nivel-vantagem');
+        const nivel = parseInt(selectNivel.value) || (item.nivelBase || 1);
         
-        let custo = nivel * item.custoPorNivel;
-        let ampliacoes = [];
-
-        checkboxes.forEach(checkbox => {
-            if(checkbox.checked) {
-                custo *= parseFloat(checkbox.dataset.custo);
-                ampliacoes.push(checkbox.id.replace('ampliacao-', ''));
-            }
-        });
+        // Usar o custo já calculado e armazenado
+        let custoFinal = parseInt(selectNivel.dataset.custoFinal);
+        if (isNaN(custoFinal)) {
+            // Fallback: calcular novamente se necessário
+            const custoPorNivel = Math.abs(item.custoPorNivel || 2);
+            custoFinal = nivel * custoPorNivel;
+        }
+        
+        // Pegar ampliações selecionadas
+        let ampliacoesSelecionadas = [];
+        try {
+            ampliacoesSelecionadas = JSON.parse(selectNivel.dataset.ampliacoes || '[]');
+        } catch (e) {
+            ampliacoesSelecionadas = [];
+        }
 
         const itemCompleto = {
             ...item,
             nivelSelecionado: nivel,
-            custo: Math.round(custo),
-            ampliacoesSelecionadas: ampliacoes
+            custo: custoFinal,
+            ampliacoesSelecionadas: ampliacoesSelecionadas,
+            custoPorNivel: item.custoPorNivel || 2
         };
 
         this.adicionarItem(itemCompleto, tipo);
@@ -265,7 +320,8 @@ class GerenciadorVantagens {
             tipo: item.tipo,
             variacao: item.variacaoSelecionada,
             nivel: item.nivelSelecionado,
-            ampliacoes: item.ampliacoesSelecionadas
+            ampliacoes: item.ampliacoesSelecionadas,
+            custoPorNivel: item.custoPorNivel
         };
 
         if (tipo === 'vantagem') {
@@ -288,18 +344,34 @@ class GerenciadorVantagens {
             return;
         }
 
-        container.innerHTML = itens.map(item => `
-            <div class="item-lista item-adquirido">
-                <div class="item-header">
-                    <div class="item-nome">${item.nome}</div>
-                    <div class="item-custo">${Math.abs(item.custo)} pts</div>
+        container.innerHTML = itens.map(item => {
+            let infoExtra = '';
+            
+            if (item.nivel) {
+                const custoPorNivel = Math.abs(item.custoPorNivel || 2);
+                infoExtra = `<div class="item-categoria">Nível ${item.nivel} (${custoPorNivel} pts/nível)</div>`;
+            }
+            
+            if (item.variacao) {
+                infoExtra = `<div class="item-categoria">${this.getNomeVariacao(item.baseId, item.variacao)}</div>`;
+            }
+            
+            if (item.ampliacoes && item.ampliacoes.length > 0) {
+                infoExtra += `<div class="item-ampliacoes"><small>Ampliações: ${item.ampliacoes.join(', ')}</small></div>`;
+            }
+
+            return `
+                <div class="item-lista item-adquirido">
+                    <div class="item-header">
+                        <div class="item-nome">${item.nome}</div>
+                        <div class="item-custo">${Math.abs(item.custo)} pts</div>
+                    </div>
+                    <div class="item-descricao">${item.descricao}</div>
+                    ${infoExtra}
+                    <button class="btn-remover" onclick="vantagensSystem.removerItem('${item.id}', '${tipo}')">×</button>
                 </div>
-                <div class="item-descricao">${item.descricao}</div>
-                ${item.nivel ? `<div class="item-categoria">Nível ${item.nivel}</div>` : ''}
-                ${item.variacao ? `<div class="item-categoria">${this.getNomeVariacao(item.baseId, item.variacao)}</div>` : ''}
-                <button class="btn-remover" onclick="vantagensSystem.removerItem('${item.id}', '${tipo}')">×</button>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     getNomeVariacao(baseId, variacaoId) {
@@ -389,30 +461,37 @@ class GerenciadorVantagens {
     }
 
     atualizarTotais() {
-        const totalVantagens = this.vantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
-        const totalDesvantagens = this.desvantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
-        const totalPeculiaridades = this.peculiaridades.length * 1; // 1 ponto cada
+        const totalVantagens = this.vantagensAdquiridas.reduce((sum, item) => {
+            const custo = Math.abs(item.custo) || 0;
+            return sum + (isNaN(custo) ? 0 : custo);
+        }, 0);
+        
+        const totalDesvantagens = this.desvantagensAdquiridas.reduce((sum, item) => {
+            const custo = Math.abs(item.custo) || 0;
+            return sum + (isNaN(custo) ? 0 : custo);
+        }, 0);
+        
+        const totalPeculiaridades = this.peculiaridades.length * 1;
 
         document.getElementById('total-vantagens').textContent = `+${totalVantagens}`;
         document.getElementById('total-desvantagens').textContent = `-${totalDesvantagens}`;
         document.getElementById('total-peculiaridades').textContent = `-${totalPeculiaridades}`;
-        document.getElementById('saldo-total').textContent = totalVantagens - totalDesvantagens - totalPeculiaridades;
+        
+        const saldoTotal = totalVantagens - totalDesvantagens - totalPeculiaridades;
+        document.getElementById('saldo-total').textContent = saldoTotal;
 
         document.getElementById('total-vantagens-adquiridas').textContent = `${totalVantagens} pts`;
         document.getElementById('total-desvantagens-adquiridas').textContent = `${totalDesvantagens} pts`;
     }
 
     setupEventListeners() {
-        // Fechar modal
         document.querySelector('.modal-close').addEventListener('click', () => this.fecharModal());
         document.querySelector('.btn-cancelar').addEventListener('click', () => this.fecharModal());
         
-        // Fechar modal clicando fora
         document.getElementById('modal-vantagem').addEventListener('click', (e) => {
             if (e.target.id === 'modal-vantagem') this.fecharModal();
         });
 
-        // Buscas e filtros
         document.getElementById('busca-vantagens').addEventListener('input', () => this.filtrarLista('vantagens'));
         document.getElementById('categoria-vantagens').addEventListener('change', () => this.filtrarLista('vantagens'));
         
