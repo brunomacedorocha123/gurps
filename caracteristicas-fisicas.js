@@ -1,25 +1,26 @@
-// COLAR ESTE NOVO BLOCO COMPLETO:
+// =============================================
+// CARACTERÍSTICAS FÍSICAS - SISTEMA COMPLETO
+// =============================================
+
+// PONTE DE COMUNICAÇÃO ENTRE SISTEMAS
 window.ponteCaracteristicas = {
     caracteristicasAtivas: [],
     
     atualizarDoCardEsquerda: function(caracteristicas) {
-        console.log("🔄 PONTE: Atualizando características", caracteristicas);
         this.caracteristicasAtivas = caracteristicas;
-        
-        // ✅ SOLUÇÃO SIMPLES: Atualizar os elementos VISUAIS diretamente
         this.atualizarCardAlturaPesoVisualmente(caracteristicas);
+        
+        if (window.sistemaAlturaPeso) {
+            window.sistemaAlturaPeso.atualizarDeCaracteristicas(caracteristicas);
+        }
     },
     
     obterCaracteristicasAtivas: function() {
         return this.caracteristicasAtivas;
     },
     
-    // ✅ MÉTODO NOVO: Atualizar visualmente o card altura/peso
     atualizarCardAlturaPesoVisualmente: function(caracteristicas) {
-        console.log("🎨 Atualizando card altura/peso VISUALMENTE");
-        
         if (caracteristicas.length === 0) {
-            // Nenhuma característica - voltar ao normal
             this.limparCardAlturaPeso();
             return;
         }
@@ -27,14 +28,14 @@ window.ponteCaracteristicas = {
         const caracteristica = caracteristicas[0];
         const multiplicador = this.obterMultiplicador(caracteristica.tipo);
         
-        // ✅ ATUALIZAR STATUS FÍSICO (IMEDIATAMENTE)
+        // Atualizar status físico
         const statusFisico = document.getElementById('statusFisico');
         if (statusFisico) {
             statusFisico.textContent = caracteristica.nome;
             statusFisico.style.background = "#f39c12";
         }
         
-        // ✅ ATUALIZAR FAIXA DE PESO (IMEDIATAMENTE)
+        // Atualizar faixa de peso
         const pesoFaixa = document.getElementById('pesoFaixa');
         if (pesoFaixa && window.sistemaAlturaPeso) {
             const st = window.sistemaAlturaPeso.stBase || 10;
@@ -42,20 +43,17 @@ window.ponteCaracteristicas = {
             pesoFaixa.textContent = `${(faixa.min * multiplicador).toFixed(1)}kg - ${(faixa.max * multiplicador).toFixed(1)}kg (${caracteristica.nome})`;
         }
         
-        // ✅ ATUALIZAR MODIFICADOR (IMEDIATAMENTE)
+        // Atualizar modificador
         const modificador = document.getElementById('modificadorPeso');
         if (modificador) {
             modificador.textContent = `${caracteristica.nome} (${multiplicador}x)`;
         }
         
-        // ✅ MOSTRAR DESVANTAGENS ATIVAS (IMEDIATAMENTE)
+        // Mostrar desvantagens ativas
         this.mostrarDesvantagensAtivas(caracteristicas);
-        
-        console.log("✅ Card altura/peso atualizado VISUALMENTE!");
     },
     
     limparCardAlturaPeso: function() {
-        // Voltar ao estado normal
         const statusFisico = document.getElementById('statusFisico');
         if (statusFisico) {
             statusFisico.textContent = "Normal";
@@ -135,15 +133,8 @@ window.ponteCaracteristicas = {
         }
     }
 };
-// ✅ INICIALIZAR AUTOMATICAMENTE PARA MOBILE
-window.ponteCaracteristicas.inicializarParaMobile();
 
-// ⚠️ O RESTO DO SEU CÓDIGO EXISTENTE PERMANECE AQUI ⚠️
-class SistemaCaracteristicasFisicas {
-    // ... TODO O SEU CÓDIGO EXISTENTE DA CLASSE AQUI ...
-    // NÃO APAGAR NADA DA CLASSE, SÓ A PONTE FOI SUBSTITUÍDA
-}
-
+// SISTEMA PRINCIPAL DE CARACTERÍSTICAS FÍSICAS
 class SistemaCaracteristicasFisicas {
     constructor() {
         this.caracteristicas = {
@@ -241,7 +232,6 @@ class SistemaCaracteristicasFisicas {
         this.configurarEventos();
         this.atualizarDisplay();
         
-        // ✅ INICIALIZAR PONTE COM DADOS EXISTENTES
         window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
         
         this.inicializado = true;
@@ -252,8 +242,18 @@ class SistemaCaracteristicasFisicas {
     }
 
     configurarEventosBotoes() {
+        // Remover listeners antigos
+        document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
+            const novoBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(novoBtn, btn);
+        });
+        
+        // Adicionar novos listeners
         document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
                 const tipo = e.target.dataset.tipo;
                 const jaSelecionada = this.caracteristicasSelecionadas.find(c => c.tipo === tipo);
                 
@@ -294,7 +294,6 @@ class SistemaCaracteristicasFisicas {
         this.atualizarDisplay();
         this.salvarDados();
         
-        // ✅ COMUNICAÇÃO CRÍTICA: Atualizar ponte global
         window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
         
         this.mostrarMensagem(`"${caracteristicaObj.nome}" adicionada!`, 'sucesso');
@@ -327,7 +326,6 @@ class SistemaCaracteristicasFisicas {
             this.atualizarDisplay();
             this.salvarDados();
             
-            // ✅ COMUNICAÇÃO CRÍTICA: Atualizar ponte global
             window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
             
             this.mostrarMensagem(`"${caracteristicaRemovida.nome}" removida!`, 'sucesso');
@@ -510,9 +508,34 @@ class SistemaCaracteristicasFisicas {
     }
 }
 
+// INICIALIZAÇÃO DO SISTEMA
 let sistemaCaracteristicasFisicas;
+
 document.addEventListener('DOMContentLoaded', function() {
-    sistemaCaracteristicasFisicas = new SistemaCaracteristicasFisicas();
+    // Aguardar um pouco para garantir que tudo está carregado
+    setTimeout(() => {
+        sistemaCaracteristicasFisicas = new SistemaCaracteristicasFisicas();
+        
+        // Corrigir botões novamente após 1 segundo (para garantir)
+        setTimeout(() => {
+            if (sistemaCaracteristicasFisicas) {
+                sistemaCaracteristicasFisicas.configurarEventosBotoes();
+            }
+        }, 1000);
+    }, 100);
 });
+
+// Tornar o sistema acessível globalmente
 window.SistemaCaracteristicasFisicas = SistemaCaracteristicasFisicas;
 window.sistemaCaracteristicasFisicas = sistemaCaracteristicasFisicas;
+
+// Função de emergência para recriar botões
+window.corrigirCaracteristicas = function() {
+    if (window.sistemaCaracteristicasFisicas) {
+        window.sistemaCaracteristicasFisicas.configurarEventosBotoes();
+        window.sistemaCaracteristicasFisicas.atualizarDisplay();
+        alert('Botões das características corrigidos!');
+    } else {
+        alert('Sistema de características não inicializado. Recarregue a página.');
+    }
+};
