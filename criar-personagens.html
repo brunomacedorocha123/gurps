@@ -545,273 +545,277 @@
             </div>
         </div>
 
-        <!-- ABA CARACTERÍSTICAS -->
-        <div id="caracteristicas" class="tab-content">
-            <div class="caracteristicas-container">
-                <!-- CARDS SUPERIORES - APARÊNCIA E RIQUEZA -->
-                <div class="caracteristicas-grid">
-                    <!-- CARD APARÊNCIA FÍSICA -->
-                    <div class="caracteristica-card">
-                        <div class="card-header">
-                            <i class="fas fa-user"></i>
-                            <h3>Aparência Física</h3>
-                            <span class="pontos-badge" id="pontosAparencia">0 pts</span>
-                        </div>
-                        <div class="card-content">
-                            <div class="select-group">
-                                <label>Nível de Aparência:</label>
-                                <select id="nivelAparencia" class="form-select">
-                                    <option value="-24">Horrendo [-24 pts]</option>
-                                    <option value="-20">Monstruoso [-20 pts]</option>
-                                    <option value="-16">Hediondo [-16 pts]</option>
-                                    <option value="-8">Feio [-8 pts]</option>
-                                    <option value="-4">Sem Atrativos [-4 pts]</option>
-                                    <option value="0" selected>Comum [0 pts]</option>
-                                    <option value="4">Atraente [+4 pts]</option>
-                                    <option value="12">Elegante [+12 pts]</option>
-                                    <option value="16">Muito Elegante [+16 pts]</option>
-                                    <option value="20">Lindo [+20 pts]</option>
-                                </select>
-                            </div>
-                            <div class="info-display" id="displayAparencia">
-                                <strong>Comum</strong>
-                                <br><small>Reação: +0</small>
-                                <br><small>Aparência padrão, sem modificadores</small>
-                            </div>
-                        </div>
+       <!-- ABA CARACTERÍSTICAS -->
+<div id="caracteristicas" class="tab-content">
+    <div class="caracteristicas-container">
+        <!-- CARDS SUPERIORES - APARÊNCIA E RIQUEZA -->
+        <div class="caracteristicas-grid">
+            <!-- CARD APARÊNCIA FÍSICA -->
+            <div class="caracteristica-card">
+                <div class="card-header">
+                    <i class="fas fa-user"></i>
+                    <h3>Aparência Física</h3>
+                    <span class="pontos-badge" id="pontosAparencia">0 pts</span>
+                </div>
+                <div class="card-content">
+                    <div class="select-group">
+                        <label>Nível de Aparência:</label>
+                        <select id="nivelAparencia" class="form-select">
+                            <option value="-24">Horrendo [-24 pts]</option>
+                            <option value="-20">Monstruoso [-20 pts]</option>
+                            <option value="-16">Hediondo [-16 pts]</option>
+                            <option value="-8">Feio [-8 pts]</option>
+                            <option value="-4">Sem Atrativos [-4 pts]</option>
+                            <option value="0" selected>Comum [0 pts]</option>
+                            <option value="4">Atraente [+4 pts]</option>
+                            <option value="12">Elegante [+12 pts]</option>
+                            <option value="16">Muito Elegante [+16 pts]</option>
+                            <option value="20">Lindo [+20 pts]</option>
+                        </select>
                     </div>
+                    <div class="info-display" id="displayAparencia">
+                        <strong>Comum</strong>
+                        <br><small>Reação: +0</small>
+                        <br><small>Aparência padrão, sem modificadores</small>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- CARD NÍVEL DE RIQUEZA -->
-                    <div class="caracteristica-card">
-                        <div class="card-header">
-                            <i class="fas fa-coins"></i>
-                            <h3>Nível de Riqueza</h3>
-                            <span class="pontos-badge" id="pontosRiqueza">0 pts</span>
-                        </div>
-                        <div class="card-content">
-                            <div class="select-group">
-                                <label>Nível de Riqueza:</label>
-                                <select id="nivelRiqueza" class="form-select">
-                                    <option value="-25">Falido [-25 pts]</option>
-                                    <option value="-15">Pobre [-15 pts]</option>
-                                    <option value="-10">Batalhador [-10 pts]</option>
-                                    <option value="0" selected>Médio [0 pts]</option>
-                                    <option value="10">Confortável [+10 pts]</option>
-                                    <option value="20">Rico [+20 pts]</option>
-                                    <option value="30">Muito Rico [+30 pts]</option>
-                                    <option value="50">Podre de Rico [+50 pts]</option>
-                                </select>
-                            </div>
-                            <div class="info-display" id="displayRiqueza">
-                                <strong>Médio</strong>
-                                <br><small>Multiplicador: 1x</small>
-                                <br><small>Nível de recursos pré-definido padrão</small>
-                            </div>
-                            <div class="renda-info">
-                                <small>Renda Mensal Estimada: <span id="rendaMensal">$1.000</span></small>
-                            </div>
-                        </div>
+            <!-- CARD NÍVEL DE RIQUEZA -->
+            <div class="caracteristica-card">
+                <div class="card-header">
+                    <i class="fas fa-coins"></i>
+                    <h3>Nível de Riqueza</h3>
+                    <span class="pontos-badge" id="pontosRiqueza">0 pts</span>
+                </div>
+                <div class="card-content">
+                    <div class="select-group">
+                        <label>Nível de Riqueza:</label>
+                        <select id="nivelRiqueza" class="form-select">
+                            <option value="-25">Falido [-25 pts]</option>
+                            <option value="-15">Pobre [-15 pts]</option>
+                            <option value="-10">Batalhador [-10 pts]</option>
+                            <option value="0" selected>Médio [0 pts]</option>
+                            <option value="10">Confortável [+10 pts]</option>
+                            <option value="20">Rico [+20 pts]</option>
+                            <option value="30">Muito Rico [+30 pts]</option>
+                            <option value="50">Podre de Rico [+50 pts]</option>
+                        </select>
+                    </div>
+                    <div class="info-display" id="displayRiqueza">
+                        <strong>Médio</strong>
+                        <br><small>Multiplicador: 1x</small>
+                        <br><small>Nível de recursos pré-definido padrão</small>
+                    </div>
+                    <div class="renda-info">
+                        <small>Renda Mensal Estimada: <span id="rendaMensal">$1.000</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD IDIOMAS -->
+        <div class="caracteristica-card full-width">
+            <div class="card-header">
+                <i class="fas fa-globe"></i>
+                <h3>Idiomas</h3>
+                <span class="pontos-badge" id="pontosIdiomas">0 pts</span>
+            </div>
+            <div class="card-content">
+                <!-- IDIOMA MATERNO -->
+                <div class="idioma-section">
+                    <h4>Idioma Materno</h4>
+                    <div class="idioma-materno">
+                        <input type="text" id="idiomaMaternoNome" value="Comum" placeholder="Nome do idioma materno" class="form-input">
+                        <span class="nivel-info">Nativo (0 pts)</span>
                     </div>
                 </div>
 
-                <!-- CARD IDIOMAS -->
-                <div class="caracteristica-card full-width">
-                    <div class="card-header">
-                        <i class="fas fa-globe"></i>
-                        <h3>Idiomas</h3>
-                        <span class="pontos-badge" id="pontosIdiomas">0 pts</span>
-                    </div>
-                    <div class="card-content">
-                        <!-- IDIOMA MATERNO -->
-                        <div class="idioma-section">
-                            <h4>Idioma Materno</h4>
-                            <div class="idioma-materno">
-                                <input type="text" id="idiomaMaternoNome" value="Comum" placeholder="Nome do idioma materno" class="form-input">
-                                <span class="nivel-info">Nativo (0 pts)</span>
-                            </div>
-                        </div>
-
-                        <!-- ADICIONAR NOVO IDIOMA -->
-                        <div class="idioma-section">
-                            <h4>Adicionar Idioma</h4>
-                            <div class="add-idioma-form">
-                                <input type="text" id="novoIdiomaNome" placeholder="Digite o nome do idioma" class="form-input">
-                                
-                                <div class="niveis-container">
-                                    <div class="nivel-group">
-                                        <label>🗣️ Nível de Fala:</label>
-                                        <select id="novoIdiomaFala" class="form-select">
-                                            <option value="0">Nenhum (0 pts)</option>
-                                            <option value="2" selected>Rudimentar (2 pts)</option>
-                                            <option value="4">Sotaque (4 pts)</option>
-                                            <option value="6">Nativo (6 pts)</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="nivel-group">
-                                        <label>📝 Nível de Escrita:</label>
-                                        <select id="novoIdiomaEscrita" class="form-select">
-                                            <option value="0" selected>Nenhum (0 pts)</option>
-                                            <option value="2">Rudimentar (1 pt)</option>
-                                            <option value="4">Sotaque (2 pts)</option>
-                                            <option value="6">Nativo (3 pts)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="add-idioma-actions">
-                                    <span class="custo-preview">Custo: <span id="custoIdiomaPreview">+2 pts</span></span>
-                                    <button id="btnAdicionarIdioma" class="btn-primary">
-                                        <i class="fas fa-plus"></i> Adicionar Idioma
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- LISTA DE IDIOMAS ADICIONAIS -->
-                        <div class="idioma-section">
-                            <h4>Idiomas Adicionais <small>(<span id="totalIdiomas">0</span> idiomas)</small></h4>
-                            <div id="listaIdiomasAdicionais" class="idiomas-lista">
-                                <div class="empty-state">
-                                    Nenhum idioma adicional adicionado
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CARACTERÍSTICAS FÍSICAS E ALTURA/PESO -->
-                <div class="caracteristicas-grid">
-                    <!-- CARD CARACTERÍSTICAS FÍSICAS -->
-                    <div class="caracteristica-card">
-                        <div class="card-header">
-                            <i class="fas fa-weight"></i>
-                            <h3>Características Físicas</h3>
-                            <span class="pontos-badge" id="pontosCaracteristicas">0 pts</span>
-                        </div>
-                        <div class="card-content">
-                            <div class="caracteristicas-lista">
-                                <div class="caracteristica-item" data-tipo="magro">
-                                    <div class="caracteristica-info">
-                                        <strong>Magro</strong>
-                                        <small>-5 pts | Peso: 67% do normal</small>
-                                    </div>
-                                    <button class="btn-add-caracteristica">Adicionar</button>
-                                </div>
-                                
-                                <div class="caracteristica-item" data-tipo="acima-peso">
-                                    <div class="caracteristica-info">
-                                        <strong>Acima do Peso</strong>
-                                        <small>-1 pt | Peso: 130% do normal</small>
-                                    </div>
-                                    <button class="btn-add-caracteristica">Adicionar</button>
-                                </div>
-                                
-                                <div class="caracteristica-item" data-tipo="gordo">
-                                    <div class="caracteristica-info">
-                                        <strong>Gordo</strong>
-                                        <small>-3 pts | Peso: 150% do normal</small>
-                                    </div>
-                                    <button class="btn-add-caracteristica">Adicionar</button>
-                                </div>
-                                
-                                <div class="caracteristica-item" data-tipo="muito-gordo">
-                                    <div class="caracteristica-info">
-                                        <strong>Muito Gordo</strong>
-                                        <small>-5 pts | Peso: 200% do normal</small>
-                                    </div>
-                                    <button class="btn-add-caracteristica">Adicionar</button>
-                                </div>
-                                
-                                <div class="caracteristica-item" data-tipo="nanismo">
-                                    <div class="caracteristica-info">
-                                        <strong>Nanismo</strong>
-                                        <small>-15 pts | MT -1, -1 Deslocamento</small>
-                                    </div>
-                                    <button class="btn-add-caracteristica">Adicionar</button>
-                                </div>
-                                
-                                <div class="caracteristica-item" data-tipo="gigantismo">
-                                    <div class="caracteristica-info">
-                                        <strong>Gigantismo</strong>
-                                        <small>0 pts | MT +1, +1 Deslocamento</small>
-                                    </div>
-                                    <button class="btn-add-caracteristica">Adicionar</button>
-                                </div>
+                <!-- ADICIONAR NOVO IDIOMA -->
+                <div class="idioma-section">
+                    <h4>Adicionar Idioma</h4>
+                    <div class="add-idioma-form">
+                        <input type="text" id="novoIdiomaNome" placeholder="Digite o nome do idioma" class="form-input">
+                        
+                        <div class="niveis-container">
+                            <div class="nivel-group">
+                                <label>🗣️ Nível de Fala:</label>
+                                <select id="novoIdiomaFala" class="form-select">
+                                    <option value="0">Nenhum (0 pts)</option>
+                                    <option value="2" selected>Rudimentar (2 pts)</option>
+                                    <option value="4">Sotaque (4 pts)</option>
+                                    <option value="6">Nativo (6 pts)</option>
+                                </select>
                             </div>
                             
-                            <!-- CARACTERÍSTICAS SELECIONADAS -->
-                            <div id="caracteristicasSelecionadas" class="caracteristicas-selecionadas">
-                                <!-- Dinâmico - características adicionadas aparecem aqui -->
+                            <div class="nivel-group">
+                                <label>📝 Nível de Escrita:</label>
+                                <select id="novoIdiomaEscrita" class="form-select">
+                                    <option value="0" selected>Nenhum (0 pts)</option>
+                                    <option value="2">Rudimentar (1 pt)</option>
+                                    <option value="4">Sotaque (2 pts)</option>
+                                    <option value="6">Nativo (3 pts)</option>
+                                </select>
                             </div>
                         </div>
+                        
+                        <div class="add-idioma-actions">
+                            <span class="custo-preview">Custo: <span id="custoIdiomaPreview">+2 pts</span></span>
+                            <button id="btnAdicionarIdioma" class="btn-primary">
+                                <i class="fas fa-plus"></i> Adicionar Idioma
+                            </button>
+                        </div>
                     </div>
-<!-- CARD ALTURA E PESO - VERSÃO COM DESVANTAGENS ATIVAS -->
-<div class="caracteristica-card">
-    <div class="card-header">
-        <i class="fas fa-ruler-combined"></i>
-        <h3>Altura e Peso</h3>
-        <span class="status-badge" id="statusFisico">Normal</span>
-    </div>
-    <div class="card-content">
-        <!-- CONTROLES ALTURA -->
-        <div class="fisica-control">
-            <label>📏 Altura (metros):</label>
-            <div class="controle-numerico">
-                <button class="btn-controle" onclick="ajustarAltura(-0.01)">
-                    <i class="fas fa-minus"></i>
-                </button>
-                <input type="number" id="altura" value="1.70" step="0.01" min="1.30" max="2.50" class="fisica-input">
-                <button class="btn-controle" onclick="ajustarAltura(0.01)">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
-            <div id="statusAltura" class="status-info"></div>
-        </div>
+                </div>
 
-        <!-- CONTROLES PESO -->
-        <div class="fisica-control">
-            <label>⚖️ Peso (kg):</label>
-            <div class="controle-numerico">
-                <button class="btn-controle" onclick="ajustarPeso(-1)">
-                    <i class="fas fa-minus"></i>
-                </button>
-                <input type="number" id="peso" value="70" step="1" min="30" max="200" class="fisica-input">
-                <button class="btn-controle" onclick="ajustarPeso(1)">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
-            <div id="statusPeso" class="status-info"></div>
-        </div>
-
-        <!-- NOVA SEÇÃO: DESVANTAGENS ATIVAS -->
-        <div class="desvantagens-ativas" id="desvantagensAtivas" style="display: none;">
-            <div class="desvantagens-header">
-                <i class="fas fa-list-check"></i>
-                <h4>Desvantagens Físicas Ativas</h4>
-            </div>
-            <div class="desvantagens-lista" id="listaDesvantagens">
-                <!-- As desvantagens aparecerão aqui automaticamente -->
+                <!-- LISTA DE IDIOMAS ADICIONAIS -->
+                <div class="idioma-section">
+                    <h4>Idiomas Adicionais <small>(<span id="totalIdiomas">0</span> idiomas)</small></h4>
+                    <div id="listaIdiomasAdicionais" class="idiomas-lista">
+                        <div class="empty-state">
+                            Nenhum idioma adicional adicionado
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- INFO BASE ST - CORRIGIDO -->
-        <div class="fisica-info">
-            <div class="info-row">
-                <span>ST Base:</span>
-                <strong id="stBase">10</strong>
+        <!-- CARACTERÍSTICAS FÍSICAS E ALTURA/PESO -->
+        <div class="caracteristicas-grid">
+            <!-- CARD CARACTERÍSTICAS FÍSICAS -->
+            <div class="caracteristica-card">
+                <div class="card-header">
+                    <i class="fas fa-weight"></i>
+                    <h3>Características Físicas</h3>
+                    <span class="pontos-badge" id="pontosCaracteristicas">0 pts</span>
+                </div>
+                <div class="card-content">
+                    <div class="caracteristicas-lista">
+                        <div class="caracteristica-item" data-tipo="magro">
+                            <div class="caracteristica-info">
+                                <strong>Magro</strong>
+                                <small>-5 pts | Peso: 67% do normal</small>
+                            </div>
+                            <button class="btn-add-caracteristica">Adicionar</button>
+                        </div>
+                        
+                        <div class="caracteristica-item" data-tipo="acima-peso">
+                            <div class="caracteristica-info">
+                                <strong>Acima do Peso</strong>
+                                <small>-1 pt | Peso: 130% do normal</small>
+                            </div>
+                            <button class="btn-add-caracteristica">Adicionar</button>
+                        </div>
+                        
+                        <div class="caracteristica-item" data-tipo="gordo">
+                            <div class="caracteristica-info">
+                                <strong>Gordo</strong>
+                                <small>-3 pts | Peso: 150% do normal</small>
+                            </div>
+                            <button class="btn-add-caracteristica">Adicionar</button>
+                        </div>
+                        
+                        <div class="caracteristica-item" data-tipo="muito-gordo">
+                            <div class="caracteristica-info">
+                                <strong>Muito Gordo</strong>
+                                <small>-5 pts | Peso: 200% do normal</small>
+                            </div>
+                            <button class="btn-add-caracteristica">Adicionar</button>
+                        </div>
+                        
+                        <div class="caracteristica-item" data-tipo="nanismo">
+                            <div class="caracteristica-info">
+                                <strong>Nanismo</strong>
+                                <small>-15 pts | MT -1, -1 Deslocamento</small>
+                            </div>
+                            <button class="btn-add-caracteristica">Adicionar</button>
+                        </div>
+                        
+                        <div class="caracteristica-item" data-tipo="gigantismo">
+                            <div class="caracteristica-info">
+                                <strong>Gigantismo</strong>
+                                <small>0 pts | MT +1, +1 Deslocamento</small>
+                            </div>
+                            <button class="btn-add-caracteristica">Adicionar</button>
+                        </div>
+                    </div>
+                    
+                    <!-- CARACTERÍSTICAS SELECIONADAS -->
+                    <div id="caracteristicasSelecionadas" class="caracteristicas-selecionadas">
+                        <!-- Dinâmico - características adicionadas aparecem aqui -->
+                    </div>
+                </div>
             </div>
-            <div class="info-row">
-                <span>Faixa de Altura (ST):</span>
-                <span id="alturaFaixa">1.58m - 1.83m</span>
-            </div>
-            <div class="info-row">
-                <span>Faixa de Peso (ST):</span>
-                <span id="pesoFaixa">57.5kg - 87.5kg</span>
-            </div>
-            <div class="info-row">
-                <span>Status:</span>
-                <span id="modificadorPeso">Dentro da faixa</span>
+
+            <!-- CARD ALTURA E PESO - VERSÃO COM DESVANTAGENS ATIVAS -->
+            <div class="caracteristica-card">
+                <div class="card-header">
+                    <i class="fas fa-ruler-combined"></i>
+                    <h3>Altura e Peso</h3>
+                    <span class="status-badge" id="statusFisico">Normal</span>
+                </div>
+                <div class="card-content">
+                    <!-- CONTROLES ALTURA -->
+                    <div class="fisica-control">
+                        <label>📏 Altura (metros):</label>
+                        <div class="controle-numerico">
+                            <button class="btn-controle" onclick="ajustarAltura(-0.01)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" id="altura" value="1.70" step="0.01" min="1.30" max="2.50" class="fisica-input">
+                            <button class="btn-controle" onclick="ajustarAltura(0.01)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div id="statusAltura" class="status-info"></div>
+                    </div>
+
+                    <!-- CONTROLES PESO -->
+                    <div class="fisica-control">
+                        <label>⚖️ Peso (kg):</label>
+                        <div class="controle-numerico">
+                            <button class="btn-controle" onclick="ajustarPeso(-1)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" id="peso" value="70" step="1" min="30" max="200" class="fisica-input">
+                            <button class="btn-controle" onclick="ajustarPeso(1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div id="statusPeso" class="status-info"></div>
+                    </div>
+
+                    <!-- NOVA SEÇÃO: DESVANTAGENS ATIVAS -->
+                    <div class="desvantagens-ativas" id="desvantagensAtivas" style="display: none;">
+                        <div class="desvantagens-header">
+                            <i class="fas fa-list-check"></i>
+                            <h4>Desvantagens Físicas Ativas</h4>
+                        </div>
+                        <div class="desvantagens-lista" id="listaDesvantagens">
+                            <!-- As desvantagens aparecerão aqui automaticamente -->
+                        </div>
+                    </div>
+
+                    <!-- INFO BASE ST - CORRIGIDO -->
+                    <div class="fisica-info">
+                        <div class="info-row">
+                            <span>ST Base:</span>
+                            <strong id="stBase">10</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Faixa de Altura (ST):</span>
+                            <span id="alturaFaixa">1.58m - 1.83m</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Faixa de Peso (ST):</span>
+                            <span id="pesoFaixa">57.5kg - 87.5kg</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Status:</span>
+                            <span id="modificadorPeso">Dentro da faixa</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1278,7 +1282,7 @@
 
   </div>
    </div>
-    </div>
+   
 
 
 <script>
