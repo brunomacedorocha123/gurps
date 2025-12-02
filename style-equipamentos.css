@@ -3094,3 +3094,194 @@ textarea:focus {
         padding: 20px;
     }
 }
+
+
+
+/* CORREÇÕES ESPECÍFICAS PARA ABA CRIAR ITEM */
+
+/* Corrigir contraste dos inputs e selects */
+#subtab-criar .form-group input,
+#subtab-criar .form-group select,
+#subtab-criar .form-group textarea {
+    background: rgba(20, 20, 30, 0.9) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--borda-principal);
+}
+
+#subtab-criar .form-group input:focus,
+#subtab-criar .form-group select:focus,
+#subtab-criar .form-group textarea:focus {
+    background: rgba(30, 30, 40, 0.95) !important;
+    border-color: var(--laranja-principal);
+    box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
+}
+
+/* Estilizar o select especificamente */
+#subtab-criar select {
+    background: rgba(20, 20, 30, 0.9) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffd700'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e") no-repeat right 10px center !important;
+    background-size: 20px !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    padding-right: 40px !important;
+}
+
+/* Estilos para checkbox */
+#subtab-criar .checkbox-group {
+    padding: 10px 15px;
+    background: rgba(255, 140, 0, 0.1);
+    border-radius: 8px;
+    border: 1px solid var(--borda-secundaria);
+}
+
+#subtab-criar .checkbox-group:hover {
+    background: rgba(255, 140, 0, 0.15);
+    border-color: var(--laranja-principal);
+}
+
+/* Preview do item */
+#preview-conteudo {
+    background: rgba(25, 25, 35, 0.9);
+    border: 2px solid var(--borda-principal);
+    border-radius: 8px;
+    padding: 25px;
+    min-height: 400px;
+}
+
+#preview-conteudo .preview-vazio {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--texto-secundario);
+}
+
+#preview-conteudo .preview-vazio i {
+    font-size: 4rem;
+    color: var(--laranja-principal);
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+/* Estilos para o item no preview */
+.preview-item {
+    color: var(--texto-principal);
+}
+
+.preview-item h5 {
+    color: var(--dourado-principal);
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--borda-principal);
+}
+
+.preview-item .tipo-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(255, 140, 0, 0.2);
+    color: var(--laranja-principal);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.preview-item .item-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.preview-item .stat-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--borda-secundaria);
+}
+
+.preview-item .stat-label {
+    color: var(--texto-secundario);
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.preview-item .stat-value {
+    color: var(--dourado-principal);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.preview-item .descricao {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 20px;
+    border-left: 4px solid var(--laranja-principal);
+    color: var(--texto-secundario);
+    line-height: 1.5;
+}
+
+.preview-item .efeito-magico {
+    background: linear-gradient(45deg, rgba(155, 89, 182, 0.1), rgba(142, 68, 173, 0.05));
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+    color: var(--magico);
+    font-style: italic;
+}
+
+/* Botões específicos da aba criar */
+#subtab-criar .btn-confirmar {
+    background: linear-gradient(45deg, var(--laranja-principal), var(--dourado-principal));
+    color: #1e1e28;
+    font-weight: 700;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1rem;
+}
+
+#subtab-criar .btn-confirmar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 140, 0, 0.4);
+}
+
+#subtab-criar .btn-cancelar {
+    background: rgba(231, 76, 60, 0.1);
+    color: var(--erro);
+    border: 2px solid rgba(231, 76, 60, 0.3);
+}
+
+#subtab-criar .btn-cancelar:hover {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: var(--erro);
+}
+
+/* Campos específicos por tipo */
+.campos-especificos {
+    background: rgba(255, 140, 0, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid var(--borda-secundaria);
+}
+
+.campos-especificos .form-group {
+    margin-bottom: 15px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #subtab-criar .criar-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #subtab-criar .form-group-duo {
+        grid-template-columns: 1fr;
+    }
+    
+    .preview-item .item-stats {
+        grid-template-columns: 1fr;
+    }
+}
