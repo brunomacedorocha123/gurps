@@ -1,4 +1,4 @@
-// equipamentos.js - Sistema de Gerenciamento de Equipamentos
+// equipamentos.js - SISTEMA COMPLETO DE EQUIPAMENTOS + FINANCEIRO
 class SistemaEquipamentos {
     constructor() {
         this.equipamentosAdquiridos = [];
@@ -34,8 +34,42 @@ class SistemaEquipamentos {
         this.deposito = [];
         this.itemCompraQuantidade = null;
         this.quantidadeAtual = 1;
+        
+        // ========== NOVO: SISTEMA FINANCEIRO ==========
         this.historicoTransacoes = [];
-        this.transacaoAtual = { tipo: '', valor: 0, motivo: '' };
+        this.transacaoAtual = {
+            tipo: 'receita',
+            valor: 0,
+            categoria: '',
+            descricao: '',
+            data: new Date().toISOString().split('T')[0],
+            responsavel: 'Jogador',
+            notas: ''
+        };
+        
+        this.categorias = {
+            receita: [
+                'Missões', 'Recompensas', 'Comércio', 'Herança', 'Presente',
+                'Tesouro', 'Trabalho', 'Aluguel', 'Investimento', 'Outros'
+            ],
+            despesa: [
+                'Alimentação', 'Hospedagem', 'Transporte', 'Armas', 'Armaduras',
+                'Poções', 'Pergaminhos', 'Serviços', 'Impostos', 'Multas', 'Outros'
+            ],
+            transferencia: [
+                'Para Personagem', 'Para NPC', 'Empréstimo', 'Pagamento', 'Outros'
+            ],
+            doacao: [
+                'Templo', 'Órfãos', 'Pobres', 'Caridade', 'Causa Nobre',
+                'Mendigos', 'Artistas', 'Pesquisa', 'Outros'
+            ]
+        };
+        
+        this.filtrosAtivos = {
+            tipo: 'todos',
+            busca: ''
+        };
+        
         this.contadorItensPersonalizados = 10000;
         this.maosDisponiveis = 2;
         this.maosOcupadas = 0;
@@ -44,6 +78,7 @@ class SistemaEquipamentos {
         this.dadosCarregados = false;
     }
 
+    // ========== INICIALIZAÇÃO ==========
     async inicializarQuandoPronto() {
         if (this.inicializacaoEmAndamento) return;
         this.inicializacaoEmAndamento = true;
@@ -87,6 +122,7 @@ class SistemaEquipamentos {
         this.configurarEventosGlobais();
         this.configurarSubAbas();
         this.configurarFiltrosInventario();
+        this.configurarEventosFinanceiro();
         this.criarDisplayMaos();
         this.atualizarSistemaCombate();
         this.atualizarInterface();
@@ -97,6 +133,7 @@ class SistemaEquipamentos {
         }, 300);
     }
 
+    // ========== SISTEMA DE RIQUEZA ==========
     calcularDinheiroPorRiqueza() {
         let nivelRiqueza = this.sistemaRiqueza.nivelAtual;
         
@@ -150,6 +187,7 @@ class SistemaEquipamentos {
         }
     }
 
+    // ========== SISTEMA DE CARGA ==========
     iniciarMonitoramentoST() {
         const inputST = document.getElementById('ST');
         if (inputST) {
@@ -274,6 +312,7 @@ class SistemaEquipamentos {
         this.atualizarNivelCarga();
     }
 
+    // ========== SISTEMA DE MOCHILA ==========
     alternarMochila() {
         this.mochilaAtiva = !this.mochilaAtiva;
         this.salvarDados();
@@ -287,6 +326,7 @@ class SistemaEquipamentos {
         this.mostrarFeedback(mensagem, this.mochilaAtiva ? 'sucesso' : 'aviso');
     }
 
+    // ========== COMPRA E VENDA DE EQUIPAMENTOS ==========
     comprarEquipamento(itemId, elemento) {
         if (!this.catalogoPronto) {
             this.mostrarFeedback('Sistema ainda carregando...', 'erro');
@@ -325,6 +365,15 @@ class SistemaEquipamentos {
         this.mostrarFeedback(`${equipamento.nome} comprado com sucesso!`, 'sucesso');
         this.atualizarInterface();
         this.notificarDashboard();
+        
+        // Registrar transação financeira
+        this.registrarTransacao({
+            tipo: 'despesa',
+            valor: equipamento.custo,
+            categoria: equipamento.tipo === 'arma' ? 'Armas' : 'Equipamentos',
+            descricao: `Compra: ${equipamento.nome}`,
+            responsavel: 'Jogador'
+        });
     }
 
     venderEquipamento(itemId) {
@@ -348,125 +397,146 @@ class SistemaEquipamentos {
         this.mostrarFeedback(`${equipamento.nome} vendido por $${valorVenda}`, 'sucesso');
         this.atualizarInterface();
         this.notificarDashboard();
+        
+        // Registrar transação financeira
+        this.registrarTransacao({
+            tipo: 'receita',
+            valor: valorVenda,
+            categoria: 'Venda',
+            descricao: `Venda: ${equipamento.nome}`,
+            responsavel: 'Jogador'
+        });
     }
 
-   abrirSubmenuQuantidade(itemId, elemento) {
-    const equipamento = this.obterEquipamentoPorId(itemId);
-    if (!equipamento) return;
+    // ========== SUBMENU DE QUANTIDADE ==========
+    abrirSubmenuQuantidade(itemId, elemento) {
+        const equipamento = this.obterEquipamentoPorId(itemId);
+        if (!equipamento) return;
 
-    this.itemCompraQuantidade = equipamento;
-    this.quantidadeAtual = 1;
+        this.itemCompraQuantidade = equipamento;
+        this.quantidadeAtual = 1;
 
-    const nomeItem = document.getElementById('quantidade-nome-item');
-    const custoUnitario = document.getElementById('quantidade-custo-unitario');
-    const pesoUnitario = document.getElementById('quantidade-peso-unitario');
-    
-    if (nomeItem) nomeItem.textContent = equipamento.nome;
-    if (custoUnitario) custoUnitario.textContent = `Custo: $${equipamento.custo}`;
-    if (pesoUnitario) pesoUnitario.textContent = `Peso: ${equipamento.peso} kg`;
+        const nomeItem = document.getElementById('quantidade-nome-item');
+        const custoUnitario = document.getElementById('quantidade-custo-unitario');
+        const pesoUnitario = document.getElementById('quantidade-peso-unitario');
+        
+        if (nomeItem) nomeItem.textContent = equipamento.nome;
+        if (custoUnitario) custoUnitario.textContent = `Custo: $${equipamento.custo}`;
+        if (pesoUnitario) pesoUnitario.textContent = `Peso: ${equipamento.peso} kg`;
 
-    const inputQuantidade = document.getElementById('input-quantidade');
-    if (inputQuantidade) {
-        inputQuantidade.value = this.quantidadeAtual;
+        const inputQuantidade = document.getElementById('input-quantidade');
+        if (inputQuantidade) {
+            inputQuantidade.value = this.quantidadeAtual;
+        }
+
+        this.atualizarTotaisQuantidade();
+
+        const submenu = document.getElementById('submenu-quantidade');
+        if (!submenu) return;
+
+        submenu.style.top = '';
+        submenu.style.left = '';
+        submenu.classList.add('aberto');
     }
 
-    this.atualizarTotaisQuantidade();
-
-    const submenu = document.getElementById('submenu-quantidade');
-    if (!submenu) return;
-
-    submenu.style.top = '';
-    submenu.style.left = '';
-    submenu.classList.add('aberto');
-}
-
-aumentarQuantidade() {
-    this.quantidadeAtual = Math.min(this.quantidadeAtual + 1, 99);
-    const inputQuantidade = document.getElementById('input-quantidade');
-    if (inputQuantidade) {
-        inputQuantidade.value = this.quantidadeAtual;
-    }
-    this.atualizarTotaisQuantidade();
-}
-
-diminuirQuantidade() {
-    this.quantidadeAtual = Math.max(this.quantidadeAtual - 1, 1);
-    const inputQuantidade = document.getElementById('input-quantidade');
-    if (inputQuantidade) {
-        inputQuantidade.value = this.quantidadeAtual;
-    }
-    this.atualizarTotaisQuantidade();
-}
-
-atualizarTotaisQuantidade() {
-    if (!this.itemCompraQuantidade) return;
-
-    const custoTotal = this.itemCompraQuantidade.custo * this.quantidadeAtual;
-    const pesoTotal = this.itemCompraQuantidade.peso * this.quantidadeAtual;
-
-    const custoTotalElem = document.getElementById('quantidade-custo-total');
-    const pesoTotalElem = document.getElementById('quantidade-peso-total');
-    
-    if (custoTotalElem) custoTotalElem.textContent = `$${custoTotal}`;
-    if (pesoTotalElem) pesoTotalElem.textContent = `${pesoTotal.toFixed(1)} kg`;
-}
-
-confirmarCompraQuantidade() {
-    if (!this.itemCompraQuantidade) return;
-
-    const equipamento = this.itemCompraQuantidade;
-    const quantidade = this.quantidadeAtual;
-    const custoTotal = equipamento.custo * quantidade;
-    const pesoTotal = equipamento.peso * quantidade;
-
-    if (this.dinheiro < custoTotal) {
-        this.mostrarFeedback(`Dinheiro insuficiente! Necessário: $${custoTotal}`, 'erro');
-        return;
+    aumentarQuantidade() {
+        this.quantidadeAtual = Math.min(this.quantidadeAtual + 1, 99);
+        const inputQuantidade = document.getElementById('input-quantidade');
+        if (inputQuantidade) {
+            inputQuantidade.value = this.quantidadeAtual;
+        }
+        this.atualizarTotaisQuantidade();
     }
 
-    const itemExistente = this.equipamentosAdquiridos.find(item => 
-        item.id === equipamento.id && item.status === 'na-mochila' && !item.equipado
-    );
-
-    if (itemExistente) {
-        itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
-        itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
-    } else {
-        const novoEquipamento = {
-            ...equipamento,
-            quantidade: quantidade,
-            custoTotal: custoTotal,
-            adquiridoEm: new Date().toISOString(),
-            status: 'na-mochila',
-            equipado: false,
-            idUnico: this.gerarIdUnico()
-        };
-
-        this.equipamentosAdquiridos.push(novoEquipamento);
-        this.equipamentosEquipados.mochila.push(novoEquipamento);
+    diminuirQuantidade() {
+        this.quantidadeAtual = Math.max(this.quantidadeAtual - 1, 1);
+        const inputQuantidade = document.getElementById('input-quantidade');
+        if (inputQuantidade) {
+            inputQuantidade.value = this.quantidadeAtual;
+        }
+        this.atualizarTotaisQuantidade();
     }
 
-    this.dinheiro -= custoTotal;
-    this.salvarDados();
-    this.mostrarFeedback(`${quantidade}x ${equipamento.nome} comprado(s) com sucesso!`, 'sucesso');
-    
-    this.fecharSubmenuQuantidade();
-    this.atualizarInterface();
-    this.notificarDashboard();
-}
+    atualizarTotaisQuantidade() {
+        if (!this.itemCompraQuantidade) return;
 
-fecharSubmenuQuantidade() {
-    const submenu = document.getElementById('submenu-quantidade');
-    if (submenu) {
-        submenu.classList.remove('aberto');
-        setTimeout(() => {
-            submenu.style.display = 'none';
-        }, 300);
+        const custoTotal = this.itemCompraQuantidade.custo * this.quantidadeAtual;
+        const pesoTotal = this.itemCompraQuantidade.peso * this.quantidadeAtual;
+
+        const custoTotalElem = document.getElementById('quantidade-custo-total');
+        const pesoTotalElem = document.getElementById('quantidade-peso-total');
+        
+        if (custoTotalElem) custoTotalElem.textContent = `$${custoTotal}`;
+        if (pesoTotalElem) pesoTotalElem.textContent = `${pesoTotal.toFixed(1)} kg`;
     }
-    this.itemCompraQuantidade = null;
-    this.quantidadeAtual = 1;
-}
-        equiparItem(itemId) {
+
+    confirmarCompraQuantidade() {
+        if (!this.itemCompraQuantidade) return;
+
+        const equipamento = this.itemCompraQuantidade;
+        const quantidade = this.quantidadeAtual;
+        const custoTotal = equipamento.custo * quantidade;
+        const pesoTotal = equipamento.peso * quantidade;
+
+        if (this.dinheiro < custoTotal) {
+            this.mostrarFeedback(`Dinheiro insuficiente! Necessário: $${custoTotal}`, 'erro');
+            return;
+        }
+
+        const itemExistente = this.equipamentosAdquiridos.find(item => 
+            item.id === equipamento.id && item.status === 'na-mochila' && !item.equipado
+        );
+
+        if (itemExistente) {
+            itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
+            itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
+        } else {
+            const novoEquipamento = {
+                ...equipamento,
+                quantidade: quantidade,
+                custoTotal: custoTotal,
+                adquiridoEm: new Date().toISOString(),
+                status: 'na-mochila',
+                equipado: false,
+                idUnico: this.gerarIdUnico()
+            };
+
+            this.equipamentosAdquiridos.push(novoEquipamento);
+            this.equipamentosEquipados.mochila.push(novoEquipamento);
+        }
+
+        this.dinheiro -= custoTotal;
+        this.salvarDados();
+        this.mostrarFeedback(`${quantidade}x ${equipamento.nome} comprado(s) com sucesso!`, 'sucesso');
+        
+        this.fecharSubmenuQuantidade();
+        this.atualizarInterface();
+        this.notificarDashboard();
+        
+        // Registrar transação financeira
+        this.registrarTransacao({
+            tipo: 'despesa',
+            valor: custoTotal,
+            categoria: equipamento.tipo === 'consumivel' ? 'Consumíveis' : 'Equipamentos',
+            descricao: `Compra: ${quantidade}x ${equipamento.nome}`,
+            responsavel: 'Jogador'
+        });
+    }
+
+    fecharSubmenuQuantidade() {
+        const submenu = document.getElementById('submenu-quantidade');
+        if (submenu) {
+            submenu.classList.remove('aberto');
+            setTimeout(() => {
+                submenu.style.display = 'none';
+            }, 300);
+        }
+        this.itemCompraQuantidade = null;
+        this.quantidadeAtual = 1;
+    }
+
+    // ========== EQUIPAR/DESEQUIPAR ==========
+    equiparItem(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
 
@@ -650,6 +720,7 @@ fecharSubmenuQuantidade() {
         this.atualizarSistemaCombate();
     }
 
+    // ========== SISTEMA DE DEPÓSITO ==========
     moverParaDeposito(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return false;
@@ -745,115 +816,879 @@ fecharSubmenuQuantidade() {
         this.atualizarInterface();
     }
 
-    abrirModalFinanceiro(tipo) {
+    // ========== SISTEMA FINANCEIRO COMPLETO ==========
+    configurarEventosFinanceiro() {
+        // Eventos para tipos de transação
+        document.querySelectorAll('.tipo-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const tipo = e.currentTarget.dataset.tipo;
+                this.selecionarTipoTransacao(tipo);
+            });
+        });
+
+        // Eventos para valores sugeridos
+        document.querySelectorAll('.btn-valor-sugerido').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const valor = parseFloat(e.currentTarget.dataset.valor);
+                this.usarValorSugerido(valor);
+            });
+        });
+
+        // Evento para categoria personalizada
+        const inputCategoriaPersonalizada = document.getElementById('categoria-personalizada-modal');
+        if (inputCategoriaPersonalizada) {
+            inputCategoriaPersonalizada.addEventListener('input', (e) => {
+                this.transacaoAtual.categoria = e.target.value;
+                document.querySelectorAll('.categoria-option').forEach(opt => 
+                    opt.classList.remove('selecionado'));
+            });
+        }
+
+        // Eventos para campos do modal
+        ['valor-transacao-modal', 'descricao-transacao-modal', 
+         'data-transacao-modal', 'responsavel-transacao-modal', 
+         'notas-transacao-modal'].forEach(id => {
+            const elemento = document.getElementById(id);
+            if (elemento) {
+                elemento.addEventListener('input', (e) => {
+                    this.atualizarCampoTransacao(id.replace('-modal', ''), e.target.value);
+                });
+            }
+        });
+
+        // Configurar data atual como padrão
+        const dataInput = document.getElementById('data-transacao-modal');
+        if (dataInput) {
+            const hoje = new Date().toISOString().split('T')[0];
+            dataInput.value = hoje;
+            this.transacaoAtual.data = hoje;
+        }
+    }
+
+    abrirModalTransacao(tipo) {
         this.transacaoAtual.tipo = tipo;
         
-        const modal = document.getElementById('modal-financeiro');
-        const titulo = document.getElementById('modal-financeiro-titulo');
-        const saldoModal = document.getElementById('saldo-modal');
-        const valorInput = document.getElementById('valor-transacao');
-        const motivoInput = document.getElementById('motivo-transacao');
+        const modal = document.getElementById('modal-transacao');
+        if (!modal) return;
         
-        if (!modal || !titulo) return;
+        // Atualizar saldo no modal
+        this.atualizarSaldoModal();
         
-        if (tipo === 'receber') {
-            titulo.textContent = '💰 Receber Dinheiro';
-            titulo.style.color = '#27ae60';
-        } else {
-            titulo.textContent = '💸 Gastar/Doar Dinheiro';
-            titulo.style.color = '#e74c3c';
+        // Selecionar tipo automaticamente
+        this.selecionarTipoTransacao(tipo);
+        
+        // Configurar data atual
+        const hoje = new Date().toISOString().split('T')[0];
+        const dataInput = document.getElementById('data-transacao-modal');
+        if (dataInput) {
+            dataInput.value = hoje;
+            this.transacaoAtual.data = hoje;
         }
         
-        if (saldoModal) saldoModal.textContent = `$${this.dinheiro}`;
-        if (valorInput) valorInput.value = '';
-        if (motivoInput) motivoInput.value = '';
+        // Limpar campos
+        this.limparCamposTransacao();
         
-        modal.classList.add('aberto');
+        // Configurar categorias
+        this.configurarCategoriasModal(tipo);
         
+        // Mostrar modal
+        modal.style.display = 'flex';
         setTimeout(() => {
-            if (valorInput) valorInput.focus();
-        }, 300);
+            modal.classList.add('aberto');
+            document.getElementById('valor-transacao-modal')?.focus();
+        }, 10);
     }
 
-    fecharModalFinanceiro() {
-        const modal = document.getElementById('modal-financeiro');
-        if (modal) modal.classList.remove('aberto');
-        this.transacaoAtual = { tipo: '', valor: 0, motivo: '' };
+    fecharModalTransacao() {
+        const modal = document.getElementById('modal-transacao');
+        if (modal) {
+            modal.classList.remove('aberto');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+        this.transacaoAtual = {
+            tipo: 'receita',
+            valor: 0,
+            categoria: '',
+            descricao: '',
+            data: new Date().toISOString().split('T')[0],
+            responsavel: 'Jogador',
+            notas: ''
+        };
     }
 
-    confirmarTransacaoFinanceira() {
-        const valorInput = document.getElementById('valor-transacao');
-        const motivoInput = document.getElementById('motivo-transacao');
+    selecionarTipoTransacao(tipo) {
+        document.querySelectorAll('.tipo-option').forEach(option => {
+            option.classList.remove('selecionado');
+            if (option.dataset.tipo === tipo) {
+                option.classList.add('selecionado');
+            }
+        });
         
-        if (!valorInput || !motivoInput) return;
+        this.transacaoAtual.tipo = tipo;
+        this.configurarCategoriasModal(tipo);
+    }
+
+    atualizarSaldoModal() {
+        const saldoModal = document.getElementById('saldo-transacao-modal');
+        const nivelRiqueza = document.getElementById('nivel-riqueza-modal');
+        const patrimonio = document.getElementById('patrimonio-modal');
         
-        const valor = parseInt(valorInput.value);
-        const motivo = motivoInput.value.trim();
+        if (saldoModal) {
+            saldoModal.textContent = `$${this.dinheiro}`;
+            // Colorir baseado no saldo
+            if (this.dinheiro < 0) {
+                saldoModal.style.color = '#e74c3c';
+            } else if (this.dinheiro < 100) {
+                saldoModal.style.color = '#f39c12';
+            } else {
+                saldoModal.style.color = '#27ae60';
+            }
+        }
         
+        if (nivelRiqueza) {
+            nivelRiqueza.textContent = this.sistemaRiqueza.nivelAtual.toUpperCase();
+        }
+        
+        if (patrimonio) {
+            const patrimonioTotal = this.calcularPatrimonioTotal();
+            patrimonio.textContent = `$${patrimonioTotal}`;
+        }
+    }
+
+    configurarCategoriasModal(tipo) {
+        const container = document.getElementById('categorias-modal');
+        if (!container) return;
+        
+        const categorias = this.categorias[tipo] || [];
+        
+        container.innerHTML = categorias.map(categoria => `
+            <div class="categoria-option" data-categoria="${categoria}">
+                ${categoria}
+            </div>
+        `).join('');
+        
+        // Adicionar evento de clique nas categorias
+        setTimeout(() => {
+            document.querySelectorAll('.categoria-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.categoria-option').forEach(opt => 
+                        opt.classList.remove('selecionado'));
+                    option.classList.add('selecionado');
+                    this.transacaoAtual.categoria = option.dataset.categoria;
+                    document.getElementById('categoria-personalizada-modal').value = '';
+                });
+            });
+        }, 10);
+    }
+
+    usarValorSugerido(valor) {
+        const inputValor = document.getElementById('valor-transacao-modal');
+        if (inputValor) {
+            inputValor.value = valor;
+            this.transacaoAtual.valor = valor;
+        }
+    }
+
+    atualizarCampoTransacao(campo, valor) {
+        this.transacaoAtual[campo] = valor;
+    }
+
+    limparCamposTransacao() {
+        // Limpar valor
+        const inputValor = document.getElementById('valor-transacao-modal');
+        if (inputValor) inputValor.value = '';
+        this.transacaoAtual.valor = 0;
+        
+        // Limpar descrição
+        const inputDescricao = document.getElementById('descricao-transacao-modal');
+        if (inputDescricao) inputDescricao.value = '';
+        this.transacaoAtual.descricao = '';
+        
+        // Limpar categoria personalizada
+        const inputCatPersonalizada = document.getElementById('categoria-personalizada-modal');
+        if (inputCatPersonalizada) inputCatPersonalizada.value = '';
+        
+        // Limpar responsável
+        const inputResponsavel = document.getElementById('responsavel-transacao-modal');
+        if (inputResponsavel) inputResponsavel.value = 'Jogador';
+        this.transacaoAtual.responsavel = 'Jogador';
+        
+        // Limpar notas
+        const inputNotas = document.getElementById('notas-transacao-modal');
+        if (inputNotas) inputNotas.value = '';
+        this.transacaoAtual.notas = '';
+        
+        // Desmarcar categorias
+        document.querySelectorAll('.categoria-option').forEach(opt => 
+            opt.classList.remove('selecionado'));
+        this.transacaoAtual.categoria = '';
+    }
+
+    confirmarTransacao() {
+        // Validar campos
+        const inputValor = document.getElementById('valor-transacao-modal');
+        const inputDescricao = document.getElementById('descricao-transacao-modal');
+        
+        if (!inputValor || !inputDescricao) return;
+        
+        const valor = parseFloat(inputValor.value);
+        const descricao = inputDescricao.value.trim();
+        const categoria = this.transacaoAtual.categoria || 
+                         document.getElementById('categoria-personalizada-modal')?.value || 
+                         'Outros';
+        
+        // Validações
         if (!valor || valor <= 0) {
             this.mostrarFeedback('Por favor, insira um valor válido!', 'erro');
             return;
         }
         
-        if (!motivo) {
-            this.mostrarFeedback('Por favor, informe o motivo da transação!', 'erro');
+        if (!descricao) {
+            this.mostrarFeedback('Por favor, insira uma descrição!', 'erro');
             return;
         }
         
-        if (this.transacaoAtual.tipo === 'gastar' && valor > this.dinheiro) {
-            this.mostrarFeedback('Saldo insuficiente!', 'erro');
+        if (!categoria) {
+            this.mostrarFeedback('Por favor, selecione ou digite uma categoria!', 'erro');
             return;
         }
         
-        if (this.transacaoAtual.tipo === 'receber') {
-            this.adicionarDinheiro(valor, motivo);
+        // Verificar saldo para despesas, transferências e doações
+        if (['despesa', 'transferencia', 'doacao'].includes(this.transacaoAtual.tipo)) {
+            if (valor > this.dinheiro) {
+                this.mostrarFeedback('Saldo insuficiente!', 'erro');
+                return;
+            }
+        }
+        
+        // Processar transação
+        this.processarTransacao(valor, descricao, categoria);
+    }
+
+    processarTransacao(valor, descricao, categoria) {
+        const tipo = this.transacaoAtual.tipo;
+        
+        // Atualizar dinheiro baseado no tipo
+        switch(tipo) {
+            case 'receita':
+                this.dinheiro += valor;
+                break;
+            case 'despesa':
+                this.dinheiro -= valor;
+                break;
+            case 'transferencia':
+                this.dinheiro -= valor;
+                // Aqui poderia adicionar lógica para transferir para outro personagem
+                break;
+            case 'doacao':
+                this.dinheiro -= valor;
+                break;
+        }
+        
+        // Criar objeto de transação
+        const transacao = {
+            id: this.gerarIdTransacao(),
+            tipo: tipo,
+            valor: valor,
+            categoria: categoria,
+            descricao: descricao,
+            data: this.transacaoAtual.data || new Date().toISOString().split('T')[0],
+            responsavel: this.transacaoAtual.responsavel || 'Jogador',
+            notas: this.transacaoAtual.notas || '',
+            timestamp: new Date().toISOString()
+        };
+        
+        // Adicionar ao histórico
+        this.historicoTransacoes.unshift(transacao);
+        
+        // Limitar histórico aos últimos 1000 registros
+        if (this.historicoTransacoes.length > 1000) {
+            this.historicoTransacoes = this.historicoTransacoes.slice(0, 1000);
+        }
+        
+        // Salvar e atualizar
+        this.salvarDados();
+        this.fecharModalTransacao();
+        this.atualizarInterface();
+        this.atualizarResumoFinanceiro();
+        this.atualizarHistorico();
+        
+        // Feedback
+        const tiposMensagem = {
+            'receita': `Recebido $${valor}`,
+            'despesa': `Gasto $${valor}`,
+            'transferencia': `Transferido $${valor}`,
+            'doacao': `Doação de $${valor} realizada`
+        };
+        
+        this.mostrarFeedback(tiposMensagem[tipo], 'sucesso');
+        this.notificarDashboard();
+    }
+
+    registrarTransacao(dados) {
+        const transacao = {
+            id: this.gerarIdTransacao(),
+            tipo: dados.tipo,
+            valor: dados.valor,
+            categoria: dados.categoria,
+            descricao: dados.descricao,
+            data: new Date().toISOString().split('T')[0],
+            responsavel: dados.responsavel || 'Jogador',
+            notas: dados.notas || '',
+            timestamp: new Date().toISOString()
+        };
+        
+        this.historicoTransacoes.unshift(transacao);
+        
+        if (this.historicoTransacoes.length > 1000) {
+            this.historicoTransacoes = this.historicoTransacoes.slice(0, 1000);
+        }
+        
+        this.salvarDados();
+        this.atualizarResumoFinanceiro();
+        this.atualizarHistorico();
+    }
+
+    gerarIdTransacao() {
+        return 'trans_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // ========== HISTÓRICO E FILTROS ==========
+    filtrarHistorico() {
+        const filtroTipo = document.getElementById('filtro-tipo-transacao')?.value || 'todos';
+        const busca = document.getElementById('busca-transacao')?.value.toLowerCase() || '';
+        
+        this.filtrosAtivos.tipo = filtroTipo;
+        this.filtrosAtivos.busca = busca;
+        
+        this.atualizarHistorico();
+    }
+
+    limparFiltros() {
+        const filtroTipo = document.getElementById('filtro-tipo-transacao');
+        const busca = document.getElementById('busca-transacao');
+        
+        if (filtroTipo) filtroTipo.value = 'todos';
+        if (busca) busca.value = '';
+        
+        this.filtrosAtivos.tipo = 'todos';
+        this.filtrosAtivos.busca = '';
+        
+        this.atualizarHistorico();
+    }
+
+    atualizarHistorico() {
+        const tabela = document.getElementById('tabela-historico');
+        const tbody = tabela?.querySelector('tbody');
+        const totalTransacoes = document.getElementById('total-transacoes');
+        const saldoInicial = document.getElementById('saldo-inicial');
+        
+        if (!tbody) return;
+        
+        // Filtrar transações
+        let transacoesFiltradas = this.historicoTransacoes;
+        
+        if (this.filtrosAtivos.tipo !== 'todos') {
+            transacoesFiltradas = transacoesFiltradas.filter(t => t.tipo === this.filtrosAtivos.tipo);
+        }
+        
+        if (this.filtrosAtivos.busca) {
+            const busca = this.filtrosAtivos.busca.toLowerCase();
+            transacoesFiltradas = transacoesFiltradas.filter(t => 
+                t.descricao.toLowerCase().includes(busca) ||
+                t.categoria.toLowerCase().includes(busca) ||
+                t.responsavel.toLowerCase().includes(busca)
+            );
+        }
+        
+        // Atualizar contadores
+        if (totalTransacoes) {
+            totalTransacoes.textContent = transacoesFiltradas.length;
+        }
+        
+        if (saldoInicial) {
+            saldoInicial.textContent = `$${this.calcularSaldoInicial()}`;
+        }
+        
+        // Atualizar tabela
+        if (transacoesFiltradas.length === 0) {
+            tbody.innerHTML = `
+                <tr class="historico-vazio">
+                    <td colspan="7">
+                        <i class="fas fa-receipt"></i>
+                        <p>Nenhuma transação encontrada</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = transacoesFiltradas.map(transacao => {
+            const dataFormatada = this.formatarData(transacao.data);
+            const valorFormatado = `$${transacao.valor.toFixed(2)}`;
+            const tipoFormatado = this.formatarTipo(transacao.tipo);
+            const classeValor = transacao.tipo === 'receita' ? 'positivo' : 'negativo';
+            
+            return `
+                <tr>
+                    <td>${dataFormatada}</td>
+                    <td>${transacao.descricao}</td>
+                    <td>${transacao.categoria}</td>
+                    <td><span class="badge-tipo badge-${transacao.tipo}">${tipoFormatado}</span></td>
+                    <td class="${classeValor}">${valorFormatado}</td>
+                    <td>${transacao.responsavel}</td>
+                    <td>
+                        <button class="btn-acao" onclick="sistemaEquipamentos.verDetalhesTransacao('${transacao.id}')" title="Detalhes">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-acao" onclick="sistemaEquipamentos.editarTransacao('${transacao.id}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-acao btn-remover" onclick="sistemaEquipamentos.removerTransacao('${transacao.id}')" title="Remover">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    formatarData(dataString) {
+        if (!dataString) return '-';
+        const data = new Date(dataString);
+        if (isNaN(data.getTime())) return dataString;
+        return data.toLocaleDateString('pt-BR');
+    }
+
+    formatarTipo(tipo) {
+        const tipos = {
+            'receita': 'Receita',
+            'despesa': 'Despesa',
+            'transferencia': 'Transferência',
+            'doacao': 'Doação'
+        };
+        return tipos[tipo] || tipo;
+    }
+
+    calcularSaldoInicial() {
+        // Implementar lógica para calcular saldo inicial baseado no nível de riqueza
+        const nivel = this.sistemaRiqueza.nivelAtual;
+        const multiplicador = this.sistemaRiqueza.multiplicadores[nivel] || 1;
+        return Math.floor(this.sistemaRiqueza.dinheiroBase * multiplicador);
+    }
+
+    verDetalhesTransacao(id) {
+        const transacao = this.historicoTransacoes.find(t => t.id === id);
+        if (!transacao) return;
+        
+        alert(`Detalhes da Transação:\n\n` +
+              `Tipo: ${this.formatarTipo(transacao.tipo)}\n` +
+              `Valor: $${transacao.valor.toFixed(2)}\n` +
+              `Categoria: ${transacao.categoria}\n` +
+              `Descrição: ${transacao.descricao}\n` +
+              `Data: ${this.formatarData(transacao.data)}\n` +
+              `Responsável: ${transacao.responsavel}\n` +
+              `Notas: ${transacao.notas || 'Nenhuma'}\n` +
+              `Registrada em: ${new Date(transacao.timestamp).toLocaleString('pt-BR')}`);
+    }
+
+    editarTransacao(id) {
+        const transacao = this.historicoTransacoes.find(t => t.id === id);
+        if (!transacao) return;
+        
+        // Para simplificar, vamos abrir o modal com os dados da transação
+        this.transacaoAtual = { ...transacao };
+        this.abrirModalTransacao(transacao.tipo);
+        
+        // Preencher campos
+        setTimeout(() => {
+            const valorInput = document.getElementById('valor-transacao-modal');
+            const descricaoInput = document.getElementById('descricao-transacao-modal');
+            const dataInput = document.getElementById('data-transacao-modal');
+            const responsavelInput = document.getElementById('responsavel-transacao-modal');
+            const notasInput = document.getElementById('notas-transacao-modal');
+            
+            if (valorInput) valorInput.value = transacao.valor;
+            if (descricaoInput) descricaoInput.value = transacao.descricao;
+            if (dataInput) dataInput.value = transacao.data;
+            if (responsavelInput) responsavelInput.value = transacao.responsavel;
+            if (notasInput) notasInput.value = transacao.notas || '';
+            
+            // Marcar categoria
+            setTimeout(() => {
+                document.querySelectorAll('.categoria-option').forEach(option => {
+                    if (option.dataset.categoria === transacao.categoria) {
+                        option.classList.add('selecionado');
+                    }
+                });
+            }, 100);
+        }, 100);
+        
+
+        // ========== ADICIONAR APENAS ESTAS 3 FUNÇÕES NO FINAL DO ARQUIVO ==========
+
+// Estas funções permitem que os botões do HTML funcionem
+window.abrirModalTransacao = function(tipo) {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.abrirModalTransacao(tipo);
+    } else {
+        console.error('Sistema não inicializado');
+    }
+};
+
+window.confirmarTransacao = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.confirmarTransacao();
+    }
+};
+
+window.fecharModalTransacao = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.fecharModalTransacao();
+    }
+};
+        // Marcar transação para edição
+        this.transacaoEditando = id;
+    }
+
+    removerTransacao(id) {
+        if (!confirm('Tem certeza que deseja remover esta transação?')) return;
+        
+        const index = this.historicoTransacoes.findIndex(t => t.id === id);
+        if (index === -1) return;
+        
+        const transacao = this.historicoTransacoes[index];
+        
+        // Ajustar saldo se necessário
+        if (transacao.tipo === 'receita') {
+            this.dinheiro -= transacao.valor;
         } else {
-            this.gastarDinheiro(valor, motivo);
+            this.dinheiro += transacao.valor;
         }
         
-        this.fecharModalFinanceiro();
-    }
-
-    adicionarDinheiro(valor, motivo) {
-        this.dinheiro += valor;
-        
-        this.historicoTransacoes.unshift({
-            tipo: 'credito',
-            valor: valor,
-            motivo: motivo,
-            data: new Date().toLocaleString('pt-BR')
-        });
-        
+        this.historicoTransacoes.splice(index, 1);
         this.salvarDados();
-        this.mostrarFeedback(`Recebido $${valor}`, 'sucesso');
         this.atualizarInterface();
-        this.notificarDashboard();
+        this.atualizarHistorico();
+        this.mostrarFeedback('Transação removida', 'sucesso');
     }
 
-    gastarDinheiro(valor, motivo) {
-        this.dinheiro -= valor;
+    exportarHistorico(formato) {
+        const dados = this.historicoTransacoes;
         
-        this.historicoTransacoes.unshift({
-            tipo: 'debito',
-            valor: valor,
-            motivo: motivo,
-            data: new Date().toLocaleString('pt-BR')
-        });
+        if (dados.length === 0) {
+            this.mostrarFeedback('Nenhuma transação para exportar', 'aviso');
+            return;
+        }
         
-        this.salvarDados();
-        this.mostrarFeedback(`Gastou $${valor}`, 'sucesso');
-        this.atualizarInterface();
-        this.notificarDashboard();
-    }
-
-    usarValorRapido(valor) {
-        const valorInput = document.getElementById('valor-transacao');
-        if (valorInput) {
-            valorInput.value = valor;
-            valorInput.focus();
+        if (formato === 'csv') {
+            this.exportarParaCSV(dados);
+        } else if (formato === 'pdf') {
+            this.mostrarFeedback('Exportação PDF em desenvolvimento', 'aviso');
+            // this.exportarParaPDF(dados);
         }
     }
 
+    exportarParaCSV(dados) {
+        const cabecalhos = ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor', 'Responsável', 'Notas'];
+        const linhas = dados.map(transacao => [
+            transacao.data,
+            this.formatarTipo(transacao.tipo),
+            transacao.categoria,
+            transacao.descricao,
+            transacao.valor.toFixed(2),
+            transacao.responsavel,
+            transacao.notas || ''
+        ]);
+        
+        const csvContent = [
+            cabecalhos.join(','),
+            ...linhas.map(row => row.join(','))
+        ].join('\n');
+        
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `historico-financeiro_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        
+        this.mostrarFeedback('Histórico exportado como CSV', 'sucesso');
+    }
+
+    // ========== ESTATÍSTICAS FINANCEIRAS ==========
+    calcularEstatisticas() {
+        const hoje = new Date();
+        const trintaDiasAtras = new Date();
+        trintaDiasAtras.setDate(hoje.getDate() - 30);
+        
+        const transacoesPeriodo = this.historicoTransacoes.filter(transacao => {
+            const dataTransacao = new Date(transacao.data);
+            return dataTransacao >= trintaDiasAtras;
+        });
+        
+        const receitas = transacoesPeriodo
+            .filter(t => t.tipo === 'receita')
+            .reduce((sum, t) => sum + t.valor, 0);
+        
+        const despesas = transacoesPeriodo
+            .filter(t => t.tipo === 'despesa')
+            .reduce((sum, t) => sum + t.valor, 0);
+        
+        // Maiores gastos
+        const maioresGastos = transacoesPeriodo
+            .filter(t => t.tipo === 'despesa')
+            .sort((a, b) => b.valor - a.valor)
+            .slice(0, 5);
+        
+        // Gastos por categoria
+        const gastosPorCategoria = {};
+        transacoesPeriodo
+            .filter(t => t.tipo === 'despesa')
+            .forEach(t => {
+                gastosPorCategoria[t.categoria] = (gastosPorCategoria[t.categoria] || 0) + t.valor;
+            });
+        
+        // Últimas transações
+        const ultimasTransacoes = this.historicoTransacoes.slice(0, 5);
+        
+        return {
+            receitasMes: receitas,
+            despesasMes: despesas,
+            saldoDisponivel: this.dinheiro,
+            maioresGastos: maioresGastos,
+            gastosPorCategoria: gastosPorCategoria,
+            ultimasTransacoes: ultimasTransacoes,
+            patrimonioTotal: this.calcularPatrimonioTotal()
+        };
+    }
+
+    calcularPatrimonioTotal() {
+        const valorEquipamentos = this.equipamentosAdquiridos.reduce((sum, item) => 
+            sum + (item.custoTotal || item.custo), 0);
+        return this.dinheiro + valorEquipamentos;
+    }
+
+    atualizarResumoFinanceiro() {
+        const estatisticas = this.calcularEstatisticas();
+        
+        // Atualizar cards de resumo
+        const saldoDisponivel = document.getElementById('saldo-disponivel');
+        const receitasMes = document.getElementById('receitas-mes');
+        const despesasMes = document.getElementById('despesas-mes');
+        const patrimonioTotal = document.getElementById('patrimonio-total');
+        const saldoStatus = document.getElementById('saldo-status');
+        
+        if (saldoDisponivel) {
+            saldoDisponivel.textContent = `$${estatisticas.saldoDisponivel}`;
+            if (estatisticas.saldoDisponivel < 0) {
+                saldoDisponivel.style.color = '#e74c3c';
+            } else if (estatisticas.saldoDisponivel < 100) {
+                saldoDisponivel.style.color = '#f39c12';
+            } else {
+                saldoDisponivel.style.color = '#27ae60';
+            }
+        }
+        
+        if (receitasMes) {
+            receitasMes.textContent = `$${estatisticas.receitasMes}`;
+        }
+        
+        if (despesasMes) {
+            despesasMes.textContent = `$${estatisticas.despesasMes}`;
+        }
+        
+        if (patrimonioTotal) {
+            patrimonioTotal.textContent = `$${estatisticas.patrimonioTotal}`;
+        }
+        
+        if (saldoStatus) {
+            if (estatisticas.saldoDisponivel < 0) {
+                saldoStatus.textContent = 'Saldo negativo';
+                saldoStatus.style.color = '#e74c3c';
+            } else if (estatisticas.saldoDisponivel < 100) {
+                saldoStatus.textContent = 'Saldo baixo';
+                saldoStatus.style.color = '#f39c12';
+            } else {
+                saldoStatus.textContent = 'Saldo saudável';
+                saldoStatus.style.color = '#27ae60';
+            }
+        }
+        
+        // Atualizar maiores gastos
+        const maioresGastosContainer = document.getElementById('maiores-gastos');
+        if (maioresGastosContainer) {
+            if (estatisticas.maioresGastos.length === 0) {
+                maioresGastosContainer.innerHTML = `
+                    <div class="estatistica-vazia">
+                        <i class="fas fa-receipt"></i>
+                        <p>Nenhuma despesa registrada</p>
+                    </div>
+                `;
+            } else {
+                maioresGastosContainer.innerHTML = estatisticas.maioresGastos.map(gasto => `
+                    <div class="gasto-item">
+                        <div class="gasto-descricao">${gasto.descricao}</div>
+                        <div class="gasto-valor">$${gasto.valor.toFixed(2)}</div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Atualizar gastos por categoria
+        const gastosCategoriasContainer = document.getElementById('gastos-categorias');
+        if (gastosCategoriasContainer) {
+            const categorias = Object.entries(estatisticas.gastosPorCategoria);
+            
+            if (categorias.length === 0) {
+                gastosCategoriasContainer.innerHTML = `
+                    <div class="estatistica-vazia">
+                        <i class="fas fa-tag"></i>
+                        <p>Nenhuma categoria registrada</p>
+                    </div>
+                `;
+            } else {
+                gastosCategoriasContainer.innerHTML = categorias.map(([categoria, valor]) => `
+                    <div class="categoria-item">
+                        <div class="categoria-nome">${categoria}</div>
+                        <div class="categoria-valor">$${valor.toFixed(2)}</div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Atualizar últimas transações
+        const ultimasTransacoesContainer = document.getElementById('ultimas-transacoes');
+        if (ultimasTransacoesContainer) {
+            if (estatisticas.ultimasTransacoes.length === 0) {
+                ultimasTransacoesContainer.innerHTML = `
+                    <div class="estatistica-vazia">
+                        <i class="fas fa-exchange-alt"></i>
+                        <p>Nenhuma transação registrada</p>
+                    </div>
+                `;
+            } else {
+                ultimasTransacoesContainer.innerHTML = estatisticas.ultimasTransacoes.map(transacao => `
+                    <div class="transacao-rapida">
+                        <div class="transacao-icon ${transacao.tipo}">
+                            ${transacao.tipo === 'receita' ? '📥' : 
+                              transacao.tipo === 'despesa' ? '📤' :
+                              transacao.tipo === 'transferencia' ? '🔄' : '❤️'}
+                        </div>
+                        <div class="transacao-info">
+                            <div class="transacao-descricao">${transacao.descricao}</div>
+                            <div class="transacao-detalhes">
+                                <span class="transacao-categoria">${transacao.categoria}</span>
+                                <span class="transacao-valor ${transacao.tipo}">
+                                    ${transacao.tipo === 'receita' ? '+' : '-'}$${transacao.valor.toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    }
+
+    // ========== CONFIGURAÇÃO DE EVENTOS GLOBAIS ==========
+    configurarEventosGlobais() {
+        document.addEventListener('click', (e) => {
+            const btnComprar = e.target.closest('.btn-comprar');
+            if (btnComprar) {
+                const itemId = btnComprar.getAttribute('data-item');
+                if (itemId) {
+                    e.stopPropagation();
+                    this.comprarEquipamento(itemId, btnComprar);
+                }
+            }
+
+            // Eventos para botões financeiros
+            const btnReceber = e.target.closest('[onclick*="abrirModalTransacao(\'receita\')"]');
+            if (btnReceber) {
+                e.preventDefault();
+                this.abrirModalTransacao('receita');
+            }
+
+            const btnGastar = e.target.closest('[onclick*="abrirModalTransacao(\'despesa\')"]');
+            if (btnGastar) {
+                e.preventDefault();
+                this.abrirModalTransacao('despesa');
+            }
+
+            const btnTransferir = e.target.closest('[onclick*="abrirModalTransacao(\'transferencia\')"]');
+            if (btnTransferir) {
+                e.preventDefault();
+                this.abrirModalTransacao('transferencia');
+            }
+
+            const btnDoar = e.target.closest('[onclick*="abrirModalTransacao(\'doacao\')"]');
+            if (btnDoar) {
+                e.preventDefault();
+                this.abrirModalTransacao('doacao');
+            }
+
+            // Botões de exportação
+            const btnExportarCSV = e.target.closest('[onclick*="exportarHistorico(\'csv\')"]');
+            if (btnExportarCSV) {
+                e.preventDefault();
+                this.exportarHistorico('csv');
+            }
+
+            const btnExportarPDF = e.target.closest('[onclick*="exportarHistorico(\'pdf\')"]');
+            if (btnExportarPDF) {
+                e.preventDefault();
+                this.exportarHistorico('pdf');
+            }
+
+            // Botão de mochila
+            const btnLiberar = document.getElementById('btn-liberar-mochila');
+            if (e.target === btnLiberar || (btnLiberar && btnLiberar.contains(e.target))) {
+                this.alternarMochila();
+            }
+
+            // Botões de depósito
+            const btnGuardarTudo = document.getElementById('btn-guardar-tudo-deposito');
+            if (e.target === btnGuardarTudo || (btnGuardarTudo && btnGuardarTudo.contains(e.target))) {
+                this.moverTudoParaDeposito();
+            }
+
+            const btnRetirarTudo = document.getElementById('btn-retirar-tudo-deposito');
+            if (e.target === btnRetirarTudo || (btnRetirarTudo && btnRetirarTudo.contains(e.target))) {
+                this.retirarTudoDoDeposito();
+            }
+
+            const btnLimparDeposito = document.getElementById('btn-limpar-deposito');
+            if (e.target === btnLimparDeposito || (btnLimparDeposito && btnLimparDeposito.contains(e.target))) {
+                if (confirm('Tem certeza que deseja limpar todo o depósito?')) {
+                    this.limparDeposito();
+                }
+            }
+        });
+
+        // Evento de fechar modal ao clicar fora
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('modal-transacao');
+            if (modal && e.target === modal) {
+                this.fecharModalTransacao();
+            }
+        });
+
+        // Evento de teclado
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('modal-transacao');
+            if (modal && modal.classList.contains('aberto') && e.key === 'Escape') {
+                this.fecharModalTransacao();
+            }
+            
+            if (modal && modal.classList.contains('aberto') && e.key === 'Enter' && e.ctrlKey) {
+                this.confirmarTransacao();
+            }
+        });
+    }
+
+    // ========== FUNÇÕES DE APOIO ==========
     configurarSubAbas() {
         document.querySelectorAll('.subtab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -866,6 +1701,14 @@ fecharSubmenuQuantidade() {
                 const subtabId = btn.getAttribute('data-subtab');
                 const subtabElement = document.getElementById(`subtab-${subtabId}`);
                 if (subtabElement) subtabElement.classList.add('active');
+                
+                // Se for a aba financeira, atualizar estatísticas
+                if (subtabId === 'financeiro') {
+                    setTimeout(() => {
+                        this.atualizarResumoFinanceiro();
+                        this.atualizarHistorico();
+                    }, 100);
+                }
             });
         });
     }
@@ -882,34 +1725,6 @@ fecharSubmenuQuantidade() {
                 this.filtrarListaEquipamentos(filtro);
             });
         });
-    }
-
-    filtrarListaEquipamentos(filtro) {
-        const lista = document.getElementById('lista-equipamentos-adquiridos');
-        if (!lista) return;
-
-        let equipamentosFiltrados = [];
-
-        switch(filtro) {
-            case 'todos':
-                equipamentosFiltrados = this.equipamentosAdquiridos;
-                break;
-            case 'equipados':
-                equipamentosFiltrados = this.equipamentosAdquiridos.filter(item => item.equipado);
-                break;
-            case 'corpo':
-                equipamentosFiltrados = this.equipamentosAdquiridos.filter(item => item.status === 'no-corpo');
-                break;
-            case 'mochila':
-                equipamentosFiltrados = this.equipamentosAdquiridos.filter(item => 
-                    item.status === 'na-mochila' && !item.equipado
-                );
-                break;
-            default:
-                equipamentosFiltrados = this.equipamentosAdquiridos;
-        }
-
-        this.atualizarListaEquipamentosAdquiridos(equipamentosFiltrados);
     }
 
     criarDisplayMaos() {
@@ -981,6 +1796,7 @@ fecharSubmenuQuantidade() {
         this.atualizarInterfaceDeposito();
         this.atualizarEstatisticas();
         this.atualizarSistemaCombate();
+        this.atualizarHistorico();
     }
 
     atualizarInterface() {
@@ -1030,6 +1846,9 @@ fecharSubmenuQuantidade() {
             }
         }
     }
+
+    // [CONTINUA NO PRÓXIMO COMENTÁRIO...]
+        // ...continuação do equipamentos.js
 
     atualizarListaEquipamentosAdquiridos(equipamentosFiltrados = null) {
         const lista = document.getElementById('lista-equipamentos-adquiridos');
@@ -1227,44 +2046,8 @@ fecharSubmenuQuantidade() {
         }
     }
 
-    atualizarResumoFinanceiro() {
-        const dinheiroAtual = document.getElementById('dinheiroAtual');
-        if (dinheiroAtual) dinheiroAtual.textContent = `$${this.dinheiro}`;
-        
-        const gastoTotal = document.getElementById('gastoTotal');
-        if (gastoTotal) {
-            const gasto = this.calcularGastoTotalEquipamentos();
-            gastoTotal.textContent = `$${gasto}`;
-        }
-        
-        const saldoAtual = document.getElementById('saldoAtual');
-        if (saldoAtual) {
-            saldoAtual.textContent = `$${this.dinheiro}`;
-            saldoAtual.className = this.dinheiro >= 0 ? 'saldo-positivo' : 'saldo-negativo';
-        }
-        
-        this.atualizarDashboardDinheiro();
-    }
-
-    atualizarDashboardDinheiro() {
-        const gastoEquipamentos = document.getElementById('gastoEquipamentos');
-        const saldoDinheiro = document.getElementById('saldoDinheiro');
-        const dinheiroTotal = document.getElementById('dinheiroTotal');
-        
-        if (gastoEquipamentos) {
-            gastoEquipamentos.textContent = `$${this.calcularGastoTotalEquipamentos()}`;
-        }
-        
-        if (saldoDinheiro) {
-            saldoDinheiro.textContent = `$${this.dinheiro}`;
-            saldoDinheiro.className = this.dinheiro >= 0 ? 'saldo-positivo' : 'saldo-negativo';
-        }
-        
-        if (dinheiroTotal) {
-            const nivelRiqueza = this.sistemaRiqueza.nivelAtual;
-            const totalBase = this.sistemaRiqueza.dinheiroBase * this.sistemaRiqueza.multiplicadores[nivelRiqueza];
-            dinheiroTotal.textContent = `$${Math.floor(totalBase)}`;
-        }
+    atualizarInfoCarga() {
+        // Implementação já feita em atualizarStatus()
     }
 
     atualizarEstatisticas() {
@@ -1292,6 +2075,7 @@ fecharSubmenuQuantidade() {
         }
     }
 
+    // ========== SISTEMA DE COMBATE ==========
     atualizarSistemaCombate() {
         this.atualizarArmadurasCombate();
         this.atualizarArmasCombate();
@@ -1361,6 +2145,7 @@ fecharSubmenuQuantidade() {
         }
     }
 
+    // ========== FUNÇÕES AUXILIARES ==========
     obterTextoMaos(maos) {
         switch(maos) {
             case 1: return '1 mão';
@@ -1424,6 +2209,35 @@ fecharSubmenuQuantidade() {
         this.atualizarInterface();
     }
 
+    filtrarListaEquipamentos(filtro) {
+        const lista = document.getElementById('lista-equipamentos-adquiridos');
+        if (!lista) return;
+
+        let equipamentosFiltrados = [];
+
+        switch(filtro) {
+            case 'todos':
+                equipamentosFiltrados = this.equipamentosAdquiridos;
+                break;
+            case 'equipados':
+                equipamentosFiltrados = this.equipamentosAdquiridos.filter(item => item.equipado);
+                break;
+            case 'corpo':
+                equipamentosFiltrados = this.equipamentosAdquiridos.filter(item => item.status === 'no-corpo');
+                break;
+            case 'mochila':
+                equipamentosFiltrados = this.equipamentosAdquiridos.filter(item => 
+                    item.status === 'na-mochila' && !item.equipado
+                );
+                break;
+            default:
+                equipamentosFiltrados = this.equipamentosAdquiridos;
+        }
+
+        this.atualizarListaEquipamentosAdquiridos(equipamentosFiltrados);
+    }
+
+    // ========== FEEDBACK E NOTIFICAÇÕES ==========
     mostrarFeedback(mensagem, tipo) {
         const feedback = document.createElement('div');
         feedback.className = `feedback-message feedback-${tipo}`;
@@ -1463,68 +2277,7 @@ fecharSubmenuQuantidade() {
         }, 3000);
     }
 
-    configurarEventosGlobais() {
-        document.addEventListener('click', (e) => {
-            const btnComprar = e.target.closest('.btn-comprar');
-            if (btnComprar) {
-                const itemId = btnComprar.getAttribute('data-item');
-                if (itemId) {
-                    e.stopPropagation();
-                    this.comprarEquipamento(itemId, btnComprar);
-                }
-            }
-
-            if (e.target.classList.contains('btn-rapido')) {
-                const valor = parseInt(e.target.getAttribute('data-valor'));
-                this.usarValorRapido(valor);
-            }
-            
-            if (e.target.id === 'btn-confirmar-transacao') {
-                this.confirmarTransacaoFinanceira();
-            }
-
-            const btnLiberar = document.getElementById('btn-liberar-mochila');
-            if (e.target === btnLiberar || (btnLiberar && btnLiberar.contains(e.target))) {
-                this.alternarMochila();
-            }
-
-            const btnGuardarTudo = document.getElementById('btn-guardar-tudo-deposito');
-            if (e.target === btnGuardarTudo || (btnGuardarTudo && btnGuardarTudo.contains(e.target))) {
-                this.moverTudoParaDeposito();
-            }
-
-            const btnRetirarTudo = document.getElementById('btn-retirar-tudo-deposito');
-            if (e.target === btnRetirarTudo || (btnRetirarTudo && btnRetirarTudo.contains(e.target))) {
-                this.retirarTudoDoDeposito();
-            }
-
-            const btnLimparDeposito = document.getElementById('btn-limpar-deposito');
-            if (e.target === btnLimparDeposito || (btnLimparDeposito && btnLimparDeposito.contains(e.target))) {
-                if (confirm('Tem certeza que deseja limpar todo o depósito?')) {
-                    this.limparDeposito();
-                }
-            }
-        });
-
-        const inputQuantidade = document.getElementById('input-quantidade');
-        if (inputQuantidade) {
-            inputQuantidade.addEventListener('input', (e) => {
-                const valor = parseInt(e.target.value) || 1;
-                if (valor >= 1 && valor <= 99) {
-                    this.quantidadeAtual = valor;
-                    this.atualizarTotaisQuantidade();
-                }
-            });
-        }
-
-        document.addEventListener('keydown', (e) => {
-            const modal = document.getElementById('modal-financeiro');
-            if (modal && modal.classList.contains('aberto') && e.key === 'Enter') {
-                this.confirmarTransacaoFinanceira();
-            }
-        });
-    }
-
+    // ========== SALVAR E CARREGAR DADOS ==========
     salvarDados() {
         try {
             const dados = {
@@ -1545,11 +2298,13 @@ fecharSubmenuQuantidade() {
                 penalidadesCarga: this.penalidadesCarga,
                 sistemaRiqueza: this.sistemaRiqueza,
                 timestamp: new Date().getTime(),
-                version: '2.0'
+                version: '3.0'
             };
             
             localStorage.setItem('sistemaEquipamentos_data', JSON.stringify(dados));
-        } catch (e) {}
+        } catch (e) {
+            console.error('Erro ao salvar dados:', e);
+        }
     }
 
     carregarDadosSalvos() {
@@ -1606,6 +2361,7 @@ fecharSubmenuQuantidade() {
             }
             
         } catch (error) {
+            console.error('Erro ao carregar dados:', error);
             localStorage.removeItem('sistemaEquipamentos_data');
         }
     }
@@ -1626,6 +2382,7 @@ fecharSubmenuQuantidade() {
     }
 }
 
+// ========== INICIALIZAÇÃO GLOBAL ==========
 let sistemaEquipamentos;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1636,6 +2393,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 sistemaEquipamentos = new SistemaEquipamentos();
                 window.sistemaEquipamentos = sistemaEquipamentos;
                 sistemaEquipamentos.inicializarQuandoPronto();
+            } else {
+                sistemaEquipamentos.atualizarInterfaceForcada();
             }
         }
     };
@@ -1658,6 +2417,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// ========== FUNÇÕES GLOBAIS PARA HTML ==========
 window.aumentarQuantidade = function() {
     if (window.sistemaEquipamentos) {
         window.sistemaEquipamentos.aumentarQuantidade();
@@ -1682,15 +2442,33 @@ window.confirmarCompraQuantidade = function() {
     }
 };
 
-window.fecharModalFinanceiro = function() {
+window.fecharModalTransacao = function() {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.fecharModalFinanceiro();
+        window.sistemaEquipamentos.fecharModalTransacao();
     }
 };
 
-window.confirmarTransacaoFinanceira = function() {
+window.confirmarTransacao = function() {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.confirmarTransacaoFinanceira();
+        window.sistemaEquipamentos.confirmarTransacao();
+    }
+};
+
+window.filtrarHistorico = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.filtrarHistorico();
+    }
+};
+
+window.limparFiltros = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.limparFiltros();
+    }
+};
+
+window.exportarHistorico = function(formato) {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.exportarHistorico(formato);
     }
 };
 
@@ -1703,6 +2481,15 @@ window.alternarSubTab = function(subtab) {
     
     if (btn) btn.classList.add('active');
     if (content) content.classList.add('active');
+    
+    // Se for a aba financeira, atualizar estatísticas
+    if (subtab === 'financeiro' && window.sistemaEquipamentos) {
+        setTimeout(() => {
+            window.sistemaEquipamentos.atualizarResumoFinanceiro();
+            window.sistemaEquipamentos.atualizarHistorico();
+        }, 100);
+    }
 };
 
+// Exportar para uso global
 window.SistemaEquipamentos = SistemaEquipamentos;
