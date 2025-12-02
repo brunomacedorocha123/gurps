@@ -1720,334 +1720,97 @@ function toggleSubmenu(id) {
                 </div>
             </div>
             
-           <!-- SUB-ABA: FINANCEIRO -->
+          <!-- SUB-ABA: FINANCEIRO (SIMPLIFICADO) -->
 <div id="subtab-financeiro" class="subtab-content">
-    <div class="financeiro-container">
+    <div class="financeiro-simples">
         
-        <!-- CABEÇALHO E AÇÕES -->
-        <div class="financeiro-header">
-            <div class="financeiro-titulo">
-                <h3><i class="fas fa-coins"></i> Sistema Financeiro</h3>
-                <p>Gerencie seu dinheiro, registre transações e acompanhe seu patrimônio</p>
-            </div>
-            
-            <div class="financeiro-acoes">
-                <button class="btn-financeiro" onclick="sistemaEquipamentos.abrirModalTransacao('receita')">
-                    <i class="fas fa-plus-circle"></i> Receber Dinheiro
-                </button>
-                <button class="btn-financeiro" onclick="sistemaEquipamentos.abrirModalTransacao('despesa')">
-                    <i class="fas fa-minus-circle"></i> Gastar Dinheiro
-                </button>
-                <button class="btn-financeiro" onclick="sistemaEquipamentos.abrirModalTransacao('transferencia')">
-                    <i class="fas fa-exchange-alt"></i> Transferir
-                </button>
-                <button class="btn-financeiro" onclick="sistemaEquipamentos.abrirModalTransacao('doacao')">
-                    <i class="fas fa-hand-holding-heart"></i> Doar
-                </button>
-            </div>
+        <!-- CABEÇALHO MINIMALISTA -->
+        <div class="financeiro-titulo-simples">
+            <h3><i class="fas fa-coins"></i> Dinheiro</h3>
+            <p>Ajuste rápido de saldo</p>
         </div>
         
-        <!-- CARDS DE RESUMO -->
-        <div class="financeiro-resumo">
-            <div class="resumo-card principal">
-                <div class="resumo-icon">
+        <!-- SALDO DINÂMICO -->
+        <div class="saldo-display">
+            <div class="saldo-container">
+                <div class="saldo-label">
                     <i class="fas fa-wallet"></i>
+                    <span>Saldo Disponível</span>
                 </div>
-                <div class="resumo-info">
-                    <h4>Saldo Disponível</h4>
-                    <span class="resumo-valor" id="saldo-disponivel">--</span>
-                    <small id="saldo-status">Carregando...</small>
-                </div>
-            </div>
-            
-            <div class="resumo-card">
-                <div class="resumo-icon">
-                    <i class="fas fa-sack-dollar"></i>
-                </div>
-                <div class="resumo-info">
-                    <h4>Receitas do Mês</h4>
-                    <span class="resumo-valor positivo" id="receitas-mes">--</span>
-                    <small>Últimos 30 dias</small>
+                <div class="saldo-valor-dinamico" id="dinheiro-disponivel">
+                    <!-- JavaScript vai preencher aqui -->
                 </div>
             </div>
             
-            <div class="resumo-card">
-                <div class="resumo-icon">
-                    <i class="fas fa-money-bill-wave"></i>
-                </div>
-                <div class="resumo-info">
-                    <h4>Despesas do Mês</h4>
-                    <span class="resumo-valor negativo" id="despesas-mes">--</span>
-                    <small>Últimos 30 dias</small>
-                </div>
-            </div>
-            
-            <div class="resumo-card">
-                <div class="resumo-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="resumo-info">
-                    <h4>Patrimônio Total</h4>
-                    <span class="resumo-valor" id="patrimonio-total">--</span>
-                    <small>Dinheiro + Itens</small>
-                </div>
+            <div class="saldo-botoes">
+                <button class="btn-receber" onclick="sistemaEquipamentos.abrirModalDinheiro('receber')">
+                    <i class="fas fa-plus"></i> Receber
+                </button>
+                <button class="btn-gastar" onclick="sistemaEquipamentos.abrirModalDinheiro('gastar')">
+                    <i class="fas fa-minus"></i> Gastar
+                </button>
             </div>
         </div>
         
-        <!-- ESTATÍSTICAS DETALHADAS -->
-        <div class="financeiro-estatisticas">
-            <h4><i class="fas fa-chart-pie"></i> Estatísticas Financeiras</h4>
-            
-            <div class="estatisticas-grid">
-                <!-- MAIORES GASTOS -->
-                <div class="estatistica-box">
-                    <h5><i class="fas fa-shopping-cart"></i> Maiores Gastos</h5>
-                    <div class="estatistica-lista" id="maiores-gastos">
-                        <div class="estatistica-vazia">
-                            <i class="fas fa-receipt"></i>
-                            <p>Nenhuma despesa registrada</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- CATEGORIAS -->
-                <div class="estatistica-box">
-                    <h5><i class="fas fa-tags"></i> Gastos por Categoria</h5>
-                    <div class="categorias-lista" id="gastos-categorias">
-                        <div class="estatistica-vazia">
-                            <i class="fas fa-tag"></i>
-                            <p>Nenhuma categoria registrada</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- ÚLTIMAS TRANSAÇÕES -->
-                <div class="estatistica-box">
-                    <h5><i class="fas fa-history"></i> Últimas Transações</h5>
-                    <div class="transacoes-rapidas" id="ultimas-transacoes">
-                        <div class="estatistica-vazia">
-                            <i class="fas fa-exchange-alt"></i>
-                            <p>Nenhuma transação registrada</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- HISTÓRICO COMPLETO -->
-        <div class="financeiro-historico">
-            <div class="historico-header">
-                <h4><i class="fas fa-history"></i> Histórico Completo de Transações</h4>
-                <div class="historico-filtros">
-                    <div class="filtro-group">
-                        <select id="filtro-tipo-transacao">
-                            <option value="todos">Todos os Tipos</option>
-                            <option value="receita">Receitas</option>
-                            <option value="despesa">Despesas</option>
-                            <option value="transferencia">Transferências</option>
-                            <option value="doacao">Doações</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filtro-group">
-                        <input type="text" id="busca-transacao" placeholder="Buscar transação...">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    
-                    <button class="btn-filtro" onclick="sistemaEquipamentos.filtrarHistorico()">
-                        <i class="fas fa-filter"></i> Filtrar
-                    </button>
-                    <button class="btn-filtro" onclick="sistemaEquipamentos.limparFiltros()">
-                        <i class="fas fa-times"></i> Limpar
-                    </button>
-                </div>
+        <!-- HISTÓRICO MÍNIMO -->
+        <div class="historico-minimo">
+            <div class="historico-header-minimo">
+                <h4>Últimas Movimentações</h4>
+                <button class="btn-limpar-minimo" onclick="sistemaEquipamentos.limparHistorico()">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             </div>
             
-            <div class="historico-tabela-container">
-                <table class="historico-tabela" id="tabela-historico">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Descrição</th>
-                            <th>Categoria</th>
-                            <th>Tipo</th>
-                            <th>Valor</th>
-                            <th>Responsável</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="historico-vazio">
-                            <td colspan="7">
-                                <i class="fas fa-receipt"></i>
-                                <p>Nenhuma transação registrada ainda</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="historico-info">
-                <div class="info-item">
-                    <span>Total de Transações: <strong id="total-transacoes">0</strong></span>
-                </div>
-                <div class="info-item">
-                    <span>Saldo Inicial: <strong id="saldo-inicial">--</strong></span>
-                </div>
-                <div class="info-item">
-                    <span>Exportar: 
-                        <button class="btn-exportar" onclick="sistemaEquipamentos.exportarHistorico('csv')">CSV</button>
-                        <button class="btn-exportar" onclick="sistemaEquipamentos.exportarHistorico('pdf')">PDF</button>
-                    </span>
+            <div class="historico-lista-minimo" id="lista-transacoes">
+                <!-- JavaScript vai preencher aqui -->
+                <div class="historico-vazio-minimo">
+                    <i class="fas fa-exchange-alt"></i>
+                    <p>Nenhuma transação registrada</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODAL DE TRANSAÇÃO COMPLETA -->
-<div id="modal-transacao" class="modal-overlay">
-    <div class="modal-content modal-transacao">
-        <div class="modal-header">
-            <h3 id="modal-transacao-titulo">Nova Transação</h3>
-            <button class="modal-close" onclick="sistemaEquipamentos.fecharModalTransacao()">
+<!-- MODAL DE DINHEIRO MÍNIMO -->
+<div id="modal-dinheiro" class="modal-overlay">
+    <div class="modal-content modal-dinheiro-minimo">
+        <div class="modal-header-minimo">
+            <h3 id="modal-dinheiro-titulo">Adicionar/Remover Dinheiro</h3>
+            <button class="modal-close-minimo" onclick="sistemaEquipamentos.fecharModalDinheiro()">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         
-        <div class="modal-body">
-            <!-- SALDO ATUAL -->
-            <div class="saldo-atual">
-                <h4><i class="fas fa-wallet"></i> Saldo Atual</h4>
-                <div class="saldo-valor" id="saldo-transacao-modal">--</div>
-                <div class="saldo-detalhes">
-                    <span>Nível Riqueza: <strong id="nivel-riqueza-modal">--</strong></span>
-                    <span>Patrimônio: <strong id="patrimonio-modal">--</strong></span>
-                </div>
-            </div>
-            
-            <!-- TIPO DE TRANSAÇÃO -->
-            <div class="form-section">
-                <h4><i class="fas fa-exchange-alt"></i> Tipo de Transação</h4>
-                <div class="transacao-tipos">
-                    <div class="tipo-option" data-tipo="receita">
-                        <div class="tipo-icon">
-                            <i class="fas fa-arrow-down"></i>
-                        </div>
-                        <div class="tipo-info">
-                            <h5>Receita</h5>
-                            <small>Entrada de dinheiro</small>
-                        </div>
-                        <div class="tipo-check">
-                            <i class="fas fa-check"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="tipo-option" data-tipo="despesa">
-                        <div class="tipo-icon">
-                            <i class="fas fa-arrow-up"></i>
-                        </div>
-                        <div class="tipo-info">
-                            <h5>Despesa</h5>
-                            <small>Saída de dinheiro</small>
-                        </div>
-                        <div class="tipo-check">
-                            <i class="fas fa-check"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="tipo-option" data-tipo="transferencia">
-                        <div class="tipo-icon">
-                            <i class="fas fa-exchange-alt"></i>
-                        </div>
-                        <div class="tipo-info">
-                            <h5>Transferência</h5>
-                            <small>Entre personagens</small>
-                        </div>
-                        <div class="tipo-check">
-                            <i class="fas fa-check"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="tipo-option" data-tipo="doacao">
-                        <div class="tipo-icon">
-                            <i class="fas fa-hand-holding-heart"></i>
-                        </div>
-                        <div class="tipo-info">
-                            <h5>Doação</h5>
-                            <small>Para NPCs/causas</small>
-                        </div>
-                        <div class="tipo-check">
-                            <i class="fas fa-check"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="modal-body-minimo">
+            <!-- SALDO ATUAL DINÂMICO -->
+            <div class="saldo-atual-minimo">
+                <span>Saldo Atual:</span>
+                <span class="saldo-valor-minimo" id="saldo-modal">0</span>
             </div>
             
             <!-- VALOR -->
-            <div class="form-section">
-                <h4><i class="fas fa-dollar-sign"></i> Valor</h4>
-                <div class="valor-container">
-                    <div class="valor-simbolo">$</div>
-                    <input type="number" id="valor-transacao-modal" placeholder="0" min="0" step="0.01">
-                </div>
-                
-                <div class="valores-sugeridos">
-                    <button type="button" class="btn-valor-sugerido" data-valor="10">$10</button>
-                    <button type="button" class="btn-valor-sugerido" data-valor="50">$50</button>
-                    <button type="button" class="btn-valor-sugerido" data-valor="100">$100</button>
-                    <button type="button" class="btn-valor-sugerido" data-valor="500">$500</button>
-                    <button type="button" class="btn-valor-sugerido" data-valor="1000">$1.000</button>
-                    <button type="button" class="btn-valor-sugerido" data-valor="5000">$5.000</button>
+            <div class="campo-valor-minimo">
+                <label for="valor-dinheiro">Valor:</label>
+                <div class="input-valor-minimo">
+                    <span>$</span>
+                    <input type="number" id="valor-dinheiro" placeholder="0" min="0" step="10">
                 </div>
             </div>
             
-            <!-- CATEGORIA -->
-            <div class="form-section">
-                <h4><i class="fas fa-tags"></i> Categoria</h4>
-                <div class="categorias-container" id="categorias-modal">
-                    <!-- Preenchido dinamicamente -->
-                </div>
-                <div class="categoria-personalizada">
-                    <input type="text" id="categoria-personalizada-modal" placeholder="Ou digite uma categoria personalizada...">
-                </div>
-            </div>
-            
-            <!-- DESCRIÇÃO -->
-            <div class="form-section">
-                <h4><i class="fas fa-file-alt"></i> Descrição</h4>
-                <textarea id="descricao-transacao-modal" 
-                          placeholder="Descreva a transação com detalhes. Ex: 'Pagamento da missão de resgate do príncipe', 'Compra de 3 poções de cura na loja do alquimista', 'Doação de 200 moedas para o templo de São Cuthbert', etc."
-                          rows="3"></textarea>
-            </div>
-            
-            <!-- INFORMAÇÕES ADICIONAIS -->
-            <div class="form-section-dupla">
-                <div class="form-group">
-                    <label><i class="fas fa-calendar"></i> Data</label>
-                    <input type="date" id="data-transacao-modal" value="">
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-user"></i> Responsável</label>
-                    <input type="text" id="responsavel-transacao-modal" placeholder="Ex: GM João, NPC Mercador, Personagem Maria...">
-                </div>
-            </div>
-            
-            <!-- NOTAS ADICIONAIS -->
-            <div class="form-section">
-                <h4><i class="fas fa-sticky-note"></i> Notas Adicionais (Opcional)</h4>
-                <textarea id="notas-transacao-modal" 
-                          placeholder="Informações adicionais, contexto da transação, observações do GM, etc."
-                          rows="2"></textarea>
+            <!-- DESCRIÇÃO SIMPLES -->
+            <div class="campo-descricao-minimo">
+                <label for="descricao-dinheiro">Descrição:</label>
+                <textarea id="descricao-dinheiro" placeholder="Ex: Missão de guarda, Compra de poções..." rows="2"></textarea>
             </div>
         </div>
         
-        <div class="modal-actions">
-            <button class="btn-cancelar" onclick="sistemaEquipamentos.fecharModalTransacao()">
+        <div class="modal-footer-minimo">
+            <button class="btn-cancelar-minimo" onclick="sistemaEquipamentos.fecharModalDinheiro()">
                 Cancelar
             </button>
-            <button class="btn-confirmar" onclick="sistemaEquipamentos.confirmarTransacao()">
-                <i class="fas fa-check"></i> Registrar Transação
+            <button class="btn-confirmar-minimo" onclick="sistemaEquipamentos.confirmarTransacao()">
+                Confirmar
             </button>
         </div>
     </div>

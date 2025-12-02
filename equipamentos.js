@@ -1,8 +1,4 @@
-// ============================================
-// SISTEMA DE EQUIPAMENTOS - VERSÃO CORRIGIDA 100%
-// Com correções para mobile: scroll horizontal e modal estável
-// ============================================
-
+// equipamentos.js - SISTEMA SIMPLIFICADO DE EQUIPAMENTOS
 class SistemaEquipamentos {
     constructor() {
         // Sistema de equipamentos
@@ -40,40 +36,9 @@ class SistemaEquipamentos {
         this.itemCompraQuantidade = null;
         this.quantidadeAtual = 1;
         
-        // Sistema financeiro
+        // Sistema financeiro SIMPLIFICADO
         this.historicoTransacoes = [];
-        this.transacaoAtual = {
-            tipo: 'receita',
-            valor: 0,
-            categoria: '',
-            descricao: '',
-            data: new Date().toISOString().split('T')[0],
-            responsavel: 'Jogador',
-            notas: ''
-        };
-        
-        this.categorias = {
-            receita: [
-                'Missões', 'Recompensas', 'Comércio', 'Herança', 'Presente',
-                'Tesouro', 'Trabalho', 'Aluguel', 'Investimento', 'Outros'
-            ],
-            despesa: [
-                'Alimentação', 'Hospedagem', 'Transporte', 'Armas', 'Armaduras',
-                'Poções', 'Pergaminhos', 'Serviços', 'Impostos', 'Multas', 'Outros'
-            ],
-            transferencia: [
-                'Para Personagem', 'Para NPC', 'Empréstimo', 'Pagamento', 'Outros'
-            ],
-            doacao: [
-                'Templo', 'Órfãos', 'Pobres', 'Caridade', 'Causa Nobre',
-                'Mendigos', 'Artistas', 'Pesquisa', 'Outros'
-            ]
-        };
-        
-        this.filtrosAtivos = {
-            tipo: 'todos',
-            busca: ''
-        };
+        this.ultimasTransacoes = [];
         
         // Sistema de criação de itens
         this.contadorItensPersonalizados = 10000;
@@ -86,11 +51,6 @@ class SistemaEquipamentos {
         this.catalogoPronto = false;
         this.inicializacaoEmAndamento = false;
         this.dadosCarregados = false;
-        
-        // Controles de touch para mobile
-        this.touchStartX = 0;
-        this.touchStartY = 0;
-        this.isModalOpen = false;
     }
 
     // ========== INICIALIZAÇÃO ==========
@@ -137,180 +97,15 @@ class SistemaEquipamentos {
         this.configurarEventosGlobais();
         this.configurarSubAbas();
         this.configurarFiltrosInventario();
-        this.configurarEventosFinanceiro();
         this.configurarCriacaoItens();
         this.criarDisplayMaos();
         this.atualizarSistemaCombate();
         this.atualizarInterface();
         
-        // CONFIGURAR SCROLL HORIZONTAL PARA MOBILE
-        this.configurarScrollHorizontalTabelas();
-        
         setTimeout(() => {
             this.notificarDashboard();
             this.atualizarInterfaceForcada();
         }, 300);
-    }
-
-    // ========== CORREÇÃO PARA SCROLL HORIZONTAL NO MOBILE ==========
-    configurarScrollHorizontalTabelas() {
-        console.log('🔧 Configurando scroll horizontal para tabelas mobile...');
-        
-        // Função para aplicar scroll horizontal
-        const aplicarScrollTabelas = () => {
-            const containers = document.querySelectorAll('.table-container');
-            containers.forEach(container => {
-                const table = container.querySelector('table');
-                if (!table) return;
-                
-                const precisaScroll = table.scrollWidth > container.clientWidth;
-                
-                if (precisaScroll) {
-                    container.classList.add('scroll-horizontal');
-                    
-                    // Adicionar indicador visual
-                    if (!container.querySelector('.scroll-indicator')) {
-                        const indicator = document.createElement('div');
-                        indicator.className = 'scroll-indicator';
-                        indicator.innerHTML = '<i class="fas fa-arrows-alt-h"></i> Arraste para os lados';
-                        indicator.style.cssText = `
-                            position: absolute;
-                            bottom: 5px;
-                            right: 5px;
-                            background: var(--laranja-principal);
-                            color: white;
-                            padding: 3px 8px;
-                            border-radius: 10px;
-                            font-size: 10px;
-                            opacity: 0.8;
-                            z-index: 10;
-                        `;
-                        container.appendChild(indicator);
-                    }
-                    
-                    // Configurar eventos de touch
-                    this.configurarTouchScroll(container);
-                } else {
-                    container.classList.remove('scroll-horizontal');
-                    const indicator = container.querySelector('.scroll-indicator');
-                    if (indicator) indicator.remove();
-                }
-            });
-        };
-        
-        // Aplicar inicialmente
-        setTimeout(aplicarScrollTabelas, 500);
-        
-        // Observar mudanças no DOM
-        const observer = new MutationObserver((mutations) => {
-            let deveReaplicar = false;
-            mutations.forEach(mutation => {
-                if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                    deveReaplicar = true;
-                }
-            });
-            if (deveReaplicar) {
-                setTimeout(aplicarScrollTabelas, 100);
-            }
-        });
-        
-        // Observar todo o documento
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['class', 'style']
-        });
-        
-        // Observar redimensionamento da janela
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(aplicarScrollTabelas, 250);
-        });
-    }
-
-    configurarTouchScroll(container) {
-        let startX, startY, scrollLeft, isDragging = false;
-        let isClick = false;
-        
-        const onStart = (e) => {
-            isDragging = true;
-            isClick = true;
-            
-            const touch = e.type.includes('touch') ? e.touches[0] : e;
-            startX = touch.pageX;
-            startY = touch.pageY;
-            scrollLeft = container.scrollLeft;
-            
-            container.style.cursor = 'grabbing';
-            container.style.userSelect = 'none';
-            
-            // Prevenir comportamento padrão
-            e.preventDefault();
-        };
-        
-        const onMove = (e) => {
-            if (!isDragging) return;
-            
-            const touch = e.type.includes('touch') ? e.touches[0] : e;
-            const x = touch.pageX;
-            const y = touch.pageY;
-            
-            // Verificar se é um movimento horizontal significativo
-            const deltaX = Math.abs(x - startX);
-            const deltaY = Math.abs(y - startY);
-            
-            // Se movimento vertical for maior, não é arraste horizontal
-            if (deltaY > deltaX && deltaY > 10) {
-                isDragging = false;
-                container.style.cursor = '';
-                return;
-            }
-            
-            // Se movimento horizontal for significativo, não é clique
-            if (deltaX > 5) {
-                isClick = false;
-            }
-            
-            const walk = (x - startX) * 1.5;
-            container.scrollLeft = scrollLeft - walk;
-            
-            // Prevenir scroll da página
-            if (Math.abs(walk) > 10) {
-                e.preventDefault();
-            }
-        };
-        
-        const onEnd = (e) => {
-            isDragging = false;
-            container.style.cursor = '';
-            container.style.userSelect = '';
-            
-            // Se foi um clique (movimento pequeno), permitir clique nos elementos
-            if (isClick && e.target.tagName === 'BUTTON') {
-                e.target.click();
-            }
-        };
-        
-        // Remover eventos antigos
-        container.removeEventListener('touchstart', onStart);
-        container.removeEventListener('touchmove', onMove);
-        container.removeEventListener('touchend', onEnd);
-        container.removeEventListener('mousedown', onStart);
-        container.removeEventListener('mousemove', onMove);
-        container.removeEventListener('mouseup', onEnd);
-        container.removeEventListener('mouseleave', onEnd);
-        
-        // Adicionar novos eventos
-        container.addEventListener('touchstart', onStart, { passive: false });
-        container.addEventListener('touchmove', onMove, { passive: false });
-        container.addEventListener('touchend', onEnd);
-        
-        container.addEventListener('mousedown', onStart);
-        container.addEventListener('mousemove', onMove);
-        container.addEventListener('mouseup', onEnd);
-        container.addEventListener('mouseleave', onEnd);
     }
 
     // ========== SISTEMA DE RIQUEZA ==========
@@ -546,13 +341,11 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         this.notificarDashboard();
         
-        // Registrar transação financeira
-        this.registrarTransacao({
+        // Registrar transação simples
+        this.registrarTransacaoSimples({
             tipo: 'despesa',
             valor: equipamento.custo,
-            categoria: equipamento.tipo === 'arma' ? 'Armas' : 'Equipamentos',
-            descricao: `Compra: ${equipamento.nome}`,
-            responsavel: 'Jogador'
+            descricao: `Compra: ${equipamento.nome}`
         });
     }
 
@@ -578,17 +371,15 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         this.notificarDashboard();
         
-        // Registrar transação financeira
-        this.registrarTransacao({
+        // Registrar transação simples
+        this.registrarTransacaoSimples({
             tipo: 'receita',
             valor: valorVenda,
-            categoria: 'Venda',
-            descricao: `Venda: ${equipamento.nome}`,
-            responsavel: 'Jogador'
+            descricao: `Venda: ${equipamento.nome}`
         });
     }
 
-    // ========== SUBMENU DE QUANTIDADE (CORRIGIDO PARA MOBILE) ==========
+    // ========== SUBMENU DE QUANTIDADE ==========
     abrirSubmenuQuantidade(itemId, elemento) {
         const equipamento = this.obterEquipamentoPorId(itemId);
         if (!equipamento) return;
@@ -596,7 +387,6 @@ class SistemaEquipamentos {
         this.itemCompraQuantidade = equipamento;
         this.quantidadeAtual = 1;
 
-        // Atualizar conteúdo
         const nomeItem = document.getElementById('quantidade-nome-item');
         const custoUnitario = document.getElementById('quantidade-custo-unitario');
         const pesoUnitario = document.getElementById('quantidade-peso-unitario');
@@ -608,148 +398,16 @@ class SistemaEquipamentos {
         const inputQuantidade = document.getElementById('input-quantidade');
         if (inputQuantidade) {
             inputQuantidade.value = this.quantidadeAtual;
-            // Prevenir zoom no iOS
-            inputQuantidade.style.fontSize = '16px';
         }
 
         this.atualizarTotaisQuantidade();
 
         const submenu = document.getElementById('submenu-quantidade');
-        if (!submenu) {
-            console.error('Submenu de quantidade não encontrado!');
-            return;
-        }
+        if (!submenu) return;
 
-        // Fechar primeiro qualquer submenu aberto
-        this.fecharSubmenuQuantidade();
-        
-        // Configurar posição antes de mostrar
-        this.posicionarSubmenuMobile(submenu, elemento);
-        
-        // Mostrar submenu
-        submenu.style.display = 'flex';
-        
-        // Forçar reflow para animação
-        submenu.offsetHeight;
-        
-        // Configurar eventos de touch
-        this.configurarEventosTouchSubmenu(submenu);
-        
-        // Animar entrada
-        setTimeout(() => {
-            submenu.classList.add('aberto');
-            this.isModalOpen = true;
-            
-            // Focar no input no mobile
-            if (window.innerWidth <= 768 && inputQuantidade) {
-                setTimeout(() => {
-                    inputQuantidade.focus();
-                    inputQuantidade.select();
-                }, 300);
-            }
-        }, 10);
-    }
-
-    posicionarSubmenuMobile(submenu, elemento) {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        
-        if (viewportWidth <= 768) {
-            // NO MOBILE: Centralizar na tela
-            submenu.style.position = 'fixed';
-            submenu.style.top = '50%';
-            submenu.style.left = '50%';
-            submenu.style.transform = 'translate(-50%, -50%) scale(0.95)';
-            submenu.style.width = '90%';
-            submenu.style.maxWidth = '400px';
-            submenu.style.maxHeight = '85vh';
-            submenu.style.overflowY = 'auto';
-            submenu.style.zIndex = '10000';
-            submenu.style.background = 'var(--bg-card)';
-            submenu.style.borderRadius = '12px';
-            submenu.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)';
-        } else {
-            // NO DESKTOP: Posicionar próximo ao botão
-            const rect = elemento.getBoundingClientRect();
-            const submenuWidth = 350;
-            const submenuHeight = 280;
-            
-            let left = rect.left;
-            let top = rect.bottom + 10;
-            
-            // Ajustar para não sair da tela
-            if (left + submenuWidth > viewportWidth) {
-                left = viewportWidth - submenuWidth - 20;
-            }
-            
-            if (top + submenuHeight > viewportHeight) {
-                top = rect.top - submenuHeight - 10;
-            }
-            
-            submenu.style.position = 'fixed';
-            submenu.style.top = `${top}px`;
-            submenu.style.left = `${left}px`;
-            submenu.style.width = `${submenuWidth}px`;
-            submenu.style.transform = 'scale(0.95)';
-            submenu.style.zIndex = '10000';
-        }
-    }
-
-    configurarEventosTouchSubmenu(submenu) {
-        // Prevenir scroll do body quando submenu está aberto
-        const preventBodyScroll = (e) => {
-            if (e.target.closest('.submenu-content')) {
-                e.stopPropagation();
-                e.preventDefault();
-            }
-        };
-        
-        // Permitir scroll apenas dentro do conteúdo
-        const allowContentScroll = (e) => {
-            const content = submenu.querySelector('.submenu-content');
-            if (content && content.scrollHeight > content.clientHeight) {
-                e.stopPropagation();
-            }
-        };
-        
-        // Fechar ao clicar fora
-        const closeOnOutsideClick = (e) => {
-            if (!e.target.closest('.submenu-content') && e.target !== submenu) {
-                this.fecharSubmenuQuantidade();
-            }
-        };
-        
-        // Remover eventos antigos
-        submenu.removeEventListener('touchmove', preventBodyScroll);
-        submenu.removeEventListener('scroll', allowContentScroll);
-        submenu.removeEventListener('click', closeOnOutsideClick);
-        document.removeEventListener('touchmove', preventBodyScroll);
-        
-        // Adicionar novos eventos
-        submenu.addEventListener('touchmove', preventBodyScroll, { passive: false });
-        submenu.addEventListener('scroll', allowContentScroll);
-        submenu.addEventListener('click', closeOnOutsideClick);
-        document.addEventListener('touchmove', preventBodyScroll, { passive: false });
-        
-        // Prevenir comportamento padrão de toque nos botões
-        const buttons = submenu.querySelectorAll('button');
-        buttons.forEach(btn => {
-            btn.addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-            }, { passive: true });
-            
-            btn.addEventListener('touchend', (e) => {
-                e.stopPropagation();
-            });
-        });
-        
-        // Prevenir zoom em inputs no iOS
-        const inputs = submenu.querySelectorAll('input[type="number"]');
-        inputs.forEach(input => {
-            input.addEventListener('touchstart', () => {
-                input.style.fontSize = '16px';
-            }, { passive: true });
-        });
+        submenu.style.top = '';
+        submenu.style.left = '';
+        submenu.classList.add('aberto');
     }
 
     aumentarQuantidade() {
@@ -781,20 +439,6 @@ class SistemaEquipamentos {
         
         if (custoTotalElem) custoTotalElem.textContent = `$${custoTotal}`;
         if (pesoTotalElem) pesoTotalElem.textContent = `${pesoTotal.toFixed(1)} kg`;
-        
-        // Verificar se tem dinheiro suficiente
-        const compraBtn = document.querySelector('.btn-confirmar-quantidade');
-        if (compraBtn) {
-            if (custoTotal > this.dinheiro) {
-                compraBtn.disabled = true;
-                compraBtn.style.opacity = '0.6';
-                compraBtn.title = 'Dinheiro insuficiente!';
-            } else {
-                compraBtn.disabled = false;
-                compraBtn.style.opacity = '1';
-                compraBtn.title = 'Confirmar compra';
-            }
-        }
     }
 
     confirmarCompraQuantidade() {
@@ -810,29 +454,14 @@ class SistemaEquipamentos {
             return;
         }
 
-        // Procurar item existente do mesmo tipo
         const itemExistente = this.equipamentosAdquiridos.find(item => 
-            item.id === equipamento.id && 
-            item.status === 'na-mochila' && 
-            !item.equipado &&
-            (!item.personalizado || equipamento.personalizado === item.personalizado)
+            item.id === equipamento.id && item.status === 'na-mochila' && !item.equipado
         );
 
-        if (itemExistente && !equipamento.personalizado) {
-            // Incrementar quantidade do item existente
+        if (itemExistente) {
             itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
             itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
-            
-            // Atualizar também na mochila
-            const itemNaMochila = this.equipamentosEquipados.mochila.find(
-                item => item.idUnico === itemExistente.idUnico
-            );
-            if (itemNaMochila) {
-                itemNaMochila.quantidade = itemExistente.quantidade;
-                itemNaMochila.custoTotal = itemExistente.custoTotal;
-            }
         } else {
-            // Criar novo item
             const novoEquipamento = {
                 ...equipamento,
                 quantidade: quantidade,
@@ -855,13 +484,11 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         this.notificarDashboard();
         
-        // Registrar transação financeira
-        this.registrarTransacao({
+        // Registrar transação simples
+        this.registrarTransacaoSimples({
             tipo: 'despesa',
             valor: custoTotal,
-            categoria: equipamento.tipo === 'consumivel' ? 'Consumíveis' : 'Equipamentos',
-            descricao: `Compra: ${quantidade}x ${equipamento.nome}`,
-            responsavel: 'Jogador'
+            descricao: `Compra: ${quantidade}x ${equipamento.nome}`
         });
     }
 
@@ -869,32 +496,12 @@ class SistemaEquipamentos {
         const submenu = document.getElementById('submenu-quantidade');
         if (submenu) {
             submenu.classList.remove('aberto');
-            
-            // Resetar eventos
-            submenu.removeEventListener('touchmove', () => {});
-            submenu.removeEventListener('scroll', () => {});
-            submenu.removeEventListener('click', () => {});
-            document.removeEventListener('touchmove', () => {});
-            
             setTimeout(() => {
                 submenu.style.display = 'none';
-                // Resetar estilos
-                submenu.style.position = '';
-                submenu.style.top = '';
-                submenu.style.left = '';
-                submenu.style.transform = '';
-                submenu.style.width = '';
-                submenu.style.maxWidth = '';
-                submenu.style.maxHeight = '';
-                submenu.style.zIndex = '';
-                submenu.style.background = '';
-                submenu.style.borderRadius = '';
-                submenu.style.boxShadow = '';
             }, 300);
         }
         this.itemCompraQuantidade = null;
         this.quantidadeAtual = 1;
-        this.isModalOpen = false;
     }
 
     // ========== EQUIPAR/DESEQUIPAR ==========
@@ -1009,44 +616,16 @@ class SistemaEquipamentos {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
 
-        // Verificar se item usa mãos
-        if (equipamento.maos && equipamento.maos > 0) {
-            const maosOcupadas = this.calcularMaosOcupadas();
-            const maosNecessarias = equipamento.maos;
-            
-            // Verificar se há mãos disponíveis
-            if (maosOcupadas + maosNecessarias > this.maosDisponiveis) {
-                this.mostrarFeedback(`Não há mãos suficientes para ${equipamento.nome}!`, 'erro');
-                return;
-            }
-            
-            // Verificar se é arma de 2 mãos e já tem algo equipado
-            if (maosNecessarias === 2 && maosOcupadas > 0) {
-                this.mostrarFeedback(`${equipamento.nome} requer 2 mãos livres!`, 'erro');
-                return;
-            }
-        }
-
         this.removerDeTodosOsLocais(itemId);
         equipamento.status = 'equipado';
         equipamento.equipado = true;
-        
-        // Colocar no local apropriado
-        if (equipamento.maos && equipamento.maos > 0) {
-            this.equipamentosEquipados.maos.push(equipamento);
-        } else {
-            this.equipamentosEquipados.mochila.push(equipamento);
-        }
+        this.equipamentosEquipados.mochila.push(equipamento);
         
         this.mostrarFeedback(`${equipamento.nome} preparado`, 'sucesso');
         
-        if (equipamento.maos && equipamento.maos > 0) {
+        if (equipamento.maos > 0) {
             this.atualizarDisplayMaos();
         }
-        
-        this.salvarDados();
-        this.atualizarInterface();
-        this.atualizarSistemaCombate();
     }
 
     desequiparItem(itemId) {
@@ -1110,7 +689,7 @@ class SistemaEquipamentos {
         this.atualizarSistemaCombate();
     }
 
-        // ========== SISTEMA DE DEPÓSITO ==========
+    // ========== SISTEMA DE DEPÓSITO ==========
     moverParaDeposito(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return false;
@@ -1206,241 +785,162 @@ class SistemaEquipamentos {
         this.atualizarInterface();
     }
 
-    // ========== SISTEMA FINANCEIRO COMPLETO ==========
-    configurarEventosFinanceiro() {
-        // Eventos para tipos de transação
-        document.querySelectorAll('.tipo-option').forEach(option => {
-            option.addEventListener('click', (e) => {
-                const tipo = e.currentTarget.dataset.tipo;
-                this.selecionarTipoTransacao(tipo);
-            });
-        });
-
-        // Eventos para valores sugeridos
-        document.querySelectorAll('.btn-valor-sugerido').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const valor = parseFloat(e.currentTarget.dataset.valor);
-                this.usarValorSugerido(valor);
-            });
-        });
-
-        // Evento para categoria personalizada
-        const inputCategoriaPersonalizada = document.getElementById('categoria-personalizada-modal');
-        if (inputCategoriaPersonalizada) {
-            inputCategoriaPersonalizada.addEventListener('input', (e) => {
-                this.transacaoAtual.categoria = e.target.value;
-                document.querySelectorAll('.categoria-option').forEach(opt => 
-                    opt.classList.remove('selecionado'));
-            });
+    // ========== SISTEMA FINANCEIRO SIMPLIFICADO ==========
+    registrarTransacaoSimples(dados) {
+        const transacao = {
+            id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            tipo: dados.tipo,
+            valor: dados.valor,
+            descricao: dados.descricao,
+            data: new Date().toLocaleDateString('pt-BR'),
+            timestamp: new Date().toISOString()
+        };
+        
+        this.ultimasTransacoes.unshift(transacao);
+        
+        // Manter apenas as últimas 10 transações
+        if (this.ultimasTransacoes.length > 10) {
+            this.ultimasTransacoes = this.ultimasTransacoes.slice(0, 10);
         }
-
-        // Eventos para campos do modal
-        ['valor-transacao-modal', 'descricao-transacao-modal', 
-         'data-transacao-modal', 'responsavel-transacao-modal', 
-         'notas-transacao-modal'].forEach(id => {
-            const elemento = document.getElementById(id);
-            if (elemento) {
-                elemento.addEventListener('input', (e) => {
-                    this.atualizarCampoTransacao(id.replace('-modal', ''), e.target.value);
-                });
-            }
-        });
-
-        // Configurar data atual como padrão
-        const dataInput = document.getElementById('data-transacao-modal');
-        if (dataInput) {
-            const hoje = new Date().toISOString().split('T')[0];
-            dataInput.value = hoje;
-            this.transacaoAtual.data = hoje;
-        }
+        
+        // Atualizar histórico na interface
+        this.atualizarHistoricoTransacoes();
     }
 
-    abrirModalTransacao(tipo) {
-        this.transacaoAtual.tipo = tipo;
+    adicionarDinheiro(valor) {
+        if (isNaN(valor) || valor <= 0) {
+            this.mostrarFeedback('Valor inválido!', 'erro');
+            return;
+        }
         
-        const modal = document.getElementById('modal-transacao');
+        this.dinheiro += valor;
+        this.salvarDados();
+        
+        this.registrarTransacaoSimples({
+            tipo: 'receita',
+            valor: valor,
+            descricao: 'Dinheiro adicionado'
+        });
+        
+        this.mostrarFeedback(`Adicionado $${valor}`, 'sucesso');
+        this.atualizarInterface();
+        this.notificarDashboard();
+    }
+
+    removerDinheiro(valor) {
+        if (isNaN(valor) || valor <= 0) {
+            this.mostrarFeedback('Valor inválido!', 'erro');
+            return;
+        }
+        
+        if (valor > this.dinheiro) {
+            this.mostrarFeedback('Dinheiro insuficiente!', 'erro');
+            return;
+        }
+        
+        this.dinheiro -= valor;
+        this.salvarDados();
+        
+        this.registrarTransacaoSimples({
+            tipo: 'despesa',
+            valor: valor,
+            descricao: 'Dinheiro removido'
+        });
+        
+        this.mostrarFeedback(`Removido $${valor}`, 'sucesso');
+        this.atualizarInterface();
+        this.notificarDashboard();
+    }
+
+    ajustarDinheiroManual() {
+        const novoValor = prompt('Digite o novo valor de dinheiro:', this.dinheiro);
+        if (novoValor === null) return;
+        
+        const valorNumerico = parseInt(novoValor);
+        if (isNaN(valorNumerico)) {
+            this.mostrarFeedback('Valor inválido!', 'erro');
+            return;
+        }
+        
+        const diferenca = valorNumerico - this.dinheiro;
+        this.dinheiro = valorNumerico;
+        this.salvarDados();
+        
+        if (diferenca > 0) {
+            this.registrarTransacaoSimples({
+                tipo: 'receita',
+                valor: diferenca,
+                descricao: 'Ajuste manual'
+            });
+        } else if (diferenca < 0) {
+            this.registrarTransacaoSimples({
+                tipo: 'despesa',
+                valor: Math.abs(diferenca),
+                descricao: 'Ajuste manual'
+            });
+        }
+        
+        this.mostrarFeedback(`Dinheiro ajustado para $${valorNumerico}`, 'sucesso');
+        this.atualizarInterface();
+        this.notificarDashboard();
+    }
+
+    abrirModalDinheiro(tipo) {
+        const modal = document.getElementById('modal-dinheiro');
         if (!modal) return;
         
-        // Atualizar saldo no modal
-        this.atualizarSaldoModal();
+        // Atualizar saldo
+        const saldoModal = document.getElementById('saldo-modal');
+        if (saldoModal) {
+            saldoModal.textContent = `$${this.dinheiro}`;
+        }
         
-        // Selecionar tipo automaticamente
-        this.selecionarTipoTransacao(tipo);
-        
-        // Configurar data atual
-        const hoje = new Date().toISOString().split('T')[0];
-        const dataInput = document.getElementById('data-transacao-modal');
-        if (dataInput) {
-            dataInput.value = hoje;
-            this.transacaoAtual.data = hoje;
+        // Configurar título
+        const titulo = document.getElementById('modal-dinheiro-titulo');
+        if (titulo) {
+            titulo.textContent = tipo === 'receber' ? 'Receber Dinheiro' : 'Gastar Dinheiro';
         }
         
         // Limpar campos
-        this.limparCamposTransacao();
+        const valorInput = document.getElementById('valor-dinheiro');
+        const descricaoInput = document.getElementById('descricao-dinheiro');
         
-        // Configurar categorias
-        this.configurarCategoriasModal(tipo);
+        if (valorInput) valorInput.value = '';
+        if (descricaoInput) descricaoInput.value = '';
+        
+        // Armazenar tipo da operação
+        this.operacaoAtual = tipo;
         
         // Mostrar modal
         modal.style.display = 'flex';
-        
-        // Prevenir scroll do body no mobile
-        if (window.innerWidth <= 768) {
-            document.body.style.overflow = 'hidden';
-        }
-        
         setTimeout(() => {
             modal.classList.add('aberto');
-            document.getElementById('valor-transacao-modal')?.focus();
+            if (valorInput) valorInput.focus();
         }, 10);
     }
 
-    fecharModalTransacao() {
-        const modal = document.getElementById('modal-transacao');
+    fecharModalDinheiro() {
+        const modal = document.getElementById('modal-dinheiro');
         if (modal) {
             modal.classList.remove('aberto');
-            
-            // Restaurar scroll do body
-            document.body.style.overflow = '';
-            
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 300);
         }
-        this.transacaoAtual = {
-            tipo: 'receita',
-            valor: 0,
-            categoria: '',
-            descricao: '',
-            data: new Date().toISOString().split('T')[0],
-            responsavel: 'Jogador',
-            notas: ''
-        };
-    }
-
-    selecionarTipoTransacao(tipo) {
-        document.querySelectorAll('.tipo-option').forEach(option => {
-            option.classList.remove('selecionado');
-            if (option.dataset.tipo === tipo) {
-                option.classList.add('selecionado');
-            }
-        });
-        
-        this.transacaoAtual.tipo = tipo;
-        this.configurarCategoriasModal(tipo);
-    }
-
-    atualizarSaldoModal() {
-        const saldoModal = document.getElementById('saldo-transacao-modal');
-        const nivelRiqueza = document.getElementById('nivel-riqueza-modal');
-        const patrimonio = document.getElementById('patrimonio-modal');
-        
-        if (saldoModal) {
-            saldoModal.textContent = `$${this.dinheiro}`;
-            // Colorir baseado no saldo
-            if (this.dinheiro < 0) {
-                saldoModal.style.color = '#e74c3c';
-            } else if (this.dinheiro < 100) {
-                saldoModal.style.color = '#f39c12';
-            } else {
-                saldoModal.style.color = '#27ae60';
-            }
-        }
-        
-        if (nivelRiqueza) {
-            nivelRiqueza.textContent = this.sistemaRiqueza.nivelAtual.toUpperCase();
-        }
-        
-        if (patrimonio) {
-            const patrimonioTotal = this.calcularPatrimonioTotal();
-            patrimonio.textContent = `$${patrimonioTotal}`;
-        }
-    }
-
-    configurarCategoriasModal(tipo) {
-        const container = document.getElementById('categorias-modal');
-        if (!container) return;
-        
-        const categorias = this.categorias[tipo] || [];
-        
-        container.innerHTML = categorias.map(categoria => `
-            <div class="categoria-option" data-categoria="${categoria}">
-                ${categoria}
-            </div>
-        `).join('');
-        
-        // Adicionar evento de clique nas categorias
-        setTimeout(() => {
-            document.querySelectorAll('.categoria-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    document.querySelectorAll('.categoria-option').forEach(opt => 
-                        opt.classList.remove('selecionado'));
-                    option.classList.add('selecionado');
-                    this.transacaoAtual.categoria = option.dataset.categoria;
-                    document.getElementById('categoria-personalizada-modal').value = '';
-                });
-            });
-        }, 10);
-    }
-
-    usarValorSugerido(valor) {
-        const inputValor = document.getElementById('valor-transacao-modal');
-        if (inputValor) {
-            inputValor.value = valor;
-            this.transacaoAtual.valor = valor;
-        }
-    }
-
-    atualizarCampoTransacao(campo, valor) {
-        this.transacaoAtual[campo] = valor;
-    }
-
-    limparCamposTransacao() {
-        // Limpar valor
-        const inputValor = document.getElementById('valor-transacao-modal');
-        if (inputValor) inputValor.value = '';
-        this.transacaoAtual.valor = 0;
-        
-        // Limpar descrição
-        const inputDescricao = document.getElementById('descricao-transacao-modal');
-        if (inputDescricao) inputDescricao.value = '';
-        this.transacaoAtual.descricao = '';
-        
-        // Limpar categoria personalizada
-        const inputCatPersonalizada = document.getElementById('categoria-personalizada-modal');
-        if (inputCatPersonalizada) inputCatPersonalizada.value = '';
-        
-        // Limpar responsável
-        const inputResponsavel = document.getElementById('responsavel-transacao-modal');
-        if (inputResponsavel) inputResponsavel.value = 'Jogador';
-        this.transacaoAtual.responsavel = 'Jogador';
-        
-        // Limpar notas
-        const inputNotas = document.getElementById('notas-transacao-modal');
-        if (inputNotas) inputNotas.value = '';
-        this.transacaoAtual.notas = '';
-        
-        // Desmarcar categorias
-        document.querySelectorAll('.categoria-option').forEach(opt => 
-            opt.classList.remove('selecionado'));
-        this.transacaoAtual.categoria = '';
+        this.operacaoAtual = null;
     }
 
     confirmarTransacao() {
-        // Validar campos
-        const inputValor = document.getElementById('valor-transacao-modal');
-        const inputDescricao = document.getElementById('descricao-transacao-modal');
+        const valorInput = document.getElementById('valor-dinheiro');
+        const descricaoInput = document.getElementById('descricao-dinheiro');
         
-        if (!inputValor || !inputDescricao) return;
+        if (!valorInput || !descricaoInput) return;
         
-        const valor = parseFloat(inputValor.value);
-        const descricao = inputDescricao.value.trim();
-        const categoria = this.transacaoAtual.categoria || 
-                         document.getElementById('categoria-personalizada-modal')?.value || 
-                         'Outros';
+        const valor = parseFloat(valorInput.value);
+        const descricao = descricaoInput.value.trim();
         
         // Validações
-        if (!valor || valor <= 0 || isNaN(valor)) {
+        if (!valor || valor <= 0) {
             this.mostrarFeedback('Por favor, insira um valor válido!', 'erro');
             return;
         }
@@ -1450,523 +950,77 @@ class SistemaEquipamentos {
             return;
         }
         
-        if (!categoria) {
-            this.mostrarFeedback('Por favor, selecione ou digite uma categoria!', 'erro');
-            return;
-        }
-        
-        // Verificar saldo para despesas, transferências e doações
-        if (['despesa', 'transferencia', 'doacao'].includes(this.transacaoAtual.tipo)) {
+        // Verificar saldo para gastos
+        if (this.operacaoAtual === 'gastar') {
             if (valor > this.dinheiro) {
-                this.mostrarFeedback('Saldo insuficiente!', 'erro');
+                this.mostrarFeedback('Dinheiro insuficiente!', 'erro');
                 return;
             }
-        }
-        
-        // Processar transação
-        this.processarTransacao(valor, descricao, categoria);
-    }
-
-    processarTransacao(valor, descricao, categoria) {
-        const tipo = this.transacaoAtual.tipo;
-        
-        // Atualizar dinheiro baseado no tipo
-        switch(tipo) {
-            case 'receita':
-                this.dinheiro += valor;
-                break;
-            case 'despesa':
-                this.dinheiro -= valor;
-                break;
-            case 'transferencia':
-                this.dinheiro -= valor;
-                // Aqui poderia adicionar lógica para transferir para outro personagem
-                break;
-            case 'doacao':
-                this.dinheiro -= valor;
-                break;
-        }
-        
-        // Criar objeto de transação
-        const transacao = {
-            id: this.gerarIdTransacao(),
-            tipo: tipo,
-            valor: valor,
-            categoria: categoria,
-            descricao: descricao,
-            data: this.transacaoAtual.data || new Date().toISOString().split('T')[0],
-            responsavel: this.transacaoAtual.responsavel || 'Jogador',
-            notas: this.transacaoAtual.notas || '',
-            timestamp: new Date().toISOString()
-        };
-        
-        // Adicionar ao histórico
-        this.historicoTransacoes.unshift(transacao);
-        
-        // Limitar histórico aos últimos 1000 registros
-        if (this.historicoTransacoes.length > 1000) {
-            this.historicoTransacoes = this.historicoTransacoes.slice(0, 1000);
-        }
-        
-        // Salvar e atualizar
-        this.salvarDados();
-        this.fecharModalTransacao();
-        this.atualizarInterface();
-        this.atualizarResumoFinanceiro();
-        this.atualizarHistorico();
-        
-        // Feedback
-        const tiposMensagem = {
-            'receita': `Recebido $${valor}`,
-            'despesa': `Gasto $${valor}`,
-            'transferencia': `Transferido $${valor}`,
-            'doacao': `Doação de $${valor} realizada`
-        };
-        
-        this.mostrarFeedback(tiposMensagem[tipo], 'sucesso');
-        this.notificarDashboard();
-    }
-
-    registrarTransacao(dados) {
-        const transacao = {
-            id: this.gerarIdTransacao(),
-            tipo: dados.tipo,
-            valor: dados.valor,
-            categoria: dados.categoria,
-            descricao: dados.descricao,
-            data: new Date().toISOString().split('T')[0],
-            responsavel: dados.responsavel || 'Jogador',
-            notas: dados.notas || '',
-            timestamp: new Date().toISOString()
-        };
-        
-        this.historicoTransacoes.unshift(transacao);
-        
-        if (this.historicoTransacoes.length > 1000) {
-            this.historicoTransacoes = this.historicoTransacoes.slice(0, 1000);
-        }
-        
-        this.salvarDados();
-        this.atualizarResumoFinanceiro();
-        this.atualizarHistorico();
-    }
-
-    gerarIdTransacao() {
-        return 'trans_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
-
-    // ========== HISTÓRICO E FILTROS ==========
-    filtrarHistorico() {
-        const filtroTipo = document.getElementById('filtro-tipo-transacao')?.value || 'todos';
-        const busca = document.getElementById('busca-transacao')?.value.toLowerCase() || '';
-        
-        this.filtrosAtivos.tipo = filtroTipo;
-        this.filtrosAtivos.busca = busca;
-        
-        this.atualizarHistorico();
-    }
-
-    limparFiltros() {
-        const filtroTipo = document.getElementById('filtro-tipo-transacao');
-        const busca = document.getElementById('busca-transacao');
-        
-        if (filtroTipo) filtroTipo.value = 'todos';
-        if (busca) busca.value = '';
-        
-        this.filtrosAtivos.tipo = 'todos';
-        this.filtrosAtivos.busca = '';
-        
-        this.atualizarHistorico();
-    }
-
-    atualizarHistorico() {
-        const tabela = document.getElementById('tabela-historico');
-        const tbody = tabela?.querySelector('tbody');
-        const totalTransacoes = document.getElementById('total-transacoes');
-        const saldoInicial = document.getElementById('saldo-inicial');
-        
-        if (!tbody) return;
-        
-        // Filtrar transações
-        let transacoesFiltradas = this.historicoTransacoes;
-        
-        if (this.filtrosAtivos.tipo !== 'todos') {
-            transacoesFiltradas = transacoesFiltradas.filter(t => t.tipo === this.filtrosAtivos.tipo);
-        }
-        
-        if (this.filtrosAtivos.busca) {
-            const busca = this.filtrosAtivos.busca.toLowerCase();
-            transacoesFiltradas = transacoesFiltradas.filter(t => 
-                t.descricao.toLowerCase().includes(busca) ||
-                t.categoria.toLowerCase().includes(busca) ||
-                t.responsavel.toLowerCase().includes(busca)
-            );
-        }
-        
-        // Atualizar contadores
-        if (totalTransacoes) {
-            totalTransacoes.textContent = transacoesFiltradas.length;
-        }
-        
-        if (saldoInicial) {
-            saldoInicial.textContent = `$${this.calcularSaldoInicial()}`;
-        }
-        
-        // Atualizar tabela
-        if (transacoesFiltradas.length === 0) {
-            tbody.innerHTML = `
-                <tr class="historico-vazio">
-                    <td colspan="7">
-                        <i class="fas fa-receipt"></i>
-                        <p>Nenhuma transação encontrada</p>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        tbody.innerHTML = transacoesFiltradas.map(transacao => {
-            const dataFormatada = this.formatarData(transacao.data);
-            const valorFormatado = `$${transacao.valor.toFixed(2)}`;
-            const tipoFormatado = this.formatarTipo(transacao.tipo);
-            const classeValor = transacao.tipo === 'receita' ? 'positivo' : 'negativo';
-            
-            return `
-                <tr>
-                    <td>${dataFormatada}</td>
-                    <td>${transacao.descricao}</td>
-                    <td>${transacao.categoria}</td>
-                    <td><span class="badge-tipo badge-${transacao.tipo}">${tipoFormatado}</span></td>
-                    <td class="${classeValor}">${valorFormatado}</td>
-                    <td>${transacao.responsavel}</td>
-                    <td>
-                        <button class="btn-acao" onclick="sistemaEquipamentos.verDetalhesTransacao('${transacao.id}')" title="Detalhes">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn-acao" onclick="sistemaEquipamentos.editarTransacao('${transacao.id}')" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-acao btn-remover" onclick="sistemaEquipamentos.removerTransacao('${transacao.id}')" title="Remover">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-        
-        // Configurar scroll horizontal se necessário
-        setTimeout(() => this.configurarScrollHorizontalTabelas(), 100);
-    }
-
-    formatarData(dataString) {
-        if (!dataString) return '-';
-        const data = new Date(dataString);
-        if (isNaN(data.getTime())) return dataString;
-        return data.toLocaleDateString('pt-BR');
-    }
-
-    formatarTipo(tipo) {
-        const tipos = {
-            'receita': 'Receita',
-            'despesa': 'Despesa',
-            'transferencia': 'Transferência',
-            'doacao': 'Doação'
-        };
-        return tipos[tipo] || tipo;
-    }
-
-    calcularSaldoInicial() {
-        const nivel = this.sistemaRiqueza.nivelAtual;
-        const multiplicador = this.sistemaRiqueza.multiplicadores[nivel] || 1;
-        return Math.floor(this.sistemaRiqueza.dinheiroBase * multiplicador);
-    }
-
-    verDetalhesTransacao(id) {
-        const transacao = this.historicoTransacoes.find(t => t.id === id);
-        if (!transacao) return;
-        
-        alert(`Detalhes da Transação:\n\n` +
-              `Tipo: ${this.formatarTipo(transacao.tipo)}\n` +
-              `Valor: $${transacao.valor.toFixed(2)}\n` +
-              `Categoria: ${transacao.categoria}\n` +
-              `Descrição: ${transacao.descricao}\n` +
-              `Data: ${this.formatarData(transacao.data)}\n` +
-              `Responsável: ${transacao.responsavel}\n` +
-              `Notas: ${transacao.notas || 'Nenhuma'}\n` +
-              `Registrada em: ${new Date(transacao.timestamp).toLocaleString('pt-BR')}`);
-    }
-
-    editarTransacao(id) {
-        const transacao = this.historicoTransacoes.find(t => t.id === id);
-        if (!transacao) return;
-        
-        // Para simplificar, vamos abrir o modal com os dados da transação
-        this.transacaoAtual = { ...transacao };
-        this.abrirModalTransacao(transacao.tipo);
-        
-        // Preencher campos
-        setTimeout(() => {
-            const valorInput = document.getElementById('valor-transacao-modal');
-            const descricaoInput = document.getElementById('descricao-transacao-modal');
-            const dataInput = document.getElementById('data-transacao-modal');
-            const responsavelInput = document.getElementById('responsavel-transacao-modal');
-            const notasInput = document.getElementById('notas-transacao-modal');
-            
-            if (valorInput) valorInput.value = transacao.valor;
-            if (descricaoInput) descricaoInput.value = transacao.descricao;
-            if (dataInput) dataInput.value = transacao.data;
-            if (responsavelInput) responsavelInput.value = transacao.responsavel;
-            if (notasInput) notasInput.value = transacao.notas || '';
-            
-            // Marcar categoria
-            setTimeout(() => {
-                document.querySelectorAll('.categoria-option').forEach(option => {
-                    if (option.dataset.categoria === transacao.categoria) {
-                        option.classList.add('selecionado');
-                    }
-                });
-            }, 100);
-        }, 100);
-        
-        // Marcar transação para edição
-        this.transacaoEditando = id;
-    }
-
-    removerTransacao(id) {
-        if (!confirm('Tem certeza que deseja remover esta transação?')) return;
-        
-        const index = this.historicoTransacoes.findIndex(t => t.id === id);
-        if (index === -1) return;
-        
-        const transacao = this.historicoTransacoes[index];
-        
-        // Ajustar saldo se necessário
-        if (transacao.tipo === 'receita') {
-            this.dinheiro -= transacao.valor;
+            this.dinheiro -= valor;
         } else {
-            this.dinheiro += transacao.valor;
+            this.dinheiro += valor;
         }
         
-        this.historicoTransacoes.splice(index, 1);
-        this.salvarDados();
-        this.atualizarInterface();
-        this.atualizarHistorico();
-        this.mostrarFeedback('Transação removida', 'sucesso');
-    }
-
-    exportarHistorico(formato) {
-        const dados = this.historicoTransacoes;
-        
-        if (dados.length === 0) {
-            this.mostrarFeedback('Nenhuma transação para exportar', 'aviso');
-            return;
-        }
-        
-        if (formato === 'csv') {
-            this.exportarParaCSV(dados);
-        } else if (formato === 'pdf') {
-            this.mostrarFeedback('Exportação PDF em desenvolvimento', 'aviso');
-        }
-    }
-
-    exportarParaCSV(dados) {
-        const cabecalhos = ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor', 'Responsável', 'Notas'];
-        const linhas = dados.map(transacao => [
-            transacao.data,
-            this.formatarTipo(transacao.tipo),
-            transacao.categoria,
-            transacao.descricao,
-            transacao.valor.toFixed(2),
-            transacao.responsavel,
-            transacao.notas || ''
-        ]);
-        
-        const csvContent = [
-            cabecalhos.join(','),
-            ...linhas.map(row => row.join(','))
-        ].join('\n');
-        
-        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `historico-financeiro_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
-        
-        this.mostrarFeedback('Histórico exportado como CSV', 'sucesso');
-    }
-
-    // ========== ESTATÍSTICAS FINANCEIRAS ==========
-    calcularEstatisticas() {
-        const hoje = new Date();
-        const trintaDiasAtras = new Date();
-        trintaDiasAtras.setDate(hoje.getDate() - 30);
-        
-        const transacoesPeriodo = this.historicoTransacoes.filter(transacao => {
-            const dataTransacao = new Date(transacao.data);
-            return dataTransacao >= trintaDiasAtras;
+        // Registrar transação
+        this.registrarTransacaoSimples({
+            tipo: this.operacaoAtual === 'gastar' ? 'despesa' : 'receita',
+            valor: valor,
+            descricao: descricao
         });
         
-        const receitas = transacoesPeriodo
-            .filter(t => t.tipo === 'receita')
-            .reduce((sum, t) => sum + t.valor, 0);
+        this.salvarDados();
+        this.fecharModalDinheiro();
+        this.atualizarInterface();
+        this.notificarDashboard();
         
-        const despesas = transacoesPeriodo
-            .filter(t => t.tipo === 'despesa')
-            .reduce((sum, t) => sum + t.valor, 0);
+        const mensagem = this.operacaoAtual === 'gastar' 
+            ? `Gasto $${valor}: ${descricao}` 
+            : `Recebido $${valor}: ${descricao}`;
         
-        // Maiores gastos
-        const maioresGastos = transacoesPeriodo
-            .filter(t => t.tipo === 'despesa')
-            .sort((a, b) => b.valor - a.valor)
-            .slice(0, 5);
-        
-        // Gastos por categoria
-        const gastosPorCategoria = {};
-        transacoesPeriodo
-            .filter(t => t.tipo === 'despesa')
-            .forEach(t => {
-                gastosPorCategoria[t.categoria] = (gastosPorCategoria[t.categoria] || 0) + t.valor;
-            });
-        
-        // Últimas transações
-        const ultimasTransacoes = this.historicoTransacoes.slice(0, 5);
-        
-        return {
-            receitasMes: receitas,
-            despesasMes: despesas,
-            saldoDisponivel: this.dinheiro,
-            maioresGastos: maioresGastos,
-            gastosPorCategoria: gastosPorCategoria,
-            ultimasTransacoes: ultimasTransacoes,
-            patrimonioTotal: this.calcularPatrimonioTotal()
-        };
+        this.mostrarFeedback(mensagem, 'sucesso');
     }
 
-    calcularPatrimonioTotal() {
-        const valorEquipamentos = this.equipamentosAdquiridos.reduce((sum, item) => 
-            sum + (item.custoTotal || item.custo), 0);
-        return this.dinheiro + valorEquipamentos;
+    atualizarHistoricoTransacoes() {
+        const historicoLista = document.getElementById('lista-transacoes');
+        const historicoVazio = document.getElementById('historico-vazio');
+        
+        if (!historicoLista) return;
+        
+        if (this.ultimasTransacoes.length === 0) {
+            if (historicoVazio) {
+                historicoVazio.style.display = 'block';
+            }
+            historicoLista.innerHTML = '';
+            return;
+        }
+        
+        if (historicoVazio) {
+            historicoVazio.style.display = 'none';
+        }
+        
+        historicoLista.innerHTML = this.ultimasTransacoes.map(transacao => `
+            <div class="transacao-item ${transacao.tipo}">
+                <div class="transacao-info">
+                    <div class="transacao-descricao">${transacao.descricao}</div>
+                    <div class="transacao-data">${transacao.data}</div>
+                </div>
+                <div class="transacao-valor">
+                    ${transacao.tipo === 'receita' ? '+' : '-'}$${transacao.valor}
+                </div>
+            </div>
+        `).join('');
     }
 
-    atualizarResumoFinanceiro() {
-        const estatisticas = this.calcularEstatisticas();
-        
-        // Atualizar cards de resumo
-        const saldoDisponivel = document.getElementById('saldo-disponivel');
-        const receitasMes = document.getElementById('receitas-mes');
-        const despesasMes = document.getElementById('despesas-mes');
-        const patrimonioTotal = document.getElementById('patrimonio-total');
-        const saldoStatus = document.getElementById('saldo-status');
-        
-        if (saldoDisponivel) {
-            saldoDisponivel.textContent = `$${estatisticas.saldoDisponivel}`;
-            if (estatisticas.saldoDisponivel < 0) {
-                saldoDisponivel.style.color = '#e74c3c';
-            } else if (estatisticas.saldoDisponivel < 100) {
-                saldoDisponivel.style.color = '#f39c12';
-            } else {
-                saldoDisponivel.style.color = '#27ae60';
-            }
+    limparHistorico() {
+        if (this.ultimasTransacoes.length === 0) {
+            this.mostrarFeedback('Nenhuma transação para limpar!', 'aviso');
+            return;
         }
         
-        if (receitasMes) {
-            receitasMes.textContent = `$${estatisticas.receitasMes}`;
-        }
-        
-        if (despesasMes) {
-            despesasMes.textContent = `$${estatisticas.despesasMes}`;
-        }
-        
-        if (patrimonioTotal) {
-            patrimonioTotal.textContent = `$${estatisticas.patrimonioTotal}`;
-        }
-        
-        if (saldoStatus) {
-            if (estatisticas.saldoDisponivel < 0) {
-                saldoStatus.textContent = 'Saldo negativo';
-                saldoStatus.style.color = '#e74c3c';
-            } else if (estatisticas.saldoDisponivel < 100) {
-                saldoStatus.textContent = 'Saldo baixo';
-                saldoStatus.style.color = '#f39c12';
-            } else {
-                saldoStatus.textContent = 'Saldo saudável';
-                saldoStatus.style.color = '#27ae60';
-            }
-        }
-        
-        // Atualizar maiores gastos
-        const maioresGastosContainer = document.getElementById('maiores-gastos');
-        if (maioresGastosContainer) {
-            if (estatisticas.maioresGastos.length === 0) {
-                maioresGastosContainer.innerHTML = `
-                    <div class="estatistica-vazia">
-                        <i class="fas fa-receipt"></i>
-                        <p>Nenhuma despesa registrada</p>
-                    </div>
-                `;
-            } else {
-                maioresGastosContainer.innerHTML = estatisticas.maioresGastos.map(gasto => `
-                    <div class="gasto-item">
-                        <div class="gasto-descricao">${gasto.descricao}</div>
-                        <div class="gasto-valor">$${gasto.valor.toFixed(2)}</div>
-                    </div>
-                `).join('');
-            }
-        }
-        
-        // Atualizar gastos por categoria
-        const gastosCategoriasContainer = document.getElementById('gastos-categorias');
-        if (gastosCategoriasContainer) {
-            const categorias = Object.entries(estatisticas.gastosPorCategoria);
-            
-            if (categorias.length === 0) {
-                gastosCategoriasContainer.innerHTML = `
-                    <div class="estatistica-vazia">
-                        <i class="fas fa-tag"></i>
-                        <p>Nenhuma categoria registrada</p>
-                    </div>
-                `;
-            } else {
-                gastosCategoriasContainer.innerHTML = categorias.map(([categoria, valor]) => `
-                    <div class="categoria-item">
-                        <div class="categoria-nome">${categoria}</div>
-                        <div class="categoria-valor">$${valor.toFixed(2)}</div>
-                    </div>
-                `).join('');
-            }
-        }
-        
-        // Atualizar últimas transações
-        const ultimasTransacoesContainer = document.getElementById('ultimas-transacoes');
-        if (ultimasTransacoesContainer) {
-            if (estatisticas.ultimasTransacoes.length === 0) {
-                ultimasTransacoesContainer.innerHTML = `
-                    <div class="estatistica-vazia">
-                        <i class="fas fa-exchange-alt"></i>
-                        <p>Nenhuma transação registrada</p>
-                    </div>
-                `;
-            } else {
-                ultimasTransacoesContainer.innerHTML = estatisticas.ultimasTransacoes.map(transacao => `
-                    <div class="transacao-rapida">
-                        <div class="transacao-icon ${transacao.tipo}">
-                            ${transacao.tipo === 'receita' ? '📥' : 
-                              transacao.tipo === 'despesa' ? '📤' :
-                              transacao.tipo === 'transferencia' ? '🔄' : '❤️'}
-                        </div>
-                        <div class="transacao-info">
-                            <div class="transacao-descricao">${transacao.descricao}</div>
-                            <div class="transacao-detalhes">
-                                <span class="transacao-categoria">${transacao.categoria}</span>
-                                <span class="transacao-valor ${transacao.tipo}">
-                                    ${transacao.tipo === 'receita' ? '+' : '-'}$${transacao.valor.toFixed(2)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
+        if (confirm('Tem certeza que deseja limpar o histórico de transações?')) {
+            this.ultimasTransacoes = [];
+            this.atualizarHistoricoTransacoes();
+            this.mostrarFeedback('Histórico limpo', 'sucesso');
         }
     }
 
@@ -2215,7 +1269,7 @@ class SistemaEquipamentos {
                         <h4><i class="fas fa-scroll"></i> Propriedades do Item de Missão</h4>
                         <div class="form-group">
                             <label>Missão Relacionada:</label>
-                                <input type="text" id="item-missao" placeholder="Nome da missão" maxlength="50">
+                            <input type="text" id="item-missao" placeholder="Nome da missão" maxlength="50">
                         </div>
                         <div class="form-group">
                             <label>Importância:</label>
@@ -2481,7 +1535,7 @@ class SistemaEquipamentos {
         const peso = parseFloat(document.getElementById('item-peso').value);
         const custo = parseInt(document.getElementById('item-custo').value) || 0;
         
-        if (peso <= 0 || isNaN(peso)) {
+        if (peso <= 0) {
             this.mostrarFeedback('O peso deve ser maior que zero!', 'erro');
             return;
         }
@@ -2535,12 +1589,10 @@ class SistemaEquipamentos {
         
         // Registrar transação se houver custo
         if (custo > 0) {
-            this.registrarTransacao({
+            this.registrarTransacaoSimples({
                 tipo: 'despesa',
                 valor: custo,
-                categoria: 'Equipamentos Personalizados',
-                descricao: `Criação: ${nome}`,
-                responsavel: 'Jogador'
+                descricao: `Criação: ${nome}`
             });
         }
         
@@ -2636,42 +1688,17 @@ class SistemaEquipamentos {
                 }
             }
 
-            // Eventos para botões financeiros
-            const btnReceber = e.target.closest('[onclick*="abrirModalTransacao(\'receita\')"]');
+            // Eventos para botões financeiros simplificados
+            const btnReceber = e.target.closest('[onclick*="abrirModalDinheiro(\'receber\')"]');
             if (btnReceber) {
                 e.preventDefault();
-                this.abrirModalTransacao('receita');
+                this.abrirModalDinheiro('receber');
             }
 
-            const btnGastar = e.target.closest('[onclick*="abrirModalTransacao(\'despesa\')"]');
+            const btnGastar = e.target.closest('[onclick*="abrirModalDinheiro(\'gastar\')"]');
             if (btnGastar) {
                 e.preventDefault();
-                this.abrirModalTransacao('despesa');
-            }
-
-            const btnTransferir = e.target.closest('[onclick*="abrirModalTransacao(\'transferencia\')"]');
-            if (btnTransferir) {
-                e.preventDefault();
-                this.abrirModalTransacao('transferencia');
-            }
-
-            const btnDoar = e.target.closest('[onclick*="abrirModalTransacao(\'doacao\')"]');
-            if (btnDoar) {
-                e.preventDefault();
-                this.abrirModalTransacao('doacao');
-            }
-
-            // Botões de exportação
-            const btnExportarCSV = e.target.closest('[onclick*="exportarHistorico(\'csv\')"]');
-            if (btnExportarCSV) {
-                e.preventDefault();
-                this.exportarHistorico('csv');
-            }
-
-            const btnExportarPDF = e.target.closest('[onclick*="exportarHistorico(\'pdf\')"]');
-            if (btnExportarPDF) {
-                e.preventDefault();
-                this.exportarHistorico('pdf');
+                this.abrirModalDinheiro('gastar');
             }
 
             // Botão de mochila
@@ -2697,13 +1724,32 @@ class SistemaEquipamentos {
                     this.limparDeposito();
                 }
             }
+
+            // Eventos para botões rápidos de dinheiro
+            const btnRapidoReceber = e.target.closest('[onclick*="adicionarDinheiro("]');
+            if (btnRapidoReceber) {
+                e.preventDefault();
+                const valor = btnRapidoReceber.getAttribute('onclick').match(/adicionarDinheiro\((\d+)\)/);
+                if (valor && valor[1]) {
+                    this.adicionarDinheiro(parseInt(valor[1]));
+                }
+            }
+
+            const btnRapidoRemover = e.target.closest('[onclick*="removerDinheiro("]');
+            if (btnRapidoRemover) {
+                e.preventDefault();
+                const valor = btnRapidoRemover.getAttribute('onclick').match(/removerDinheiro\((\d+)\)/);
+                if (valor && valor[1]) {
+                    this.removerDinheiro(parseInt(valor[1]));
+                }
+            }
         });
 
         // Evento de fechar modal ao clicar fora
         document.addEventListener('click', (e) => {
-            const modal = document.getElementById('modal-transacao');
-            if (modal && e.target === modal) {
-                this.fecharModalTransacao();
+            const modalDinheiro = document.getElementById('modal-dinheiro');
+            if (modalDinheiro && e.target === modalDinheiro) {
+                this.fecharModalDinheiro();
             }
             
             const submenu = document.getElementById('submenu-quantidade');
@@ -2714,13 +1760,9 @@ class SistemaEquipamentos {
 
         // Evento de teclado
         document.addEventListener('keydown', (e) => {
-            const modal = document.getElementById('modal-transacao');
-            if (modal && modal.classList.contains('aberto') && e.key === 'Escape') {
-                this.fecharModalTransacao();
-            }
-            
-            if (modal && modal.classList.contains('aberto') && e.key === 'Enter' && e.ctrlKey) {
-                this.confirmarTransacao();
+            const modalDinheiro = document.getElementById('modal-dinheiro');
+            if (modalDinheiro && modalDinheiro.classList.contains('aberto') && e.key === 'Escape') {
+                this.fecharModalDinheiro();
             }
             
             const submenu = document.getElementById('submenu-quantidade');
@@ -2744,13 +1786,10 @@ class SistemaEquipamentos {
                 const subtabElement = document.getElementById(`subtab-${subtabId}`);
                 if (subtabElement) subtabElement.classList.add('active');
                 
-                // Se for a aba financeira, atualizar estatísticas
+                // Se for a aba financeira, atualizar histórico
                 if (subtabId === 'financeiro') {
                     setTimeout(() => {
-                        this.atualizarResumoFinanceiro();
-                        this.atualizarHistorico();
-                        // Configurar scroll para tabelas
-                        setTimeout(() => this.configurarScrollHorizontalTabelas(), 200);
+                        this.atualizarHistoricoTransacoes();
                     }, 100);
                 }
                 
@@ -2836,33 +1875,31 @@ class SistemaEquipamentos {
         }
         
         displayMaos.innerHTML = html;
+        
+        // Atualizar texto
+        const statusInfo = displayMaos.parentElement?.querySelector('.status-info small');
+        if (statusInfo) {
+            statusInfo.textContent = `${maosLivres} mãos disponíveis`;
+        }
     }
 
     atualizarInterfaceForcada() {
         this.atualizarStatus();
         this.atualizarListaEquipamentosAdquiridos();
-        this.atualizarResumoFinanceiro();
         this.atualizarInfoCarga();
         this.atualizarDisplayMaos();
         this.atualizarInterfaceDeposito();
-        this.atualizarEstatisticas();
         this.atualizarSistemaCombate();
-        this.atualizarHistorico();
-        
-        // Configurar scroll para tabelas
-        setTimeout(() => this.configurarScrollHorizontalTabelas(), 500);
+        this.atualizarHistoricoTransacoes();
     }
 
     atualizarInterface() {
         this.atualizarStatus();
         this.atualizarListaEquipamentosAdquiridos();
-        this.atualizarResumoFinanceiro();
         this.atualizarInfoCarga();
         this.atualizarDisplayMaos();
         this.atualizarInterfaceDeposito();
-        
-        // Configurar scroll para tabelas após atualização
-        setTimeout(() => this.configurarScrollHorizontalTabelas(), 300);
+        this.atualizarHistoricoTransacoes();
     }
 
     atualizarStatus() {
@@ -2901,6 +1938,12 @@ class SistemaEquipamentos {
             } else {
                 btnMochila.innerHTML = '<i class="fas fa-suitcase"></i> Usar Mochila';
             }
+        }
+
+        // Atualizar dinheiro disponível na aba financeiro
+        const dinheiroDisponivel = document.getElementById('dinheiro-disponivel');
+        if (dinheiroDisponivel) {
+            dinheiroDisponivel.textContent = `$${this.dinheiro}`;
         }
     }
 
@@ -2968,14 +2011,6 @@ class SistemaEquipamentos {
                 </div>
             </div>
         `).join('');
-        
-        // Configurar scroll horizontal se necessário
-        setTimeout(() => {
-            const container = lista.closest('.table-container');
-            if (container) {
-                this.configurarScrollHorizontalTabelas();
-            }
-        }, 100);
     }
 
     gerarBotoesControle(equipamento) {
@@ -3110,28 +2145,16 @@ class SistemaEquipamentos {
         }
     }
 
-    atualizarEstatisticas() {
-        const totalItens = document.getElementById('total-itens');
-        if (totalItens) totalItens.textContent = this.equipamentosAdquiridos.length;
+    atualizarInfoCarga() {
+        const totalItensInventario = document.getElementById('totalItensInventario');
+        const pesoInventario = document.getElementById('pesoInventario');
         
-        const itensEquipados = document.getElementById('itens-equipados');
-        if (itensEquipados) {
-            itensEquipados.textContent = this.equipamentosAdquiridos.filter(item => item.equipado).length;
+        if (totalItensInventario) {
+            totalItensInventario.textContent = this.equipamentosAdquiridos.length;
         }
         
-        const itensMochila = document.getElementById('itens-mochila');
-        if (itensMochila) {
-            itensMochila.textContent = this.equipamentosAdquiridos.filter(item => 
-                item.status === 'na-mochila' && !item.equipado
-            ).length;
-        }
-        
-        const itensDeposito = document.getElementById('itens-deposito');
-        if (itensDeposito) itensDeposito.textContent = this.deposito.length;
-        
-        const itensCorpo = document.getElementById('itens-corpo');
-        if (itensCorpo) {
-            itensCorpo.textContent = this.equipamentosAdquiridos.filter(item => item.status === 'no-corpo').length;
+        if (pesoInventario) {
+            pesoInventario.textContent = this.pesoAtual.toFixed(1);
         }
     }
 
@@ -3351,14 +2374,14 @@ class SistemaEquipamentos {
                 escudoCombate: this.escudoCombate,
                 deposito: this.deposito,
                 capacidadeCarga: this.capacidadeCarga,
-                historicoTransacoes: this.historicoTransacoes,
+                ultimasTransacoes: this.ultimasTransacoes,
                 contadorItensPersonalizados: this.contadorItensPersonalizados,
                 ST: this.ST,
                 nivelCargaAtual: this.nivelCargaAtual,
                 penalidadesCarga: this.penalidadesCarga,
                 sistemaRiqueza: this.sistemaRiqueza,
                 timestamp: new Date().getTime(),
-                version: '3.0'
+                version: '2.0'
             };
             
             localStorage.setItem('sistemaEquipamentos_data', JSON.stringify(dados));
@@ -3401,8 +2424,8 @@ class SistemaEquipamentos {
             
             this.deposito = Array.isArray(dados.deposito) ? dados.deposito : [];
             
-            this.historicoTransacoes = Array.isArray(dados.historicoTransacoes) ? 
-                dados.historicoTransacoes : [];
+            this.ultimasTransacoes = Array.isArray(dados.ultimasTransacoes) ? 
+                dados.ultimasTransacoes : [];
             
             this.contadorItensPersonalizados = typeof dados.contadorItensPersonalizados === 'number' ? 
                 dados.contadorItensPersonalizados : 10000;
@@ -3535,10 +2558,10 @@ window.criarItemPersonalizado = function() {
     }
 };
 
-// Funções financeiras
-window.abrirModalTransacao = function(tipo) {
+// Funções financeiras simplificadas
+window.abrirModalDinheiro = function(tipo) {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.abrirModalTransacao(tipo);
+        window.sistemaEquipamentos.abrirModalDinheiro(tipo);
     }
 };
 
@@ -3548,27 +2571,33 @@ window.confirmarTransacao = function() {
     }
 };
 
-window.fecharModalTransacao = function() {
+window.fecharModalDinheiro = function() {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.fecharModalTransacao();
+        window.sistemaEquipamentos.fecharModalDinheiro();
     }
 };
 
-window.filtrarHistorico = function() {
+window.adicionarDinheiro = function(valor) {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.filtrarHistorico();
+        window.sistemaEquipamentos.adicionarDinheiro(valor);
     }
 };
 
-window.limparFiltros = function() {
+window.removerDinheiro = function(valor) {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.limparFiltros();
+        window.sistemaEquipamentos.removerDinheiro(valor);
     }
 };
 
-window.exportarHistorico = function(formato) {
+window.ajustarDinheiroManual = function() {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.exportarHistorico(formato);
+        window.sistemaEquipamentos.ajustarDinheiroManual();
+    }
+};
+
+window.limparHistorico = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.limparHistorico();
     }
 };
 
@@ -3583,17 +2612,10 @@ window.alternarSubTab = function(subtab) {
     if (btn) btn.classList.add('active');
     if (content) content.classList.add('active');
     
-    // Se for a aba financeira, atualizar estatísticas
+    // Se for a aba financeira, atualizar histórico
     if (subtab === 'financeiro' && window.sistemaEquipamentos) {
         setTimeout(() => {
-            window.sistemaEquipamentos.atualizarResumoFinanceiro();
-            window.sistemaEquipamentos.atualizarHistorico();
-            // Configurar scroll para tabelas
-            setTimeout(() => {
-                if (window.sistemaEquipamentos) {
-                    window.sistemaEquipamentos.configurarScrollHorizontalTabelas();
-                }
-            }, 200);
+            window.sistemaEquipamentos.atualizarHistoricoTransacoes();
         }, 100);
     }
     
@@ -3609,7 +2631,6 @@ window.alternarSubTab = function(subtab) {
 window.SistemaEquipamentos = SistemaEquipamentos;
 
 // ========== INICIALIZAÇÃO AUTOMÁTICA ==========
-// Inicializar quando a aba equipamento estiver ativa
 function inicializarSistemaEquipamentos() {
     const intervalo = setInterval(() => {
         const abaEquipamento = document.getElementById('equipamento');
@@ -3629,211 +2650,3 @@ if (document.readyState === 'loading') {
 } else {
     inicializarSistemaEquipamentos();
 }
-
-// ========== CSS ADICIONAL PARA MOBILE ==========
-const estiloMobileCSS = `
-/* ADICIONE ESTAS REGRAS AO FINAL DO SEU CSS */
-
-/* Scroll horizontal para tabelas */
-.table-container.scroll-horizontal {
-    position: relative;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    cursor: grab;
-    scrollbar-width: thin;
-    scrollbar-color: var(--laranja-principal) var(--bg-secundario);
-}
-
-.table-container.scroll-horizontal::-webkit-scrollbar {
-    height: 6px;
-}
-
-.table-container.scroll-horizontal::-webkit-scrollbar-track {
-    background: var(--bg-secundario);
-    border-radius: 3px;
-}
-
-.table-container.scroll-horizontal::-webkit-scrollbar-thumb {
-    background: var(--laranja-principal);
-    border-radius: 3px;
-}
-
-.table-container.scroll-horizontal:active {
-    cursor: grabbing;
-}
-
-.table-container.scroll-horizontal table {
-    min-width: 600px;
-}
-
-/* Indicador de scroll para mobile */
-.scroll-indicator {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: var(--laranja-principal);
-    color: white;
-    padding: 3px 8px;
-    border-radius: 10px;
-    font-size: 10px;
-    opacity: 0.8;
-    z-index: 10;
-    animation: pulse-scroll 2s infinite;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.scroll-indicator i {
-    font-size: 9px;
-}
-
-@keyframes pulse-scroll {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.8; }
-}
-
-/* Prevenir zoom em inputs no iOS */
-@media screen and (max-width: 768px) {
-    input[type="number"],
-    input[type="text"],
-    input[type="date"],
-    input[type="email"],
-    input[type="tel"],
-    input[type="password"],
-    textarea,
-    select {
-        font-size: 16px !important;
-        max-height: 44px;
-    }
-    
-    /* Ajustes para submenu no mobile */
-    #submenu-quantidade {
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) scale(0.95) !important;
-        width: 90% !important;
-        max-width: 400px !important;
-        max-height: 85vh !important;
-        overflow-y: auto !important;
-        z-index: 10000 !important;
-        background: var(--bg-card) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
-    }
-    
-    #submenu-quantidade .submenu-content {
-        padding: 20px !important;
-    }
-    
-    /* Modal no mobile */
-    .modal-overlay,
-    .modal-submenu {
-        align-items: flex-start;
-        padding-top: 20px;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .modal-content,
-    .submenu-content {
-        margin: auto;
-        max-height: calc(100vh - 40px);
-        overflow-y: auto;
-        width: 95% !important;
-        max-width: 500px !important;
-    }
-    
-    /* Botões no mobile */
-    button, .btn-equipamento-acao, .btn-deposito {
-        min-height: 44px;
-        min-width: 44px;
-    }
-    
-    /* Tabelas no mobile */
-    table {
-        font-size: 14px;
-    }
-    
-    table th, table td {
-        padding: 8px 6px;
-    }
-    
-    /* Ajustes de layout */
-    .form-group-duo {
-        flex-direction: column;
-    }
-    
-    .form-group-duo .form-group {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-}
-
-/* Desabilitar animações em dispositivos com preferência reduzida */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* Melhorias para touch */
-@media (hover: none) and (pointer: coarse) {
-    .btn-equipamento-acao,
-    .btn-deposito,
-    button {
-        padding: 12px 15px;
-    }
-    
-    .equipamento-adquirido-item {
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-    
-    /* Aumentar área de toque */
-    .btn-acao {
-        min-width: 44px;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-}
-
-/* Orientação paisagem no mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-    .modal-content,
-    .submenu-content {
-        max-height: 90vh;
-    }
-    
-    #submenu-quantidade {
-        max-height: 90vh;
-    }
-}
-
-/* Ajustes para tablets */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .table-container.scroll-horizontal table {
-        min-width: 800px;
-    }
-    
-    .modal-content {
-        width: 80% !important;
-    }
-}
-`;
-
-// Adicionar CSS dinamicamente
-const styleElement = document.createElement('style');
-styleElement.id = 'sistema-equipamentos-mobile-css';
-styleElement.textContent = estiloMobileCSS;
-document.head.appendChild(styleElement);
-
-console.log('✅ Sistema de Equipamentos 100% carregado com suporte mobile completo!');
