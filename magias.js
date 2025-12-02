@@ -1,4 +1,4 @@
-// ===== SISTEMA CORE DE MAGIA - VERSÃO 100% FUNCIONAL =====
+// ===== SISTEMA CORE DE MAGIA =====
 class SistemaMagia {
     constructor() {
         this.magiasAprendidas = [];
@@ -19,25 +19,19 @@ class SistemaMagia {
         this.configurarEventos();
         this.atualizarInterface();
         
-        // Forçar atualização inicial
         setTimeout(() => {
             this.atualizarStatusMagico();
             this.filtrarCatalogo();
-            console.log('✅ Sistema de Magia Inicializado!');
         }, 100);
     }
 
-    // ===== CONFIGURAÇÃO DOS FILTROS (MÉTODO CORRETO) =====
     configurarFiltrosManualmente() {
-        // Remove qualquer evento anterior
         document.querySelectorAll('.filtro-header').forEach(header => {
             const newHeader = header.cloneNode(true);
             header.parentNode.replaceChild(newHeader, header);
         });
 
-        // Adiciona eventos aos filtros
         setTimeout(() => {
-            // Configurar "Escolas de Magia"
             const headerEscolas = document.querySelector('.filtro-header[onclick*="escolas-submenu"]');
             if (headerEscolas) {
                 headerEscolas.addEventListener('click', (e) => {
@@ -46,7 +40,6 @@ class SistemaMagia {
                 });
             }
 
-            // Configurar "Classes de Magia"
             const headerClasses = document.querySelector('.filtro-header[onclick*="classes-submenu"]');
             if (headerClasses) {
                 headerClasses.addEventListener('click', (e) => {
@@ -55,7 +48,6 @@ class SistemaMagia {
                 });
             }
 
-            // Configurar checkbox "Todas as Escolas"
             const todasEscolas = document.getElementById('escola-todas');
             if (todasEscolas) {
                 todasEscolas.addEventListener('change', (e) => {
@@ -71,7 +63,6 @@ class SistemaMagia {
                 });
             }
 
-            // Configurar checkbox "Todas as Classes"
             const todasClasses = document.getElementById('classe-todas');
             if (todasClasses) {
                 todasClasses.addEventListener('change', (e) => {
@@ -87,7 +78,6 @@ class SistemaMagia {
                 });
             }
 
-            // Configurar checkboxes individuais
             document.querySelectorAll('.escola-checkbox').forEach(checkbox => {
                 checkbox.addEventListener('change', () => {
                     this.verificarTodasEscolas();
@@ -102,15 +92,12 @@ class SistemaMagia {
                 });
             });
 
-            // Configurar busca
             const buscaInput = document.getElementById('busca-magias');
             if (buscaInput) {
                 buscaInput.addEventListener('input', () => {
                     this.filtrarCatalogo();
                 });
             }
-
-            console.log('✅ Filtros configurados!');
         }, 150);
     }
 
@@ -118,7 +105,6 @@ class SistemaMagia {
         const submenu = document.getElementById(submenuId);
         if (!submenu) return;
 
-        // Fechar outros submenus
         document.querySelectorAll('.filtro-submenu').forEach(otherMenu => {
             if (otherMenu.id !== submenuId && otherMenu.classList.contains('active')) {
                 otherMenu.classList.remove('active');
@@ -130,7 +116,6 @@ class SistemaMagia {
             }
         });
 
-        // Alternar submenu atual
         submenu.classList.toggle('active');
         const header = submenu.previousElementSibling;
         if (header) {
@@ -161,9 +146,7 @@ class SistemaMagia {
         }
     }
 
-    // ===== OBSERVAÇÃO DE ATRIBUTOS EM TEMPO REAL =====
     configurarObservadorAtributosMagia() {
-        // Observar mudanças no IQ
         const iqInput = document.getElementById('IQ');
         if (iqInput) {
             iqInput.addEventListener('input', () => {
@@ -175,7 +158,6 @@ class SistemaMagia {
             });
         }
 
-        // Observar mudanças no HT
         const htInput = document.getElementById('HT');
         if (htInput) {
             htInput.addEventListener('input', () => {
@@ -186,7 +168,6 @@ class SistemaMagia {
             });
         }
 
-        // Observar mudanças na Aptidão Mágica
         const aptidaoInput = document.getElementById('aptidao-magica');
         if (aptidaoInput) {
             aptidaoInput.addEventListener('input', () => {
@@ -198,7 +179,6 @@ class SistemaMagia {
             });
         }
 
-        // Observar botões +/- dos atributos
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-plus, .btn-minus');
             if (btn) {
@@ -223,24 +203,20 @@ class SistemaMagia {
         });
     }
 
-    // ===== ATUALIZAÇÃO DO STATUS MÁGICO =====
     atualizarStatusMagico() {
         const iq = this.obterIQ();
         const ht = this.obterHT();
         
-        // Atualizar IQ Mágico
         const iqMagicoElem = document.getElementById('iq-magico');
         if (iqMagicoElem) {
             iqMagicoElem.textContent = iq;
         }
         
-        // Atualizar Mana Base
         const manaBaseElem = document.getElementById('mana-base');
         if (manaBaseElem) {
             manaBaseElem.textContent = ht;
         }
         
-        // Ajustar Mana Atual se necessário
         const manaAtualElem = document.getElementById('mana-atual');
         if (manaAtualElem) {
             const manaAtual = parseInt(manaAtualElem.value) || 0;
@@ -265,7 +241,6 @@ class SistemaMagia {
         this.salvarDados();
     }
 
-    // ===== FILTRAGEM DO CATÁLOGO =====
     obterEscolasSelecionadas() {
         const todasEscolas = document.getElementById('escola-todas');
         if (todasEscolas && todasEscolas.checked) {
@@ -300,7 +275,6 @@ class SistemaMagia {
 
     filtrarCatalogo() {
         if (typeof catalogoMagias === 'undefined') {
-            console.error('❌ Catálogo de magias não carregado!');
             return;
         }
 
@@ -311,7 +285,6 @@ class SistemaMagia {
         const classesSelecionadas = this.obterClassesSelecionadas();
 
         const magiasFiltradas = catalogoMagias.filter(magia => {
-            // Filtro por busca
             if (termoBusca && termoBusca.length > 0) {
                 const nomeMatch = magia.nome.toLowerCase().includes(termoBusca);
                 const descMatch = magia.descricao.toLowerCase().includes(termoBusca);
@@ -320,12 +293,10 @@ class SistemaMagia {
                 }
             }
 
-            // Filtro por escola (se houver seleção)
             if (escolasSelecionadas.length > 0 && !escolasSelecionadas.includes(magia.escola)) {
                 return false;
             }
 
-            // Filtro por classe (se houver seleção)
             if (classesSelecionadas.length > 0 && !classesSelecionadas.includes(magia.classe)) {
                 return false;
             }
@@ -381,7 +352,6 @@ class SistemaMagia {
         }).join('');
     }
 
-    // ===== MÉTODOS DE OBTER VALORES =====
     obterIQ() {
         const elemento = document.getElementById('IQ');
         return elemento ? parseInt(elemento.value) || 10 : 10;
@@ -397,7 +367,6 @@ class SistemaMagia {
         return elemento ? parseInt(elemento.value) || 0 : 0;
     }
 
-    // ===== CÁLCULOS DE NH =====
     calcularNH(magia, pontos) {
         const iq = this.obterIQ();
         const aptidao = this.obterAptidao();
@@ -423,7 +392,6 @@ class SistemaMagia {
         return tabelaBonus[dificuldade]?.[pontos] || 0;
     }
 
-    // ===== MODAIS =====
     abrirModalAprendizagem(id) {
         if (typeof catalogoMagias !== 'undefined') {
             this.magiaSelecionada = catalogoMagias.find(m => m.id === id);
@@ -457,7 +425,12 @@ class SistemaMagia {
         const modalHTML = `
             <div class="modal-compra-overlay" id="modal-magia-compra">
                 <div class="modal-compra">
-                    <h3>${editando ? 'Editar Magia' : 'Aprender Magia'}: ${magia.nome}</h3>
+                    <div class="modal-header">
+                        <h3>${editando ? 'Editar Magia' : 'Aprender Magia'}: ${magia.nome}</h3>
+                        <button class="btn-fechar-modal" id="btn-fechar-modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                     <div class="info-magia">
                         <strong>${this.formatarEscola(magia.escola)} / ${this.formatarClasse(magia.classe)}</strong>
                         <div class="descricao">${magia.descricao}</div>
@@ -465,25 +438,25 @@ class SistemaMagia {
                     
                     <div class="controles-compra">
                         <div class="controle-pontos">
-                            <button class="btn-controle" onclick="sistemaMagia.diminuirPontosCompra()">-</button>
+                            <button class="btn-controle" id="btn-diminuir-pontos">-</button>
                             <span class="display-pontos">${this.pontosSelecionados} pontos</span>
-                            <button class="btn-controle" onclick="sistemaMagia.aumentarPontosCompra()">+</button>
+                            <button class="btn-controle" id="btn-aumentar-pontos">+</button>
                         </div>
                         <div class="nivel-calculado">
-                            NH calculado: <strong>${nhCalculado}</strong>
-                            <small>(IQ ${this.obterIQ()} + Apt ${this.obterAptidao()} + ${this.calcularBonus(this.pontosSelecionados, magia.dificuldade)})</small>
+                            NH calculado: <strong id="nh-calculado">${nhCalculado}</strong>
+                            <small id="nh-detalhes">(IQ ${this.obterIQ()} + Apt ${this.obterAptidao()} + ${this.calcularBonus(this.pontosSelecionados, magia.dificuldade)})</small>
                         </div>
                     </div>
 
                     <div class="acoes-modal">
                         ${editando ? 
-                            `<button class="btn-remover" onclick="sistemaMagia.removerMagia(${magia.id}); sistemaMagia.fecharModalCompra()">
+                            `<button class="btn-remover" id="btn-remover-magia">
                                 Remover Magia
                             </button>` : 
                             ''
                         }
-                        <button class="btn-cancelar" onclick="sistemaMagia.fecharModalCompra()">Cancelar</button>
-                        <button class="btn-comprar" onclick="sistemaMagia.confirmarAprendizagem()">
+                        <button class="btn-cancelar" id="btn-cancelar-compra">Cancelar</button>
+                        <button class="btn-comprar" id="btn-confirmar-compra">
                             ${editando ? 'Atualizar' : 'Aprender'} por ${this.pontosSelecionados} pontos
                         </button>
                     </div>
@@ -491,11 +464,58 @@ class SistemaMagia {
             </div>
         `;
 
-        // Remove modal existente
         const modalExistente = document.getElementById('modal-magia-compra');
         if (modalExistente) modalExistente.remove();
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Configurar eventos do modal
+        this.configurarEventosModal();
+    }
+
+    configurarEventosModal() {
+        // Fechar modal
+        document.getElementById('btn-fechar-modal')?.addEventListener('click', () => {
+            this.fecharModalCompra();
+        });
+
+        document.getElementById('btn-cancelar-compra')?.addEventListener('click', () => {
+            this.fecharModalCompra();
+        });
+
+        // Botões de controle de pontos
+        document.getElementById('btn-aumentar-pontos')?.addEventListener('click', () => {
+            this.aumentarPontosCompra();
+            this.atualizarModalCompra();
+        });
+
+        document.getElementById('btn-diminuir-pontos')?.addEventListener('click', () => {
+            this.diminuirPontosCompra();
+            this.atualizarModalCompra();
+        });
+
+        // Confirmar compra
+        document.getElementById('btn-confirmar-compra')?.addEventListener('click', () => {
+            this.confirmarAprendizagem();
+        });
+
+        // Remover magia
+        const btnRemover = document.getElementById('btn-remover-magia');
+        if (btnRemover) {
+            btnRemover.addEventListener('click', () => {
+                if (this.magiaEditando) {
+                    this.removerMagia(this.magiaEditando.id);
+                    this.fecharModalCompra();
+                }
+            });
+        }
+
+        // Fechar ao clicar fora
+        document.querySelector('#modal-magia-compra .modal-compra-overlay')?.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-compra-overlay')) {
+                this.fecharModalCompra();
+            }
+        });
     }
 
     aumentarPontosCompra() {
@@ -504,7 +524,6 @@ class SistemaMagia {
         
         if (indexAtual < custos.length - 1) {
             this.pontosSelecionados = custos[indexAtual + 1];
-            this.atualizarModalCompra();
         }
     }
 
@@ -514,7 +533,6 @@ class SistemaMagia {
         
         if (indexAtual > 0) {
             this.pontosSelecionados = custos[indexAtual - 1];
-            this.atualizarModalCompra();
         }
     }
 
@@ -523,23 +541,30 @@ class SistemaMagia {
         if (!magia) return;
 
         const nhCalculado = this.calcularNH(magia, this.pontosSelecionados);
-        const editando = !!this.magiaEditando;
         
-        const modal = document.querySelector('.modal-compra');
-        if (modal) {
-            modal.querySelector('.display-pontos').textContent = `${this.pontosSelecionados} pontos`;
-            modal.querySelector('.nivel-calculado strong').textContent = nhCalculado;
-            
+        const displayPontos = document.querySelector('.display-pontos');
+        const nhElement = document.getElementById('nh-calculado');
+        const detalhesElement = document.getElementById('nh-detalhes');
+        const btnComprar = document.getElementById('btn-confirmar-compra');
+        
+        if (displayPontos) {
+            displayPontos.textContent = `${this.pontosSelecionados} pontos`;
+        }
+        
+        if (nhElement) {
+            nhElement.textContent = nhCalculado;
+        }
+        
+        if (detalhesElement) {
             const iq = this.obterIQ();
             const aptidao = this.obterAptidao();
             const bonus = this.calcularBonus(this.pontosSelecionados, magia.dificuldade);
-            
-            modal.querySelector('.nivel-calculado').innerHTML = 
-                `NH calculado: <strong>${nhCalculado}</strong>
-                <small>(IQ ${iq} + Apt ${aptidao} + ${bonus})</small>`;
-            
-            modal.querySelector('.btn-comprar').textContent = 
-                `${editando ? 'Atualizar' : 'Aprender'} por ${this.pontosSelecionados} pontos`;
+            detalhesElement.textContent = `(IQ ${iq} + Apt ${aptidao} + ${bonus})`;
+        }
+        
+        if (btnComprar) {
+            const editando = !!this.magiaEditando;
+            btnComprar.textContent = `${editando ? 'Atualizar' : 'Aprender'} por ${this.pontosSelecionados} pontos`;
         }
     }
 
@@ -581,7 +606,6 @@ class SistemaMagia {
         this.salvarDados();
     }
 
-    // ===== DETALHES DA MAGIA =====
     mostrarDetalhesMagiaModal(id) {
         if (typeof catalogoMagias === 'undefined') return;
 
@@ -593,7 +617,7 @@ class SistemaMagia {
                 <div class="modal-compra modal-detalhes">
                     <div class="modal-header">
                         <h3>Detalhes da Magia: ${magia.nome}</h3>
-                        <button class="btn-fechar-modal" onclick="sistemaMagia.fecharModalDetalhes()">
+                        <button class="btn-fechar-modal" id="btn-fechar-detalhes">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -601,7 +625,7 @@ class SistemaMagia {
                         ${this.gerarDetalhesTecnicos(magia)}
                     </div>
                     <div class="acoes-modal">
-                        <button class="btn-cancelar" onclick="sistemaMagia.fecharModalDetalhes()">Fechar</button>
+                        <button class="btn-cancelar" id="btn-fechar-detalhes2">Fechar</button>
                     </div>
                 </div>
             </div>
@@ -611,6 +635,21 @@ class SistemaMagia {
         if (modalExistente) modalExistente.remove();
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Configurar eventos do modal de detalhes
+        document.getElementById('btn-fechar-detalhes')?.addEventListener('click', () => {
+            this.fecharModalDetalhes();
+        });
+        
+        document.getElementById('btn-fechar-detalhes2')?.addEventListener('click', () => {
+            this.fecharModalDetalhes();
+        });
+        
+        document.querySelector('#modal-detalhes-magia .modal-compra-overlay')?.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-compra-overlay')) {
+                this.fecharModalDetalhes();
+            }
+        });
     }
 
     fecharModalDetalhes() {
@@ -691,7 +730,6 @@ class SistemaMagia {
         `;
     }
 
-        // ===== ATUALIZAÇÃO DA INTERFACE =====
     atualizarInterface() {
         this.atualizarStatusMagico();
         this.atualizarListaAprendidas();
@@ -703,7 +741,6 @@ class SistemaMagia {
         const container = document.getElementById('magias-aprendidas');
         const pontosTotal = this.magiasAprendidas.reduce((sum, m) => sum + (m.pontos || 0), 0);
 
-        // Atualizar pontos totais
         const pontosMagiaTotal = document.getElementById('pontos-magia-total');
         const totalGastoMagia = document.getElementById('total-gasto-magia');
         
@@ -759,7 +796,6 @@ class SistemaMagia {
             gastoMagiasElement.textContent = totalPontos;
         }
         
-        // Chamar função global de atualização de pontos se existir
         if (typeof atualizarPontos === 'function') {
             setTimeout(() => {
                 atualizarPontos();
@@ -771,9 +807,7 @@ class SistemaMagia {
         return this.magiasAprendidas.reduce((sum, magia) => sum + (magia.pontos || 0), 0);
     }
 
-    // ===== CONFIGURAÇÃO DE EVENTOS ADICIONAIS =====
     configurarEventos() {
-        // Evento para Mana Atual
         const manaAtualInput = document.getElementById('mana-atual');
         if (manaAtualInput) {
             manaAtualInput.addEventListener('change', () => {
@@ -781,7 +815,6 @@ class SistemaMagia {
             });
         }
 
-        // Evento para Bônus de Mana
         const bonusManaInput = document.getElementById('bonus-mana');
         if (bonusManaInput) {
             bonusManaInput.addEventListener('change', () => {
@@ -789,7 +822,6 @@ class SistemaMagia {
             });
         }
 
-        // Fechar submenus ao clicar fora
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.filtro-grupo')) {
                 document.querySelectorAll('.filtro-submenu.active').forEach(submenu => {
@@ -803,7 +835,6 @@ class SistemaMagia {
             }
         });
 
-        // Observar mudanças de aba
         const magiaTab = document.getElementById('magia');
         if (magiaTab) {
             const observer = new MutationObserver((mutations) => {
@@ -837,7 +868,6 @@ class SistemaMagia {
         }
     }
 
-    // ===== FORMATAÇÃO =====
     formatarEscola(escola) {
         const escolas = {
             'agua': 'Água',
@@ -873,7 +903,6 @@ class SistemaMagia {
         return classes[classe] || classe;
     }
 
-    // ===== PERSISTÊNCIA =====
     salvarDados() {
         try {
             const dados = {
@@ -882,7 +911,7 @@ class SistemaMagia {
             };
             localStorage.setItem('sistemaMagia', JSON.stringify(dados));
         } catch (e) {
-            console.error('Erro ao salvar dados:', e);
+            // Silencioso em caso de erro
         }
     }
 
@@ -896,7 +925,6 @@ class SistemaMagia {
                 }
             }
         } catch (e) {
-            console.error('Erro ao carregar dados:', e);
             localStorage.removeItem('sistemaMagia');
         }
     }
@@ -906,11 +934,9 @@ class SistemaMagia {
 let sistemaMagia;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar sistema de magia
     sistemaMagia = new SistemaMagia();
     window.sistemaMagia = sistemaMagia;
     
-    // Configurar eventos de aba
     const magiaTab = document.getElementById('magia');
     if (magiaTab) {
         magiaTab.addEventListener('click', () => {
@@ -922,8 +948,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 100);
         });
     }
-    
-    console.log('🎯 Sistema de Magia Inicializado com Sucesso!');
 });
 
 // ===== FUNÇÕES GLOBAIS PARA HTML =====
@@ -967,25 +991,18 @@ window.confirmarAprendizagem = () => {
     if (sistemaMagia) sistemaMagia.confirmarAprendizagem();
 };
 
-// Função para toggle submenu (usada no HTML)
 window.toggleSubmenu = (submenuId) => {
     if (sistemaMagia) sistemaMagia.toggleSubmenu(submenuId);
 };
 
-// ... todo o código anterior do SistemaMagia que já te enviei ...
-
-// ===== INICIALIZAÇÃO DE ATRIBUTOS COM OBSERVADOR DE MAGIA =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar sistema de atributos se existir
     if (typeof inicializarAtributos === 'function') {
         inicializarAtributos();
     }
     
-    // Inicializar sistema de magia
     sistemaMagia = new SistemaMagia();
     window.sistemaMagia = sistemaMagia;
     
-    // Adicionar evento de clique nas abas
     const tabLinks = document.querySelectorAll('.tab-link');
     tabLinks.forEach(tab => {
         tab.addEventListener('click', function() {
@@ -1000,30 +1017,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    console.log('🚀 Sistema Completo Inicializado!');
-    console.log('✅ IQ Mágico: Tempo Real');
-    console.log('✅ Mana Base: Tempo Real');
-    console.log('✅ Filtros: Funcionando');
-    console.log('✅ NHs: Atualizando Automaticamente');
 });
-
-// ===== FUNÇÃO DE DEBUG PARA TESTES =====
-function debugSistemaMagia() {
-    if (!sistemaMagia) {
-        console.log('❌ Sistema de magia não inicializado');
-        return;
-    }
-    
-    console.log('=== DEBUG SISTEMA MAGIA ===');
-    console.log('IQ Atual:', sistemaMagia.obterIQ());
-    console.log('HT Atual:', sistemaMagia.obterHT());
-    console.log('Aptidão:', sistemaMagia.obterAptidao());
-    console.log('Magias Aprendidas:', sistemaMagia.magiasAprendidas.length);
-    console.log('Escolas selecionadas:', sistemaMagia.obterEscolasSelecionadas());
-    console.log('Classes selecionadas:', sistemaMagia.obterClassesSelecionadas());
-    console.log('===========================');
-}
-
-// Expor função de debug para console
-window.debugMagia = debugSistemaMagia;
