@@ -5,8 +5,8 @@ class SistemaEquipamentos {
         this.equipamentosAdquiridos = [];
         this.deposito = [];
         
-        // ========== SISTEMA FINANCEIRO SIMPLIFICADO ==========
-        this.dinheiro = 1000;
+        // ========== SISTEMA FINANCEIRO ==========
+        this.dinheiro = 0; // Será calculado pela riqueza
         this.ultimasTransacoes = [];
         
         // ========== SISTEMA DE CARGA ==========
@@ -42,21 +42,19 @@ class SistemaEquipamentos {
         this.armasCombate = { maos: [], corpo: [] };
         this.escudoCombate = null;
         
-        // ========== SISTEMA DE RIQUEZA ==========
-        this.sistemaRiqueza = {
-            nivelAtual: 'medio',
-            dinheiroBase: 1000,
-            multiplicadores: {
-                'falido': 0,
-                'pobre': 0.2,
-                'batalhador': 0.5,
-                'medio': 1,
-                'confortavel': 2,
-                'rico': 5,
-                'muito-rico': 20,
-                'podre-rico': 100
-            }
+        // ========== SISTEMA DE RIQUEZA - INTEGRAÇÃO COMPLETA ==========
+        this.valoresBaseRiqueza = {
+            'falido': 0,        // 0%
+            'pobre': 200,       // 20% de 1000
+            'batalhador': 500,  // 50% de 1000
+            'medio': 1000,      // 100% (valor original)
+            'confortavel': 2000, // 200%
+            'rico': 5000,       // 500%
+            'muito-rico': 20000, // 2000%
+            'podre-rico': 100000 // 10000%
         };
+        
+        this.nivelRiquezaAtual = 'medio';
         
         // ========== SISTEMA DE CRIAÇÃO ==========
         this.contadorItensPersonalizados = 10000;
@@ -75,13 +73,40 @@ class SistemaEquipamentos {
         // ========== ESTADO DO SISTEMA ==========
         this.catalogoPronto = false;
         this.inicializacaoEmAndamento = false;
-        this.dadosCarregados = false;
+        this.dadosCarregados = false; // REMOVIDO: não carrega mais do localStorage
         this.itemCompraQuantidade = null;
         this.quantidadeAtual = 1;
         this.operacaoAtual = null;
         
         // Inicializar dinheiro baseado na riqueza
-        this.dinheiro = this.calcularDinheiroPorRiqueza();
+        this.inicializarDinheiroPorRiqueza();
+    }
+
+    // ========== NOVO MÉTODO: Inicializar dinheiro por riqueza ==========
+    inicializarDinheiroPorRiqueza() {
+        // Tentar obter nível de riqueza do sistema de características
+        let nivelRiqueza = this.nivelRiquezaAtual;
+        
+        if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
+            const pontos = window.sistemaRiqueza.getPontosRiqueza();
+            nivelRiqueza = this.mapearPontosParaNivel(pontos);
+        } else {
+            // Se não encontrar sistema de riqueza, verificar no select manualmente
+            const selectRiqueza = document.getElementById('nivelRiqueza');
+            if (selectRiqueza) {
+                const pontos = parseInt(selectRiqueza.value);
+                nivelRiqueza = this.mapearPontosParaNivel(pontos);
+            }
+        }
+        
+        this.nivelRiquezaAtual = nivelRiqueza;
+        const valorBase = this.valoresBaseRiqueza[nivelRiqueza] || 1000;
+        
+        // REMOVIDO: Não carrega dinheiro do localStorage
+        // O dinheiro começa sempre como o valor base da riqueza
+        this.dinheiro = valorBase;
+        
+        console.log(`💰 Dinheiro inicializado: $${this.dinheiro} (Nível: ${nivelRiqueza})`);
     }
 
     // ========== INICIALIZAÇÃO ==========
@@ -93,7 +118,8 @@ class SistemaEquipamentos {
             await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
         }
         
-        this.carregarDadosSalvos();
+        // REMOVIDO: Não carrega dados salvos automaticamente
+        // this.carregarDadosSalvos();
         this.dadosCarregados = true;
         
         await this.aguardarCatalogo();
@@ -139,71 +165,73 @@ class SistemaEquipamentos {
         }, 300);
     }
 
-   // ========== SISTEMA DE RIQUEZA ==========
-calcularDinheiroPorRiqueza() {
-    let nivelRiqueza = 'medio'; // valor padrão
-    
-    // Obter nível atual do sistema de riqueza
-    if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
-        const pontos = window.sistemaRiqueza.getPontosRiqueza();
-        nivelRiqueza = this.mapearPontosParaNivel(pontos);
-        this.sistemaRiqueza.nivelAtual = nivelRiqueza;
+    // ========== SISTEMA DE RIQUEZA - MÉTODOS COMPLETOS ==========
+    mapearPontosParaNivel(pontos) {
+        const mapeamento = {
+            '-25': 'falido',
+            '-15': 'pobre',
+            '-10': 'batalhador',
+            '0': 'medio',
+            '10': 'confortavel',
+            '20': 'rico',
+            '30': 'muito-rico',
+            '50': 'podre-rico'
+        };
+        return mapeamento[pontos] || 'medio';
     }
-    
-    const multiplicador = this.sistemaRiqueza.multiplicadores[nivelRiqueza] || 1;
-    const dinheiroBase = Math.floor(this.sistemaRiqueza.dinheiroBase * multiplicador);
-    
-    // RETORNA APENAS O DINHEIRO BASE, SEM SUBTRAIR GASTOS
-    // Os gastos serão subtraídos nas compras
-    return dinheiroBase;
-}
 
-mapearPontosParaNivel(pontos) {
-    const mapeamento = {
-        '-25': 'falido',
-        '-15': 'pobre',
-        '-10': 'batalhador',
-        '0': 'medio',
-        '10': 'confortavel',
-        '20': 'rico',
-        '30': 'muito-rico',
-        '50': 'podre-rico'
-    };
-    return mapeamento[pontos] || 'medio';
-}
+    configurarObservadorRiqueza() {
+        // Observar mudanças no sistema de riqueza
+        document.addEventListener('riquezaAlterada', (e) => {
+            if (e.detail && e.detail.pontos !== undefined) {
+                const novoNivel = this.mapearPontosParaNivel(e.detail.pontos);
+                const diferencaDinheiro = this.atualizarDinheiroPorNivelRiqueza(novoNivel);
+                
+                if (diferencaDinheiro !== 0) {
+                    const mensagem = diferencaDinheiro > 0 
+                        ? `Ajuste de riqueza: +$${diferencaDinheiro}`
+                        : `Ajuste de riqueza: -$${Math.abs(diferencaDinheiro)}`;
+                    this.mostrarFeedback(mensagem, 'sucesso');
+                }
+            }
+        });
+        
+        // Observar mudanças no select de riqueza diretamente
+        const selectRiqueza = document.getElementById('nivelRiqueza');
+        if (selectRiqueza) {
+            selectRiqueza.addEventListener('change', () => {
+                const pontos = parseInt(selectRiqueza.value);
+                const novoNivel = this.mapearPontosParaNivel(pontos);
+                this.atualizarDinheiroPorNivelRiqueza(novoNivel);
+            });
+        }
+    }
 
-configurarObservadorRiqueza() {
-    document.addEventListener('riquezaAlterada', (e) => {
-        // Calcular novo dinheiro base
-        const novoDinheiroBase = this.calcularDinheiroPorRiqueza();
-        const gastoAtual = this.calcularGastoTotalEquipamentos();
+    atualizarDinheiroPorNivelRiqueza(novoNivel) {
+        if (this.nivelRiquezaAtual === novoNivel) return 0;
         
-        // Dinheiro disponível = Base - Gasto atual
-        this.dinheiro = Math.max(0, novoDinheiroBase - gastoAtual);
+        const dinheiroAntes = this.dinheiro;
+        const valorNovoNivel = this.valoresBaseRiqueza[novoNivel] || 1000;
         
+        // Se for a primeira inicialização (dinheiro = 0), apenas define o valor
+        if (this.dinheiro === 0 || this.nivelRiquezaAtual === 'medio') {
+            this.dinheiro = valorNovoNivel;
+        } else {
+            // Calcula a diferença e ajusta o dinheiro
+            const valorNivelAtual = this.valoresBaseRiqueza[this.nivelRiquezaAtual] || 1000;
+            const diferenca = valorNovoNivel - valorNivelAtual;
+            this.dinheiro += diferenca;
+        }
+        
+        this.nivelRiquezaAtual = novoNivel;
+        
+        // Atualizar interface
         this.atualizarInterface();
         this.notificarDashboard();
-        this.salvarDados();
-    });
-    
-    const selectRiqueza = document.getElementById('nivelRiqueza');
-    if (selectRiqueza) {
-        selectRiqueza.addEventListener('change', () => {
-            setTimeout(() => {
-                const novoDinheiroBase = this.calcularDinheiroPorRiqueza();
-                const gastoAtual = this.calcularGastoTotalEquipamentos();
-                
-                this.dinheiro = Math.max(0, novoDinheiroBase - gastoAtual);
-                
-                this.atualizarInterface();
-                this.notificarDashboard();
-                this.salvarDados();
-            }, 100);
-        });
+        
+        const diferenca = this.dinheiro - dinheiroAntes;
+        return diferenca;
     }
-}
-
-
 
     // ========== SISTEMA DE CARGA ==========
     iniciarMonitoramentoST() {
@@ -234,7 +262,7 @@ configurarObservadorRiqueza() {
             this.pesoMaximo = this.capacidadeCarga.pesada;
             this.atualizarNivelCarga();
             this.atualizarInterface();
-            this.salvarDados();
+            // REMOVIDO: Não salva automaticamente
         }
     }
 
@@ -340,7 +368,7 @@ configurarObservadorRiqueza() {
     // ========== SISTEMA DE MOCHILA ==========
     alternarMochila() {
         this.mochilaAtiva = !this.mochilaAtiva;
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.atualizarPeso();
         this.atualizarInterface();
         
@@ -351,7 +379,7 @@ configurarObservadorRiqueza() {
         this.mostrarFeedback(mensagem, this.mochilaAtiva ? 'sucesso' : 'aviso');
     }
 
-    // ========== SISTEMA FINANCEIRO SIMPLIFICADO ==========
+    // ========== SISTEMA FINANCEIRO ==========
     receberDinheiroRapido() {
         this.abrirModalDinheiroSimples('receber');
     }
@@ -447,7 +475,7 @@ configurarObservadorRiqueza() {
             descricao: descricao
         });
         
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.fecharModalSimples();
         this.atualizarInterface();
         this.notificarDashboard();
@@ -466,7 +494,7 @@ configurarObservadorRiqueza() {
         }
         
         this.dinheiro += valor;
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         
         this.registrarTransacao({
             tipo: 'receita',
@@ -491,7 +519,7 @@ configurarObservadorRiqueza() {
         }
         
         this.dinheiro -= valor;
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         
         this.registrarTransacao({
             tipo: 'despesa',
@@ -516,7 +544,7 @@ configurarObservadorRiqueza() {
         
         const diferenca = valorNumerico - this.dinheiro;
         this.dinheiro = valorNumerico;
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         
         if (diferenca > 0) {
             this.registrarTransacao({
@@ -591,7 +619,7 @@ configurarObservadorRiqueza() {
         this.equipamentosAdquiridos.push(novoEquipamento);
         this.equipamentosEquipados.mochila.push(novoEquipamento);
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} comprado com sucesso!`, 'sucesso');
         this.atualizarInterface();
         this.notificarDashboard();
@@ -621,7 +649,7 @@ configurarObservadorRiqueza() {
         this.equipamentosAdquiridos.splice(index, 1);
         this.deposito = this.deposito.filter(item => item.idUnico !== itemId);
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} vendido por $${valorVenda}`, 'sucesso');
         this.atualizarInterface();
         this.notificarDashboard();
@@ -739,7 +767,7 @@ configurarObservadorRiqueza() {
         }
 
         this.dinheiro -= custoTotal;
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${quantidade}x ${equipamento.nome} comprado(s) com sucesso!`, 'sucesso');
         
         this.fecharSubmenuQuantidade();
@@ -815,7 +843,7 @@ configurarObservadorRiqueza() {
                 this.equiparItemGeral(itemId);
         }
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.atualizarInterface();
         this.atualizarSistemaCombate();
     }
@@ -930,7 +958,7 @@ configurarObservadorRiqueza() {
         equipamento.equipado = false;
         this.equipamentosEquipados.mochila.push(equipamento);
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} guardado`, 'sucesso');
         this.atualizarInterface();
         this.atualizarDisplayMaos();
@@ -959,7 +987,7 @@ configurarObservadorRiqueza() {
         equipamento.equipado = false;
         this.equipamentosEquipados.corpo.push(equipamento);
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} colocado no corpo`, 'sucesso');
         this.atualizarInterface();
         this.atualizarSistemaCombate();
@@ -982,7 +1010,7 @@ configurarObservadorRiqueza() {
         equipamento.equipado = false;
         this.equipamentosEquipados.mochila.push(equipamento);
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} removido do corpo`, 'sucesso');
         this.atualizarInterface();
         this.atualizarSistemaCombate();
@@ -1006,7 +1034,7 @@ configurarObservadorRiqueza() {
         equipamento.equipado = false;
         this.deposito.push(equipamento);
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} guardado no depósito`, 'sucesso');
         this.atualizarInterface();
         return true;
@@ -1025,7 +1053,7 @@ configurarObservadorRiqueza() {
         equipamento.equipado = false;
         this.equipamentosEquipados.mochila.push(equipamento);
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} retirado do depósito`, 'sucesso');
         this.atualizarInterface();
         return true;
@@ -1048,7 +1076,7 @@ configurarObservadorRiqueza() {
             this.deposito.push(equipamento);
         });
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamentosNaMochila.length} itens guardados no depósito`, 'sucesso');
         this.atualizarInterface();
     }
@@ -1067,7 +1095,7 @@ configurarObservadorRiqueza() {
         });
 
         this.deposito = [];
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${totalItens} itens retirados do depósito`, 'sucesso');
         this.atualizarInterface();
     }
@@ -1086,7 +1114,7 @@ configurarObservadorRiqueza() {
         );
 
         this.deposito = [];
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${totalLimpos} itens removidos do depósito`, 'sucesso');
         this.atualizarInterface();
     }
@@ -1317,11 +1345,11 @@ configurarObservadorRiqueza() {
                         </div>
                         <div class="form-group">
                             <label>Mãos Necessárias (se aplicável):</label>
-                            <select id="item-maos">
-                                <option value="0">Não usa mãos</option>
-                                <option value="1">1 mão</option>
-                                <option value="2">2 mãos</option>
-                            </select>
+                                <select id="item-maos">
+                                    <option value="0">Não usa mãos</option>
+                                    <option value="1">1 mão</option>
+                                    <option value="2">2 mãos</option>
+                                </select>
                         </div>
                     </div>
                 `;
@@ -1607,8 +1635,7 @@ configurarObservadorRiqueza() {
         this.equipamentosAdquiridos.push(novoItem);
         this.equipamentosEquipados.mochila.push(novoItem);
         
-        // Salvar e atualizar
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${nome} criado com sucesso!`, 'sucesso');
         
         // Registrar transação se houver custo
@@ -2270,7 +2297,7 @@ configurarObservadorRiqueza() {
             this.mostrarFeedback(`${equipamento.nome} consumido (${equipamento.quantidade} restantes)`, 'sucesso');
         }
 
-        this.salvarDados();
+        // REMOVIDO: Não salva automaticamente
         this.atualizarInterface();
     }
 
@@ -2388,101 +2415,48 @@ configurarObservadorRiqueza() {
         }, 3000);
     }
 
-    // ========== SALVAR E CARREGAR DADOS ==========
-    salvarDados() {
+    // ========== MÉTODOS PARA SALVAR MANUALMENTE ==========
+    // ESSES MÉTODOS SERÃO CHAMADOS QUANDO O JOGADOR CONCLUIR TODAS AS ABAS
+    
+    exportarDados() {
+        return {
+            equipamentosAdquiridos: this.equipamentosAdquiridos,
+            dinheiro: this.dinheiro,
+            pesoAtual: this.pesoAtual,
+            mochilaAtiva: this.mochilaAtiva,
+            equipamentosEquipados: this.equipamentosEquipados,
+            armadurasCombate: this.armadurasCombate,
+            armasCombate: this.armasCombate,
+            escudoCombate: this.escudoCombate,
+            deposito: this.deposito,
+            capacidadeCarga: this.capacidadeCarga,
+            ultimasTransacoes: this.ultimasTransacoes,
+            contadorItensPersonalizados: this.contadorItensPersonalizados,
+            ST: this.ST,
+            nivelCargaAtual: this.nivelCargaAtual,
+            penalidadesCarga: this.penalidadesCarga,
+            nivelRiquezaAtual: this.nivelRiquezaAtual,
+            valoresBaseRiqueza: this.valoresBaseRiqueza,
+            timestamp: new Date().getTime(),
+            version: '4.0'
+        };
+    }
+
+    salvarDadosManualmente() {
         try {
-            const dados = {
-                equipamentosAdquiridos: this.equipamentosAdquiridos,
-                dinheiro: this.dinheiro,
-                pesoAtual: this.pesoAtual,
-                mochilaAtiva: this.mochilaAtiva,
-                equipamentosEquipados: this.equipamentosEquipados,
-                armadurasCombate: this.armadurasCombate,
-                armasCombate: this.armasCombate,
-                escudoCombate: this.escudoCombate,
-                deposito: this.deposito,
-                capacidadeCarga: this.capacidadeCarga,
-                ultimasTransacoes: this.ultimasTransacoes,
-                contadorItensPersonalizados: this.contadorItensPersonalizados,
-                ST: this.ST,
-                nivelCargaAtual: this.nivelCargaAtual,
-                penalidadesCarga: this.penalidadesCarga,
-                sistemaRiqueza: this.sistemaRiqueza,
-                timestamp: new Date().getTime(),
-                version: '3.0'
-            };
-            
+            const dados = this.exportarDados();
             localStorage.setItem('sistemaEquipamentos_data', JSON.stringify(dados));
+            this.mostrarFeedback('Dados de equipamentos salvos com sucesso!', 'sucesso');
+            return true;
         } catch (e) {
-            console.error('Erro ao salvar dados:', e);
+            console.error('Erro ao salvar dados manualmente:', e);
+            this.mostrarFeedback('Erro ao salvar dados!', 'erro');
+            return false;
         }
     }
 
-    carregarDadosSalvos() {
-        try {
-            const dadosSalvos = localStorage.getItem('sistemaEquipamentos_data');
-            
-            if (!dadosSalvos) {
-                return;
-            }
-
-            const dados = JSON.parse(dadosSalvos);
-            
-            // Carregar dados básicos
-            this.equipamentosAdquiridos = Array.isArray(dados.equipamentosAdquiridos) ? 
-                dados.equipamentosAdquiridos : [];
-            
-            this.dinheiro = typeof dados.dinheiro === 'number' ? dados.dinheiro : this.calcularDinheiroPorRiqueza();
-            this.pesoAtual = typeof dados.pesoAtual === 'number' ? dados.pesoAtual : 0;
-            this.mochilaAtiva = typeof dados.mochilaAtiva === 'boolean' ? dados.mochilaAtiva : true;
-            
-            // Carregar equipamentos equipados
-            if (dados.equipamentosEquipados && typeof dados.equipamentosEquipados === 'object') {
-                this.equipamentosEquipados = {
-                    maos: Array.isArray(dados.equipamentosEquipados.maos) ? dados.equipamentosEquipados.maos : [],
-                    armaduras: Array.isArray(dados.equipamentosEquipados.armaduras) ? dados.equipamentosEquipados.armaduras : [],
-                    escudos: Array.isArray(dados.equipamentosEquipados.escudos) ? dados.equipamentosEquipados.escudos : [],
-                    mochila: Array.isArray(dados.equipamentosEquipados.mochila) ? dados.equipamentosEquipados.mochila : [],
-                    corpo: Array.isArray(dados.equipamentosEquipados.corpo) ? dados.equipamentosEquipados.corpo : []
-                };
-            }
-            
-            // Carregar sistema de combate
-            if (dados.armadurasCombate) this.armadurasCombate = dados.armadurasCombate;
-            if (dados.armasCombate) this.armasCombate = dados.armasCombate;
-            if (dados.escudoCombate) this.escudoCombate = dados.escudoCombate;
-            
-            // Carregar depósito
-            this.deposito = Array.isArray(dados.deposito) ? dados.deposito : [];
-            
-            // Carregar transações
-            this.ultimasTransacoes = Array.isArray(dados.ultimasTransacoes) ? 
-                dados.ultimasTransacoes : [];
-            
-            // Carregar contador de itens personalizados
-            this.contadorItensPersonalizados = typeof dados.contadorItensPersonalizados === 'number' ? 
-                dados.contadorItensPersonalizados : 10000;
-            
-            // Carregar sistema de carga
-            this.ST = typeof dados.ST === 'number' ? dados.ST : 10;
-            this.nivelCargaAtual = dados.nivelCargaAtual || 'leve';
-            this.penalidadesCarga = dados.penalidadesCarga || 'MOV +0 / DODGE +0';
-            
-            this.capacidadeCarga = dados.capacidadeCarga && typeof dados.capacidadeCarga === 'object' ? 
-                dados.capacidadeCarga : this.calcularCapacidadeCarga();
-            
-            this.pesoMaximo = this.capacidadeCarga.pesada;
-            
-            // Carregar sistema de riqueza
-            if (dados.sistemaRiqueza) {
-                this.sistemaRiqueza = { ...this.sistemaRiqueza, ...dados.sistemaRiqueza };
-            }
-            
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
-            localStorage.removeItem('sistemaEquipamentos_data');
-        }
-    }
+    // REMOVIDO: Não carrega dados automaticamente
+    // carregarDadosSalvos() { ... }
 
     notificarDashboard() {
         const event = new CustomEvent('equipamentosAtualizados', {
@@ -2498,171 +2472,4 @@ configurarObservadorRiqueza() {
         });
         document.dispatchEvent(event);
     }
-}
-
-// ========== INICIALIZAÇÃO GLOBAL ==========
-let sistemaEquipamentos;
-
-document.addEventListener('DOMContentLoaded', function() {
-    const verificarAbaEquipamento = () => {
-        const abaEquipamento = document.getElementById('equipamento');
-        if (abaEquipamento && abaEquipamento.classList.contains('active')) {
-            if (!sistemaEquipamentos) {
-                sistemaEquipamentos = new SistemaEquipamentos();
-                window.sistemaEquipamentos = sistemaEquipamentos;
-                sistemaEquipamentos.inicializarQuandoPronto();
-            } else {
-                sistemaEquipamentos.atualizarInterfaceForcada();
-            }
-        }
-    };
-    
-    verificarAbaEquipamento();
-    
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const tab = mutation.target;
-                if (tab.id === 'equipamento' && tab.classList.contains('active')) {
-                    setTimeout(verificarAbaEquipamento, 100);
-                }
-            }
-        });
-    });
-    
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        observer.observe(tab, { attributes: true });
-    });
-});
-
-// ========== FUNÇÕES GLOBAIS PARA HTML ==========
-
-// Funções para quantidade
-window.aumentarQuantidade = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.aumentarQuantidade();
-    }
-};
-
-window.diminuirQuantidade = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.diminuirQuantidade();
-    }
-};
-
-window.fecharSubmenuQuantidade = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.fecharSubmenuQuantidade();
-    }
-};
-
-window.confirmarCompraQuantidade = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.confirmarCompraQuantidade();
-    }
-};
-
-// Funções para criação de itens
-window.atualizarCamposPorTipo = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.atualizarCamposPorTipo();
-    }
-};
-
-window.atualizarCamposMagicos = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.atualizarCamposMagicos();
-    }
-};
-
-window.atualizarPreview = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.atualizarPreview();
-    }
-};
-
-window.limparFormCriacao = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.limparFormCriacao();
-    }
-};
-
-window.criarItemPersonalizado = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.criarItemPersonalizado();
-    }
-};
-
-// Funções financeiras
-window.receberDinheiroRapido = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.receberDinheiroRapido();
-    }
-};
-
-window.gastarDinheiroRapido = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.gastarDinheiroRapido();
-    }
-};
-
-window.adicionarDinheiro = function(valor) {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.adicionarDinheiro(valor);
-    }
-};
-
-window.removerDinheiro = function(valor) {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.removerDinheiro(valor);
-    }
-};
-
-window.ajustarDinheiroManual = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.ajustarDinheiroManual();
-    }
-};
-
-window.confirmarOperacao = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.confirmarOperacao();
-    }
-};
-
-window.fecharModalSimples = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.fecharModalSimples();
-    }
-};
-
-// Funções de navegação
-window.alternarSubTab = function(subtab) {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.alternarSubTab(subtab);
-    }
-};
-
-// Exportar para uso global
-window.SistemaEquipamentos = SistemaEquipamentos;
-
-// ========== INICIALIZAÇÃO AUTOMÁTICA ==========
-function inicializarSistemaEquipamentos() {
-    const intervalo = setInterval(() => {
-        const abaEquipamento = document.getElementById('equipamento');
-        if (abaEquipamento && abaEquipamento.classList.contains('active')) {
-            if (!window.sistemaEquipamentos) {
-                window.sistemaEquipamentos = new SistemaEquipamentos();
-                window.sistemaEquipamentos.inicializarQuandoPronto();
-            }
-            clearInterval(intervalo);
-        }
-    }, 500);
-}
-
-// Iniciar quando o DOM estiver pronto
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', inicializarSistemaEquipamentos);
-} else {
-    inicializarSistemaEquipamentos();
 }
