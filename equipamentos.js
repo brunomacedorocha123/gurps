@@ -1,4 +1,4 @@
-// equipamentos.js - SISTEMA COMPLETO ATUALIZADO
+// equipamentos.js - SISTEMA COMPLETO COM ATUALIZAÇÃO EM TEMPO REAL
 class SistemaEquipamentos {
     constructor() {
         // ========== SISTEMA DE EQUIPAMENTOS ==========
@@ -6,7 +6,7 @@ class SistemaEquipamentos {
         this.deposito = [];
         
         // ========== SISTEMA FINANCEIRO ==========
-        this.dinheiro = 0; // Será calculado pela riqueza
+        this.dinheiro = 0;
         this.ultimasTransacoes = [];
         
         // ========== SISTEMA DE CARGA ==========
@@ -42,19 +42,20 @@ class SistemaEquipamentos {
         this.armasCombate = { maos: [], corpo: [] };
         this.escudoCombate = null;
         
-        // ========== SISTEMA DE RIQUEZA - INTEGRAÇÃO COMPLETA ==========
+        // ========== SISTEMA DE RIQUEZA - VALORES FIXOS ==========
         this.valoresBaseRiqueza = {
-            'falido': 0,        // 0%
-            'pobre': 200,       // 20% de 1000
-            'batalhador': 500,  // 50% de 1000
-            'medio': 1000,      // 100% (valor original)
-            'confortavel': 2000, // 200%
-            'rico': 5000,       // 500%
-            'muito-rico': 20000, // 2000%
-            'podre-rico': 100000 // 10000%
+            'falido': 0,
+            'pobre': 200,
+            'batalhador': 500,
+            'medio': 1000,
+            'confortavel': 2000,
+            'rico': 5000,
+            'muito-rico': 20000,
+            'podre-rico': 100000
         };
         
-        this.nivelRiquezaAtual = 'medio';
+        this.nivelRiquezaAtual = null;
+        this.primeiraInicializacao = true;
         
         // ========== SISTEMA DE CRIAÇÃO ==========
         this.contadorItensPersonalizados = 10000;
@@ -73,40 +74,11 @@ class SistemaEquipamentos {
         // ========== ESTADO DO SISTEMA ==========
         this.catalogoPronto = false;
         this.inicializacaoEmAndamento = false;
-        this.dadosCarregados = false; // REMOVIDO: não carrega mais do localStorage
         this.itemCompraQuantidade = null;
         this.quantidadeAtual = 1;
         this.operacaoAtual = null;
         
-        // Inicializar dinheiro baseado na riqueza
-        this.inicializarDinheiroPorRiqueza();
-    }
-
-    // ========== NOVO MÉTODO: Inicializar dinheiro por riqueza ==========
-    inicializarDinheiroPorRiqueza() {
-        // Tentar obter nível de riqueza do sistema de características
-        let nivelRiqueza = this.nivelRiquezaAtual;
-        
-        if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
-            const pontos = window.sistemaRiqueza.getPontosRiqueza();
-            nivelRiqueza = this.mapearPontosParaNivel(pontos);
-        } else {
-            // Se não encontrar sistema de riqueza, verificar no select manualmente
-            const selectRiqueza = document.getElementById('nivelRiqueza');
-            if (selectRiqueza) {
-                const pontos = parseInt(selectRiqueza.value);
-                nivelRiqueza = this.mapearPontosParaNivel(pontos);
-            }
-        }
-        
-        this.nivelRiquezaAtual = nivelRiqueza;
-        const valorBase = this.valoresBaseRiqueza[nivelRiqueza] || 1000;
-        
-        // REMOVIDO: Não carrega dinheiro do localStorage
-        // O dinheiro começa sempre como o valor base da riqueza
-        this.dinheiro = valorBase;
-        
-        console.log(`💰 Dinheiro inicializado: $${this.dinheiro} (Nível: ${nivelRiqueza})`);
+        // NÃO INICIALIZA DINHEIRO AQUI - será feito depois
     }
 
     // ========== INICIALIZAÇÃO ==========
@@ -118,9 +90,8 @@ class SistemaEquipamentos {
             await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
         }
         
-        // REMOVIDO: Não carrega dados salvos automaticamente
-        // this.carregarDadosSalvos();
-        this.dadosCarregados = true;
+        // REMOVIDO COMPLETAMENTE: NÃO CARREGA NADA DO LOCALSTORAGE
+        // this.carregarDadosSalvos(); // <--- REMOVIDO
         
         await this.aguardarCatalogo();
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -128,6 +99,9 @@ class SistemaEquipamentos {
         this.inicializarSistema();
         this.iniciarMonitoramentoST();
         this.configurarObservadorRiqueza();
+        
+        // AGORA SIM: Inicializar dinheiro baseado na riqueza ATUAL
+        this.atualizarDinheiroPorRiquezaAtual();
     }
 
     aguardarCatalogo() {
@@ -180,57 +154,99 @@ class SistemaEquipamentos {
         return mapeamento[pontos] || 'medio';
     }
 
+    obterNivelRiquezaAtual() {
+        // Tenta pelo sistema de riqueza
+        if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
+            const pontos = window.sistemaRiqueza.getPontosRiqueza();
+            return this.mapearPontosParaNivel(pontos);
+        }
+        
+        // Tenta pelo select diretamente
+        const selectRiqueza = document.getElementById('nivelRiqueza');
+        if (selectRiqueza) {
+            const pontos = parseInt(selectRiqueza.value);
+            return this.mapearPontosParaNivel(pontos);
+        }
+        
+        // Padrão
+        return 'medio';
+    }
+
     configurarObservadorRiqueza() {
-        // Observar mudanças no sistema de riqueza
+        // 1. Observar eventos do sistema de riqueza
         document.addEventListener('riquezaAlterada', (e) => {
-            if (e.detail && e.detail.pontos !== undefined) {
-                const novoNivel = this.mapearPontosParaNivel(e.detail.pontos);
-                const diferencaDinheiro = this.atualizarDinheiroPorNivelRiqueza(novoNivel);
-                
-                if (diferencaDinheiro !== 0) {
-                    const mensagem = diferencaDinheiro > 0 
-                        ? `Ajuste de riqueza: +$${diferencaDinheiro}`
-                        : `Ajuste de riqueza: -$${Math.abs(diferencaDinheiro)}`;
-                    this.mostrarFeedback(mensagem, 'sucesso');
-                }
-            }
+            console.log('💰 Evento riquezaAlterada recebido:', e.detail);
+            this.atualizarDinheiroPorRiquezaAtual();
         });
         
-        // Observar mudanças no select de riqueza diretamente
+        // 2. Observar mudanças DIRETAS no select (caso o evento não funcione)
         const selectRiqueza = document.getElementById('nivelRiqueza');
         if (selectRiqueza) {
             selectRiqueza.addEventListener('change', () => {
-                const pontos = parseInt(selectRiqueza.value);
-                const novoNivel = this.mapearPontosParaNivel(pontos);
-                this.atualizarDinheiroPorNivelRiqueza(novoNivel);
+                console.log('💰 Select de riqueza alterado diretamente');
+                setTimeout(() => {
+                    this.atualizarDinheiroPorRiquezaAtual();
+                }, 100);
             });
+        }
+        
+        // 3. Observar mudanças na aba de características
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    const tab = mutation.target;
+                    if (tab.id === 'caracteristicas' && tab.classList.contains('active')) {
+                        // Quando a aba características ficar ativa, verificar riqueza
+                        setTimeout(() => {
+                            this.atualizarDinheiroPorRiquezaAtual();
+                        }, 300);
+                    }
+                }
+            });
+        });
+        
+        const caracteristicasTab = document.getElementById('caracteristicas');
+        if (caracteristicasTab) {
+            observer.observe(caracteristicasTab, { attributes: true });
         }
     }
 
-    atualizarDinheiroPorNivelRiqueza(novoNivel) {
-        if (this.nivelRiquezaAtual === novoNivel) return 0;
+    atualizarDinheiroPorRiquezaAtual() {
+        const nivelAnterior = this.nivelRiquezaAtual;
+        const novoNivel = this.obterNivelRiquezaAtual();
         
-        const dinheiroAntes = this.dinheiro;
-        const valorNovoNivel = this.valoresBaseRiqueza[novoNivel] || 1000;
+        console.log(`💰 Atualizando dinheiro: ${nivelAnterior} -> ${novoNivel}`);
         
-        // Se for a primeira inicialização (dinheiro = 0), apenas define o valor
-        if (this.dinheiro === 0 || this.nivelRiquezaAtual === 'medio') {
-            this.dinheiro = valorNovoNivel;
-        } else {
-            // Calcula a diferença e ajusta o dinheiro
-            const valorNivelAtual = this.valoresBaseRiqueza[this.nivelRiquezaAtual] || 1000;
-            const diferenca = valorNovoNivel - valorNivelAtual;
-            this.dinheiro += diferenca;
+        // Se for a primeira vez ou nível mudou
+        if (this.primeiraInicializacao || nivelAnterior !== novoNivel) {
+            const valorNovoNivel = this.valoresBaseRiqueza[novoNivel] || 1000;
+            
+            // Se for primeira inicialização, apenas define o valor
+            if (this.primeiraInicializacao) {
+                this.dinheiro = valorNovoNivel;
+                this.primeiraInicializacao = false;
+            } else {
+                // Se nível mudou, calcula diferença
+                const valorNivelAnterior = this.valoresBaseRiqueza[nivelAnterior] || 1000;
+                const diferenca = valorNovoNivel - valorNivelAnterior;
+                this.dinheiro += diferenca;
+            }
+            
+            this.nivelRiquezaAtual = novoNivel;
+            
+            // Atualizar interface
+            this.atualizarInterfaceFinanceiro();
+            this.notificarDashboard();
+            
+            console.log(`💰 Dinheiro atualizado para: $${this.dinheiro} (${novoNivel})`);
+            
+            // Mostrar feedback visual
+            if (nivelAnterior && nivelAnterior !== novoNivel) {
+                const diferencaValor = this.valoresBaseRiqueza[novoNivel] - this.valoresBaseRiqueza[nivelAnterior];
+                const sinal = diferencaValor > 0 ? '+' : '';
+                this.mostrarFeedback(`Riqueza alterada: ${novoNivel} (${sinal}$${Math.abs(diferencaValor)})`, 'sucesso');
+            }
         }
-        
-        this.nivelRiquezaAtual = novoNivel;
-        
-        // Atualizar interface
-        this.atualizarInterface();
-        this.notificarDashboard();
-        
-        const diferenca = this.dinheiro - dinheiroAntes;
-        return diferenca;
     }
 
     // ========== SISTEMA DE CARGA ==========
@@ -262,7 +278,6 @@ class SistemaEquipamentos {
             this.pesoMaximo = this.capacidadeCarga.pesada;
             this.atualizarNivelCarga();
             this.atualizarInterface();
-            // REMOVIDO: Não salva automaticamente
         }
     }
 
@@ -368,7 +383,6 @@ class SistemaEquipamentos {
     // ========== SISTEMA DE MOCHILA ==========
     alternarMochila() {
         this.mochilaAtiva = !this.mochilaAtiva;
-        // REMOVIDO: Não salva automaticamente
         this.atualizarPeso();
         this.atualizarInterface();
         
@@ -475,7 +489,6 @@ class SistemaEquipamentos {
             descricao: descricao
         });
         
-        // REMOVIDO: Não salva automaticamente
         this.fecharModalSimples();
         this.atualizarInterface();
         this.notificarDashboard();
@@ -494,7 +507,6 @@ class SistemaEquipamentos {
         }
         
         this.dinheiro += valor;
-        // REMOVIDO: Não salva automaticamente
         
         this.registrarTransacao({
             tipo: 'receita',
@@ -519,7 +531,6 @@ class SistemaEquipamentos {
         }
         
         this.dinheiro -= valor;
-        // REMOVIDO: Não salva automaticamente
         
         this.registrarTransacao({
             tipo: 'despesa',
@@ -544,7 +555,6 @@ class SistemaEquipamentos {
         
         const diferenca = valorNumerico - this.dinheiro;
         this.dinheiro = valorNumerico;
-        // REMOVIDO: Não salva automaticamente
         
         if (diferenca > 0) {
             this.registrarTransacao({
@@ -583,7 +593,7 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== COMPRA E VENDA DE EQUIPAMENTOS ==========
+        // ========== COMPRA E VENDA DE EQUIPAMENTOS ==========
     comprarEquipamento(itemId, elemento) {
         if (!this.catalogoPronto) {
             this.mostrarFeedback('Sistema ainda carregando...', 'erro');
@@ -619,7 +629,6 @@ class SistemaEquipamentos {
         this.equipamentosAdquiridos.push(novoEquipamento);
         this.equipamentosEquipados.mochila.push(novoEquipamento);
 
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} comprado com sucesso!`, 'sucesso');
         this.atualizarInterface();
         this.notificarDashboard();
@@ -649,7 +658,6 @@ class SistemaEquipamentos {
         this.equipamentosAdquiridos.splice(index, 1);
         this.deposito = this.deposito.filter(item => item.idUnico !== itemId);
 
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} vendido por $${valorVenda}`, 'sucesso');
         this.atualizarInterface();
         this.notificarDashboard();
@@ -767,7 +775,6 @@ class SistemaEquipamentos {
         }
 
         this.dinheiro -= custoTotal;
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${quantidade}x ${equipamento.nome} comprado(s) com sucesso!`, 'sucesso');
         
         this.fecharSubmenuQuantidade();
@@ -843,7 +850,6 @@ class SistemaEquipamentos {
                 this.equiparItemGeral(itemId);
         }
 
-        // REMOVIDO: Não salva automaticamente
         this.atualizarInterface();
         this.atualizarSistemaCombate();
     }
@@ -958,7 +964,6 @@ class SistemaEquipamentos {
         equipamento.equipado = false;
         this.equipamentosEquipados.mochila.push(equipamento);
 
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} guardado`, 'sucesso');
         this.atualizarInterface();
         this.atualizarDisplayMaos();
@@ -987,7 +992,6 @@ class SistemaEquipamentos {
         equipamento.equipado = false;
         this.equipamentosEquipados.corpo.push(equipamento);
 
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} colocado no corpo`, 'sucesso');
         this.atualizarInterface();
         this.atualizarSistemaCombate();
@@ -1010,7 +1014,6 @@ class SistemaEquipamentos {
         equipamento.equipado = false;
         this.equipamentosEquipados.mochila.push(equipamento);
 
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} removido do corpo`, 'sucesso');
         this.atualizarInterface();
         this.atualizarSistemaCombate();
@@ -1034,7 +1037,6 @@ class SistemaEquipamentos {
         equipamento.equipado = false;
         this.deposito.push(equipamento);
 
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} guardado no depósito`, 'sucesso');
         this.atualizarInterface();
         return true;
@@ -1053,7 +1055,6 @@ class SistemaEquipamentos {
         equipamento.equipado = false;
         this.equipamentosEquipados.mochila.push(equipamento);
 
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamento.nome} retirado do depósito`, 'sucesso');
         this.atualizarInterface();
         return true;
@@ -1076,7 +1077,6 @@ class SistemaEquipamentos {
             this.deposito.push(equipamento);
         });
 
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${equipamentosNaMochila.length} itens guardados no depósito`, 'sucesso');
         this.atualizarInterface();
     }
@@ -1095,7 +1095,6 @@ class SistemaEquipamentos {
         });
 
         this.deposito = [];
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${totalItens} itens retirados do depósito`, 'sucesso');
         this.atualizarInterface();
     }
@@ -1114,610 +1113,11 @@ class SistemaEquipamentos {
         );
 
         this.deposito = [];
-        // REMOVIDO: Não salva automaticamente
         this.mostrarFeedback(`${totalLimpos} itens removidos do depósito`, 'sucesso');
         this.atualizarInterface();
     }
 
-    // ========== SISTEMA DE CRIAÇÃO DE ITENS ==========
-    configurarCriacaoItens() {
-        // Eventos para atualização em tempo real
-        const formInputs = document.querySelectorAll('#subtab-criar input, #subtab-criar select, #subtab-criar textarea');
-        formInputs.forEach(input => {
-            input.addEventListener('input', () => this.atualizarPreview());
-            input.addEventListener('change', () => this.atualizarPreview());
-        });
-        
-        // Evento específico para checkbox mágico
-        const checkboxMagico = document.getElementById('item-magico');
-        if (checkboxMagico) {
-            checkboxMagico.addEventListener('change', () => this.atualizarCamposMagicos());
-        }
-        
-        // Evento para tipo de item
-        const selectTipo = document.getElementById('item-tipo');
-        if (selectTipo) {
-            selectTipo.addEventListener('change', () => this.atualizarCamposPorTipo());
-        }
-        
-        // Inicializar campos
-        this.atualizarCamposPorTipo();
-        this.atualizarPreview();
-    }
-
-    atualizarCamposPorTipo() {
-        const tipo = document.getElementById('item-tipo').value;
-        const camposDiv = document.getElementById('campos-especificos');
-        
-        if (!camposDiv) return;
-        
-        let camposHTML = '';
-        
-        switch(tipo) {
-            case 'arma-cc':
-                camposHTML = `
-                    <div class="form-section">
-                        <h4><i class="fas fa-sword"></i> Propriedades da Arma</h4>
-                        <div class="form-group-duo">
-                            <div class="form-group">
-                                <label>Dano:</label>
-                                <input type="text" id="item-dano" placeholder="Ex: 1d6+1" maxlength="20">
-                            </div>
-                            <div class="form-group">
-                                <label>Tipo de Dano:</label>
-                                <select id="item-tipo-dano">
-                                    <option value="corte">Corte</option>
-                                    <option value="perfuração">Perfuração</option>
-                                    <option value="impacto">Impacto</option>
-                                    <option value="outro">Outro</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group-duo">
-                            <div class="form-group">
-                                <label>Mãos Necessárias:</label>
-                                <select id="item-maos">
-                                    <option value="1">1 mão</option>
-                                    <option value="1.5">1 ou 2 mãos</option>
-                                    <option value="2">2 mãos</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>ST Mínimo:</label>
-                                <input type="number" id="item-st" value="10" min="1" max="30">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Alcance:</label>
-                            <input type="text" id="item-alcance" placeholder="Ex: Corpo-a-corpo" maxlength="30">
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            case 'arma-dist':
-                camposHTML = `
-                    <div class="form-section">
-                        <h4><i class="fas fa-bow-arrow"></i> Propriedades da Arma</h4>
-                        <div class="form-group-duo">
-                            <div class="form-group">
-                                <label>Dano:</label>
-                                <input type="text" id="item-dano" placeholder="Ex: 1d8" maxlength="20">
-                            </div>
-                            <div class="form-group">
-                                <label>Tipo de Dano:</label>
-                                <select id="item-tipo-dano">
-                                    <option value="perfuração">Perfuração</option>
-                                    <option value="impacto">Impacto</option>
-                                    <option value="outro">Outro</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group-duo">
-                            <div class="form-group">
-                                <label>Mãos Necessárias:</label>
-                                <select id="item-maos">
-                                    <option value="1">1 mão</option>
-                                    <option value="2">2 mãos</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>ST Mínimo:</label>
-                                <input type="number" id="item-st" value="10" min="1" max="30">
-                            </div>
-                        </div>
-                        <div class="form-group-duo">
-                            <div class="form-group">
-                                <label>Alcance Mínimo:</label>
-                                <input type="text" id="item-alcance-min" placeholder="Ex: 10m" maxlength="20">
-                            </div>
-                            <div class="form-group">
-                                <label>Alcance Máximo:</label>
-                                <input type="text" id="item-alcance-max" placeholder="Ex: 100m" maxlength="20">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Munição Necessária:</label>
-                            <input type="text" id="item-municao" placeholder="Ex: Flecha" maxlength="30">
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            case 'armadura':
-                camposHTML = `
-                    <div class="form-section">
-                        <h4><i class="fas fa-shield-alt"></i> Propriedades da Armadura</h4>
-                        <div class="form-group">
-                            <label>Local da Armadura:</label>
-                            <select id="item-local">
-                                <option value="Cabeça">Cabeça</option>
-                                <option value="Torso">Torso</option>
-                                <option value="Braços">Braços</option>
-                                <option value="Pernas">Pernas</option>
-                                <option value="Mãos">Mãos</option>
-                                <option value="Pés">Pés</option>
-                                <option value="Corpo Inteiro">Corpo Inteiro</option>
-                            </select>
-                        </div>
-                        <div class="form-group-duo">
-                            <div class="form-group">
-                                <label>RD (Resistência a Dano):</label>
-                                <input type="number" id="item-rd" value="1" min="0" max="20">
-                            </div>
-                            <div class="form-group">
-                                <label>BD (Bloqueio de Dano):</label>
-                                <input type="number" id="item-bd" value="0" min="0" max="10">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Penalidade de Movimento:</label>
-                            <select id="item-penalidade">
-                                <option value="0">Nenhuma</option>
-                                <option value="-1">-1 MOV</option>
-                                <option value="-2">-2 MOV</option>
-                                <option value="-3">-3 MOV</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            case 'escudo':
-                camposHTML = `
-                    <div class="form-section">
-                        <h4><i class="fas fa-shield"></i> Propriedades do Escudo</h4>
-                        <div class="form-group-duo">
-                            <div class="form-group">
-                                <label>BD (Bloqueio de Dano):</label>
-                                <input type="number" id="item-bd" value="2" min="1" max="10">
-                            </div>
-                            <div class="form-group">
-                                <label>Mãos Necessárias:</label>
-                                <select id="item-maos">
-                                    <option value="1">1 mão</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>RD/PV:</label>
-                            <input type="number" id="item-rdpv" value="5" min="1" max="50">
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            case 'consumivel':
-                camposHTML = `
-                    <div class="form-section">
-                        <h4><i class="fas fa-wine-bottle"></i> Propriedades do Consumível</h4>
-                        <div class="form-group">
-                            <label>Efeito:</label>
-                            <textarea id="item-efeito" rows="3" placeholder="Descreva o efeito do consumível..."></textarea>
-                        </div>
-                        <div class="form-group-duo">
-                            <div class="form-group">
-                                <label>Duração:</label>
-                                <input type="text" id="item-duracao" placeholder="Ex: 1 hora" maxlength="30">
-                            </div>
-                            <div class="form-group">
-                                <label>Tipo:</label>
-                                <select id="item-tipo-consumivel">
-                                    <option value="poção">Poção</option>
-                                    <option value="veneno">Veneno</option>
-                                    <option value="comida">Comida</option>
-                                    <option value="bebida">Bebida</option>
-                                    <option value="outro">Outro</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            default: // Equipamento Geral
-                camposHTML = `
-                    <div class="form-section">
-                        <h4><i class="fas fa-toolbox"></i> Propriedades Específicas</h4>
-                        <div class="form-group">
-                            <label>Função/Utilidade:</label>
-                            <textarea id="item-funcao" rows="3" placeholder="Descreva a função do equipamento..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Mãos Necessárias (se aplicável):</label>
-                                <select id="item-maos">
-                                    <option value="0">Não usa mãos</option>
-                                    <option value="1">1 mão</option>
-                                    <option value="2">2 mãos</option>
-                                </select>
-                        </div>
-                    </div>
-                `;
-        }
-        
-        camposDiv.innerHTML = camposHTML;
-        
-        // Reconfigurar eventos para novos campos
-        setTimeout(() => {
-            const novosInputs = camposDiv.querySelectorAll('input, select, textarea');
-            novosInputs.forEach(input => {
-                input.addEventListener('input', () => this.atualizarPreview());
-                input.addEventListener('change', () => this.atualizarPreview());
-            });
-            this.atualizarPreview();
-        }, 10);
-    }
-
-    atualizarCamposMagicos() {
-        const isMagico = document.getElementById('item-magico').checked;
-        const camposMagicos = document.getElementById('campos-magicos');
-        
-        if (!camposMagicos) return;
-        
-        if (isMagico) {
-            camposMagicos.style.display = 'block';
-        } else {
-            camposMagicos.style.display = 'none';
-            document.getElementById('item-efeito-magico').value = '';
-        }
-        
-        this.atualizarPreview();
-    }
-
-    atualizarPreview() {
-        const previewDiv = document.getElementById('preview-conteudo');
-        if (!previewDiv) return;
-        
-        // Obter valores do formulário
-        const nome = document.getElementById('item-nome')?.value.trim() || '';
-        const tipo = document.getElementById('item-tipo')?.value || 'geral';
-        const peso = parseFloat(document.getElementById('item-peso')?.value) || 0;
-        const custo = parseInt(document.getElementById('item-custo')?.value) || 0;
-        const era = document.getElementById('item-era')?.value || 'medieval';
-        const descricao = document.getElementById('item-descricao')?.value.trim() || '';
-        const isMagico = document.getElementById('item-magico')?.checked || false;
-        const efeitoMagico = document.getElementById('item-efeito-magico')?.value.trim() || '';
-        
-        if (!nome) {
-            previewDiv.innerHTML = `
-                <div class="preview-vazio">
-                    <i class="fas fa-cube fa-3x"></i>
-                    <p>As informações do item aparecerão aqui</p>
-                    <small>Comece preenchendo o nome do item</small>
-                </div>
-            `;
-            return;
-        }
-        
-        // Traduzir tipo para português
-        const tiposTraduzidos = {
-            'geral': 'Equipamento Geral',
-            'arma-cc': 'Arma Corpo-a-Corpo',
-            'arma-dist': 'Arma à Distância',
-            'armadura': 'Armadura',
-            'escudo': 'Escudo',
-            'consumivel': 'Consumível',
-            'artefato': 'Artefato Mágico',
-            'missao': 'Item de Missão'
-        };
-        
-        let previewHTML = `
-            <div class="preview-item">
-                <h5>${nome}</h5>
-                <span class="tipo-badge">${tiposTraduzidos[tipo] || tipo}</span>
-                
-                <div class="item-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Custo:</span>
-                        <span class="stat-value">$${custo}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Peso:</span>
-                        <span class="stat-value">${peso.toFixed(1)} kg</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Era:</span>
-                        <span class="stat-value">${era === 'medieval' ? 'Medieval' : 'Moderna'}</span>
-                    </div>
-        `;
-        
-        if (isMagico) {
-            previewHTML += `
-                    <div class="stat-item">
-                        <span class="stat-label">Tipo:</span>
-                        <span class="stat-value" style="color: var(--magico);">Mágico</span>
-                    </div>
-            `;
-        }
-        
-        // Adicionar campos específicos baseados no tipo
-        switch(tipo) {
-            case 'arma-cc':
-            case 'arma-dist':
-                const dano = document.getElementById('item-dano')?.value || 'Não especificado';
-                const tipoDano = document.getElementById('item-tipo-dano')?.value || 'Não especificado';
-                const maos = document.getElementById('item-maos')?.value || '1';
-                const st = document.getElementById('item-st')?.value || '10';
-                const alcance = tipo === 'arma-cc' 
-                    ? document.getElementById('item-alcance')?.value || 'Corpo-a-corpo'
-                    : `${document.getElementById('item-alcance-min')?.value || '?'} - ${document.getElementById('item-alcance-max')?.value || '?'}`;
-                
-                previewHTML += `
-                    <div class="stat-item">
-                        <span class="stat-label">Dano:</span>
-                        <span class="stat-value" style="color: var(--erro);">${dano}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Tipo:</span>
-                        <span class="stat-value">${tipoDano}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Mãos:</span>
-                        <span class="stat-value">${this.obterTextoMaos(parseFloat(maos))}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">ST Mín:</span>
-                        <span class="stat-value">${st}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Alcance:</span>
-                        <span class="stat-value">${alcance}</span>
-                    </div>
-                `;
-                break;
-                
-            case 'armadura':
-                const local = document.getElementById('item-local')?.value || 'Não especificado';
-                const rd = document.getElementById('item-rd')?.value || '0';
-                const bd = document.getElementById('item-bd')?.value || '0';
-                const penalidade = document.getElementById('item-penalidade')?.value || '0';
-                
-                previewHTML += `
-                    <div class="stat-item">
-                        <span class="stat-label">Local:</span>
-                        <span class="stat-value">${local}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">RD:</span>
-                        <span class="stat-value">${rd}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">BD:</span>
-                        <span class="stat-value">${bd}</span>
-                    </div>
-                `;
-                
-                if (penalidade !== '0') {
-                    previewHTML += `
-                    <div class="stat-item">
-                        <span class="stat-label">Penalidade:</span>
-                        <span class="stat-value" style="color: var(--aviso);">MOV ${penalidade}</span>
-                    </div>
-                    `;
-                }
-                break;
-        }
-        
-        previewHTML += `
-                </div>
-        `;
-        
-        if (descricao) {
-            previewHTML += `
-                <div class="descricao">
-                    <strong>Descrição:</strong><br>
-                    ${descricao}
-                </div>
-            `;
-        }
-        
-        if (isMagico && efeitoMagico) {
-            previewHTML += `
-                <div class="efeito-magico">
-                    <strong>✨ Efeito Mágico:</strong><br>
-                    ${efeitoMagico}
-                </div>
-            `;
-        }
-        
-        previewHTML += `
-            </div>
-        `;
-        
-        previewDiv.innerHTML = previewHTML;
-    }
-
-    limparFormCriacao() {
-        // Limpar campos básicos
-        const nomeInput = document.getElementById('item-nome');
-        const tipoSelect = document.getElementById('item-tipo');
-        const pesoInput = document.getElementById('item-peso');
-        const custoInput = document.getElementById('item-custo');
-        const eraSelect = document.getElementById('item-era');
-        const descricaoInput = document.getElementById('item-descricao');
-        const magicoCheckbox = document.getElementById('item-magico');
-        const efeitoMagicoInput = document.getElementById('item-efeito-magico');
-        
-        if (nomeInput) nomeInput.value = '';
-        if (tipoSelect) tipoSelect.value = 'geral';
-        if (pesoInput) pesoInput.value = '1.0';
-        if (custoInput) custoInput.value = '0';
-        if (eraSelect) eraSelect.value = 'medieval';
-        if (descricaoInput) descricaoInput.value = '';
-        if (magicoCheckbox) magicoCheckbox.checked = false;
-        if (efeitoMagicoInput) efeitoMagicoInput.value = '';
-        
-        // Atualizar campos e preview
-        this.atualizarCamposPorTipo();
-        this.atualizarCamposMagicos();
-        this.atualizarPreview();
-        
-        this.mostrarFeedback('Formulário limpo', 'sucesso');
-    }
-
-    criarItemPersonalizado() {
-        // Validar campos obrigatórios
-        const nome = document.getElementById('item-nome')?.value.trim();
-        if (!nome) {
-            this.mostrarFeedback('Por favor, insira um nome para o item!', 'erro');
-            return;
-        }
-        
-        const tipo = document.getElementById('item-tipo')?.value || 'geral';
-        const peso = parseFloat(document.getElementById('item-peso')?.value);
-        const custo = parseInt(document.getElementById('item-custo')?.value) || 0;
-        
-        if (isNaN(peso) || peso <= 0) {
-            this.mostrarFeedback('O peso deve ser maior que zero!', 'erro');
-            return;
-        }
-        
-        // Verificar custo (se o item tem custo positivo, verificar dinheiro)
-        if (custo > 0 && this.dinheiro < custo) {
-            this.mostrarFeedback(`Dinheiro insuficiente! Necessário: $${custo}`, 'erro');
-            return;
-        }
-        
-        // Criar objeto do item
-        const novoItem = {
-            id: `personalizado_${this.contadorItensPersonalizados++}`,
-            nome: nome,
-            tipo: tipo,
-            subtipo: this.obterSubtipoPorTipo(tipo),
-            peso: peso,
-            custo: custo,
-            custoTotal: custo,
-            era: document.getElementById('item-era')?.value || 'medieval',
-            descricao: document.getElementById('item-descricao')?.value.trim() || 'Sem descrição',
-            personalizado: true,
-            criadoEm: new Date().toISOString(),
-            status: 'na-mochila',
-            equipado: false,
-            quantidade: 1,
-            idUnico: this.gerarIdUnico()
-        };
-        
-        // Adicionar propriedades mágicas se necessário
-        if (document.getElementById('item-magico')?.checked) {
-            novoItem.magico = true;
-            novoItem.efeitoMagico = document.getElementById('item-efeito-magico')?.value.trim() || '';
-        }
-        
-        // Adicionar campos específicos baseados no tipo
-        this.adicionarCamposEspecificos(novoItem, tipo);
-        
-        // Deduzir custo se houver
-        if (custo > 0) {
-            this.dinheiro -= custo;
-        }
-        
-        // Adicionar ao inventário
-        this.equipamentosAdquiridos.push(novoItem);
-        this.equipamentosEquipados.mochila.push(novoItem);
-        
-        // REMOVIDO: Não salva automaticamente
-        this.mostrarFeedback(`${nome} criado com sucesso!`, 'sucesso');
-        
-        // Registrar transação se houver custo
-        if (custo > 0) {
-            this.registrarTransacao({
-                tipo: 'despesa',
-                valor: custo,
-                descricao: `Criação: ${nome}`
-            });
-        }
-        
-        // Limpar formulário
-        this.limparFormCriacao();
-        
-        // Atualizar interface e ir para inventário
-        this.atualizarInterface();
-        
-        // Ir para inventário
-        setTimeout(() => {
-            this.alternarSubTab('inventario');
-        }, 500);
-    }
-
-    obterSubtipoPorTipo(tipo) {
-        const subtipos = {
-            'arma-cc': 'arma',
-            'arma-dist': 'arma',
-            'armadura': 'armadura',
-            'escudo': 'escudo',
-            'consumivel': 'consumivel',
-            'artefato': 'artefato',
-            'missao': 'missao',
-            'geral': 'equipamento'
-        };
-        return subtipos[tipo] || 'equipamento';
-    }
-
-    adicionarCamposEspecificos(item, tipo) {
-        switch(tipo) {
-            case 'arma-cc':
-            case 'arma-dist':
-                item.dano = document.getElementById('item-dano')?.value || '1d6';
-                item.tipoDano = document.getElementById('item-tipo-dano')?.value || 'corte';
-                item.maos = parseFloat(document.getElementById('item-maos')?.value) || 1;
-                item.st = parseInt(document.getElementById('item-st')?.value) || 10;
-                
-                if (tipo === 'arma-cc') {
-                    item.alcance = document.getElementById('item-alcance')?.value || 'Corpo-a-corpo';
-                } else {
-                    item.alcanceMin = document.getElementById('item-alcance-min')?.value || '10m';
-                    item.alcanceMax = document.getElementById('item-alcance-max')?.value || '50m';
-                    item.municao = document.getElementById('item-municao')?.value || '';
-                }
-                break;
-                
-            case 'armadura':
-                item.local = document.getElementById('item-local')?.value || 'Torso';
-                item.rd = parseInt(document.getElementById('item-rd')?.value) || 1;
-                item.bd = parseInt(document.getElementById('item-bd')?.value) || 0;
-                item.penalidadeMovimento = document.getElementById('item-penalidade')?.value || '0';
-                break;
-                
-            case 'escudo':
-                item.bd = parseInt(document.getElementById('item-bd')?.value) || 2;
-                item.rdpv = parseInt(document.getElementById('item-rdpv')?.value) || 5;
-                item.maos = parseFloat(document.getElementById('item-maos')?.value) || 1;
-                break;
-                
-            case 'consumivel':
-                item.efeito = document.getElementById('item-efeito')?.value || '';
-                item.duracao = document.getElementById('item-duracao')?.value || '';
-                item.tipoConsumivel = document.getElementById('item-tipo-consumivel')?.value || 'poção';
-                break;
-                
-            case 'geral':
-                item.funcao = document.getElementById('item-funcao')?.value || '';
-                item.maos = parseFloat(document.getElementById('item-maos')?.value) || 0;
-                break;
-        }
-    }
-
-    // ========== CONFIGURAÇÃO DE EVENTOS ==========
+        // ========== CONFIGURAÇÃO DE EVENTOS ==========
     configurarEventosGlobais() {
         // Evento de clique para botões de compra
         document.addEventListener('click', (e) => {
@@ -2297,7 +1697,6 @@ class SistemaEquipamentos {
             this.mostrarFeedback(`${equipamento.nome} consumido (${equipamento.quantidade} restantes)`, 'sucesso');
         }
 
-        // REMOVIDO: Não salva automaticamente
         this.atualizarInterface();
     }
 
@@ -2353,7 +1752,7 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== FEEDBACK ==========
+        // ========== FEEDBACK ==========
     mostrarFeedback(mensagem, tipo) {
         const feedback = document.createElement('div');
         feedback.className = `feedback-message feedback-${tipo}`;
@@ -2415,9 +1814,7 @@ class SistemaEquipamentos {
         }, 3000);
     }
 
-    // ========== MÉTODOS PARA SALVAR MANUALMENTE ==========
-    // ESSES MÉTODOS SERÃO CHAMADOS QUANDO O JOGADOR CONCLUIR TODAS AS ABAS
-    
+    // ========== MÉTODOS PARA SALVAR MANUALMENTE (DEPOIS) ==========
     exportarDados() {
         return {
             equipamentosAdquiridos: this.equipamentosAdquiridos,
@@ -2438,7 +1835,7 @@ class SistemaEquipamentos {
             nivelRiquezaAtual: this.nivelRiquezaAtual,
             valoresBaseRiqueza: this.valoresBaseRiqueza,
             timestamp: new Date().getTime(),
-            version: '4.0'
+            version: '5.0'
         };
     }
 
@@ -2455,9 +1852,6 @@ class SistemaEquipamentos {
         }
     }
 
-    // REMOVIDO: Não carrega dados automaticamente
-    // carregarDadosSalvos() { ... }
-
     notificarDashboard() {
         const event = new CustomEvent('equipamentosAtualizados', {
             detail: {
@@ -2472,4 +1866,140 @@ class SistemaEquipamentos {
         });
         document.dispatchEvent(event);
     }
+}
+
+// ========== INICIALIZAÇÃO GLOBAL ==========
+let sistemaEquipamentos;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const verificarAbaEquipamento = () => {
+        const abaEquipamento = document.getElementById('equipamento');
+        if (abaEquipamento && abaEquipamento.classList.contains('active')) {
+            if (!sistemaEquipamentos) {
+                sistemaEquipamentos = new SistemaEquipamentos();
+                window.sistemaEquipamentos = sistemaEquipamentos;
+                sistemaEquipamentos.inicializarQuandoPronto();
+            } else {
+                sistemaEquipamentos.atualizarInterfaceForcada();
+            }
+        }
+    };
+    
+    verificarAbaEquipamento();
+    
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const tab = mutation.target;
+                if (tab.id === 'equipamento' && tab.classList.contains('active')) {
+                    setTimeout(verificarAbaEquipamento, 100);
+                }
+            }
+        });
+    });
+    
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        observer.observe(tab, { attributes: true });
+    });
+});
+
+// ========== FUNÇÕES GLOBAIS PARA HTML ==========
+
+// Funções para quantidade
+window.aumentarQuantidade = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.aumentarQuantidade();
+    }
+};
+
+window.diminuirQuantidade = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.diminuirQuantidade();
+    }
+};
+
+window.fecharSubmenuQuantidade = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.fecharSubmenuQuantidade();
+    }
+};
+
+window.confirmarCompraQuantidade = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.confirmarCompraQuantidade();
+    }
+};
+
+// Funções financeiras
+window.receberDinheiroRapido = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.receberDinheiroRapido();
+    }
+};
+
+window.gastarDinheiroRapido = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.gastarDinheiroRapido();
+    }
+};
+
+window.adicionarDinheiro = function(valor) {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.adicionarDinheiro(valor);
+    }
+};
+
+window.removerDinheiro = function(valor) {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.removerDinheiro(valor);
+    }
+};
+
+window.ajustarDinheiroManual = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.ajustarDinheiroManual();
+    }
+};
+
+window.confirmarOperacao = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.confirmarOperacao();
+    }
+};
+
+window.fecharModalSimples = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.fecharModalSimples();
+    }
+};
+
+// Funções de navegação
+window.alternarSubTab = function(subtab) {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.alternarSubTab(subtab);
+    }
+};
+
+// Exportar para uso global
+window.SistemaEquipamentos = SistemaEquipamentos;
+
+// ========== INICIALIZAÇÃO AUTOMÁTICA ==========
+function inicializarSistemaEquipamentos() {
+    const intervalo = setInterval(() => {
+        const abaEquipamento = document.getElementById('equipamento');
+        if (abaEquipamento && abaEquipamento.classList.contains('active')) {
+            if (!window.sistemaEquipamentos) {
+                window.sistemaEquipamentos = new SistemaEquipamentos();
+                window.sistemaEquipamentos.inicializarQuandoPronto();
+            }
+            clearInterval(intervalo);
+        }
+    }, 500);
+}
+
+// Iniciar quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarSistemaEquipamentos);
+} else {
+    inicializarSistemaEquipamentos();
 }
