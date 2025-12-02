@@ -139,64 +139,71 @@ class SistemaEquipamentos {
         }, 300);
     }
 
-    // ========== SISTEMA DE RIQUEZA ==========
-    calcularDinheiroPorRiqueza() {
-        let nivelRiqueza = this.sistemaRiqueza.nivelAtual;
-        
-        if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
-            const pontos = window.sistemaRiqueza.getPontosRiqueza();
-            nivelRiqueza = this.mapearPontosParaNivel(pontos);
-            this.sistemaRiqueza.nivelAtual = nivelRiqueza;
-        }
-        
-        const multiplicador = this.sistemaRiqueza.multiplicadores[nivelRiqueza] || 1;
+   // ========== SISTEMA DE RIQUEZA ==========
+calcularDinheiroPorRiqueza() {
+    let nivelRiqueza = 'medio'; // valor padrão
+    
+    // Obter nível atual do sistema de riqueza
+    if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
+        const pontos = window.sistemaRiqueza.getPontosRiqueza();
+        nivelRiqueza = this.mapearPontosParaNivel(pontos);
+        this.sistemaRiqueza.nivelAtual = nivelRiqueza;
+    }
+    
+    const multiplicador = this.sistemaRiqueza.multiplicadores[nivelRiqueza] || 1;
+    const dinheiroBase = Math.floor(this.sistemaRiqueza.dinheiroBase * multiplicador);
+    
+    // RETORNA APENAS O DINHEIRO BASE, SEM SUBTRAIR GASTOS
+    // Os gastos serão subtraídos nas compras
+    return dinheiroBase;
+}
+
+mapearPontosParaNivel(pontos) {
+    const mapeamento = {
+        '-25': 'falido',
+        '-15': 'pobre',
+        '-10': 'batalhador',
+        '0': 'medio',
+        '10': 'confortavel',
+        '20': 'rico',
+        '30': 'muito-rico',
+        '50': 'podre-rico'
+    };
+    return mapeamento[pontos] || 'medio';
+}
+
+configurarObservadorRiqueza() {
+    document.addEventListener('riquezaAlterada', (e) => {
+        // Calcular novo dinheiro base
+        const novoDinheiroBase = this.calcularDinheiroPorRiqueza();
         const gastoAtual = this.calcularGastoTotalEquipamentos();
-        const dinheiroBase = Math.floor(this.sistemaRiqueza.dinheiroBase * multiplicador);
         
-        return Math.max(0, dinheiroBase - gastoAtual);
-    }
-
-    mapearPontosParaNivel(pontos) {
-        const mapeamento = {
-            '-25': 'falido',
-            '-15': 'pobre',
-            '-10': 'batalhador',
-            '0': 'medio',
-            '10': 'confortavel',
-            '20': 'rico',
-            '30': 'muito-rico',
-            '50': 'podre-rico'
-        };
-        return mapeamento[pontos] || 'medio';
-    }
-
-    configurarObservadorRiqueza() {
-        document.addEventListener('riquezaAlterada', (e) => {
-            this.atualizarDinheiroPorRiqueza();
-            this.atualizarInterface();
-            this.notificarDashboard();
+        // Dinheiro disponível = Base - Gasto atual
+        this.dinheiro = Math.max(0, novoDinheiroBase - gastoAtual);
+        
+        this.atualizarInterface();
+        this.notificarDashboard();
+        this.salvarDados();
+    });
+    
+    const selectRiqueza = document.getElementById('nivelRiqueza');
+    if (selectRiqueza) {
+        selectRiqueza.addEventListener('change', () => {
+            setTimeout(() => {
+                const novoDinheiroBase = this.calcularDinheiroPorRiqueza();
+                const gastoAtual = this.calcularGastoTotalEquipamentos();
+                
+                this.dinheiro = Math.max(0, novoDinheiroBase - gastoAtual);
+                
+                this.atualizarInterface();
+                this.notificarDashboard();
+                this.salvarDados();
+            }, 100);
         });
-        
-        const selectRiqueza = document.getElementById('nivelRiqueza');
-        if (selectRiqueza) {
-            selectRiqueza.addEventListener('change', () => {
-                setTimeout(() => {
-                    this.atualizarDinheiroPorRiqueza();
-                    this.atualizarInterface();
-                    this.notificarDashboard();
-                }, 100);
-            });
-        }
     }
+}
 
-    atualizarDinheiroPorRiqueza() {
-        const dinheiroAnterior = this.dinheiro;
-        this.dinheiro = this.calcularDinheiroPorRiqueza();
-        
-        if (dinheiroAnterior !== this.dinheiro) {
-            this.salvarDados();
-        }
-    }
+
 
     // ========== SISTEMA DE CARGA ==========
     iniciarMonitoramentoST() {
