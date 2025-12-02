@@ -1,56 +1,87 @@
-// equipamentos.js - SISTEMA SIMPLIFICADO DE EQUIPAMENTOS
+// equipamentos.js - SISTEMA COMPLETO ATUALIZADO
 class SistemaEquipamentos {
     constructor() {
-        // Sistema de equipamentos
+        // ========== SISTEMA DE EQUIPAMENTOS ==========
         this.equipamentosAdquiridos = [];
-        this.sistemaRiqueza = {
-            nivelAtual: 'medio',
-            dinheiroBase: 1000,
-            multiplicadores: {
-                'falido': 0, 'pobre': 0.2, 'batalhador': 0.5, 'medio': 1,
-                'confortavel': 2, 'rico': 5, 'muito-rico': 20, 'podre-rico': 100
-            }
-        };
-        this.dinheiro = this.calcularDinheiroPorRiqueza();
-        this.pesoAtual = 0;
+        this.deposito = [];
+        
+        // ========== SISTEMA FINANCEIRO SIMPLIFICADO ==========
+        this.dinheiro = 1000;
+        this.ultimasTransacoes = [];
+        
+        // ========== SISTEMA DE CARGA ==========
         this.ST = 10;
+        this.pesoAtual = 0;
         this.capacidadeCarga = this.calcularCapacidadeCarga();
         this.pesoMaximo = this.capacidadeCarga.pesada;
         this.nivelCargaAtual = 'leve';
         this.penalidadesCarga = 'MOV +0 / DODGE +0';
         this.mochilaAtiva = true;
+        
+        // ========== SISTEMA DE EQUIPAMENTOS EQUIPADOS ==========
         this.equipamentosEquipados = {
-            armas: [], armaduras: [], escudos: [], maos: [], mochila: [], corpo: []
+            maos: [],
+            armaduras: [],
+            escudos: [],
+            mochila: [],
+            corpo: []
         };
+        
+        // ========== SISTEMA DE COMBATE ==========
+        this.maosDisponiveis = 2;
+        this.maosOcupadas = 0;
         this.armadurasCombate = {
-            cabeca: null, torso: null, bracos: null, pernas: null,
-            maos: null, pes: null, corpoInteiro: null
+            cabeca: null,
+            torso: null,
+            bracos: null,
+            pernas: null,
+            maos: null,
+            pes: null,
+            corpoInteiro: null
         };
         this.armasCombate = { maos: [], corpo: [] };
         this.escudoCombate = null;
-        this.mapeamentoLocais = {
-            'Cabeça': 'cabeca', 'Torso': 'torso', 'Braços': 'bracos',
-            'Pernas': 'pernas', 'Mãos': 'maos', 'Pés': 'pes', 'Corpo Inteiro': 'corpoInteiro'
+        
+        // ========== SISTEMA DE RIQUEZA ==========
+        this.sistemaRiqueza = {
+            nivelAtual: 'medio',
+            dinheiroBase: 1000,
+            multiplicadores: {
+                'falido': 0,
+                'pobre': 0.2,
+                'batalhador': 0.5,
+                'medio': 1,
+                'confortavel': 2,
+                'rico': 5,
+                'muito-rico': 20,
+                'podre-rico': 100
+            }
         };
-        this.deposito = [];
-        this.itemCompraQuantidade = null;
-        this.quantidadeAtual = 1;
         
-        // Sistema financeiro SIMPLIFICADO
-        this.historicoTransacoes = [];
-        this.ultimasTransacoes = [];
-        
-        // Sistema de criação de itens
+        // ========== SISTEMA DE CRIAÇÃO ==========
         this.contadorItensPersonalizados = 10000;
         
-        // Sistema de combate
-        this.maosDisponiveis = 2;
-        this.maosOcupadas = 0;
+        // ========== MAPPING ==========
+        this.mapeamentoLocais = {
+            'Cabeça': 'cabeca',
+            'Torso': 'torso',
+            'Braços': 'bracos',
+            'Pernas': 'pernas',
+            'Mãos': 'maos',
+            'Pés': 'pes',
+            'Corpo Inteiro': 'corpoInteiro'
+        };
         
-        // Estado do sistema
+        // ========== ESTADO DO SISTEMA ==========
         this.catalogoPronto = false;
         this.inicializacaoEmAndamento = false;
         this.dadosCarregados = false;
+        this.itemCompraQuantidade = null;
+        this.quantidadeAtual = 1;
+        this.operacaoAtual = null;
+        
+        // Inicializar dinheiro baseado na riqueza
+        this.dinheiro = this.calcularDinheiroPorRiqueza();
     }
 
     // ========== INICIALIZAÇÃO ==========
@@ -127,9 +158,14 @@ class SistemaEquipamentos {
 
     mapearPontosParaNivel(pontos) {
         const mapeamento = {
-            '-25': 'falido', '-15': 'pobre', '-10': 'batalhador',
-            '0': 'medio', '10': 'confortavel', '20': 'rico',
-            '30': 'muito-rico', '50': 'podre-rico'
+            '-25': 'falido',
+            '-15': 'pobre',
+            '-10': 'batalhador',
+            '0': 'medio',
+            '10': 'confortavel',
+            '20': 'rico',
+            '30': 'muito-rico',
+            '50': 'podre-rico'
         };
         return mapeamento[pontos] || 'medio';
     }
@@ -263,15 +299,22 @@ class SistemaEquipamentos {
     calcularPesoAtual() {
         let peso = 0;
 
+        // Peso dos itens equipados nas mãos
         peso += this.equipamentosEquipados.maos.reduce((sum, item) => sum + (item.peso || 0), 0);
+        
+        // Peso das armaduras equipadas
         peso += this.equipamentosEquipados.armaduras.reduce((sum, item) => sum + (item.peso || 0), 0);
+        
+        // Peso dos escudos equipados
         peso += this.equipamentosEquipados.escudos.reduce((sum, item) => sum + (item.peso || 0), 0);
 
+        // Peso dos itens no corpo
         peso += this.equipamentosEquipados.corpo.reduce((sum, item) => {
             const quantidade = item.quantidade || 1;
             return sum + (item.peso * quantidade);
         }, 0);
 
+        // Peso dos itens na mochila (se ativa)
         if (this.mochilaAtiva) {
             peso += this.equipamentosEquipados.mochila.reduce((sum, item) => {
                 const quantidade = item.quantidade || 1;
@@ -299,6 +342,210 @@ class SistemaEquipamentos {
             'Mochila liberada';
         
         this.mostrarFeedback(mensagem, this.mochilaAtiva ? 'sucesso' : 'aviso');
+    }
+
+    // ========== SISTEMA FINANCEIRO SIMPLIFICADO ==========
+    receberDinheiroRapido() {
+        this.abrirModalDinheiroSimples('receber');
+    }
+
+    gastarDinheiroRapido() {
+        this.abrirModalDinheiroSimples('gastar');
+    }
+
+    abrirModalDinheiroSimples(tipo) {
+        this.operacaoAtual = tipo;
+        
+        // Atualizar título
+        const titulo = document.getElementById('modal-titulo');
+        if (titulo) {
+            titulo.textContent = tipo === 'receber' ? 'Receber Dinheiro' : 'Gastar Dinheiro';
+        }
+        
+        // Atualizar saldo atual
+        const saldoAtual = document.getElementById('saldo-modal-atual');
+        if (saldoAtual) {
+            saldoAtual.textContent = `$${this.dinheiro}`;
+        }
+        
+        // Limpar campos
+        const valorInput = document.getElementById('valor-operacao');
+        const descricaoInput = document.getElementById('descricao-operacao');
+        
+        if (valorInput) {
+            valorInput.value = '';
+            valorInput.focus();
+        }
+        
+        if (descricaoInput) {
+            descricaoInput.value = '';
+        }
+        
+        // Mostrar modal
+        const modal = document.getElementById('modal-dinheiro-simples');
+        if (modal) {
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('aberto');
+            }, 10);
+        }
+    }
+
+    fecharModalSimples() {
+        const modal = document.getElementById('modal-dinheiro-simples');
+        if (modal) {
+            modal.classList.remove('aberto');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+        this.operacaoAtual = null;
+    }
+
+    confirmarOperacao() {
+        const valorInput = document.getElementById('valor-operacao');
+        const descricaoInput = document.getElementById('descricao-operacao');
+        
+        if (!valorInput || !descricaoInput) return;
+        
+        const valor = parseFloat(valorInput.value);
+        const descricao = descricaoInput.value.trim();
+        
+        // Validações
+        if (!valor || isNaN(valor) || valor <= 0) {
+            this.mostrarFeedback('Por favor, insira um valor válido!', 'erro');
+            return;
+        }
+        
+        if (!descricao) {
+            this.mostrarFeedback('Por favor, insira um motivo!', 'erro');
+            return;
+        }
+        
+        // Verificar saldo para gastos
+        if (this.operacaoAtual === 'gastar') {
+            if (valor > this.dinheiro) {
+                this.mostrarFeedback('Dinheiro insuficiente!', 'erro');
+                return;
+            }
+            this.dinheiro -= valor;
+        } else {
+            this.dinheiro += valor;
+        }
+        
+        // Registrar transação
+        this.registrarTransacao({
+            tipo: this.operacaoAtual === 'gastar' ? 'despesa' : 'receita',
+            valor: valor,
+            descricao: descricao
+        });
+        
+        this.salvarDados();
+        this.fecharModalSimples();
+        this.atualizarInterface();
+        this.notificarDashboard();
+        
+        const mensagem = this.operacaoAtual === 'gastar' 
+            ? `Gasto $${valor}: ${descricao}` 
+            : `Recebido $${valor}: ${descricao}`;
+        
+        this.mostrarFeedback(mensagem, 'sucesso');
+    }
+
+    adicionarDinheiro(valor) {
+        if (isNaN(valor) || valor <= 0) {
+            this.mostrarFeedback('Valor inválido!', 'erro');
+            return;
+        }
+        
+        this.dinheiro += valor;
+        this.salvarDados();
+        
+        this.registrarTransacao({
+            tipo: 'receita',
+            valor: valor,
+            descricao: 'Dinheiro rápido adicionado'
+        });
+        
+        this.mostrarFeedback(`Adicionado $${valor}`, 'sucesso');
+        this.atualizarInterface();
+        this.notificarDashboard();
+    }
+
+    removerDinheiro(valor) {
+        if (isNaN(valor) || valor <= 0) {
+            this.mostrarFeedback('Valor inválido!', 'erro');
+            return;
+        }
+        
+        if (valor > this.dinheiro) {
+            this.mostrarFeedback('Dinheiro insuficiente!', 'erro');
+            return;
+        }
+        
+        this.dinheiro -= valor;
+        this.salvarDados();
+        
+        this.registrarTransacao({
+            tipo: 'despesa',
+            valor: valor,
+            descricao: 'Dinheiro rápido removido'
+        });
+        
+        this.mostrarFeedback(`Removido $${valor}`, 'sucesso');
+        this.atualizarInterface();
+        this.notificarDashboard();
+    }
+
+    ajustarDinheiroManual() {
+        const novoValor = prompt('Digite o novo valor de dinheiro:', this.dinheiro);
+        if (novoValor === null) return;
+        
+        const valorNumerico = parseInt(novoValor);
+        if (isNaN(valorNumerico)) {
+            this.mostrarFeedback('Valor inválido!', 'erro');
+            return;
+        }
+        
+        const diferenca = valorNumerico - this.dinheiro;
+        this.dinheiro = valorNumerico;
+        this.salvarDados();
+        
+        if (diferenca > 0) {
+            this.registrarTransacao({
+                tipo: 'receita',
+                valor: diferenca,
+                descricao: 'Ajuste manual'
+            });
+        } else if (diferenca < 0) {
+            this.registrarTransacao({
+                tipo: 'despesa',
+                valor: Math.abs(diferenca),
+                descricao: 'Ajuste manual'
+            });
+        }
+        
+        this.mostrarFeedback(`Dinheiro ajustado para $${valorNumerico}`, 'sucesso');
+        this.atualizarInterface();
+        this.notificarDashboard();
+    }
+
+    registrarTransacao(dados) {
+        const transacao = {
+            id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            tipo: dados.tipo,
+            valor: dados.valor,
+            descricao: dados.descricao,
+            data: new Date().toLocaleDateString('pt-BR'),
+            timestamp: new Date().toISOString()
+        };
+        
+        this.ultimasTransacoes.unshift(transacao);
+        
+        // Manter apenas as últimas 10 transações
+        if (this.ultimasTransacoes.length > 10) {
+            this.ultimasTransacoes = this.ultimasTransacoes.slice(0, 10);
+        }
     }
 
     // ========== COMPRA E VENDA DE EQUIPAMENTOS ==========
@@ -330,7 +577,8 @@ class SistemaEquipamentos {
             adquiridoEm: new Date().toISOString(),
             status: 'na-mochila',
             equipado: false,
-            idUnico: this.gerarIdUnico()
+            idUnico: this.gerarIdUnico(),
+            quantidade: 1
         };
 
         this.equipamentosAdquiridos.push(novoEquipamento);
@@ -341,8 +589,8 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         this.notificarDashboard();
         
-        // Registrar transação simples
-        this.registrarTransacaoSimples({
+        // Registrar transação
+        this.registrarTransacao({
             tipo: 'despesa',
             valor: equipamento.custo,
             descricao: `Compra: ${equipamento.nome}`
@@ -359,7 +607,7 @@ class SistemaEquipamentos {
         const equipamento = this.equipamentosAdquiridos[index];
         const custoBase = equipamento.custoTotal || equipamento.custo;
         const quantidade = equipamento.quantidade || 1;
-        const valorVenda = Math.floor(custoBase * 0.5);
+        const valorVenda = Math.floor(custoBase * 0.5 * quantidade);
         
         this.dinheiro += valorVenda;
         this.removerDeTodosOsLocais(itemId);
@@ -371,8 +619,8 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         this.notificarDashboard();
         
-        // Registrar transação simples
-        this.registrarTransacaoSimples({
+        // Registrar transação
+        this.registrarTransacao({
             tipo: 'receita',
             valor: valorVenda,
             descricao: `Venda: ${equipamento.nome}`
@@ -398,6 +646,7 @@ class SistemaEquipamentos {
         const inputQuantidade = document.getElementById('input-quantidade');
         if (inputQuantidade) {
             inputQuantidade.value = this.quantidadeAtual;
+            inputQuantidade.focus();
         }
 
         this.atualizarTotaisQuantidade();
@@ -405,9 +654,10 @@ class SistemaEquipamentos {
         const submenu = document.getElementById('submenu-quantidade');
         if (!submenu) return;
 
-        submenu.style.top = '';
-        submenu.style.left = '';
-        submenu.classList.add('aberto');
+        submenu.style.display = 'flex';
+        setTimeout(() => {
+            submenu.classList.add('aberto');
+        }, 10);
     }
 
     aumentarQuantidade() {
@@ -454,14 +704,19 @@ class SistemaEquipamentos {
             return;
         }
 
+        // Verificar se já existe o item na mochila
         const itemExistente = this.equipamentosAdquiridos.find(item => 
-            item.id === equipamento.id && item.status === 'na-mochila' && !item.equipado
+            item.id === equipamento.id && 
+            item.status === 'na-mochila' && 
+            !item.equipado
         );
 
         if (itemExistente) {
+            // Atualizar quantidade existente
             itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
             itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
         } else {
+            // Criar novo item
             const novoEquipamento = {
                 ...equipamento,
                 quantidade: quantidade,
@@ -484,8 +739,8 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         this.notificarDashboard();
         
-        // Registrar transação simples
-        this.registrarTransacaoSimples({
+        // Registrar transação
+        this.registrarTransacao({
             tipo: 'despesa',
             valor: custoTotal,
             descricao: `Compra: ${quantidade}x ${equipamento.nome}`
@@ -504,10 +759,13 @@ class SistemaEquipamentos {
         this.quantidadeAtual = 1;
     }
 
-    // ========== EQUIPAR/DESEQUIPAR ==========
+    // ========== EQUIPAR/DESEQUIPAR ITENS ==========
     equiparItem(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
-        if (!equipamento) return;
+        if (!equipamento) {
+            this.mostrarFeedback('Equipamento não encontrado!', 'erro');
+            return;
+        }
 
         if (equipamento.equipado) {
             this.mostrarFeedback(`${equipamento.nome} já está equipado!`, 'aviso');
@@ -519,22 +777,35 @@ class SistemaEquipamentos {
             return;
         }
 
-        if (equipamento.tipo === 'arma-cc' || equipamento.tipo === 'arma-dist') {
-            if (!this.podeEquiparArma(equipamento)) {
-                this.mostrarFeedback('Não há mãos suficientes!', 'erro');
-                return;
-            }
-            this.equiparArma(itemId);
-        } else if (equipamento.tipo === 'armadura') {
-            this.equiparArmadura(itemId);
-        } else if (equipamento.tipo === 'escudo') {
-            if (!this.podeEquiparEscudo(equipamento)) {
-                this.mostrarFeedback('Não é possível equipar este escudo!', 'erro');
-                return;
-            }
-            this.equiparEscudo(itemId);
-        } else {
-            this.equiparItemGeral(itemId);
+        // Verificar tipo do equipamento
+        switch(equipamento.tipo) {
+            case 'arma-cc':
+            case 'arma-dist':
+                if (!this.podeEquiparArma(equipamento)) {
+                    this.mostrarFeedback('Não há mãos suficientes!', 'erro');
+                    return;
+                }
+                this.equiparArma(itemId);
+                break;
+                
+            case 'armadura':
+                if (!this.podeEquiparArmadura(equipamento)) {
+                    this.mostrarFeedback('Não é possível equipar esta armadura!', 'erro');
+                    return;
+                }
+                this.equiparArmadura(itemId);
+                break;
+                
+            case 'escudo':
+                if (!this.podeEquiparEscudo(equipamento)) {
+                    this.mostrarFeedback('Não é possível equipar este escudo!', 'erro');
+                    return;
+                }
+                this.equiparEscudo(itemId);
+                break;
+                
+            default:
+                this.equiparItemGeral(itemId);
         }
 
         this.salvarDados();
@@ -557,10 +828,23 @@ class SistemaEquipamentos {
         return true;
     }
 
+    podeEquiparArmadura(armadura) {
+        const local = armadura.local;
+        if (!local) return false;
+        
+        const localCombate = this.mapeamentoLocais[local];
+        if (!localCombate) return false;
+        
+        // Verificar se já existe armadura neste local
+        const armaduraAtual = this.equipamentosEquipados.armaduras.find(a => a.local === local);
+        return !armaduraAtual;
+    }
+
     podeEquiparEscudo(escudo) {
         const maosOcupadas = this.calcularMaosOcupadas();
         const maosNecessarias = escudo.maos || 1;
         
+        // Verificar se já tem escudo equipado
         if (this.equipamentosEquipados.escudos.length > 0) {
             return false;
         }
@@ -584,12 +868,6 @@ class SistemaEquipamentos {
     equiparArmadura(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
-
-        const armaduraAtual = this.equipamentosEquipados.armaduras.find(a => a.local === equipamento.local);
-        if (armaduraAtual) {
-            this.mostrarFeedback(`Já existe ${armaduraAtual.nome} equipado no ${equipamento.local}`, 'aviso');
-            return;
-        }
 
         this.removerDeTodosOsLocais(itemId);
         equipamento.status = 'equipado';
@@ -630,7 +908,15 @@ class SistemaEquipamentos {
 
     desequiparItem(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
-        if (!equipamento) return;
+        if (!equipamento) {
+            this.mostrarFeedback('Equipamento não encontrado!', 'erro');
+            return;
+        }
+
+        if (!equipamento.equipado) {
+            this.mostrarFeedback(`${equipamento.nome} não está equipado!`, 'aviso');
+            return;
+        }
 
         this.removerDeTodosOsLocais(itemId);
         equipamento.status = 'na-mochila';
@@ -646,15 +932,18 @@ class SistemaEquipamentos {
 
     colocarNoCorpo(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
-        if (!equipamento) return;
+        if (!equipamento) {
+            this.mostrarFeedback('Equipamento não encontrado!', 'erro');
+            return;
+        }
 
         if (equipamento.equipado) {
-            this.mostrarFeedback(`Não é possível colocar no corpo um item equipado!`, 'erro');
+            this.mostrarFeedback('Não é possível colocar no corpo um item equipado!', 'erro');
             return;
         }
 
         if (equipamento.status === 'deposito') {
-            this.mostrarFeedback(`Não é possível colocar no corpo um item no depósito!`, 'erro');
+            this.mostrarFeedback('Não é possível colocar no corpo um item no depósito!', 'erro');
             return;
         }
 
@@ -671,7 +960,10 @@ class SistemaEquipamentos {
 
     removerDoCorpo(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
-        if (!equipamento) return;
+        if (!equipamento) {
+            this.mostrarFeedback('Equipamento não encontrado!', 'erro');
+            return;
+        }
 
         if (equipamento.status !== 'no-corpo') {
             this.mostrarFeedback(`${equipamento.nome} não está no corpo!`, 'erro');
@@ -692,7 +984,10 @@ class SistemaEquipamentos {
     // ========== SISTEMA DE DEPÓSITO ==========
     moverParaDeposito(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
-        if (!equipamento) return false;
+        if (!equipamento) {
+            this.mostrarFeedback('Equipamento não encontrado!', 'erro');
+            return false;
+        }
 
         if (equipamento.status === 'deposito') {
             this.mostrarFeedback(`${equipamento.nome} já está no depósito!`, 'aviso');
@@ -712,7 +1007,10 @@ class SistemaEquipamentos {
 
     retirarDoDeposito(itemId) {
         const index = this.deposito.findIndex(item => item.idUnico === itemId);
-        if (index === -1) return false;
+        if (index === -1) {
+            this.mostrarFeedback('Item não encontrado no depósito!', 'erro');
+            return false;
+        }
 
         const equipamento = this.deposito[index];
         this.deposito.splice(index, 1);
@@ -744,7 +1042,7 @@ class SistemaEquipamentos {
         });
 
         this.salvarDados();
-        this.mostrarFeedback(`${equipamentosNaMochila.length} itens guardados`, 'sucesso');
+        this.mostrarFeedback(`${equipamentosNaMochila.length} itens guardados no depósito`, 'sucesso');
         this.atualizarInterface();
     }
 
@@ -763,7 +1061,7 @@ class SistemaEquipamentos {
 
         this.deposito = [];
         this.salvarDados();
-        this.mostrarFeedback(`${totalItens} itens retirados`, 'sucesso');
+        this.mostrarFeedback(`${totalItens} itens retirados do depósito`, 'sucesso');
         this.atualizarInterface();
     }
 
@@ -775,256 +1073,18 @@ class SistemaEquipamentos {
 
         const totalLimpos = this.deposito.length;
         
+        // Remover do array de equipamentos adquiridos
         this.equipamentosAdquiridos = this.equipamentosAdquiridos.filter(
             item => item.status !== 'deposito'
         );
 
         this.deposito = [];
         this.salvarDados();
-        this.mostrarFeedback(`${totalLimpos} itens removidos`, 'sucesso');
+        this.mostrarFeedback(`${totalLimpos} itens removidos do depósito`, 'sucesso');
         this.atualizarInterface();
     }
 
-    // ========== SISTEMA FINANCEIRO SIMPLIFICADO ==========
-    registrarTransacaoSimples(dados) {
-        const transacao = {
-            id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            tipo: dados.tipo,
-            valor: dados.valor,
-            descricao: dados.descricao,
-            data: new Date().toLocaleDateString('pt-BR'),
-            timestamp: new Date().toISOString()
-        };
-        
-        this.ultimasTransacoes.unshift(transacao);
-        
-        // Manter apenas as últimas 10 transações
-        if (this.ultimasTransacoes.length > 10) {
-            this.ultimasTransacoes = this.ultimasTransacoes.slice(0, 10);
-        }
-        
-        // Atualizar histórico na interface
-        this.atualizarHistoricoTransacoes();
-    }
-
-    adicionarDinheiro(valor) {
-        if (isNaN(valor) || valor <= 0) {
-            this.mostrarFeedback('Valor inválido!', 'erro');
-            return;
-        }
-        
-        this.dinheiro += valor;
-        this.salvarDados();
-        
-        this.registrarTransacaoSimples({
-            tipo: 'receita',
-            valor: valor,
-            descricao: 'Dinheiro adicionado'
-        });
-        
-        this.mostrarFeedback(`Adicionado $${valor}`, 'sucesso');
-        this.atualizarInterface();
-        this.notificarDashboard();
-    }
-
-    removerDinheiro(valor) {
-        if (isNaN(valor) || valor <= 0) {
-            this.mostrarFeedback('Valor inválido!', 'erro');
-            return;
-        }
-        
-        if (valor > this.dinheiro) {
-            this.mostrarFeedback('Dinheiro insuficiente!', 'erro');
-            return;
-        }
-        
-        this.dinheiro -= valor;
-        this.salvarDados();
-        
-        this.registrarTransacaoSimples({
-            tipo: 'despesa',
-            valor: valor,
-            descricao: 'Dinheiro removido'
-        });
-        
-        this.mostrarFeedback(`Removido $${valor}`, 'sucesso');
-        this.atualizarInterface();
-        this.notificarDashboard();
-    }
-
-    ajustarDinheiroManual() {
-        const novoValor = prompt('Digite o novo valor de dinheiro:', this.dinheiro);
-        if (novoValor === null) return;
-        
-        const valorNumerico = parseInt(novoValor);
-        if (isNaN(valorNumerico)) {
-            this.mostrarFeedback('Valor inválido!', 'erro');
-            return;
-        }
-        
-        const diferenca = valorNumerico - this.dinheiro;
-        this.dinheiro = valorNumerico;
-        this.salvarDados();
-        
-        if (diferenca > 0) {
-            this.registrarTransacaoSimples({
-                tipo: 'receita',
-                valor: diferenca,
-                descricao: 'Ajuste manual'
-            });
-        } else if (diferenca < 0) {
-            this.registrarTransacaoSimples({
-                tipo: 'despesa',
-                valor: Math.abs(diferenca),
-                descricao: 'Ajuste manual'
-            });
-        }
-        
-        this.mostrarFeedback(`Dinheiro ajustado para $${valorNumerico}`, 'sucesso');
-        this.atualizarInterface();
-        this.notificarDashboard();
-    }
-
-    abrirModalDinheiro(tipo) {
-        const modal = document.getElementById('modal-dinheiro');
-        if (!modal) return;
-        
-        // Atualizar saldo
-        const saldoModal = document.getElementById('saldo-modal');
-        if (saldoModal) {
-            saldoModal.textContent = `$${this.dinheiro}`;
-        }
-        
-        // Configurar título
-        const titulo = document.getElementById('modal-dinheiro-titulo');
-        if (titulo) {
-            titulo.textContent = tipo === 'receber' ? 'Receber Dinheiro' : 'Gastar Dinheiro';
-        }
-        
-        // Limpar campos
-        const valorInput = document.getElementById('valor-dinheiro');
-        const descricaoInput = document.getElementById('descricao-dinheiro');
-        
-        if (valorInput) valorInput.value = '';
-        if (descricaoInput) descricaoInput.value = '';
-        
-        // Armazenar tipo da operação
-        this.operacaoAtual = tipo;
-        
-        // Mostrar modal
-        modal.style.display = 'flex';
-        setTimeout(() => {
-            modal.classList.add('aberto');
-            if (valorInput) valorInput.focus();
-        }, 10);
-    }
-
-    fecharModalDinheiro() {
-        const modal = document.getElementById('modal-dinheiro');
-        if (modal) {
-            modal.classList.remove('aberto');
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300);
-        }
-        this.operacaoAtual = null;
-    }
-
-    confirmarTransacao() {
-        const valorInput = document.getElementById('valor-dinheiro');
-        const descricaoInput = document.getElementById('descricao-dinheiro');
-        
-        if (!valorInput || !descricaoInput) return;
-        
-        const valor = parseFloat(valorInput.value);
-        const descricao = descricaoInput.value.trim();
-        
-        // Validações
-        if (!valor || valor <= 0) {
-            this.mostrarFeedback('Por favor, insira um valor válido!', 'erro');
-            return;
-        }
-        
-        if (!descricao) {
-            this.mostrarFeedback('Por favor, insira uma descrição!', 'erro');
-            return;
-        }
-        
-        // Verificar saldo para gastos
-        if (this.operacaoAtual === 'gastar') {
-            if (valor > this.dinheiro) {
-                this.mostrarFeedback('Dinheiro insuficiente!', 'erro');
-                return;
-            }
-            this.dinheiro -= valor;
-        } else {
-            this.dinheiro += valor;
-        }
-        
-        // Registrar transação
-        this.registrarTransacaoSimples({
-            tipo: this.operacaoAtual === 'gastar' ? 'despesa' : 'receita',
-            valor: valor,
-            descricao: descricao
-        });
-        
-        this.salvarDados();
-        this.fecharModalDinheiro();
-        this.atualizarInterface();
-        this.notificarDashboard();
-        
-        const mensagem = this.operacaoAtual === 'gastar' 
-            ? `Gasto $${valor}: ${descricao}` 
-            : `Recebido $${valor}: ${descricao}`;
-        
-        this.mostrarFeedback(mensagem, 'sucesso');
-    }
-
-    atualizarHistoricoTransacoes() {
-        const historicoLista = document.getElementById('lista-transacoes');
-        const historicoVazio = document.getElementById('historico-vazio');
-        
-        if (!historicoLista) return;
-        
-        if (this.ultimasTransacoes.length === 0) {
-            if (historicoVazio) {
-                historicoVazio.style.display = 'block';
-            }
-            historicoLista.innerHTML = '';
-            return;
-        }
-        
-        if (historicoVazio) {
-            historicoVazio.style.display = 'none';
-        }
-        
-        historicoLista.innerHTML = this.ultimasTransacoes.map(transacao => `
-            <div class="transacao-item ${transacao.tipo}">
-                <div class="transacao-info">
-                    <div class="transacao-descricao">${transacao.descricao}</div>
-                    <div class="transacao-data">${transacao.data}</div>
-                </div>
-                <div class="transacao-valor">
-                    ${transacao.tipo === 'receita' ? '+' : '-'}$${transacao.valor}
-                </div>
-            </div>
-        `).join('');
-    }
-
-    limparHistorico() {
-        if (this.ultimasTransacoes.length === 0) {
-            this.mostrarFeedback('Nenhuma transação para limpar!', 'aviso');
-            return;
-        }
-        
-        if (confirm('Tem certeza que deseja limpar o histórico de transações?')) {
-            this.ultimasTransacoes = [];
-            this.atualizarHistoricoTransacoes();
-            this.mostrarFeedback('Histórico limpo', 'sucesso');
-        }
-    }
-
-        // ========== SISTEMA DE CRIAR ITEM PERSONALIZADO ==========
+    // ========== SISTEMA DE CRIAÇÃO DE ITENS ==========
     configurarCriacaoItens() {
         // Eventos para atualização em tempo real
         const formInputs = document.querySelectorAll('#subtab-criar input, #subtab-criar select, #subtab-criar textarea');
@@ -1053,6 +1113,8 @@ class SistemaEquipamentos {
     atualizarCamposPorTipo() {
         const tipo = document.getElementById('item-tipo').value;
         const camposDiv = document.getElementById('campos-especificos');
+        
+        if (!camposDiv) return;
         
         let camposHTML = '';
         
@@ -1238,55 +1300,6 @@ class SistemaEquipamentos {
                 `;
                 break;
                 
-            case 'artefato':
-                camposHTML = `
-                    <div class="form-section">
-                        <h4><i class="fas fa-gem"></i> Propriedades do Artefato</h4>
-                        <div class="form-group">
-                            <label>Poder Especial:</label>
-                            <textarea id="item-poder" rows="3" placeholder="Descreva o poder especial..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Carga (se aplicável):</label>
-                            <input type="number" id="item-carga" value="0" min="0" max="100">
-                        </div>
-                        <div class="form-group">
-                            <label>Ativação:</label>
-                            <select id="item-ativacao">
-                                <option value="comando">Comando Verbal</option>
-                                <option value="toque">Toque</option>
-                                <option value="uso">Uso</option>
-                                <option value="passiva">Passiva</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            case 'missao':
-                camposHTML = `
-                    <div class="form-section">
-                        <h4><i class="fas fa-scroll"></i> Propriedades do Item de Missão</h4>
-                        <div class="form-group">
-                            <label>Missão Relacionada:</label>
-                            <input type="text" id="item-missao" placeholder="Nome da missão" maxlength="50">
-                        </div>
-                        <div class="form-group">
-                            <label>Importância:</label>
-                            <select id="item-importancia">
-                                <option value="chave">Chave</option>
-                                <option value="importante">Importante</option>
-                                <option value="secundario">Secundário</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Pista ou Informação:</label>
-                            <textarea id="item-pista" rows="3" placeholder="Descreva a pista ou informação..."></textarea>
-                        </div>
-                    </div>
-                `;
-                break;
-                
             default: // Equipamento Geral
                 camposHTML = `
                     <div class="form-section">
@@ -1324,6 +1337,8 @@ class SistemaEquipamentos {
         const isMagico = document.getElementById('item-magico').checked;
         const camposMagicos = document.getElementById('campos-magicos');
         
+        if (!camposMagicos) return;
+        
         if (isMagico) {
             camposMagicos.style.display = 'block';
         } else {
@@ -1336,16 +1351,17 @@ class SistemaEquipamentos {
 
     atualizarPreview() {
         const previewDiv = document.getElementById('preview-conteudo');
+        if (!previewDiv) return;
         
         // Obter valores do formulário
-        const nome = document.getElementById('item-nome').value.trim();
-        const tipo = document.getElementById('item-tipo').value;
-        const peso = parseFloat(document.getElementById('item-peso').value) || 0;
-        const custo = parseInt(document.getElementById('item-custo').value) || 0;
-        const era = document.getElementById('item-era').value;
-        const descricao = document.getElementById('item-descricao').value.trim();
-        const isMagico = document.getElementById('item-magico').checked;
-        const efeitoMagico = document.getElementById('item-efeito-magico').value.trim();
+        const nome = document.getElementById('item-nome')?.value.trim() || '';
+        const tipo = document.getElementById('item-tipo')?.value || 'geral';
+        const peso = parseFloat(document.getElementById('item-peso')?.value) || 0;
+        const custo = parseInt(document.getElementById('item-custo')?.value) || 0;
+        const era = document.getElementById('item-era')?.value || 'medieval';
+        const descricao = document.getElementById('item-descricao')?.value.trim() || '';
+        const isMagico = document.getElementById('item-magico')?.checked || false;
+        const efeitoMagico = document.getElementById('item-efeito-magico')?.value.trim() || '';
         
         if (!nome) {
             previewDiv.innerHTML = `
@@ -1388,13 +1404,16 @@ class SistemaEquipamentos {
                         <span class="stat-label">Era:</span>
                         <span class="stat-value">${era === 'medieval' ? 'Medieval' : 'Moderna'}</span>
                     </div>
-                    ${isMagico ? `
+        `;
+        
+        if (isMagico) {
+            previewHTML += `
                     <div class="stat-item">
                         <span class="stat-label">Tipo:</span>
                         <span class="stat-value" style="color: var(--magico);">Mágico</span>
                     </div>
-                    ` : ''}
-        `;
+            `;
+        }
         
         // Adicionar campos específicos baseados no tipo
         switch(tipo) {
@@ -1451,53 +1470,42 @@ class SistemaEquipamentos {
                         <span class="stat-label">BD:</span>
                         <span class="stat-value">${bd}</span>
                     </div>
-                    ${penalidade !== '0' ? `
+                `;
+                
+                if (penalidade !== '0') {
+                    previewHTML += `
                     <div class="stat-item">
                         <span class="stat-label">Penalidade:</span>
                         <span class="stat-value" style="color: var(--aviso);">MOV ${penalidade}</span>
                     </div>
-                    ` : ''}
-                `;
-                break;
-                
-            case 'escudo':
-                const bdEscudo = document.getElementById('item-bd')?.value || '2';
-                const rdpv = document.getElementById('item-rdpv')?.value || '5';
-                const maosEscudo = document.getElementById('item-maos')?.value || '1';
-                
-                previewHTML += `
-                    <div class="stat-item">
-                        <span class="stat-label">BD:</span>
-                        <span class="stat-value">${bdEscudo}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">RD/PV:</span>
-                        <span class="stat-value">${rdpv}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Mãos:</span>
-                        <span class="stat-value">${this.obterTextoMaos(parseFloat(maosEscudo))}</span>
-                    </div>
-                `;
+                    `;
+                }
                 break;
         }
         
         previewHTML += `
                 </div>
-                
-                ${descricao ? `
+        `;
+        
+        if (descricao) {
+            previewHTML += `
                 <div class="descricao">
                     <strong>Descrição:</strong><br>
                     ${descricao}
                 </div>
-                ` : ''}
-                
-                ${isMagico && efeitoMagico ? `
+            `;
+        }
+        
+        if (isMagico && efeitoMagico) {
+            previewHTML += `
                 <div class="efeito-magico">
                     <strong>✨ Efeito Mágico:</strong><br>
                     ${efeitoMagico}
                 </div>
-                ` : ''}
+            `;
+        }
+        
+        previewHTML += `
             </div>
         `;
         
@@ -1506,14 +1514,23 @@ class SistemaEquipamentos {
 
     limparFormCriacao() {
         // Limpar campos básicos
-        document.getElementById('item-nome').value = '';
-        document.getElementById('item-tipo').value = 'geral';
-        document.getElementById('item-peso').value = '1.0';
-        document.getElementById('item-custo').value = '0';
-        document.getElementById('item-era').value = 'medieval';
-        document.getElementById('item-descricao').value = '';
-        document.getElementById('item-magico').checked = false;
-        document.getElementById('item-efeito-magico').value = '';
+        const nomeInput = document.getElementById('item-nome');
+        const tipoSelect = document.getElementById('item-tipo');
+        const pesoInput = document.getElementById('item-peso');
+        const custoInput = document.getElementById('item-custo');
+        const eraSelect = document.getElementById('item-era');
+        const descricaoInput = document.getElementById('item-descricao');
+        const magicoCheckbox = document.getElementById('item-magico');
+        const efeitoMagicoInput = document.getElementById('item-efeito-magico');
+        
+        if (nomeInput) nomeInput.value = '';
+        if (tipoSelect) tipoSelect.value = 'geral';
+        if (pesoInput) pesoInput.value = '1.0';
+        if (custoInput) custoInput.value = '0';
+        if (eraSelect) eraSelect.value = 'medieval';
+        if (descricaoInput) descricaoInput.value = '';
+        if (magicoCheckbox) magicoCheckbox.checked = false;
+        if (efeitoMagicoInput) efeitoMagicoInput.value = '';
         
         // Atualizar campos e preview
         this.atualizarCamposPorTipo();
@@ -1525,17 +1542,17 @@ class SistemaEquipamentos {
 
     criarItemPersonalizado() {
         // Validar campos obrigatórios
-        const nome = document.getElementById('item-nome').value.trim();
+        const nome = document.getElementById('item-nome')?.value.trim();
         if (!nome) {
             this.mostrarFeedback('Por favor, insira um nome para o item!', 'erro');
             return;
         }
         
-        const tipo = document.getElementById('item-tipo').value;
-        const peso = parseFloat(document.getElementById('item-peso').value);
-        const custo = parseInt(document.getElementById('item-custo').value) || 0;
+        const tipo = document.getElementById('item-tipo')?.value || 'geral';
+        const peso = parseFloat(document.getElementById('item-peso')?.value);
+        const custo = parseInt(document.getElementById('item-custo')?.value) || 0;
         
-        if (peso <= 0) {
+        if (isNaN(peso) || peso <= 0) {
             this.mostrarFeedback('O peso deve ser maior que zero!', 'erro');
             return;
         }
@@ -1555,8 +1572,8 @@ class SistemaEquipamentos {
             peso: peso,
             custo: custo,
             custoTotal: custo,
-            era: document.getElementById('item-era').value,
-            descricao: document.getElementById('item-descricao').value.trim() || 'Sem descrição',
+            era: document.getElementById('item-era')?.value || 'medieval',
+            descricao: document.getElementById('item-descricao')?.value.trim() || 'Sem descrição',
             personalizado: true,
             criadoEm: new Date().toISOString(),
             status: 'na-mochila',
@@ -1566,9 +1583,9 @@ class SistemaEquipamentos {
         };
         
         // Adicionar propriedades mágicas se necessário
-        if (document.getElementById('item-magico').checked) {
+        if (document.getElementById('item-magico')?.checked) {
             novoItem.magico = true;
-            novoItem.efeitoMagico = document.getElementById('item-efeito-magico').value.trim();
+            novoItem.efeitoMagico = document.getElementById('item-efeito-magico')?.value.trim() || '';
         }
         
         // Adicionar campos específicos baseados no tipo
@@ -1589,7 +1606,7 @@ class SistemaEquipamentos {
         
         // Registrar transação se houver custo
         if (custo > 0) {
-            this.registrarTransacaoSimples({
+            this.registrarTransacao({
                 tipo: 'despesa',
                 valor: custo,
                 descricao: `Criação: ${nome}`
@@ -1601,8 +1618,10 @@ class SistemaEquipamentos {
         
         // Atualizar interface e ir para inventário
         this.atualizarInterface();
+        
+        // Ir para inventário
         setTimeout(() => {
-            alternarSubTab('inventario');
+            this.alternarSubTab('inventario');
         }, 500);
     }
 
@@ -1657,18 +1676,6 @@ class SistemaEquipamentos {
                 item.tipoConsumivel = document.getElementById('item-tipo-consumivel')?.value || 'poção';
                 break;
                 
-            case 'artefato':
-                item.poder = document.getElementById('item-poder')?.value || '';
-                item.carga = parseInt(document.getElementById('item-carga')?.value) || 0;
-                item.ativacao = document.getElementById('item-ativacao')?.value || 'uso';
-                break;
-                
-            case 'missao':
-                item.missao = document.getElementById('item-missao')?.value || '';
-                item.importancia = document.getElementById('item-importancia')?.value || 'chave';
-                item.pista = document.getElementById('item-pista')?.value || '';
-                break;
-                
             case 'geral':
                 item.funcao = document.getElementById('item-funcao')?.value || '';
                 item.maos = parseFloat(document.getElementById('item-maos')?.value) || 0;
@@ -1676,80 +1683,41 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== CONFIGURAÇÃO DE EVENTOS GLOBAIS ==========
+    // ========== CONFIGURAÇÃO DE EVENTOS ==========
     configurarEventosGlobais() {
+        // Evento de clique para botões de compra
         document.addEventListener('click', (e) => {
             const btnComprar = e.target.closest('.btn-comprar');
             if (btnComprar) {
                 const itemId = btnComprar.getAttribute('data-item');
                 if (itemId) {
+                    e.preventDefault();
                     e.stopPropagation();
                     this.comprarEquipamento(itemId, btnComprar);
                 }
             }
+        });
 
-            // Eventos para botões financeiros simplificados
-            const btnReceber = e.target.closest('[onclick*="abrirModalDinheiro(\'receber\')"]');
-            if (btnReceber) {
-                e.preventDefault();
-                this.abrirModalDinheiro('receber');
+        // Evento de teclado para modais
+        document.addEventListener('keydown', (e) => {
+            // Fechar modal de dinheiro com ESC
+            const modalDinheiro = document.getElementById('modal-dinheiro-simples');
+            if (modalDinheiro && modalDinheiro.classList.contains('aberto') && e.key === 'Escape') {
+                this.fecharModalSimples();
             }
-
-            const btnGastar = e.target.closest('[onclick*="abrirModalDinheiro(\'gastar\')"]');
-            if (btnGastar) {
-                e.preventDefault();
-                this.abrirModalDinheiro('gastar');
-            }
-
-            // Botão de mochila
-            const btnLiberar = document.getElementById('btn-liberar-mochila');
-            if (e.target === btnLiberar || (btnLiberar && btnLiberar.contains(e.target))) {
-                this.alternarMochila();
-            }
-
-            // Botões de depósito
-            const btnGuardarTudo = document.getElementById('btn-guardar-tudo-deposito');
-            if (e.target === btnGuardarTudo || (btnGuardarTudo && btnGuardarTudo.contains(e.target))) {
-                this.moverTudoParaDeposito();
-            }
-
-            const btnRetirarTudo = document.getElementById('btn-retirar-tudo-deposito');
-            if (e.target === btnRetirarTudo || (btnRetirarTudo && btnRetirarTudo.contains(e.target))) {
-                this.retirarTudoDoDeposito();
-            }
-
-            const btnLimparDeposito = document.getElementById('btn-limpar-deposito');
-            if (e.target === btnLimparDeposito || (btnLimparDeposito && btnLimparDeposito.contains(e.target))) {
-                if (confirm('Tem certeza que deseja limpar todo o depósito?')) {
-                    this.limparDeposito();
-                }
-            }
-
-            // Eventos para botões rápidos de dinheiro
-            const btnRapidoReceber = e.target.closest('[onclick*="adicionarDinheiro("]');
-            if (btnRapidoReceber) {
-                e.preventDefault();
-                const valor = btnRapidoReceber.getAttribute('onclick').match(/adicionarDinheiro\((\d+)\)/);
-                if (valor && valor[1]) {
-                    this.adicionarDinheiro(parseInt(valor[1]));
-                }
-            }
-
-            const btnRapidoRemover = e.target.closest('[onclick*="removerDinheiro("]');
-            if (btnRapidoRemover) {
-                e.preventDefault();
-                const valor = btnRapidoRemover.getAttribute('onclick').match(/removerDinheiro\((\d+)\)/);
-                if (valor && valor[1]) {
-                    this.removerDinheiro(parseInt(valor[1]));
-                }
+            
+            // Fechar modal de quantidade com ESC
+            const submenu = document.getElementById('submenu-quantidade');
+            if (submenu && submenu.classList.contains('aberto') && e.key === 'Escape') {
+                this.fecharSubmenuQuantidade();
             }
         });
 
-        // Evento de fechar modal ao clicar fora
+        // Fechar modais ao clicar fora
         document.addEventListener('click', (e) => {
-            const modalDinheiro = document.getElementById('modal-dinheiro');
+            const modalDinheiro = document.getElementById('modal-dinheiro-simples');
             if (modalDinheiro && e.target === modalDinheiro) {
-                this.fecharModalDinheiro();
+                this.fecharModalSimples();
             }
             
             const submenu = document.getElementById('submenu-quantidade');
@@ -1757,22 +1725,8 @@ class SistemaEquipamentos {
                 this.fecharSubmenuQuantidade();
             }
         });
-
-        // Evento de teclado
-        document.addEventListener('keydown', (e) => {
-            const modalDinheiro = document.getElementById('modal-dinheiro');
-            if (modalDinheiro && modalDinheiro.classList.contains('aberto') && e.key === 'Escape') {
-                this.fecharModalDinheiro();
-            }
-            
-            const submenu = document.getElementById('submenu-quantidade');
-            if (submenu && submenu.classList.contains('aberto') && e.key === 'Escape') {
-                this.fecharSubmenuQuantidade();
-            }
-        });
     }
 
-    // ========== FUNÇÕES DE APOIO ==========
     configurarSubAbas() {
         document.querySelectorAll('.subtab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -1786,10 +1740,10 @@ class SistemaEquipamentos {
                 const subtabElement = document.getElementById(`subtab-${subtabId}`);
                 if (subtabElement) subtabElement.classList.add('active');
                 
-                // Se for a aba financeira, atualizar histórico
+                // Se for a aba financeira, atualizar
                 if (subtabId === 'financeiro') {
                     setTimeout(() => {
-                        this.atualizarHistoricoTransacoes();
+                        this.atualizarInterfaceFinanceiro();
                     }, 100);
                 }
                 
@@ -1817,6 +1771,7 @@ class SistemaEquipamentos {
         });
     }
 
+    // ========== INTERFACE E ATUALIZAÇÕES ==========
     criarDisplayMaos() {
         const statusBar = document.querySelector('.banner-grid');
         if (!statusBar || document.getElementById('displayMaos')) return;
@@ -1841,14 +1796,17 @@ class SistemaEquipamentos {
     calcularMaosOcupadas() {
         let maosOcupadas = 0;
         
+        // Mãos ocupadas por armas
         maosOcupadas += this.equipamentosEquipados.maos.reduce((total, arma) => {
             return total + (arma.maos || 1);
         }, 0);
         
+        // Mãos ocupadas por escudos
         maosOcupadas += this.equipamentosEquipados.escudos.reduce((total, escudo) => {
             return total + (escudo.maos || 1);
         }, 0);
         
+        // Mãos ocupadas por itens equipados na mochila
         maosOcupadas += this.equipamentosEquipados.mochila
             .filter(item => item.equipado && item.maos > 0)
             .reduce((total, item) => total + item.maos, 0);
@@ -1867,11 +1825,11 @@ class SistemaEquipamentos {
         let html = '';
         
         for (let i = 0; i < maosOcupadas; i++) {
-            html += `<span class="mao mao-ocupada" title="Mão ocupada">👊</span>`;
+            html += `<span class="mao-ocupada" title="Mão ocupada">👊</span>`;
         }
         
         for (let i = 0; i < maosLivres; i++) {
-            html += `<span class="mao mao-livre" title="Mão livre">👐</span>`;
+            html += `<span class="mao-livre" title="Mão livre">👐</span>`;
         }
         
         displayMaos.innerHTML = html;
@@ -1889,8 +1847,8 @@ class SistemaEquipamentos {
         this.atualizarInfoCarga();
         this.atualizarDisplayMaos();
         this.atualizarInterfaceDeposito();
+        this.atualizarInterfaceFinanceiro();
         this.atualizarSistemaCombate();
-        this.atualizarHistoricoTransacoes();
     }
 
     atualizarInterface() {
@@ -1899,21 +1857,37 @@ class SistemaEquipamentos {
         this.atualizarInfoCarga();
         this.atualizarDisplayMaos();
         this.atualizarInterfaceDeposito();
-        this.atualizarHistoricoTransacoes();
+        this.atualizarInterfaceFinanceiro();
+    }
+
+    atualizarInterfaceFinanceiro() {
+        // Atualizar dinheiro disponível
+        const dinheiroDisponivel = document.getElementById('dinheiro-disponivel');
+        if (dinheiroDisponivel) {
+            dinheiroDisponivel.textContent = `$${this.dinheiro}`;
+        }
+        
+        // Atualizar dinheiro no banner
+        const dinheiroBanner = document.getElementById('dinheiroEquipamento');
+        if (dinheiroBanner) {
+            dinheiroBanner.textContent = `$${this.dinheiro}`;
+        }
     }
 
     atualizarStatus() {
         this.atualizarPeso();
 
-        const dinheiroElem = document.getElementById('dinheiroEquipamento');
-        if (dinheiroElem) dinheiroElem.textContent = `$${this.dinheiro}`;
+        // Atualizar dinheiro
+        this.atualizarInterfaceFinanceiro();
 
+        // Atualizar peso
         const pesoAtualElem = document.getElementById('pesoAtual');
         if (pesoAtualElem) pesoAtualElem.textContent = this.pesoAtual.toFixed(1);
 
         const pesoMaximoElem = document.getElementById('pesoMaximo');
         if (pesoMaximoElem) pesoMaximoElem.textContent = this.pesoMaximo.toFixed(1);
 
+        // Atualizar nível de carga
         const nivelCargaElem = document.getElementById('nivelCarga');
         if (nivelCargaElem) {
             nivelCargaElem.textContent = this.nivelCargaAtual.toUpperCase();
@@ -1923,6 +1897,7 @@ class SistemaEquipamentos {
         const penalidadesElem = document.getElementById('penalidadesCarga');
         if (penalidadesElem) penalidadesElem.textContent = this.penalidadesCarga;
 
+        // Atualizar contador da mochila
         const contadorMochila = document.getElementById('contadorMochila');
         if (contadorMochila) {
             const itensNaMochila = this.equipamentosAdquiridos.filter(item => 
@@ -1931,6 +1906,7 @@ class SistemaEquipamentos {
             contadorMochila.textContent = itensNaMochila;
         }
 
+        // Atualizar botão da mochila
         const btnMochila = document.getElementById('btn-liberar-mochila');
         if (btnMochila) {
             if (this.mochilaAtiva) {
@@ -1938,12 +1914,6 @@ class SistemaEquipamentos {
             } else {
                 btnMochila.innerHTML = '<i class="fas fa-suitcase"></i> Usar Mochila';
             }
-        }
-
-        // Atualizar dinheiro disponível na aba financeiro
-        const dinheiroDisponivel = document.getElementById('dinheiro-disponivel');
-        if (dinheiroDisponivel) {
-            dinheiroDisponivel.textContent = `$${this.dinheiro}`;
         }
     }
 
@@ -1959,7 +1929,7 @@ class SistemaEquipamentos {
                     <i class="fas fa-inbox fa-3x"></i>
                     <h4>Inventário Vazio</h4>
                     <p>Adquira equipamentos no catálogo para começar</p>
-                    <button class="btn-ir-catalogo" onclick="alternarSubTab('catalogo')">
+                    <button class="btn-ir-catalogo" onclick="sistemaEquipamentos.alternarSubTab('catalogo')">
                         <i class="fas fa-store"></i> Ir para Catálogo
                     </button>
                 </div>
@@ -2167,8 +2137,13 @@ class SistemaEquipamentos {
 
     atualizarArmadurasCombate() {
         this.armadurasCombate = {
-            cabeca: null, torso: null, bracos: null, 
-            pernas: null, maos: null, pes: null, corpoInteiro: null
+            cabeca: null,
+            torso: null,
+            bracos: null,
+            pernas: null,
+            maos: null,
+            pes: null,
+            corpoInteiro: null
         };
 
         this.equipamentosEquipados.armaduras.forEach(armadura => {
@@ -2320,40 +2295,86 @@ class SistemaEquipamentos {
         this.atualizarListaEquipamentosAdquiridos(equipamentosFiltrados);
     }
 
-    // ========== FEEDBACK E NOTIFICAÇÕES ==========
+    alternarSubTab(subtab) {
+        document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
+        
+        const btn = document.querySelector(`[data-subtab="${subtab}"]`);
+        const content = document.getElementById(`subtab-${subtab}`);
+        
+        if (btn) btn.classList.add('active');
+        if (content) content.classList.add('active');
+        
+        // Configurações específicas da aba
+        if (subtab === 'financeiro') {
+            setTimeout(() => {
+                this.atualizarInterfaceFinanceiro();
+            }, 100);
+        }
+        
+        if (subtab === 'criar') {
+            setTimeout(() => {
+                this.configurarCriacaoItens();
+            }, 100);
+        }
+    }
+
+    // ========== FEEDBACK ==========
     mostrarFeedback(mensagem, tipo) {
         const feedback = document.createElement('div');
         feedback.className = `feedback-message feedback-${tipo}`;
-        feedback.textContent = mensagem;
-        feedback.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            z-index: 10000;
-            opacity: 0;
-            transform: translateX(100px);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        feedback.innerHTML = `
+            <i class="fas fa-${tipo === 'sucesso' ? 'check-circle' : tipo === 'erro' ? 'times-circle' : 'exclamation-triangle'}"></i>
+            <span>${mensagem}</span>
         `;
         
-        if (tipo === 'sucesso') feedback.style.background = '#27ae60';
-        if (tipo === 'erro') feedback.style.background = '#e74c3c';
-        if (tipo === 'aviso') feedback.style.background = '#f39c12';
+        // Estilos inline para garantir funcionamento
+        feedback.style.cssText = `
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 18px 30px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(150px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        `;
+        
+        // Cor baseada no tipo
+        if (tipo === 'sucesso') {
+            feedback.style.background = 'linear-gradient(135deg, rgba(39, 174, 96, 0.95), rgba(46, 204, 113, 0.95))';
+            feedback.style.borderLeft = '5px solid #27ae60';
+        } else if (tipo === 'erro') {
+            feedback.style.background = 'linear-gradient(135deg, rgba(231, 76, 60, 0.95), rgba(192, 57, 43, 0.95))';
+            feedback.style.borderLeft = '5px solid #e74c3c';
+        } else if (tipo === 'aviso') {
+            feedback.style.background = 'linear-gradient(135deg, rgba(243, 156, 18, 0.95), rgba(230, 126, 34, 0.95))';
+            feedback.style.borderLeft = '5px solid #f39c12';
+        }
         
         document.body.appendChild(feedback);
         
+        // Animação de entrada
         setTimeout(() => {
             feedback.style.opacity = '1';
             feedback.style.transform = 'translateX(0)';
         }, 10);
         
+        // Animação de saída
         setTimeout(() => {
             feedback.style.opacity = '0';
-            feedback.style.transform = 'translateX(100px)';
+            feedback.style.transform = 'translateX(150px)';
             setTimeout(() => {
                 if (feedback.parentNode) feedback.parentNode.removeChild(feedback);
             }, 300);
@@ -2381,7 +2402,7 @@ class SistemaEquipamentos {
                 penalidadesCarga: this.penalidadesCarga,
                 sistemaRiqueza: this.sistemaRiqueza,
                 timestamp: new Date().getTime(),
-                version: '2.0'
+                version: '3.0'
             };
             
             localStorage.setItem('sistemaEquipamentos_data', JSON.stringify(dados));
@@ -2400,6 +2421,7 @@ class SistemaEquipamentos {
 
             const dados = JSON.parse(dadosSalvos);
             
+            // Carregar dados básicos
             this.equipamentosAdquiridos = Array.isArray(dados.equipamentosAdquiridos) ? 
                 dados.equipamentosAdquiridos : [];
             
@@ -2407,29 +2429,34 @@ class SistemaEquipamentos {
             this.pesoAtual = typeof dados.pesoAtual === 'number' ? dados.pesoAtual : 0;
             this.mochilaAtiva = typeof dados.mochilaAtiva === 'boolean' ? dados.mochilaAtiva : true;
             
+            // Carregar equipamentos equipados
             if (dados.equipamentosEquipados && typeof dados.equipamentosEquipados === 'object') {
                 this.equipamentosEquipados = {
-                    armas: Array.isArray(dados.equipamentosEquipados.armas) ? dados.equipamentosEquipados.armas : [],
+                    maos: Array.isArray(dados.equipamentosEquipados.maos) ? dados.equipamentosEquipados.maos : [],
                     armaduras: Array.isArray(dados.equipamentosEquipados.armaduras) ? dados.equipamentosEquipados.armaduras : [],
                     escudos: Array.isArray(dados.equipamentosEquipados.escudos) ? dados.equipamentosEquipados.escudos : [],
-                    maos: Array.isArray(dados.equipamentosEquipados.maos) ? dados.equipamentosEquipados.maos : [],
                     mochila: Array.isArray(dados.equipamentosEquipados.mochila) ? dados.equipamentosEquipados.mochila : [],
                     corpo: Array.isArray(dados.equipamentosEquipados.corpo) ? dados.equipamentosEquipados.corpo : []
                 };
             }
             
+            // Carregar sistema de combate
             if (dados.armadurasCombate) this.armadurasCombate = dados.armadurasCombate;
             if (dados.armasCombate) this.armasCombate = dados.armasCombate;
             if (dados.escudoCombate) this.escudoCombate = dados.escudoCombate;
             
+            // Carregar depósito
             this.deposito = Array.isArray(dados.deposito) ? dados.deposito : [];
             
+            // Carregar transações
             this.ultimasTransacoes = Array.isArray(dados.ultimasTransacoes) ? 
                 dados.ultimasTransacoes : [];
             
+            // Carregar contador de itens personalizados
             this.contadorItensPersonalizados = typeof dados.contadorItensPersonalizados === 'number' ? 
                 dados.contadorItensPersonalizados : 10000;
             
+            // Carregar sistema de carga
             this.ST = typeof dados.ST === 'number' ? dados.ST : 10;
             this.nivelCargaAtual = dados.nivelCargaAtual || 'leve';
             this.penalidadesCarga = dados.penalidadesCarga || 'MOV +0 / DODGE +0';
@@ -2439,6 +2466,7 @@ class SistemaEquipamentos {
             
             this.pesoMaximo = this.capacidadeCarga.pesada;
             
+            // Carregar sistema de riqueza
             if (dados.sistemaRiqueza) {
                 this.sistemaRiqueza = { ...this.sistemaRiqueza, ...dados.sistemaRiqueza };
             }
@@ -2558,22 +2586,16 @@ window.criarItemPersonalizado = function() {
     }
 };
 
-// Funções financeiras simplificadas
-window.abrirModalDinheiro = function(tipo) {
+// Funções financeiras
+window.receberDinheiroRapido = function() {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.abrirModalDinheiro(tipo);
+        window.sistemaEquipamentos.receberDinheiroRapido();
     }
 };
 
-window.confirmarTransacao = function() {
+window.gastarDinheiroRapido = function() {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.confirmarTransacao();
-    }
-};
-
-window.fecharModalDinheiro = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.fecharModalDinheiro();
+        window.sistemaEquipamentos.gastarDinheiroRapido();
     }
 };
 
@@ -2595,35 +2617,22 @@ window.ajustarDinheiroManual = function() {
     }
 };
 
-window.limparHistorico = function() {
+window.confirmarOperacao = function() {
     if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.limparHistorico();
+        window.sistemaEquipamentos.confirmarOperacao();
+    }
+};
+
+window.fecharModalSimples = function() {
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.fecharModalSimples();
     }
 };
 
 // Funções de navegação
 window.alternarSubTab = function(subtab) {
-    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
-    
-    const btn = document.querySelector(`[data-subtab="${subtab}"]`);
-    const content = document.getElementById(`subtab-${subtab}`);
-    
-    if (btn) btn.classList.add('active');
-    if (content) content.classList.add('active');
-    
-    // Se for a aba financeira, atualizar histórico
-    if (subtab === 'financeiro' && window.sistemaEquipamentos) {
-        setTimeout(() => {
-            window.sistemaEquipamentos.atualizarHistoricoTransacoes();
-        }, 100);
-    }
-    
-    // Se for a aba criar, configurar eventos
-    if (subtab === 'criar' && window.sistemaEquipamentos) {
-        setTimeout(() => {
-            window.sistemaEquipamentos.configurarCriacaoItens();
-        }, 100);
+    if (window.sistemaEquipamentos) {
+        window.sistemaEquipamentos.alternarSubTab(subtab);
     }
 };
 

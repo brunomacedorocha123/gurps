@@ -1720,132 +1720,87 @@ function toggleSubmenu(id) {
                 </div>
             </div>
             
-          <!-- SUB-ABA: FINANCEIRO (SIMPLIFICADO) -->
+         <!-- SUB-ABA: FINANCEIRO (SUPER SIMPLIFICADO) -->
 <div id="subtab-financeiro" class="subtab-content">
-    <div class="financeiro-simples">
+    <div class="financeiro-ultra-simples">
         
-        <!-- CABEÇALHO MINIMALISTA -->
-        <div class="financeiro-titulo-simples">
+        <!-- CABEÇALHO MÍNIMO -->
+        <div class="financeiro-titulo">
             <h3><i class="fas fa-coins"></i> Dinheiro</h3>
-            <p>Ajuste rápido de saldo</p>
+            <p>Controle rápido de ouro/moedas</p>
         </div>
         
-        <!-- SALDO DINÂMICO -->
-        <div class="saldo-display">
-            <div class="saldo-container">
-                <div class="saldo-label">
-                    <i class="fas fa-wallet"></i>
-                    <span>Saldo Disponível</span>
-                </div>
-                <div class="saldo-valor-dinamico" id="dinheiro-disponivel">
-                    <!-- JavaScript vai preencher aqui -->
-                </div>
+        <!-- SALDO GRANDE E VISÍVEL -->
+        <div class="saldo-principal">
+            <div class="saldo-atual">
+                <span>Saldo Disponível:</span>
+                <h2 id="dinheiro-disponivel">$0</h2>
             </div>
             
-            <div class="saldo-botoes">
-                <button class="btn-receber" onclick="sistemaEquipamentos.abrirModalDinheiro('receber')">
-                    <i class="fas fa-plus"></i> Receber
+            <!-- BOTÕES GRANDES E CLAROS -->
+            <div class="botoes-rapidos">
+                <button class="btn-receber-grande" onclick="sistemaEquipamentos.receberDinheiroRapido()">
+                    <i class="fas fa-plus-circle"></i> RECEBER
                 </button>
-                <button class="btn-gastar" onclick="sistemaEquipamentos.abrirModalDinheiro('gastar')">
-                    <i class="fas fa-minus"></i> Gastar
+                <button class="btn-gastar-grande" onclick="sistemaEquipamentos.gastarDinheiroRapido()">
+                    <i class="fas fa-minus-circle"></i> GASTAR
+                </button>
+                <button class="btn-ajustar" onclick="sistemaEquipamentos.ajustarDinheiroManual()">
+                    <i class="fas fa-edit"></i> AJUSTAR
                 </button>
             </div>
         </div>
         
-        <!-- HISTÓRICO MÍNIMO -->
-        <div class="historico-minimo">
-            <div class="historico-header-minimo">
-                <h4>Últimas Movimentações</h4>
-                <button class="btn-limpar-minimo" onclick="sistemaEquipamentos.limparHistorico()">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            </div>
-            
-            <div class="historico-lista-minimo" id="lista-transacoes">
-                <!-- JavaScript vai preencher aqui -->
-                <div class="historico-vazio-minimo">
-                    <i class="fas fa-exchange-alt"></i>
-                    <p>Nenhuma transação registrada</p>
-                </div>
+        <!-- VALORES RÁPIDOS -->
+        <div class="valores-rapidos">
+            <h4>Valores Rápidos:</h4>
+            <div class="botoes-valores">
+                <button onclick="sistemaEquipamentos.adicionarDinheiro(10)">+$10</button>
+                <button onclick="sistemaEquipamentos.adicionarDinheiro(50)">+$50</button>
+                <button onclick="sistemaEquipamentos.adicionarDinheiro(100)">+$100</button>
+                <button onclick="sistemaEquipamentos.removerDinheiro(10)">-$10</button>
+                <button onclick="sistemaEquipamentos.removerDinheiro(50)">-$50</button>
+                <button onclick="sistemaEquipamentos.removerDinheiro(100)">-$100</button>
             </div>
         </div>
+        
     </div>
 </div>
 
-<!-- MODAL DE DINHEIRO MÍNIMO -->
-<div id="modal-dinheiro" class="modal-overlay">
-    <div class="modal-content modal-dinheiro-minimo">
-        <div class="modal-header-minimo">
-            <h3 id="modal-dinheiro-titulo">Adicionar/Remover Dinheiro</h3>
-            <button class="modal-close-minimo" onclick="sistemaEquipamentos.fecharModalDinheiro()">
-                <i class="fas fa-times"></i>
-            </button>
+<!-- MODAL SIMPLIFICADO -->
+<div id="modal-dinheiro-simples" class="modal-overlay" style="display: none;">
+    <div class="modal-simples">
+        <div class="modal-header">
+            <h3 id="modal-titulo">Receber Dinheiro</h3>
+            <button onclick="sistemaEquipamentos.fecharModalSimples()">&times;</button>
         </div>
         
-        <div class="modal-body-minimo">
-            <!-- SALDO ATUAL DINÂMICO -->
-            <div class="saldo-atual-minimo">
-                <span>Saldo Atual:</span>
-                <span class="saldo-valor-minimo" id="saldo-modal">0</span>
+        <div class="modal-body">
+            <div class="saldo-atual-modal">
+                Saldo Atual: <strong id="saldo-modal-atual">$0</strong>
             </div>
             
-            <!-- VALOR -->
-            <div class="campo-valor-minimo">
-                <label for="valor-dinheiro">Valor:</label>
-                <div class="input-valor-minimo">
+            <div class="campo-valor">
+                <label>Valor:</label>
+                <div class="input-com-simbolo">
                     <span>$</span>
-                    <input type="number" id="valor-dinheiro" placeholder="0" min="0" step="10">
+                    <input type="number" id="valor-operacao" placeholder="0" min="1" step="1" autofocus>
                 </div>
             </div>
             
-            <!-- DESCRIÇÃO SIMPLES -->
-            <div class="campo-descricao-minimo">
-                <label for="descricao-dinheiro">Descrição:</label>
-                <textarea id="descricao-dinheiro" placeholder="Ex: Missão de guarda, Compra de poções..." rows="2"></textarea>
+            <div class="campo-descricao">
+                <label>Motivo:</label>
+                <input type="text" id="descricao-operacao" 
+                       placeholder="Ex: Missão, Recompensa, Compras...">
             </div>
         </div>
         
-        <div class="modal-footer-minimo">
-            <button class="btn-cancelar-minimo" onclick="sistemaEquipamentos.fecharModalDinheiro()">
+        <div class="modal-footer">
+            <button class="btn-cancelar" onclick="sistemaEquipamentos.fecharModalSimples()">
                 Cancelar
             </button>
-            <button class="btn-confirmar-minimo" onclick="sistemaEquipamentos.confirmarTransacao()">
+            <button class="btn-confirmar" onclick="sistemaEquipamentos.confirmarOperacao()">
                 Confirmar
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL DE QUANTIDADE (MANTIDO PARA COMPRAS) -->
-<div id="submenu-quantidade" class="modal-submenu">
-    <div class="submenu-content">
-        <h4 id="quantidade-nome-item">Nome do Item</h4>
-        <div class="quantidade-info">
-            <div><small id="quantidade-custo-unitario">Custo: $--</small></div>
-            <div><small id="quantidade-peso-unitario">Peso: -- kg</small></div>
-        </div>
-        
-        <div class="quantidade-controls">
-            <button class="btn-quantidade" onclick="sistemaEquipamentos.diminuirQuantidade()">
-                <i class="fas fa-minus"></i>
-            </button>
-            <input type="number" id="input-quantidade" value="1" min="1" max="99">
-            <button class="btn-quantidade" onclick="sistemaEquipamentos.aumentarQuantidade()">
-                <i class="fas fa-plus"></i>
-            </button>
-        </div>
-        
-        <div class="quantidade-totais">
-            <div>Custo Total: <span id="quantidade-custo-total">$--</span></div>
-            <div>Peso Total: <span id="quantidade-peso-total">-- kg</span></div>
-        </div>
-        
-        <div class="quantidade-actions">
-            <button class="btn-cancelar" onclick="sistemaEquipamentos.fecharSubmenuQuantidade()">
-                Cancelar
-            </button>
-            <button class="btn-confirmar" onclick="sistemaEquipamentos.confirmarCompraQuantidade()">
-                Comprar
             </button>
         </div>
     </div>
