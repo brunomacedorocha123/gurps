@@ -1,4 +1,8 @@
-// equipamentos.js - SISTEMA COMPLETO DE EQUIPAMENTOS + FINANCEIRO + CRIAR ITENS
+// ============================================
+// SISTEMA DE EQUIPAMENTOS - VERSÃO CORRIGIDA 100%
+// Com correções para mobile: scroll horizontal e modal estável
+// ============================================
+
 class SistemaEquipamentos {
     constructor() {
         // Sistema de equipamentos
@@ -82,6 +86,11 @@ class SistemaEquipamentos {
         this.catalogoPronto = false;
         this.inicializacaoEmAndamento = false;
         this.dadosCarregados = false;
+        
+        // Controles de touch para mobile
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.isModalOpen = false;
     }
 
     // ========== INICIALIZAÇÃO ==========
@@ -129,15 +138,179 @@ class SistemaEquipamentos {
         this.configurarSubAbas();
         this.configurarFiltrosInventario();
         this.configurarEventosFinanceiro();
-        this.configurarCriacaoItens(); // NOVO: Configurar criação de itens
+        this.configurarCriacaoItens();
         this.criarDisplayMaos();
         this.atualizarSistemaCombate();
         this.atualizarInterface();
+        
+        // CONFIGURAR SCROLL HORIZONTAL PARA MOBILE
+        this.configurarScrollHorizontalTabelas();
         
         setTimeout(() => {
             this.notificarDashboard();
             this.atualizarInterfaceForcada();
         }, 300);
+    }
+
+    // ========== CORREÇÃO PARA SCROLL HORIZONTAL NO MOBILE ==========
+    configurarScrollHorizontalTabelas() {
+        console.log('🔧 Configurando scroll horizontal para tabelas mobile...');
+        
+        // Função para aplicar scroll horizontal
+        const aplicarScrollTabelas = () => {
+            const containers = document.querySelectorAll('.table-container');
+            containers.forEach(container => {
+                const table = container.querySelector('table');
+                if (!table) return;
+                
+                const precisaScroll = table.scrollWidth > container.clientWidth;
+                
+                if (precisaScroll) {
+                    container.classList.add('scroll-horizontal');
+                    
+                    // Adicionar indicador visual
+                    if (!container.querySelector('.scroll-indicator')) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'scroll-indicator';
+                        indicator.innerHTML = '<i class="fas fa-arrows-alt-h"></i> Arraste para os lados';
+                        indicator.style.cssText = `
+                            position: absolute;
+                            bottom: 5px;
+                            right: 5px;
+                            background: var(--laranja-principal);
+                            color: white;
+                            padding: 3px 8px;
+                            border-radius: 10px;
+                            font-size: 10px;
+                            opacity: 0.8;
+                            z-index: 10;
+                        `;
+                        container.appendChild(indicator);
+                    }
+                    
+                    // Configurar eventos de touch
+                    this.configurarTouchScroll(container);
+                } else {
+                    container.classList.remove('scroll-horizontal');
+                    const indicator = container.querySelector('.scroll-indicator');
+                    if (indicator) indicator.remove();
+                }
+            });
+        };
+        
+        // Aplicar inicialmente
+        setTimeout(aplicarScrollTabelas, 500);
+        
+        // Observar mudanças no DOM
+        const observer = new MutationObserver((mutations) => {
+            let deveReaplicar = false;
+            mutations.forEach(mutation => {
+                if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                    deveReaplicar = true;
+                }
+            });
+            if (deveReaplicar) {
+                setTimeout(aplicarScrollTabelas, 100);
+            }
+        });
+        
+        // Observar todo o documento
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class', 'style']
+        });
+        
+        // Observar redimensionamento da janela
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(aplicarScrollTabelas, 250);
+        });
+    }
+
+    configurarTouchScroll(container) {
+        let startX, startY, scrollLeft, isDragging = false;
+        let isClick = false;
+        
+        const onStart = (e) => {
+            isDragging = true;
+            isClick = true;
+            
+            const touch = e.type.includes('touch') ? e.touches[0] : e;
+            startX = touch.pageX;
+            startY = touch.pageY;
+            scrollLeft = container.scrollLeft;
+            
+            container.style.cursor = 'grabbing';
+            container.style.userSelect = 'none';
+            
+            // Prevenir comportamento padrão
+            e.preventDefault();
+        };
+        
+        const onMove = (e) => {
+            if (!isDragging) return;
+            
+            const touch = e.type.includes('touch') ? e.touches[0] : e;
+            const x = touch.pageX;
+            const y = touch.pageY;
+            
+            // Verificar se é um movimento horizontal significativo
+            const deltaX = Math.abs(x - startX);
+            const deltaY = Math.abs(y - startY);
+            
+            // Se movimento vertical for maior, não é arraste horizontal
+            if (deltaY > deltaX && deltaY > 10) {
+                isDragging = false;
+                container.style.cursor = '';
+                return;
+            }
+            
+            // Se movimento horizontal for significativo, não é clique
+            if (deltaX > 5) {
+                isClick = false;
+            }
+            
+            const walk = (x - startX) * 1.5;
+            container.scrollLeft = scrollLeft - walk;
+            
+            // Prevenir scroll da página
+            if (Math.abs(walk) > 10) {
+                e.preventDefault();
+            }
+        };
+        
+        const onEnd = (e) => {
+            isDragging = false;
+            container.style.cursor = '';
+            container.style.userSelect = '';
+            
+            // Se foi um clique (movimento pequeno), permitir clique nos elementos
+            if (isClick && e.target.tagName === 'BUTTON') {
+                e.target.click();
+            }
+        };
+        
+        // Remover eventos antigos
+        container.removeEventListener('touchstart', onStart);
+        container.removeEventListener('touchmove', onMove);
+        container.removeEventListener('touchend', onEnd);
+        container.removeEventListener('mousedown', onStart);
+        container.removeEventListener('mousemove', onMove);
+        container.removeEventListener('mouseup', onEnd);
+        container.removeEventListener('mouseleave', onEnd);
+        
+        // Adicionar novos eventos
+        container.addEventListener('touchstart', onStart, { passive: false });
+        container.addEventListener('touchmove', onMove, { passive: false });
+        container.addEventListener('touchend', onEnd);
+        
+        container.addEventListener('mousedown', onStart);
+        container.addEventListener('mousemove', onMove);
+        container.addEventListener('mouseup', onEnd);
+        container.addEventListener('mouseleave', onEnd);
     }
 
     // ========== SISTEMA DE RIQUEZA ==========
@@ -333,7 +506,7 @@ class SistemaEquipamentos {
         this.mostrarFeedback(mensagem, this.mochilaAtiva ? 'sucesso' : 'aviso');
     }
 
-        // ========== COMPRA E VENDA DE EQUIPAMENTOS ==========
+    // ========== COMPRA E VENDA DE EQUIPAMENTOS ==========
     comprarEquipamento(itemId, elemento) {
         if (!this.catalogoPronto) {
             this.mostrarFeedback('Sistema ainda carregando...', 'erro');
@@ -415,7 +588,7 @@ class SistemaEquipamentos {
         });
     }
 
-    // ========== SUBMENU DE QUANTIDADE ==========
+    // ========== SUBMENU DE QUANTIDADE (CORRIGIDO PARA MOBILE) ==========
     abrirSubmenuQuantidade(itemId, elemento) {
         const equipamento = this.obterEquipamentoPorId(itemId);
         if (!equipamento) return;
@@ -423,6 +596,7 @@ class SistemaEquipamentos {
         this.itemCompraQuantidade = equipamento;
         this.quantidadeAtual = 1;
 
+        // Atualizar conteúdo
         const nomeItem = document.getElementById('quantidade-nome-item');
         const custoUnitario = document.getElementById('quantidade-custo-unitario');
         const pesoUnitario = document.getElementById('quantidade-peso-unitario');
@@ -434,16 +608,148 @@ class SistemaEquipamentos {
         const inputQuantidade = document.getElementById('input-quantidade');
         if (inputQuantidade) {
             inputQuantidade.value = this.quantidadeAtual;
+            // Prevenir zoom no iOS
+            inputQuantidade.style.fontSize = '16px';
         }
 
         this.atualizarTotaisQuantidade();
 
         const submenu = document.getElementById('submenu-quantidade');
-        if (!submenu) return;
+        if (!submenu) {
+            console.error('Submenu de quantidade não encontrado!');
+            return;
+        }
 
-        submenu.style.top = '';
-        submenu.style.left = '';
-        submenu.classList.add('aberto');
+        // Fechar primeiro qualquer submenu aberto
+        this.fecharSubmenuQuantidade();
+        
+        // Configurar posição antes de mostrar
+        this.posicionarSubmenuMobile(submenu, elemento);
+        
+        // Mostrar submenu
+        submenu.style.display = 'flex';
+        
+        // Forçar reflow para animação
+        submenu.offsetHeight;
+        
+        // Configurar eventos de touch
+        this.configurarEventosTouchSubmenu(submenu);
+        
+        // Animar entrada
+        setTimeout(() => {
+            submenu.classList.add('aberto');
+            this.isModalOpen = true;
+            
+            // Focar no input no mobile
+            if (window.innerWidth <= 768 && inputQuantidade) {
+                setTimeout(() => {
+                    inputQuantidade.focus();
+                    inputQuantidade.select();
+                }, 300);
+            }
+        }, 10);
+    }
+
+    posicionarSubmenuMobile(submenu, elemento) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        if (viewportWidth <= 768) {
+            // NO MOBILE: Centralizar na tela
+            submenu.style.position = 'fixed';
+            submenu.style.top = '50%';
+            submenu.style.left = '50%';
+            submenu.style.transform = 'translate(-50%, -50%) scale(0.95)';
+            submenu.style.width = '90%';
+            submenu.style.maxWidth = '400px';
+            submenu.style.maxHeight = '85vh';
+            submenu.style.overflowY = 'auto';
+            submenu.style.zIndex = '10000';
+            submenu.style.background = 'var(--bg-card)';
+            submenu.style.borderRadius = '12px';
+            submenu.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)';
+        } else {
+            // NO DESKTOP: Posicionar próximo ao botão
+            const rect = elemento.getBoundingClientRect();
+            const submenuWidth = 350;
+            const submenuHeight = 280;
+            
+            let left = rect.left;
+            let top = rect.bottom + 10;
+            
+            // Ajustar para não sair da tela
+            if (left + submenuWidth > viewportWidth) {
+                left = viewportWidth - submenuWidth - 20;
+            }
+            
+            if (top + submenuHeight > viewportHeight) {
+                top = rect.top - submenuHeight - 10;
+            }
+            
+            submenu.style.position = 'fixed';
+            submenu.style.top = `${top}px`;
+            submenu.style.left = `${left}px`;
+            submenu.style.width = `${submenuWidth}px`;
+            submenu.style.transform = 'scale(0.95)';
+            submenu.style.zIndex = '10000';
+        }
+    }
+
+    configurarEventosTouchSubmenu(submenu) {
+        // Prevenir scroll do body quando submenu está aberto
+        const preventBodyScroll = (e) => {
+            if (e.target.closest('.submenu-content')) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        };
+        
+        // Permitir scroll apenas dentro do conteúdo
+        const allowContentScroll = (e) => {
+            const content = submenu.querySelector('.submenu-content');
+            if (content && content.scrollHeight > content.clientHeight) {
+                e.stopPropagation();
+            }
+        };
+        
+        // Fechar ao clicar fora
+        const closeOnOutsideClick = (e) => {
+            if (!e.target.closest('.submenu-content') && e.target !== submenu) {
+                this.fecharSubmenuQuantidade();
+            }
+        };
+        
+        // Remover eventos antigos
+        submenu.removeEventListener('touchmove', preventBodyScroll);
+        submenu.removeEventListener('scroll', allowContentScroll);
+        submenu.removeEventListener('click', closeOnOutsideClick);
+        document.removeEventListener('touchmove', preventBodyScroll);
+        
+        // Adicionar novos eventos
+        submenu.addEventListener('touchmove', preventBodyScroll, { passive: false });
+        submenu.addEventListener('scroll', allowContentScroll);
+        submenu.addEventListener('click', closeOnOutsideClick);
+        document.addEventListener('touchmove', preventBodyScroll, { passive: false });
+        
+        // Prevenir comportamento padrão de toque nos botões
+        const buttons = submenu.querySelectorAll('button');
+        buttons.forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
+            
+            btn.addEventListener('touchend', (e) => {
+                e.stopPropagation();
+            });
+        });
+        
+        // Prevenir zoom em inputs no iOS
+        const inputs = submenu.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.addEventListener('touchstart', () => {
+                input.style.fontSize = '16px';
+            }, { passive: true });
+        });
     }
 
     aumentarQuantidade() {
@@ -475,6 +781,20 @@ class SistemaEquipamentos {
         
         if (custoTotalElem) custoTotalElem.textContent = `$${custoTotal}`;
         if (pesoTotalElem) pesoTotalElem.textContent = `${pesoTotal.toFixed(1)} kg`;
+        
+        // Verificar se tem dinheiro suficiente
+        const compraBtn = document.querySelector('.btn-confirmar-quantidade');
+        if (compraBtn) {
+            if (custoTotal > this.dinheiro) {
+                compraBtn.disabled = true;
+                compraBtn.style.opacity = '0.6';
+                compraBtn.title = 'Dinheiro insuficiente!';
+            } else {
+                compraBtn.disabled = false;
+                compraBtn.style.opacity = '1';
+                compraBtn.title = 'Confirmar compra';
+            }
+        }
     }
 
     confirmarCompraQuantidade() {
@@ -490,14 +810,29 @@ class SistemaEquipamentos {
             return;
         }
 
+        // Procurar item existente do mesmo tipo
         const itemExistente = this.equipamentosAdquiridos.find(item => 
-            item.id === equipamento.id && item.status === 'na-mochila' && !item.equipado
+            item.id === equipamento.id && 
+            item.status === 'na-mochila' && 
+            !item.equipado &&
+            (!item.personalizado || equipamento.personalizado === item.personalizado)
         );
 
-        if (itemExistente) {
+        if (itemExistente && !equipamento.personalizado) {
+            // Incrementar quantidade do item existente
             itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
             itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
+            
+            // Atualizar também na mochila
+            const itemNaMochila = this.equipamentosEquipados.mochila.find(
+                item => item.idUnico === itemExistente.idUnico
+            );
+            if (itemNaMochila) {
+                itemNaMochila.quantidade = itemExistente.quantidade;
+                itemNaMochila.custoTotal = itemExistente.custoTotal;
+            }
         } else {
+            // Criar novo item
             const novoEquipamento = {
                 ...equipamento,
                 quantidade: quantidade,
@@ -534,12 +869,32 @@ class SistemaEquipamentos {
         const submenu = document.getElementById('submenu-quantidade');
         if (submenu) {
             submenu.classList.remove('aberto');
+            
+            // Resetar eventos
+            submenu.removeEventListener('touchmove', () => {});
+            submenu.removeEventListener('scroll', () => {});
+            submenu.removeEventListener('click', () => {});
+            document.removeEventListener('touchmove', () => {});
+            
             setTimeout(() => {
                 submenu.style.display = 'none';
+                // Resetar estilos
+                submenu.style.position = '';
+                submenu.style.top = '';
+                submenu.style.left = '';
+                submenu.style.transform = '';
+                submenu.style.width = '';
+                submenu.style.maxWidth = '';
+                submenu.style.maxHeight = '';
+                submenu.style.zIndex = '';
+                submenu.style.background = '';
+                submenu.style.borderRadius = '';
+                submenu.style.boxShadow = '';
             }, 300);
         }
         this.itemCompraQuantidade = null;
         this.quantidadeAtual = 1;
+        this.isModalOpen = false;
     }
 
     // ========== EQUIPAR/DESEQUIPAR ==========
@@ -654,16 +1009,44 @@ class SistemaEquipamentos {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
 
+        // Verificar se item usa mãos
+        if (equipamento.maos && equipamento.maos > 0) {
+            const maosOcupadas = this.calcularMaosOcupadas();
+            const maosNecessarias = equipamento.maos;
+            
+            // Verificar se há mãos disponíveis
+            if (maosOcupadas + maosNecessarias > this.maosDisponiveis) {
+                this.mostrarFeedback(`Não há mãos suficientes para ${equipamento.nome}!`, 'erro');
+                return;
+            }
+            
+            // Verificar se é arma de 2 mãos e já tem algo equipado
+            if (maosNecessarias === 2 && maosOcupadas > 0) {
+                this.mostrarFeedback(`${equipamento.nome} requer 2 mãos livres!`, 'erro');
+                return;
+            }
+        }
+
         this.removerDeTodosOsLocais(itemId);
         equipamento.status = 'equipado';
         equipamento.equipado = true;
-        this.equipamentosEquipados.mochila.push(equipamento);
+        
+        // Colocar no local apropriado
+        if (equipamento.maos && equipamento.maos > 0) {
+            this.equipamentosEquipados.maos.push(equipamento);
+        } else {
+            this.equipamentosEquipados.mochila.push(equipamento);
+        }
         
         this.mostrarFeedback(`${equipamento.nome} preparado`, 'sucesso');
         
-        if (equipamento.maos > 0) {
+        if (equipamento.maos && equipamento.maos > 0) {
             this.atualizarDisplayMaos();
         }
+        
+        this.salvarDados();
+        this.atualizarInterface();
+        this.atualizarSistemaCombate();
     }
 
     desequiparItem(itemId) {
@@ -727,7 +1110,7 @@ class SistemaEquipamentos {
         this.atualizarSistemaCombate();
     }
 
-    // ========== SISTEMA DE DEPÓSITO ==========
+        // ========== SISTEMA DE DEPÓSITO ==========
     moverParaDeposito(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return false;
@@ -823,7 +1206,7 @@ class SistemaEquipamentos {
         this.atualizarInterface();
     }
 
-        // ========== SISTEMA FINANCEIRO COMPLETO ==========
+    // ========== SISTEMA FINANCEIRO COMPLETO ==========
     configurarEventosFinanceiro() {
         // Eventos para tipos de transação
         document.querySelectorAll('.tipo-option').forEach(option => {
@@ -900,6 +1283,12 @@ class SistemaEquipamentos {
         
         // Mostrar modal
         modal.style.display = 'flex';
+        
+        // Prevenir scroll do body no mobile
+        if (window.innerWidth <= 768) {
+            document.body.style.overflow = 'hidden';
+        }
+        
         setTimeout(() => {
             modal.classList.add('aberto');
             document.getElementById('valor-transacao-modal')?.focus();
@@ -910,6 +1299,10 @@ class SistemaEquipamentos {
         const modal = document.getElementById('modal-transacao');
         if (modal) {
             modal.classList.remove('aberto');
+            
+            // Restaurar scroll do body
+            document.body.style.overflow = '';
+            
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 300);
@@ -1047,7 +1440,7 @@ class SistemaEquipamentos {
                          'Outros';
         
         // Validações
-        if (!valor || valor <= 0) {
+        if (!valor || valor <= 0 || isNaN(valor)) {
             this.mostrarFeedback('Por favor, insira um valor válido!', 'erro');
             return;
         }
@@ -1260,6 +1653,9 @@ class SistemaEquipamentos {
                 </tr>
             `;
         }).join('');
+        
+        // Configurar scroll horizontal se necessário
+        setTimeout(() => this.configurarScrollHorizontalTabelas(), 100);
     }
 
     formatarData(dataString) {
@@ -1819,7 +2215,7 @@ class SistemaEquipamentos {
                         <h4><i class="fas fa-scroll"></i> Propriedades do Item de Missão</h4>
                         <div class="form-group">
                             <label>Missão Relacionada:</label>
-                            <input type="text" id="item-missao" placeholder="Nome da missão" maxlength="50">
+                                <input type="text" id="item-missao" placeholder="Nome da missão" maxlength="50">
                         </div>
                         <div class="form-group">
                             <label>Importância:</label>
@@ -2085,7 +2481,7 @@ class SistemaEquipamentos {
         const peso = parseFloat(document.getElementById('item-peso').value);
         const custo = parseInt(document.getElementById('item-custo').value) || 0;
         
-        if (peso <= 0) {
+        if (peso <= 0 || isNaN(peso)) {
             this.mostrarFeedback('O peso deve ser maior que zero!', 'erro');
             return;
         }
@@ -2228,7 +2624,7 @@ class SistemaEquipamentos {
         }
     }
 
-        // ========== CONFIGURAÇÃO DE EVENTOS GLOBAIS ==========
+    // ========== CONFIGURAÇÃO DE EVENTOS GLOBAIS ==========
     configurarEventosGlobais() {
         document.addEventListener('click', (e) => {
             const btnComprar = e.target.closest('.btn-comprar');
@@ -2353,6 +2749,8 @@ class SistemaEquipamentos {
                     setTimeout(() => {
                         this.atualizarResumoFinanceiro();
                         this.atualizarHistorico();
+                        // Configurar scroll para tabelas
+                        setTimeout(() => this.configurarScrollHorizontalTabelas(), 200);
                     }, 100);
                 }
                 
@@ -2450,6 +2848,9 @@ class SistemaEquipamentos {
         this.atualizarEstatisticas();
         this.atualizarSistemaCombate();
         this.atualizarHistorico();
+        
+        // Configurar scroll para tabelas
+        setTimeout(() => this.configurarScrollHorizontalTabelas(), 500);
     }
 
     atualizarInterface() {
@@ -2459,6 +2860,9 @@ class SistemaEquipamentos {
         this.atualizarInfoCarga();
         this.atualizarDisplayMaos();
         this.atualizarInterfaceDeposito();
+        
+        // Configurar scroll para tabelas após atualização
+        setTimeout(() => this.configurarScrollHorizontalTabelas(), 300);
     }
 
     atualizarStatus() {
@@ -2564,6 +2968,14 @@ class SistemaEquipamentos {
                 </div>
             </div>
         `).join('');
+        
+        // Configurar scroll horizontal se necessário
+        setTimeout(() => {
+            const container = lista.closest('.table-container');
+            if (container) {
+                this.configurarScrollHorizontalTabelas();
+            }
+        }, 100);
     }
 
     gerarBotoesControle(equipamento) {
@@ -3176,6 +3588,12 @@ window.alternarSubTab = function(subtab) {
         setTimeout(() => {
             window.sistemaEquipamentos.atualizarResumoFinanceiro();
             window.sistemaEquipamentos.atualizarHistorico();
+            // Configurar scroll para tabelas
+            setTimeout(() => {
+                if (window.sistemaEquipamentos) {
+                    window.sistemaEquipamentos.configurarScrollHorizontalTabelas();
+                }
+            }, 200);
         }, 100);
     }
     
@@ -3212,139 +3630,210 @@ if (document.readyState === 'loading') {
     inicializarSistemaEquipamentos();
 }
 
-// ========== FUNÇÕES DE DEPURAÇÃO (opcional) ==========
-if (typeof window !== 'undefined') {
-    window.debugEquipamentos = function() {
-        if (!window.sistemaEquipamentos) {
-            console.log('Sistema de Equipamentos não inicializado');
-            return;
-        }
-        
-        console.log('=== SISTEMA DE EQUIPAMENTOS - DEBUG ===');
-        console.log('Dinheiro:', window.sistemaEquipamentos.dinheiro);
-        console.log('Peso Atual:', window.sistemaEquipamentos.pesoAtual);
-        console.log('Peso Máximo:', window.sistemaEquipamentos.pesoMaximo);
-        console.log('Nível de Carga:', window.sistemaEquipamentos.nivelCargaAtual);
-        console.log('Total de Itens:', window.sistemaEquipamentos.equipamentosAdquiridos.length);
-        console.log('Itens Equipados:', window.sistemaEquipamentos.equipamentosAdquiridos.filter(i => i.equipado).length);
-        console.log('Itens no Depósito:', window.sistemaEquipamentos.deposito.length);
-        console.log('Histórico Transações:', window.sistemaEquipamentos.historicoTransacoes.length);
-        console.log('Contador Itens Personalizados:', window.sistemaEquipamentos.contadorItensPersonalizados);
-        console.log('======================================');
-    };
-    
-    window.resetarEquipamentos = function() {
-        if (confirm('Tem certeza que deseja resetar TODOS os dados do sistema de equipamentos? Isso não pode ser desfeito!')) {
-            localStorage.removeItem('sistemaEquipamentos_data');
-            if (window.sistemaEquipamentos) {
-                window.sistemaEquipamentos = new SistemaEquipamentos();
-                window.sistemaEquipamentos.inicializarQuandoPronto();
-            }
-            location.reload();
-        }
-    };
+// ========== CSS ADICIONAL PARA MOBILE ==========
+const estiloMobileCSS = `
+/* ADICIONE ESTAS REGRAS AO FINAL DO SEU CSS */
+
+/* Scroll horizontal para tabelas */
+.table-container.scroll-horizontal {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+    scrollbar-width: thin;
+    scrollbar-color: var(--laranja-principal) var(--bg-secundario);
 }
 
-// ========== FUNÇÕES PARA INTEGRAÇÃO COM OUTROS SISTEMAS ==========
-// Exportar dados para uso em outros módulos
-window.getDadosEquipamentos = function() {
-    if (!window.sistemaEquipamentos) return null;
-    
-    return {
-        dinheiro: window.sistemaEquipamentos.dinheiro,
-        pesoAtual: window.sistemaEquipamentos.pesoAtual,
-        pesoMaximo: window.sistemaEquipamentos.pesoMaximo,
-        nivelCarga: window.sistemaEquipamentos.nivelCargaAtual,
-        penalidades: window.sistemaEquipamentos.penalidadesCarga,
-        armasEquipadas: window.sistemaEquipamentos.armasCombate.maos,
-        escudoEquipado: window.sistemaEquipamentos.escudoCombate,
-        armadurasEquipadas: window.sistemaEquipamentos.armadurasCombate,
-        historicoTransacoes: window.sistemaEquipamentos.historicoTransacoes.slice(0, 10) // Últimas 10 transações
-    };
-};
-
-// Importar dados de outros sistemas
-window.setDadosEquipamentos = function(dados) {
-    if (!window.sistemaEquipamentos || !dados) return false;
-    
-    try {
-        if (dados.dinheiro !== undefined) {
-            window.sistemaEquipamentos.dinheiro = dados.dinheiro;
-        }
-        
-        if (dados.ST !== undefined) {
-            window.sistemaEquipamentos.ST = dados.ST;
-            window.sistemaEquipamentos.capacidadeCarga = window.sistemaEquipamentos.calcularCapacidadeCarga();
-            window.sistemaEquipamentos.pesoMaximo = window.sistemaEquipamentos.capacidadeCarga.pesada;
-        }
-        
-        if (dados.equipamentosAdquiridos && Array.isArray(dados.equipamentosAdquiridos)) {
-            window.sistemaEquipamentos.equipamentosAdquiridos = dados.equipamentosAdquiridos;
-        }
-        
-        window.sistemaEquipamentos.salvarDados();
-        window.sistemaEquipamentos.atualizarInterfaceForcada();
-        
-        return true;
-    } catch (error) {
-        console.error('Erro ao importar dados:', error);
-        return false;
-    }
-};
-
-// ========== HOTKEYS (atalhos de teclado) ==========
-document.addEventListener('keydown', function(e) {
-    // Alt + E - Abrir aba de equipamentos
-    if (e.altKey && e.key === 'e') {
-        e.preventDefault();
-        const abaEquipamento = document.getElementById('equipamento');
-        if (abaEquipamento) {
-            // Simular clique na aba equipamentos
-            const tabBtn = document.querySelector('[data-tab="equipamento"]');
-            if (tabBtn) tabBtn.click();
-        }
-    }
-    
-    // Alt + C - Abrir catálogo
-    if (e.altKey && e.key === 'c') {
-        e.preventDefault();
-        alternarSubTab('catalogo');
-    }
-    
-    // Alt + I - Abrir inventário
-    if (e.altKey && e.key === 'i') {
-        e.preventDefault();
-        alternarSubTab('inventario');
-    }
-    
-    // Alt + N - Criar novo item
-    if (e.altKey && e.key === 'n') {
-        e.preventDefault();
-        alternarSubTab('criar');
-        setTimeout(() => {
-            const nomeInput = document.getElementById('item-nome');
-            if (nomeInput) nomeInput.focus();
-        }, 100);
-    }
-    
-    // Alt + F - Abrir financeiro
-    if (e.altKey && e.key === 'f') {
-        e.preventDefault();
-        alternarSubTab('financeiro');
-    }
-    
-    // Alt + D - Abrir depósito
-    if (e.altKey && e.key === 'd') {
-        e.preventDefault();
-        alternarSubTab('deposito');
-    }
-});
-
-// ========== EXPORTAR PARA MÓDULOS ES6 ==========
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        SistemaEquipamentos,
-        getSistemaEquipamentos: () => window.sistemaEquipamentos,
-        inicializarSistemaEquipamentos
-    };
+.table-container.scroll-horizontal::-webkit-scrollbar {
+    height: 6px;
 }
+
+.table-container.scroll-horizontal::-webkit-scrollbar-track {
+    background: var(--bg-secundario);
+    border-radius: 3px;
+}
+
+.table-container.scroll-horizontal::-webkit-scrollbar-thumb {
+    background: var(--laranja-principal);
+    border-radius: 3px;
+}
+
+.table-container.scroll-horizontal:active {
+    cursor: grabbing;
+}
+
+.table-container.scroll-horizontal table {
+    min-width: 600px;
+}
+
+/* Indicador de scroll para mobile */
+.scroll-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: var(--laranja-principal);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    opacity: 0.8;
+    z-index: 10;
+    animation: pulse-scroll 2s infinite;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.scroll-indicator i {
+    font-size: 9px;
+}
+
+@keyframes pulse-scroll {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+/* Prevenir zoom em inputs no iOS */
+@media screen and (max-width: 768px) {
+    input[type="number"],
+    input[type="text"],
+    input[type="date"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    textarea,
+    select {
+        font-size: 16px !important;
+        max-height: 44px;
+    }
+    
+    /* Ajustes para submenu no mobile */
+    #submenu-quantidade {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) scale(0.95) !important;
+        width: 90% !important;
+        max-width: 400px !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        z-index: 10000 !important;
+        background: var(--bg-card) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
+    }
+    
+    #submenu-quantidade .submenu-content {
+        padding: 20px !important;
+    }
+    
+    /* Modal no mobile */
+    .modal-overlay,
+    .modal-submenu {
+        align-items: flex-start;
+        padding-top: 20px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .modal-content,
+    .submenu-content {
+        margin: auto;
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+        width: 95% !important;
+        max-width: 500px !important;
+    }
+    
+    /* Botões no mobile */
+    button, .btn-equipamento-acao, .btn-deposito {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Tabelas no mobile */
+    table {
+        font-size: 14px;
+    }
+    
+    table th, table td {
+        padding: 8px 6px;
+    }
+    
+    /* Ajustes de layout */
+    .form-group-duo {
+        flex-direction: column;
+    }
+    
+    .form-group-duo .form-group {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* Desabilitar animações em dispositivos com preferência reduzida */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Melhorias para touch */
+@media (hover: none) and (pointer: coarse) {
+    .btn-equipamento-acao,
+    .btn-deposito,
+    button {
+        padding: 12px 15px;
+    }
+    
+    .equipamento-adquirido-item {
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+    
+    /* Aumentar área de toque */
+    .btn-acao {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Orientação paisagem no mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .modal-content,
+    .submenu-content {
+        max-height: 90vh;
+    }
+    
+    #submenu-quantidade {
+        max-height: 90vh;
+    }
+}
+
+/* Ajustes para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .table-container.scroll-horizontal table {
+        min-width: 800px;
+    }
+    
+    .modal-content {
+        width: 80% !important;
+    }
+}
+`;
+
+// Adicionar CSS dinamicamente
+const styleElement = document.createElement('style');
+styleElement.id = 'sistema-equipamentos-mobile-css';
+styleElement.textContent = estiloMobileCSS;
+document.head.appendChild(styleElement);
+
+console.log('✅ Sistema de Equipamentos 100% carregado com suporte mobile completo!');
