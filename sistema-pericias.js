@@ -101,42 +101,42 @@ function atualizarFiltrosPericias() {
     carregarPericiasFiltradas(termo, categoria, subcategoria);
 }
 
-// CALCULAR CUSTO DA PERÍCIA - TABELA CORRIGIDA
 // CALCULAR CUSTO DA PERÍCIA - TABELA CORRIGIDA SEM CUSTO 0
 function calcularCustoPericia(nivel, dificuldade) {
     const tabelaCustos = {
         'Fácil': [
-            { nivel: -2, custo: 1 }, { nivel: -1, custo: 1 }, // 1 ponto = -2 e -1
-            { nivel: 0, custo: 1 },  // 1 ponto = +0
-            { nivel: 1, custo: 2 },  // 2 pontos = +1
-            { nivel: 2, custo: 4 },  // 4 pontos = +2
+            { nivel: -2, custo: 1 },  // 1 ponto = -2
+            { nivel: -1, custo: 1 },  // 1 ponto = -1 (mesmo custo)
+            { nivel: 0, custo: 1 },   // 1 ponto = 0 (mesmo custo)
+            { nivel: 1, custo: 2 },   // 2 pontos = +1
+            { nivel: 2, custo: 4 },   // 4 pontos = +2
             { nivel: 3, custo: 8 }, { nivel: 4, custo: 12 }, { nivel: 5, custo: 16 },
             { nivel: 6, custo: 20 }, { nivel: 7, custo: 24 }, { nivel: 8, custo: 28 },
             { nivel: 9, custo: 32 }, { nivel: 10, custo: 36 }
         ],
         'Média': [
-            { nivel: -2, custo: 1 }, // 1 ponto = -2
-            { nivel: -1, custo: 1 }, // 1 ponto = -1
-            { nivel: 0, custo: 2 },  // 2 pontos = +0
-            { nivel: 1, custo: 4 },  // 4 pontos = +1
+            { nivel: -2, custo: 1 },  // 1 ponto = -2
+            { nivel: -1, custo: 1 },  // 1 ponto = -1 (mesmo custo)
+            { nivel: 0, custo: 2 },   // 2 pontos = +0
+            { nivel: 1, custo: 4 },   // 4 pontos = +1
             { nivel: 2, custo: 8 }, { nivel: 3, custo: 12 }, { nivel: 4, custo: 16 },
             { nivel: 5, custo: 20 }, { nivel: 6, custo: 24 }, { nivel: 7, custo: 28 },
             { nivel: 8, custo: 32 }, { nivel: 9, custo: 36 }, { nivel: 10, custo: 40 }
         ],
         'Difícil': [
-            { nivel: -2, custo: 1 }, // 1 ponto = -2
-            { nivel: -1, custo: 2 }, // 2 pontos = -1
-            { nivel: 0, custo: 4 },  // 4 pontos = +0
+            { nivel: -2, custo: 1 },  // 1 ponto = -2
+            { nivel: -1, custo: 2 },  // 2 pontos = -1
+            { nivel: 0, custo: 4 },   // 4 pontos = +0
             { nivel: 1, custo: 8 }, { nivel: 2, custo: 12 }, { nivel: 3, custo: 16 },
             { nivel: 4, custo: 20 }, { nivel: 5, custo: 24 }, { nivel: 6, custo: 28 },
             { nivel: 7, custo: 32 }, { nivel: 8, custo: 36 }, { nivel: 9, custo: 40 },
             { nivel: 10, custo: 44 }
         ],
         'Muito Difícil': [
-            { nivel: -3, custo: 1 }, // 1 ponto = -3
-            { nivel: -2, custo: 2 }, // 2 pontos = -2
-            { nivel: -1, custo: 4 }, // 4 pontos = -1
-            { nivel: 0, custo: 8 },  // 8 pontos = +0
+            { nivel: -3, custo: 1 },  // 1 ponto = -3
+            { nivel: -2, custo: 2 },  // 2 pontos = -2
+            { nivel: -1, custo: 4 },  // 4 pontos = -1
+            { nivel: 0, custo: 8 },   // 8 pontos = +0
             { nivel: 1, custo: 12 }, { nivel: 2, custo: 16 }, { nivel: 3, custo: 20 },
             { nivel: 4, custo: 24 }, { nivel: 5, custo: 28 }, { nivel: 6, custo: 32 },
             { nivel: 7, custo: 36 }, { nivel: 8, custo: 40 }, { nivel: 9, custo: 44 },
@@ -153,8 +153,8 @@ function calcularCustoPericia(nivel, dificuldade) {
 // OBTER INFORMAÇÕES DE REDUTORES - ATUALIZADO
 function getInfoRedutores(dificuldade) {
     const infos = {
-        "Fácil": "1 ponto = Atributo+0 | 2 pontos = Atributo+1 | 4 pontos = Atributo+2",
-        "Média": "1 ponto = Atributo-1 | 2 pontos = Atributo+0 | 4 pontos = Atributo+1",  
+        "Fácil": "1 ponto = Atributo-2 até +0 | 2 pontos = Atributo+1 | 4 pontos = Atributo+2",
+        "Média": "1 ponto = Atributo-2 ou -1 | 2 pontos = Atributo+0 | 4 pontos = Atributo+1",  
         "Difícil": "1 ponto = Atributo-2 | 2 pontos = Atributo-1 | 4 pontos = Atributo+0",
         "Muito Difícil": "1 ponto = Atributo-3 | 2 pontos = Atributo-2 | 4 pontos = Atributo-1 | 8 pontos = Atributo+0"
     };
@@ -194,7 +194,7 @@ function abrirModalPericia(pericia) {
             <h4>Selecionar Nível</h4>
             
             <div class="pericia-controle">
-                <button id="btn-pericia-menos" class="btn-pericia" ${nivelAtual <= -3 ? 'disabled' : ''}>-</button>
+                <button id="btn-pericia-menos" class="btn-pericia" ${nivelAtual <= -2 ? 'disabled' : ''}>-</button>
                 
                 <div class="pericia-valor-container">
                     <div class="pericia-nh" id="nh-final">${valorAtributo + nivelAtual}</div>
@@ -234,6 +234,26 @@ function abrirModalPericia(pericia) {
     const custo = corpo.querySelector('#custo-pericia');
     const custoAdicional = corpo.querySelector('#custo-adicional');
     
+    // Função para verificar se pode mudar de nível
+    function podeMudarNivel(nivelAtual, novoNivel) {
+        // Limites mínimo e máximo
+        if (novoNivel < -2 || novoNivel > 10) return false;
+        
+        const custoAtualNivel = calcularCustoPericia(nivelAtual, pericia.dificuldade);
+        const custoNovoNivel = calcularCustoPericia(novoNivel, pericia.dificuldade);
+        
+        // Sempre permite se o custo for diferente
+        if (custoAtualNivel !== custoNovoNivel) return true;
+        
+        // Para Fácil, permite todos os níveis de -2 a 0 (todos custam 1 ponto)
+        if (pericia.dificuldade === 'Fácil' && novoNivel >= -2 && novoNivel <= 0) {
+            return true;
+        }
+        
+        // Para outras dificuldades, não permite alternar entre níveis com mesmo custo
+        return false;
+    }
+    
     // Função para atualizar a exibição
     function atualizarDisplay() {
         const nivel = parseInt(nivelHidden.value);
@@ -246,9 +266,9 @@ function abrirModalPericia(pericia) {
         nivelRelativo.innerHTML = `${pericia.atributo}${nivel >= 0 ? '+' : ''}${nivel}`;
         custo.textContent = custoTotal;
         
-        // Atualizar botões
-        btnMenos.disabled = nivel <= -3;
-        btnMais.disabled = nivel >= 10;
+        // Atualizar botões baseado na lógica de custos
+        btnMenos.disabled = !podeMudarNivel(nivel, nivel - 1);
+        btnMais.disabled = !podeMudarNivel(nivel, nivel + 1);
         
         // Calcular custo adicional se já existir a perícia
         if (periciaExistente && custoAdicional) {
@@ -264,18 +284,20 @@ function abrirModalPericia(pericia) {
     // Eventos dos botões
     btnMenos.addEventListener('click', () => {
         let nivel = parseInt(nivelHidden.value);
-        if (nivel > -3) {
-            nivel--;
-            nivelHidden.value = nivel;
+        let novoNivel = nivel - 1;
+        
+        if (podeMudarNivel(nivel, novoNivel)) {
+            nivelHidden.value = novoNivel;
             atualizarDisplay();
         }
     });
     
     btnMais.addEventListener('click', () => {
         let nivel = parseInt(nivelHidden.value);
-        if (nivel < 10) {
-            nivel++;
-            nivelHidden.value = nivel;
+        let novoNivel = nivel + 1;
+        
+        if (podeMudarNivel(nivel, novoNivel)) {
+            nivelHidden.value = novoNivel;
             atualizarDisplay();
         }
     });
