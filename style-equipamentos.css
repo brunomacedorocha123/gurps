@@ -3752,4 +3752,67 @@ select:focus {
     border-color: var(--borda-principal) transparent transparent transparent;
 }
 
+/* ========== CORREÇÃO PARA ÍCONES ========== */
+/* Esta regra garante que os ícones sejam sempre visíveis */
+
+.equipamento-container i.fas,
+.equipamento-container i.far,
+.equipamento-container i.fab,
+.equipamento-container i.fa-solid,
+.equipamento-container i.fa-regular,
+.equipamento-container i.fa-brands {
+    font-family: 'Font Awesome 6 Free' !important;
+    font-weight: 900 !important;
+    display: inline-block !important;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1 !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Garantir que ícones específicos sejam visíveis em telas pequenas */
+@media (max-width: 768px) {
+    .subtab-btn i {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        font-size: 1.4rem !important;
+        margin: 0 !important;
+    }
+    
+    .categoria-header i {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .status-header i {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .filtro-header i {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
+
+/* Correção específica para emojis/ícones de mãos */
+.equipamento-container .mao-livre,
+.equipamento-container .mao-ocupada {
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif !important;
+    display: inline-block !important;
+}
+
+/* Garantir que todos os ícones dentro de .equipamento-container sejam visíveis */
+.equipamento-container i {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 /* Fim do CSS completo */
