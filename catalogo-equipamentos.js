@@ -51,26 +51,26 @@ class CatalogoEquipamentos {
                 "armasDistancia": [
                     {
                         id: "M850", nome: "Arco Curto", tipo: "arma-dist", era: "medieval", nt: 0,
-                        dano: "1d+1", tipoDano: "perfuração", prec: 0, alcance: "150/200", peso: 2.0,
-                        st: 9, custo: 150, magnit: "Flechas", maos: 2, quantificavel: false,
-                        descricao: "Arco curto para combate"
+                        dano: "GdP", tipoDano: "perfuração", prec: 0, alcance: "x10/x15", peso: 1.0,
+                        st: 7, custo: 50, magnit: "Flechas ", maos: 2, quantificavel: false,
+                        descricao: "Arco curto"
                     },
                     {
                         id: "M851", nome: "Besta", tipo: "arma-dist", era: "medieval", nt: 0,
-                        dano: "1d+2", tipoDano: "perfuração", prec: 0, alcance: "180/240", peso: 3.0,
-                        st: 10, custo: 300, magnit: "Virote", maos: 2, quantificavel: false,
-                        descricao: "Besta de repetição"
+                        dano: "GdP+4", tipoDano: "perfuração", prec: 4, alcance: "x20/x25", peso: 3.0,
+                        st: 7, custo: 150, magnit: "Virote", maos: 2, quantificavel: false,
+                        descricao: "Besta"
                     },
                     {
                         id: "M852", nome: "Funda", tipo: "arma-dist", era: "medieval", nt: 0,
-                        dano: "1d-1", tipoDano: "contusão", prec: 0, alcance: "100/150", peso: 0.5,
-                        st: 7, custo: 20, magnit: "Pedras", maos: 1, quantificavel: true,
-                        descricao: "Funda simples"
+                        dano: "GeB", tipoDano: "contusão", prec: 0, alcance: "x6/x10", peso: 0.25,
+                        st: 6, custo: 20, magnit: "Pedras", maos: 1, quantificavel: true,
+                        descricao: "Funda"
                     },
                     {
                         id: "M853", nome: "Arco Longo", tipo: "arma-dist", era: "medieval", nt: 0,
-                        dano: "1d+2", tipoDano: "perfuração", prec: 0, alcance: "200/280", peso: 3.0,
-                        st: 11, custo: 200, magnit: "Flechas", maos: 2, quantificavel: false,
+                        dano: "GdP+2", tipoDano: "perfuração", prec: 3, alcance: "x15/x20", peso: 1.5,
+                        st: 8, custo: 200, magnit: "Flechas", maos: 2, quantificavel: false,
                         descricao: "Arco longo de precisão"
                     }
                 ],
