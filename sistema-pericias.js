@@ -174,18 +174,20 @@ function abrirModalPericia(pericia) {
     // Verificar se já existe esta perícia
     const periciaExistente = estadoPericias.adquiridas.find(p => p.id === pericia.id);
     
-    // Para Fácil, começa sempre no 0 (não tem redutores)
+    // Definir nível inicial baseado na dificuldade
     let nivelInicial = 0;
     if (periciaExistente) {
         nivelInicial = periciaExistente.nivelRelativo;
-    } else if (pericia.dificuldade !== 'Fácil') {
-        // Para outras dificuldades, começa no melhor redutor disponível
-        if (pericia.dificuldade === 'Muito Difícil') {
-            nivelInicial = -3; // Melhor redutor: -3
-        } else if (pericia.dificuldade === 'Difícil') {
-            nivelInicial = -2; // Melhor redutor: -2
+    } else {
+        // Para perícias novas, definir nível inicial baseado na dificuldade
+        if (pericia.dificuldade === 'Fácil') {
+            nivelInicial = 0; // Fácil começa no 0
         } else if (pericia.dificuldade === 'Média') {
-            nivelInicial = -2; // Melhor redutor: -2
+            nivelInicial = -2; // Média começa no -2
+        } else if (pericia.dificuldade === 'Difícil') {
+            nivelInicial = -2; // Difícil começa no -2
+        } else if (pericia.dificuldade === 'Muito Difícil') {
+            nivelInicial = -3; // Muito Difícil começa no -3
         }
     }
     
@@ -247,28 +249,16 @@ function abrirModalPericia(pericia) {
     const custo = corpo.querySelector('#custo-pericia');
     const custoAdicional = corpo.querySelector('#custo-adicional');
     
-    // Função para verificar se pode mudar de nível
-    function podeMudarNivel(nivelAtual, novoNivel, direcao) {
-        // Limites absolutos
-        if (novoNivel < -3 || novoNivel > 10) return false;
-        
-        // Para Fácil, mínimo é 0 (não tem redutores)
-        if (pericia.dificuldade === 'Fácil' && novoNivel < 0) return false;
-        
-        const custoAtualNivel = calcularCustoPericia(nivelAtual, pericia.dificuldade);
-        const custoNovoNivel = calcularCustoPericia(novoNivel, pericia.dificuldade);
-        
-        // Sempre permite se o custo for diferente
-        if (custoAtualNivel !== custoNovoNivel) return true;
-        
-        // Para Média: -2 e -1 custam o mesmo (1 ponto), não pode alternar entre eles
-        if (pericia.dificuldade === 'Média' && 
-            ((nivelAtual === -2 && novoNivel === -1) || 
-             (nivelAtual === -1 && novoNivel === -2))) {
-            return false;
+    // Função para obter limites baseado na dificuldade
+    function getLimites(dificuldade) {
+        if (dificuldade === 'Fácil') {
+            return { min: 0, max: 10 }; // Fácil: 0 a 10
+        } else if (dificuldade === 'Média' || dificuldade === 'Difícil') {
+            return { min: -2, max: 10 }; // Média/Difícil: -2 a 10
+        } else if (dificuldade === 'Muito Difícil') {
+            return { min: -3, max: 10 }; // Muito Difícil: -3 a 10
         }
-        
-        return false;
+        return { min: -3, max: 10 }; // Padrão
     }
     
     // Função para atualizar a exibição
@@ -276,6 +266,7 @@ function abrirModalPericia(pericia) {
         const nivel = parseInt(nivelHidden.value);
         const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
         const nhAtual = valorAtributo + nivel;
+        const limites = getLimites(pericia.dificuldade);
         
         // Atualizar valores na tela
         nhFinal.textContent = nhAtual;
@@ -283,9 +274,9 @@ function abrirModalPericia(pericia) {
         nivelRelativo.innerHTML = `${pericia.atributo}${nivel >= 0 ? '+' : ''}${nivel}`;
         custo.textContent = custoTotal;
         
-        // Atualizar botões baseado na lógica
-        btnMenos.disabled = !podeMudarNivel(nivel, nivel - 1, 'menos');
-        btnMais.disabled = !podeMudarNivel(nivel, nivel + 1, 'mais');
+        // Atualizar botões baseado nos limites
+        btnMenos.disabled = nivel <= limites.min;
+        btnMais.disabled = nivel >= limites.max;
         
         // Calcular custo adicional se já existir a perícia
         if (periciaExistente && custoAdicional) {
@@ -302,8 +293,9 @@ function abrirModalPericia(pericia) {
     btnMenos.addEventListener('click', () => {
         let nivel = parseInt(nivelHidden.value);
         let novoNivel = nivel - 1;
+        const limites = getLimites(pericia.dificuldade);
         
-        if (podeMudarNivel(nivel, novoNivel, 'menos')) {
+        if (novoNivel >= limites.min) {
             nivelHidden.value = novoNivel;
             atualizarDisplay();
         }
@@ -312,8 +304,9 @@ function abrirModalPericia(pericia) {
     btnMais.addEventListener('click', () => {
         let nivel = parseInt(nivelHidden.value);
         let novoNivel = nivel + 1;
+        const limites = getLimites(pericia.dificuldade);
         
-        if (podeMudarNivel(nivel, novoNivel, 'mais')) {
+        if (novoNivel <= limites.max) {
             nivelHidden.value = novoNivel;
             atualizarDisplay();
         }
