@@ -101,13 +101,11 @@ function atualizarFiltrosPericias() {
     carregarPericiasFiltradas(termo, categoria, subcategoria);
 }
 
-// CALCULAR CUSTO DA PERÍCIA - TABELA CORRIGIDA SEM CUSTO 0
+// CALCULAR CUSTO DA PERÍCIA - TABELA CORRIGIDA
 function calcularCustoPericia(nivel, dificuldade) {
     const tabelaCustos = {
         'Fácil': [
-            { nivel: -2, custo: 1 },  // 1 ponto = -2
-            { nivel: -1, custo: 1 },  // 1 ponto = -1 (mesmo custo)
-            { nivel: 0, custo: 1 },   // 1 ponto = 0 (mesmo custo)
+            { nivel: 0, custo: 1 },   // 1 ponto = +0
             { nivel: 1, custo: 2 },   // 2 pontos = +1
             { nivel: 2, custo: 4 },   // 4 pontos = +2
             { nivel: 3, custo: 8 }, { nivel: 4, custo: 12 }, { nivel: 5, custo: 16 },
@@ -116,7 +114,7 @@ function calcularCustoPericia(nivel, dificuldade) {
         ],
         'Média': [
             { nivel: -2, custo: 1 },  // 1 ponto = -2
-            { nivel: -1, custo: 1 },  // 1 ponto = -1 (mesmo custo)
+            { nivel: -1, custo: 1 },  // 1 ponto = -1
             { nivel: 0, custo: 2 },   // 2 pontos = +0
             { nivel: 1, custo: 4 },   // 4 pontos = +1
             { nivel: 2, custo: 8 }, { nivel: 3, custo: 12 }, { nivel: 4, custo: 16 },
@@ -153,7 +151,7 @@ function calcularCustoPericia(nivel, dificuldade) {
 // OBTER INFORMAÇÕES DE REDUTORES - ATUALIZADO
 function getInfoRedutores(dificuldade) {
     const infos = {
-        "Fácil": "1 ponto = Atributo-2 até +0 | 2 pontos = Atributo+1 | 4 pontos = Atributo+2",
+        "Fácil": "1 ponto = Atributo+0 | 2 pontos = Atributo+1 | 4 pontos = Atributo+2",
         "Média": "1 ponto = Atributo-2 ou -1 | 2 pontos = Atributo+0 | 4 pontos = Atributo+1",  
         "Difícil": "1 ponto = Atributo-2 | 2 pontos = Atributo-1 | 4 pontos = Atributo+0",
         "Muito Difícil": "1 ponto = Atributo-3 | 2 pontos = Atributo-2 | 4 pontos = Atributo-1 | 8 pontos = Atributo+0"
@@ -175,8 +173,23 @@ function abrirModalPericia(pericia) {
     
     // Verificar se já existe esta perícia
     const periciaExistente = estadoPericias.adquiridas.find(p => p.id === pericia.id);
-    const nivelAtual = periciaExistente ? periciaExistente.nivelRelativo : 0;
-    const custoAtual = periciaExistente ? periciaExistente.custo : 0;
+    
+    // Para Fácil, começa sempre no 0 (não tem redutores)
+    let nivelInicial = 0;
+    if (periciaExistente) {
+        nivelInicial = periciaExistente.nivelRelativo;
+    } else if (pericia.dificuldade !== 'Fácil') {
+        // Para outras dificuldades, começa no melhor redutor disponível
+        if (pericia.dificuldade === 'Muito Difícil') {
+            nivelInicial = -3; // Melhor redutor: -3
+        } else if (pericia.dificuldade === 'Difícil') {
+            nivelInicial = -2; // Melhor redutor: -2
+        } else if (pericia.dificuldade === 'Média') {
+            nivelInicial = -2; // Melhor redutor: -2
+        }
+    }
+    
+    const custoAtual = periciaExistente ? periciaExistente.custo : calcularCustoPericia(nivelInicial, pericia.dificuldade);
     
     titulo.textContent = pericia.nome;
     
@@ -187,23 +200,23 @@ function abrirModalPericia(pericia) {
             <p><strong>Dificuldade:</strong> ${pericia.dificuldade}</p>
             <p><strong>Descrição:</strong> ${pericia.descricao}</p>
             ${pericia.prereq ? `<p><strong>Pré-requisito:</strong> ${pericia.prereq}</p>` : ''}
-            ${periciaExistente ? `<p class="info-existente"><strong>Já adquirida:</strong> Nível ${pericia.atributo}${nivelAtual >= 0 ? '+' : ''}${nivelAtual} (${custoAtual} pts)</p>` : ''}
+            ${periciaExistente ? `<p class="info-existente"><strong>Já adquirida:</strong> Nível ${pericia.atributo}${periciaExistente.nivelRelativo >= 0 ? '+' : ''}${periciaExistente.nivelRelativo} (${custoAtual} pts)</p>` : ''}
         </div>
         
         <div class="modal-nivel">
             <h4>Selecionar Nível</h4>
             
             <div class="pericia-controle">
-                <button id="btn-pericia-menos" class="btn-pericia" ${nivelAtual <= -2 ? 'disabled' : ''}>-</button>
+                <button id="btn-pericia-menos" class="btn-pericia">-</button>
                 
                 <div class="pericia-valor-container">
-                    <div class="pericia-nh" id="nh-final">${valorAtributo + nivelAtual}</div>
+                    <div class="pericia-nh" id="nh-final">${valorAtributo + nivelInicial}</div>
                     <div class="pericia-nivel" id="nivel-relativo">
-                        ${pericia.atributo}${nivelAtual >= 0 ? '+' : ''}${nivelAtual}
+                        ${pericia.atributo}${nivelInicial >= 0 ? '+' : ''}${nivelInicial}
                     </div>
                 </div>
                 
-                <button id="btn-pericia-mais" class="btn-pericia" ${nivelAtual >= 10 ? 'disabled' : ''}>+</button>
+                <button id="btn-pericia-mais" class="btn-pericia">+</button>
             </div>
             
             <div class="pericia-custo-container">
@@ -222,7 +235,7 @@ function abrirModalPericia(pericia) {
             </div>
         </div>
         
-        <input type="hidden" id="nivel-pericia" value="${nivelAtual}">
+        <input type="hidden" id="nivel-pericia" value="${nivelInicial}">
     `;
     
     // Elementos do DOM
@@ -235,9 +248,12 @@ function abrirModalPericia(pericia) {
     const custoAdicional = corpo.querySelector('#custo-adicional');
     
     // Função para verificar se pode mudar de nível
-    function podeMudarNivel(nivelAtual, novoNivel) {
-        // Limites mínimo e máximo
-        if (novoNivel < -2 || novoNivel > 10) return false;
+    function podeMudarNivel(nivelAtual, novoNivel, direcao) {
+        // Limites absolutos
+        if (novoNivel < -3 || novoNivel > 10) return false;
+        
+        // Para Fácil, mínimo é 0 (não tem redutores)
+        if (pericia.dificuldade === 'Fácil' && novoNivel < 0) return false;
         
         const custoAtualNivel = calcularCustoPericia(nivelAtual, pericia.dificuldade);
         const custoNovoNivel = calcularCustoPericia(novoNivel, pericia.dificuldade);
@@ -245,12 +261,13 @@ function abrirModalPericia(pericia) {
         // Sempre permite se o custo for diferente
         if (custoAtualNivel !== custoNovoNivel) return true;
         
-        // Para Fácil, permite todos os níveis de -2 a 0 (todos custam 1 ponto)
-        if (pericia.dificuldade === 'Fácil' && novoNivel >= -2 && novoNivel <= 0) {
-            return true;
+        // Para Média: -2 e -1 custam o mesmo (1 ponto), não pode alternar entre eles
+        if (pericia.dificuldade === 'Média' && 
+            ((nivelAtual === -2 && novoNivel === -1) || 
+             (nivelAtual === -1 && novoNivel === -2))) {
+            return false;
         }
         
-        // Para outras dificuldades, não permite alternar entre níveis com mesmo custo
         return false;
     }
     
@@ -266,9 +283,9 @@ function abrirModalPericia(pericia) {
         nivelRelativo.innerHTML = `${pericia.atributo}${nivel >= 0 ? '+' : ''}${nivel}`;
         custo.textContent = custoTotal;
         
-        // Atualizar botões baseado na lógica de custos
-        btnMenos.disabled = !podeMudarNivel(nivel, nivel - 1);
-        btnMais.disabled = !podeMudarNivel(nivel, nivel + 1);
+        // Atualizar botões baseado na lógica
+        btnMenos.disabled = !podeMudarNivel(nivel, nivel - 1, 'menos');
+        btnMais.disabled = !podeMudarNivel(nivel, nivel + 1, 'mais');
         
         // Calcular custo adicional se já existir a perícia
         if (periciaExistente && custoAdicional) {
@@ -286,7 +303,7 @@ function abrirModalPericia(pericia) {
         let nivel = parseInt(nivelHidden.value);
         let novoNivel = nivel - 1;
         
-        if (podeMudarNivel(nivel, novoNivel)) {
+        if (podeMudarNivel(nivel, novoNivel, 'menos')) {
             nivelHidden.value = novoNivel;
             atualizarDisplay();
         }
@@ -296,7 +313,7 @@ function abrirModalPericia(pericia) {
         let nivel = parseInt(nivelHidden.value);
         let novoNivel = nivel + 1;
         
-        if (podeMudarNivel(nivel, novoNivel)) {
+        if (podeMudarNivel(nivel, novoNivel, 'mais')) {
             nivelHidden.value = novoNivel;
             atualizarDisplay();
         }
