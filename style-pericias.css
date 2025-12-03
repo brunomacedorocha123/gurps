@@ -768,3 +768,23 @@
         font-size: 1.4em;
     }
 }
+
+/* Adicione isto ao seu CSS existente */
+#modal-pericia .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+#modal-pericia .modal-actions {
+    position: sticky;
+    bottom: 0;
+    background: rgba(30, 30, 40, 0.95);
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 20px;
+}
+
+#modal-pericia .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}

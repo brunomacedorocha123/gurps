@@ -285,8 +285,8 @@ function abrirModalPericia(pericia) {
             custoAdicional.style.color = custoExtra > 0 ? '#27ae60' : (custoExtra < 0 ? '#e74c3c' : '#ccc');
         }
         
-        // Habilitar/desabilitar botão confirmar
-        btnConfirmar.disabled = custoTotal <= 0;
+        // Habilitar/desabilitar botão confirmar - SEMPRE HABILITADO SE CUSTO > 0
+        btnConfirmar.disabled = false;
     }
     
     // Eventos dos botões
