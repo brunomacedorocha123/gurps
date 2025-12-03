@@ -76,45 +76,45 @@ class CatalogoEquipamentos {
                 ],
                 "armaduras": [
                     {
-                        id: "M900", nome: "Couro Batido", tipo: "armadura", era: "medieval", nt: 0,
-                        local: "Torso", rd: 2, peso: 5.0, custo: 200, cl: 4, maos: 0,
-                        quantificavel: false, descricao: "Armadura de couro endurecido"
+                        id: "M900", nome: "Armadura de Couro", tipo: "armadura", era: "medieval", nt: 0,
+                        local: "Tronco/Virilha", rd: 2, peso: 5.0, custo: 100, cl: 4, maos: 0,
+                        quantificavel: false, descricao: "Armadura de couro"
                     },
                     {
-                        id: "M901", nome: "Cota de Malha", tipo: "armadura", era: "medieval", nt: 0,
-                        local: "Torso", rd: 4, peso: 12.0, custo: 800, cl: 4, maos: 0,
-                        quantificavel: false, descricao: "Cota de anéis entrelaçados"
+                        id: "M901", nome: "Cota de Malha Longa", tipo: "armadura", era: "medieval", nt: 0,
+                        local: "Tronco/Virilha", rd: 4/2, peso: 12.5, custo: 230, cl: 3, maos: 0,
+                        quantificavel: false, descricao: "Cota de Malha Longa"
                     },
                     {
-                        id: "M902", nome: "Elmo de Aço", tipo: "armadura", era: "medieval", nt: 0,
-                        local: "Cabeça", rd: 4, peso: 3.0, custo: 400, cl: 4, maos: 0,
-                        quantificavel: false, descricao: "Elmo de proteção completa"
+                        id: "M902", nome: "Elmo de Bronze", tipo: "armadura", era: "medieval", nt: 0,
+                        local: "Cabeça", rd: 3, peso: 3.7, custo: 160, cl: 4, maos: 0,
+                        quantificavel: false, descricao: "Elmo de Bronze"
                     },
                     {
-                        id: "M903", nome: "Braçadeiras de Couro", tipo: "armadura", era: "medieval", nt: 0,
-                        local: "Braços", rd: 1, peso: 1.0, custo: 30, cl: 4, maos: 0,
-                        quantificavel: false, descricao: "Proteção para braços"
+                        id: "M903", nome: "Braçadeiras de Bronze", tipo: "armadura", era: "medieval", nt: 0,
+                        local: "Braços", rd: 3, peso: 4.5, custo: 180, cl: 4, maos: 0,
+                        quantificavel: false, descricao: "Braçadeiras de Bronze"
                     },
                     {
-                        id: "M904", nome: "Armadura de Placas", tipo: "armadura", era: "medieval", nt: 0,
-                        local: "Corpo Inteiro", rd: 6, peso: 25.0, custo: 5000, cl: 4, maos: 0,
-                        quantificavel: false, descricao: "Armadura completa de placas de aço"
+                        id: "M904", nome: "Armadura de Escamas", tipo: "armadura", era: "medieval", nt: 0,
+                        local: "Tronco/Virilha", rd: 4, peso: 17.5, custo: 420, cl: 4, maos: 0,
+                        quantificavel: false, descricao: "Armadura de Escamas"
                     }
                 ],
                 "escudos": [
                     {
                         id: "M950", nome: "Escudo Pequeno", tipo: "escudo", era: "medieval", nt: 0,
-                        bd: "+1", custo: 50, rdpv: "RD 7", cl: 4, peso: 2.0, maos: 1,
+                        bd: "+1", custo: 40, rdpv: "5/20", cl: 4, peso: 2.5, maos: 1,
                         quantificavel: false, descricao: "Escudo leve para defesa"
                     },
                     {
                         id: "M951", nome: "Escudo Médio", tipo: "escudo", era: "medieval", nt: 0,
-                        bd: "+2", custo: 150, rdpv: "PV 30", cl: 4, peso: 5.0, maos: 1,
+                        bd: "+2", custo: 60, rdpv: "7/40", cl: 4, peso: 7.5, maos: 1,
                         quantificavel: false, descricao: "Escudo versátil"
                     },
                     {
                         id: "M952", nome: "Escudo Grande", tipo: "escudo", era: "medieval", nt: 0,
-                        bd: "+3", custo: 300, rdpv: "PV 45", cl: 4, peso: 8.0, maos: 1,
+                        bd: "+3", custo: 90, rdpv: "9/60", cl: 4, peso: 12.5, maos: 1,
                         quantificavel: false, descricao: "Escudo de proteção máxima"
                     },
                     {
