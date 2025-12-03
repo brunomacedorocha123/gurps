@@ -1,4 +1,4 @@
-/* ===== SISTEMA DE PERÍCIAS - CSS COMPLETO E CORRIGIDO ===== */
+/* ===== SISTEMA DE PERÍCIAS - CSS COMPLETO E ATUALIZADO ===== */
 
 /* Container principal */
 .atributos-container {
@@ -448,82 +448,137 @@
 
 .modal-nivel {
     margin: 20px 0;
+    text-align: center;
 }
 
 .modal-nivel h4 {
     color: #ffd700;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
-.nivel-slider {
-    width: 100%;
-    margin: 10px 0;
-    height: 8px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    outline: none;
-    -webkit-appearance: none;
-}
-
-.nivel-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #ff8c00;
-    cursor: pointer;
-    border: 2px solid #ffd700;
-}
-
-.nivel-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #ff8c00;
-    cursor: pointer;
-    border: 2px solid #ffd700;
-}
-
-.nivel-labels {
+/* ===== NOVO SISTEMA DE BOTÕES + E - ===== */
+.pericia-controle {
     display: flex;
-    justify-content: space-between;
-    margin-top: 5px;
-    color: #95a5a6;
-    font-size: 0.8em;
-}
-
-.nivel-info {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-top: 15px;
-    flex-wrap: wrap;
-    gap: 10px;
+    justify-content: center;
+    gap: 25px;
+    margin: 20px 0;
 }
 
-.nivel-valor {
+.btn-pericia {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff8c00, #ffd700);
+    color: #1e1e28;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-pericia:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+}
+
+.btn-pericia:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: #95a5a6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.pericia-valor-container {
+    min-width: 150px;
+    padding: 15px 25px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 140, 0, 0.3);
+}
+
+.pericia-nh {
+    font-size: 1.8em;
+    font-weight: 700;
     color: #ffd700;
-    font-weight: 600;
+    margin-bottom: 5px;
 }
 
-.custo-total {
+.pericia-nivel {
+    font-size: 1.1em;
+    color: #ccc;
+    font-weight: 500;
+}
+
+/* Contêiner de custo */
+.pericia-custo-container {
+    margin: 25px 0;
+    padding: 15px;
+    background: rgba(255, 140, 0, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 140, 0, 0.2);
+}
+
+.pericia-custo {
+    font-size: 1.3em;
     color: #27ae60;
     font-weight: 600;
+    margin-bottom: 5px;
 }
 
+.pericia-custo-adicional {
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+/* Remover estilos antigos do slider */
+.nivel-slider,
+.nivel-labels {
+    display: none !important;
+}
+
+/* Ajustes no nivel-info */
+.nivel-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* Info de custos */
 .info-custos {
-    margin-top: 10px;
-    padding: 10px;
+    margin-top: 20px;
+    padding: 15px;
     background: rgba(255, 140, 0, 0.1);
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid rgba(255, 140, 0, 0.2);
+    text-align: left;
 }
 
 .info-custos small {
     color: #ffd700;
-    font-size: 0.85em;
+    font-size: 0.9em;
+    line-height: 1.4;
 }
 
+/* Info de perícia existente */
+.info-existente {
+    color: #ffd700;
+    background: rgba(255, 140, 0, 0.1);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 10px;
+    border: 1px solid rgba(255, 140, 0, 0.3);
+}
+
+/* Botões do modal */
 .modal-actions {
     padding: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -533,12 +588,13 @@
 }
 
 .btn {
-    padding: 10px 20px;
+    padding: 12px 25px;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 1em;
 }
 
 .btn-cancelar {
@@ -647,6 +703,26 @@
     .item-nome {
         padding-right: 0;
     }
+    
+    /* Ajuste botões + e - */
+    .pericia-controle {
+        gap: 15px;
+    }
+    
+    .btn-pericia {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+    
+    .pericia-valor-container {
+        min-width: 120px;
+        padding: 12px 20px;
+    }
+    
+    .pericia-nh {
+        font-size: 1.6em;
+    }
 }
 
 @media (max-width: 480px) {
@@ -670,5 +746,25 @@
     .btn-remover {
         position: static;
         align-self: flex-end;
+    }
+    
+    /* Ajuste botões + e - para mobile pequeno */
+    .pericia-controle {
+        gap: 10px;
+    }
+    
+    .btn-pericia {
+        width: 35px;
+        height: 35px;
+        font-size: 20px;
+    }
+    
+    .pericia-valor-container {
+        min-width: 100px;
+        padding: 10px 15px;
+    }
+    
+    .pericia-nh {
+        font-size: 1.4em;
     }
 }

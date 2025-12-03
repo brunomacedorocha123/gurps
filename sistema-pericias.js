@@ -1,4 +1,4 @@
-// ===== SISTEMA DE PERÍCIAS - VERSÃO DEFINITIVA CORRIGIDA =====
+// ===== SISTEMA DE PERÍCIAS - VERSÃO DEFINITIVA COM BOTÕES + E - =====
 
 let estadoPericias = {
     adquiridas: [],
@@ -102,42 +102,52 @@ function atualizarFiltrosPericias() {
 }
 
 // CALCULAR CUSTO DA PERÍCIA - TABELA CORRIGIDA
+// CALCULAR CUSTO DA PERÍCIA - TABELA CORRIGIDA SEM CUSTO 0
 function calcularCustoPericia(nivel, dificuldade) {
     const tabelaCustos = {
         'Fácil': [
-            { nivel: -3, custo: 0 }, { nivel: -2, custo: 0 }, { nivel: -1, custo: 0 },
-            { nivel: 0, custo: 1 }, { nivel: 1, custo: 2 }, { nivel: 2, custo: 4 },
+            { nivel: -2, custo: 1 }, { nivel: -1, custo: 1 }, // 1 ponto = -2 e -1
+            { nivel: 0, custo: 1 },  // 1 ponto = +0
+            { nivel: 1, custo: 2 },  // 2 pontos = +1
+            { nivel: 2, custo: 4 },  // 4 pontos = +2
             { nivel: 3, custo: 8 }, { nivel: 4, custo: 12 }, { nivel: 5, custo: 16 },
             { nivel: 6, custo: 20 }, { nivel: 7, custo: 24 }, { nivel: 8, custo: 28 },
             { nivel: 9, custo: 32 }, { nivel: 10, custo: 36 }
         ],
         'Média': [
-            { nivel: -3, custo: 0 }, { nivel: -2, custo: 0 }, 
-            { nivel: -1, custo: 1 }, { nivel: 0, custo: 2 }, { nivel: 1, custo: 4 },
+            { nivel: -2, custo: 1 }, // 1 ponto = -2
+            { nivel: -1, custo: 1 }, // 1 ponto = -1
+            { nivel: 0, custo: 2 },  // 2 pontos = +0
+            { nivel: 1, custo: 4 },  // 4 pontos = +1
             { nivel: 2, custo: 8 }, { nivel: 3, custo: 12 }, { nivel: 4, custo: 16 },
             { nivel: 5, custo: 20 }, { nivel: 6, custo: 24 }, { nivel: 7, custo: 28 },
             { nivel: 8, custo: 32 }, { nivel: 9, custo: 36 }, { nivel: 10, custo: 40 }
         ],
         'Difícil': [
-            { nivel: -3, custo: 0 }, { nivel: -2, custo: 1 }, { nivel: -1, custo: 2 },
-            { nivel: 0, custo: 4 }, { nivel: 1, custo: 8 }, { nivel: 2, custo: 12 },
-            { nivel: 3, custo: 16 }, { nivel: 4, custo: 20 }, { nivel: 5, custo: 24 },
-            { nivel: 6, custo: 28 }, { nivel: 7, custo: 32 }, { nivel: 8, custo: 36 },
-            { nivel: 9, custo: 40 }, { nivel: 10, custo: 44 }
+            { nivel: -2, custo: 1 }, // 1 ponto = -2
+            { nivel: -1, custo: 2 }, // 2 pontos = -1
+            { nivel: 0, custo: 4 },  // 4 pontos = +0
+            { nivel: 1, custo: 8 }, { nivel: 2, custo: 12 }, { nivel: 3, custo: 16 },
+            { nivel: 4, custo: 20 }, { nivel: 5, custo: 24 }, { nivel: 6, custo: 28 },
+            { nivel: 7, custo: 32 }, { nivel: 8, custo: 36 }, { nivel: 9, custo: 40 },
+            { nivel: 10, custo: 44 }
         ],
         'Muito Difícil': [
-            { nivel: -3, custo: 1 }, { nivel: -2, custo: 2 }, { nivel: -1, custo: 4 },
-            { nivel: 0, custo: 8 }, { nivel: 1, custo: 12 }, { nivel: 2, custo: 16 },
-            { nivel: 3, custo: 20 }, { nivel: 4, custo: 24 }, { nivel: 5, custo: 28 },
-            { nivel: 6, custo: 32 }, { nivel: 7, custo: 36 }, { nivel: 8, custo: 40 },
-            { nivel: 9, custo: 44 }, { nivel: 10, custo: 48 }
+            { nivel: -3, custo: 1 }, // 1 ponto = -3
+            { nivel: -2, custo: 2 }, // 2 pontos = -2
+            { nivel: -1, custo: 4 }, // 4 pontos = -1
+            { nivel: 0, custo: 8 },  // 8 pontos = +0
+            { nivel: 1, custo: 12 }, { nivel: 2, custo: 16 }, { nivel: 3, custo: 20 },
+            { nivel: 4, custo: 24 }, { nivel: 5, custo: 28 }, { nivel: 6, custo: 32 },
+            { nivel: 7, custo: 36 }, { nivel: 8, custo: 40 }, { nivel: 9, custo: 44 },
+            { nivel: 10, custo: 48 }
         ]
     };
     
     const tabela = tabelaCustos[dificuldade] || tabelaCustos['Média'];
     const entrada = tabela.find(item => item.nivel === nivel);
     
-    return entrada ? entrada.custo : 0;
+    return entrada ? entrada.custo : 1;
 }
 
 // OBTER INFORMAÇÕES DE REDUTORES - ATUALIZADO
@@ -151,7 +161,7 @@ function getInfoRedutores(dificuldade) {
     return infos[dificuldade] || infos["Média"];
 }
 
-// ABRIR MODAL DA PERÍCIA
+// ABRIR MODAL DA PERÍCIA COM BOTÕES + E -
 function abrirModalPericia(pericia) {
     const modal = document.getElementById('modal-pericia');
     const titulo = document.getElementById('modal-titulo-pericia');
@@ -170,6 +180,7 @@ function abrirModalPericia(pericia) {
     
     titulo.textContent = pericia.nome;
     
+    // HTML atualizado com botões + e -
     corpo.innerHTML = `
         <div class="modal-info">
             <p><strong>Atributo:</strong> ${pericia.atributo} (${valorAtributo})</p>
@@ -181,58 +192,100 @@ function abrirModalPericia(pericia) {
         
         <div class="modal-nivel">
             <h4>Selecionar Nível</h4>
-            <input type="range" id="nivel-pericia" class="nivel-slider" min="-3" max="10" value="${nivelAtual}" step="1">
-            <div class="nivel-labels">
-                <span>${pericia.atributo}-3</span>
-                <span>${pericia.atributo}+0</span>
-                <span>${pericia.atributo}+10</span>
-            </div>
-            <div class="nivel-info">
-                <div class="nivel-valor">
-                    NH: <span id="nh-final">${valorAtributo + nivelAtual}</span> 
-                    (${pericia.atributo}<span id="nivel-relativo">${nivelAtual >= 0 ? '+' : ''}${nivelAtual}</span>)
+            
+            <div class="pericia-controle">
+                <button id="btn-pericia-menos" class="btn-pericia" ${nivelAtual <= -3 ? 'disabled' : ''}>-</button>
+                
+                <div class="pericia-valor-container">
+                    <div class="pericia-nh" id="nh-final">${valorAtributo + nivelAtual}</div>
+                    <div class="pericia-nivel" id="nivel-relativo">
+                        ${pericia.atributo}${nivelAtual >= 0 ? '+' : ''}${nivelAtual}
+                    </div>
                 </div>
-                <div class="custo-total">
+                
+                <button id="btn-pericia-mais" class="btn-pericia" ${nivelAtual >= 10 ? 'disabled' : ''}>+</button>
+            </div>
+            
+            <div class="pericia-custo-container">
+                <div class="pericia-custo">
                     Custo: <span id="custo-pericia">${custoAtual}</span> pts
-                    ${periciaExistente ? `<br><small>Custo adicional: <span id="custo-adicional">0</span> pts</small>` : ''}
                 </div>
+                ${periciaExistente ? `
+                <div class="pericia-custo-adicional">
+                    Custo adicional: <span id="custo-adicional">0</span> pts
+                </div>
+                ` : ''}
             </div>
+            
             <div class="info-custos">
                 <small>🎯 <strong>${pericia.dificuldade}:</strong> ${getInfoRedutores(pericia.dificuldade)}</small>
             </div>
         </div>
+        
+        <input type="hidden" id="nivel-pericia" value="${nivelAtual}">
     `;
     
-    const slider = corpo.querySelector('#nivel-pericia');
+    // Elementos do DOM
+    const nivelHidden = corpo.querySelector('#nivel-pericia');
+    const btnMenos = corpo.querySelector('#btn-pericia-menos');
+    const btnMais = corpo.querySelector('#btn-pericia-mais');
     const nhFinal = corpo.querySelector('#nh-final');
     const nivelRelativo = corpo.querySelector('#nivel-relativo');
     const custo = corpo.querySelector('#custo-pericia');
     const custoAdicional = corpo.querySelector('#custo-adicional');
     
+    // Função para atualizar a exibição
     function atualizarDisplay() {
-        const nivel = parseInt(slider.value);
+        const nivel = parseInt(nivelHidden.value);
         const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
         const nhAtual = valorAtributo + nivel;
         
+        // Atualizar valores na tela
         nhFinal.textContent = nhAtual;
         nivelRelativo.textContent = nivel >= 0 ? `+${nivel}` : `${nivel}`;
+        nivelRelativo.innerHTML = `${pericia.atributo}${nivel >= 0 ? '+' : ''}${nivel}`;
         custo.textContent = custoTotal;
+        
+        // Atualizar botões
+        btnMenos.disabled = nivel <= -3;
+        btnMais.disabled = nivel >= 10;
         
         // Calcular custo adicional se já existir a perícia
         if (periciaExistente && custoAdicional) {
             const custoExtra = custoTotal - custoAtual;
             custoAdicional.textContent = custoExtra >= 0 ? `+${custoExtra}` : custoExtra;
-            custoAdicional.style.color = custoExtra > 0 ? '#27ae60' : (custoExtra < 0 ? '#e74c3c' : '#666');
+            custoAdicional.style.color = custoExtra > 0 ? '#27ae60' : (custoExtra < 0 ? '#e74c3c' : '#ccc');
         }
         
+        // Habilitar/desabilitar botão confirmar
         btnConfirmar.disabled = custoTotal <= 0;
     }
     
-    slider.addEventListener('input', atualizarDisplay);
+    // Eventos dos botões
+    btnMenos.addEventListener('click', () => {
+        let nivel = parseInt(nivelHidden.value);
+        if (nivel > -3) {
+            nivel--;
+            nivelHidden.value = nivel;
+            atualizarDisplay();
+        }
+    });
+    
+    btnMais.addEventListener('click', () => {
+        let nivel = parseInt(nivelHidden.value);
+        if (nivel < 10) {
+            nivel++;
+            nivelHidden.value = nivel;
+            atualizarDisplay();
+        }
+    });
+    
+    // Inicializar display
     atualizarDisplay();
     
+    // Configurar botão confirmar
     btnConfirmar.onclick = () => {
-        const nivel = parseInt(slider.value);
+        const nivel = parseInt(nivelHidden.value);
         const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
         
         if (custoTotal > 0) {
@@ -241,15 +294,18 @@ function abrirModalPericia(pericia) {
         }
     };
     
+    // Configurar botão cancelar e fechar
     modal.querySelector('.btn-cancelar').onclick = () => modal.style.display = 'none';
     modal.querySelector('.modal-close').onclick = () => modal.style.display = 'none';
     
+    // Fechar modal ao clicar fora
     modal.onclick = (event) => {
         if (event.target === modal) {
             modal.style.display = 'none';
         }
     };
     
+    // Mostrar modal
     modal.style.display = 'block';
 }
 
