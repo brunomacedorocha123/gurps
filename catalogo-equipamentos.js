@@ -6,8 +6,8 @@ class CatalogoEquipamentos {
                 "armasCorpoACorpo": [
                     {
                         id: "M800", nome: "Machado GEB+2", tipo: "arma-cc", era: "medieval", nt: 0,
-                        dano: "GEB+2", tipoDano: "corte", alcance: "1", peso: 2.0, st: 11, custo: 50,
-                        maos: 1, quantificavel: false, descricao: "Machado de batalha simples"
+                        dano: "GeB+2", tipoDano: "corte", alcance: "1", peso: 2.0, st: 11, custo: 50,
+                        maos: 1, quantificavel: false, descricao: "Machado"
                     },
                    {
     id: "M801", 
@@ -15,7 +15,7 @@ class CatalogoEquipamentos {
     tipo: "arma-cc", 
     era: "medieval", 
     nt: 0,
-    dano: "GEB+1",  
+    dano: "GeB+1",  
     tipoDano: "corte",
     danoGDP: "GdP+1",  
     tipoDanoGDP: "contusão",  
@@ -39,13 +39,13 @@ class CatalogoEquipamentos {
                     },
                     {
                         id: "M804", nome: "Adaga", tipo: "arma-cc", era: "medieval", nt: 0,
-                        dano: "1d-2", tipoDano: "perfuração", alcance: "C,1", peso: 0.5, st: 5,
+                        dano: "GdP-1", tipoDano: "perfuração", alcance: "C,1", peso: 0.125, st: 5,
                         custo: 20, maos: 1, quantificavel: false, descricao: "Adaga pequena e afiada"
                     },
                     {
                         id: "M805", nome: "Maça", tipo: "arma-cc", era: "medieval", nt: 0,
-                        dano: "1d+3", tipoDano: "contusão", alcance: "1", peso: 3.0, st: 11, custo: 40,
-                        maos: 1, quantificavel: false, descricao: "Maça de guerra"
+                        dano: "GeB+3", tipoDano: "contusão", alcance: "1", peso: 2.5, st: 12, custo: 50,
+                        maos: 1, quantificavel: false, descricao: "Maça"
                     }
                 ],
                 "armasDistancia": [
