@@ -1,15 +1,15 @@
-// equipamentos.js - SISTEMA COMPLETO INTEGRADO COM RIQUEZA
+// equipamentos.js - SISTEMA COMPLETO COM DINHEIRO POR RIQUEZA
 class SistemaEquipamentos {
     constructor() {
-        // ========== SISTEMA DE EQUIPAMENTOS ==========
         this.equipamentosAdquiridos = [];
         this.deposito = [];
-        
-        // ========== SISTEMA FINANCEIRO ==========
         this.dinheiro = 0;
         this.ultimasTransacoes = [];
-        
-        // ========== SISTEMA DE CARGA ==========
+        this.nivelRiquezaAtual = null;
+        this.valorBaseRiqueza = 1000;
+        this.multiplicadorAtual = 1;
+        this.pontosRiquezaAtual = 0;
+        this.primeiraInicializacao = true;
         this.ST = 10;
         this.pesoAtual = 0;
         this.capacidadeCarga = this.calcularCapacidadeCarga();
@@ -17,59 +17,32 @@ class SistemaEquipamentos {
         this.nivelCargaAtual = 'leve';
         this.penalidadesCarga = 'MOV +0 / DODGE +0';
         this.mochilaAtiva = true;
-        
-        // ========== SISTEMA DE EQUIPAMENTOS EQUIPADOS ==========
         this.equipamentosEquipados = {
-            maos: [],
-            armaduras: [],
-            escudos: [],
-            mochila: [],
-            corpo: []
+            maos: [], armaduras: [], escudos: [], mochila: [], corpo: []
         };
-        
-        // ========== SISTEMA DE COMBATE ==========
         this.maosDisponiveis = 2;
         this.maosOcupadas = 0;
         this.armadurasCombate = {
-            cabeca: null,
-            torso: null,
-            bracos: null,
-            pernas: null,
-            maos: null,
-            pes: null,
-            corpoInteiro: null
+            cabeca: null, torso: null, bracos: null, pernas: null,
+            maos: null, pes: null, corpoInteiro: null
         };
         this.armasCombate = { maos: [], corpo: [] };
         this.escudoCombate = null;
-        
-        // ========== SISTEMA DE RIQUEZA ==========
-        this.nivelRiquezaAtual = null;
-        this.valorBaseRiqueza = 1000;
-        this.primeiraInicializacao = true;
-        
-        // ========== SISTEMA DE CRIAÇÃO ==========
         this.contadorItensPersonalizados = 10000;
-        
-        // ========== MAPPING ==========
         this.mapeamentoLocais = {
-            'Cabeça': 'cabeca',
-            'Torso': 'torso',
-            'Braços': 'bracos',
-            'Pernas': 'pernas',
-            'Mãos': 'maos',
-            'Pés': 'pes',
+            'Cabeça': 'cabeca', 'Torso': 'torso', 'Braços': 'bracos',
+            'Pernas': 'pernas', 'Mãos': 'maos', 'Pés': 'pes',
             'Corpo Inteiro': 'corpoInteiro'
         };
-        
-        // ========== ESTADO DO SISTEMA ==========
         this.catalogoPronto = false;
         this.inicializacaoEmAndamento = false;
         this.itemCompraQuantidade = null;
         this.quantidadeAtual = 1;
         this.operacaoAtual = null;
+        this.sistemaRiquezaDisponivel = false;
     }
 
-    // ========== INICIALIZAÇÃO ==========
+    // ========== INICIALIZAÇÃO PRINCIPAL ==========
     async inicializarQuandoPronto() {
         if (this.inicializacaoEmAndamento) return;
         this.inicializacaoEmAndamento = true;
@@ -78,14 +51,31 @@ class SistemaEquipamentos {
             await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
         }
         
+        await this.aguardarSistemaRiqueza();
         await this.aguardarCatalogo();
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
         this.inicializarSistema();
-        this.iniciarMonitoramentoST();
         this.configurarObservadorRiqueza();
-        
         this.inicializarDinheiroPorRiqueza();
+        this.inicializacaoEmAndamento = false;
+    }
+
+    aguardarSistemaRiqueza() {
+        return new Promise((resolve) => {
+            let tentativas = 0;
+            const verificarRiqueza = () => {
+                tentativas++;
+                if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
+                    this.sistemaRiquezaDisponivel = true;
+                    resolve();
+                } else if (tentativas < 30) {
+                    setTimeout(verificarRiqueza, 100);
+                } else {
+                    this.sistemaRiquezaDisponivel = false;
+                    resolve();
+                }
+            };
+            verificarRiqueza();
+        });
     }
 
     aguardarCatalogo() {
@@ -93,11 +83,10 @@ class SistemaEquipamentos {
             let tentativas = 0;
             const verificarCatalogo = () => {
                 tentativas++;
-                if (window.catalogoEquipamentos && 
-                    typeof window.catalogoEquipamentos.obterEquipamentoPorId === 'function') {
+                if (window.catalogoEquipamentos && typeof window.catalogoEquipamentos.obterEquipamentoPorId === 'function') {
                     this.catalogoPronto = true;
                     resolve();
-                } else if (tentativas < 50) {
+                } else if (tentativas < 30) {
                     setTimeout(verificarCatalogo, 100);
                 } else {
                     this.catalogoPronto = true;
@@ -108,50 +97,7 @@ class SistemaEquipamentos {
         });
     }
 
-    inicializarSistema() {
-        this.configurarEventosGlobais();
-        this.configurarSubAbas();
-        this.configurarFiltrosInventario();
-        this.configurarCriacaoItens();
-        this.criarDisplayMaos();
-        this.atualizarSistemaCombate();
-        this.atualizarInterface();
-        
-        setTimeout(() => {
-            this.notificarDashboard();
-            this.atualizarInterfaceForcada();
-        }, 300);
-    }
-
-    // ========== SISTEMA DE RIQUEZA - MÉTODOS COMPLETOS ==========
-    mapearPontosParaNivel(pontos) {
-        const mapeamento = {
-            '-25': 'falido',
-            '-15': 'pobre',
-            '-10': 'batalhador',
-            '0': 'medio',
-            '10': 'confortavel',
-            '20': 'rico',
-            '30': 'muito-rico',
-            '50': 'podre-rico'
-        };
-        return mapeamento[pontos] || 'medio';
-    }
-
-    obterMultiplicadorRiqueza(pontos) {
-        const multiplicadores = {
-            '-25': 0,
-            '-15': 0.2,
-            '-10': 0.5,
-            '0': 1,
-            '10': 2,
-            '20': 5,
-            '30': 20,
-            '50': 100
-        };
-        return multiplicadores[pontos] || 1;
-    }
-
+    // ========== SISTEMA DE RIQUEZA ==========
     obterPontosRiquezaAtual() {
         if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
             return window.sistemaRiqueza.getPontosRiqueza();
@@ -159,22 +105,38 @@ class SistemaEquipamentos {
         
         const selectRiqueza = document.getElementById('nivelRiqueza');
         if (selectRiqueza) {
-            return parseInt(selectRiqueza.value);
+            return parseInt(selectRiqueza.value) || 0;
         }
         
         return 0;
     }
 
+    obterMultiplicadorPorPontos(pontos) {
+        const mapeamento = {
+            '-25': 0, '-15': 0.2, '-10': 0.5, '0': 1,
+            '10': 2, '20': 5, '30': 20, '50': 100
+        };
+        return mapeamento[pontos.toString()] || 1;
+    }
+
     calcularDinheiroPorRiqueza(pontos) {
-        const multiplicador = this.obterMultiplicadorRiqueza(pontos);
+        const multiplicador = this.obterMultiplicadorPorPontos(pontos);
         return Math.floor(this.valorBaseRiqueza * multiplicador);
     }
 
     inicializarDinheiroPorRiqueza() {
         const pontos = this.obterPontosRiquezaAtual();
-        this.dinheiro = this.calcularDinheiroPorRiqueza(pontos);
-        this.nivelRiquezaAtual = this.mapearPontosParaNivel(pontos);
+        const novoDinheiro = this.calcularDinheiroPorRiqueza(pontos);
+        
+        if (this.primeiraInicializacao) {
+            this.dinheiro = novoDinheiro;
+            this.pontosRiquezaAtual = pontos;
+            this.multiplicadorAtual = this.obterMultiplicadorPorPontos(pontos);
+            this.primeiraInicializacao = false;
+        }
+        
         this.atualizarInterfaceFinanceiro();
+        this.notificarDashboard();
     }
 
     configurarObservadorRiqueza() {
@@ -193,81 +155,80 @@ class SistemaEquipamentos {
                 }, 100);
             });
         }
-        
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    const tab = mutation.target;
-                    if (tab.id === 'caracteristicas' && tab.classList.contains('active')) {
-                        setTimeout(() => {
-                            const pontos = this.obterPontosRiquezaAtual();
-                            this.atualizarDinheiroPorMudancaRiqueza(pontos);
-                        }, 300);
-                    }
-                }
-            });
-        });
-        
-        const caracteristicasTab = document.getElementById('caracteristicas');
-        if (caracteristicasTab) {
-            observer.observe(caracteristicasTab, { attributes: true });
-        }
     }
 
     atualizarDinheiroPorMudancaRiqueza(novosPontos) {
-        const novoNivel = this.mapearPontosParaNivel(novosPontos);
         const novoDinheiro = this.calcularDinheiroPorRiqueza(novosPontos);
+        const diferenca = novoDinheiro - this.dinheiro;
         
-        if (this.primeiraInicializacao || this.nivelRiquezaAtual === null) {
-            this.dinheiro = novoDinheiro;
-            this.primeiraInicializacao = false;
-        } else if (this.nivelRiquezaAtual !== novoNivel) {
-            const diferenca = novoDinheiro - this.dinheiro;
-            this.dinheiro = novoDinheiro;
-            
-            if (diferenca !== 0) {
-                const sinal = diferenca > 0 ? '+' : '';
-                this.mostrarFeedback(`Riqueza alterada: ${novoNivel} (${sinal}$${Math.abs(diferenca)})`, 'sucesso');
-            }
-        }
+        this.dinheiro = novoDinheiro;
+        this.pontosRiquezaAtual = novosPontos;
+        this.multiplicadorAtual = this.obterMultiplicadorPorPontos(novosPontos);
         
-        this.nivelRiquezaAtual = novoNivel;
         this.atualizarInterfaceFinanceiro();
         this.notificarDashboard();
+        
+        if (diferenca !== 0) {
+            const sinal = diferenca > 0 ? '+' : '';
+            const nivel = this.obterNomeNivelRiqueza(novosPontos);
+            this.mostrarFeedback(
+                `Riqueza alterada para ${nivel}: ${sinal}$${Math.abs(diferenca)}`, 
+                diferenca > 0 ? 'sucesso' : 'aviso'
+            );
+        }
+    }
+
+    obterNomeNivelRiqueza(pontos) {
+        const niveis = {
+            '-25': 'Falido', '-15': 'Pobre', '-10': 'Batalhador',
+            '0': 'Médio', '10': 'Confortável', '20': 'Rico',
+            '30': 'Muito Rico', '50': 'Podre de Rico'
+        };
+        return niveis[pontos.toString()] || 'Desconhecido';
+    }
+
+    // ========== INICIALIZAÇÃO DO SISTEMA ==========
+    inicializarSistema() {
+        this.configurarEventosGlobais();
+        this.configurarSubAbas();
+        this.configurarFiltrosInventario();
+        this.configurarCriacaoItens();
+        this.criarDisplayMaos();
+        this.atualizarSistemaCombate();
+        this.atualizarInterface();
+        
+        const btnMochila = document.getElementById('btn-liberar-mochila');
+        if (btnMochila) {
+            btnMochila.addEventListener('click', () => this.alternarMochila());
+        }
+        
+        document.getElementById('btn-guardar-tudo-deposito')?.addEventListener('click', () => this.moverTudoParaDeposito());
+        document.getElementById('btn-retirar-tudo-deposito')?.addEventListener('click', () => this.retirarTudoDoDeposito());
+        document.getElementById('btn-limpar-deposito')?.addEventListener('click', () => this.limparDeposito());
+    }
+
+    // ========== ATUALIZAÇÃO DA INTERFACE ==========
+    atualizarInterfaceFinanceiro() {
+        const dinheiroBanner = document.getElementById('dinheiroEquipamento');
+        if (dinheiroBanner) {
+            dinheiroBanner.textContent = `$${this.dinheiro}`;
+            dinheiroBanner.style.color = this.dinheiro > 0 ? '#27ae60' : '#e74c3c';
+            dinheiroBanner.style.fontWeight = 'bold';
+        }
+        
+        const dinheiroDisponivel = document.getElementById('dinheiro-disponivel');
+        if (dinheiroDisponivel) {
+            dinheiroDisponivel.textContent = `$${this.dinheiro}`;
+            dinheiroDisponivel.style.color = this.dinheiro > 0 ? '#27ae60' : '#e74c3c';
+        }
+        
+        const saldoModal = document.getElementById('saldo-modal-atual');
+        if (saldoModal) {
+            saldoModal.textContent = `$${this.dinheiro}`;
+        }
     }
 
     // ========== SISTEMA DE CARGA ==========
-    iniciarMonitoramentoST() {
-        const inputST = document.getElementById('ST');
-        if (inputST) {
-            inputST.addEventListener('change', () => {
-                this.atualizarST(parseInt(inputST.value) || 10);
-            });
-            
-            inputST.addEventListener('input', () => {
-                this.atualizarST(parseInt(inputST.value) || 10);
-            });
-            
-            this.atualizarST(parseInt(inputST.value) || 10);
-        }
-        
-        document.addEventListener('atributosAlterados', (e) => {
-            if (e.detail && e.detail.ST !== undefined) {
-                this.atualizarST(e.detail.ST);
-            }
-        });
-    }
-
-    atualizarST(novoST) {
-        if (this.ST !== novoST) {
-            this.ST = novoST;
-            this.capacidadeCarga = this.calcularCapacidadeCarga();
-            this.pesoMaximo = this.capacidadeCarga.pesada;
-            this.atualizarNivelCarga();
-            this.atualizarInterface();
-        }
-    }
-
     calcularCapacidadeCarga() {
         const ST = this.ST;
         const cargasTable = {
@@ -280,21 +241,11 @@ class SistemaEquipamentos {
             7: { nenhuma: 4.9, leve: 9.8, media: 14.7, pesada: 29.4, muitoPesada: 49.0 },
             8: { nenhuma: 6.5, leve: 13.0, media: 19.5, pesada: 39.0, muitoPesada: 65.0 },
             9: { nenhuma: 8.0, leve: 16.0, media: 24.0, pesada: 48.0, muitoPesada: 80.0 },
-            10: { nenhuma: 10.0, leve: 20.0, media: 30.0, pesada: 60.0, muitoPesada: 100.0 },
-            11: { nenhuma: 12.0, leve: 24.0, media: 36.0, pesada: 72.0, muitoPesada: 120.0 },
-            12: { nenhuma: 14.5, leve: 29.0, media: 43.5, pesada: 87.0, muitoPesada: 145.0 },
-            13: { nenhuma: 17.0, leve: 34.0, media: 51.0, pesada: 102.0, muitoPesada: 170.0 },
-            14: { nenhuma: 19.5, leve: 39.0, media: 58.5, pesada: 117.0, muitoPesada: 195.0 },
-            15: { nenhuma: 22.5, leve: 45.0, media: 67.5, pesada: 135.0, muitoPesada: 225.0 },
-            16: { nenhuma: 25.5, leve: 51.0, media: 76.5, pesada: 153.0, muitoPesada: 255.0 },
-            17: { nenhuma: 29.0, leve: 58.0, media: 87.0, pesada: 174.0, muitoPesada: 294.0 },
-            18: { nenhuma: 32.5, leve: 65.0, media: 97.5, pesada: 195.0, muitoPesada: 325.0 },
-            19: { nenhuma: 36.0, leve: 72.0, media: 108.0, pesada: 216.0, muitoPesada: 360.0 },
-            20: { nenhuma: 40.0, leve: 80.0, media: 120.0, pesada: 240.0, muitoPesada: 400.0 }
+            10: { nenhuma: 10.0, leve: 20.0, media: 30.0, pesada: 60.0, muitoPesada: 100.0 }
         };
-
+        
         let stKey = ST;
-        if (ST > 20) stKey = 20;
+        if (ST > 10) stKey = 10;
         if (ST < 1) stKey = 1;
 
         return cargasTable[stKey] || cargasTable[10];
@@ -360,7 +311,6 @@ class SistemaEquipamentos {
         this.atualizarNivelCarga();
     }
 
-    // ========== SISTEMA DE MOCHILA ==========
     alternarMochila() {
         this.mochilaAtiva = !this.mochilaAtiva;
         this.atualizarPeso();
@@ -463,7 +413,7 @@ class SistemaEquipamentos {
         });
         
         this.fecharModalSimples();
-        this.atualizarInterface();
+        this.atualizarInterfaceFinanceiro();
         this.notificarDashboard();
         
         const mensagem = this.operacaoAtual === 'gastar' 
@@ -480,7 +430,6 @@ class SistemaEquipamentos {
         }
         
         this.dinheiro += valor;
-        
         this.registrarTransacao({
             tipo: 'receita',
             valor: valor,
@@ -488,7 +437,7 @@ class SistemaEquipamentos {
         });
         
         this.mostrarFeedback(`Adicionado $${valor}`, 'sucesso');
-        this.atualizarInterface();
+        this.atualizarInterfaceFinanceiro();
         this.notificarDashboard();
     }
 
@@ -504,7 +453,6 @@ class SistemaEquipamentos {
         }
         
         this.dinheiro -= valor;
-        
         this.registrarTransacao({
             tipo: 'despesa',
             valor: valor,
@@ -512,7 +460,7 @@ class SistemaEquipamentos {
         });
         
         this.mostrarFeedback(`Removido $${valor}`, 'sucesso');
-        this.atualizarInterface();
+        this.atualizarInterfaceFinanceiro();
         this.notificarDashboard();
     }
 
@@ -544,7 +492,7 @@ class SistemaEquipamentos {
         }
         
         this.mostrarFeedback(`Dinheiro ajustado para $${valorNumerico}`, 'sucesso');
-        this.atualizarInterface();
+        this.atualizarInterfaceFinanceiro();
         this.notificarDashboard();
     }
 
@@ -565,7 +513,7 @@ class SistemaEquipamentos {
         }
     }
 
-        // ========== COMPRA E VENDA DE EQUIPAMENTOS ==========
+    // ========== COMPRA E VENDA ==========
     comprarEquipamento(itemId, elemento) {
         if (!this.catalogoPronto) {
             this.mostrarFeedback('Sistema ainda carregando...', 'erro');
@@ -638,6 +586,203 @@ class SistemaEquipamentos {
             valor: valorVenda,
             descricao: `Venda: ${equipamento.nome}`
         });
+    }
+
+    // ========== MÉTODOS DE INTERFACE ==========
+    configurarEventosGlobais() {
+        document.addEventListener('click', (e) => {
+            const btnComprar = e.target.closest('.btn-comprar');
+            if (btnComprar) {
+                const itemId = btnComprar.getAttribute('data-item');
+                if (itemId) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.comprarEquipamento(itemId, btnComprar);
+                }
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const modalDinheiro = document.getElementById('modal-dinheiro-simples');
+            if (modalDinheiro && modalDinheiro.classList.contains('aberto') && e.key === 'Escape') {
+                this.fecharModalSimples();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            const modalDinheiro = document.getElementById('modal-dinheiro-simples');
+            if (modalDinheiro && e.target === modalDinheiro) {
+                this.fecharModalSimples();
+            }
+        });
+    }
+
+    configurarSubAbas() {
+        document.querySelectorAll('.subtab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                const subtabId = btn.getAttribute('data-subtab');
+                const subtabElement = document.getElementById(`subtab-${subtabId}`);
+                if (subtabElement) subtabElement.classList.add('active');
+                
+                if (subtabId === 'financeiro') {
+                    setTimeout(() => {
+                        this.atualizarInterfaceFinanceiro();
+                    }, 100);
+                }
+            });
+        });
+    }
+
+    atualizarInterface() {
+        this.atualizarStatus();
+        this.atualizarListaEquipamentosAdquiridos();
+        this.atualizarInfoCarga();
+        this.atualizarDisplayMaos();
+        this.atualizarInterfaceDeposito();
+        this.atualizarInterfaceFinanceiro();
+    }
+
+    atualizarStatus() {
+        this.atualizarPeso();
+
+        const pesoAtualElem = document.getElementById('pesoAtual');
+        if (pesoAtualElem) pesoAtualElem.textContent = this.pesoAtual.toFixed(1);
+
+        const pesoMaximoElem = document.getElementById('pesoMaximo');
+        if (pesoMaximoElem) pesoMaximoElem.textContent = this.pesoMaximo.toFixed(1);
+
+        const nivelCargaElem = document.getElementById('nivelCarga');
+        if (nivelCargaElem) {
+            nivelCargaElem.textContent = this.nivelCargaAtual.toUpperCase();
+            nivelCargaElem.className = `carga-${this.nivelCargaAtual.replace(' ', '-')}`;
+        }
+
+        const penalidadesElem = document.getElementById('penalidadesCarga');
+        if (penalidadesElem) penalidadesElem.textContent = this.penalidadesCarga;
+
+        const contadorMochila = document.getElementById('contadorMochila');
+        if (contadorMochila) {
+            const itensNaMochila = this.equipamentosAdquiridos.filter(item => 
+                item.status === 'na-mochila' && !item.equipado
+            ).length;
+            contadorMochila.textContent = itensNaMochila;
+        }
+    }
+
+    notificarDashboard() {
+        const event = new CustomEvent('equipamentosAtualizados', {
+            detail: {
+                dinheiro: this.dinheiro,
+                pesoAtual: this.pesoAtual,
+                pesoMaximo: this.pesoMaximo,
+                nivelCargaAtual: this.nivelCargaAtual,
+                penalidadesCarga: this.penalidadesCarga,
+                totalEquipamentos: this.equipamentosAdquiridos.length,
+                gastoTotal: this.calcularGastoTotalEquipamentos()
+            }
+        });
+        document.dispatchEvent(event);
+    }
+
+    // ========== MÉTODOS AUXILIARES ==========
+    obterEquipamentoPorId(itemId) {
+        if (!this.catalogoPronto || !window.catalogoEquipamentos) {
+            return null;
+        }
+        return window.catalogoEquipamentos.obterEquipamentoPorId(itemId);
+    }
+
+    isQuantificavel(itemId) {
+        if (!this.catalogoPronto || !window.catalogoEquipamentos) return false;
+        return window.catalogoEquipamentos.isQuantificavel(itemId);
+    }
+
+    gerarIdUnico() {
+        return 'eq_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    mostrarFeedback(mensagem, tipo) {
+        const feedback = document.createElement('div');
+        feedback.className = `feedback-message feedback-${tipo}`;
+        feedback.innerHTML = `
+            <i class="fas fa-${tipo === 'sucesso' ? 'check-circle' : tipo === 'erro' ? 'times-circle' : 'exclamation-triangle'}"></i>
+            <span>${mensagem}</span>
+        `;
+        
+        feedback.style.cssText = `
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 18px 30px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(150px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        `;
+        
+        if (tipo === 'sucesso') {
+            feedback.style.background = 'linear-gradient(135deg, rgba(39, 174, 96, 0.95), rgba(46, 204, 113, 0.95))';
+            feedback.style.borderLeft = '5px solid #27ae60';
+        } else if (tipo === 'erro') {
+            feedback.style.background = 'linear-gradient(135deg, rgba(231, 76, 60, 0.95), rgba(192, 57, 43, 0.95))';
+            feedback.style.borderLeft = '5px solid #e74c3c';
+        } else if (tipo === 'aviso') {
+            feedback.style.background = 'linear-gradient(135deg, rgba(243, 156, 18, 0.95), rgba(230, 126, 34, 0.95))';
+            feedback.style.borderLeft = '5px solid #f39c12';
+        }
+        
+        document.body.appendChild(feedback);
+        
+        setTimeout(() => {
+            feedback.style.opacity = '1';
+            feedback.style.transform = 'translateX(0)';
+        }, 10);
+        
+        setTimeout(() => {
+            feedback.style.opacity = '0';
+            feedback.style.transform = 'translateX(150px)';
+            setTimeout(() => {
+                if (feedback.parentNode) feedback.parentNode.removeChild(feedback);
+            }, 300);
+        }, 3000);
+    }
+
+    // ========== MÉTODOS PARA SALVAMENTO ==========
+    exportarDados() {
+        return {
+            equipamentosAdquiridos: this.equipamentosAdquiridos,
+            dinheiro: this.dinheiro,
+            pesoAtual: this.pesoAtual,
+            mochilaAtiva: this.mochilaAtiva,
+            equipamentosEquipados: this.equipamentosEquipados,
+            deposito: this.deposito,
+            ultimasTransacoes: this.ultimasTransacoes,
+            contadorItensPersonalizados: this.contadorItensPersonalizados,
+            ST: this.ST,
+            nivelCargaAtual: this.nivelCargaAtual,
+            penalidadesCarga: this.penalidadesCarga,
+            nivelRiquezaAtual: this.pontosRiquezaAtual,
+            valorBaseRiqueza: this.valorBaseRiqueza,
+            timestamp: new Date().getTime(),
+            version: '1.0-integrado'
+        };
     }
 
     // ========== SUBMENU DE QUANTIDADE ==========
@@ -824,10 +969,6 @@ class SistemaEquipamentos {
         const maosNecessarias = arma.maos || 1;
         
         if (maosOcupadas + maosNecessarias > this.maosDisponiveis) {
-            return false;
-        }
-        
-        if (maosNecessarias === 2 && maosOcupadas > 0) {
             return false;
         }
         
@@ -1079,88 +1220,7 @@ class SistemaEquipamentos {
         this.atualizarInterface();
     }
 
-        // ========== CONFIGURAÇÃO DE EVENTOS ==========
-    configurarEventosGlobais() {
-        document.addEventListener('click', (e) => {
-            const btnComprar = e.target.closest('.btn-comprar');
-            if (btnComprar) {
-                const itemId = btnComprar.getAttribute('data-item');
-                if (itemId) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.comprarEquipamento(itemId, btnComprar);
-                }
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            const modalDinheiro = document.getElementById('modal-dinheiro-simples');
-            if (modalDinheiro && modalDinheiro.classList.contains('aberto') && e.key === 'Escape') {
-                this.fecharModalSimples();
-            }
-            
-            const submenu = document.getElementById('submenu-quantidade');
-            if (submenu && submenu.classList.contains('aberto') && e.key === 'Escape') {
-                this.fecharSubmenuQuantidade();
-            }
-        });
-
-        document.addEventListener('click', (e) => {
-            const modalDinheiro = document.getElementById('modal-dinheiro-simples');
-            if (modalDinheiro && e.target === modalDinheiro) {
-                this.fecharModalSimples();
-            }
-            
-            const submenu = document.getElementById('submenu-quantidade');
-            if (submenu && e.target === submenu) {
-                this.fecharSubmenuQuantidade();
-            }
-        });
-    }
-
-    configurarSubAbas() {
-        document.querySelectorAll('.subtab-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
-                
-                btn.classList.add('active');
-                const subtabId = btn.getAttribute('data-subtab');
-                const subtabElement = document.getElementById(`subtab-${subtabId}`);
-                if (subtabElement) subtabElement.classList.add('active');
-                
-                if (subtabId === 'financeiro') {
-                    setTimeout(() => {
-                        this.atualizarInterfaceFinanceiro();
-                    }, 100);
-                }
-                
-                if (subtabId === 'criar') {
-                    setTimeout(() => {
-                        this.configurarCriacaoItens();
-                    }, 100);
-                }
-            });
-        });
-    }
-
-    configurarFiltrosInventario() {
-        document.querySelectorAll('.filtro-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-                
-                btn.classList.add('active');
-                const filtro = btn.getAttribute('data-filtro');
-                this.filtrarListaEquipamentos(filtro);
-            });
-        });
-    }
-
-    // ========== INTERFACE E ATUALIZAÇÕES ==========
+    // ========== SISTEMA DE MÃOS ==========
     criarDisplayMaos() {
         const statusBar = document.querySelector('.banner-grid');
         if (!statusBar || document.getElementById('displayMaos')) return;
@@ -1226,75 +1286,7 @@ class SistemaEquipamentos {
         }
     }
 
-    atualizarInterfaceForcada() {
-        this.atualizarStatus();
-        this.atualizarListaEquipamentosAdquiridos();
-        this.atualizarInfoCarga();
-        this.atualizarDisplayMaos();
-        this.atualizarInterfaceDeposito();
-        this.atualizarInterfaceFinanceiro();
-        this.atualizarSistemaCombate();
-    }
-
-    atualizarInterface() {
-        this.atualizarStatus();
-        this.atualizarListaEquipamentosAdquiridos();
-        this.atualizarInfoCarga();
-        this.atualizarDisplayMaos();
-        this.atualizarInterfaceDeposito();
-        this.atualizarInterfaceFinanceiro();
-    }
-
-    atualizarInterfaceFinanceiro() {
-        const dinheiroDisponivel = document.getElementById('dinheiro-disponivel');
-        if (dinheiroDisponivel) {
-            dinheiroDisponivel.textContent = `$${this.dinheiro}`;
-        }
-        
-        const dinheiroBanner = document.getElementById('dinheiroEquipamento');
-        if (dinheiroBanner) {
-            dinheiroBanner.textContent = `$${this.dinheiro}`;
-        }
-    }
-
-    atualizarStatus() {
-        this.atualizarPeso();
-
-        this.atualizarInterfaceFinanceiro();
-
-        const pesoAtualElem = document.getElementById('pesoAtual');
-        if (pesoAtualElem) pesoAtualElem.textContent = this.pesoAtual.toFixed(1);
-
-        const pesoMaximoElem = document.getElementById('pesoMaximo');
-        if (pesoMaximoElem) pesoMaximoElem.textContent = this.pesoMaximo.toFixed(1);
-
-        const nivelCargaElem = document.getElementById('nivelCarga');
-        if (nivelCargaElem) {
-            nivelCargaElem.textContent = this.nivelCargaAtual.toUpperCase();
-            nivelCargaElem.className = `carga-${this.nivelCargaAtual.replace(' ', '-')}`;
-        }
-
-        const penalidadesElem = document.getElementById('penalidadesCarga');
-        if (penalidadesElem) penalidadesElem.textContent = this.penalidadesCarga;
-
-        const contadorMochila = document.getElementById('contadorMochila');
-        if (contadorMochila) {
-            const itensNaMochila = this.equipamentosAdquiridos.filter(item => 
-                item.status === 'na-mochila' && !item.equipado
-            ).length;
-            contadorMochila.textContent = itensNaMochila;
-        }
-
-        const btnMochila = document.getElementById('btn-liberar-mochila');
-        if (btnMochila) {
-            if (this.mochilaAtiva) {
-                btnMochila.innerHTML = '<i class="fas fa-suitcase-rolling"></i> Liberar Mochila';
-            } else {
-                btnMochila.innerHTML = '<i class="fas fa-suitcase"></i> Usar Mochila';
-            }
-        }
-    }
-
+    // ========== LISTA DE EQUIPAMENTOS ADQUIRIDOS ==========
     atualizarListaEquipamentosAdquiridos(equipamentosFiltrados = null) {
         const lista = document.getElementById('lista-equipamentos-adquiridos');
         if (!lista) return;
@@ -1343,7 +1335,6 @@ class SistemaEquipamentos {
                             ${equipamento.local ? `<span>Local: ${equipamento.local}</span>` : ''}
                             ${equipamento.maos > 0 ? `<span>Mãos: ${this.obterTextoMaos(equipamento.maos)}</span>` : ''}
                             ${equipamento.quantidade > 1 ? `<span class="quantidade-info">Quantidade: ${equipamento.quantidade}</span>` : ''}
-                            ${equipamento.personalizado ? `<span class="personalizado-info">✨ Personalizado</span>` : ''}
                         </div>
                     </div>
                     <div class="equipamento-controles">
@@ -1427,6 +1418,17 @@ class SistemaEquipamentos {
         return botoes;
     }
 
+    obterTextoMaos(maos) {
+        switch(maos) {
+            case 1: return '1 mão';
+            case 1.5: return '1 ou 2 mãos';
+            case 2: return '2 mãos';
+            case 0: return 'Não usa mãos';
+            default: return `${maos} mãos`;
+        }
+    }
+
+    // ========== SISTEMA DE DEPÓSITO ==========
     atualizarInterfaceDeposito() {
         this.atualizarListaDeposito();
         this.atualizarResumoDeposito();
@@ -1493,19 +1495,6 @@ class SistemaEquipamentos {
         }
     }
 
-    atualizarInfoCarga() {
-        const totalItensInventario = document.getElementById('totalItensInventario');
-        const pesoInventario = document.getElementById('pesoInventario');
-        
-        if (totalItensInventario) {
-            totalItensInventario.textContent = this.equipamentosAdquiridos.length;
-        }
-        
-        if (pesoInventario) {
-            pesoInventario.textContent = this.pesoAtual.toFixed(1);
-        }
-    }
-
     // ========== SISTEMA DE COMBATE ==========
     atualizarSistemaCombate() {
         this.atualizarArmadurasCombate();
@@ -1515,13 +1504,8 @@ class SistemaEquipamentos {
 
     atualizarArmadurasCombate() {
         this.armadurasCombate = {
-            cabeca: null,
-            torso: null,
-            bracos: null,
-            pernas: null,
-            maos: null,
-            pes: null,
-            corpoInteiro: null
+            cabeca: null, torso: null, bracos: null, pernas: null,
+            maos: null, pes: null, corpoInteiro: null
         };
 
         this.equipamentosEquipados.armaduras.forEach(armadura => {
@@ -1581,33 +1565,6 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== FUNÇÕES AUXILIARES ==========
-    obterTextoMaos(maos) {
-        switch(maos) {
-            case 1: return '1 mão';
-            case 1.5: return '1 ou 2 mãos';
-            case 2: return '2 mãos';
-            case 0: return 'Não usa mãos';
-            default: return `${maos} mãos`;
-        }
-    }
-
-    gerarIdUnico() {
-        return 'eq_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
-
-    obterEquipamentoPorId(itemId) {
-        if (!this.catalogoPronto || !window.catalogoEquipamentos) {
-            return null;
-        }
-        return window.catalogoEquipamentos.obterEquipamentoPorId(itemId);
-    }
-
-    isQuantificavel(itemId) {
-        if (!this.catalogoPronto || !window.catalogoEquipamentos) return false;
-        return window.catalogoEquipamentos.isQuantificavel(itemId);
-    }
-
     calcularGastoTotalEquipamentos() {
         return this.equipamentosAdquiridos.reduce((total, item) => {
             return total + (item.custoTotal || item.custo);
@@ -1642,6 +1599,20 @@ class SistemaEquipamentos {
         }
 
         this.atualizarInterface();
+    }
+
+    configurarFiltrosInventario() {
+        document.querySelectorAll('.filtro-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+                
+                btn.classList.add('active');
+                const filtro = btn.getAttribute('data-filtro');
+                this.filtrarListaEquipamentos(filtro);
+            });
+        });
     }
 
     filtrarListaEquipamentos(filtro) {
@@ -1687,122 +1658,375 @@ class SistemaEquipamentos {
                 this.atualizarInterfaceFinanceiro();
             }, 100);
         }
-        
-        if (subtab === 'criar') {
-            setTimeout(() => {
-                this.configurarCriacaoItens();
-            }, 100);
-        }
     }
 
-        // ========== FEEDBACK ==========
-    mostrarFeedback(mensagem, tipo) {
-        const feedback = document.createElement('div');
-        feedback.className = `feedback-message feedback-${tipo}`;
-        feedback.innerHTML = `
-            <i class="fas fa-${tipo === 'sucesso' ? 'check-circle' : tipo === 'erro' ? 'times-circle' : 'exclamation-triangle'}"></i>
-            <span>${mensagem}</span>
-        `;
-        
-        feedback.style.cssText = `
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            padding: 18px 30px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            z-index: 10000;
-            opacity: 0;
-            transform: translateX(150px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            max-width: 400px;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        `;
-        
-        if (tipo === 'sucesso') {
-            feedback.style.background = 'linear-gradient(135deg, rgba(39, 174, 96, 0.95), rgba(46, 204, 113, 0.95))';
-            feedback.style.borderLeft = '5px solid #27ae60';
-        } else if (tipo === 'erro') {
-            feedback.style.background = 'linear-gradient(135deg, rgba(231, 76, 60, 0.95), rgba(192, 57, 43, 0.95))';
-            feedback.style.borderLeft = '5px solid #e74c3c';
-        } else if (tipo === 'aviso') {
-            feedback.style.background = 'linear-gradient(135deg, rgba(243, 156, 18, 0.95), rgba(230, 126, 34, 0.95))';
-            feedback.style.borderLeft = '5px solid #f39c12';
+    // ========== SISTEMA DE CRIAÇÃO DE ITENS ==========
+    configurarCriacaoItens() {
+        const itemTipoSelect = document.getElementById('item-tipo');
+        if (itemTipoSelect) {
+            itemTipoSelect.addEventListener('change', () => {
+                this.atualizarCamposPorTipo();
+            });
         }
         
-        document.body.appendChild(feedback);
-        
-        setTimeout(() => {
-            feedback.style.opacity = '1';
-            feedback.style.transform = 'translateX(0)';
-        }, 10);
-        
-        setTimeout(() => {
-            feedback.style.opacity = '0';
-            feedback.style.transform = 'translateX(150px)';
-            setTimeout(() => {
-                if (feedback.parentNode) feedback.parentNode.removeChild(feedback);
-            }, 300);
-        }, 3000);
-    }
-
-    // ========== MÉTODOS PARA SALVAMENTO ==========
-    exportarDados() {
-        return {
-            equipamentosAdquiridos: this.equipamentosAdquiridos,
-            dinheiro: this.dinheiro,
-            pesoAtual: this.pesoAtual,
-            mochilaAtiva: this.mochilaAtiva,
-            equipamentosEquipados: this.equipamentosEquipados,
-            armadurasCombate: this.armadurasCombate,
-            armasCombate: this.armasCombate,
-            escudoCombate: this.escudoCombate,
-            deposito: this.deposito,
-            capacidadeCarga: this.capacidadeCarga,
-            ultimasTransacoes: this.ultimasTransacoes,
-            contadorItensPersonalizados: this.contadorItensPersonalizados,
-            ST: this.ST,
-            nivelCargaAtual: this.nivelCargaAtual,
-            penalidadesCarga: this.penalidadesCarga,
-            nivelRiquezaAtual: this.nivelRiquezaAtual,
-            valorBaseRiqueza: this.valorBaseRiqueza,
-            timestamp: new Date().getTime(),
-            version: '6.0'
-        };
-    }
-
-    salvarDadosManualmente() {
-        try {
-            const dados = this.exportarDados();
-            localStorage.setItem('sistemaEquipamentos_data', JSON.stringify(dados));
-            this.mostrarFeedback('Dados de equipamentos salvos com sucesso!', 'sucesso');
-            return true;
-        } catch (e) {
-            this.mostrarFeedback('Erro ao salvar dados!', 'erro');
-            return false;
+        const itemMagicoCheckbox = document.getElementById('item-magico');
+        if (itemMagicoCheckbox) {
+            itemMagicoCheckbox.addEventListener('change', () => {
+                this.atualizarCamposMagicos();
+            });
         }
-    }
-
-    notificarDashboard() {
-        const event = new CustomEvent('equipamentosAtualizados', {
-            detail: {
-                dinheiro: this.dinheiro,
-                pesoAtual: this.pesoAtual,
-                pesoMaximo: this.pesoMaximo,
-                nivelCargaAtual: this.nivelCargaAtual,
-                penalidadesCarga: this.penalidadesCarga,
-                totalEquipamentos: this.equipamentosAdquiridos.length,
-                gastoTotal: this.calcularGastoTotalEquipamentos()
+        
+        const inputs = ['item-nome', 'item-peso', 'item-custo', 'item-descricao'];
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', () => {
+                    this.atualizarPreviewItem();
+                });
             }
         });
-        document.dispatchEvent(event);
+    }
+
+    atualizarCamposPorTipo() {
+        const camposEspecificos = document.getElementById('campos-especificos');
+        if (!camposEspecificos) return;
+        
+        const tipo = document.getElementById('item-tipo').value;
+        
+        let camposHTML = '';
+        
+        switch(tipo) {
+            case 'arma-cc':
+                camposHTML = `
+                    <div class="form-section">
+                        <h4><i class="fas fa-gavel"></i> Detalhes da Arma</h4>
+                        <div class="form-group">
+                            <label>Dano:</label>
+                            <input type="text" id="item-dano" placeholder="Ex: 1d+2 corte">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Dano:</label>
+                            <select id="item-tipo-dano">
+                                <option value="corte">Corte</option>
+                                <option value="perf">Perfuração</option>
+                                <option value="contusao">Contusão</option>
+                                <option value="esmag">Esmagamento</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mãos Necessárias:</label>
+                            <select id="item-maos">
+                                <option value="1">1 mão</option>
+                                <option value="1.5">1 ou 2 mãos</option>
+                                <option value="2">2 mãos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>ST Mínimo:</label>
+                            <input type="number" id="item-st" value="10" min="1">
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'arma-dist':
+                camposHTML = `
+                    <div class="form-section">
+                        <h4><i class="fas fa-bullseye"></i> Detalhes da Arma</h4>
+                        <div class="form-group">
+                            <label>Dano:</label>
+                            <input type="text" id="item-dano" placeholder="Ex: 1d+2 perf">
+                        </div>
+                        <div class="form-group">
+                            <label>Alcance:</label>
+                            <input type="text" id="item-alcance" placeholder="Ex: 100/200">
+                        </div>
+                        <div class="form-group">
+                            <label>Mãos Necessárias:</label>
+                            <select id="item-maos">
+                                <option value="1">1 mão</option>
+                                <option value="2">2 mãos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>ST Mínimo:</label>
+                            <input type="number" id="item-st" value="10" min="1">
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'armadura':
+                camposHTML = `
+                    <div class="form-section">
+                        <h4><i class="fas fa-shield-alt"></i> Detalhes da Armadura</h4>
+                        <div class="form-group">
+                            <label>RD (Resistência a Dano):</label>
+                            <input type="number" id="item-rd" value="2" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Local Protegido:</label>
+                            <select id="item-local">
+                                <option value="Cabeça">Cabeça</option>
+                                <option value="Torso">Torso</option>
+                                <option value="Braços">Braços</option>
+                                <option value="Pernas">Pernas</option>
+                                <option value="Mãos">Mãos</option>
+                                <option value="Pés">Pés</option>
+                                <option value="Corpo Inteiro">Corpo Inteiro</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            case 'escudo':
+                camposHTML = `
+                    <div class="form-section">
+                        <h4><i class="fas fa-shield-virus"></i> Detalhes do Escudo</h4>
+                        <div class="form-group">
+                            <label>BD (Bônus de Defesa):</label>
+                            <input type="number" id="item-bd" value="1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>RD/PV:</label>
+                            <input type="number" id="item-rdpv" value="20" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Mãos Necessárias:</label>
+                            <select id="item-maos">
+                                <option value="1">1 mão</option>
+                                <option value="2">2 mãos</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                break;
+                
+            default:
+                camposHTML = '';
+        }
+        
+        camposEspecificos.innerHTML = camposHTML;
+        this.atualizarPreviewItem();
+    }
+
+    atualizarCamposMagicos() {
+        const camposMagicos = document.getElementById('campos-magicos');
+        const itemMagicoCheckbox = document.getElementById('item-magico');
+        
+        if (!camposMagicos || !itemMagicoCheckbox) return;
+        
+        if (itemMagicoCheckbox.checked) {
+            camposMagicos.style.display = 'block';
+        } else {
+            camposMagicos.style.display = 'none';
+        }
+        
+        this.atualizarPreviewItem();
+    }
+
+    atualizarPreviewItem() {
+        const preview = document.getElementById('preview-conteudo');
+        if (!preview) return;
+        
+        const nome = document.getElementById('item-nome')?.value || 'Novo Item';
+        const tipo = document.getElementById('item-tipo')?.value || 'geral';
+        const peso = document.getElementById('item-peso')?.value || '0';
+        const custo = document.getElementById('item-custo')?.value || '0';
+        const descricao = document.getElementById('item-descricao')?.value || 'Sem descrição';
+        const era = document.getElementById('item-era')?.value || 'medieval';
+        const magico = document.getElementById('item-magico')?.checked || false;
+        
+        const tipoText = {
+            'geral': 'Equipamento Geral',
+            'arma-cc': 'Arma Corpo-a-Corpo',
+            'arma-dist': 'Arma à Distância',
+            'armadura': 'Armadura',
+            'escudo': 'Escudo'
+        }[tipo] || 'Equipamento';
+        
+        const eraText = era === 'medieval' ? 'Medieval/Fantasia' : 'Moderna/Cyberpunk';
+        
+        let detalhesHTML = '';
+        
+        if (tipo === 'arma-cc' || tipo === 'arma-dist') {
+            const dano = document.getElementById('item-dano')?.value || '1d';
+            const tipoDano = document.getElementById('item-tipo-dano')?.value || 'contusao';
+            const maos = document.getElementById('item-maos')?.value || '1';
+            const st = document.getElementById('item-st')?.value || '10';
+            const alcance = tipo === 'arma-dist' ? document.getElementById('item-alcance')?.value || '-' : '-';
+            
+            detalhesHTML = `
+                <div><strong>Dano:</strong> ${dano} (${tipoDano})</div>
+                <div><strong>Mãos:</strong> ${maos === '1' ? '1 mão' : maos === '2' ? '2 mãos' : '1 ou 2 mãos'}</div>
+                ${tipo === 'arma-dist' ? `<div><strong>Alcance:</strong> ${alcance}</div>` : ''}
+                <div><strong>ST Mínimo:</strong> ${st}</div>
+            `;
+        } else if (tipo === 'armadura') {
+            const rd = document.getElementById('item-rd')?.value || '0';
+            const local = document.getElementById('item-local')?.value || 'Torso';
+            
+            detalhesHTML = `
+                <div><strong>RD:</strong> ${rd}</div>
+                <div><strong>Local:</strong> ${local}</div>
+            `;
+        } else if (tipo === 'escudo') {
+            const bd = document.getElementById('item-bd')?.value || '1';
+            const rdpv = document.getElementById('item-rdpv')?.value || '20';
+            const maos = document.getElementById('item-maos')?.value || '1';
+            
+            detalhesHTML = `
+                <div><strong>BD:</strong> +${bd}</div>
+                <div><strong>RD/PV:</strong> ${rdpv}</div>
+                <div><strong>Mãos:</strong> ${maos === '1' ? '1 mão' : '2 mãos'}</div>
+            `;
+        }
+        
+        preview.innerHTML = `
+            <div class="preview-item">
+                <div class="preview-header">
+                    <h4>${nome}</h4>
+                    <span class="preview-tipo">${tipoText} ${magico ? '✨' : ''}</span>
+                </div>
+                <div class="preview-info">
+                    <div><strong>Tipo:</strong> ${tipoText}</div>
+                    <div><strong>Era:</strong> ${eraText}</div>
+                    <div><strong>Peso:</strong> ${peso} kg</div>
+                    <div><strong>Custo:</strong> $${custo}</div>
+                    ${detalhesHTML}
+                    <div class="preview-descricao">
+                        <strong>Descrição:</strong>
+                        <p>${descricao || 'Sem descrição'}</p>
+                    </div>
+                    ${magico ? `<div class="preview-magico"><strong>✨ Efeito Mágico:</strong><p>${document.getElementById('item-efeito-magico')?.value || 'Efeito não especificado'}</p></div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    criarItemPersonalizado() {
+        const nome = document.getElementById('item-nome')?.value;
+        if (!nome || nome.trim() === '') {
+            this.mostrarFeedback('Digite um nome para o item!', 'erro');
+            return;
+        }
+        
+        const tipo = document.getElementById('item-tipo')?.value || 'geral';
+        const peso = parseFloat(document.getElementById('item-peso')?.value) || 0;
+        const custo = parseInt(document.getElementById('item-custo')?.value) || 0;
+        const descricao = document.getElementById('item-descricao')?.value || '';
+        const era = document.getElementById('item-era')?.value || 'medieval';
+        const magico = document.getElementById('item-magico')?.checked || false;
+        const efeitoMagico = magico ? document.getElementById('item-efeito-magico')?.value : '';
+        
+        const novoItem = {
+            id: `personalizado_${this.contadorItensPersonalizados++}`,
+            nome: nome.trim(),
+            tipo: tipo,
+            peso: peso,
+            custo: custo,
+            descricao: descricao,
+            era: era,
+            personalizado: true,
+            adquiridoEm: new Date().toISOString(),
+            status: 'na-mochila',
+            equipado: false,
+            idUnico: this.gerarIdUnico(),
+            quantidade: 1
+        };
+        
+        if (tipo === 'arma-cc' || tipo === 'arma-dist') {
+            novoItem.dano = document.getElementById('item-dano')?.value || '1d';
+            novoItem.tipoDano = document.getElementById('item-tipo-dano')?.value || 'contusao';
+            novoItem.maos = parseFloat(document.getElementById('item-maos')?.value) || 1;
+            novoItem.st = parseInt(document.getElementById('item-st')?.value) || 10;
+            if (tipo === 'arma-dist') {
+                novoItem.alcance = document.getElementById('item-alcance')?.value || '-';
+            }
+        } else if (tipo === 'armadura') {
+            novoItem.rd = parseInt(document.getElementById('item-rd')?.value) || 0;
+            novoItem.local = document.getElementById('item-local')?.value || 'Torso';
+        } else if (tipo === 'escudo') {
+            novoItem.bd = parseInt(document.getElementById('item-bd')?.value) || 1;
+            novoItem.rdpv = parseInt(document.getElementById('item-rdpv')?.value) || 20;
+            novoItem.maos = parseFloat(document.getElementById('item-maos')?.value) || 1;
+        }
+        
+        if (magico) {
+            novoItem.magico = true;
+            novoItem.efeitoMagico = efeitoMagico;
+        }
+        
+        this.equipamentosAdquiridos.push(novoItem);
+        this.equipamentosEquipados.mochila.push(novoItem);
+        
+        this.mostrarFeedback(`Item "${nome}" criado com sucesso!`, 'sucesso');
+        this.limparFormCriacao();
+        this.atualizarInterface();
+    }
+
+    limparFormCriacao() {
+        document.getElementById('item-nome').value = '';
+        document.getElementById('item-peso').value = '1.0';
+        document.getElementById('item-custo').value = '0';
+        document.getElementById('item-descricao').value = '';
+        document.getElementById('item-era').value = 'medieval';
+        document.getElementById('item-magico').checked = false;
+        document.getElementById('item-efeito-magico').value = '';
+        
+        const camposEspecificos = document.getElementById('campos-especificos');
+        if (camposEspecificos) camposEspecificos.innerHTML = '';
+        
+        const camposMagicos = document.getElementById('campos-magicos');
+        if (camposMagicos) camposMagicos.style.display = 'none';
+        
+        this.atualizarPreviewItem();
+    }
+
+    // ========== INFORMAÇÕES DE CARGA ==========
+    atualizarInfoCarga() {
+        const totalItensInventario = document.getElementById('totalItensInventario');
+        const pesoInventario = document.getElementById('pesoInventario');
+        
+        if (totalItensInventario) {
+            totalItensInventario.textContent = this.equipamentosAdquiridos.length;
+        }
+        
+        if (pesoInventario) {
+            pesoInventario.textContent = this.pesoAtual.toFixed(1);
+        }
+    }
+
+    iniciarMonitoramentoST() {
+        const inputST = document.getElementById('ST');
+        if (inputST) {
+            inputST.addEventListener('change', () => {
+                this.atualizarST(parseInt(inputST.value) || 10);
+            });
+            
+            inputST.addEventListener('input', () => {
+                this.atualizarST(parseInt(inputST.value) || 10);
+            });
+            
+            this.atualizarST(parseInt(inputST.value) || 10);
+        }
+        
+        document.addEventListener('atributosAlterados', (e) => {
+            if (e.detail && e.detail.ST !== undefined) {
+                this.atualizarST(e.detail.ST);
+            }
+        });
+    }
+
+    atualizarST(novoST) {
+        if (this.ST !== novoST) {
+            this.ST = novoST;
+            this.capacidadeCarga = this.calcularCapacidadeCarga();
+            this.pesoMaximo = this.capacidadeCarga.pesada;
+            this.atualizarNivelCarga();
+            this.atualizarInterface();
+        }
     }
 }
 
@@ -1812,13 +2036,11 @@ let sistemaEquipamentos;
 document.addEventListener('DOMContentLoaded', function() {
     const verificarAbaEquipamento = () => {
         const abaEquipamento = document.getElementById('equipamento');
-        if (abaEquipamento && abaEquipamento.classList.contains('active')) {
+        if (abaEquipamento) {
             if (!sistemaEquipamentos) {
                 sistemaEquipamentos = new SistemaEquipamentos();
                 window.sistemaEquipamentos = sistemaEquipamentos;
                 sistemaEquipamentos.inicializarQuandoPronto();
-            } else {
-                sistemaEquipamentos.atualizarInterfaceForcada();
             }
         }
     };
@@ -1841,96 +2063,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// ========== FUNÇÕES GLOBAIS PARA HTML ==========
-window.aumentarQuantidade = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.aumentarQuantidade();
-    }
-};
-
-window.diminuirQuantidade = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.diminuirQuantidade();
-    }
-};
-
-window.fecharSubmenuQuantidade = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.fecharSubmenuQuantidade();
-    }
-};
-
-window.confirmarCompraQuantidade = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.confirmarCompraQuantidade();
-    }
-};
-
-window.receberDinheiroRapido = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.receberDinheiroRapido();
-    }
-};
-
-window.gastarDinheiroRapido = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.gastarDinheiroRapido();
-    }
-};
-
-window.adicionarDinheiro = function(valor) {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.adicionarDinheiro(valor);
-    }
-};
-
-window.removerDinheiro = function(valor) {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.removerDinheiro(valor);
-    }
-};
-
-window.ajustarDinheiroManual = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.ajustarDinheiroManual();
-    }
-};
-
-window.confirmarOperacao = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.confirmarOperacao();
-    }
-};
-
-window.fecharModalSimples = function() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.fecharModalSimples();
-    }
-};
-
-window.alternarSubTab = function(subtab) {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.alternarSubTab(subtab);
-    }
-};
-
+// ========== FUNÇÕES GLOBAIS ==========
+window.aumentarQuantidade = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.aumentarQuantidade(); };
+window.diminuirQuantidade = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.diminuirQuantidade(); };
+window.fecharSubmenuQuantidade = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.fecharSubmenuQuantidade(); };
+window.confirmarCompraQuantidade = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.confirmarCompraQuantidade(); };
+window.receberDinheiroRapido = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.receberDinheiroRapido(); };
+window.gastarDinheiroRapido = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.gastarDinheiroRapido(); };
+window.adicionarDinheiro = function(valor) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.adicionarDinheiro(valor); };
+window.removerDinheiro = function(valor) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.removerDinheiro(valor); };
+window.ajustarDinheiroManual = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.ajustarDinheiroManual(); };
+window.confirmarOperacao = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.confirmarOperacao(); };
+window.fecharModalSimples = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.fecharModalSimples(); };
+window.alternarSubTab = function(subtab) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.alternarSubTab(subtab); };
+window.comprarEquipamento = function(itemId, elemento) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.comprarEquipamento(itemId, elemento); };
+window.venderEquipamento = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.venderEquipamento(itemId); };
+window.equiparItem = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.equiparItem(itemId); };
+window.desequiparItem = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.desequiparItem(itemId); };
+window.colocarNoCorpo = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.colocarNoCorpo(itemId); };
+window.removerDoCorpo = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.removerDoCorpo(itemId); };
+window.moverParaDeposito = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.moverParaDeposito(itemId); };
+window.retirarDoDeposito = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.retirarDoDeposito(itemId); };
+window.moverTudoParaDeposito = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.moverTudoParaDeposito(); };
+window.retirarTudoDoDeposito = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.retirarTudoDoDeposito(); };
+window.limparDeposito = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.limparDeposito(); };
+window.consumirItem = function(itemId, quantidade) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.consumirItem(itemId, quantidade); };
+window.atualizarCamposPorTipo = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.atualizarCamposPorTipo(); };
+window.atualizarCamposMagicos = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.atualizarCamposMagicos(); };
+window.criarItemPersonalizado = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.criarItemPersonalizado(); };
+window.limparFormCriacao = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.limparFormCriacao(); };
+window.atualizarPreviewItem = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.atualizarPreviewItem(); };
 window.SistemaEquipamentos = SistemaEquipamentos;
-
-function inicializarSistemaEquipamentos() {
-    const intervalo = setInterval(() => {
-        const abaEquipamento = document.getElementById('equipamento');
-        if (abaEquipamento && abaEquipamento.classList.contains('active')) {
-            if (!window.sistemaEquipamentos) {
-                window.sistemaEquipamentos = new SistemaEquipamentos();
-                window.sistemaEquipamentos.inicializarQuandoPronto();
-            }
-            clearInterval(intervalo);
-        }
-    }, 500);
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', inicializarSistemaEquipamentos);
-} else {
-    inicializarSistemaEquipamentos();
-}
