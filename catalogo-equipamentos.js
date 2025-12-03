@@ -9,11 +9,24 @@ class CatalogoEquipamentos {
                         dano: "GEB+2", tipoDano: "corte", alcance: "1", peso: 2.0, st: 11, custo: 50,
                         maos: 1, quantificavel: false, descricao: "Machado de batalha simples"
                     },
-                    {
-                        id: "M801", nome: "Espada Longa", tipo: "arma-cc", era: "medieval", nt: 0,
-                        dano: "2d+2", tipoDano: "corte", alcance: "1,2", peso: 3.0, st: 10, custo: 600,
-                        maos: 1.5, quantificavel: false, descricao: "Espada longa versátil"
-                    },
+                   {
+    id: "M801", 
+    nome: "Espada Longa", 
+    tipo: "arma-cc", 
+    era: "medieval", 
+    nt: 0,
+    dano: "GEB+1",  // GEB: +1
+    tipoDano: "corte",
+    danoGDP: "GDP+2",  // GDP: +2 (adicione esta linha)
+    tipoDanoGDP: "perfuração",  // (adicione esta linha)
+    alcance: "1,2", 
+    peso: 3.0, 
+    st: 10, 
+    custo: 600,
+    maos: 1.5, 
+    quantificavel: false, 
+    descricao: "Espada longa versátil"
+},
                     {
                         id: "M802", nome: "Lança", tipo: "arma-cc", era: "medieval", nt: 0,
                         dano: "1d+2", tipoDano: "perfuração", alcance: "1,2", peso: 4.0, st: 10,
@@ -485,58 +498,83 @@ class CatalogoEquipamentos {
         
         container.innerHTML = html;
         
-        // *** CORREÇÃO DO BUG DA DUPLICAÇÃO ***
-        // NÃO ADICIONAR EVENTOS AQUI - já são tratados pelo sistema principal
+       
     }
 
-    gerarHTMLArmasCorpoACorpo(equipamentos) {
-        return `
-            <table class="catalog-table">
-                <thead>
-                    <tr>
-                        <th class="col-nt">NT</th>
-                        <th class="col-nome">ARMA</th>
-                        <th class="col-dano">DANO</th>
-                        <th class="col-tipo">TIPO DANO</th>
-                        <th class="col-alcance">ALCANCE</th>
-                        <th class="col-peso">PESO</th>
-                        <th class="col-st">ST</th>
-                        <th class="col-maos">MÃOS</th>
-                        <th class="col-custo">CUSTO</th>
-                        <th class="col-acao">AÇÃO</th>
+   gerarHTMLArmasCorpoACorpo(equipamentos) {
+    return `
+        <table class="catalog-table">
+            <thead>
+                <tr>
+                    <th class="col-nt">NT</th>
+                    <th class="col-nome">ARMA</th>
+                    <th class="col-dano">DANO</th>
+                    <th class="col-alcance">ALCANCE</th>
+                    <th class="col-peso">PESO</th>
+                    <th class="col-st">ST</th>
+                    <th class="col-maos">MÃOS</th>
+                    <th class="col-custo">CUSTO</th>
+                    <th class="col-acao">AÇÃO</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${equipamentos.map(equipamento => {
+                    // VERIFICA SE TEM GDP OU SÓ GEB
+                    const temGDP = equipamento.danoGDP && equipamento.danoGDP !== "-";
+                    
+                    return `
+                    <tr class="era-${equipamento.era}">
+                        <td class="col-nt">${equipamento.nt}</td>
+                        <td class="col-nome">
+                            <strong>${equipamento.nome}</strong>
+                            <div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>
+                            <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
+                        </td>
+                        <td class="col-dano">
+                            <div class="dano-vertical">
+                                ${temGDP ? `
+                                <!-- SE TEM AMBOS: mostra GEB e GDP -->
+                                <div class="linha-dano">
+                                    <span class="dano-titulo">GEB:</span>
+                                    <span class="dano-valor">${equipamento.dano}</span>
+                                    <span class="dano-tipo">${equipamento.tipoDano}</span>
+                                </div>
+                                <div class="linha-dano gdp-linha">
+                                    <span class="dano-titulo">GDP:</span>
+                                    <span class="dano-valor">${equipamento.danoGDP}</span>
+                                    <span class="dano-tipo">${equipamento.tipoDanoGDP}</span>
+                                </div>
+                                ` : `
+                                <!-- SE SÓ TEM GEB: mostra só GEB -->
+                                <div class="linha-dano unico-dano">
+                                    <span class="dano-titulo">GEB:</span>
+                                    <span class="dano-valor">${equipamento.dano}</span>
+                                    <span class="dano-tipo">${equipamento.tipoDano}</span>
+                                </div>
+                                `}
+                            </div>
+                        </td>
+                        <td class="col-alcance">${equipamento.alcance}</td>
+                        <td class="col-peso">${equipamento.peso} kg</td>
+                        <td class="col-st">${equipamento.st}</td>
+                        <td class="col-maos">
+                            <span class="badge-maos maos-${equipamento.maos}">
+                                ${this.obterIconeMaos(equipamento.maos)}
+                            </span>
+                        </td>
+                        <td class="col-custo">$${equipamento.custo}</td>
+                        <td class="col-acao">
+                            <button class="btn-comprar" data-item="${equipamento.id}">
+                                <i class="fas fa-shopping-cart"></i> COMPRAR
+                            </button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    ${equipamentos.map(equipamento => `
-                        <tr class="era-${equipamento.era}">
-                            <td class="col-nt">${equipamento.nt}</td>
-                            <td class="col-nome">
-                                <strong>${equipamento.nome}</strong>
-                                <div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>
-                                <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
-                            </td>
-                            <td class="col-dano">${equipamento.dano}</td>
-                            <td class="col-tipo">${equipamento.tipoDano}</td>
-                            <td class="col-alcance">${equipamento.alcance}</td>
-                            <td class="col-peso">${equipamento.peso} kg</td>
-                            <td class="col-st">${equipamento.st}</td>
-                            <td class="col-maos">
-                                <span class="badge-maos maos-${equipamento.maos}">
-                                    ${this.obterIconeMaos(equipamento.maos)}
-                                </span>
-                            </td>
-                            <td class="col-custo">$${equipamento.custo}</td>
-                            <td class="col-acao">
-                                <button class="btn-comprar" data-item="${equipamento.id}">
-                                    <i class="fas fa-shopping-cart"></i> COMPRAR
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    }
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
+}
 
     gerarHTMLArmasDistancia(equipamentos) {
         return `

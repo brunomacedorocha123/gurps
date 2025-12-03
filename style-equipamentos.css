@@ -3815,4 +3815,57 @@ select:focus {
     opacity: 1 !important;
 }
 
+
+/* ESTILO PARA DANO VERTICAL */
+.dano-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 0;
+}
+
+.linha-dano {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 2px solid var(--laranja-principal);
+    font-size: 0.9rem;
+}
+
+.linha-dano.gdp-linha {
+    border-left-color: var(--info);
+    background: rgba(52, 152, 219, 0.08);
+}
+
+.linha-dano.unico-dano {
+    border-left: 2px solid var(--laranja-principal);
+    background: rgba(255, 140, 0, 0.08);
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.dano-titulo {
+    font-weight: bold;
+    color: var(--dourado-principal);
+    min-width: 40px;
+    text-align: right;
+}
+
+.dano-valor {
+    font-weight: bold;
+    color: var(--texto-principal);
+    min-width: 50px;
+}
+
+.dano-tipo {
+    color: var(--texto-secundario);
+    font-style: italic;
+    font-size: 0.85rem;
+    padding-left: 5px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Fim do CSS completo */
