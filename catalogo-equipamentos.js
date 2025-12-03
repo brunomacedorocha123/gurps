@@ -11,31 +11,31 @@ class CatalogoEquipamentos {
                     },
                    {
     id: "M801", 
-    nome: "Espada Longa", 
+    nome: "Espada Larga", 
     tipo: "arma-cc", 
     era: "medieval", 
     nt: 0,
-    dano: "GEB+1",  // GEB: +1
+    dano: "GEB+1",  
     tipoDano: "corte",
-    danoGDP: "GDP+2",  // GDP: +2 (adicione esta linha)
-    tipoDanoGDP: "perfuração",  // (adicione esta linha)
-    alcance: "1,2", 
-    peso: 3.0, 
+    danoGDP: "GdP+1",  
+    tipoDanoGDP: "contusão",  
+    alcance: "1", 
+    peso: 1.5, 
     st: 10, 
-    custo: 600,
+    custo: 500,
     maos: 1.5, 
     quantificavel: false, 
-    descricao: "Espada longa versátil"
+    descricao: "Espada larga"
 },
                     {
                         id: "M802", nome: "Lança", tipo: "arma-cc", era: "medieval", nt: 0,
-                        dano: "1d+2", tipoDano: "perfuração", alcance: "1,2", peso: 4.0, st: 10,
-                        custo: 400, maos: 2, quantificavel: false, descricao: "Lança de combate"
+                        dano: "GdP+3", tipoDano: "perfuração", alcance: "1,2", peso: 2.0, st: 9,
+                        custo: 40, maos: 2, quantificavel: false, descricao: "Lança de combate"
                     },
                     {
                         id: "M803", nome: "Martelo de Guerra", tipo: "arma-cc", era: "medieval", nt: 0,
-                        dano: "2d+1", tipoDano: "contusão", alcance: "1", peso: 5.0, st: 12, custo: 300,
-                        maos: 2, quantificavel: false, descricao: "Martelo pesado de guerra"
+                        dano: "GeB+3", tipoDano: "perfuração", alcance: "1,2", peso: 3.5, st: 12, custo: 100,
+                        maos: 2, quantificavel: false, descricao: "Martelo de guerra"
                     },
                     {
                         id: "M804", nome: "Adaga", tipo: "arma-cc", era: "medieval", nt: 0,
