@@ -125,33 +125,33 @@ class CatalogoEquipamentos {
                 ],
                 "equipamentosGerais": [
                     {
-                        id: "M1000", nome: "Mochila (40kg)", tipo: "geral", era: "medieval",
-                        categoria: "Transporte", custo: 60, peso: 2.0, cl: 4, maos: 0,
-                        quantificavel: false, descricao: "Mochila de couro"
+                        id: "M1000", nome: "Mochila (50kg)", tipo: "geral", era: "medieval",
+                        categoria: "Sobrevivência", custo: 100, peso: 5.0, cl: 4, maos: 0,
+                        quantificavel: false, descricao: "Mochila"
                     },
                     {
-                        id: "M1001", nome: "Corda (10m)", tipo: "geral", era: "medieval",
-                        categoria: "Sobrevivência", custo: 25, peso: 1.5, cl: 4, maos: 0,
-                        quantificavel: true, descricao: "Corda de cânhamo"
+                        id: "M1001", nome: "Corda 3/4 (10m)", tipo: "geral", era: "medieval",
+                        categoria: "Sobrevivência", custo: 25, peso: 2.5, cl: 0, maos: 0,
+                        quantificavel: true, descricao: "Corda 3/4"
                     },
                     {
-                        id: "M1002", nome: "Tochas (x3)", tipo: "geral", era: "medieval",
-                        categoria: "Iluminação", custo: 9, peso: 1.0, cl: 4, maos: 1,
-                        quantificavel: true, descricao: "Tochas de madeira resinosa"
+                        id: "M1002", nome: "Tocha (1 Hora)", tipo: "geral", era: "medieval",
+                        categoria: "Sobrevivência", custo: 3, peso: 1.0, cl: 0, maos: 1,
+                        quantificavel: true, descricao: "Tocha"
                     },
                     {
-                        id: "M1003", nome: "Kit de Primeiros Socorros", tipo: "geral", era: "medieval",
-                        categoria: "Saúde", custo: 50, peso: 2.0, cl: 4, maos: 0,
-                        quantificavel: true, descricao: "Bandagens e ervas medicinais"
+                        id: "M1003", nome: "Kit Básico para Primeiros Socorros", tipo: "geral", era: "medieval",
+                        categoria: "Saúde", custo: 10, peso: 1.0, cl: 4, maos: 0,
+                        quantificavel: true, descricao: "Kit Básico para Primeiros Socorros"
                     },
                     {
-                        id: "M1004", nome: "Água (1L)", tipo: "geral", era: "medieval",
-                        categoria: "Sobrevivência", custo: 1, peso: 1.0, cl: 4, maos: 0,
-                        quantificavel: true, descricao: "Odre com água"
+                        id: "M1004", nome: "Odre de Vinho (4L)", tipo: "geral", era: "medieval",
+                        categoria: "Sobrevivência", custo: 10, peso: 0.125, cl: 0, maos: 0,
+                        quantificavel: true, descricao: "Odre de Vinho"
                     },
                     {
-                        id: "M1005", nome: "Rações (1 dia)", tipo: "geral", era: "medieval",
-                        categoria: "Sobrevivência", custo: 5, peso: 0.5, cl: 4, maos: 0,
+                        id: "M1005", nome: "Ração de Viagem (1 dia)", tipo: "geral", era: "medieval",
+                        categoria: "Sobrevivência", custo: 2, peso: 0.25, cl: 0, maos: 0,
                         quantificavel: true, descricao: "Rações de viagem"
                     }
                 ]
