@@ -1,5 +1,6 @@
-// ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA 100% =====
+// ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA 100% FUNCIONAL =====
 // Sistema completo para gerenciar perícias com modal de escolha
+// Integração automática com sistema de atributos
 
 let estadoPericias = {
     adquiridas: [],      // Perícias adquiridas pelo jogador
@@ -7,66 +8,49 @@ let estadoPericias = {
     pontosDisponiveis: 150  // Pontos disponíveis para gastar
 };
 
-// ===== FUNÇÕES PARA INTEGRAÇÃO COM SISTEMA PRINCIPAL =====
+// ===== FUNÇÕES PARA OBTER ATRIBUTOS ATUAIS =====
 
 function obterAtributosAtuais() {
-    // Primeiro tenta usar funções do sistema principal
-    if (typeof window.obterValorAtributo === 'function') {
-        return {
-            ST: window.obterValorAtributo('ST') || 10,
-            DX: window.obterValorAtributo('DX') || 10,
-            IQ: window.obterValorAtributo('IQ') || 10,
-            HT: window.obterValorAtributo('HT') || 10,
-            PERC: window.obterValorAtributo('PERC') || 10
-        };
+    // Busca valores dos atributos no sistema principal
+    let ST = 10, DX = 10, IQ = 10, HT = 10, PERC = 10;
+    
+    // Buscar ST
+    const inputST = document.getElementById('ST');
+    if (inputST && inputST.value) ST = parseInt(inputST.value) || 10;
+    
+    // Buscar DX
+    const inputDX = document.getElementById('DX');
+    if (inputDX && inputDX.value) DX = parseInt(inputDX.value) || 10;
+    
+    // Buscar IQ
+    const inputIQ = document.getElementById('IQ');
+    if (inputIQ && inputIQ.value) IQ = parseInt(inputIQ.value) || 10;
+    
+    // Buscar HT
+    const inputHT = document.getElementById('HT');
+    if (inputHT && inputHT.value) HT = parseInt(inputHT.value) || 10;
+    
+    // Buscar Percepção (PERC)
+    const percElement = document.getElementById('PercepcaoTotal');
+    if (percElement) {
+        const percText = percElement.textContent || percElement.innerText || '10';
+        PERC = parseInt(percText.replace(/[^0-9]/g, '')) || IQ;
+    } else {
+        PERC = IQ; // Se não encontrar, usa IQ
     }
     
-    // Se não tiver funções do sistema principal, busca no DOM
-    const atributos = { ST: 10, DX: 10, IQ: 10, HT: 10, PERC: 10 };
-    
-    // Procurar elementos de atributos no DOM
-    const elementosAtributos = {
-        ST: document.getElementById('ST') || document.querySelector('[data-atributo="ST"]'),
-        DX: document.getElementById('DX') || document.querySelector('[data-atributo="DX"]'),
-        IQ: document.getElementById('IQ') || document.querySelector('[data-atributo="IQ"]'),
-        HT: document.getElementById('HT') || document.querySelector('[data-atributo="HT"]'),
-        PERC: document.getElementById('PercepcaoTotal') || document.querySelector('[data-atributo="PERC"]')
-    };
-    
-    for (const [atributo, elemento] of Object.entries(elementosAtributos)) {
-        if (elemento) {
-            let valorTexto = elemento.value || elemento.textContent || elemento.innerText || '10';
-            valorTexto = valorTexto.replace(/[^0-9\-]/g, '');
-            const valor = parseInt(valorTexto);
-            if (!isNaN(valor)) {
-                atributos[atributo] = valor;
-            }
-        }
-    }
-    
-    // Se PERC não foi encontrado, usar IQ
-    if (atributos.PERC === 10 && atributos.IQ !== 10) {
-        atributos.PERC = atributos.IQ;
-    }
-    
-    return atributos;
+    return { ST, DX, IQ, HT, PERC };
 }
 
 function obterPontosGastosAtributos() {
-    // Tenta usar função do sistema principal
-    if (typeof window.obterPontosGastosAtributos === 'function') {
-        return window.obterPontosGastosAtributos();
-    }
-    
-    // Tenta obter do elemento HTML
-    const elemento = document.getElementById('total-atributos-adquiridos') || 
-                    document.getElementById('pontosGastos') ||
-                    document.querySelector('.ponto-card.gastos .ponto-valor');
+    // Buscar pontos gastos em atributos
+    const elemento = document.getElementById('pontosGastos') || 
+                     document.getElementById('total-atributos-adquiridos');
     
     if (elemento) {
-        let valorTexto = elemento.textContent || elemento.innerText || '0';
-        valorTexto = valorTexto.replace(/[^0-9\-]/g, '');
-        const valor = parseInt(valorTexto);
+        let texto = elemento.textContent || elemento.innerText || '0';
+        texto = texto.replace(/[^0-9\-]/g, '');
+        const valor = parseInt(texto);
         return isNaN(valor) ? 0 : Math.abs(valor);
     }
     
@@ -160,10 +144,8 @@ function configurarBuscaEFiltros() {
     }
 }
 
-// ===== SISTEMA DE ESCUTA DE ATRIBUTOS =====
-
 function configurarEscutaAtributos() {
-    // Escutar mudanças nos inputs de atributos
+    // Escutar mudanças nos atributos principais
     ['ST', 'DX', 'IQ', 'HT'].forEach(atributo => {
         const input = document.getElementById(atributo);
         if (input) {
@@ -174,13 +156,6 @@ function configurarEscutaAtributos() {
             });
         }
     });
-    
-    // Escutar mudanças em percepção
-    const percElement = document.getElementById('PercepcaoTotal');
-    if (percElement) {
-        const observer = new MutationObserver(atualizarInterfacePericias);
-        observer.observe(percElement, { childList: true, characterData: true });
-    }
 }
 
 // ===== FILTRAGEM DE PERÍCIAS =====
@@ -189,16 +164,9 @@ function filtrarPericias(termoBusca, filtroAtributo) {
     const listaContainer = document.getElementById('lista-pericias');
     if (!listaContainer) return;
     
-    // Remover todos os grupos existentes
     listaContainer.innerHTML = '';
-    
-    // Criar grupos baseados no catálogo
     criarGruposPericias(termoBusca, filtroAtributo);
-    
-    // Adicionar eventos aos grupos
     adicionarEventosGrupos();
-    
-    // Atualizar contador
     atualizarContadorPericias();
 }
 
@@ -207,20 +175,15 @@ function filtrarPericias(termoBusca, filtroAtributo) {
 function criarGruposPericias(termoBusca = '', filtroAtributo = 'Todos') {
     const listaContainer = document.getElementById('lista-pericias');
     
-    // Processar cada categoria
     for (const [categoriaNome, conteudoCategoria] of Object.entries(window.catalogoPericias)) {
-        
-        // Verificar se a categoria passa no filtro
         if (filtroAtributo !== 'Todos' && filtroAtributo !== categoriaNome) {
             continue;
         }
         
-        // Criar grupo da categoria
         const grupoDiv = document.createElement('div');
         grupoDiv.className = 'grupo-pericias ativo';
         grupoDiv.dataset.categoria = categoriaNome;
         
-        // Definir ícone baseado na categoria
         let icone = '🎯';
         switch(categoriaNome) {
             case 'Combate': icone = '⚔️'; break;
@@ -240,28 +203,23 @@ function criarGruposPericias(termoBusca = '', filtroAtributo = 'Todos') {
         
         listaContainer.appendChild(grupoDiv);
         
-        // Adicionar perícias ao grupo
         const grupoConteudo = grupoDiv.querySelector('.grupo-conteudo');
         grupoConteudo.innerHTML = '';
         
-        // Adicionar perícias baseado no tipo de conteúdo
         if (Array.isArray(conteudoCategoria)) {
-            // Categoria com array direto (DX, IQ, HT, PERC)
             adicionarPericiasArray(grupoConteudo, conteudoCategoria, termoBusca);
         } else {
-            // Categoria com objeto estruturado (Combate)
             adicionarPericiasCombate(grupoConteudo, conteudoCategoria, termoBusca);
         }
     }
 }
 
-// ===== ADICIONAR PERÍCIAS DE ARRAY (DX, IQ, HT, PERC) =====
+// ===== ADICIONAR PERÍCIAS DE ARRAY =====
 
 function adicionarPericiasArray(container, arrayPericias, termoBusca) {
     let encontrouAlguma = false;
     
     arrayPericias.forEach(pericia => {
-        // Verificar se passa na busca
         if (termoBusca && !pericia.nome.toLowerCase().includes(termoBusca.toLowerCase())) {
             return;
         }
@@ -282,9 +240,7 @@ function adicionarPericiasCombate(container, objetoCombate, termoBusca) {
     let encontrouAlguma = false;
     
     for (const [grupoNome, dadosGrupo] of Object.entries(objetoCombate)) {
-        // Verificar se passa na busca
         if (termoBusca && !grupoNome.toLowerCase().includes(termoBusca.toLowerCase())) {
-            // Verificar também se alguma perícia dentro passa
             let temPericiaNaBusca = false;
             if (dadosGrupo.tipo === 'modal-escolha') {
                 temPericiaNaBusca = dadosGrupo.pericias.some(p => 
@@ -297,11 +253,9 @@ function adicionarPericiasCombate(container, objetoCombate, termoBusca) {
         encontrouAlguma = true;
         
         if (dadosGrupo.tipo === 'pericia-simples') {
-            // Perícia simples (ex: Arco)
             const item = criarItemPericia(dadosGrupo);
             container.appendChild(item);
         } else if (dadosGrupo.tipo === 'modal-escolha') {
-            // Grupo que abre modal (ex: Armas de Esgrima)
             const item = criarItemGrupoModal(dadosGrupo);
             container.appendChild(item);
         }
@@ -370,7 +324,7 @@ function criarItemGrupoModal(grupo) {
     return item;
 }
 
-// ===== MODAL DE ESCOLHA DE PERÍCIA (PARA GRUPOS) =====
+// ===== MODAL DE ESCOLHA DE PERÍCIA =====
 
 function abrirModalEscolhaPericia(grupo) {
     const modal = document.getElementById('modal-pericia');
@@ -381,12 +335,9 @@ function abrirModalEscolhaPericia(grupo) {
     
     if (!modal || !titulo || !corpo) return;
     
-    // Armazenar grupo para uso posterior
     modal.dataset.grupoAtual = grupo.nome;
-    
     titulo.textContent = grupo.nome;
     
-    // Criar HTML das opções
     let opcoesHTML = '';
     grupo.pericias.forEach((pericia, index) => {
         const dificuldade = pericia.dificuldade || 'Média';
@@ -431,7 +382,6 @@ function abrirModalEscolhaPericia(grupo) {
         <input type="hidden" id="pericia-escolhida-index" value="">
     `;
     
-    // Configurar eventos das opções
     const radios = corpo.querySelectorAll('.especializacao-radio');
     const periciaIdInput = corpo.querySelector('#pericia-escolhida-id');
     const periciaIndexInput = corpo.querySelector('#pericia-escolhida-index');
@@ -444,28 +394,21 @@ function abrirModalEscolhaPericia(grupo) {
         });
     });
     
-    // Configurar botão confirmar
     btnConfirmar.onclick = () => {
         const index = parseInt(periciaIndexInput.value);
         if (!isNaN(index) && index >= 0 && grupo.pericias[index]) {
             const periciaEscolhida = grupo.pericias[index];
-            
-            // Fechar modal de escolha
             modal.style.display = 'none';
-            
-            // Abrir modal de nível
             setTimeout(() => {
                 abrirModalNivelPericia(periciaEscolhida);
             }, 100);
         }
     };
     
-    // Configurar botão cancelar
     btnCancelar.onclick = () => {
         modal.style.display = 'none';
     };
     
-    // Configurar fechar modal
     const modalClose = modal.querySelector('.modal-close');
     if (modalClose) {
         modalClose.onclick = () => {
@@ -473,15 +416,11 @@ function abrirModalEscolhaPericia(grupo) {
         };
     }
     
-    // Fechar ao clicar fora
     modal.onclick = (e) => {
         if (e.target === modal) modal.style.display = 'none';
     };
     
-    // Resetar botão confirmar
     btnConfirmar.disabled = true;
-    
-    // Mostrar modal
     modal.style.display = 'block';
 }
 
@@ -496,14 +435,11 @@ function abrirModalNivelPericia(pericia) {
     
     if (!modal || !titulo || !corpo) return;
     
-    // Obter atributos atuais do personagem
     const atributos = obterAtributosAtuais();
     const valorAtributo = atributos[pericia.atributo] || 10;
     
-    // Verificar se já existe esta perícia
     const periciaExistente = estadoPericias.adquiridas.find(p => p.id === pericia.id);
     
-    // Definir nível inicial baseado na dificuldade
     let nivelInicial = 0;
     if (periciaExistente) {
         nivelInicial = periciaExistente.nivelRelativo;
@@ -574,7 +510,6 @@ function abrirModalNivelPericia(pericia) {
         <input type="hidden" id="pericia-id" value="${pericia.id}">
     `;
     
-    // Configurar elementos do DOM
     const nivelHidden = corpo.querySelector('#nivel-pericia');
     const btnMenos = corpo.querySelector('#btn-pericia-menos');
     const btnMais = corpo.querySelector('#btn-pericia-mais');
@@ -582,34 +517,27 @@ function abrirModalNivelPericia(pericia) {
     const nivelRelativo = corpo.querySelector('#nivel-relativo');
     const custoElement = corpo.querySelector('#custo-pericia');
     const custoAdicional = corpo.querySelector('#custo-adicional');
-    const periciaIdHidden = corpo.querySelector('#pericia-id');
     
-    // Função para atualizar display
     function atualizarDisplay() {
         const nivel = parseInt(nivelHidden.value);
         const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
         
-        // Obter atributo ATUAL (pode ter mudado)
         const atributosAtual = obterAtributosAtuais();
         const valorAtributoAtual = atributosAtual[pericia.atributo] || valorAtributo;
         const nhAtual = valorAtributoAtual + nivel;
         
-        // Obter níveis válidos
         const tabelaCusto = obterTabelaCusto(pericia.dificuldade);
         const niveisValidos = tabelaCusto.map(item => item.nivel);
         const nivelMinimo = Math.min(...niveisValidos);
         const nivelMaximo = Math.max(...niveisValidos);
         
-        // Atualizar valores
         nhFinal.textContent = nhAtual;
         nivelRelativo.innerHTML = `${pericia.atributo}${nivel >= 0 ? '+' : ''}${nivel}`;
         custoElement.textContent = custoTotal;
         
-        // Limitar botões
         btnMenos.disabled = nivel <= nivelMinimo;
         btnMais.disabled = nivel >= nivelMaximo;
         
-        // Custo adicional se já existir
         if (periciaExistente && custoAdicional) {
             const custoExtra = custoTotal - custoAtual;
             custoAdicional.textContent = custoExtra >= 0 ? `+${custoExtra}` : custoExtra;
@@ -617,10 +545,10 @@ function abrirModalNivelPericia(pericia) {
                                          custoExtra < 0 ? '#e74c3c' : '#ccc';
         }
         
+        // AQUI ESTÁ A CORREÇÃO: SEMPRE HABILITAR O BOTÃO CONFIRMAR
         btnConfirmar.disabled = false;
     }
     
-    // Eventos dos botões + e -
     btnMenos.addEventListener('click', () => {
         let nivel = parseInt(nivelHidden.value);
         const tabelaCusto = obterTabelaCusto(pericia.dificuldade);
@@ -645,23 +573,19 @@ function abrirModalNivelPericia(pericia) {
         }
     });
     
-    // Configurar botão confirmar
     btnConfirmar.onclick = () => {
         const nivel = parseInt(nivelHidden.value);
         const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
         
-        if (custoTotal > 0) {
-            adicionarOuAtualizarPericia(pericia, nivel, custoTotal);
-            modal.style.display = 'none';
-        }
+        // ADICIONAR OU ATUALIZAR A PERÍCIA
+        adicionarOuAtualizarPericia(pericia, nivel, custoTotal);
+        modal.style.display = 'none';
     };
     
-    // Configurar botão cancelar
     btnCancelar.onclick = () => {
         modal.style.display = 'none';
     };
     
-    // Configurar fechar modal
     const modalClose = modal.querySelector('.modal-close');
     if (modalClose) {
         modalClose.onclick = () => {
@@ -669,15 +593,11 @@ function abrirModalNivelPericia(pericia) {
         };
     }
     
-    // Fechar ao clicar fora
     modal.onclick = (e) => {
         if (e.target === modal) modal.style.display = 'none';
     };
     
-    // Inicializar display
     atualizarDisplay();
-    
-    // Mostrar modal
     modal.style.display = 'block';
 }
 
@@ -687,7 +607,6 @@ function adicionarOuAtualizarPericia(pericia, nivel, custo) {
     const indexExistente = estadoPericias.adquiridas.findIndex(p => p.id === pericia.id);
     
     if (indexExistente !== -1) {
-        // Atualizar perícia existente
         const custoAntigo = estadoPericias.adquiridas[indexExistente].custo;
         estadoPericias.adquiridas[indexExistente] = {
             ...estadoPericias.adquiridas[indexExistente],
@@ -697,7 +616,6 @@ function adicionarOuAtualizarPericia(pericia, nivel, custo) {
         };
         estadoPericias.pontosGastos += (custo - custoAntigo);
     } else {
-        // Adicionar nova perícia
         estadoPericias.adquiridas.push({
             id: pericia.id,
             nome: pericia.nome,
@@ -741,7 +659,6 @@ function carregarPericiasAdquiridas() {
     }
     
     estadoPericias.adquiridas.forEach(pericia => {
-        // Obter atributo ATUAL (pode ter mudado desde que a perícia foi adquirida)
         const atributos = obterAtributosAtuais();
         const valorAtributo = atributos[pericia.atributo] || 10;
         const nhFinal = valorAtributo + pericia.nivelRelativo;
@@ -760,10 +677,8 @@ function carregarPericiasAdquiridas() {
             <button class="btn-remover" onclick="removerPericia('${pericia.id}')">×</button>
         `;
         
-        // Adicionar evento para editar
         item.addEventListener('click', (e) => {
             if (!e.target.classList.contains('btn-remover')) {
-                // Encontrar a perícia original no catálogo
                 const periciaOriginal = encontrarPericiaNoCatalogo(pericia.id);
                 if (periciaOriginal) {
                     abrirModalNivelPericia({
@@ -783,14 +698,11 @@ function carregarPericiasAdquiridas() {
 // ===== FUNÇÕES AUXILIARES =====
 
 function encontrarPericiaNoCatalogo(id) {
-    // Buscar em todas as categorias
     for (const [categoria, conteudo] of Object.entries(window.catalogoPericias)) {
         if (Array.isArray(conteudo)) {
-            // Buscar em array (DX, IQ, HT, PERC)
             const encontrada = conteudo.find(p => p.id === id);
             if (encontrada) return encontrada;
         } else {
-            // Buscar em objeto (Combate)
             for (const [grupoNome, grupo] of Object.entries(conteudo)) {
                 if (grupo.tipo === 'pericia-simples' && grupo.id === id) {
                     return grupo;
@@ -818,7 +730,6 @@ function atualizarContadorPericias() {
     const contador = document.getElementById('contador-pericias');
     if (!contador) return;
     
-    // Contar perícias totais no catálogo
     let total = 0;
     for (const [categoria, conteudo] of Object.entries(window.catalogoPericias)) {
         if (Array.isArray(conteudo)) {
@@ -863,13 +774,12 @@ function atualizarInterfacePericias() {
 }
 
 function configurarEventosModais() {
-    // Eventos já configurados nas funções de modal
+    // Configuração já feita nas funções dos modais
 }
 
 // ===== INICIALIZAÇÃO AUTOMÁTICA =====
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar se a aba de perícias está ativa
     const periciasTab = document.getElementById('pericias');
     if (periciasTab && periciasTab.classList.contains('active')) {
         setTimeout(() => {
@@ -877,7 +787,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     }
     
-    // Observar mudanças na aba
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
@@ -891,7 +800,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Observar todas as abas
     document.querySelectorAll('.tab-content').forEach(tab => {
         observer.observe(tab, { attributes: true });
     });
