@@ -1,4 +1,7 @@
-// equipamentos.js - SISTEMA COMPLETO COM DINHEIRO POR RIQUEZA - VERSÃO CORRIGIDA (BUG FIX)
+// equipamentos.js - SISTEMA COMPLETO COM DINHEIRO POR RIQUEZA - VERSÃO CORRIGIDA E ATUALIZADA
+// ✅ Correção: escudo agora equipa corretamente com arma de 1 mão
+// ✅ Nova funcionalidade: botão "Excluir" (ícone de lixeira) em itens adquiridos
+// ✅ CORREÇÃO DE CARGA: agora mostra "Muito Pesada" como limite máximo (ex: ST10 → 100 kg)
 class SistemaEquipamentos {
     constructor() {
         this.equipamentosAdquiridos = [];
@@ -13,8 +16,9 @@ class SistemaEquipamentos {
         this.ST = 10;
         this.pesoAtual = 0;
         this.capacidadeCarga = this.calcularCapacidadeCarga();
-        this.pesoMaximo = this.capacidadeCarga.pesada;
-        this.nivelCargaAtual = 'leve';
+        // ✅ ALTERAÇÃO PRINCIPAL: pesoMaximo agora é "muitoPesada" (limite físico máximo)
+        this.pesoMaximo = this.capacidadeCarga.muitoPesada;
+        this.nivelCargaAtual = 'nenhuma';
         this.penalidadesCarga = 'MOV +0 / DODGE +0';
         this.mochilaAtiva = true;
         this.equipamentosEquipados = {
@@ -221,30 +225,33 @@ class SistemaEquipamentos {
         if (ST < 1) stKey = 1;
         return cargasTable[stKey] || cargasTable[10];
     }
+    // ✅ LÓGICA DE CARGA 100% CONFORME REGRAS OFICIAIS DO GURPS
     atualizarNivelCarga() {
         const peso = this.pesoAtual;
         const { nenhuma, leve, media, pesada, muitoPesada } = this.capacidadeCarga;
-        let novoNivel = 'leve';
+        let novoNivel = 'nenhuma';
         let novasPenalidades = 'MOV +0 / DODGE +0';
+
         if (peso <= nenhuma) {
             novoNivel = 'nenhuma';
             novasPenalidades = 'MOV +0 / DODGE +0';
         } else if (peso <= leve) {
             novoNivel = 'leve';
-            novasPenalidades = 'MOV +0 / DODGE +0';
+            novasPenalidades = 'MOV -1 / DODGE -1';
         } else if (peso <= media) {
             novoNivel = 'média';
-            novasPenalidades = 'MOV -1 / DODGE -1';
+            novasPenalidades = 'MOV -2 / DODGE -2';
         } else if (peso <= pesada) {
             novoNivel = 'pesada';
-            novasPenalidades = 'MOV -2 / DODGE -2';
+            novasPenalidades = 'MOV -3 / DODGE -3';
         } else if (peso <= muitoPesada) {
             novoNivel = 'muito pesada';
-            novasPenalidades = 'MOV -3 / DODGE -3';
+            novasPenalidades = 'MOV -4 / DODGE -4';
         } else {
             novoNivel = 'sobrecarregado';
             novasPenalidades = 'MOV -4 / DODGE -4 / Não pode correr';
         }
+
         if (this.nivelCargaAtual !== novoNivel || this.penalidadesCarga !== novasPenalidades) {
             this.nivelCargaAtual = novoNivel;
             this.penalidadesCarga = novasPenalidades;
@@ -435,8 +442,7 @@ class SistemaEquipamentos {
             this.ultimasTransacoes = this.ultimasTransacoes.slice(0, 10);
         }
     }
-
-    // ========== COMPRA E VENDA - VERSÃO CORRIGIDA (BUG FIX AQUI!) ==========
+    // ========== COMPRA E VENDA - VERSÃO CORRIGIDA ==========
     comprarEquipamento(itemId, elemento) {
         console.log('🛒 INICIANDO COMPRA - Item ID:', itemId);
         if (!this.catalogoPronto) {
@@ -450,23 +456,15 @@ class SistemaEquipamentos {
             return;
         }
         console.log('📦 Equipamento:', equipamento.nome, 'Quantificável:', equipamento.quantificavel);
-
-        // ====== ITENS QUANTIFICÁVEIS (ex: poções, flechas) ======
         if (equipamento.quantificavel === true) {
             console.log('🎯 Item QUANTIFICÁVEL - Abrindo modal de quantidade');
             this.abrirSubmenuQuantidade(itemId, elemento);
             return;
         }
-
-        // ====== ITENS NÃO QUANTIFICÁVEIS (armas, armaduras, escudos) ======
         if (this.dinheiro < equipamento.custo) {
             this.mostrarFeedback(`Dinheiro insuficiente! Necessário: $${equipamento.custo}`, 'erro');
             return;
         }
-
-        // ✅ CORREÇÃO: REMOVIDA verificação anti-duplicata para itens não quantificáveis
-        // Agora, o jogador pode comprar múltiplas cópias de armas/armaduras normalmente
-
         const novoEquipamento = {
             ...equipamento,
             adquiridoEm: new Date().toISOString(),
@@ -475,11 +473,9 @@ class SistemaEquipamentos {
             idUnico: this.gerarIdUnico(),
             quantidade: 1
         };
-
         this.equipamentosAdquiridos.push(novoEquipamento);
         this.equipamentosEquipados.mochila.push(novoEquipamento);
         this.dinheiro -= equipamento.custo;
-
         this.mostrarFeedback(`${equipamento.nome} comprado com sucesso!`, 'sucesso');
         this.atualizarInterface();
         this.notificarDashboard();
@@ -490,7 +486,6 @@ class SistemaEquipamentos {
         });
         console.log('✅ Compra concluída com sucesso!');
     }
-
     venderEquipamento(itemId) {
         const index = this.equipamentosAdquiridos.findIndex(item => item.idUnico === itemId);
         if (index === -1) {
@@ -514,7 +509,6 @@ class SistemaEquipamentos {
             descricao: `Venda: ${equipamento.nome}`
         });
     }
-
     // ========== MÉTODOS DE INTERFACE ==========
     configurarEventosGlobais() {
         document.addEventListener('click', (e) => {
@@ -572,6 +566,7 @@ class SistemaEquipamentos {
         const pesoAtualElem = document.getElementById('pesoAtual');
         if (pesoAtualElem) pesoAtualElem.textContent = this.pesoAtual.toFixed(1);
         const pesoMaximoElem = document.getElementById('pesoMaximo');
+        // ✅ Agora exibe "muitoPesada" como limite máximo
         if (pesoMaximoElem) pesoMaximoElem.textContent = this.pesoMaximo.toFixed(1);
         const nivelCargaElem = document.getElementById('nivelCarga');
         if (nivelCargaElem) {
@@ -687,7 +682,7 @@ class SistemaEquipamentos {
             version: '1.0-integrado'
         };
     }
-    // ========== SUBMENU DE QUANTIDADE - VERSÃO CORRIGIDA ==========
+    // ========== SUBMENU DE QUANTIDADE ==========
     abrirSubmenuQuantidade(itemId, elemento) {
         const equipamento = this.obterEquipamentoPorId(itemId);
         if (!equipamento) return;
@@ -748,22 +743,18 @@ class SistemaEquipamentos {
             this.mostrarFeedback(`Dinheiro insuficiente! Necessário: $${custoTotal}`, 'erro');
             return;
         }
-        // ====== CORREÇÃO PARA ITENS QUANTIFICÁVEIS ======
-        // Para itens quantificáveis, busca item existente do MESMO TIPO
         const itemExistente = this.equipamentosAdquiridos.find(item => 
-            item.id === equipamento.id && // MESMO ID
-            item.status === 'na-mochila' && // NA MOCHILA
-            !item.equipado && // NÃO EQUIPADO
-            item.quantificavel === true // É ITEM QUANTIFICÁVEL
+            item.id === equipamento.id && 
+            item.status === 'na-mochila' && 
+            !item.equipado && 
+            item.quantificavel === true
         );
         console.log('🔍 Item existente para quantificação:', itemExistente ? 'ENCONTRADO' : 'NOVO');
         if (itemExistente) {
-            // SE JÁ EXISTE, AUMENTA A QUANTIDADE
             console.log('➕ Aumentando quantidade do item existente');
             itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
             itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
         } else {
-            // SE NÃO EXISTE, CRIA NOVO COM QUANTIDADE
             console.log('🆕 Criando novo item com quantidade');
             const novoEquipamento = {
                 ...equipamento,
@@ -815,11 +806,21 @@ class SistemaEquipamentos {
             this.mostrarFeedback('Não é possível equipar itens em quantidade!', 'erro');
             return;
         }
-        switch(equipamento.tipo) {
+        // ✅ DETECÇÃO ROBUSTA DE ESCUDO (mesmo com dados incompletos)
+        let tipoItem = equipamento.tipo;
+        // Força escudo se tiver BD ou RD/PV (características exclusivas de escudo)
+        if (!tipoItem && (equipamento.hasOwnProperty('bd') || equipamento.hasOwnProperty('rdpv'))) {
+            tipoItem = 'escudo';
+        }
+        // Também força se usa mãos, mas não é arma e não é armadura
+        if (!tipoItem && equipamento.maos > 0 && !equipamento.rd && !equipamento.dano) {
+            tipoItem = 'escudo';
+        }
+        switch(tipoItem) {
             case 'arma-cc':
             case 'arma-dist':
                 if (!this.podeEquiparArma(equipamento)) {
-                    this.mostrarFeedback('Não há mãos suficientes!', 'erro');
+                    this.mostrarFeedback('Mãos insuficientes para esta arma!', 'erro');
                     return;
                 }
                 this.equiparArma(itemId);
@@ -833,7 +834,13 @@ class SistemaEquipamentos {
                 break;
             case 'escudo':
                 if (!this.podeEquiparEscudo(equipamento)) {
-                    this.mostrarFeedback('Não é possível equipar este escudo!', 'erro');
+                    const maosOcupadas = this.calcularMaosOcupadas();
+                    const maosNecessarias = equipamento.maos || 1;
+                    if (maosOcupadas + maosNecessarias > this.maosDisponiveis) {
+                        this.mostrarFeedback('Mãos insuficientes para equipar o escudo!', 'erro');
+                    } else {
+                        this.mostrarFeedback('Não é possível equipar este escudo!', 'erro');
+                    }
                     return;
                 }
                 this.equiparEscudo(itemId);
@@ -1213,11 +1220,37 @@ class SistemaEquipamentos {
             `;
         }
         botoes += `
-            <button class="btn-equipamento-acao remover" onclick="sistemaEquipamentos.venderEquipamento('${equipamento.idUnico}')">
-                <i class="fas fa-coins"></i> Vender
+            <button class="btn-equipamento-acao" onclick="sistemaEquipamentos.venderEquipamento('${equipamento.idUnico}')">
+                <i class="fas fa-coins"></i>
+            </button>
+        `;
+        // ✅ NOVO: Botão EXCLUIR com ícone de lixeira
+        botoes += `
+            <button class="btn-equipamento-acao remover" 
+                    title="Excluir permanentemente"
+                    style="background: rgba(100,100,100,0.2); border-color: #666; color: #ccc;"
+                    onclick="sistemaEquipamentos.excluirItem('${equipamento.idUnico}')">
+                <i class="fas fa-trash"></i>
             </button>
         `;
         return botoes;
+    }
+    // ✅ NOVA FUNÇÃO: Excluir item permanentemente
+    excluirItem(itemId) {
+        if (!confirm('⚠️ Excluir permanentemente?\nEsta ação não pode ser desfeita.')) {
+            return;
+        }
+        const index = this.equipamentosAdquiridos.findIndex(item => item.idUnico === itemId);
+        if (index === -1) {
+            this.mostrarFeedback('Item não encontrado!', 'erro');
+            return;
+        }
+        const equipamento = this.equipamentosAdquiridos[index];
+        this.removerDeTodosOsLocais(itemId);
+        this.equipamentosAdquiridos.splice(index, 1);
+        this.deposito = this.deposito.filter(item => item.idUnico !== itemId);
+        this.mostrarFeedback(`🗑️ ${equipamento.nome} excluído`, 'aviso');
+        this.atualizarInterface();
     }
     obterTextoMaos(maos) {
         switch(maos) {
@@ -1262,6 +1295,13 @@ class SistemaEquipamentos {
                     </button>
                     <button class="btn-deposito" onclick="sistemaEquipamentos.venderEquipamento('${equipamento.idUnico}')">
                         <i class="fas fa-coins"></i> Vender
+                    </button>
+                    <!-- ✅ Botão Excluir também no depósito -->
+                    <button class="btn-deposito" 
+                            title="Excluir permanentemente"
+                            style="background: rgba(100,100,100,0.2); border-color: #666; color: #ccc;"
+                            onclick="sistemaEquipamentos.excluirItem('${equipamento.idUnico}')">
+                        <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </div>
@@ -1745,7 +1785,8 @@ class SistemaEquipamentos {
         if (this.ST !== novoST) {
             this.ST = novoST;
             this.capacidadeCarga = this.calcularCapacidadeCarga();
-            this.pesoMaximo = this.capacidadeCarga.pesada;
+            // ✅ Atualiza também o pesoMaximo quando ST muda
+            this.pesoMaximo = this.capacidadeCarga.muitoPesada;
             this.atualizarNivelCarga();
             this.atualizarInterface();
         }
@@ -1753,36 +1794,15 @@ class SistemaEquipamentos {
 }
 // ========== INICIALIZAÇÃO GLOBAL ==========
 let sistemaEquipamentos;
-// VERIFICAÇÃO SIMPLIFICADA PARA EVITAR DUPLICAÇÃO
 if (!window.sistemaEquipamentosInicializado) {
-    window.sistemaEquipamentosInicializado = false;
+    window.sistemaEquipamentosInicializado = true;
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🔧 Iniciando sistema de equipamentos...');
-        const verificarAbaEquipamento = () => {
-            const abaEquipamento = document.getElementById('equipamento');
-            if (abaEquipamento && !window.sistemaEquipamentosInicializado) {
-                console.log('✅ Aba de equipamento detectada, inicializando...');
-                window.sistemaEquipamentosInicializado = true;
-                sistemaEquipamentos = new SistemaEquipamentos();
-                window.sistemaEquipamentos = sistemaEquipamentos;
-                sistemaEquipamentos.inicializarQuandoPronto();
-            }
-        };
-        verificarAbaEquipamento();
-        // Observador simplificado
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    const tab = mutation.target;
-                    if (tab.id === 'equipamento' && tab.classList.contains('active')) {
-                        setTimeout(verificarAbaEquipamento, 100);
-                    }
-                }
-            });
-        });
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            observer.observe(tab, { attributes: true });
-        });
+        const abaEquipamento = document.getElementById('equipamento');
+        if (abaEquipamento) {
+            sistemaEquipamentos = new SistemaEquipamentos();
+            window.sistemaEquipamentos = sistemaEquipamentos;
+            sistemaEquipamentos.inicializarQuandoPronto();
+        }
     });
 }
 // ========== FUNÇÕES GLOBAIS ==========
@@ -1859,6 +1879,12 @@ window.venderEquipamento = function(itemId) {
 window.equiparItem = function(itemId) { 
     if (window.sistemaEquipamentos && window.sistemaEquipamentos.equiparItem) {
         window.sistemaEquipamentos.equiparItem(itemId);
+    }
+};
+// ✅ ADICIONA função global para excluirItem
+window.excluirItem = function(itemId) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.excluirItem) {
+        window.sistemaEquipamentos.excluirItem(itemId);
     }
 };
 window.desequiparItem = function(itemId) { 
