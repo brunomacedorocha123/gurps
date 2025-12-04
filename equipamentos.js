@@ -1,4 +1,4 @@
-// equipamentos.js - SISTEMA COMPLETO COM DINHEIRO POR RIQUEZA - VERSÃO CORRIGIDA
+// equipamentos.js - SISTEMA COMPLETO COM DINHEIRO POR RIQUEZA - VERSÃO FINAL
 class SistemaEquipamentos {
     constructor() {
         this.equipamentosAdquiridos = [];
@@ -42,7 +42,6 @@ class SistemaEquipamentos {
         this.sistemaRiquezaDisponivel = false;
     }
 
-    // ========== INICIALIZAÇÃO PRINCIPAL ==========
     async inicializarQuandoPronto() {
         if (this.inicializacaoEmAndamento) return;
         this.inicializacaoEmAndamento = true;
@@ -97,7 +96,6 @@ class SistemaEquipamentos {
         });
     }
 
-    // ========== SISTEMA DE RIQUEZA ==========
     obterPontosRiquezaAtual() {
         if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
             return window.sistemaRiqueza.getPontosRiqueza();
@@ -187,7 +185,6 @@ class SistemaEquipamentos {
         return niveis[pontos.toString()] || 'Desconhecido';
     }
 
-    // ========== INICIALIZAÇÃO DO SISTEMA ==========
     inicializarSistema() {
         this.configurarEventosGlobais();
         this.configurarSubAbas();
@@ -207,7 +204,6 @@ class SistemaEquipamentos {
         document.getElementById('btn-limpar-deposito')?.addEventListener('click', () => this.limparDeposito());
     }
 
-    // ========== ATUALIZAÇÃO DA INTERFACE ==========
     atualizarInterfaceFinanceiro() {
         const dinheiroBanner = document.getElementById('dinheiroEquipamento');
         if (dinheiroBanner) {
@@ -228,7 +224,6 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== SISTEMA DE CARGA ==========
     calcularCapacidadeCarga() {
         const ST = this.ST;
         const cargasTable = {
@@ -323,7 +318,6 @@ class SistemaEquipamentos {
         this.mostrarFeedback(mensagem, this.mochilaAtiva ? 'sucesso' : 'aviso');
     }
 
-    // ========== SISTEMA FINANCEIRO ==========
     receberDinheiroRapido() {
         this.abrirModalDinheiroSimples('receber');
     }
@@ -513,10 +507,7 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== COMPRA E VENDA - VERSÃO CORRIGIDA ==========
-    comprarEquipamento(itemId, elemento) {
-        console.log('🛒 INICIANDO COMPRA - Item ID:', itemId);
-        
+        comprarEquipamento(itemId, elemento) {
         if (!this.catalogoPronto) {
             this.mostrarFeedback('Sistema ainda carregando...', 'erro');
             return;
@@ -524,45 +515,20 @@ class SistemaEquipamentos {
 
         const equipamento = this.obterEquipamentoPorId(itemId);
         if (!equipamento) {
-            console.error('❌ Equipamento não encontrado:', itemId);
             this.mostrarFeedback('Equipamento não encontrado!', 'erro');
             return;
         }
 
-        console.log('📦 Equipamento:', equipamento.nome, 'Quantificável:', equipamento.quantificavel);
-
-        // ====== CORREÇÃO CRÍTICA ======
-        // Para itens QUANTIFICÁVEIS (equipamentos gerais com quantificavel: true)
         if (equipamento.quantificavel === true) {
-            console.log('🎯 Item QUANTIFICÁVEL - Abrindo modal de quantidade');
             this.abrirSubmenuQuantidade(itemId, elemento);
             return;
         }
 
-        // Para itens NÃO QUANTIFICÁVEIS (armas, armaduras, escudos)
         if (this.dinheiro < equipamento.custo) {
             this.mostrarFeedback(`Dinheiro insuficiente! Necessário: $${equipamento.custo}`, 'erro');
             return;
         }
 
-        // ====== VERIFICAÇÃO ANTI-DUPLICAÇÃO ======
-        // Verifica se JÁ EXISTE um item IDÊNTICO no inventário
-        const itemExistente = this.equipamentosAdquiridos.find(item => 
-            item.id === equipamento.id && // MESMO ID DO CATÁLOGO
-            item.status === 'na-mochila' && // NA MOCHILA
-            !item.equipado && // NÃO EQUIPADO
-            !item.quantificavel // NÃO É ITEM QUANTIFICÁVEL (armas/armaduras)
-        );
-        
-        console.log('🔍 Verificando item existente:', itemExistente ? 'ENCONTRADO' : 'NÃO ENCONTRADO');
-
-        if (itemExistente) {
-            // SE JÁ TEM UM IGUAL, NÃO COMPRA OUTRO
-            this.mostrarFeedback(`Você já possui ${equipamento.nome}! Não é possível ter duplicatas.`, 'aviso');
-            return;
-        }
-
-        // SE NÃO EXISTE, CRIA NOVO
         const novoEquipamento = {
             ...equipamento,
             adquiridoEm: new Date().toISOString(),
@@ -586,12 +552,9 @@ class SistemaEquipamentos {
             valor: equipamento.custo,
             descricao: `Compra: ${equipamento.nome}`
         });
-        
-        console.log('✅ Compra concluída com sucesso!');
     }
 
-    // CONTINUA NO PRÓXIMO COMENTÁRIO...
-        venderEquipamento(itemId) {
+    venderEquipamento(itemId) {
         const index = this.equipamentosAdquiridos.findIndex(item => item.idUnico === itemId);
         if (index === -1) {
             this.mostrarFeedback('Equipamento não encontrado para venda!', 'erro');
@@ -619,7 +582,6 @@ class SistemaEquipamentos {
         });
     }
 
-    // ========== MÉTODOS DE INTERFACE ==========
     configurarEventosGlobais() {
         document.addEventListener('click', (e) => {
             const btnComprar = e.target.closest('.btn-comprar');
@@ -721,17 +683,11 @@ class SistemaEquipamentos {
         document.dispatchEvent(event);
     }
 
-    // ========== MÉTODOS AUXILIARES ==========
     obterEquipamentoPorId(itemId) {
         if (!this.catalogoPronto || !window.catalogoEquipamentos) {
             return null;
         }
         return window.catalogoEquipamentos.obterEquipamentoPorId(itemId);
-    }
-
-    isQuantificavel(itemId) {
-        if (!this.catalogoPronto || !window.catalogoEquipamentos) return false;
-        return window.catalogoEquipamentos.isQuantificavel(itemId);
     }
 
     gerarIdUnico() {
@@ -795,7 +751,6 @@ class SistemaEquipamentos {
         }, 3000);
     }
 
-    // ========== MÉTODOS PARA SALVAMENTO ==========
     exportarDados() {
         return {
             equipamentosAdquiridos: this.equipamentosAdquiridos,
@@ -816,7 +771,6 @@ class SistemaEquipamentos {
         };
     }
 
-    // ========== SUBMENU DE QUANTIDADE - VERSÃO CORRIGIDA ==========
     abrirSubmenuQuantidade(itemId, elemento) {
         const equipamento = this.obterEquipamentoPorId(itemId);
         if (!equipamento) return;
@@ -883,8 +837,6 @@ class SistemaEquipamentos {
     confirmarCompraQuantidade() {
         if (!this.itemCompraQuantidade) return;
         
-        console.log('🎯 Confirmando compra com quantidade...');
-
         const equipamento = this.itemCompraQuantidade;
         const quantidade = this.quantidadeAtual;
         const custoTotal = equipamento.custo * quantidade;
@@ -895,37 +847,45 @@ class SistemaEquipamentos {
             return;
         }
 
-        // ====== CORREÇÃO PARA ITENS QUANTIFICÁVEIS ======
-        // Para itens quantificáveis, busca item existente do MESMO TIPO
-        const itemExistente = this.equipamentosAdquiridos.find(item => 
-            item.id === equipamento.id && // MESMO ID
-            item.status === 'na-mochila' && // NA MOCHILA
-            !item.equipado && // NÃO EQUIPADO
-            item.quantificavel === true // É ITEM QUANTIFICÁVEL
-        );
-        
-        console.log('🔍 Item existente para quantificação:', itemExistente ? 'ENCONTRADO' : 'NOVO');
+        if (equipamento.quantificavel === true) {
+            const itemExistente = this.equipamentosAdquiridos.find(item => 
+                item.id === equipamento.id &&
+                item.status === 'na-mochila' &&
+                !item.equipado &&
+                item.quantificavel === true
+            );
+            
+            if (itemExistente) {
+                itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
+                itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
+            } else {
+                const novoEquipamento = {
+                    ...equipamento,
+                    quantidade: quantidade,
+                    custoTotal: custoTotal,
+                    adquiridoEm: new Date().toISOString(),
+                    status: 'na-mochila',
+                    equipado: false,
+                    idUnico: this.gerarIdUnico()
+                };
 
-        if (itemExistente) {
-            // SE JÁ EXISTE, AUMENTA A QUANTIDADE
-            console.log('➕ Aumentando quantidade do item existente');
-            itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
-            itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
+                this.equipamentosAdquiridos.push(novoEquipamento);
+                this.equipamentosEquipados.mochila.push(novoEquipamento);
+            }
         } else {
-            // SE NÃO EXISTE, CRIA NOVO COM QUANTIDADE
-            console.log('🆕 Criando novo item com quantidade');
-            const novoEquipamento = {
-                ...equipamento,
-                quantidade: quantidade,
-                custoTotal: custoTotal,
-                adquiridoEm: new Date().toISOString(),
-                status: 'na-mochila',
-                equipado: false,
-                idUnico: this.gerarIdUnico()
-            };
-
-            this.equipamentosAdquiridos.push(novoEquipamento);
-            this.equipamentosEquipados.mochila.push(novoEquipamento);
+            for (let i = 0; i < quantidade; i++) {
+                const novoEquipamento = {
+                    ...equipamento,
+                    adquiridoEm: new Date().toISOString(),
+                    status: 'na-mochila',
+                    equipado: false,
+                    idUnico: this.gerarIdUnico(),
+                    quantidade: 1
+                };
+                
+                this.equipamentosAdquiridos.push(novoEquipamento);
+                this.equipamentosEquipados.mochila.push(novoEquipamento);
+            }
         }
 
         this.dinheiro -= custoTotal;
@@ -940,8 +900,6 @@ class SistemaEquipamentos {
             valor: custoTotal,
             descricao: `Compra: ${quantidade}x ${equipamento.nome}`
         });
-        
-        console.log('✅ Compra com quantidade concluída!');
     }
 
     fecharSubmenuQuantidade() {
@@ -956,8 +914,7 @@ class SistemaEquipamentos {
         this.quantidadeAtual = 1;
     }
 
-    // ========== EQUIPAR/DESEQUIPAR ITENS ==========
-    equiparItem(itemId) {
+        equiparItem(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) {
             this.mostrarFeedback('Equipamento não encontrado!', 'erro');
@@ -1167,8 +1124,6 @@ class SistemaEquipamentos {
         this.atualizarSistemaCombate();
     }
 
-    // CONTINUA NO PRÓXIMO COMENTÁRIO...
-        // ========== SISTEMA DE DEPÓSITO ==========
     moverParaDeposito(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) {
@@ -1265,7 +1220,6 @@ class SistemaEquipamentos {
         this.atualizarInterface();
     }
 
-    // ========== SISTEMA DE MÃOS ==========
     criarDisplayMaos() {
         const statusBar = document.querySelector('.banner-grid');
         if (!statusBar || document.getElementById('displayMaos')) return;
@@ -1331,8 +1285,7 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== LISTA DE EQUIPAMENTOS ADQUIRIDOS ==========
-    atualizarListaEquipamentosAdquiridos(equipamentosFiltrados = null) {
+        atualizarListaEquipamentosAdquiridos(equipamentosFiltrados = null) {
         const lista = document.getElementById('lista-equipamentos-adquiridos');
         if (!lista) return;
 
@@ -1473,7 +1426,6 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== SISTEMA DE DEPÓSITO ==========
     atualizarInterfaceDeposito() {
         this.atualizarListaDeposito();
         this.atualizarResumoDeposito();
@@ -1540,7 +1492,6 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== SISTEMA DE COMBATE ==========
     atualizarSistemaCombate() {
         this.atualizarArmadurasCombate();
         this.atualizarArmasCombate();
@@ -1705,7 +1656,6 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== SISTEMA DE CRIAÇÃO DE ITENS ==========
     configurarCriacaoItens() {
         const itemTipoSelect = document.getElementById('item-tipo');
         if (itemTipoSelect) {
@@ -2029,7 +1979,6 @@ class SistemaEquipamentos {
         this.atualizarPreviewItem();
     }
 
-    // ========== INFORMAÇÕES DE CARGA ==========
     atualizarInfoCarga() {
         const totalItensInventario = document.getElementById('totalItensInventario');
         const pesoInventario = document.getElementById('pesoInventario');
@@ -2078,17 +2027,13 @@ class SistemaEquipamentos {
 // ========== INICIALIZAÇÃO GLOBAL ==========
 let sistemaEquipamentos;
 
-// VERIFICAÇÃO SIMPLIFICADA PARA EVITAR DUPLICAÇÃO
 if (!window.sistemaEquipamentosInicializado) {
     window.sistemaEquipamentosInicializado = false;
     
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🔧 Iniciando sistema de equipamentos...');
-        
         const verificarAbaEquipamento = () => {
             const abaEquipamento = document.getElementById('equipamento');
             if (abaEquipamento && !window.sistemaEquipamentosInicializado) {
-                console.log('✅ Aba de equipamento detectada, inicializando...');
                 window.sistemaEquipamentosInicializado = true;
                 
                 sistemaEquipamentos = new SistemaEquipamentos();
@@ -2099,7 +2044,6 @@ if (!window.sistemaEquipamentosInicializado) {
         
         verificarAbaEquipamento();
         
-        // Observador simplificado
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
@@ -2293,5 +2237,3 @@ window.atualizarPreviewItem = function() {
 };
 
 window.SistemaEquipamentos = SistemaEquipamentos;
-
-console.log('✅ equipamentos.js carregado com sucesso!');
