@@ -3868,4 +3868,275 @@ select:focus {
     border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* ========== MODAL DE QUANTIDADE ESPECÍFICO ========== */
+#submenu-quantidade {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#submenu-quantidade.aberto {
+    display: flex;
+    opacity: 1;
+}
+
+#submenu-quantidade .modal-simples {
+    background: var(--fundo-card);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    border: 3px solid var(--laranja-principal);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    transform: translateY(-30px) scale(0.95);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#submenu-quantidade.aberto .modal-simples {
+    transform: translateY(0) scale(1);
+}
+
+/* Header do modal de quantidade */
+#quantidade-titulo {
+    color: var(--dourado-principal);
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-shadow: var(--sombra-texto);
+    margin: 0;
+}
+
+/* Info do item */
+.item-info-modal {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(255, 140, 0, 0.3);
+}
+
+#quantidade-nome-item {
+    color: var(--dourado-principal);
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.detalhes-item-modal {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    color: var(--texto-secundario);
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.detalhes-item-modal span {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Controles de quantidade */
+.controles-quantidade-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.btn-quantidade-modal {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 140, 0, 0.2);
+    border: 2px solid var(--laranja-principal);
+    color: var(--dourado-principal);
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-quantidade-modal:hover {
+    background: rgba(255, 140, 0, 0.3);
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(255, 140, 0, 0.2);
+}
+
+.btn-quantidade-modal:active {
+    transform: scale(0.95);
+}
+
+#input-quantidade {
+    width: 100px;
+    height: 60px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--laranja-principal);
+    border-radius: 12px;
+    color: var(--dourado-principal);
+    font-size: 2rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+#input-quantidade:focus {
+    border-color: var(--dourado-principal);
+    box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Totais */
+.totais-modal {
+    background: rgba(255, 140, 0, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 25px 0;
+    border: 2px solid rgba(255, 140, 0, 0.3);
+}
+
+.total-linha-modal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    font-size: 1.1rem;
+    color: var(--texto-principal);
+}
+
+.total-linha-modal strong {
+    color: var(--dourado-principal);
+    font-size: 1.3rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+}
+
+/* Botões do modal de quantidade - APENAS ESTES */
+#submenu-quantidade .modal-footer {
+    display: flex;
+    gap: 15px;
+    padding: 25px 30px;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(20, 20, 35, 0.9);
+}
+
+#submenu-quantidade .modal-footer .btn-cancelar,
+#submenu-quantidade .modal-footer .btn-confirmar {
+    flex: 1;
+    padding: 16px 25px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+#submenu-quantidade .modal-footer .btn-cancelar {
+    background: rgba(231, 76, 60, 0.2);
+    color: var(--erro);
+    border: 3px solid rgba(231, 76, 60, 0.4);
+}
+
+#submenu-quantidade .modal-footer .btn-cancelar:hover {
+    background: rgba(231, 76, 60, 0.3);
+    border-color: var(--erro);
+    color: var(--erro-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(231, 76, 60, 0.2);
+}
+
+#submenu-quantidade .modal-footer .btn-confirmar {
+    background: var(--gradiente-dourado);
+    color: #000;
+}
+
+#submenu-quantidade .modal-footer .btn-confirmar:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255, 140, 0, 0.4);
+}
+
+/* Responsividade do modal de quantidade */
+@media (max-width: 768px) {
+    #submenu-quantidade .modal-simples {
+        width: 95%;
+        margin: 15px;
+    }
+    
+    .controles-quantidade-modal {
+        gap: 15px;
+        margin: 25px 0;
+    }
+    
+    .btn-quantidade-modal {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3rem;
+    }
+    
+    #input-quantidade {
+        width: 80px;
+        height: 50px;
+        font-size: 1.8rem;
+    }
+    
+    .total-linha-modal {
+        font-size: 1rem;
+    }
+    
+    .total-linha-modal strong {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .controles-quantidade-modal {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-quantidade-modal {
+        order: 2;
+    }
+    
+    #input-quantidade {
+        order: 1;
+        width: 100%;
+        max-width: 120px;
+    }
+    
+    #submenu-quantidade .modal-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    #submenu-quantidade .modal-footer .btn-cancelar,
+    #submenu-quantidade .modal-footer .btn-confirmar {
+        width: 100%;
+    }
+}
+
 /* Fim do CSS completo */

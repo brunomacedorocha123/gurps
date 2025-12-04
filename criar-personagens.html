@@ -1379,9 +1379,9 @@ function toggleSubmenu(id) {
                     <span>Catálogo</span>
                 </button>
                 <button class="subtab-btn" data-subtab="inventario">
-        <i class="fas fa-box-open"></i>  <!-- TROQUEI AQUI! -->
-        <span>Inventário</span>
-    </button>
+                    <i class="fas fa-box-open"></i>
+                    <span>Inventário</span>
+                </button>
                 <button class="subtab-btn" data-subtab="deposito">
                     <i class="fas fa-home"></i>
                     <span>Depósito</span>
@@ -1721,92 +1721,153 @@ function toggleSubmenu(id) {
                 </div>
             </div>
             
-         <!-- SUB-ABA: FINANCEIRO (SUPER SIMPLIFICADO) -->
-<div id="subtab-financeiro" class="subtab-content">
-    <div class="financeiro-ultra-simples">
-        
-        <!-- CABEÇALHO MÍNIMO -->
-        <div class="financeiro-titulo">
-            <h3><i class="fas fa-coins"></i> Dinheiro</h3>
-            <p>Controle rápido de ouro/moedas</p>
-        </div>
-        
-        <!-- SALDO GRANDE E VISÍVEL -->
-        <div class="saldo-principal">
-            <div class="saldo-atual">
-                <span>Saldo Disponível:</span>
-                <h2 id="dinheiro-disponivel">$0</h2>
-            </div>
-            
-            <!-- BOTÕES GRANDES E CLAROS -->
-            <div class="botoes-rapidos">
-                <button class="btn-receber-grande" onclick="sistemaEquipamentos.receberDinheiroRapido()">
-                    <i class="fas fa-plus-circle"></i> RECEBER
-                </button>
-                <button class="btn-gastar-grande" onclick="sistemaEquipamentos.gastarDinheiroRapido()">
-                    <i class="fas fa-minus-circle"></i> GASTAR
-                </button>
-                <button class="btn-ajustar" onclick="sistemaEquipamentos.ajustarDinheiroManual()">
-                    <i class="fas fa-edit"></i> AJUSTAR
-                </button>
-            </div>
-        </div>
-        
-        <!-- VALORES RÁPIDOS -->
-        <div class="valores-rapidos">
-            <h4>Valores Rápidos:</h4>
-            <div class="botoes-valores">
-                <button onclick="sistemaEquipamentos.adicionarDinheiro(10)">+$10</button>
-                <button onclick="sistemaEquipamentos.adicionarDinheiro(50)">+$50</button>
-                <button onclick="sistemaEquipamentos.adicionarDinheiro(100)">+$100</button>
-                <button onclick="sistemaEquipamentos.removerDinheiro(10)">-$10</button>
-                <button onclick="sistemaEquipamentos.removerDinheiro(50)">-$50</button>
-                <button onclick="sistemaEquipamentos.removerDinheiro(100)">-$100</button>
-            </div>
-        </div>
-        
-    </div>
-</div>
-
-<!-- MODAL SIMPLIFICADO -->
-<div id="modal-dinheiro-simples" class="modal-overlay" style="display: none;">
-    <div class="modal-simples">
-        <div class="modal-header">
-            <h3 id="modal-titulo">Receber Dinheiro</h3>
-            <button onclick="sistemaEquipamentos.fecharModalSimples()">&times;</button>
-        </div>
-        
-        <div class="modal-body">
-            <div class="saldo-atual-modal">
-                Saldo Atual: <strong id="saldo-modal-atual">$0</strong>
-            </div>
-            
-            <div class="campo-valor">
-                <label>Valor:</label>
-                <div class="input-com-simbolo">
-                    <span>$</span>
-                    <input type="number" id="valor-operacao" placeholder="0" min="1" step="1" autofocus>
+            <!-- SUB-ABA: FINANCEIRO (SUPER SIMPLIFICADO) -->
+            <div id="subtab-financeiro" class="subtab-content">
+                <div class="financeiro-ultra-simples">
+                    
+                    <!-- CABEÇALHO MÍNIMO -->
+                    <div class="financeiro-titulo">
+                        <h3><i class="fas fa-coins"></i> Dinheiro</h3>
+                        <p>Controle rápido de ouro/moedas</p>
+                    </div>
+                    
+                    <!-- SALDO GRANDE E VISÍVEL -->
+                    <div class="saldo-principal">
+                        <div class="saldo-atual">
+                            <span>Saldo Disponível:</span>
+                            <h2 id="dinheiro-disponivel">$0</h2>
+                        </div>
+                        
+                        <!-- BOTÕES GRANDES E CLAROS -->
+                        <div class="botoes-rapidos">
+                            <button class="btn-receber-grande" onclick="sistemaEquipamentos.receberDinheiroRapido()">
+                                <i class="fas fa-plus-circle"></i> RECEBER
+                            </button>
+                            <button class="btn-gastar-grande" onclick="sistemaEquipamentos.gastarDinheiroRapido()">
+                                <i class="fas fa-minus-circle"></i> GASTAR
+                            </button>
+                            <button class="btn-ajustar" onclick="sistemaEquipamentos.ajustarDinheiroManual()">
+                                <i class="fas fa-edit"></i> AJUSTAR
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- VALORES RÁPIDOS -->
+                    <div class="valores-rapidos">
+                        <h4>Valores Rápidos:</h4>
+                        <div class="botoes-valores">
+                            <button onclick="sistemaEquipamentos.adicionarDinheiro(10)">+$10</button>
+                            <button onclick="sistemaEquipamentos.adicionarDinheiro(50)">+$50</button>
+                            <button onclick="sistemaEquipamentos.adicionarDinheiro(100)">+$100</button>
+                            <button onclick="sistemaEquipamentos.removerDinheiro(10)">-$10</button>
+                            <button onclick="sistemaEquipamentos.removerDinheiro(50)">-$50</button>
+                            <button onclick="sistemaEquipamentos.removerDinheiro(100)">-$100</button>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
             
-            <div class="campo-descricao">
-                <label>Motivo:</label>
-                <input type="text" id="descricao-operacao" 
-                       placeholder="Ex: Missão, Recompensa, Compras...">
+        </div><!-- FIM DO equipamento-subcontent -->
+        
+        <!-- MODAIS GLOBAIS (FORA DAS SUB-ABAS) -->
+        
+        <!-- MODAL SIMPLIFICADO PARA DINHEIRO -->
+        <div id="modal-dinheiro-simples" class="modal-overlay" style="display: none;">
+            <div class="modal-simples">
+                <div class="modal-header">
+                    <h3 id="modal-titulo">Receber Dinheiro</h3>
+                    <button onclick="sistemaEquipamentos.fecharModalSimples()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="saldo-atual-modal">
+                        Saldo Atual: <strong id="saldo-modal-atual">$0</strong>
+                    </div>
+                    
+                    <div class="campo-valor">
+                        <label>Valor:</label>
+                        <div class="input-com-simbolo">
+                            <span>$</span>
+                            <input type="number" id="valor-operacao" placeholder="0" min="1" step="1" autofocus>
+                        </div>
+                    </div>
+                    
+                    <div class="campo-descricao">
+                        <label>Motivo:</label>
+                        <input type="text" id="descricao-operacao" 
+                               placeholder="Ex: Missão, Recompensa, Compras...">
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-cancelar" onclick="sistemaEquipamentos.fecharModalSimples()">
+                        Cancelar
+                    </button>
+                    <button class="btn-confirmar" onclick="sistemaEquipamentos.confirmarOperacao()">
+                        Confirmar
+                    </button>
+                </div>
             </div>
         </div>
         
-        <div class="modal-footer">
-            <button class="btn-cancelar" onclick="sistemaEquipamentos.fecharModalSimples()">
-                Cancelar
-            </button>
-            <button class="btn-confirmar" onclick="sistemaEquipamentos.confirmarOperacao()">
-                Confirmar
-            </button>
+        <!-- MODAL DE QUANTIDADE PARA COMPRAS -->
+        <div id="submenu-quantidade" class="modal-overlay" style="display: none;">
+            <div class="modal-simples">
+                <div class="modal-header">
+                    <h3 id="quantidade-titulo">Quantidade para Comprar</h3>
+                    <button onclick="fecharSubmenuQuantidade()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="item-info-modal">
+                        <h4 id="quantidade-nome-item">Item</h4>
+                        <div class="detalhes-item-modal">
+                            <span id="quantidade-custo-unitario">Custo: $0</span>
+                            <span id="quantidade-peso-unitario">Peso: 0 kg</span>
+                        </div>
+                    </div>
+                    
+                    <div class="controles-quantidade-modal">
+                        <button class="btn-quantidade-modal" onclick="diminuirQuantidade()">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        
+                        <input type="number" id="input-quantidade" 
+                               value="1" min="1" max="99" 
+                               oninput="window.sistemaEquipamentos?.atualizarTotaisQuantidade()">
+                        
+                        <button class="btn-quantidade-modal" onclick="aumentarQuantidade()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="totais-modal">
+                        <div class="total-linha-modal">
+                            <span>Custo Total:</span>
+                            <strong id="quantidade-custo-total">$0</strong>
+                        </div>
+                        <div class="total-linha-modal">
+                            <span>Peso Total:</span>
+                            <strong id="quantidade-peso-total">0 kg</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-cancelar" onclick="fecharSubmenuQuantidade()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn-confirmar" onclick="confirmarCompraQuantidade()">
+                        <i class="fas fa-check"></i> Comprar
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-
+        <!-- FIM DO MODAL DE QUANTIDADE -->
+        
+    </div><!-- FIM DO equipamento-container -->
+</div><!-- FIM DA ABA EQUIPAMENTO -->
 <script>
 // Script inicial para navegação entre sub-abas
 document.addEventListener('DOMContentLoaded', function() {
@@ -1831,7 +1892,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Configurar event listeners para botões de compra
+    configurarEventListenersCompra();
 });
+
+// Configurar event listeners para botões de compra
+function configurarEventListenersCompra() {
+    console.log('🔧 Configurando event listeners para botões de compra...');
+    
+    // Usar event delegation para capturar cliques
+    document.addEventListener('click', function(e) {
+        const btnComprar = e.target.closest('.btn-comprar');
+        
+        if (btnComprar) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const itemId = btnComprar.getAttribute('data-item');
+            console.log('🎯 Botão de compra clicado - ID:', itemId);
+            
+            if (itemId) {
+                // Verifica se o sistema está disponível
+                if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.comprarEquipamento === 'function') {
+                    console.log('✅ Sistema disponível, chamando comprarEquipamento...');
+                    window.sistemaEquipamentos.comprarEquipamento(itemId, btnComprar);
+                } else {
+                    console.error('❌ Sistema de equipamentos não disponível!');
+                    
+                    // Tenta inicializar novamente
+                    setTimeout(() => {
+                        if (window.sistemaEquipamentos) {
+                            window.sistemaEquipamentos.comprarEquipamento(itemId, btnComprar);
+                        } else {
+                            alert('Sistema de equipamentos não carregado. Recarregue a página.');
+                        }
+                    }, 500);
+                }
+            }
+        }
+    });
+    
+    console.log('✅ Event listeners configurados!');
+}
 
 // Funções auxiliares (serão implementadas no equipamentos.js)
 function alternarSubTab(subtab) {
@@ -1843,19 +1946,27 @@ function alternarSubTab(subtab) {
 }
 
 function atualizarCamposPorTipo() {
-    // Implementar no equipamentos.js
+    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.atualizarCamposPorTipo === 'function') {
+        window.sistemaEquipamentos.atualizarCamposPorTipo();
+    }
 }
 
 function atualizarCamposMagicos() {
-    // Implementar no equipamentos.js
+    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.atualizarCamposMagicos === 'function') {
+        window.sistemaEquipamentos.atualizarCamposMagicos();
+    }
 }
 
 function limparFormCriacao() {
-    // Implementar no equipamentos.js
+    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.limparFormCriacao === 'function') {
+        window.sistemaEquipamentos.limparFormCriacao();
+    }
 }
 
 function criarItemPersonalizado() {
-    // Implementar no equipamentos.js
+    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.criarItemPersonalizado === 'function') {
+        window.sistemaEquipamentos.criarItemPersonalizado();
+    }
 }
 
 // Funções do modal de quantidade
@@ -1884,18 +1995,51 @@ function confirmarCompraQuantidade() {
 }
 
 // Funções do modal financeiro
-function fecharModalFinanceiro() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.fecharModalFinanceiro();
+function fecharModalSimples() {
+    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.fecharModalSimples === 'function') {
+        window.sistemaEquipamentos.fecharModalSimples();
     }
 }
 
-function confirmarTransacaoFinanceira() {
-    if (window.sistemaEquipamentos) {
-        window.sistemaEquipamentos.confirmarTransacaoFinanceira();
+function confirmarOperacao() {
+    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.confirmarOperacao === 'function') {
+        window.sistemaEquipamentos.confirmarOperacao();
     }
 }
+
+// Funções de depósito (se não estiverem no equipamentos.js)
+function guardarTudoDeposito() {
+    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.moverTudoParaDeposito === 'function') {
+        window.sistemaEquipamentos.moverTudoParaDeposito();
+    }
+}
+
+function retirarTudoDeposito() {
+    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.retirarTudoDoDeposito === 'function') {
+        window.sistemaEquipamentos.retirarTudoDoDeposito();
+    }
+}
+
+function limparDeposito() {
+    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.limparDeposito === 'function') {
+        window.sistemaEquipamentos.limparDeposito();
+    }
+}
+
+// Debug inicial
+console.log('🔧 Script da aba equipamento carregado!');
+
+// Verificar se o catálogo está pronto
+document.addEventListener('catalogoPronto', function() {
+    console.log('📦 Catálogo pronto! Configurando sistema...');
+    setTimeout(() => {
+        if (window.sistemaEquipamentos) {
+            console.log('✅ Sistema de equipamentos inicializado com sucesso!');
+        }
+    }, 100);
+});
 </script>
+
         <!-- ABA RESUMO -->
         <div id="resumo" class="tab-content">
             <div class="loading">
