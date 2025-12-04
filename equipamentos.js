@@ -2,6 +2,7 @@
 // ✅ Correção: escudo agora equipa corretamente com arma de 1 mão
 // ✅ Nova funcionalidade: botão "Excluir" (ícone de lixeira) em itens adquiridos
 // ✅ CORREÇÃO DE CARGA: agora mostra "Muito Pesada" como limite máximo (ex: ST10 → 100 kg)
+// ✅ INTEGRAÇÃO COM ATRIBUTOS: nível de carga atualiza em tempo real com ST
 class SistemaEquipamentos {
     constructor() {
         this.equipamentosAdquiridos = [];
@@ -44,7 +45,9 @@ class SistemaEquipamentos {
         this.quantidadeAtual = 1;
         this.operacaoAtual = null;
         this.sistemaRiquezaDisponivel = false;
+        this.inicializarEventListeners();
     }
+
     // ========== INICIALIZAÇÃO PRINCIPAL ==========
     async inicializarQuandoPronto() {
         if (this.inicializacaoEmAndamento) return;
@@ -59,6 +62,7 @@ class SistemaEquipamentos {
         this.inicializarDinheiroPorRiqueza();
         this.inicializacaoEmAndamento = false;
     }
+
     aguardarSistemaRiqueza() {
         return new Promise((resolve) => {
             let tentativas = 0;
@@ -77,6 +81,7 @@ class SistemaEquipamentos {
             verificarRiqueza();
         });
     }
+
     aguardarCatalogo() {
         return new Promise((resolve) => {
             let tentativas = 0;
@@ -95,6 +100,17 @@ class SistemaEquipamentos {
             verificarCatalogo();
         });
     }
+
+    // ========== INTEGRAÇÃO COM ATRIBUTOS ==========
+    inicializarEventListeners() {
+        // ✅ OUVE EVENTO DE ATRIBUTOS ALTERADOS
+        document.addEventListener('atributosAlterados', (e) => {
+            if (e.detail && e.detail.ST !== undefined) {
+                this.atualizarST(e.detail.ST);
+            }
+        });
+    }
+
     // ========== SISTEMA DE RIQUEZA ==========
     obterPontosRiquezaAtual() {
         if (window.sistemaRiqueza && typeof window.sistemaRiqueza.getPontosRiqueza === 'function') {
@@ -106,6 +122,7 @@ class SistemaEquipamentos {
         }
         return 0;
     }
+
     obterMultiplicadorPorPontos(pontos) {
         const mapeamento = {
             '-25': 0, '-15': 0.2, '-10': 0.5, '0': 1,
@@ -113,10 +130,12 @@ class SistemaEquipamentos {
         };
         return mapeamento[pontos.toString()] || 1;
     }
+
     calcularDinheiroPorRiqueza(pontos) {
         const multiplicador = this.obterMultiplicadorPorPontos(pontos);
         return Math.floor(this.valorBaseRiqueza * multiplicador);
     }
+
     inicializarDinheiroPorRiqueza() {
         const pontos = this.obterPontosRiquezaAtual();
         const novoDinheiro = this.calcularDinheiroPorRiqueza(pontos);
@@ -129,6 +148,7 @@ class SistemaEquipamentos {
         this.atualizarInterfaceFinanceiro();
         this.notificarDashboard();
     }
+
     configurarObservadorRiqueza() {
         document.addEventListener('riquezaAlterada', (e) => {
             if (e.detail && e.detail.pontos !== undefined) {
@@ -145,6 +165,7 @@ class SistemaEquipamentos {
             });
         }
     }
+
     atualizarDinheiroPorMudancaRiqueza(novosPontos) {
         const novoDinheiro = this.calcularDinheiroPorRiqueza(novosPontos);
         const diferenca = novoDinheiro - this.dinheiro;
@@ -162,6 +183,7 @@ class SistemaEquipamentos {
             );
         }
     }
+
     obterNomeNivelRiqueza(pontos) {
         const niveis = {
             '-25': 'Falido', '-15': 'Pobre', '-10': 'Batalhador',
@@ -170,6 +192,7 @@ class SistemaEquipamentos {
         };
         return niveis[pontos.toString()] || 'Desconhecido';
     }
+
     // ========== INICIALIZAÇÃO DO SISTEMA ==========
     inicializarSistema() {
         this.configurarEventosGlobais();
@@ -179,6 +202,8 @@ class SistemaEquipamentos {
         this.criarDisplayMaos();
         this.atualizarSistemaCombate();
         this.atualizarInterface();
+        this.iniciarMonitoramentoST();
+        
         const btnMochila = document.getElementById('btn-liberar-mochila');
         if (btnMochila) {
             btnMochila.addEventListener('click', () => this.alternarMochila());
@@ -187,6 +212,7 @@ class SistemaEquipamentos {
         document.getElementById('btn-retirar-tudo-deposito')?.addEventListener('click', () => this.retirarTudoDoDeposito());
         document.getElementById('btn-limpar-deposito')?.addEventListener('click', () => this.limparDeposito());
     }
+
     // ========== ATUALIZAÇÃO DA INTERFACE ==========
     atualizarInterfaceFinanceiro() {
         const dinheiroBanner = document.getElementById('dinheiroEquipamento');
@@ -205,6 +231,7 @@ class SistemaEquipamentos {
             saldoModal.textContent = `$${this.dinheiro}`;
         }
     }
+
     // ========== SISTEMA DE CARGA ==========
     calcularCapacidadeCarga() {
         const ST = this.ST;
@@ -218,13 +245,26 @@ class SistemaEquipamentos {
             7: { nenhuma: 4.9, leve: 9.8, media: 14.7, pesada: 29.4, muitoPesada: 49.0 },
             8: { nenhuma: 6.5, leve: 13.0, media: 19.5, pesada: 39.0, muitoPesada: 65.0 },
             9: { nenhuma: 8.0, leve: 16.0, media: 24.0, pesada: 48.0, muitoPesada: 80.0 },
-            10: { nenhuma: 10.0, leve: 20.0, media: 30.0, pesada: 60.0, muitoPesada: 100.0 }
+            10: { nenhuma: 10.0, leve: 20.0, media: 30.0, pesada: 60.0, muitoPesada: 100.0 },
+            11: { nenhuma: 12.0, leve: 24.0, media: 36.0, pesada: 72.0, muitoPesada: 120.0 },
+            12: { nenhuma: 14.5, leve: 29.0, media: 43.5, pesada: 87.0, muitoPesada: 145.0 },
+            13: { nenhuma: 17.0, leve: 34.0, media: 51.0, pesada: 102.0, muitoPesada: 170.0 },
+            14: { nenhuma: 19.5, leve: 39.0, media: 58.5, pesada: 117.0, muitoPesada: 195.0 },
+            15: { nenhuma: 22.5, leve: 45.0, media: 67.5, pesada: 135.0, muitoPesada: 225.0 },
+            16: { nenhuma: 25.5, leve: 51.0, media: 76.5, pesada: 153.0, muitoPesada: 255.0 },
+            17: { nenhuma: 29.0, leve: 58.0, media: 87.0, pesada: 174.0, muitoPesada: 294.0 },
+            18: { nenhuma: 32.5, leve: 65.0, media: 97.5, pesada: 195.0, muitoPesada: 325.0 },
+            19: { nenhuma: 36.0, leve: 72.0, media: 108.0, pesada: 216.0, muitoPesada: 360.0 },
+            20: { nenhuma: 40.0, leve: 80.0, media: 120.0, pesada: 240.0, muitoPesada: 400.0 }
         };
+        
         let stKey = ST;
-        if (ST > 10) stKey = 10;
+        if (ST > 20) stKey = 20;
         if (ST < 1) stKey = 1;
+        
         return cargasTable[stKey] || cargasTable[10];
     }
+
     // ✅ LÓGICA DE CARGA 100% CONFORME REGRAS OFICIAIS DO GURPS
     atualizarNivelCarga() {
         const peso = this.pesoAtual;
@@ -257,6 +297,7 @@ class SistemaEquipamentos {
             this.penalidadesCarga = novasPenalidades;
         }
     }
+
     calcularPesoAtual() {
         let peso = 0;
         peso += this.equipamentosEquipados.maos.reduce((sum, item) => sum + (item.peso || 0), 0);
@@ -274,10 +315,13 @@ class SistemaEquipamentos {
         }
         return parseFloat(peso.toFixed(1));
     }
+
     atualizarPeso() {
         this.pesoAtual = this.calcularPesoAtual();
         this.atualizarNivelCarga();
+        this.atualizarInterface();
     }
+
     alternarMochila() {
         this.mochilaAtiva = !this.mochilaAtiva;
         this.atualizarPeso();
@@ -287,13 +331,16 @@ class SistemaEquipamentos {
             'Mochila liberada';
         this.mostrarFeedback(mensagem, this.mochilaAtiva ? 'sucesso' : 'aviso');
     }
+
     // ========== SISTEMA FINANCEIRO ==========
     receberDinheiroRapido() {
         this.abrirModalDinheiroSimples('receber');
     }
+
     gastarDinheiroRapido() {
         this.abrirModalDinheiroSimples('gastar');
     }
+
     abrirModalDinheiroSimples(tipo) {
         this.operacaoAtual = tipo;
         const titulo = document.getElementById('modal-titulo');
@@ -321,6 +368,7 @@ class SistemaEquipamentos {
             }, 10);
         }
     }
+
     fecharModalSimples() {
         const modal = document.getElementById('modal-dinheiro-simples');
         if (modal) {
@@ -331,6 +379,7 @@ class SistemaEquipamentos {
         }
         this.operacaoAtual = null;
     }
+
     confirmarOperacao() {
         const valorInput = document.getElementById('valor-operacao');
         const descricaoInput = document.getElementById('descricao-operacao');
@@ -367,6 +416,7 @@ class SistemaEquipamentos {
             : `Recebido $${valor}: ${descricao}`;
         this.mostrarFeedback(mensagem, 'sucesso');
     }
+
     adicionarDinheiro(valor) {
         if (isNaN(valor) || valor <= 0) {
             this.mostrarFeedback('Valor inválido!', 'erro');
@@ -382,6 +432,7 @@ class SistemaEquipamentos {
         this.atualizarInterfaceFinanceiro();
         this.notificarDashboard();
     }
+
     removerDinheiro(valor) {
         if (isNaN(valor) || valor <= 0) {
             this.mostrarFeedback('Valor inválido!', 'erro');
@@ -401,6 +452,7 @@ class SistemaEquipamentos {
         this.atualizarInterfaceFinanceiro();
         this.notificarDashboard();
     }
+
     ajustarDinheiroManual() {
         const novoValor = prompt('Digite o novo valor de dinheiro:', this.dinheiro);
         if (novoValor === null) return;
@@ -428,6 +480,7 @@ class SistemaEquipamentos {
         this.atualizarInterfaceFinanceiro();
         this.notificarDashboard();
     }
+
     registrarTransacao(dados) {
         const transacao = {
             id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
@@ -442,6 +495,7 @@ class SistemaEquipamentos {
             this.ultimasTransacoes = this.ultimasTransacoes.slice(0, 10);
         }
     }
+
     // ========== COMPRA E VENDA - VERSÃO CORRIGIDA ==========
     comprarEquipamento(itemId, elemento) {
         console.log('🛒 INICIANDO COMPRA - Item ID:', itemId);
@@ -486,6 +540,7 @@ class SistemaEquipamentos {
         });
         console.log('✅ Compra concluída com sucesso!');
     }
+
     venderEquipamento(itemId) {
         const index = this.equipamentosAdquiridos.findIndex(item => item.idUnico === itemId);
         if (index === -1) {
@@ -509,6 +564,7 @@ class SistemaEquipamentos {
             descricao: `Venda: ${equipamento.nome}`
         });
     }
+
     // ========== MÉTODOS DE INTERFACE ==========
     configurarEventosGlobais() {
         document.addEventListener('click', (e) => {
@@ -535,6 +591,7 @@ class SistemaEquipamentos {
             }
         });
     }
+
     configurarSubAbas() {
         document.querySelectorAll('.subtab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -553,6 +610,7 @@ class SistemaEquipamentos {
             });
         });
     }
+
     atualizarInterface() {
         this.atualizarStatus();
         this.atualizarListaEquipamentosAdquiridos();
@@ -561,6 +619,7 @@ class SistemaEquipamentos {
         this.atualizarInterfaceDeposito();
         this.atualizarInterfaceFinanceiro();
     }
+
     atualizarStatus() {
         this.atualizarPeso();
         const pesoAtualElem = document.getElementById('pesoAtual');
@@ -583,6 +642,7 @@ class SistemaEquipamentos {
             contadorMochila.textContent = itensNaMochila;
         }
     }
+
     notificarDashboard() {
         const event = new CustomEvent('equipamentosAtualizados', {
             detail: {
@@ -597,6 +657,7 @@ class SistemaEquipamentos {
         });
         document.dispatchEvent(event);
     }
+
     // ========== MÉTODOS AUXILIARES ==========
     obterEquipamentoPorId(itemId) {
         if (!this.catalogoPronto || !window.catalogoEquipamentos) {
@@ -604,13 +665,16 @@ class SistemaEquipamentos {
         }
         return window.catalogoEquipamentos.obterEquipamentoPorId(itemId);
     }
+
     isQuantificavel(itemId) {
         if (!this.catalogoPronto || !window.catalogoEquipamentos) return false;
         return window.catalogoEquipamentos.isQuantificavel(itemId);
     }
+
     gerarIdUnico() {
         return 'eq_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
+
     mostrarFeedback(mensagem, tipo) {
         const feedback = document.createElement('div');
         feedback.className = `feedback-message feedback-${tipo}`;
@@ -662,6 +726,7 @@ class SistemaEquipamentos {
             }, 300);
         }, 3000);
     }
+
     // ========== MÉTODOS PARA SALVAMENTO ==========
     exportarDados() {
         return {
@@ -682,6 +747,7 @@ class SistemaEquipamentos {
             version: '1.0-integrado'
         };
     }
+
     // ========== SUBMENU DE QUANTIDADE ==========
     abrirSubmenuQuantidade(itemId, elemento) {
         const equipamento = this.obterEquipamentoPorId(itemId);
@@ -707,6 +773,7 @@ class SistemaEquipamentos {
             submenu.classList.add('aberto');
         }, 10);
     }
+
     aumentarQuantidade() {
         this.quantidadeAtual = Math.min(this.quantidadeAtual + 1, 99);
         const inputQuantidade = document.getElementById('input-quantidade');
@@ -715,6 +782,7 @@ class SistemaEquipamentos {
         }
         this.atualizarTotaisQuantidade();
     }
+
     diminuirQuantidade() {
         this.quantidadeAtual = Math.max(this.quantidadeAtual - 1, 1);
         const inputQuantidade = document.getElementById('input-quantidade');
@@ -723,6 +791,7 @@ class SistemaEquipamentos {
         }
         this.atualizarTotaisQuantidade();
     }
+
     atualizarTotaisQuantidade() {
         if (!this.itemCompraQuantidade) return;
         const custoTotal = this.itemCompraQuantidade.custo * this.quantidadeAtual;
@@ -732,6 +801,7 @@ class SistemaEquipamentos {
         if (custoTotalElem) custoTotalElem.textContent = `$${custoTotal}`;
         if (pesoTotalElem) pesoTotalElem.textContent = `${pesoTotal.toFixed(1)} kg`;
     }
+
     confirmarCompraQuantidade() {
         if (!this.itemCompraQuantidade) return;
         console.log('🎯 Confirmando compra com quantidade...');
@@ -780,6 +850,7 @@ class SistemaEquipamentos {
         });
         console.log('✅ Compra com quantidade concluída!');
     }
+
     fecharSubmenuQuantidade() {
         const submenu = document.getElementById('submenu-quantidade');
         if (submenu) {
@@ -791,6 +862,7 @@ class SistemaEquipamentos {
         this.itemCompraQuantidade = null;
         this.quantidadeAtual = 1;
     }
+
     // ========== EQUIPAR/DESEQUIPAR ITENS ==========
     equiparItem(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
@@ -851,6 +923,7 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         this.atualizarSistemaCombate();
     }
+
     podeEquiparArma(arma) {
         const maosOcupadas = this.calcularMaosOcupadas();
         const maosNecessarias = arma.maos || 1;
@@ -859,6 +932,7 @@ class SistemaEquipamentos {
         }
         return true;
     }
+
     podeEquiparArmadura(armadura) {
         const local = armadura.local;
         if (!local) return false;
@@ -867,6 +941,7 @@ class SistemaEquipamentos {
         const armaduraAtual = this.equipamentosEquipados.armaduras.find(a => a.local === local);
         return !armaduraAtual;
     }
+
     podeEquiparEscudo(escudo) {
         const maosOcupadas = this.calcularMaosOcupadas();
         const maosNecessarias = escudo.maos || 1;
@@ -875,6 +950,7 @@ class SistemaEquipamentos {
         }
         return maosOcupadas + maosNecessarias <= this.maosDisponiveis;
     }
+
     equiparArma(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
@@ -885,6 +961,7 @@ class SistemaEquipamentos {
         this.mostrarFeedback(`${equipamento.nome} equipado`, 'sucesso');
         this.atualizarDisplayMaos();
     }
+
     equiparArmadura(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
@@ -894,6 +971,7 @@ class SistemaEquipamentos {
         this.equipamentosEquipados.armaduras.push(equipamento);
         this.mostrarFeedback(`${equipamento.nome} equipado`, 'sucesso');
     }
+
     equiparEscudo(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
@@ -904,6 +982,7 @@ class SistemaEquipamentos {
         this.mostrarFeedback(`${equipamento.nome} equipado`, 'sucesso');
         this.atualizarDisplayMaos();
     }
+
     equiparItemGeral(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
@@ -916,6 +995,7 @@ class SistemaEquipamentos {
             this.atualizarDisplayMaos();
         }
     }
+
     desequiparItem(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) {
@@ -935,6 +1015,7 @@ class SistemaEquipamentos {
         this.atualizarDisplayMaos();
         this.atualizarSistemaCombate();
     }
+
     colocarNoCorpo(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) {
@@ -957,6 +1038,7 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         this.atualizarSistemaCombate();
     }
+
     removerDoCorpo(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) {
@@ -975,6 +1057,7 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         this.atualizarSistemaCombate();
     }
+
     // ========== SISTEMA DE DEPÓSITO ==========
     moverParaDeposito(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
@@ -994,6 +1077,7 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         return true;
     }
+
     retirarDoDeposito(itemId) {
         const index = this.deposito.findIndex(item => item.idUnico === itemId);
         if (index === -1) {
@@ -1009,6 +1093,7 @@ class SistemaEquipamentos {
         this.atualizarInterface();
         return true;
     }
+
     moverTudoParaDeposito() {
         const equipamentosNaMochila = this.equipamentosAdquiridos.filter(
             item => item.status === 'na-mochila' && !item.equipado
@@ -1026,6 +1111,7 @@ class SistemaEquipamentos {
         this.mostrarFeedback(`${equipamentosNaMochila.length} itens guardados no depósito`, 'sucesso');
         this.atualizarInterface();
     }
+
     retirarTudoDoDeposito() {
         if (this.deposito.length === 0) {
             this.mostrarFeedback('Depósito vazio!', 'aviso');
@@ -1041,6 +1127,7 @@ class SistemaEquipamentos {
         this.mostrarFeedback(`${totalItens} itens retirados do depósito`, 'sucesso');
         this.atualizarInterface();
     }
+
     limparDeposito() {
         if (this.deposito.length === 0) {
             this.mostrarFeedback('Depósito já está vazio!', 'aviso');
@@ -1054,6 +1141,7 @@ class SistemaEquipamentos {
         this.mostrarFeedback(`${totalLimpos} itens removidos do depósito`, 'sucesso');
         this.atualizarInterface();
     }
+
     // ========== SISTEMA DE MÃOS ==========
     criarDisplayMaos() {
         const statusBar = document.querySelector('.banner-grid');
@@ -1074,6 +1162,7 @@ class SistemaEquipamentos {
         `;
         statusBar.appendChild(maosContainer);
     }
+
     calcularMaosOcupadas() {
         let maosOcupadas = 0;
         maosOcupadas += this.equipamentosEquipados.maos.reduce((total, arma) => {
@@ -1088,6 +1177,7 @@ class SistemaEquipamentos {
         this.maosOcupadas = maosOcupadas;
         return maosOcupadas;
     }
+
     atualizarDisplayMaos() {
         const displayMaos = document.getElementById('displayMaos');
         if (!displayMaos) return;
@@ -1106,6 +1196,7 @@ class SistemaEquipamentos {
             statusInfo.textContent = `${maosLivres} mãos disponíveis`;
         }
     }
+
     // ========== LISTA DE EQUIPAMENTOS ADQUIRIDOS ==========
     atualizarListaEquipamentosAdquiridos(equipamentosFiltrados = null) {
         const lista = document.getElementById('lista-equipamentos-adquiridos');
@@ -1167,6 +1258,7 @@ class SistemaEquipamentos {
             </div>
         `).join('');
     }
+
     gerarBotoesControle(equipamento) {
         let botoes = '';
         if (equipamento.status === 'deposito') {
@@ -1235,6 +1327,7 @@ class SistemaEquipamentos {
         `;
         return botoes;
     }
+
     // ✅ NOVA FUNÇÃO: Excluir item permanentemente
     excluirItem(itemId) {
         if (!confirm('⚠️ Excluir permanentemente?\nEsta ação não pode ser desfeita.')) {
@@ -1252,6 +1345,7 @@ class SistemaEquipamentos {
         this.mostrarFeedback(`🗑️ ${equipamento.nome} excluído`, 'aviso');
         this.atualizarInterface();
     }
+
     obterTextoMaos(maos) {
         switch(maos) {
             case 1: return '1 mão';
@@ -1261,11 +1355,13 @@ class SistemaEquipamentos {
             default: return `${maos} mãos`;
         }
     }
+
     // ========== SISTEMA DE DEPÓSITO ==========
     atualizarInterfaceDeposito() {
         this.atualizarListaDeposito();
         this.atualizarResumoDeposito();
     }
+
     atualizarListaDeposito() {
         const listaDeposito = document.getElementById('lista-deposito');
         if (!listaDeposito) return;
@@ -1307,6 +1403,7 @@ class SistemaEquipamentos {
             </div>
         `).join('');
     }
+
     atualizarResumoDeposito() {
         const contadorDeposito = document.getElementById('contador-deposito');
         const pesoLiberado = document.getElementById('peso-liberado');
@@ -1327,12 +1424,14 @@ class SistemaEquipamentos {
             valorDeposito.textContent = `$${valorTotalDeposito}`;
         }
     }
+
     // ========== SISTEMA DE COMBATE ==========
     atualizarSistemaCombate() {
         this.atualizarArmadurasCombate();
         this.atualizarArmasCombate();
         this.atualizarEscudoCombate();
     }
+
     atualizarArmadurasCombate() {
         this.armadurasCombate = {
             cabeca: null, torso: null, bracos: null, pernas: null,
@@ -1350,6 +1449,7 @@ class SistemaEquipamentos {
             }
         });
     }
+
     atualizarArmasCombate() {
         this.armasCombate = { maos: [], corpo: [] };
         this.equipamentosEquipados.maos.forEach(arma => {
@@ -1376,6 +1476,7 @@ class SistemaEquipamentos {
             }
         });
     }
+
     atualizarEscudoCombate() {
         this.escudoCombate = null;
         if (this.equipamentosEquipados.escudos.length > 0) {
@@ -1389,11 +1490,13 @@ class SistemaEquipamentos {
             };
         }
     }
+
     calcularGastoTotalEquipamentos() {
         return this.equipamentosAdquiridos.reduce((total, item) => {
             return total + (item.custoTotal || item.custo);
         }, 0);
     }
+
     removerDeTodosOsLocais(itemId) {
         this.equipamentosEquipados.maos = this.equipamentosEquipados.maos.filter(item => item.idUnico !== itemId);
         this.equipamentosEquipados.armaduras = this.equipamentosEquipados.armaduras.filter(item => item.idUnico !== itemId);
@@ -1401,6 +1504,7 @@ class SistemaEquipamentos {
         this.equipamentosEquipados.mochila = this.equipamentosEquipados.mochila.filter(item => item.idUnico !== itemId);
         this.equipamentosEquipados.corpo = this.equipamentosEquipados.corpo.filter(item => item.idUnico !== itemId);
     }
+
     consumirItem(itemId, quantidade = 1) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) return;
@@ -1418,6 +1522,7 @@ class SistemaEquipamentos {
         }
         this.atualizarInterface();
     }
+
     configurarFiltrosInventario() {
         document.querySelectorAll('.filtro-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -1429,6 +1534,7 @@ class SistemaEquipamentos {
             });
         });
     }
+
     filtrarListaEquipamentos(filtro) {
         const lista = document.getElementById('lista-equipamentos-adquiridos');
         if (!lista) return;
@@ -1453,6 +1559,7 @@ class SistemaEquipamentos {
         }
         this.atualizarListaEquipamentosAdquiridos(equipamentosFiltrados);
     }
+
     alternarSubTab(subtab) {
         document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
@@ -1466,6 +1573,7 @@ class SistemaEquipamentos {
             }, 100);
         }
     }
+
     // ========== SISTEMA DE CRIAÇÃO DE ITENS ==========
     configurarCriacaoItens() {
         const itemTipoSelect = document.getElementById('item-tipo');
@@ -1490,6 +1598,7 @@ class SistemaEquipamentos {
             }
         });
     }
+
     atualizarCamposPorTipo() {
         const camposEspecificos = document.getElementById('campos-especificos');
         if (!camposEspecificos) return;
@@ -1605,6 +1714,7 @@ class SistemaEquipamentos {
         camposEspecificos.innerHTML = camposHTML;
         this.atualizarPreviewItem();
     }
+
     atualizarCamposMagicos() {
         const camposMagicos = document.getElementById('campos-magicos');
         const itemMagicoCheckbox = document.getElementById('item-magico');
@@ -1616,6 +1726,7 @@ class SistemaEquipamentos {
         }
         this.atualizarPreviewItem();
     }
+
     atualizarPreviewItem() {
         const preview = document.getElementById('preview-conteudo');
         if (!preview) return;
@@ -1685,6 +1796,7 @@ class SistemaEquipamentos {
             </div>
         `;
     }
+
     criarItemPersonalizado() {
         const nome = document.getElementById('item-nome')?.value;
         if (!nome || nome.trim() === '') {
@@ -1739,6 +1851,7 @@ class SistemaEquipamentos {
         this.limparFormCriacao();
         this.atualizarInterface();
     }
+
     limparFormCriacao() {
         document.getElementById('item-nome').value = '';
         document.getElementById('item-peso').value = '1.0';
@@ -1753,6 +1866,7 @@ class SistemaEquipamentos {
         if (camposMagicos) camposMagicos.style.display = 'none';
         this.atualizarPreviewItem();
     }
+
     // ========== INFORMAÇÕES DE CARGA ==========
     atualizarInfoCarga() {
         const totalItensInventario = document.getElementById('totalItensInventario');
@@ -1764,34 +1878,38 @@ class SistemaEquipamentos {
             pesoInventario.textContent = this.pesoAtual.toFixed(1);
         }
     }
+
+    // ✅ NOVO: Monitoramento em tempo real do ST
     iniciarMonitoramentoST() {
+        // Tenta pegar o ST do sistema de atributos
         const inputST = document.getElementById('ST');
         if (inputST) {
-            inputST.addEventListener('change', () => {
-                this.atualizarST(parseInt(inputST.value) || 10);
-            });
-            inputST.addEventListener('input', () => {
-                this.atualizarST(parseInt(inputST.value) || 10);
-            });
-            this.atualizarST(parseInt(inputST.value) || 10);
+            this.ST = parseInt(inputST.value) || 10;
+            this.atualizarCapacidadeCarga();
         }
-        document.addEventListener('atributosAlterados', (e) => {
-            if (e.detail && e.detail.ST !== undefined) {
-                this.atualizarST(e.detail.ST);
-            }
-        });
     }
+
+    // ✅ NOVO: Atualizar ST quando atributo mudar
     atualizarST(novoST) {
         if (this.ST !== novoST) {
+            console.log(`🔧 ST alterado: ${this.ST} → ${novoST}`);
             this.ST = novoST;
-            this.capacidadeCarga = this.calcularCapacidadeCarga();
-            // ✅ Atualiza também o pesoMaximo quando ST muda
-            this.pesoMaximo = this.capacidadeCarga.muitoPesada;
-            this.atualizarNivelCarga();
-            this.atualizarInterface();
+            this.atualizarCapacidadeCarga();
+            this.mostrarFeedback(`ST alterado para ${novoST}. Capacidade de carga atualizada.`, 'sucesso');
         }
     }
+
+    // ✅ NOVO: Atualizar capacidade de carga baseado no ST
+    atualizarCapacidadeCarga() {
+        this.capacidadeCarga = this.calcularCapacidadeCarga();
+        this.pesoMaximo = this.capacidadeCarga.muitoPesada;
+        this.atualizarNivelCarga();
+        this.atualizarInterface();
+        
+        console.log(`📊 Capacidade atualizada: ST ${this.ST}, Muito Pesada: ${this.pesoMaximo}kg`);
+    }
 }
+
 // ========== INICIALIZAÇÃO GLOBAL ==========
 let sistemaEquipamentos;
 if (!window.sistemaEquipamentosInicializado) {
@@ -1805,6 +1923,7 @@ if (!window.sistemaEquipamentosInicializado) {
         }
     });
 }
+
 // ========== FUNÇÕES GLOBAIS ==========
 window.aumentarQuantidade = function() { 
     if (window.sistemaEquipamentos && window.sistemaEquipamentos.aumentarQuantidade) {
