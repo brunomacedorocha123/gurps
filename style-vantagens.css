@@ -769,3 +769,202 @@
 #desvantagens-adquiridas .item-adquirido .item-custo {
     background: rgba(231, 76, 60, 0.9);
 }
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: rgba(30, 30, 40, 0.95);
+    margin: 5% auto;
+    padding: 25px;
+    border: 1px solid rgba(255, 140, 0, 0.3);
+    border-radius: 12px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.modal-close:hover {
+    color: #ff8c00;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 140, 0, 0.2);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+#modal-titulo {
+    color: #ffd700;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.modal-descricao {
+    background: rgba(40, 40, 50, 0.5);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #ff8c00;
+}
+
+.modal-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-cancelar {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-cancelar:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-confirmar {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+}
+
+.btn-confirmar:hover {
+    background: linear-gradient(45deg, #219653, #27ae60);
+}
+
+.btn-confirmar:disabled {
+    background: #555;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Variacoes do modal */
+.variacoes-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.modal-variacao {
+    background: rgba(50, 50, 60, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.modal-variacao:hover {
+    border-color: rgba(255, 140, 0, 0.3);
+    background: rgba(60, 60, 70, 0.5);
+}
+
+.modal-variacao input[type="radio"] {
+    margin-right: 10px;
+}
+
+.modal-variacao label {
+    cursor: pointer;
+    display: block;
+}
+
+.modal-nivel {
+    background: rgba(40, 40, 50, 0.5);
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.modal-nivel label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.nivel-info {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custo-total-container {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2ecc71;
+}
+
+.ampliacoes-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ampliacao-option {
+    background: rgba(50, 50, 60, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    border-left: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.ampliacao-option:hover {
+    background: rgba(60, 60, 70, 0.3);
+    border-left-color: #ff8c00;
+}
+
+.ampliacao-option input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.ampliacao-option label {
+    cursor: pointer;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px 15px;
+    }
+    
+    .modal-acoes {
+        flex-direction: column;
+    }
+    
+    .modal-acoes button {
+        width: 100%;
+    }
+}
