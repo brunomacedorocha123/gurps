@@ -1,4 +1,4 @@
-/* ===== SISTEMA DE PERÍCIAS - CSS COMPLETO E ATUALIZADO ===== */
+/* ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA REFORMULADA ===== */
 
 /* Container principal */
 .atributos-container {
@@ -91,10 +91,6 @@
     grid-template-columns: 1fr 1fr;
 }
 
-.secundarios-grid {
-    grid-template-columns: 1fr;
-}
-
 /* Cards de perícias */
 .atributo-card {
     background: rgba(30, 30, 40, 0.9);
@@ -157,69 +153,124 @@
     border: 1px solid rgba(39, 174, 96, 0.3);
 }
 
-/* Sistema de busca */
-.busca-container {
-    padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
+/* Contador */
+.contador {
+    background: rgba(52, 152, 219, 0.8);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.85em;
+    font-weight: 600;
+    border: 1px solid rgba(52, 152, 219, 0.3);
 }
 
-/* Inputs e selects */
-.atributo-input {
-    flex: 1;
-    min-width: 150px;
-    padding: 12px 15px;
+/* ===== SISTEMA DE BUSCA SIMPLES ===== */
+.busca-simples {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 0 5px;
+}
+
+.busca-input {
+    flex: 3;
+    padding: 14px 18px;
     border: 2px solid rgba(255, 140, 0, 0.3);
-    border-radius: 8px;
-    font-size: 0.95em;
-    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-size: 1em;
+    background: rgba(30, 30, 40, 0.9);
     color: #ffd700;
     transition: all 0.3s ease;
 }
 
-.atributo-input:focus {
+.busca-input:focus {
     outline: none;
     border-color: #ff8c00;
-    box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
 }
 
-.atributo-input::placeholder {
-    color: rgba(255, 215, 0, 0.6);
+.busca-input::placeholder {
+    color: rgba(255, 215, 0, 0.5);
 }
 
-/* Selects personalizados */
-.atributo-input select {
+.filtro-select {
+    flex: 1;
+    min-width: 180px;
+    padding: 14px 18px;
+    border: 2px solid rgba(255, 140, 0, 0.3);
+    border-radius: 10px;
+    font-size: 1em;
+    background: rgba(30, 30, 40, 0.9);
+    color: #ffd700;
+    cursor: pointer;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffd700' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 15px center;
+    background-position: right 18px center;
     background-size: 12px;
     padding-right: 40px;
 }
 
-.atributo-input option {
-    background: #1e1e28 !important;
-    color: #ffd700 !important;
-    padding: 12px 15px !important;
-    border: none !important;
-    font-size: 0.95em;
+.filtro-select option {
+    background: #1e1e28;
+    color: #ffd700;
+    padding: 10px;
 }
 
-.atributo-input option:hover,
-.atributo-input option:focus {
-    background: #ff8c00 !important;
-    color: #1e1e28 !important;
+/* ===== GRUPOS DE PERÍCIAS COLABSÁVEIS ===== */
+.grupo-pericias {
+    margin-bottom: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 140, 0, 0.2);
 }
 
-.atributo-input option:checked {
-    background: #ff8c00 !important;
-    color: #1e1e28 !important;
-    font-weight: bold;
+.grupo-pericias.ativo .grupo-conteudo {
+    display: block;
 }
 
-/* Lista de itens */
+.grupo-pericias.ativo .grupo-icone {
+    transform: rotate(180deg);
+}
+
+.grupo-header {
+    background: linear-gradient(135deg, rgba(50, 50, 65, 0.9), rgba(60, 60, 75, 0.9));
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.grupo-header:hover {
+    background: linear-gradient(135deg, rgba(60, 60, 75, 0.9), rgba(70, 70, 85, 0.9));
+}
+
+.grupo-header h4 {
+    margin: 0;
+    color: #ffd700;
+    font-size: 1.1em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.grupo-icone {
+    color: #ff8c00;
+    font-size: 0.9em;
+    transition: transform 0.3s ease;
+}
+
+.grupo-conteudo {
+    display: none;
+    padding: 10px;
+    background: rgba(25, 25, 35, 0.7);
+}
+
+/* ===== LISTA DE PERÍCIAS ===== */
 .lista-container {
     max-height: 400px;
     overflow-y: auto;
@@ -268,7 +319,7 @@
     font-size: 1.1em;
     margin: 0;
     flex: 1;
-    padding-right: 100px; /* Espaço para custo e botão */
+    padding-right: 100px;
 }
 
 /* Custo normal (lista disponível) */
@@ -290,34 +341,47 @@
     color: #ccc;
     font-size: 0.9em;
     line-height: 1.4;
-    margin: 0;
+    margin: 0 0 8px 0;
+}
+
+.item-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
 }
 
 .item-categoria {
     display: inline-block;
     background: rgba(52, 152, 219, 0.3);
     color: #3498db;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: 10px;
-    font-size: 0.75em;
-    margin-top: 8px;
+    font-size: 0.8em;
     border: 1px solid rgba(52, 152, 219, 0.3);
 }
 
-/* Subcategoria específica para perícias */
-.item-subcategoria {
+.item-dificuldade {
+    display: inline-block;
+    background: rgba(231, 76, 60, 0.3);
+    color: #e74c3c;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.item-prereq {
     display: inline-block;
     background: rgba(155, 89, 182, 0.3);
     color: #9b59b6;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: 10px;
-    font-size: 0.75em;
-    margin-top: 8px;
-    margin-left: 5px;
+    font-size: 0.8em;
     border: 1px solid rgba(155, 89, 182, 0.3);
 }
 
-/* ITENS ADQUIRIDOS - CORRIGIDO SEM SOBREPOSIÇÃO */
+/* ITENS ADQUIRIDOS */
 .item-adquirido {
     background: rgba(39, 174, 96, 0.15);
     border-color: rgba(39, 174, 96, 0.4);
@@ -325,7 +389,7 @@
 }
 
 .item-adquirido .item-header {
-    padding-right: 80px; /* Espaço reservado para os elementos da direita */
+    padding-right: 80px;
 }
 
 /* Custo em itens adquiridos */
@@ -333,11 +397,11 @@
     background: rgba(39, 174, 96, 0.9);
     position: absolute;
     top: 0;
-    right: 45px; /* Mais para a direita */
+    right: 45px;
     z-index: 2;
 }
 
-/* Botão remover - CORRIGIDO SEM SOBREPOSIÇÃO */
+/* Botão remover */
 .btn-remover {
     background: #e74c3c;
     color: white;
@@ -353,7 +417,7 @@
     transition: all 0.3s ease;
     position: absolute;
     top: 0;
-    right: 10px; /* Mais para a esquerda */
+    right: 10px;
     z-index: 3;
 }
 
@@ -368,7 +432,7 @@
     border-color: rgba(39, 174, 96, 0.4);
 }
 
-/* Modal de perícias */
+/* ===== MODAL DE PERÍCIAS ===== */
 .modal {
     display: none;
     position: fixed;
@@ -431,19 +495,33 @@
     font-size: 1.4em;
 }
 
+/* Conteúdo do modal */
 .modal-body {
     padding: 20px;
     color: #ccc;
 }
 
 /* Estilos específicos para o modal de perícias */
+.modal-pericia .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
 .modal-info {
     margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 140, 0, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 140, 0, 0.2);
 }
 
 .modal-info p {
-    margin: 5px 0;
+    margin: 8px 0;
     line-height: 1.5;
+}
+
+.modal-info strong {
+    color: #ffd700;
 }
 
 .modal-nivel {
@@ -454,9 +532,10 @@
 .modal-nivel h4 {
     color: #ffd700;
     margin-bottom: 20px;
+    font-size: 1.2em;
 }
 
-/* ===== NOVO SISTEMA DE BOTÕES + E - ===== */
+/* ===== SISTEMA DE BOTÕES + E - ===== */
 .pericia-controle {
     display: flex;
     align-items: center;
@@ -523,6 +602,7 @@
     background: rgba(255, 140, 0, 0.05);
     border-radius: 8px;
     border: 1px solid rgba(255, 140, 0, 0.2);
+    text-align: center;
 }
 
 .pericia-custo {
@@ -535,21 +615,6 @@
 .pericia-custo-adicional {
     font-size: 0.9em;
     color: #ccc;
-}
-
-/* Remover estilos antigos do slider */
-.nivel-slider,
-.nivel-labels {
-    display: none !important;
-}
-
-/* Ajustes no nivel-info */
-.nivel-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    margin-top: 15px;
 }
 
 /* Info de custos */
@@ -566,16 +631,19 @@
     color: #ffd700;
     font-size: 0.9em;
     line-height: 1.4;
+    display: block;
+    margin-bottom: 5px;
 }
 
 /* Info de perícia existente */
 .info-existente {
     color: #ffd700;
     background: rgba(255, 140, 0, 0.1);
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-top: 10px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 15px 0;
     border: 1px solid rgba(255, 140, 0, 0.3);
+    font-size: 0.95em;
 }
 
 /* Botões do modal */
@@ -585,6 +653,9 @@
     display: flex;
     gap: 10px;
     justify-content: flex-end;
+    position: sticky;
+    bottom: 0;
+    background: rgba(30, 30, 40, 0.95);
 }
 
 .btn {
@@ -595,6 +666,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 1em;
+    min-width: 100px;
 }
 
 .btn-cancelar {
@@ -627,26 +699,58 @@
     box-shadow: none;
 }
 
+/* ===== ESTILOS PARA TÉCNICAS ===== */
+.tecnica-item {
+    background: rgba(50, 50, 65, 0.8);
+    border: 1px solid rgba(155, 89, 182, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.tecnica-item:hover {
+    border-color: #9b59b6;
+    background: rgba(155, 89, 182, 0.1);
+}
+
+.tecnica-nome {
+    color: #9b59b6;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 1em;
+}
+
+.tecnica-descricao {
+    color: #ccc;
+    font-size: 0.85em;
+    line-height: 1.3;
+}
+
 /* Scrollbar personalizado */
-.lista-container::-webkit-scrollbar {
-    width: 6px;
+.lista-container::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar {
+    width: 8px;
 }
 
-.lista-container::-webkit-scrollbar-track {
+.lista-container::-webkit-scrollbar-track,
+.modal-content::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
-.lista-container::-webkit-scrollbar-thumb {
+.lista-container::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb {
     background: rgba(255, 140, 0, 0.5);
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
-.lista-container::-webkit-scrollbar-thumb:hover {
+.lista-container::-webkit-scrollbar-thumb:hover,
+.modal-content::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 140, 0, 0.7);
 }
 
-/* Responsividade */
+/* ===== RESPONSIVIDADE ===== */
 @media (max-width: 1024px) {
     .principais-grid {
         grid-template-columns: 1fr;
@@ -662,9 +766,14 @@
         padding: 15px;
     }
     
-    .busca-container {
+    .busca-simples {
         flex-direction: column;
         gap: 10px;
+    }
+    
+    .busca-input,
+    .filtro-select {
+        width: 100%;
     }
     
     .atributo-header {
@@ -673,13 +782,23 @@
         text-align: center;
     }
     
+    .contador {
+        margin-top: 5px;
+    }
+    
     .modal-content {
         margin: 10% auto;
         width: 95%;
+        max-width: 95%;
     }
     
     .modal-actions {
         flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        min-width: auto;
     }
     
     .pontos-section {
@@ -736,10 +855,9 @@
         align-items: flex-start;
     }
     
-    .nivel-info {
+    .item-info {
         flex-direction: column;
-        gap: 10px;
-        text-align: center;
+        gap: 5px;
     }
     
     .item-custo,
@@ -767,24 +885,50 @@
     .pericia-nh {
         font-size: 1.4em;
     }
+    
+    .grupo-header {
+        padding: 12px 15px;
+    }
+    
+    .grupo-header h4 {
+        font-size: 1em;
+    }
 }
 
-/* Adicione isto ao seu CSS existente */
-#modal-pericia .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
+/* Animações suaves */
+.item-lista,
+.grupo-pericias,
+.btn-pericia,
+.btn {
+    animation: fadeIn 0.3s ease;
 }
 
-#modal-pericia .modal-actions {
-    position: sticky;
-    bottom: 0;
-    background: rgba(30, 30, 40, 0.95);
-    padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 20px;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-#modal-pericia .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
+/* Destaque para pré-requisitos não atendidos */
+.prereq-nao-atendido {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.prereq-nao-atendido:hover {
+    border-color: rgba(231, 76, 60, 0.3);
+    background: rgba(231, 76, 60, 0.05);
+    transform: none;
+}
+
+.prereq-nao-atendido::after {
+    content: " (Pré-requisito não atendido)";
+    color: #e74c3c;
+    font-size: 0.8em;
+    font-style: italic;
 }
