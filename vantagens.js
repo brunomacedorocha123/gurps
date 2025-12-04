@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO 100% FUNCIONAL
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO SUPER SIMPLES E FUNCIONAL
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -6,11 +6,11 @@ class GerenciadorVantagens {
         this.peculiaridades = [];
         this.pontosTotais = 0;
         
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            this.init();
-        } else {
-            document.addEventListener('DOMContentLoaded', () => this.init());
-        }
+        // Item sendo selecionado no momento
+        this.itemSelecionado = null;
+        this.tipoSelecionado = null;
+        
+        this.init();
     }
 
     init() {
@@ -48,6 +48,11 @@ class GerenciadorVantagens {
     criarItemLista(item, tipo) {
         const div = document.createElement('div');
         div.className = `item-lista ${tipo}-item`;
+        div.style.cursor = 'pointer';
+        div.style.padding = '10px';
+        div.style.margin = '5px 0';
+        div.style.border = '1px solid #444';
+        div.style.borderRadius = '5px';
         
         let custoDisplay = Math.abs(item.custo) || 'var';
         if (item.tipo === 'variavel') {
@@ -56,14 +61,16 @@ class GerenciadorVantagens {
         
         div.innerHTML = `
             <div class="item-header">
-                <div class="item-nome">${item.nome}</div>
+                <div class="item-nome"><strong>${item.nome}</strong></div>
                 <div class="item-custo">${custoDisplay}</div>
             </div>
-            <div class="item-descricao">${item.descricao}</div>
-            <div class="item-categoria">${this.getCategoriaNome(item.categoria)}</div>
+            <div class="item-descricao" style="font-size: 0.9em; color: #ccc;">${item.descricao}</div>
+            <div class="item-categoria" style="font-size: 0.8em; color: #888;">${this.getCategoriaNome(item.categoria)}</div>
         `;
 
         div.addEventListener('click', () => {
+            this.itemSelecionado = item;
+            this.tipoSelecionado = tipo;
             this.abrirModalItem(item, tipo);
         });
 
@@ -81,130 +88,231 @@ class GerenciadorVantagens {
     }
 
     abrirModalItem(item, tipo) {
+        console.log('Abrindo modal para:', item.nome);
+        
         const modal = document.getElementById('modal-vantagem');
         const titulo = document.getElementById('modal-titulo');
         const corpo = document.getElementById('modal-corpo');
-        const btnConfirmar = document.querySelector('.btn-confirmar');
-        const btnCancelar = document.querySelector('.btn-cancelar');
-        const modalClose = document.querySelector('.modal-close');
+        const btnConfirmar = document.getElementById('btn-confirmar-modal');
 
-        if (!modal || !titulo || !corpo || !btnConfirmar || !btnCancelar || !modalClose) {
+        if (!modal || !titulo || !corpo || !btnConfirmar) {
             console.error('Elementos do modal não encontrados!');
+            alert('Erro: Modal não encontrado!');
             return;
         }
 
+        // Armazena os dados para usar depois
+        this.itemSelecionado = item;
+        this.tipoSelecionado = tipo;
+
         titulo.textContent = item.nome;
         
-        // Limpa eventos anteriores
-        btnConfirmar.onclick = null;
-        btnCancelar.onclick = null;
-        modalClose.onclick = null;
-
-        // Configura eventos do modal
-        const fecharModal = () => this.fecharModal();
-        btnCancelar.onclick = fecharModal;
-        modalClose.onclick = fecharModal;
-        
-        // Fechar modal ao clicar fora
-        modal.onclick = (e) => {
-            if (e.target === modal) fecharModal();
-        };
-
+        // Configura o conteúdo baseado no tipo
+        let html = '';
         switch(item.tipo) {
             case 'simples':
-                corpo.innerHTML = this.criarModalSimples(item);
-                btnConfirmar.onclick = () => {
-                    this.adicionarItem(item, tipo);
-                    fecharModal();
-                };
-                btnConfirmar.disabled = false;
+                html = this.criarModalSimples(item);
+                btnConfirmar.onclick = () => this.confirmarSimples();
                 break;
-
+                
             case 'multipla':
-                corpo.innerHTML = this.criarModalMultipla(item);
-                btnConfirmar.onclick = () => {
-                    this.confirmarMultipla(item, tipo);
-                    fecharModal();
-                };
-                btnConfirmar.disabled = true;
-                
-                // Configura eventos para os radios
-                setTimeout(() => {
-                    this.configurarEventosMultipla();
-                }, 10);
+                html = this.criarModalMultipla(item);
+                btnConfirmar.onclick = () => this.confirmarMultipla();
                 break;
-
-            case 'variavel':
-                corpo.innerHTML = this.criarModalVariavel(item);
-                btnConfirmar.onclick = () => {
-                    this.confirmarVariavel(item, tipo);
-                    fecharModal();
-                };
-                btnConfirmar.disabled = false;
                 
-                // Configura eventos para nível e ampliações
-                setTimeout(() => {
-                    this.configurarEventosVariavel(item);
-                }, 10);
+            case 'variavel':
+                html = this.criarModalVariavel(item);
+                btnConfirmar.onclick = () => this.confirmarVariavel();
                 break;
         }
-
+        
+        corpo.innerHTML = html;
+        
+        // Configura eventos específicos
+        if (item.tipo === 'multipla') {
+            this.configurarEventosMultipla();
+        } else if (item.tipo === 'variavel') {
+            this.configurarEventosVariavel();
+        }
+        
+        // Mostra o modal
         modal.style.display = 'block';
         modal.style.zIndex = '9999';
+        
+        console.log('Modal aberto com sucesso!');
     }
 
     configurarEventosMultipla() {
-        const radios = document.querySelectorAll('input[name="variacao"]');
-        const btnConfirmar = document.querySelector('.btn-confirmar');
-        
-        if (radios.length > 0 && btnConfirmar) {
-            radios.forEach(radio => {
-                radio.addEventListener('change', () => {
-                    btnConfirmar.disabled = false;
+        // Aguarda o DOM atualizar
+        setTimeout(() => {
+            const radios = document.querySelectorAll('input[name="variacao"]');
+            const btnConfirmar = document.getElementById('btn-confirmar-modal');
+            
+            if (radios.length > 0 && btnConfirmar) {
+                radios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        btnConfirmar.disabled = false;
+                    });
                 });
-            });
-        }
+                
+                // Desabilita o botão inicialmente
+                btnConfirmar.disabled = true;
+            }
+        }, 100);
     }
 
-    configurarEventosVariavel(item) {
-        const nivelBase = item.nivelBase || 1;
-        const custoPorNivel = Math.abs(item.custoPorNivel || 2);
-        const selectNivel = document.getElementById('nivel-vantagem');
-        const custoTotal = document.getElementById('custo-total');
-        const checkboxes = document.querySelectorAll('.ampliacao-checkbox');
+    configurarEventosVariavel() {
+        setTimeout(() => {
+            const selectNivel = document.getElementById('nivel-vantagem');
+            const custoTotal = document.getElementById('custo-total');
+            const checkboxes = document.querySelectorAll('.ampliacao-checkbox');
 
-        if (!selectNivel || !custoTotal) return;
+            if (!selectNivel || !custoTotal) return;
 
-        const calcularCusto = () => {
-            const nivel = parseInt(selectNivel.value) || nivelBase;
-            let custoBase = nivel * custoPorNivel;
-            let multiplicadorTotal = 1.0;
-            let ampliacoesAtivas = [];
+            const calcularCusto = () => {
+                const nivel = parseInt(selectNivel.value) || 1;
+                const custoPorNivel = Math.abs(this.itemSelecionado.custoPorNivel || 2);
+                let custoBase = nivel * custoPorNivel;
+                let multiplicadorTotal = 1.0;
+                let ampliacoesAtivas = [];
+                
+                checkboxes.forEach(checkbox => {
+                    if(checkbox.checked) {
+                        const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
+                        multiplicadorTotal *= multiplicador;
+                        ampliacoesAtivas.push(checkbox.dataset.nome);
+                    }
+                });
+                
+                const custoFinal = Math.round(custoBase * multiplicadorTotal);
+                
+                custoTotal.textContent = `${custoFinal} pts`;
+                selectNivel.dataset.custoFinal = custoFinal;
+                selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
+            };
+
+            calcularCusto();
+
+            selectNivel.addEventListener('change', calcularCusto);
             
             checkboxes.forEach(checkbox => {
-                if(checkbox.checked) {
-                    const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
-                    multiplicadorTotal *= multiplicador;
-                    ampliacoesAtivas.push(checkbox.dataset.nome);
-                }
+                checkbox.addEventListener('change', calcularCusto);
             });
-            
-            const custoFinal = Math.round(custoBase * multiplicadorTotal);
-            
-            custoTotal.textContent = `${custoFinal} pts`;
-            selectNivel.dataset.custoFinal = custoFinal;
-            selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
-        };
-
-        calcularCusto();
-
-        selectNivel.addEventListener('change', calcularCusto);
-        
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', calcularCusto);
-        });
+        }, 100);
     }
 
+    // FUNÇÕES DE CONFIRMAÇÃO DIRETAS
+    confirmarSimples() {
+        if (!this.itemSelecionado || !this.tipoSelecionado) return;
+        
+        const itemAdquirido = {
+            id: this.itemSelecionado.id + '-' + Date.now(),
+            baseId: this.itemSelecionado.id,
+            nome: this.itemSelecionado.nome,
+            custo: Math.abs(this.itemSelecionado.custo) || 0,
+            descricao: this.itemSelecionado.descricao,
+            tipo: this.itemSelecionado.tipo
+        };
+
+        if (this.tipoSelecionado === 'vantagem') {
+            this.vantagensAdquiridas.push(itemAdquirido);
+        } else {
+            this.desvantagensAdquiridas.push(itemAdquirido);
+        }
+
+        this.renderizarListas();
+        this.atualizarTotais();
+        this.fecharModal();
+        
+        alert(`${this.itemSelecionado.nome} adquirido com sucesso!`);
+    }
+
+    confirmarMultipla() {
+        if (!this.itemSelecionado || !this.tipoSelecionado) return;
+        
+        const radioSelecionado = document.querySelector('input[name="variacao"]:checked');
+        if (!radioSelecionado) {
+            alert('Selecione uma variação!');
+            return;
+        }
+
+        const variacaoId = radioSelecionado.value;
+        const variacao = this.itemSelecionado.variacoes.find(v => v.id === variacaoId);
+        
+        if (!variacao) return;
+
+        const itemAdquirido = {
+            id: this.itemSelecionado.id + '-' + Date.now(),
+            baseId: this.itemSelecionado.id,
+            nome: variacao.nome,
+            custo: Math.abs(variacao.custo) || 0,
+            descricao: variacao.descricao,
+            tipo: this.itemSelecionado.tipo,
+            variacao: variacaoId
+        };
+
+        if (this.tipoSelecionado === 'vantagem') {
+            this.vantagensAdquiridas.push(itemAdquirido);
+        } else {
+            this.desvantagensAdquiridas.push(itemAdquirido);
+        }
+
+        this.renderizarListas();
+        this.atualizarTotais();
+        this.fecharModal();
+        
+        alert(`${variacao.nome} adquirido com sucesso!`);
+    }
+
+    confirmarVariavel() {
+        if (!this.itemSelecionado || !this.tipoSelecionado) return;
+        
+        const selectNivel = document.getElementById('nivel-vantagem');
+        if (!selectNivel) return;
+        
+        const nivel = parseInt(selectNivel.value) || (this.itemSelecionado.nivelBase || 1);
+        
+        let custoFinal = parseInt(selectNivel.dataset.custoFinal);
+        if (isNaN(custoFinal) || custoFinal <= 0) {
+            const custoPorNivel = Math.abs(this.itemSelecionado.custoPorNivel || 2);
+            custoFinal = nivel * custoPorNivel;
+            
+            const checkboxes = document.querySelectorAll('.ampliacao-checkbox:checked');
+            if (checkboxes.length > 0) {
+                let multiplicadorTotal = 1.0;
+                checkboxes.forEach(checkbox => {
+                    const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
+                    multiplicadorTotal *= multiplicador;
+                });
+                custoFinal = Math.round(custoFinal * multiplicadorTotal);
+            }
+        }
+
+        const itemAdquirido = {
+            id: this.itemSelecionado.id + '-' + Date.now(),
+            baseId: this.itemSelecionado.id,
+            nome: this.itemSelecionado.nome,
+            custo: custoFinal,
+            descricao: this.itemSelecionado.descricao,
+            tipo: this.itemSelecionado.tipo,
+            nivel: nivel,
+            ampliacoes: this.itemSelecionado.ampliacoesSelecionadas || []
+        };
+
+        if (this.tipoSelecionado === 'vantagem') {
+            this.vantagensAdquiridas.push(itemAdquirido);
+        } else {
+            this.desvantagensAdquiridas.push(itemAdquirido);
+        }
+
+        this.renderizarListas();
+        this.atualizarTotais();
+        this.fecharModal();
+        
+        alert(`${this.itemSelecionado.nome} Nível ${nivel} adquirido com sucesso!`);
+    }
+
+    // FUNÇÕES AUXILIARES (mantenha as originais)
     criarModalSimples(item) {
         return `
             <div class="modal-descricao">
@@ -225,11 +333,11 @@ class GerenciadorVantagens {
 
         item.variacoes.forEach((variacao, index) => {
             html += `
-                <div class="modal-variacao" data-variacao-id="${variacao.id}">
+                <div class="modal-variacao" style="margin: 10px 0; padding: 10px; border: 1px solid #555; border-radius: 5px;">
                     <input type="radio" id="variacao-${variacao.id}" name="variacao" value="${variacao.id}">
-                    <label for="variacao-${variacao.id}">
+                    <label for="variacao-${variacao.id}" style="cursor: pointer;">
                         <strong>${variacao.nome} (${Math.abs(variacao.custo)} pts)</strong>
-                        <p>${variacao.descricao}</p>
+                        <p style="margin: 5px 0; font-size: 0.9em;">${variacao.descricao}</p>
                     </label>
                 </div>
             `;
@@ -249,9 +357,9 @@ class GerenciadorVantagens {
                 <p>${item.descricao}</p>
                 ${item.limitacoes ? `<p><small>${item.limitacoes}</small></p>` : ''}
                 
-                <div class="modal-nivel">
-                    <label for="nivel-vantagem">Nível:</label>
-                    <select id="nivel-vantagem" class="atributo-input">
+                <div class="modal-nivel" style="margin: 15px 0;">
+                    <label for="nivel-vantagem" style="display: block; margin-bottom: 5px;"><strong>Nível:</strong></label>
+                    <select id="nivel-vantagem" style="width: 100%; padding: 8px; background: #333; color: white; border: 1px solid #555;">
         `;
 
         for(let i = nivelBase; i <= niveisMax; i++) {
@@ -260,30 +368,31 @@ class GerenciadorVantagens {
 
         html += `
                     </select>
-                    <div class="nivel-info">
+                    <div class="nivel-info" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #555;">
                         <div class="custo-total-container">
-                            <span>Custo: </span>
-                            <span class="custo-total" id="custo-total">${nivelBase * custoPorNivel} pts</span>
+                            <strong>Custo Total: <span id="custo-total" style="color: #2ecc71;">${nivelBase * custoPorNivel} pts</span></strong>
                         </div>
                     </div>
+                </div>
         `;
 
         if(item.ampliacoes && item.ampliacoes.length > 0) {
-            html += `<div class="ampliacoes-section"><h4>Ampliações Opcionais:</h4>`;
+            html += `<div class="ampliacoes-section" style="margin-top: 20px;">
+                <h4 style="margin-bottom: 10px;">Ampliações Opcionais:</h4>`;
             
             item.ampliacoes.forEach((ampliacao, index) => {
                 const custoMultiplicador = parseFloat(ampliacao.custoExtra) || 2.5;
                 const percentualAumento = (custoMultiplicador - 1) * 100;
                 
                 html += `
-                    <div class="ampliacao-option">
+                    <div class="ampliacao-option" style="margin: 10px 0; padding: 10px; background: #2a2a3a; border-radius: 5px;">
                         <input type="checkbox" id="ampliacao-${ampliacao.id}" 
                                data-multiplicador="${custoMultiplicador}" 
                                data-nome="${ampliacao.nome}"
-                               class="ampliacao-checkbox">
-                        <label for="ampliacao-${ampliacao.id}">
+                               style="margin-right: 10px;">
+                        <label for="ampliacao-${ampliacao.id}" style="cursor: pointer;">
                             <strong>${ampliacao.nome} (+${percentualAumento}%)</strong>
-                            <p>${ampliacao.descricao}</p>
+                            <p style="margin: 5px 0; font-size: 0.9em;">${ampliacao.descricao}</p>
                         </label>
                     </div>
                 `;
@@ -292,166 +401,55 @@ class GerenciadorVantagens {
             html += `</div>`;
         }
 
-        html += `</div></div>`;
+        html += `</div>`;
         return html;
     }
 
-    confirmarMultipla(item, tipo) {
-        const radioSelecionado = document.querySelector('input[name="variacao"]:checked');
-        if (!radioSelecionado) {
-            alert('Selecione uma variação antes de confirmar!');
-            return;
-        }
-
-        const variacaoId = radioSelecionado.value;
-        const variacao = item.variacoes.find(v => v.id === variacaoId);
-        
-        if (!variacao) {
-            alert('Variação não encontrada!');
-            return;
-        }
-
-        const itemCompleto = {
-            ...item,
-            ...variacao,
-            variacaoSelecionada: variacaoId
-        };
-
-        this.adicionarItem(itemCompleto, tipo);
-    }
-
-    confirmarVariavel(item, tipo) {
-        const selectNivel = document.getElementById('nivel-vantagem');
-        if (!selectNivel) return;
-        
-        const nivel = parseInt(selectNivel.value) || (item.nivelBase || 1);
-        
-        let custoFinal = parseInt(selectNivel.dataset.custoFinal);
-        if (isNaN(custoFinal) || custoFinal <= 0) {
-            const custoPorNivel = Math.abs(item.custoPorNivel || 2);
-            custoFinal = nivel * custoPorNivel;
-            
-            const checkboxes = document.querySelectorAll('.ampliacao-checkbox:checked');
-            if (checkboxes.length > 0) {
-                let multiplicadorTotal = 1.0;
-                checkboxes.forEach(checkbox => {
-                    const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
-                    multiplicadorTotal *= multiplicador;
-                });
-                custoFinal = Math.round(custoFinal * multiplicadorTotal);
-            }
-        }
-        
-        let ampliacoesSelecionadas = [];
-        try {
-            ampliacoesSelecionadas = JSON.parse(selectNivel.dataset.ampliacoes || '[]');
-        } catch (e) {
-            ampliacoesSelecionadas = [];
-        }
-
-        const itemCompleto = {
-            ...item,
-            nivelSelecionado: nivel,
-            custo: custoFinal,
-            ampliacoesSelecionadas: ampliacoesSelecionadas
-        };
-
-        this.adicionarItem(itemCompleto, tipo);
-    }
-
-    adicionarItem(item, tipo) {
-        let custoCalculado = Math.abs(item.custo) || 0;
-        if (isNaN(custoCalculado) || custoCalculado <= 0) {
-            if (item.tipo === 'variavel') {
-                const nivel = item.nivelSelecionado || (item.nivelBase || 1);
-                const custoPorNivel = Math.abs(item.custoPorNivel || 2);
-                custoCalculado = nivel * custoPorNivel;
-            }
-        }
-
-        const itemAdquirido = {
-            id: item.id + '-' + Date.now(),
-            baseId: item.id,
-            nome: item.nome,
-            custo: custoCalculado,
-            descricao: item.descricao,
-            tipo: item.tipo,
-            variacao: item.variacaoSelecionada,
-            nivel: item.nivelSelecionado,
-            ampliacoes: item.ampliacoesSelecionadas
-        };
-
-        if (tipo === 'vantagem') {
-            this.vantagensAdquiridas.push(itemAdquirido);
-            this.renderizarListaAdquiridas('vantagens-adquiridas', this.vantagensAdquiridas, 'vantagem');
-        } else {
-            this.desvantagensAdquiridas.push(itemAdquirido);
-            this.renderizarListaAdquiridas('desvantagens-adquiridas', this.desvantagensAdquiridas, 'desvantagem');
-        }
-
-        this.atualizarTotais();
-        alert(`${item.nome} adquirido com sucesso! Custo: ${custoCalculado} pontos`);
-    }
-
-    renderizarListaAdquiridas(containerId, itens, tipo) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        
-        if (itens.length === 0) {
-            container.innerHTML = '<div class="lista-vazia">Nenhum item adquirido</div>';
-            return;
-        }
-
-        container.innerHTML = itens.map(item => {
-            let infoExtra = '';
-            
-            if (item.nivel) {
-                infoExtra = `<div class="item-categoria">Nível ${item.nivel}</div>`;
-            }
-            
-            if (item.variacao) {
-                infoExtra = `<div class="item-categoria">${this.getNomeVariacao(item.baseId, item.variacao)}</div>`;
-            }
-            
-            if (item.ampliacoes && item.ampliacoes.length > 0) {
-                infoExtra += `<div class="item-ampliacoes"><small>Ampliações: ${item.ampliacoes.join(', ')}</small></div>`;
-            }
-
-            return `
-                <div class="item-lista item-adquirido">
-                    <div class="item-header">
-                        <div class="item-nome">${item.nome}</div>
-                        <div class="item-custo">${Math.abs(item.custo)} pts</div>
+    renderizarListas() {
+        // Renderiza vantagens adquiridas
+        const vantagensContainer = document.getElementById('vantagens-adquiridas');
+        if (vantagensContainer) {
+            if (this.vantagensAdquiridas.length === 0) {
+                vantagensContainer.innerHTML = '<div class="lista-vazia">Nenhuma vantagem adquirida</div>';
+            } else {
+                vantagensContainer.innerHTML = this.vantagensAdquiridas.map(item => `
+                    <div class="item-lista item-adquirido" style="position: relative; padding: 10px; margin: 5px 0; border: 1px solid #2ecc71; border-radius: 5px;">
+                        <div class="item-header" style="display: flex; justify-content: space-between;">
+                            <div class="item-nome"><strong>${item.nome}</strong></div>
+                            <div class="item-custo" style="color: #2ecc71;">${Math.abs(item.custo)} pts</div>
+                        </div>
+                        <div class="item-descricao" style="font-size: 0.9em; color: #ccc;">${item.descricao}</div>
+                        ${item.nivel ? `<div style="font-size: 0.8em; color: #888;">Nível ${item.nivel}</div>` : ''}
+                        ${item.variacao ? `<div style="font-size: 0.8em; color: #888;">${item.variacao}</div>` : ''}
+                        <button onclick="vantagensSystem.removerItem('${item.id}', 'vantagem')" 
+                                style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
                     </div>
-                    <div class="item-descricao">${item.descricao}</div>
-                    ${infoExtra}
-                    <button class="btn-remover" onclick="vantagensSystem.removerItem('${item.id}', '${tipo}')">×</button>
-                </div>
-            `;
-        }).join('');
-    }
-
-    getNomeVariacao(baseId, variacaoId) {
-        const item = [...vantagensData.vantagens, ...vantagensData.desvantagens].find(i => i.id === baseId);
-        if (item && item.variacoes) {
-            const variacao = item.variacoes.find(v => v.id === variacaoId);
-            return variacao ? variacao.nome : '';
+                `).join('');
+            }
         }
-        return '';
-    }
 
-    removerItem(itemId, tipo) {
-        if (tipo === 'vantagem') {
-            this.vantagensAdquiridas = this.vantagensAdquiridas.filter(item => item.id !== itemId);
-            this.renderizarListaAdquiridas('vantagens-adquiridas', this.vantagensAdquiridas, 'vantagem');
-        } else {
-            this.desvantagensAdquiridas = this.desvantagensAdquiridas.filter(item => item.id !== itemId);
-            this.renderizarListaAdquiridas('desvantagens-adquiridas', this.desvantagensAdquiridas, 'desvantagem');
+        // Renderiza desvantagens adquiridas
+        const desvantagensContainer = document.getElementById('desvantagens-adquiridas');
+        if (desvantagensContainer) {
+            if (this.desvantagensAdquiridas.length === 0) {
+                desvantagensContainer.innerHTML = '<div class="lista-vazia">Nenhuma desvantagem adquirida</div>';
+            } else {
+                desvantagensContainer.innerHTML = this.desvantagensAdquiridas.map(item => `
+                    <div class="item-lista item-adquirido" style="position: relative; padding: 10px; margin: 5px 0; border: 1px solid #e74c3c; border-radius: 5px;">
+                        <div class="item-header" style="display: flex; justify-content: space-between;">
+                            <div class="item-nome"><strong>${item.nome}</strong></div>
+                            <div class="item-custo" style="color: #e74c3c;">${Math.abs(item.custo)} pts</div>
+                        </div>
+                        <div class="item-descricao" style="font-size: 0.9em; color: #ccc;">${item.descricao}</div>
+                        <button onclick="vantagensSystem.removerItem('${item.id}', 'desvantagem')" 
+                                style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+                    </div>
+                `).join('');
+            }
         }
-        this.atualizarTotais();
-        alert('Item removido com sucesso!');
     }
 
+    // Restante das funções (setupPeculiaridades, atualizarTotais, etc) mantenha iguais
     setupPeculiaridades() {
         const input = document.getElementById('nova-peculiaridade');
         const btnAdicionar = document.getElementById('btn-adicionar-peculiaridade');
@@ -513,9 +511,10 @@ class GerenciadorVantagens {
         }
 
         container.innerHTML = this.peculiaridades.map(pec => `
-            <div class="peculiaridade-item">
+            <div class="peculiaridade-item" style="position: relative; padding: 10px; margin: 5px 0; border: 1px solid #f39c12; border-radius: 5px;">
                 <p class="peculiaridade-texto">${pec.texto}</p>
-                <button class="btn-remover" onclick="vantagensSystem.removerPeculiaridade('${pec.id}')">×</button>
+                <button class="btn-remover" onclick="vantagensSystem.removerPeculiaridade('${pec.id}')" 
+                        style="position: absolute; top: 5px; right: 5px; background: #f39c12; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
             </div>
         `).join('');
     }
@@ -525,6 +524,18 @@ class GerenciadorVantagens {
         this.renderizarPeculiaridades();
         this.atualizarTotais();
         alert('Peculiaridade removida!');
+    }
+
+    removerItem(itemId, tipo) {
+        if (tipo === 'vantagem') {
+            this.vantagensAdquiridas = this.vantagensAdquiridas.filter(item => item.id !== itemId);
+        } else {
+            this.desvantagensAdquiridas = this.desvantagensAdquiridas.filter(item => item.id !== itemId);
+        }
+        
+        this.renderizarListas();
+        this.atualizarTotais();
+        alert('Item removido com sucesso!');
     }
 
     atualizarTotais() {
@@ -559,7 +570,7 @@ class GerenciadorVantagens {
     }
 
     setupEventListeners() {
-        // Event listeners para filtros
+        // Filtros
         const buscaVantagens = document.getElementById('busca-vantagens');
         const categoriaVantagens = document.getElementById('categoria-vantagens');
         const buscaDesvantagens = document.getElementById('busca-desvantagens');
@@ -612,29 +623,16 @@ class GerenciadorVantagens {
         const modal = document.getElementById('modal-vantagem');
         if (modal) {
             modal.style.display = 'none';
+            this.itemSelecionado = null;
+            this.tipoSelecionado = null;
             
-            // Limpa os event listeners para evitar acúmulo
-            const btnConfirmar = document.querySelector('.btn-confirmar');
-            const btnCancelar = document.querySelector('.btn-cancelar');
-            const modalClose = document.querySelector('.modal-close');
-            
+            // Limpa o botão confirmar
+            const btnConfirmar = document.getElementById('btn-confirmar-modal');
             if (btnConfirmar) btnConfirmar.onclick = null;
-            if (btnCancelar) btnCancelar.onclick = null;
-            if (modalClose) modalClose.onclick = null;
-            if (modal) modal.onclick = null;
         }
     }
 }
 
-// Inicializar sistema
-let vantagensSystem;
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        vantagensSystem = new GerenciadorVantagens();
-        window.vantagensSystem = vantagensSystem;
-    });
-} else {
-    vantagensSystem = new GerenciadorVantagens();
-    window.vantagensSystem = vantagensSystem;
-}
+// Inicialização SIMPLES
+const vantagensSystem = new GerenciadorVantagens();
+window.vantagensSystem = vantagensSystem;
