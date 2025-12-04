@@ -1,6 +1,5 @@
 // ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA 100% =====
 // Sistema completo para gerenciar perícias com modal de escolha
-// Integração automática com sistema de atributos
 
 let estadoPericias = {
     adquiridas: [],      // Perícias adquiridas pelo jogador
@@ -11,101 +10,64 @@ let estadoPericias = {
 // ===== FUNÇÕES PARA INTEGRAÇÃO COM SISTEMA PRINCIPAL =====
 
 function obterAtributosAtuais() {
-    // Função principal que obtém todos os atributos atuais do personagem
-    const atributos = {
-        ST: obterValorAtributo('ST'),
-        DX: obterValorAtributo('DX'),
-        IQ: obterValorAtributo('IQ'),
-        HT: obterValorAtributo('HT'),
-        PERC: obterValorPercepcao()
+    // Primeiro tenta usar funções do sistema principal
+    if (typeof window.obterValorAtributo === 'function') {
+        return {
+            ST: window.obterValorAtributo('ST') || 10,
+            DX: window.obterValorAtributo('DX') || 10,
+            IQ: window.obterValorAtributo('IQ') || 10,
+            HT: window.obterValorAtributo('HT') || 10,
+            PERC: window.obterValorAtributo('PERC') || 10
+        };
+    }
+    
+    // Se não tiver funções do sistema principal, busca no DOM
+    const atributos = { ST: 10, DX: 10, IQ: 10, HT: 10, PERC: 10 };
+    
+    // Procurar elementos de atributos no DOM
+    const elementosAtributos = {
+        ST: document.getElementById('ST') || document.querySelector('[data-atributo="ST"]'),
+        DX: document.getElementById('DX') || document.querySelector('[data-atributo="DX"]'),
+        IQ: document.getElementById('IQ') || document.querySelector('[data-atributo="IQ"]'),
+        HT: document.getElementById('HT') || document.querySelector('[data-atributo="HT"]'),
+        PERC: document.getElementById('PercepcaoTotal') || document.querySelector('[data-atributo="PERC"]')
     };
     
-    // DEBUG: Descomente para verificar valores
-    // console.log("Atributos obtidos:", atributos);
+    for (const [atributo, elemento] of Object.entries(elementosAtributos)) {
+        if (elemento) {
+            let valorTexto = elemento.value || elemento.textContent || elemento.innerText || '10';
+            valorTexto = valorTexto.replace(/[^0-9\-]/g, '');
+            const valor = parseInt(valorTexto);
+            if (!isNaN(valor)) {
+                atributos[atributo] = valor;
+            }
+        }
+    }
+    
+    // Se PERC não foi encontrado, usar IQ
+    if (atributos.PERC === 10 && atributos.IQ !== 10) {
+        atributos.PERC = atributos.IQ;
+    }
     
     return atributos;
 }
 
-function obterValorAtributo(atributo) {
-    // Método 1: Usar função do sistema principal se existir
-    if (typeof window.obterValorAtributo === 'function') {
-        const valor = window.obterValorAtributo(atributo);
-        if (valor !== undefined && valor !== null) return valor;
-    }
-    
-    // Método 2: Buscar no input direto do atributo
-    const input = document.getElementById(atributo);
-    if (input) {
-        const valorInput = parseInt(input.value);
-        if (!isNaN(valorInput)) return valorInput;
-    }
-    
-    // Método 3: Buscar no display de valor do atributo
-    const display = document.getElementById(`valor-${atributo.toLowerCase()}`);
-    if (display) {
-        const textoDisplay = display.textContent || display.innerText || '';
-        const valorDisplay = parseInt(textoDisplay.replace(/[^0-9]/g, ''));
-        if (!isNaN(valorDisplay)) return valorDisplay;
-    }
-    
-    // Método 4: Buscar por data-atributo
-    const elementoData = document.querySelector(`[data-atributo="${atributo}"]`);
-    if (elementoData) {
-        const textoData = elementoData.textContent || elementoData.innerText || elementoData.value || '';
-        const valorData = parseInt(textoData.replace(/[^0-9]/g, ''));
-        if (!isNaN(valorData)) return valorData;
-    }
-    
-    // Método 5: Buscar no total do atributo (PVTotal, PFTotal, etc)
-    if (atributo === 'ST') {
-        const pvTotal = document.getElementById('PVTotal');
-        if (pvTotal) {
-            const textoPV = pvTotal.textContent || pvTotal.innerText || '';
-            const valorPV = parseInt(textoPV.replace(/[^0-9]/g, ''));
-            if (!isNaN(valorPV)) return valorPV;
-        }
-    }
-    
-    // Valor padrão
-    return 10;
-}
-
-function obterValorPercepcao() {
-    // Percepção é especial: geralmente IQ + bônus
-    // Método 1: Buscar elemento específico de percepção
-    const percElement = document.getElementById('PercepcaoTotal') || 
-                       document.getElementById('valor-perc') || 
-                       document.getElementById('valor-percepcao');
-    
-    if (percElement) {
-        const texto = percElement.textContent || percElement.innerText || percElement.value || '';
-        const valor = parseInt(texto.replace(/[^0-9]/g, ''));
-        if (!isNaN(valor)) return valor;
-    }
-    
-    // Método 2: Se não encontrar, usar IQ + 0
-    const iq = obterValorAtributo('IQ');
-    return iq;
-}
-
 function obterPontosGastosAtributos() {
-    // Método 1: Usar função do sistema principal
+    // Tenta usar função do sistema principal
     if (typeof window.obterPontosGastosAtributos === 'function') {
-        const pontos = window.obterPontosGastosAtributos();
-        if (pontos !== undefined && pontos !== null) return pontos;
+        return window.obterPontosGastosAtributos();
     }
     
-    // Método 2: Buscar no elemento de pontos gastos
+    // Tenta obter do elemento HTML
     const elemento = document.getElementById('total-atributos-adquiridos') || 
-                     document.getElementById('pontos-gastos-atributos') ||
-                     document.getElementById('pontosGastos') ||
-                     document.querySelector('.ponto-card.gastos .ponto-valor');
+                    document.getElementById('pontosGastos') ||
+                    document.querySelector('.ponto-card.gastos .ponto-valor');
     
     if (elemento) {
-        let texto = elemento.textContent || elemento.innerText || '0';
-        texto = texto.replace(/[^0-9\-]/g, '');
-        const valor = parseInt(texto);
-        if (!isNaN(valor)) return Math.abs(valor);
+        let valorTexto = elemento.textContent || elemento.innerText || '0';
+        valorTexto = valorTexto.replace(/[^0-9\-]/g, '');
+        const valor = parseInt(valorTexto);
+        return isNaN(valor) ? 0 : Math.abs(valor);
     }
     
     return 0;
@@ -162,92 +124,9 @@ function getInfoRedutores(dificuldade) {
     return infos[dificuldade] || infos["Média"];
 }
 
-// ===== SISTEMA DE ESCUTA DE ATRIBUTOS =====
-
-function configurarEscutaAtributos() {
-    // Escutar mudanças nos atributos
-    document.addEventListener('atributosAlterados', function(event) {
-        console.log("📢 Evento atributosAlterados recebido:", event.detail);
-        atualizarPericiasComNovosAtributos();
-    });
-    
-    // Escutar mudanças diretas nos inputs
-    ['ST', 'DX', 'IQ', 'HT'].forEach(atributo => {
-        const input = document.getElementById(atributo);
-        if (input) {
-            input.addEventListener('input', function() {
-                setTimeout(() => {
-                    atualizarPericiasComNovosAtributos();
-                }, 100);
-            });
-        }
-    });
-    
-    // Escutar mudanças em elementos de atributos secundários
-    const elementosAtributos = [
-        'PercepcaoTotal', 'valor-perc', 'valor-percepcao',
-        'PVTotal', 'PFTotal', 'VontadeTotal'
-    ];
-    
-    elementosAtributos.forEach(id => {
-        const elemento = document.getElementById(id);
-        if (elemento) {
-            // Observar mudanças no conteúdo
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'characterData' || mutation.type === 'childList') {
-                        atualizarPericiasComNovosAtributos();
-                    }
-                });
-            });
-            
-            observer.observe(elemento, {
-                childList: true,
-                characterData: true,
-                subtree: true
-            });
-        }
-    });
-}
-
-function atualizarPericiasComNovosAtributos() {
-    console.log("🔄 Atualizando perícias com novos atributos...");
-    
-    // 1. Atualizar perícias adquiridas na interface
-    carregarPericiasAdquiridas();
-    
-    // 2. Atualizar pontuação
-    atualizarPontuacaoPericias();
-    
-    // 3. Forçar atualização se houver modal aberto
-    const modal = document.getElementById('modal-pericia');
-    if (modal && modal.style.display === 'block') {
-        const periciaId = document.getElementById('pericia-id');
-        if (periciaId && periciaId.value) {
-            const pericia = encontrarPericiaNoCatalogo(periciaId.value);
-            if (pericia) {
-                // Recriar modal com novos valores
-                const titulo = document.getElementById('modal-titulo-pericia');
-                if (titulo && titulo.textContent === pericia.nome) {
-                    // Fechar e reabrir com novos valores
-                    modal.style.display = 'none';
-                    setTimeout(() => {
-                        abrirModalNivelPericia(pericia);
-                    }, 50);
-                }
-            }
-        }
-    }
-}
-
 // ===== INICIALIZAÇÃO DO SISTEMA =====
 
 function inicializarSistemaPericias() {
-    console.log("✅ Inicializando sistema de perícias...");
-    
-    // Configurar escuta de atributos
-    configurarEscutaAtributos();
-    
     // Configurar busca e filtros
     configurarBuscaEFiltros();
     
@@ -260,7 +139,8 @@ function inicializarSistemaPericias() {
     // Configurar eventos dos modais
     configurarEventosModais();
     
-    console.log("✅ Sistema de perícias inicializado com integração de atributos!");
+    // Configurar escuta de atributos
+    configurarEscutaAtributos();
 }
 
 function configurarBuscaEFiltros() {
@@ -277,6 +157,29 @@ function configurarBuscaEFiltros() {
         filtroSelect.addEventListener('change', function() {
             filtrarPericias(buscaInput?.value || '', this.value);
         });
+    }
+}
+
+// ===== SISTEMA DE ESCUTA DE ATRIBUTOS =====
+
+function configurarEscutaAtributos() {
+    // Escutar mudanças nos inputs de atributos
+    ['ST', 'DX', 'IQ', 'HT'].forEach(atributo => {
+        const input = document.getElementById(atributo);
+        if (input) {
+            input.addEventListener('change', atualizarInterfacePericias);
+            input.addEventListener('input', function() {
+                clearTimeout(this._timer);
+                this._timer = setTimeout(atualizarInterfacePericias, 300);
+            });
+        }
+    });
+    
+    // Escutar mudanças em percepção
+    const percElement = document.getElementById('PercepcaoTotal');
+    if (percElement) {
+        const observer = new MutationObserver(atualizarInterfacePericias);
+        observer.observe(percElement, { childList: true, characterData: true });
     }
 }
 
@@ -352,7 +255,6 @@ function criarGruposPericias(termoBusca = '', filtroAtributo = 'Todos') {
     }
 }
 
-// CONTINUA NO PRÓXIMO COMENTÁRIO...
 // ===== ADICIONAR PERÍCIAS DE ARRAY (DX, IQ, HT, PERC) =====
 
 function adicionarPericiasArray(container, arrayPericias, termoBusca) {
@@ -583,8 +485,7 @@ function abrirModalEscolhaPericia(grupo) {
     modal.style.display = 'block';
 }
 
-// CONTINUA NO PRÓXIMO COMENTÁRIO...
-// ===== MODAL DE NÍVEL DE PERÍCIA (SISTEMA + E -) =====
+// ===== MODAL DE NÍVEL DE PERÍCIA =====
 
 function abrirModalNivelPericia(pericia) {
     const modal = document.getElementById('modal-pericia');
@@ -595,11 +496,9 @@ function abrirModalNivelPericia(pericia) {
     
     if (!modal || !titulo || !corpo) return;
     
-    // Obter atributos atuais do personagem - AGORA COM VALORES REAIS
+    // Obter atributos atuais do personagem
     const atributos = obterAtributosAtuais();
     const valorAtributo = atributos[pericia.atributo] || 10;
-    
-    console.log(`📊 Perícia: ${pericia.nome}, Atributo: ${pericia.atributo} = ${valorAtributo}`);
     
     // Verificar se já existe esta perícia
     const periciaExistente = estadoPericias.adquiridas.find(p => p.id === pericia.id);
@@ -626,7 +525,7 @@ function abrirModalNivelPericia(pericia) {
     corpo.innerHTML = `
         <div class="modal-info">
             <p><strong>Perícia:</strong> ${pericia.nome}</p>
-            <p><strong>Atributo Base:</strong> ${pericia.atributo} (${valorAtributo})</p>
+            <p><strong>Atributo:</strong> ${pericia.atributo} (${valorAtributo})</p>
             <p><strong>Dificuldade:</strong> ${pericia.dificuldade}</p>
             <p><strong>Descrição:</strong> ${pericia.descricao || ''}</p>
             ${pericia.prereq ? `<p><strong>Pré-requisito:</strong> ${pericia.prereq}</p>` : ''}
@@ -690,12 +589,12 @@ function abrirModalNivelPericia(pericia) {
         const nivel = parseInt(nivelHidden.value);
         const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
         
-        // OBTER ATRIBUTO ATUAL NO MOMENTO (pode ter mudado)
+        // Obter atributo ATUAL (pode ter mudado)
         const atributosAtual = obterAtributosAtuais();
         const valorAtributoAtual = atributosAtual[pericia.atributo] || valorAtributo;
         const nhAtual = valorAtributoAtual + nivel;
         
-        // OBTER TABELA E NÍVEIS VÁLIDOS
+        // Obter níveis válidos
         const tabelaCusto = obterTabelaCusto(pericia.dificuldade);
         const niveisValidos = tabelaCusto.map(item => item.nivel);
         const nivelMinimo = Math.min(...niveisValidos);
@@ -706,7 +605,7 @@ function abrirModalNivelPericia(pericia) {
         nivelRelativo.innerHTML = `${pericia.atributo}${nivel >= 0 ? '+' : ''}${nivel}`;
         custoElement.textContent = custoTotal;
         
-        // CORREÇÃO CRÍTICA: Usar os níveis válidos da tabela
+        // Limitar botões
         btnMenos.disabled = nivel <= nivelMinimo;
         btnMais.disabled = nivel >= nivelMaximo;
         
@@ -746,7 +645,7 @@ function abrirModalNivelPericia(pericia) {
         }
     });
     
-    // Configurar botões do modal
+    // Configurar botão confirmar
     btnConfirmar.onclick = () => {
         const nivel = parseInt(nivelHidden.value);
         const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
@@ -757,6 +656,7 @@ function abrirModalNivelPericia(pericia) {
         }
     };
     
+    // Configurar botão cancelar
     btnCancelar.onclick = () => {
         modal.style.display = 'none';
     };
@@ -841,7 +741,7 @@ function carregarPericiasAdquiridas() {
     }
     
     estadoPericias.adquiridas.forEach(pericia => {
-        // OBTER ATRIBUTO ATUAL (pode ter mudado desde que a perícia foi adquirida)
+        // Obter atributo ATUAL (pode ter mudado desde que a perícia foi adquirida)
         const atributos = obterAtributosAtuais();
         const valorAtributo = atributos[pericia.atributo] || 10;
         const nhFinal = valorAtributo + pericia.nivelRelativo;
@@ -1003,6 +903,3 @@ window.removerPericia = removerPericia;
 window.carregarPericiasNaLista = carregarPericiasNaLista;
 window.obterAtributosAtuais = obterAtributosAtuais;
 window.obterPontosGastosAtributos = obterPontosGastosAtributos;
-window.atualizarPericiasComNovosAtributos = atualizarPericiasComNovosAtributos;
-
-console.log("✅ Sistema de perícias carregado com integração automática de atributos!");
