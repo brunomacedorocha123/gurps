@@ -4139,4 +4139,62 @@ select:focus {
     }
 }
 
+/* ESTILOS PARA INDICAR ITENS QUANTIFICÁVEIS */
+.catalog-table tr.quantificavel {
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.catalog-table tr.quantificavel:hover {
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.quantificavel-badge {
+    display: inline-block;
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.quantificavel-badge i {
+    margin-right: 4px;
+}
+
+/* Estilo para indicar que abre modal de quantidade */
+.btn-comprar[data-quantificavel="true"] {
+    background: linear-gradient(135deg, #ff9800, #ff5722);
+    position: relative;
+    animation: pulse-quantidade 2s infinite;
+}
+
+.btn-comprar[data-quantificavel="true"]:after {
+    content: '+';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff5722;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+@keyframes pulse-quantidade {
+    0% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 87, 34, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0); }
+}
+
+/* Estilo para o modal de quantidade já existente */
+/* (você já tem esse CSS, está ok) */
+
 /* Fim do CSS completo */

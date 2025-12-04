@@ -1,4 +1,4 @@
-// catalogo-equipamentos.js
+// catalogo-equipamentos.js - VERSÃO CORRIGIDA
 class CatalogoEquipamentos {
     constructor() {
         this.catalogo = {
@@ -9,24 +9,13 @@ class CatalogoEquipamentos {
                         dano: "GeB+2", tipoDano: "corte", alcance: "1", peso: 2.0, st: 11, custo: 50,
                         maos: 1, quantificavel: false, descricao: "Machado"
                     },
-                   {
-    id: "M801", 
-    nome: "Espada Larga", 
-    tipo: "arma-cc", 
-    era: "medieval", 
-    nt: 0,
-    dano: "GeB+1",  
-    tipoDano: "corte",
-    danoGDP: "GdP+1",  
-    tipoDanoGDP: "contusão",  
-    alcance: "1", 
-    peso: 1.5, 
-    st: 10, 
-    custo: 500,
-    maos: 1.5, 
-    quantificavel: false, 
-    descricao: "Espada larga"
-},
+                    {
+                        id: "M801", nome: "Espada Larga", tipo: "arma-cc", era: "medieval", nt: 0,
+                        dano: "GeB+1", tipoDano: "corte",
+                        danoGDP: "GdP+1", tipoDanoGDP: "contusão",
+                        alcance: "1", peso: 1.5, st: 10, custo: 500,
+                        maos: 1.5, quantificavel: false, descricao: "Espada larga"
+                    },
                     {
                         id: "M802", nome: "Lança", tipo: "arma-cc", era: "medieval", nt: 0,
                         dano: "GdP+3", tipoDano: "perfuração", alcance: "1,2", peso: 2.0, st: 9,
@@ -82,7 +71,7 @@ class CatalogoEquipamentos {
                     },
                     {
                         id: "M901", nome: "Cota de Malha Longa", tipo: "armadura", era: "medieval", nt: 0,
-                        local: "Tronco/Virilha", rd: 4/2, peso: 12.5, custo: 230, cl: 3, maos: 0,
+                        local: "Tronco/Virilha", rd: "4/2", peso: 12.5, custo: 230, cl: 3, maos: 0,
                         quantificavel: false, descricao: "Cota de Malha Longa"
                     },
                     {
@@ -276,6 +265,7 @@ class CatalogoEquipamentos {
         
         this.inicializado = false;
         this.tabelasInicializadas = false;
+        this.tabelasGeradas = new Set(); // Para evitar duplicação
         
         this.inicializarQuandoPronto();
     }
@@ -292,17 +282,25 @@ class CatalogoEquipamentos {
 
     inicializar() {
         try {
+            console.log('🔄 Inicializando catálogo de equipamentos...');
+            
             this.configurarFiltros();
             this.configurarBusca();
-            this.inicializarTabelas();
+            
+            // Marcar como inicializado ANTES de gerar tabelas
             this.inicializado = true;
+            this.inicializarTabelas();
             
             const evento = new CustomEvent('catalogoPronto', {
                 detail: { catalogo: this }
             });
             document.dispatchEvent(evento);
             
-        } catch (error) {}
+            console.log('✅ Catálogo de equipamentos inicializado com sucesso!');
+            
+        } catch (error) {
+            console.error('❌ Erro ao inicializar catálogo:', error);
+        }
     }
 
     configurarFiltros() {
@@ -385,7 +383,7 @@ class CatalogoEquipamentos {
             if (termoBusca) {
                 equipamentosFiltrados = equipamentosFiltrados.filter(equipamento => 
                     equipamento.nome.toLowerCase().includes(termoBusca) ||
-                    equipamento.descricao.toLowerCase().includes(termoBusca)
+                    (equipamento.descricao && equipamento.descricao.toLowerCase().includes(termoBusca))
                 );
             }
             
@@ -397,7 +395,15 @@ class CatalogoEquipamentos {
             if (equipamentosFiltrados.length > 0) {
                 section.style.display = 'block';
                 totalEquipamentos += equipamentosFiltrados.length;
-                this.atualizarTabelaCategoria(categoriaHTML, equipamentosFiltrados);
+                
+                // Evitar gerar tabelas duplicadas
+                if (!this.tabelasGeradas.has(categoriaHTML)) {
+                    this.atualizarTabelaCategoria(categoriaHTML, equipamentosFiltrados);
+                    this.tabelasGeradas.add(categoriaHTML);
+                } else {
+                    // Se já foi gerada, apenas atualizar os dados
+                    this.atualizarDadosTabela(categoriaHTML, equipamentosFiltrados);
+                }
             } else {
                 section.style.display = 'none';
             }
@@ -406,7 +412,7 @@ class CatalogoEquipamentos {
         this.mostrarMensagemSemResultados(totalEquipamentos === 0);
     }
 
-        mostrarMensagemSemResultados(semResultados) {
+    mostrarMensagemSemResultados(semResultados) {
         let mensagemContainer = document.getElementById('mensagem-sem-resultados');
         
         if (semResultados) {
@@ -431,11 +437,16 @@ class CatalogoEquipamentos {
     }
 
     inicializarTabelas() {
-        if (this.tabelasInicializadas) return;
+        if (this.tabelasInicializadas) {
+            console.log('⚠️ Tabelas já inicializadas, evitando duplicação');
+            return;
+        }
         
+        console.log('📊 Inicializando tabelas do catálogo...');
         this.atualizarContadores();
         this.aplicarFiltros();
         this.tabelasInicializadas = true;
+        console.log('✅ Tabelas inicializadas com sucesso');
     }
 
     atualizarContadores() {
@@ -465,6 +476,8 @@ class CatalogoEquipamentos {
     atualizarTabelaCategoria(categoria, equipamentos) {
         const container = document.querySelector(`[data-category="${categoria}"] .table-container`);
         if (!container) return;
+        
+        console.log(`📋 Atualizando tabela ${categoria} com ${equipamentos.length} itens`);
         
         if (equipamentos.length === 0) {
             container.innerHTML = `
@@ -497,84 +510,125 @@ class CatalogoEquipamentos {
         }
         
         container.innerHTML = html;
-        
-       
     }
 
-   gerarHTMLArmasCorpoACorpo(equipamentos) {
-    return `
-        <table class="catalog-table">
-            <thead>
-                <tr>
-                    <th class="col-nt">NT</th>
-                    <th class="col-nome">ARMA</th>
-                    <th class="col-dano">DANO</th>
-                    <th class="col-alcance">ALCANCE</th>
-                    <th class="col-peso">PESO</th>
-                    <th class="col-st">ST</th>
-                    <th class="col-maos">MÃOS</th>
-                    <th class="col-custo">CUSTO</th>
-                    <th class="col-acao">AÇÃO</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${equipamentos.map(equipamento => {
-                    // VERIFICA SE TEM GDP OU SÓ GEB
-                    const temGDP = equipamento.danoGDP && equipamento.danoGDP !== "-";
-                    
-                    return `
-                    <tr class="era-${equipamento.era}">
-                        <td class="col-nt">${equipamento.nt}</td>
-                        <td class="col-nome">
-                            <strong>${equipamento.nome}</strong>
-                            <div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>
-                            <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
-                        </td>
-                        <td class="col-dano">
-                            <div class="dano-vertical">
-                                ${temGDP ? `
-                                <!-- SE TEM AMBOS: mostra GEB e GDP -->
-                                <div class="linha-dano">
-                                    <span class="dano-titulo">GEB:</span>
-                                    <span class="dano-valor">${equipamento.dano}</span>
-                                    <span class="dano-tipo">${equipamento.tipoDano}</span>
-                                </div>
-                                <div class="linha-dano gdp-linha">
-                                    <span class="dano-titulo">GDP:</span>
-                                    <span class="dano-valor">${equipamento.danoGDP}</span>
-                                    <span class="dano-tipo">${equipamento.tipoDanoGDP}</span>
-                                </div>
-                                ` : `
-                                <!-- SE SÓ TEM GEB: mostra só GEB -->
-                                <div class="linha-dano unico-dano">
-                                    <span class="dano-titulo">GEB:</span>
-                                    <span class="dano-valor">${equipamento.dano}</span>
-                                    <span class="dano-tipo">${equipamento.tipoDano}</span>
-                                </div>
-                                `}
-                            </div>
-                        </td>
-                        <td class="col-alcance">${equipamento.alcance}</td>
-                        <td class="col-peso">${equipamento.peso} kg</td>
-                        <td class="col-st">${equipamento.st}</td>
-                        <td class="col-maos">
-                            <span class="badge-maos maos-${equipamento.maos}">
-                                ${this.obterIconeMaos(equipamento.maos)}
-                            </span>
-                        </td>
-                        <td class="col-custo">$${equipamento.custo}</td>
-                        <td class="col-acao">
-                            <button class="btn-comprar" data-item="${equipamento.id}">
-                                <i class="fas fa-shopping-cart"></i> COMPRAR
-                            </button>
-                        </td>
+    atualizarDadosTabela(categoria, equipamentos) {
+        // Método mais eficiente para atualizar apenas os dados sem recriar toda a tabela
+        const container = document.querySelector(`[data-category="${categoria}"] .table-container`);
+        if (!container) return;
+        
+        if (equipamentos.length === 0) {
+            container.innerHTML = `
+                <div class="nenhum-equipamento-catalogo">
+                    <i class="fas fa-inbox fa-2x"></i>
+                    <div>Nenhum equipamento encontrado</div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Encontrar e atualizar apenas o corpo da tabela
+        const tbody = container.querySelector('tbody');
+        if (tbody) {
+            let html = '';
+            
+            switch(categoria) {
+                case 'armas-cc':
+                    html = this.gerarHTMLCorpoArmasCorpoACorpo(equipamentos);
+                    break;
+                case 'armas-dist':
+                    html = this.gerarHTMLCorpoArmasDistancia(equipamentos);
+                    break;
+                case 'armaduras':
+                    html = this.gerarHTMLCorpoArmaduras(equipamentos);
+                    break;
+                case 'escudos':
+                    html = this.gerarHTMLCorpoEscudos(equipamentos);
+                    break;
+                case 'geral':
+                    html = this.gerarHTMLCorpoEquipamentosGerais(equipamentos);
+                    break;
+            }
+            
+            tbody.innerHTML = html;
+        }
+    }
+
+    gerarHTMLArmasCorpoACorpo(equipamentos) {
+        return `
+            <table class="catalog-table">
+                <thead>
+                    <tr>
+                        <th class="col-nt">NT</th>
+                        <th class="col-nome">ARMA</th>
+                        <th class="col-dano">DANO</th>
+                        <th class="col-alcance">ALCANCE</th>
+                        <th class="col-peso">PESO</th>
+                        <th class="col-st">ST</th>
+                        <th class="col-maos">MÃOS</th>
+                        <th class="col-custo">CUSTO</th>
+                        <th class="col-acao">AÇÃO</th>
                     </tr>
-                    `;
-                }).join('')}
-            </tbody>
-        </table>
-    `;
-}
+                </thead>
+                <tbody>
+                    ${this.gerarHTMLCorpoArmasCorpoACorpo(equipamentos)}
+                </tbody>
+            </table>
+        `;
+    }
+
+    gerarHTMLCorpoArmasCorpoACorpo(equipamentos) {
+        return equipamentos.map(equipamento => {
+            const temGDP = equipamento.danoGDP && equipamento.danoGDP !== "-";
+            
+            return `
+                <tr class="era-${equipamento.era}" data-id="${equipamento.id}">
+                    <td class="col-nt">${equipamento.nt}</td>
+                    <td class="col-nome">
+                        <strong>${equipamento.nome}</strong>
+                        <div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>
+                        <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
+                    </td>
+                    <td class="col-dano">
+                        <div class="dano-vertical">
+                            ${temGDP ? `
+                            <div class="linha-dano">
+                                <span class="dano-titulo">GEB:</span>
+                                <span class="dano-valor">${equipamento.dano}</span>
+                                <span class="dano-tipo">${equipamento.tipoDano}</span>
+                            </div>
+                            <div class="linha-dano gdp-linha">
+                                <span class="dano-titulo">GDP:</span>
+                                <span class="dano-valor">${equipamento.danoGDP}</span>
+                                <span class="dano-tipo">${equipamento.tipoDanoGDP}</span>
+                            </div>
+                            ` : `
+                            <div class="linha-dano unico-dano">
+                                <span class="dano-titulo">GEB:</span>
+                                <span class="dano-valor">${equipamento.dano}</span>
+                                <span class="dano-tipo">${equipamento.tipoDano}</span>
+                            </div>
+                            `}
+                        </div>
+                    </td>
+                    <td class="col-alcance">${equipamento.alcance}</td>
+                    <td class="col-peso">${equipamento.peso} kg</td>
+                    <td class="col-st">${equipamento.st}</td>
+                    <td class="col-maos">
+                        <span class="badge-maos maos-${equipamento.maos}">
+                            ${this.obterIconeMaos(equipamento.maos)}
+                        </span>
+                    </td>
+                    <td class="col-custo">$${equipamento.custo}</td>
+                    <td class="col-acao">
+                        <button class="btn-comprar" data-item="${equipamento.id}">
+                            <i class="fas fa-shopping-cart"></i> COMPRAR
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
 
     gerarHTMLArmasDistancia(equipamentos) {
         return `
@@ -595,36 +649,40 @@ class CatalogoEquipamentos {
                     </tr>
                 </thead>
                 <tbody>
-                    ${equipamentos.map(equipamento => `
-                        <tr class="era-${equipamento.era}">
-                            <td class="col-nt">${equipamento.nt}</td>
-                            <td class="col-nome">
-                                <strong>${equipamento.nome}</strong>
-                                <div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>
-                                <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
-                            </td>
-                            <td class="col-dano">${equipamento.dano}</td>
-                            <td class="col-tipo">${equipamento.tipoDano}</td>
-                            <td class="col-prec">${equipamento.prec || '-'}</td>
-                            <td class="col-alcance">${equipamento.alcance}</td>
-                            <td class="col-peso">${equipamento.peso} kg</td>
-                            <td class="col-maos">
-                                <span class="badge-maos maos-${equipamento.maos}">
-                                    ${this.obterIconeMaos(equipamento.maos)}
-                                </span>
-                            </td>
-                            <td class="col-custo">$${equipamento.custo}</td>
-                            <td class="col-mag">${equipamento.magnit || '-'}</td>
-                            <td class="col-acao">
-                                <button class="btn-comprar" data-item="${equipamento.id}">
-                                    <i class="fas fa-shopping-cart"></i> COMPRAR
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('')}
+                    ${this.gerarHTMLCorpoArmasDistancia(equipamentos)}
                 </tbody>
             </table>
         `;
+    }
+
+    gerarHTMLCorpoArmasDistancia(equipamentos) {
+        return equipamentos.map(equipamento => `
+            <tr class="era-${equipamento.era}" data-id="${equipamento.id}">
+                <td class="col-nt">${equipamento.nt}</td>
+                <td class="col-nome">
+                    <strong>${equipamento.nome}</strong>
+                    <div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>
+                    <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
+                </td>
+                <td class="col-dano">${equipamento.dano}</td>
+                <td class="col-tipo">${equipamento.tipoDano}</td>
+                <td class="col-prec">${equipamento.prec || '-'}</td>
+                <td class="col-alcance">${equipamento.alcance}</td>
+                <td class="col-peso">${equipamento.peso} kg</td>
+                <td class="col-maos">
+                    <span class="badge-maos maos-${equipamento.maos}">
+                        ${this.obterIconeMaos(equipamento.maos)}
+                    </span>
+                </td>
+                <td class="col-custo">$${equipamento.custo}</td>
+                <td class="col-mag">${equipamento.magnit || '-'}</td>
+                <td class="col-acao">
+                    <button class="btn-comprar" data-item="${equipamento.id}">
+                        <i class="fas fa-shopping-cart"></i> COMPRAR
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
     gerarHTMLArmaduras(equipamentos) {
@@ -643,28 +701,32 @@ class CatalogoEquipamentos {
                     </tr>
                 </thead>
                 <tbody>
-                    ${equipamentos.map(equipamento => `
-                        <tr class="era-${equipamento.era}">
-                            <td class="col-nt">${equipamento.nt}</td>
-                            <td class="col-nome">
-                                <strong>${equipamento.nome}</strong>
-                                <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
-                            </td>
-                            <td class="col-local">${equipamento.local}</td>
-                            <td class="col-rd">${equipamento.rd}</td>
-                            <td class="col-peso">${equipamento.peso} kg</td>
-                            <td class="col-custo">$${equipamento.custo}</td>
-                            <td class="col-cl">${equipamento.cl || '-'}</td>
-                            <td class="col-acao">
-                                <button class="btn-comprar" data-item="${equipamento.id}">
-                                    <i class="fas fa-shopping-cart"></i> COMPRAR
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('')}
+                    ${this.gerarHTMLCorpoArmaduras(equipamentos)}
                 </tbody>
             </table>
         `;
+    }
+
+    gerarHTMLCorpoArmaduras(equipamentos) {
+        return equipamentos.map(equipamento => `
+            <tr class="era-${equipamento.era}" data-id="${equipamento.id}">
+                <td class="col-nt">${equipamento.nt}</td>
+                <td class="col-nome">
+                    <strong>${equipamento.nome}</strong>
+                    <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
+                </td>
+                <td class="col-local">${equipamento.local}</td>
+                <td class="col-rd">${equipamento.rd}</td>
+                <td class="col-peso">${equipamento.peso} kg</td>
+                <td class="col-custo">$${equipamento.custo}</td>
+                <td class="col-cl">${equipamento.cl || '-'}</td>
+                <td class="col-acao">
+                    <button class="btn-comprar" data-item="${equipamento.id}">
+                        <i class="fas fa-shopping-cart"></i> COMPRAR
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
     gerarHTMLEscudos(equipamentos) {
@@ -684,36 +746,41 @@ class CatalogoEquipamentos {
                     </tr>
                 </thead>
                 <tbody>
-                    ${equipamentos.map(equipamento => `
-                        <tr class="era-${equipamento.era}">
-                            <td class="col-nt">${equipamento.nt}</td>
-                            <td class="col-nome">
-                                <strong>${equipamento.nome}</strong>
-                                <div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>
-                                <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
-                            </td>
-                            <td class="col-bd">${equipamento.bd}</td>
-                            <td class="col-custo">$${equipamento.custo}</td>
-                            <td class="col-rdpv">${equipamento.rdpv}</td>
-                            <td class="col-cl">${equipamento.cl || '-'}</td>
-                            <td class="col-peso">${equipamento.peso} kg</td>
-                            <td class="col-maos">
-                                <span class="badge-maos maos-${equipamento.maos}">
-                                    ${this.obterIconeMaos(equipamento.maos)}
-                                </span>
-                            </td>
-                            <td class="col-acao">
-                                <button class="btn-comprar" data-item="${equipamento.id}">
-                                    <i class="fas fa-shopping-cart"></i> COMPRAR
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('')}
+                    ${this.gerarHTMLCorpoEscudos(equipamentos)}
                 </tbody>
             </table>
         `;
     }
 
+    gerarHTMLCorpoEscudos(equipamentos) {
+        return equipamentos.map(equipamento => `
+            <tr class="era-${equipamento.era}" data-id="${equipamento.id}">
+                <td class="col-nt">${equipamento.nt}</td>
+                <td class="col-nome">
+                    <strong>${equipamento.nome}</strong>
+                    <div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>
+                    <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
+                </td>
+                <td class="col-bd">${equipamento.bd}</td>
+                <td class="col-custo">$${equipamento.custo}</td>
+                <td class="col-rdpv">${equipamento.rdpv}</td>
+                <td class="col-cl">${equipamento.cl || '-'}</td>
+                <td class="col-peso">${equipamento.peso} kg</td>
+                <td class="col-maos">
+                    <span class="badge-maos maos-${equipamento.maos}">
+                        ${this.obterIconeMaos(equipamento.maos)}
+                    </span>
+                </td>
+                <td class="col-acao">
+                    <button class="btn-comprar" data-item="${equipamento.id}">
+                        <i class="fas fa-shopping-cart"></i> COMPRAR
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ========== FUNÇÃO CRÍTICA PARA EQUIPAMENTOS GERAIS ==========
     gerarHTMLEquipamentosGerais(equipamentos) {
         return `
             <table class="catalog-table">
@@ -729,34 +796,44 @@ class CatalogoEquipamentos {
                     </tr>
                 </thead>
                 <tbody>
-                    ${equipamentos.map(equipamento => `
-                        <tr class="era-${equipamento.era}">
-                            <td class="col-categoria">${equipamento.categoria}</td>
-                            <td class="col-nome">
-                                <strong>${equipamento.nome}</strong>
-                                ${equipamento.maos > 0 ? `<div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>` : ''}
-                                <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
-                            </td>
-                            <td class="col-custo">$${equipamento.custo}</td>
-                            <td class="col-peso">${equipamento.peso} kg</td>
-                            <td class="col-maos">
-                                ${equipamento.maos > 0 ? `
-                                    <span class="badge-maos maos-${equipamento.maos}">
-                                        ${this.obterIconeMaos(equipamento.maos)}
-                                    </span>
-                                ` : '-'}
-                            </td>
-                            <td class="col-cl">${equipamento.cl || '-'}</td>
-                            <td class="col-acao">
-                                <button class="btn-comprar" data-item="${equipamento.id}">
-                                    <i class="fas fa-shopping-cart"></i> COMPRAR
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('')}
+                    ${this.gerarHTMLCorpoEquipamentosGerais(equipamentos)}
                 </tbody>
             </table>
         `;
+    }
+
+    gerarHTMLCorpoEquipamentosGerais(equipamentos) {
+        return equipamentos.map(equipamento => {
+            // Verificar se é quantificável para mostrar feedback visual
+            const quantificavel = equipamento.quantificavel === true;
+            
+            return `
+                <tr class="era-${equipamento.era} ${quantificavel ? 'quantificavel' : ''}" data-id="${equipamento.id}">
+                    <td class="col-categoria">${equipamento.categoria}</td>
+                    <td class="col-nome">
+                        <strong>${equipamento.nome}</strong>
+                        ${equipamento.maos > 0 ? `<div class="maos-info">${this.obterTextoMaos(equipamento.maos)}</div>` : ''}
+                        <small class="era-badge era-${equipamento.era}">${equipamento.era === 'medieval' ? '🏰 Medieval' : '🔫 Moderna'}</small>
+                        ${quantificavel ? '<div class="quantificavel-badge"><i class="fas fa-layer-group"></i> Multiplo</div>' : ''}
+                    </td>
+                    <td class="col-custo">$${equipamento.custo}</td>
+                    <td class="col-peso">${equipamento.peso} kg</td>
+                    <td class="col-maos">
+                        ${equipamento.maos > 0 ? `
+                            <span class="badge-maos maos-${equipamento.maos}">
+                                ${this.obterIconeMaos(equipamento.maos)}
+                            </span>
+                        ` : '-'}
+                    </td>
+                    <td class="col-cl">${equipamento.cl || '-'}</td>
+                    <td class="col-acao">
+                        <button class="btn-comprar" data-item="${equipamento.id}">
+                            <i class="fas fa-shopping-cart"></i> COMPRAR
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
     obterTextoMaos(maos) {
@@ -814,7 +891,7 @@ class CatalogoEquipamentos {
             for (const categoria in this.catalogo[era]) {
                 const encontrados = this.catalogo[era][categoria].filter(item =>
                     item.nome.toLowerCase().includes(termo) ||
-                    item.descricao.toLowerCase().includes(termo) ||
+                    (item.descricao && item.descricao.toLowerCase().includes(termo)) ||
                     item.tipo.toLowerCase().includes(termo)
                 );
                 resultados.push(...encontrados);
@@ -866,40 +943,60 @@ class CatalogoEquipamentos {
         this.catalogo = { ...this.catalogo, ...dados };
         this.inicializado = false;
         this.tabelasInicializadas = false;
+        this.tabelasGeradas.clear();
         
         setTimeout(() => this.inicializar(), 100);
     }
 }
 
+// Inicialização única do catálogo
 let catalogoEquipamentos;
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('📦 Iniciando carregamento do catálogo...');
+    
+    // Verificar se já foi inicializado
+    if (window.catalogoEquipamentos) {
+        console.log('⚠️ Catálogo já inicializado, evitando duplicação');
+        return;
+    }
+    
+    // Função para verificar e inicializar quando a aba estiver ativa
     const verificarAbaEquipamento = () => {
         const abaEquipamento = document.getElementById('equipamento');
-        if (abaEquipamento && abaEquipamento.classList.contains('active')) {
-            if (!catalogoEquipamentos) {
-                catalogoEquipamentos = new CatalogoEquipamentos();
-                window.catalogoEquipamentos = catalogoEquipamentos;
-            }
+        
+        if (abaEquipamento && !catalogoEquipamentos) {
+            console.log('🎯 Aba de equipamento detectada, inicializando catálogo...');
+            catalogoEquipamentos = new CatalogoEquipamentos();
+            window.catalogoEquipamentos = catalogoEquipamentos;
         }
     };
     
+    // Verificar inicialmente
     verificarAbaEquipamento();
     
+    // Observar mudanças na aba
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                 const tab = mutation.target;
                 if (tab.id === 'equipamento' && tab.classList.contains('active')) {
+                    console.log('🔄 Aba de equipamento ativada');
                     setTimeout(verificarAbaEquipamento, 100);
                 }
             }
         });
     });
     
+    // Observar todas as abas
     document.querySelectorAll('.tab-content').forEach(tab => {
         observer.observe(tab, { attributes: true });
     });
 });
 
+// Tornar a classe disponível globalmente
 window.CatalogoEquipamentos = CatalogoEquipamentos;
+
+console.log('🔧 catalogo-equipamentos.js carregado com sucesso!');
+
+// CONTINUAÇÃO NO PRÓXIMO COMENTÁRIO...
