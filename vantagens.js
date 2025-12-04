@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO CORRIGIDA
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO FUNCIONAL
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -6,7 +6,6 @@ class GerenciadorVantagens {
         this.peculiaridades = [];
         this.pontosTotais = 0;
         
-        // AGUARDA O DOM ESTAR PRONTO
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             this.init();
         } else {
@@ -24,6 +23,8 @@ class GerenciadorVantagens {
 
     carregarVantagens() {
         const lista = document.getElementById('lista-vantagens');
+        if (!lista) return;
+        
         lista.innerHTML = '';
 
         vantagensData.vantagens.forEach(vantagem => {
@@ -34,6 +35,8 @@ class GerenciadorVantagens {
 
     carregarDesvantagens() {
         const lista = document.getElementById('lista-desvantagens');
+        if (!lista) return;
+        
         lista.innerHTML = '';
 
         vantagensData.desvantagens.forEach(desvantagem => {
@@ -83,6 +86,8 @@ class GerenciadorVantagens {
         const corpo = document.getElementById('modal-corpo');
         const btnConfirmar = document.querySelector('.btn-confirmar');
 
+        if (!modal || !titulo || !corpo || !btnConfirmar) return;
+
         titulo.textContent = item.nome;
         
         btnConfirmar.onclick = null;
@@ -98,16 +103,74 @@ class GerenciadorVantagens {
                 corpo.innerHTML = this.criarModalMultipla(item);
                 btnConfirmar.onclick = () => this.confirmarMultipla(item, tipo);
                 btnConfirmar.disabled = true;
+                this.configurarEventosMultipla();
                 break;
 
             case 'variavel':
                 corpo.innerHTML = this.criarModalVariavel(item);
                 btnConfirmar.onclick = () => this.confirmarVariavel(item, tipo);
                 btnConfirmar.disabled = false;
+                this.configurarEventosVariavel(item);
                 break;
         }
 
         modal.style.display = 'block';
+    }
+
+    configurarEventosMultipla() {
+        setTimeout(() => {
+            const radios = document.querySelectorAll('input[name="variacao"]');
+            const btnConfirmar = document.querySelector('.btn-confirmar');
+            
+            if (radios.length > 0 && btnConfirmar) {
+                radios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        btnConfirmar.disabled = false;
+                    });
+                });
+            }
+        }, 10);
+    }
+
+    configurarEventosVariavel(item) {
+        setTimeout(() => {
+            const nivelBase = item.nivelBase || 1;
+            const custoPorNivel = Math.abs(item.custoPorNivel || 2);
+            const selectNivel = document.getElementById('nivel-vantagem');
+            const custoTotal = document.getElementById('custo-total');
+            const checkboxes = document.querySelectorAll('.ampliacao-checkbox');
+
+            if (!selectNivel || !custoTotal) return;
+
+            const calcularCusto = () => {
+                const nivel = parseInt(selectNivel.value) || nivelBase;
+                let custoBase = nivel * custoPorNivel;
+                let multiplicadorTotal = 1.0;
+                let ampliacoesAtivas = [];
+                
+                checkboxes.forEach(checkbox => {
+                    if(checkbox.checked) {
+                        const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
+                        multiplicadorTotal *= multiplicador;
+                        ampliacoesAtivas.push(checkbox.dataset.nome);
+                    }
+                });
+                
+                const custoFinal = Math.round(custoBase * multiplicadorTotal);
+                
+                custoTotal.textContent = `${custoFinal} pts`;
+                selectNivel.dataset.custoFinal = custoFinal;
+                selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
+            };
+
+            calcularCusto();
+
+            selectNivel.addEventListener('change', calcularCusto);
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', calcularCusto);
+            });
+        }, 10);
     }
 
     criarModalSimples(item) {
@@ -141,15 +204,6 @@ class GerenciadorVantagens {
         });
 
         html += `</div></div>`;
-
-        setTimeout(() => {
-            document.querySelectorAll('input[name="variacao"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    document.querySelector('.btn-confirmar').disabled = false;
-                });
-            });
-        }, 100);
-
         return html;
     }
 
@@ -207,43 +261,6 @@ class GerenciadorVantagens {
         }
 
         html += `</div></div>`;
-
-        setTimeout(() => {
-            const selectNivel = document.getElementById('nivel-vantagem');
-            const custoTotal = document.getElementById('custo-total');
-            const checkboxes = document.querySelectorAll('.ampliacao-checkbox');
-
-            const calcularCusto = () => {
-                const nivel = parseInt(selectNivel.value) || nivelBase;
-                let custoBase = nivel * custoPorNivel;
-                let multiplicadorTotal = 1.0;
-                let ampliacoesAtivas = [];
-                
-                checkboxes.forEach(checkbox => {
-                    if(checkbox.checked) {
-                        const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
-                        multiplicadorTotal *= multiplicador;
-                        ampliacoesAtivas.push(checkbox.dataset.nome);
-                    }
-                });
-                
-                const custoFinal = Math.round(custoBase * multiplicadorTotal);
-                
-                custoTotal.textContent = `${custoFinal} pts`;
-                selectNivel.dataset.custoFinal = custoFinal;
-                selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
-            };
-
-            calcularCusto();
-
-            selectNivel.addEventListener('change', calcularCusto);
-            
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', calcularCusto);
-            });
-
-        }, 100);
-
         return html;
     }
 
@@ -265,6 +282,8 @@ class GerenciadorVantagens {
 
     confirmarVariavel(item, tipo) {
         const selectNivel = document.getElementById('nivel-vantagem');
+        if (!selectNivel) return;
+        
         const nivel = parseInt(selectNivel.value) || (item.nivelBase || 1);
         
         let custoFinal = parseInt(selectNivel.dataset.custoFinal);
@@ -336,6 +355,7 @@ class GerenciadorVantagens {
 
     renderizarListaAdquiridas(containerId, itens, tipo) {
         const container = document.getElementById(containerId);
+        if (!container) return;
         
         if (itens.length === 0) {
             container.innerHTML = '<div class="lista-vazia">Nenhum item adquirido</div>';
@@ -396,6 +416,8 @@ class GerenciadorVantagens {
         const btnAdicionar = document.getElementById('btn-adicionar-peculiaridade');
         const contadorChars = document.getElementById('contador-chars');
 
+        if (!input || !btnAdicionar || !contadorChars) return;
+
         input.addEventListener('input', () => {
             const texto = input.value;
             contadorChars.textContent = texto.length;
@@ -436,6 +458,8 @@ class GerenciadorVantagens {
         const container = document.getElementById('lista-peculiaridades');
         const contador = document.getElementById('contador-peculiaridades');
 
+        if (!container || !contador) return;
+
         contador.textContent = `${this.peculiaridades.length}/5`;
 
         if (this.peculiaridades.length === 0) {
@@ -470,30 +494,56 @@ class GerenciadorVantagens {
         
         const totalPeculiaridades = this.peculiaridades.length * 1;
 
-        document.getElementById('total-vantagens').textContent = `+${totalVantagens}`;
-        document.getElementById('total-desvantagens').textContent = `-${totalDesvantagens}`;
-        document.getElementById('total-peculiaridades').textContent = `-${totalPeculiaridades}`;
+        const totalVantagensEl = document.getElementById('total-vantagens');
+        const totalDesvantagensEl = document.getElementById('total-desvantagens');
+        const totalPeculiaridadesEl = document.getElementById('total-peculiaridades');
+        const saldoTotalEl = document.getElementById('saldo-total');
+        const totalVantagensAdquiridasEl = document.getElementById('total-vantagens-adquiridas');
+        const totalDesvantagensAdquiridasEl = document.getElementById('total-desvantagens-adquiridas');
+
+        if (totalVantagensEl) totalVantagensEl.textContent = `+${totalVantagens}`;
+        if (totalDesvantagensEl) totalDesvantagensEl.textContent = `-${totalDesvantagens}`;
+        if (totalPeculiaridadesEl) totalPeculiaridadesEl.textContent = `-${totalPeculiaridades}`;
         
         const saldoTotal = totalVantagens - totalDesvantagens - totalPeculiaridades;
-        document.getElementById('saldo-total').textContent = saldoTotal;
+        if (saldoTotalEl) saldoTotalEl.textContent = saldoTotal;
 
-        document.getElementById('total-vantagens-adquiridas').textContent = `${totalVantagens} pts`;
-        document.getElementById('total-desvantagens-adquiridas').textContent = `${totalDesvantagens} pts`;
+        if (totalVantagensAdquiridasEl) totalVantagensAdquiridasEl.textContent = `${totalVantagens} pts`;
+        if (totalDesvantagensAdquiridasEl) totalDesvantagensAdquiridasEl.textContent = `${totalDesvantagens} pts`;
     }
 
     setupEventListeners() {
-        document.querySelector('.modal-close').addEventListener('click', () => this.fecharModal());
-        document.querySelector('.btn-cancelar').addEventListener('click', () => this.fecharModal());
+        const modalClose = document.querySelector('.modal-close');
+        const btnCancelar = document.querySelector('.btn-cancelar');
+        const modal = document.getElementById('modal-vantagem');
         
-        document.getElementById('modal-vantagem').addEventListener('click', (e) => {
-            if (e.target.id === 'modal-vantagem') this.fecharModal();
-        });
+        if (modalClose) modalClose.addEventListener('click', () => this.fecharModal());
+        if (btnCancelar) btnCancelar.addEventListener('click', () => this.fecharModal());
+        
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target.id === 'modal-vantagem') this.fecharModal();
+            });
+        }
 
-        document.getElementById('busca-vantagens').addEventListener('input', () => this.filtrarLista('vantagens'));
-        document.getElementById('categoria-vantagens').addEventListener('change', () => this.filtrarLista('vantagens'));
+        const buscaVantagens = document.getElementById('busca-vantagens');
+        const categoriaVantagens = document.getElementById('categoria-vantagens');
+        const buscaDesvantagens = document.getElementById('busca-desvantagens');
+        const categoriaDesvantagens = document.getElementById('categoria-desvantagens');
         
-        document.getElementById('busca-desvantagens').addEventListener('input', () => this.filtrarLista('desvantagens'));
-        document.getElementById('categoria-desvantagens').addEventListener('change', () => this.filtrarLista('desvantagens'));
+        if (buscaVantagens) {
+            buscaVantagens.addEventListener('input', () => this.filtrarLista('vantagens'));
+        }
+        if (categoriaVantagens) {
+            categoriaVantagens.addEventListener('change', () => this.filtrarLista('vantagens'));
+        }
+        
+        if (buscaDesvantagens) {
+            buscaDesvantagens.addEventListener('input', () => this.filtrarLista('desvantagens'));
+        }
+        if (categoriaDesvantagens) {
+            categoriaDesvantagens.addEventListener('change', () => this.filtrarLista('desvantagens'));
+        }
     }
 
     filtrarLista(tipo) {
@@ -501,11 +551,13 @@ class GerenciadorVantagens {
         const categoriaId = `categoria-${tipo}`;
         const listaId = `lista-${tipo}`;
 
-        const termoBusca = document.getElementById(buscaId).value.toLowerCase();
-        const categoria = document.getElementById(categoriaId).value;
+        const termoBusca = document.getElementById(buscaId)?.value.toLowerCase() || '';
+        const categoria = document.getElementById(categoriaId)?.value || '';
+        const lista = document.getElementById(listaId);
+
+        if (!lista) return;
 
         const itens = tipo === 'vantagens' ? vantagensData.vantagens : vantagensData.desvantagens;
-        const lista = document.getElementById(listaId);
 
         const itensFiltrados = itens.filter(item => {
             const matchBusca = item.nome.toLowerCase().includes(termoBusca) || 
@@ -523,11 +575,12 @@ class GerenciadorVantagens {
     }
 
     fecharModal() {
-        document.getElementById('modal-vantagem').style.display = 'none';
+        const modal = document.getElementById('modal-vantagem');
+        if (modal) modal.style.display = 'none';
     }
 }
 
-// CORREÇÃO FINAL: Inicializar sistema quando tudo estiver pronto
+// Inicializar sistema
 let vantagensSystem;
 
 if (document.readyState === 'loading') {
