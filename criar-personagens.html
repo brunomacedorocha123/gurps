@@ -1864,44 +1864,77 @@ function toggleSubmenu(id) {
                 </div>
             </div>
         </div>
-        <!-- FIM DO MODAL DE QUANTIDADE -->
+       
         
     </div><!-- FIM DO equipamento-container -->
 </div><!-- FIM DA ABA EQUIPAMENTO -->
 <script>
-// Script inicial para navegação entre sub-abas
+// Script inicial para navegação entre sub-abas - VERSÃO CORRIGIDA
+// Este script só lida com a navegação básica, o sistema será inicializado pelo equipamentos.js
+
+// Variável para controlar se já foi inicializado
+let sistemaInicializado = false;
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Navegação entre sub-abas
-    document.querySelectorAll('.subtab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
-            
-            this.classList.add('active');
-            const subtabId = this.getAttribute('data-subtab');
-            document.getElementById(`subtab-${subtabId}`).classList.add('active');
-        });
-    });
+    console.log('🔧 DOM Content Loaded - Configurando navegação básica da aba equipamento...');
     
-    // Alternar mochila
+    // 1. Configurar navegação entre sub-abas (APENAS UI)
+    configurarNavegacaoSubAbas();
+    
+    // 2. Configurar botão de mochila (apenas o event listener)
     const btnLiberarMochila = document.getElementById('btn-liberar-mochila');
     if (btnLiberarMochila) {
         btnLiberarMochila.addEventListener('click', function() {
-            if (window.sistemaEquipamentos) {
+            if (window.sistemaEquipamentos && window.sistemaEquipamentos.alternarMochila) {
                 window.sistemaEquipamentos.alternarMochila();
             }
         });
     }
     
-    // Configurar event listeners para botões de compra
-    configurarEventListenersCompra();
+    // 3. Configurar botões de compra (delegação de eventos apenas)
+    configurarEventListenersCompraBasico();
+    
+    // 4. NÃO inicializar o sistema aqui - será feito pelo equipamentos.js
+    // 5. Esperar que o sistema seja carregado
+    esperarSistemaCarregar();
+    
+    console.log('✅ Navegação básica configurada - Aguardando sistema...');
 });
 
-// Configurar event listeners para botões de compra
-function configurarEventListenersCompra() {
-    console.log('🔧 Configurando event listeners para botões de compra...');
+// Função para configurar navegação entre sub-abas (APENAS UI)
+function configurarNavegacaoSubAbas() {
+    document.querySelectorAll('.subtab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remover active de todos
+            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
+            
+            // Adicionar active ao clicado
+            this.classList.add('active');
+            const subtabId = this.getAttribute('data-subtab');
+            const subtabContent = document.getElementById(`subtab-${subtabId}`);
+            
+            if (subtabContent) {
+                subtabContent.classList.add('active');
+                
+                // Se for a aba financeiro, atualizar interface
+                if (subtabId === 'financeiro' && window.sistemaEquipamentos) {
+                    setTimeout(() => {
+                        if (window.sistemaEquipamentos.atualizarInterfaceFinanceiro) {
+                            window.sistemaEquipamentos.atualizarInterfaceFinanceiro();
+                        }
+                    }, 100);
+                }
+            }
+        });
+    });
+}
+
+// Configurar event listeners para botões de compra (APENAS delegação)
+function configurarEventListenersCompraBasico() {
+    console.log('🔧 Configurando event listeners básicos para botões de compra...');
     
-    // Usar event delegation para capturar cliques
+    // Usar event delegation para capturar cliques nos botões de compra
     document.addEventListener('click', function(e) {
         const btnComprar = e.target.closest('.btn-comprar');
         
@@ -1912,132 +1945,219 @@ function configurarEventListenersCompra() {
             const itemId = btnComprar.getAttribute('data-item');
             console.log('🎯 Botão de compra clicado - ID:', itemId);
             
-            if (itemId) {
-                // Verifica se o sistema está disponível
-                if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.comprarEquipamento === 'function') {
-                    console.log('✅ Sistema disponível, chamando comprarEquipamento...');
-                    window.sistemaEquipamentos.comprarEquipamento(itemId, btnComprar);
-                } else {
-                    console.error('❌ Sistema de equipamentos não disponível!');
-                    
-                    // Tenta inicializar novamente
-                    setTimeout(() => {
-                        if (window.sistemaEquipamentos) {
-                            window.sistemaEquipamentos.comprarEquipamento(itemId, btnComprar);
-                        } else {
-                            alert('Sistema de equipamentos não carregado. Recarregue a página.');
-                        }
-                    }, 500);
-                }
+            if (itemId && window.sistemaEquipamentos && typeof window.sistemaEquipamentos.comprarEquipamento === 'function') {
+                window.sistemaEquipamentos.comprarEquipamento(itemId, btnComprar);
+            } else if (itemId) {
+                console.warn('⚠️ Sistema de equipamentos ainda não disponível, tentando novamente...');
+                // Tenta novamente após um delay
+                setTimeout(() => {
+                    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.comprarEquipamento === 'function') {
+                        window.sistemaEquipamentos.comprarEquipamento(itemId, btnComprar);
+                    } else {
+                        console.error('❌ Sistema de equipamentos não disponível após timeout');
+                    }
+                }, 500);
             }
         }
     });
     
-    console.log('✅ Event listeners configurados!');
+    console.log('✅ Event listeners básicos configurados!');
 }
 
-// Funções auxiliares (serão implementadas no equipamentos.js)
+// Esperar o sistema ser carregado
+function esperarSistemaCarregar() {
+    let tentativas = 0;
+    const maxTentativas = 50; // 5 segundos
+    
+    function verificarSistema() {
+        tentativas++;
+        
+        if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.inicializarSistema === 'function') {
+            console.log('✅ Sistema de equipamentos detectado!');
+            
+            if (!sistemaInicializado) {
+                sistemaInicializado = true;
+                
+                // Configurar botões de depósito
+                configurarBotoesDeposito();
+                
+                // Configurar botões de financeiro simples
+                configurarFinanceiroSimples();
+                
+                console.log('🚀 Sistema completamente inicializado!');
+            }
+            return;
+        }
+        
+        if (tentativas < maxTentativas) {
+            setTimeout(verificarSistema, 100);
+        } else {
+            console.error('❌ Sistema de equipamentos não carregado após timeout');
+        }
+    }
+    
+    verificarSistema();
+}
+
+// Configurar botões de depósito (apenas os event listeners)
+function configurarBotoesDeposito() {
+    const btnGuardarTudo = document.getElementById('btn-guardar-tudo-deposito');
+    const btnRetirarTudo = document.getElementById('btn-retirar-tudo-deposito');
+    const btnLimpar = document.getElementById('btn-limpar-deposito');
+    
+    if (btnGuardarTudo) {
+        btnGuardarTudo.addEventListener('click', function() {
+            if (window.sistemaEquipamentos && window.sistemaEquipamentos.moverTudoParaDeposito) {
+                window.sistemaEquipamentos.moverTudoParaDeposito();
+            }
+        });
+    }
+    
+    if (btnRetirarTudo) {
+        btnRetirarTudo.addEventListener('click', function() {
+            if (window.sistemaEquipamentos && window.sistemaEquipamentos.retirarTudoDoDeposito) {
+                window.sistemaEquipamentos.retirarTudoDoDeposito();
+            }
+        });
+    }
+    
+    if (btnLimpar) {
+        btnLimpar.addEventListener('click', function() {
+            if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparDeposito) {
+                window.sistemaEquipamentos.limparDeposito();
+            }
+        });
+    }
+}
+
+// Configurar botões de financeiro simples
+function configurarFinanceiroSimples() {
+    // Botões de valores rápidos
+    const botoesValores = document.querySelector('.botoes-valores');
+    if (botoesValores) {
+        botoesValores.addEventListener('click', function(e) {
+            const botao = e.target.closest('button');
+            if (botao && window.sistemaEquipamentos) {
+                const texto = botao.textContent;
+                const valor = parseInt(texto.replace(/[^0-9]/g, ''));
+                
+                if (texto.startsWith('+') && window.sistemaEquipamentos.adicionarDinheiro) {
+                    window.sistemaEquipamentos.adicionarDinheiro(valor);
+                } else if (texto.startsWith('-') && window.sistemaEquipamentos.removerDinheiro) {
+                    window.sistemaEquipamentos.removerDinheiro(valor);
+                }
+            }
+        });
+    }
+}
+
+// Funções wrapper para o sistema (mantidas para compatibilidade)
 function alternarSubTab(subtab) {
     document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
     
-    document.querySelector(`[data-subtab="${subtab}"]`).classList.add('active');
-    document.getElementById(`subtab-${subtab}`).classList.add('active');
+    const btn = document.querySelector(`[data-subtab="${subtab}"]`);
+    const content = document.getElementById(`subtab-${subtab}`);
+    
+    if (btn) btn.classList.add('active');
+    if (content) content.classList.add('active');
+    
+    if (subtab === 'financeiro' && window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarInterfaceFinanceiro) {
+        setTimeout(() => {
+            window.sistemaEquipamentos.atualizarInterfaceFinanceiro();
+        }, 100);
+    }
 }
 
 function atualizarCamposPorTipo() {
-    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.atualizarCamposPorTipo === 'function') {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposPorTipo) {
         window.sistemaEquipamentos.atualizarCamposPorTipo();
     }
 }
 
 function atualizarCamposMagicos() {
-    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.atualizarCamposMagicos === 'function') {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposMagicos) {
         window.sistemaEquipamentos.atualizarCamposMagicos();
     }
 }
 
 function limparFormCriacao() {
-    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.limparFormCriacao === 'function') {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparFormCriacao) {
         window.sistemaEquipamentos.limparFormCriacao();
     }
 }
 
 function criarItemPersonalizado() {
-    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.criarItemPersonalizado === 'function') {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.criarItemPersonalizado) {
         window.sistemaEquipamentos.criarItemPersonalizado();
     }
 }
 
-// Funções do modal de quantidade
+// Funções do modal de quantidade (redirecionam para o sistema)
 function aumentarQuantidade() {
-    if (window.sistemaEquipamentos) {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.aumentarQuantidade) {
         window.sistemaEquipamentos.aumentarQuantidade();
     }
 }
 
 function diminuirQuantidade() {
-    if (window.sistemaEquipamentos) {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.diminuirQuantidade) {
         window.sistemaEquipamentos.diminuirQuantidade();
     }
 }
 
 function fecharSubmenuQuantidade() {
-    if (window.sistemaEquipamentos) {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.fecharSubmenuQuantidade) {
         window.sistemaEquipamentos.fecharSubmenuQuantidade();
     }
 }
 
 function confirmarCompraQuantidade() {
-    if (window.sistemaEquipamentos) {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.confirmarCompraQuantidade) {
         window.sistemaEquipamentos.confirmarCompraQuantidade();
     }
 }
 
-// Funções do modal financeiro
+// Funções do modal financeiro (redirecionam para o sistema)
 function fecharModalSimples() {
-    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.fecharModalSimples === 'function') {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.fecharModalSimples) {
         window.sistemaEquipamentos.fecharModalSimples();
     }
 }
 
 function confirmarOperacao() {
-    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.confirmarOperacao === 'function') {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.confirmarOperacao) {
         window.sistemaEquipamentos.confirmarOperacao();
     }
 }
 
-// Funções de depósito (se não estiverem no equipamentos.js)
-function guardarTudoDeposito() {
-    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.moverTudoParaDeposito === 'function') {
+// Funções globais para acesso direto (mantidas para compatibilidade)
+window.guardarTudoDeposito = function() {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.moverTudoParaDeposito) {
         window.sistemaEquipamentos.moverTudoParaDeposito();
     }
-}
+};
 
-function retirarTudoDeposito() {
-    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.retirarTudoDoDeposito === 'function') {
+window.retirarTudoDeposito = function() {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.retirarTudoDoDeposito) {
         window.sistemaEquipamentos.retirarTudoDoDeposito();
     }
-}
+};
 
-function limparDeposito() {
-    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.limparDeposito === 'function') {
+window.limparDeposito = function() {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparDeposito) {
         window.sistemaEquipamentos.limparDeposito();
     }
-}
+};
 
-// Debug inicial
-console.log('🔧 Script da aba equipamento carregado!');
-
-// Verificar se o catálogo está pronto
+// Ouvir evento de catálogo pronto
 document.addEventListener('catalogoPronto', function() {
-    console.log('📦 Catálogo pronto! Configurando sistema...');
-    setTimeout(() => {
-        if (window.sistemaEquipamentos) {
-            console.log('✅ Sistema de equipamentos inicializado com sucesso!');
-        }
-    }, 100);
+    console.log('📦 Catálogo pronto!');
+    // O sistema de equipamentos se inicializará sozinho
 });
+
+// Debug
+console.log('🔧 Script de navegação da aba equipamento carregado com sucesso!');
 </script>
 
         <!-- ABA RESUMO -->
