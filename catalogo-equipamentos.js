@@ -126,17 +126,17 @@ class CatalogoEquipamentos {
                 "equipamentosGerais": [
                     {
                         id: "M1000", nome: "Mochila (50kg)", tipo: "geral", era: "medieval",
-                        categoria: "Sobrevivência", custo: 100, peso: 5.0, cl: 4, maos: 0,
+                        categoria: "Sobrevivencia", custo: 100, peso: 5.0, cl: 4, maos: 0,
                         quantificavel: false, descricao: "Mochila"
                     },
                     {
                         id: "M1001", nome: "Corda 3/4 (10m)", tipo: "geral", era: "medieval",
-                        categoria: "Sobrevivência", custo: 25, peso: 2.5, cl: 0, maos: 0,
+                        categoria: "Sobrevivencia", custo: 25, peso: 2.5, cl: 0, maos: 0,
                         quantificavel: true, descricao: "Corda 3/4"
                     },
                     {
                         id: "M1002", nome: "Tocha (1 Hora)", tipo: "geral", era: "medieval",
-                        categoria: "Sobrevivência", custo: 3, peso: 1.0, cl: 0, maos: 1,
+                        categoria: "Sobrevivencia", custo: 3, peso: 1.0, cl: 0, maos: 1,
                         quantificavel: true, descricao: "Tocha"
                     },
                     {
@@ -146,12 +146,12 @@ class CatalogoEquipamentos {
                     },
                     {
                         id: "M1004", nome: "Odre de Vinho (4L)", tipo: "geral", era: "medieval",
-                        categoria: "Sobrevivência", custo: 10, peso: 0.125, cl: 0, maos: 0,
+                        categoria: "Sobrevivencia", custo: 10, peso: 0.125, cl: 0, maos: 0,
                         quantificavel: true, descricao: "Odre de Vinho"
                     },
                     {
                         id: "M1005", nome: "Ração de Viagem (1 dia)", tipo: "geral", era: "medieval",
-                        categoria: "Sobrevivência", custo: 2, peso: 0.25, cl: 0, maos: 0,
+                        categoria: "Sobrevivencia", custo: 2, peso: 0.25, cl: 0, maos: 0,
                         quantificavel: true, descricao: "Rações de viagem"
                     }
                 ]
