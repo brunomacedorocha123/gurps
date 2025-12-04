@@ -2203,21 +2203,29 @@ window.criarItemPersonalizado = criarItemPersonalizado;
 
     <!-- ========== MODAIS GLOBAIS ========== -->
     
-    <!-- MODAL PARA VANTAGENS/DESVANTAGENS -->
-    <div id="modal-vantagem" class="modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
-        <div class="modal-content" style="background-color: #1e1e28; margin: 10% auto; padding: 20px; border: 1px solid #ff8c00; width: 80%; max-width: 600px; border-radius: 10px; position: relative;">
-            <span class="modal-close" onclick="vantagensSystem.fecharModal()" 
-                  style="position: absolute; right: 20px; top: 10px; color: #aaa; font-size: 28px; cursor: pointer; font-weight: bold;">&times;</span>
-            <h2 id="modal-titulo" style="color: #ffd700; margin-bottom: 20px;">Vantagem</h2>
-            <div id="modal-corpo" style="margin-bottom: 20px; max-height: 400px; overflow-y: auto;"></div>
-            <div class="modal-acoes" style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 20px; border-top: 1px solid #444;">
-                <button class="btn-controle btn-cancelar" onclick="vantagensSystem.fecharModal()" 
-                        style="padding: 10px 20px; background: #555; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancelar</button>
-                <button class="btn-controle btn-confirmar" id="btn-confirmar-modal" 
-                        style="padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer;">Adquirir</button>
-            </div>
+   <!-- MODAL PARA VANTAGENS/DESVANTAGENS - VERSÃO CORRIGIDA -->
+<div id="modal-vantagem" class="modal">
+    <div class="modal-content vantagem-modal">
+        <span class="modal-close" onclick="window.vantagensSystem?.fecharModal?.()">&times;</span>
+        
+        <div class="modal-header">
+            <h3 id="modal-titulo">Vantagem</h3>
+        </div>
+        
+        <div class="modal-body" id="modal-corpo">
+            <!-- Conteúdo será preenchido pelo JavaScript -->
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn btn-cancelar" onclick="window.vantagensSystem?.fecharModal?.()">
+                Cancelar
+            </button>
+            <button class="btn btn-confirmar" id="btn-confirmar-modal" onclick="window.vantagensSystem?.confirmarSelecao?.()">
+                Confirmar
+            </button>
         </div>
     </div>
+</div>
 
     <!-- SCRIPTS PRINCIPAIS -->
     <script>

@@ -16,18 +16,18 @@ class GerenciadorVantagens {
 
     iniciarQuandoPronto() {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            this.init();
+            setTimeout(() => this.init(), 100);
         } else {
-            document.addEventListener('DOMContentLoaded', () => this.init());
+            document.addEventListener('DOMContentLoaded', () => setTimeout(() => this.init(), 100));
         }
     }
 
     init() {
-        console.log('Iniciando sistema de vantagens...');
+        console.log('🚀 Iniciando sistema de vantagens...');
         
         // Verificar se o modal existe
         if (!document.getElementById('modal-vantagem')) {
-            console.error('ERRO: Modal não encontrado no DOM!');
+            console.warn('Modal não encontrado, criando emergencial...');
             this.criarModalEmergencial();
         }
         
@@ -37,7 +37,7 @@ class GerenciadorVantagens {
         this.setupEventListeners();
         this.atualizarTotais();
         
-        console.log('Sistema de vantagens inicializado!');
+        console.log('✅ Sistema de vantagens inicializado!');
     }
 
     // CRIAR MODAL SE NÃO EXISTIR
@@ -58,17 +58,12 @@ class GerenciadorVantagens {
             </div>
         `;
         
-        // Adiciona o modal ao final do body
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         
-        // Configura eventos do modal
-        setTimeout(() => {
-            document.getElementById('modal-close-btn').addEventListener('click', () => this.fecharModal());
-            document.getElementById('modal-cancelar-btn').addEventListener('click', () => this.fecharModal());
-            document.getElementById('modal-confirmar-btn').addEventListener('click', () => this.confirmarSelecao());
-        }, 100);
-        
-        console.log('Modal emergencial criado!');
+        // Configurar eventos
+        document.getElementById('modal-close-btn').addEventListener('click', () => this.fecharModal());
+        document.getElementById('modal-cancelar-btn').addEventListener('click', () => this.fecharModal());
+        document.getElementById('modal-confirmar-btn').addEventListener('click', () => this.confirmarSelecao());
     }
 
     carregarVantagens() {
@@ -79,6 +74,11 @@ class GerenciadorVantagens {
         }
         
         lista.innerHTML = '';
+
+        if (!window.vantagensData || !window.vantagensData.vantagens) {
+            lista.innerHTML = '<div class="lista-vazia">Erro: Dados não carregados</div>';
+            return;
+        }
 
         vantagensData.vantagens.forEach(vantagem => {
             const item = this.criarItemLista(vantagem, 'vantagem');
@@ -95,6 +95,11 @@ class GerenciadorVantagens {
         
         lista.innerHTML = '';
 
+        if (!window.vantagensData || !window.vantagensData.desvantagens) {
+            lista.innerHTML = '<div class="lista-vazia">Erro: Dados não carregados</div>';
+            return;
+        }
+
         vantagensData.desvantagens.forEach(desvantagem => {
             const item = this.criarItemLista(desvantagem, 'desvantagem');
             lista.appendChild(item);
@@ -108,20 +113,22 @@ class GerenciadorVantagens {
             cursor: pointer;
             padding: 12px;
             margin: 8px 0;
-            border: 1px solid #444;
+            border: 1px solid ${tipo === 'vantagem' ? 'rgba(46, 204, 113, 0.3)' : 'rgba(231, 76, 60, 0.3)'};
             border-radius: 6px;
             background: rgba(40, 40, 50, 0.5);
             transition: all 0.2s;
         `;
         
         div.onmouseover = () => {
-            div.style.backgroundColor = 'rgba(255, 140, 0, 0.1)';
-            div.style.borderColor = '#ff8c00';
+            div.style.backgroundColor = tipo === 'vantagem' 
+                ? 'rgba(46, 204, 113, 0.1)' 
+                : 'rgba(231, 76, 60, 0.1)';
+            div.style.borderColor = tipo === 'vantagem' ? '#2ecc71' : '#e74c3c';
         };
         
         div.onmouseout = () => {
             div.style.backgroundColor = 'rgba(40, 40, 50, 0.5)';
-            div.style.borderColor = '#444';
+            div.style.borderColor = tipo === 'vantagem' ? 'rgba(46, 204, 113, 0.3)' : 'rgba(231, 76, 60, 0.3)';
         };
         
         let custoDisplay = Math.abs(item.custo) || 'var';
@@ -130,12 +137,14 @@ class GerenciadorVantagens {
         }
         
         div.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div style="font-weight: bold; font-size: 1.1em; color: #ffd700;">${item.nome}</div>
-                <div style="background: #2ecc71; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold;">${custoDisplay}</div>
+            <div class="item-header">
+                <div class="item-nome">${item.nome}</div>
+                <div class="item-custo" style="background: ${tipo === 'vantagem' ? 'rgba(46, 204, 113, 0.8)' : 'rgba(231, 76, 60, 0.8)'}">
+                    ${custoDisplay}
+                </div>
             </div>
-            <div style="font-size: 0.9em; color: #ccc; margin-bottom: 6px;">${item.descricao}</div>
-            <div style="font-size: 0.8em; color: #888; font-style: italic;">${this.getCategoriaNome(item.categoria)}</div>
+            <div class="item-descricao">${item.descricao}</div>
+            <div class="item-categoria">${this.getCategoriaNome(item.categoria)}</div>
         `;
 
         div.addEventListener('click', () => {
@@ -173,11 +182,18 @@ class GerenciadorVantagens {
         const modal = document.getElementById('modal-vantagem');
         const titulo = document.getElementById('modal-titulo');
         const corpo = document.getElementById('modal-corpo');
-        const btnConfirmar = document.getElementById('modal-confirmar-btn');
+        const btnConfirmar = document.getElementById('btn-confirmar-modal') || 
+                           document.getElementById('modal-confirmar-btn');
         
-        if (!modal || !titulo || !corpo || !btnConfirmar) {
+        if (!modal) {
+            console.error('Modal não encontrado!');
+            this.criarModalEmergencial();
+            setTimeout(() => this.abrirModal(), 100);
+            return;
+        }
+        
+        if (!titulo || !corpo) {
             console.error('Elementos do modal não encontrados!');
-            alert('Erro: Modal não carregado corretamente. Recarregue a página.');
             return;
         }
         
@@ -185,41 +201,68 @@ class GerenciadorVantagens {
         titulo.textContent = this.itemSelecionado.nome;
         
         // Configura conteúdo baseado no tipo
+        let modalHTML = '';
+        let precisaSelecao = false;
+        
         switch(this.itemSelecionado.tipo) {
             case 'simples':
-                corpo.innerHTML = this.criarModalSimples(this.itemSelecionado);
-                btnConfirmar.disabled = false;
+                modalHTML = this.criarModalSimples(this.itemSelecionado);
                 break;
                 
             case 'multipla':
-                corpo.innerHTML = this.criarModalMultipla(this.itemSelecionado);
-                btnConfirmar.disabled = true;
-                
-                // Configura eventos dos radios
-                setTimeout(() => {
-                    document.querySelectorAll('input[name="variacao"]').forEach(radio => {
-                        radio.addEventListener('change', () => {
-                            btnConfirmar.disabled = false;
-                        });
-                    });
-                }, 50);
+                modalHTML = this.criarModalMultipla(this.itemSelecionado);
+                precisaSelecao = true;
                 break;
                 
             case 'variavel':
-                corpo.innerHTML = this.criarModalVariavel(this.itemSelecionado);
-                btnConfirmar.disabled = false;
-                
-                // Configura eventos do nível
-                setTimeout(() => {
-                    this.configurarCalculadoraVariavel();
-                }, 50);
+                modalHTML = this.criarModalVariavel(this.itemSelecionado);
                 break;
+                
+            default:
+                modalHTML = this.criarModalSimples(this.itemSelecionado);
         }
+        
+        corpo.innerHTML = modalHTML;
+        
+        // Configura botão confirmar
+        if (btnConfirmar) {
+            btnConfirmar.disabled = precisaSelecao;
+            btnConfirmar.textContent = this.tipoSelecionado === 'vantagem' ? 'Adquirir' : 'Adquirir Desvantagem';
+            
+            // Remove event listeners antigos e adiciona novo
+            const novaBtn = btnConfirmar.cloneNode(true);
+            btnConfirmar.parentNode.replaceChild(novaBtn, btnConfirmar);
+            novaBtn.addEventListener('click', () => this.confirmarSelecao());
+        }
+        
+        // Configura eventos específicos
+        setTimeout(() => {
+            if (this.itemSelecionado.tipo === 'multipla') {
+                this.configurarEventosMultipla();
+            } else if (this.itemSelecionado.tipo === 'variavel') {
+                this.configurarCalculadoraVariavel();
+            }
+        }, 50);
         
         // Mostra o modal
         modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
         
-        console.log('Modal aberto com sucesso!');
+        console.log('✅ Modal aberto com sucesso!');
+    }
+
+    configurarEventosMultipla() {
+        const radios = document.querySelectorAll('input[name="variacao"]');
+        const btnConfirmar = document.getElementById('btn-confirmar-modal') || 
+                           document.getElementById('modal-confirmar-btn');
+        
+        if (radios.length > 0 && btnConfirmar) {
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    btnConfirmar.disabled = false;
+                });
+            });
+        }
     }
 
     configurarCalculadoraVariavel() {
@@ -246,8 +289,11 @@ class GerenciadorVantagens {
             
             const custoFinal = Math.round(custoBase * multiplicador);
             custoTotal.textContent = `${custoFinal} pts`;
+            
+            // Armazena dados para uso posterior
             select.dataset.custoFinal = custoFinal;
             select.dataset.ampliacoes = JSON.stringify(ampliacoes);
+            select.dataset.nivel = nivel;
         };
         
         calcularCusto(); // Cálculo inicial
@@ -257,11 +303,18 @@ class GerenciadorVantagens {
     }
 
     criarModalSimples(item) {
+        const custo = Math.abs(item.custo) || 0;
+        const tipo = this.tipoSelecionado === 'vantagem' ? 'vantagem' : 'desvantagem';
+        const cor = tipo === 'vantagem' ? '#2ecc71' : '#e74c3c';
+        
         return `
-            <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 5px; margin-bottom: 15px;">
-                <p style="margin: 0 0 15px 0;">${item.descricao}</p>
-                <div style="background: #2ecc71; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 1.2em;">
-                    Custo: ${Math.abs(item.custo)} pontos
+            <div class="modal-descricao">
+                <p>${item.descricao}</p>
+            </div>
+            <div class="custo-total-display" style="border-color: ${cor}">
+                <div style="text-align: center;">
+                    <div style="font-size: 0.9em; color: #aaa; margin-bottom: 5px;">Custo</div>
+                    <div style="font-size: 2em; font-weight: bold; color: ${cor}">${custo} pontos</div>
                 </div>
             </div>
         `;
@@ -269,24 +322,31 @@ class GerenciadorVantagens {
 
     criarModalMultipla(item) {
         let html = `
-            <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 5px; margin-bottom: 15px;">
-                <p style="margin: 0 0 15px 0;">${item.descricao}</p>
-                <div style="margin-top: 20px;">
-                    <h4 style="color: #ffd700; margin-bottom: 15px;">Selecione uma variação:</h4>
+            <div class="modal-descricao">
+                <p>${item.descricao}</p>
+            </div>
+            <div style="margin: 20px 0;">
+                <h4 style="color: #ffd700; margin-bottom: 15px;">Selecione uma variação:</h4>
         `;
 
         item.variacoes.forEach((variacao, index) => {
+            const custo = Math.abs(variacao.custo) || 0;
+            const tipo = this.tipoSelecionado === 'vantagem' ? 'vantagem' : 'desvantagem';
+            const cor = tipo === 'vantagem' ? '#2ecc71' : '#e74c3c';
+            
             html += `
-                <div style="margin: 10px 0; padding: 15px; border: 2px solid #555; border-radius: 5px; background: rgba(50,50,60,0.5);">
+                <div class="modal-variacao">
                     <div style="display: flex; align-items: flex-start; gap: 10px;">
-                        <input type="radio" id="variacao-${variacao.id}" name="variacao" value="${variacao.id}" 
+                        <input type="radio" id="variacao-${variacao.id}" 
+                               name="variacao" value="${variacao.id}" 
+                               ${index === 0 ? 'checked' : ''}
                                style="margin-top: 4px;">
                         <div style="flex: 1;">
                             <label for="variacao-${variacao.id}" style="cursor: pointer; display: block;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                                     <strong style="color: #fff; font-size: 1.1em;">${variacao.nome}</strong>
-                                    <span style="background: #2ecc71; color: white; padding: 4px 12px; border-radius: 12px; font-weight: bold;">
-                                        ${Math.abs(variacao.custo)} pts
+                                    <span style="background: ${cor}; color: white; padding: 4px 12px; border-radius: 12px; font-weight: bold;">
+                                        ${custo} pts
                                     </span>
                                 </div>
                                 <p style="margin: 0; color: #ccc; font-size: 0.9em;">${variacao.descricao}</p>
@@ -297,7 +357,7 @@ class GerenciadorVantagens {
             `;
         });
 
-        html += `</div></div>`;
+        html += `</div>`;
         return html;
     }
 
@@ -305,15 +365,23 @@ class GerenciadorVantagens {
         const nivelBase = item.nivelBase || 1;
         const niveisMax = item.niveis || 10;
         const custoPorNivel = Math.abs(item.custoPorNivel || 2);
+        const tipo = this.tipoSelecionado === 'vantagem' ? 'vantagem' : 'desvantagem';
+        const cor = tipo === 'vantagem' ? '#2ecc71' : '#e74c3c';
 
         let html = `
-            <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 5px; margin-bottom: 15px;">
-                <p style="margin: 0 0 15px 0;">${item.descricao}</p>
-                ${item.limitacoes ? `<p style="margin: 0 0 15px 0; color: #ff8c00; font-size: 0.9em;"><strong>⚠️ Limitações:</strong> ${item.limitacoes}</p>` : ''}
-                
-                <div style="margin: 20px 0;">
-                    <label style="display: block; margin-bottom: 8px; color: #ffd700; font-weight: bold;">Selecione o nível:</label>
-                    <select id="nivel-vantagem" style="width: 100%; padding: 10px; background: #333; color: white; border: 1px solid #555; border-radius: 5px; font-size: 1em;">
+            <div class="modal-descricao">
+                <p>${item.descricao}</p>
+                ${item.limitacoes ? 
+                    `<div class="limitacao-info">
+                        <strong>⚠️ Limitações:</strong> ${item.limitacoes}
+                    </div>` : ''}
+            </div>
+            
+            <div class="nivel-container">
+                <label style="color: #ffd700; font-weight: bold; margin-bottom: 10px; display: block;">
+                    Selecione o nível:
+                </label>
+                <select id="nivel-vantagem" class="nivel-select">
         `;
 
         for(let i = nivelBase; i <= niveisMax; i++) {
@@ -321,21 +389,13 @@ class GerenciadorVantagens {
         }
 
         html += `
-                    </select>
-                    
-                    <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 5px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: bold; color: #fff;">Custo Total:</span>
-                            <span id="custo-total" style="font-size: 1.5em; font-weight: bold; color: #2ecc71;">${nivelBase * custoPorNivel} pts</span>
-                        </div>
-                    </div>
-                </div>
+                </select>
         `;
 
         if(item.ampliacoes && item.ampliacoes.length > 0) {
             html += `
-                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #555;">
-                    <h4 style="color: #ffd700; margin-bottom: 15px;">Ampliações Opcionais:</h4>
+                <div class="ampliacoes-section" style="margin-top: 20px;">
+                    <h4 style="color: #ffd700; margin-bottom: 10px;">Ampliações Opcionais:</h4>
             `;
             
             item.ampliacoes.forEach((ampliacao, index) => {
@@ -343,22 +403,22 @@ class GerenciadorVantagens {
                 const percentualAumento = (custoMultiplicador - 1) * 100;
                 
                 html += `
-                    <div style="margin: 12px 0; padding: 12px; background: rgba(50,50,60,0.5); border: 1px solid #555; border-radius: 5px;">
+                    <div class="ampliacao-option">
                         <div style="display: flex; align-items: flex-start; gap: 10px;">
-                            <input type="checkbox" id="ampliacao-${ampliacao.id}" 
-                                   data-multiplicador="${custoMultiplicador}" 
-                                   data-nome="${ampliacao.nome}"
+                            <input type="checkbox" 
+                                   id="ampliacao-${ampliacao.id}" 
                                    class="ampliacao-checkbox"
-                                   style="margin-top: 4px;">
+                                   data-multiplicador="${custoMultiplicador}" 
+                                   data-nome="${ampliacao.nome}">
                             <div style="flex: 1;">
-                                <label for="ampliacao-${ampliacao.id}" style="cursor: pointer; display: block;">
+                                <label for="ampliacao-${ampliacao.id}" style="cursor: pointer;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                                         <strong style="color: #fff;">${ampliacao.nome}</strong>
-                                        <span style="background: #ff8c00; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.9em;">
+                                        <span style="background: #ff8c00; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85em;">
                                             +${percentualAumento}% de custo
                                         </span>
                                     </div>
-                                    <p style="margin: 0; color: #ccc; font-size: 0.9em;">${ampliacao.descricao}</p>
+                                    <p style="margin: 0; color: #aaa; font-size: 0.9em;">${ampliacao.descricao}</p>
                                 </label>
                             </div>
                         </div>
@@ -369,7 +429,18 @@ class GerenciadorVantagens {
             html += `</div>`;
         }
 
-        html += `</div>`;
+        html += `
+                <div class="custo-total-display" style="margin-top: 20px; border-color: ${cor}">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: bold;">Custo Total:</span>
+                        <span id="custo-total" style="font-size: 1.5em; color: ${cor}; font-weight: bold;">
+                            ${nivelBase * custoPorNivel} pts
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+
         return html;
     }
 
@@ -381,6 +452,7 @@ class GerenciadorVantagens {
         
         let itemAdquirido = null;
         let custoFinal = 0;
+        let detalhes = '';
         
         switch(this.itemSelecionado.tipo) {
             case 'simples':
@@ -420,6 +492,7 @@ class GerenciadorVantagens {
                     variacao: variacaoId
                 };
                 custoFinal = Math.abs(variacao.custo) || 0;
+                detalhes = `Variação: ${variacao.nome}`;
                 break;
                 
             case 'variavel':
@@ -430,7 +503,8 @@ class GerenciadorVantagens {
                 }
                 
                 const nivel = parseInt(select.value) || 1;
-                custoFinal = parseInt(select.dataset.custoFinal) || (nivel * Math.abs(this.itemSelecionado.custoPorNivel || 2));
+                custoFinal = parseInt(select.dataset.custoFinal) || 
+                            (nivel * Math.abs(this.itemSelecionado.custoPorNivel || 2));
                 
                 let ampliacoes = [];
                 try {
@@ -449,6 +523,10 @@ class GerenciadorVantagens {
                     nivel: nivel,
                     ampliacoes: ampliacoes
                 };
+                detalhes = `Nível: ${nivel}`;
+                if (ampliacoes.length > 0) {
+                    detalhes += ` | Ampliações: ${ampliacoes.join(', ')}`;
+                }
                 break;
         }
         
@@ -461,6 +539,8 @@ class GerenciadorVantagens {
         if (this.tipoSelecionado === 'vantagem') {
             this.vantagensAdquiridas.push(itemAdquirido);
         } else {
+            // Para desvantagens, o custo é negativo
+            itemAdquirido.custo = -Math.abs(itemAdquirido.custo);
             this.desvantagensAdquiridas.push(itemAdquirido);
         }
         
@@ -471,63 +551,69 @@ class GerenciadorVantagens {
         
         // Mensagem de sucesso
         const tipoTexto = this.tipoSelecionado === 'vantagem' ? 'Vantagem' : 'Desvantagem';
-        alert(`✅ ${tipoTexto} "${itemAdquirido.nome}" adquirida com sucesso!\nCusto: ${Math.abs(custoFinal)} pontos`);
+        const sinal = this.tipoSelecionado === 'vantagem' ? '+' : '-';
+        
+        alert(`✅ ${tipoTexto} "${itemAdquirido.nome}" adquirida com sucesso!\nCusto: ${sinal}${Math.abs(custoFinal)} pontos\n${detalhes}`);
     }
 
     atualizarListasAdquiridas() {
         // Atualiza vantagens adquiridas
-        const vantagensContainer = document.getElementById('vantagens-adquiridas');
-        if (vantagensContainer) {
-            if (this.vantagensAdquiridas.length === 0) {
-                vantagensContainer.innerHTML = '<div class="lista-vazia">Nenhuma vantagem adquirida</div>';
-            } else {
-                vantagensContainer.innerHTML = this.vantagensAdquiridas.map(item => `
-                    <div style="position: relative; padding: 12px; margin: 8px 0; border: 2px solid #2ecc71; border-radius: 6px; background: rgba(46, 204, 113, 0.1);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <strong style="color: #fff;">${item.nome}</strong>
-                            <span style="background: #2ecc71; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold;">+${Math.abs(item.custo)} pts</span>
-                        </div>
-                        <div style="font-size: 0.9em; color: #ccc; margin-bottom: 5px;">${item.descricao}</div>
-                        ${item.nivel ? `<div style="font-size: 0.8em; color: #888;">Nível ${item.nivel}</div>` : ''}
-                        ${item.ampliacoes && item.ampliacoes.length > 0 ? 
-                          `<div style="font-size: 0.8em; color: #ff8c00;">Ampliações: ${item.ampliacoes.join(', ')}</div>` : ''}
-                        <button onclick="vantagensSystem.removerItem('${item.id}', 'vantagem')" 
-                                style="position: absolute; top: 8px; right: 8px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-weight: bold;">×</button>
-                    </div>
-                `).join('');
-            }
-        }
+        this.atualizarLista('vantagens-adquiridas', this.vantagensAdquiridas, '#2ecc71', 'vantagem');
         
         // Atualiza desvantagens adquiridas
-        const desvantagensContainer = document.getElementById('desvantagens-adquiridas');
-        if (desvantagensContainer) {
-            if (this.desvantagensAdquiridas.length === 0) {
-                desvantagensContainer.innerHTML = '<div class="lista-vazia">Nenhuma desvantagem adquirida</div>';
-            } else {
-                desvantagensContainer.innerHTML = this.desvantagensAdquiridas.map(item => `
-                    <div style="position: relative; padding: 12px; margin: 8px 0; border: 2px solid #e74c3c; border-radius: 6px; background: rgba(231, 76, 60, 0.1);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <strong style="color: #fff;">${item.nome}</strong>
-                            <span style="background: #e74c3c; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold;">-${Math.abs(item.custo)} pts</span>
-                        </div>
-                        <div style="font-size: 0.9em; color: #ccc; margin-bottom: 5px;">${item.descricao}</div>
-                        <button onclick="vantagensSystem.removerItem('${item.id}', 'desvantagem')" 
-                                style="position: absolute; top: 8px; right: 8px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-weight: bold;">×</button>
-                    </div>
-                `).join('');
-            }
-        }
+        this.atualizarLista('desvantagens-adquiridas', this.desvantagensAdquiridas, '#e74c3c', 'desvantagem');
     }
 
-    removerItem(itemId, tipo) {
+    atualizarLista(elementId, itens, cor, tipo) {
+        const container = document.getElementById(elementId);
+        if (!container) return;
+
+        if (itens.length === 0) {
+            container.innerHTML = '<div class="lista-vazia">Nenhum item adquirido</div>';
+            return;
+        }
+
+        container.innerHTML = itens.map((item, index) => {
+            const custo = Math.abs(item.custo);
+            const sinal = item.custo >= 0 ? '+' : '-';
+            
+            let detalhes = '';
+            if (item.nivel) detalhes += `<div style="font-size: 0.85em; color: #888;">Nível ${item.nivel}</div>`;
+            if (item.ampliacoes && item.ampliacoes.length > 0) {
+                detalhes += `<div style="font-size: 0.8em; color: #ff8c00;">Ampliações: ${item.ampliacoes.join(', ')}</div>`;
+            }
+            if (item.variacao) {
+                detalhes += `<div style="font-size: 0.85em; color: #aaa;">Variação específica</div>`;
+            }
+            
+            return `
+                <div class="item-adquirido" style="border-color: ${cor}; background: ${cor}20;">
+                    <div class="item-header">
+                        <div class="item-nome">${item.nome}</div>
+                        <div class="item-custo" style="background: ${cor}">
+                            ${sinal}${custo} pts
+                        </div>
+                    </div>
+                    <div class="item-descricao">${item.descricao}</div>
+                    ${detalhes}
+                    <button onclick="window.vantagensSystem.removerItem(${index}, '${tipo}')" 
+                            class="btn-remover" style="background: ${cor}">
+                        ×
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    removerItem(index, tipo) {
         if (!confirm(`Tem certeza que deseja remover este item?`)) {
             return;
         }
         
         if (tipo === 'vantagem') {
-            this.vantagensAdquiridas = this.vantagensAdquiridas.filter(item => item.id !== itemId);
+            this.vantagensAdquiridas.splice(index, 1);
         } else {
-            this.desvantagensAdquiridas = this.desvantagensAdquiridas.filter(item => item.id !== itemId);
+            this.desvantagensAdquiridas.splice(index, 1);
         }
         
         this.atualizarListasAdquiridas();
@@ -535,8 +621,6 @@ class GerenciadorVantagens {
         
         alert('Item removido com sucesso!');
     }
-
-    // ... (mantenha as funções setupPeculiaridades, adicionarPeculiaridade, renderizarPeculiaridades, removerPeculiaridade iguais)
 
     setupPeculiaridades() {
         const input = document.getElementById('nova-peculiaridade');
@@ -567,6 +651,8 @@ class GerenciadorVantagens {
                 btnAdicionar.disabled = true;
             }
         });
+
+        this.renderizarPeculiaridades();
     }
 
     adicionarPeculiaridade(texto) {
@@ -582,6 +668,7 @@ class GerenciadorVantagens {
 
         this.renderizarPeculiaridades();
         this.atualizarTotais();
+        
         alert('Peculiaridade adicionada! Custo: -1 ponto');
     }
 
@@ -598,23 +685,27 @@ class GerenciadorVantagens {
             return;
         }
 
-        container.innerHTML = this.peculiaridades.map(pec => `
-            <div style="position: relative; padding: 12px; margin: 8px 0; border: 2px solid #f39c12; border-radius: 6px; background: rgba(243, 156, 18, 0.1);">
-                <p style="margin: 0; color: #fff;">${pec.texto}</p>
-                <button onclick="vantagensSystem.removerPeculiaridade('${pec.id}')" 
-                        style="position: absolute; top: 8px; right: 8px; background: #f39c12; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-weight: bold;">×</button>
+        container.innerHTML = this.peculiaridades.map((pec, index) => `
+            <div class="peculiaridade-item">
+                <div class="peculiaridade-texto">${pec.texto}</div>
+                <button onclick="window.vantagensSystem.removerPeculiaridade(${index})" 
+                        class="btn-remover" style="background: #f39c12">
+                    ×
+                </button>
             </div>
         `).join('');
     }
 
-    removerPeculiaridade(id) {
-        this.peculiaridades = this.peculiaridades.filter(pec => pec.id !== id);
+    removerPeculiaridade(index) {
+        this.peculiaridades.splice(index, 1);
         this.renderizarPeculiaridades();
         this.atualizarTotais();
+        
         alert('Peculiaridade removida!');
     }
 
     atualizarTotais() {
+        // Calcula totais
         const totalVantagens = this.vantagensAdquiridas.reduce((sum, item) => {
             const custo = Math.abs(item.custo) || 0;
             return sum + (isNaN(custo) ? 0 : custo);
@@ -628,21 +719,68 @@ class GerenciadorVantagens {
         const totalPeculiaridades = this.peculiaridades.length * 1;
 
         // Atualiza os totais na interface
-        document.getElementById('total-vantagens').textContent = `+${totalVantagens}`;
-        document.getElementById('total-desvantagens').textContent = `-${totalDesvantagens}`;
-        document.getElementById('total-peculiaridades').textContent = `-${totalPeculiaridades}`;
-        document.getElementById('saldo-total').textContent = totalVantagens - totalDesvantagens - totalPeculiaridades;
+        this.atualizarElemento('total-vantagens', `+${totalVantagens}`);
+        this.atualizarElemento('total-desvantagens', `-${totalDesvantagens}`);
+        this.atualizarElemento('total-peculiaridades', `-${totalPeculiaridades}`);
         
-        document.getElementById('total-vantagens-adquiridas').textContent = `${totalVantagens} pts`;
-        document.getElementById('total-desvantagens-adquiridas').textContent = `${totalDesvantagens} pts`;
+        const saldoTotal = totalVantagens - totalDesvantagens - totalPeculiaridades;
+        this.atualizarElemento('saldo-total', saldoTotal);
+        
+        this.atualizarElemento('total-vantagens-adquiridas', `${totalVantagens} pts`);
+        this.atualizarElemento('total-desvantagens-adquiridas', `${totalDesvantagens} pts`);
+    }
+
+    atualizarElemento(id, valor) {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.textContent = valor;
+            
+            // Adiciona animação
+            elemento.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                elemento.style.transform = 'scale(1)';
+            }, 300);
+        }
     }
 
     setupEventListeners() {
         // Filtros
-        document.getElementById('busca-vantagens')?.addEventListener('input', () => this.filtrarLista('vantagens'));
-        document.getElementById('categoria-vantagens')?.addEventListener('change', () => this.filtrarLista('vantagens'));
-        document.getElementById('busca-desvantagens')?.addEventListener('input', () => this.filtrarLista('desvantagens'));
-        document.getElementById('categoria-desvantagens')?.addEventListener('change', () => this.filtrarLista('desvantagens'));
+        this.configurarFiltro('vantagens');
+        this.configurarFiltro('desvantagens');
+        
+        // Fechar modal ao clicar fora
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('modal-vantagem');
+            if (modal && modal.style.display === 'block' && e.target === modal) {
+                this.fecharModal();
+            }
+        });
+        
+        // Fechar com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.fecharModal();
+            }
+        });
+        
+        // Evento para quando a aba é aberta
+        document.addEventListener('abaVantagensAberta', () => {
+            console.log('Aba de vantagens aberta, atualizando dados...');
+            this.atualizarTotais();
+        });
+    }
+
+    configurarFiltro(tipo) {
+        const busca = document.getElementById(`busca-${tipo}`);
+        const categoria = document.getElementById(`categoria-${tipo}`);
+        
+        if (busca) {
+            busca.addEventListener('input', () => this.filtrarLista(tipo));
+        }
+        
+        if (categoria) {
+            categoria.addEventListener('change', () => this.filtrarLista(tipo));
+        }
     }
 
     filtrarLista(tipo) {
@@ -667,6 +805,12 @@ class GerenciadorVantagens {
         });
 
         lista.innerHTML = '';
+        
+        if (itensFiltrados.length === 0) {
+            lista.innerHTML = '<div class="lista-vazia">Nenhum item encontrado</div>';
+            return;
+        }
+        
         itensFiltrados.forEach(item => {
             const itemElement = this.criarItemLista(item, tipo === 'vantagens' ? 'vantagem' : 'desvantagem');
             lista.appendChild(itemElement);
@@ -677,18 +821,69 @@ class GerenciadorVantagens {
         const modal = document.getElementById('modal-vantagem');
         if (modal) {
             modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
             this.itemSelecionado = null;
             this.tipoSelecionado = null;
+            
+            // Limpa o conteúdo do modal
+            const corpo = document.getElementById('modal-corpo');
+            if (corpo) corpo.innerHTML = '';
         }
+    }
+
+    // Métodos públicos para uso externo
+    getDadosSalvar() {
+        return {
+            vantagens: this.vantagensAdquiridas,
+            desvantagens: this.desvantagensAdquiridas,
+            peculiaridades: this.peculiaridades
+        };
+    }
+
+    carregarDados(dados) {
+        if (dados.vantagens) this.vantagensAdquiridas = dados.vantagens;
+        if (dados.desvantagens) this.desvantagensAdquiridas = dados.desvantagens;
+        if (dados.peculiaridades) this.peculiaridades = dados.peculiaridades;
+        
+        this.atualizarListasAdquiridas();
+        this.atualizarTotais();
+    }
+
+    resetar() {
+        this.vantagensAdquiridas = [];
+        this.desvantagensAdquiridas = [];
+        this.peculiaridades = [];
+        
+        this.atualizarListasAdquiridas();
+        this.atualizarTotais();
+        
+        alert('Sistema de vantagens resetado!');
     }
 }
 
-// INICIALIZAÇÃO GARANTIDA
+// INICIALIZAÇÃO GLOBAL
 let vantagensSystem;
 
-// Espera TUDO carregar
-window.addEventListener('load', function() {
-    console.log('Página completamente carregada, inicializando sistema...');
-    vantagensSystem = new GerenciadorVantagens();
-    window.vantagensSystem = vantagensSystem;
+// Inicialização automática quando a aba é ativada
+document.addEventListener('DOMContentLoaded', function() {
+    // Monitora cliques nas abas
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            if (tabId === 'vantagens') {
+                // Inicializa ou atualiza o sistema quando a aba é aberta
+                if (!window.vantagensSystem) {
+                    vantagensSystem = new GerenciadorVantagens();
+                    window.vantagensSystem = vantagensSystem;
+                } else {
+                    // Dispara evento para atualizar
+                    const evento = new CustomEvent('abaVantagensAberta');
+                    document.dispatchEvent(evento);
+                }
+            }
+        });
+    });
 });
+
+// Exporta para uso global
+window.GerenciadorVantagens = GerenciadorVantagens;
