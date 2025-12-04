@@ -952,10 +952,10 @@
             </div>
         </div>
 
-       <!-- ABA PERÍCIAS -->
+      <!-- ABA PERÍCIAS - VERSÃO REFORMULADA -->
 <div id="pericias" class="tab-content">
     <div class="atributos-container">
-        <!-- CARD DE RESUMO DE PONTOS -->
+        <!-- CARD DE RESUMO DE PONTOS (MANTIDO) -->
         <div class="pontos-section">
             <div class="ponto-card">
                 <h3>Perícias</h3>
@@ -973,32 +973,81 @@
 
         <!-- SEÇÃO PERÍCIAS -->
         <h2 class="secao-titulo">Perícias</h2>
+        
+        <!-- SISTEMA DE BUSCA SIMPLES -->
+        <div class="busca-simples">
+            <input type="text" id="busca-pericias" placeholder="🔍 Buscar perícia por nome..." 
+                   class="busca-input" autocomplete="off">
+            <select id="filtro-atributo" class="filtro-select">
+                <option value="Todos">Todos os Atributos</option>
+                <option value="DX">Destreza (DX)</option>
+                <option value="IQ">Inteligência (IQ)</option>
+                <option value="HT">Vigor (HT)</option>
+                <option value="PERC">Percepção (PERC)</option>
+                <option value="Combate">Combate</option>
+            </select>
+        </div>
+
         <div class="cards-grid principais-grid">
             <!-- CARD PERÍCIAS DISPONÍVEIS -->
             <div class="atributo-card">
                 <div class="atributo-header">
                     <h3>🎯 Perícias Disponíveis</h3>
+                    <div class="contador" id="contador-pericias">0 perícias</div>
                 </div>
                 
-                <!-- SISTEMA DE BUSCA -->
-                <div class="busca-container">
-                    <input type="text" id="busca-pericias" placeholder="Buscar perícias..." class="atributo-input">
-                    <select id="categoria-pericias" class="atributo-input">
-                        <option value="Todas">Todas as Categorias</option>
-                        <option value="Combate">Combate</option>
-                        <option value="DX">Destreza (DX)</option>
-                        <option value="HT">Vigor (HT)</option>
-                        <option value="PERC">Percepção (PERC)</option>
-                        <option value="IQ">Inteligência (IQ)</option>
-                    </select>
-                    <select id="subcategoria-pericias" class="atributo-input">
-                        <option value="Todas">Todas Subcategorias</option>
-                    </select>
-                </div>
-
-                <!-- LISTA DE PERÍCIAS DISPONÍVEIS -->
+                <!-- LISTA COM GRUPOS COLABSÁVEIS -->
                 <div class="lista-container" id="lista-pericias">
-                    <div class="lista-vazia">Carregando perícias...</div>
+                    <div class="grupo-pericias ativo" data-tipo="Combate">
+                        <div class="grupo-header">
+                            <h4>⚔️ Perícias de Combate</h4>
+                            <span class="grupo-icone">▼</span>
+                        </div>
+                        <div class="grupo-conteudo">
+                            <!-- Conteúdo será preenchido por JavaScript -->
+                            <div class="lista-vazia">Carregando perícias de combate...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grupo-pericias ativo" data-tipo="DX">
+                        <div class="grupo-header">
+                            <h4>🏃‍♂️ Destreza (DX)</h4>
+                            <span class="grupo-icone">▼</span>
+                        </div>
+                        <div class="grupo-conteudo">
+                            <div class="lista-vazia">Carregando perícias de DX...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grupo-pericias ativo" data-tipo="IQ">
+                        <div class="grupo-header">
+                            <h4>🧠 Inteligência (IQ)</h4>
+                            <span class="grupo-icone">▼</span>
+                        </div>
+                        <div class="grupo-conteudo">
+                            <div class="lista-vazia">Carregando perícias de IQ...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grupo-pericias ativo" data-tipo="HT">
+                        <div class="grupo-header">
+                            <h4>💪 Vigor (HT)</h4>
+                            <span class="grupo-icone">▼</span>
+                        </div>
+                        <div class="grupo-conteudo">
+                            <div class="lista-vazia">Carregando perícias de HT...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grupo-pericias ativo" data-tipo="PERC">
+                        <div class="grupo-header">
+                            <h4>👁️ Percepção (PERC)</h4>
+                            <span class="grupo-icone">▼</span>
+                        </div>
+                        <div class="grupo-conteudo">
+                            <div class="lista-vazia">Carregando perícias de PERC...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1017,15 +1066,15 @@
     </div>
 </div>
 
-<!-- MODAL PARA VANTAGENS/DESVANTAGENS -->
-<div id="modal-vantagem" class="modal">
-    <div class="modal-content">
+<!-- MODAL PARA PERÍCIAS (SIMPLIFICADO) -->
+<div id="modal-pericia" class="modal">
+    <div class="modal-content modal-pericia">
         <span class="modal-close">&times;</span>
         <div class="modal-header">
-            <h3 id="modal-titulo">Selecionar Item</h3>
+            <h3 id="modal-titulo-pericia">Selecionar Perícia</h3>
         </div>
-        <div id="modal-corpo">
-            <!-- Conteúdo dinâmico será inserido aqui -->
+        <div id="modal-corpo-pericia">
+            <!-- Conteúdo será preenchido dinamicamente -->
         </div>
         <div class="modal-actions">
             <button class="btn btn-cancelar">Cancelar</button>
@@ -1034,19 +1083,15 @@
     </div>
 </div>
 
-<!-- MODAL PARA PERÍCIAS -->
-<div id="modal-pericia" class="modal">
-    <div class="modal-content">
+<!-- MODAL PARA TÉCNICAS (SE NECESSÁRIO FUTURAMENTE) -->
+<div id="modal-tecnicas" class="modal">
+    <div class="modal-content modal-tecnicas">
         <span class="modal-close">&times;</span>
         <div class="modal-header">
-            <h3 id="modal-titulo-pericia">Selecionar Perícia</h3>
+            <h3>Técnicas Relacionadas</h3>
         </div>
-        <div id="modal-corpo-pericia">
-            <!-- Conteúdo dinâmico será inserido aqui -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-cancelar">Cancelar</button>
-            <button class="btn btn-confirmar" disabled>Confirmar</button>
+        <div id="modal-corpo-tecnicas">
+            <!-- Para futuro: lista de técnicas que usam esta perícia -->
         </div>
     </div>
 </div>
