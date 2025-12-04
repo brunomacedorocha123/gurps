@@ -1,4 +1,4 @@
-// equipamentos.js - SISTEMA COMPLETO COM DINHEIRO POR RIQUEZA
+// equipamentos.js - SISTEMA COMPLETO COM DINHEIRO POR RIQUEZA - VERSÃO CORRIGIDA
 class SistemaEquipamentos {
     constructor() {
         this.equipamentosAdquiridos = [];
@@ -513,8 +513,10 @@ class SistemaEquipamentos {
         }
     }
 
-    // ========== COMPRA E VENDA ==========
+    // ========== COMPRA E VENDA - VERSÃO CORRIGIDA ==========
     comprarEquipamento(itemId, elemento) {
+        console.log('🛒 INICIANDO COMPRA - Item ID:', itemId);
+        
         if (!this.catalogoPronto) {
             this.mostrarFeedback('Sistema ainda carregando...', 'erro');
             return;
@@ -522,21 +524,45 @@ class SistemaEquipamentos {
 
         const equipamento = this.obterEquipamentoPorId(itemId);
         if (!equipamento) {
+            console.error('❌ Equipamento não encontrado:', itemId);
             this.mostrarFeedback('Equipamento não encontrado!', 'erro');
             return;
         }
 
-        if (this.isQuantificavel(itemId)) {
+        console.log('📦 Equipamento:', equipamento.nome, 'Quantificável:', equipamento.quantificavel);
+
+        // ====== CORREÇÃO CRÍTICA ======
+        // Para itens QUANTIFICÁVEIS (equipamentos gerais com quantificavel: true)
+        if (equipamento.quantificavel === true) {
+            console.log('🎯 Item QUANTIFICÁVEL - Abrindo modal de quantidade');
             this.abrirSubmenuQuantidade(itemId, elemento);
             return;
         }
 
+        // Para itens NÃO QUANTIFICÁVEIS (armas, armaduras, escudos)
         if (this.dinheiro < equipamento.custo) {
             this.mostrarFeedback(`Dinheiro insuficiente! Necessário: $${equipamento.custo}`, 'erro');
             return;
         }
 
-        this.dinheiro -= equipamento.custo;
+        // ====== VERIFICAÇÃO ANTI-DUPLICAÇÃO ======
+        // Verifica se JÁ EXISTE um item IDÊNTICO no inventário
+        const itemExistente = this.equipamentosAdquiridos.find(item => 
+            item.id === equipamento.id && // MESMO ID DO CATÁLOGO
+            item.status === 'na-mochila' && // NA MOCHILA
+            !item.equipado && // NÃO EQUIPADO
+            !item.quantificavel // NÃO É ITEM QUANTIFICÁVEL (armas/armaduras)
+        );
+        
+        console.log('🔍 Verificando item existente:', itemExistente ? 'ENCONTRADO' : 'NÃO ENCONTRADO');
+
+        if (itemExistente) {
+            // SE JÁ TEM UM IGUAL, NÃO COMPRA OUTRO
+            this.mostrarFeedback(`Você já possui ${equipamento.nome}! Não é possível ter duplicatas.`, 'aviso');
+            return;
+        }
+
+        // SE NÃO EXISTE, CRIA NOVO
         const novoEquipamento = {
             ...equipamento,
             adquiridoEm: new Date().toISOString(),
@@ -548,6 +574,8 @@ class SistemaEquipamentos {
 
         this.equipamentosAdquiridos.push(novoEquipamento);
         this.equipamentosEquipados.mochila.push(novoEquipamento);
+        
+        this.dinheiro -= equipamento.custo;
 
         this.mostrarFeedback(`${equipamento.nome} comprado com sucesso!`, 'sucesso');
         this.atualizarInterface();
@@ -558,9 +586,12 @@ class SistemaEquipamentos {
             valor: equipamento.custo,
             descricao: `Compra: ${equipamento.nome}`
         });
+        
+        console.log('✅ Compra concluída com sucesso!');
     }
 
-    venderEquipamento(itemId) {
+    // CONTINUA NO PRÓXIMO COMENTÁRIO...
+        venderEquipamento(itemId) {
         const index = this.equipamentosAdquiridos.findIndex(item => item.idUnico === itemId);
         if (index === -1) {
             this.mostrarFeedback('Equipamento não encontrado para venda!', 'erro');
@@ -785,7 +816,7 @@ class SistemaEquipamentos {
         };
     }
 
-    // ========== SUBMENU DE QUANTIDADE ==========
+    // ========== SUBMENU DE QUANTIDADE - VERSÃO CORRIGIDA ==========
     abrirSubmenuQuantidade(itemId, elemento) {
         const equipamento = this.obterEquipamentoPorId(itemId);
         if (!equipamento) return;
@@ -851,6 +882,8 @@ class SistemaEquipamentos {
 
     confirmarCompraQuantidade() {
         if (!this.itemCompraQuantidade) return;
+        
+        console.log('🎯 Confirmando compra com quantidade...');
 
         const equipamento = this.itemCompraQuantidade;
         const quantidade = this.quantidadeAtual;
@@ -862,16 +895,25 @@ class SistemaEquipamentos {
             return;
         }
 
+        // ====== CORREÇÃO PARA ITENS QUANTIFICÁVEIS ======
+        // Para itens quantificáveis, busca item existente do MESMO TIPO
         const itemExistente = this.equipamentosAdquiridos.find(item => 
-            item.id === equipamento.id && 
-            item.status === 'na-mochila' && 
-            !item.equipado
+            item.id === equipamento.id && // MESMO ID
+            item.status === 'na-mochila' && // NA MOCHILA
+            !item.equipado && // NÃO EQUIPADO
+            item.quantificavel === true // É ITEM QUANTIFICÁVEL
         );
+        
+        console.log('🔍 Item existente para quantificação:', itemExistente ? 'ENCONTRADO' : 'NOVO');
 
         if (itemExistente) {
+            // SE JÁ EXISTE, AUMENTA A QUANTIDADE
+            console.log('➕ Aumentando quantidade do item existente');
             itemExistente.quantidade = (itemExistente.quantidade || 1) + quantidade;
             itemExistente.custoTotal = (itemExistente.custoTotal || itemExistente.custo) + custoTotal;
         } else {
+            // SE NÃO EXISTE, CRIA NOVO COM QUANTIDADE
+            console.log('🆕 Criando novo item com quantidade');
             const novoEquipamento = {
                 ...equipamento,
                 quantidade: quantidade,
@@ -898,6 +940,8 @@ class SistemaEquipamentos {
             valor: custoTotal,
             descricao: `Compra: ${quantidade}x ${equipamento.nome}`
         });
+        
+        console.log('✅ Compra com quantidade concluída!');
     }
 
     fecharSubmenuQuantidade() {
@@ -1123,7 +1167,8 @@ class SistemaEquipamentos {
         this.atualizarSistemaCombate();
     }
 
-    // ========== SISTEMA DE DEPÓSITO ==========
+    // CONTINUA NO PRÓXIMO COMENTÁRIO...
+        // ========== SISTEMA DE DEPÓSITO ==========
     moverParaDeposito(itemId) {
         const equipamento = this.equipamentosAdquiridos.find(item => item.idUnico === itemId);
         if (!equipamento) {
@@ -2033,64 +2078,220 @@ class SistemaEquipamentos {
 // ========== INICIALIZAÇÃO GLOBAL ==========
 let sistemaEquipamentos;
 
-document.addEventListener('DOMContentLoaded', function() {
-    const verificarAbaEquipamento = () => {
-        const abaEquipamento = document.getElementById('equipamento');
-        if (abaEquipamento) {
-            if (!sistemaEquipamentos) {
+// VERIFICAÇÃO SIMPLIFICADA PARA EVITAR DUPLICAÇÃO
+if (!window.sistemaEquipamentosInicializado) {
+    window.sistemaEquipamentosInicializado = false;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔧 Iniciando sistema de equipamentos...');
+        
+        const verificarAbaEquipamento = () => {
+            const abaEquipamento = document.getElementById('equipamento');
+            if (abaEquipamento && !window.sistemaEquipamentosInicializado) {
+                console.log('✅ Aba de equipamento detectada, inicializando...');
+                window.sistemaEquipamentosInicializado = true;
+                
                 sistemaEquipamentos = new SistemaEquipamentos();
                 window.sistemaEquipamentos = sistemaEquipamentos;
                 sistemaEquipamentos.inicializarQuandoPronto();
             }
-        }
-    };
-    
-    verificarAbaEquipamento();
-    
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const tab = mutation.target;
-                if (tab.id === 'equipamento' && tab.classList.contains('active')) {
-                    setTimeout(verificarAbaEquipamento, 100);
+        };
+        
+        verificarAbaEquipamento();
+        
+        // Observador simplificado
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    const tab = mutation.target;
+                    if (tab.id === 'equipamento' && tab.classList.contains('active')) {
+                        setTimeout(verificarAbaEquipamento, 100);
+                    }
                 }
-            }
+            });
+        });
+        
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            observer.observe(tab, { attributes: true });
         });
     });
-    
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        observer.observe(tab, { attributes: true });
-    });
-});
+}
 
 // ========== FUNÇÕES GLOBAIS ==========
-window.aumentarQuantidade = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.aumentarQuantidade(); };
-window.diminuirQuantidade = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.diminuirQuantidade(); };
-window.fecharSubmenuQuantidade = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.fecharSubmenuQuantidade(); };
-window.confirmarCompraQuantidade = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.confirmarCompraQuantidade(); };
-window.receberDinheiroRapido = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.receberDinheiroRapido(); };
-window.gastarDinheiroRapido = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.gastarDinheiroRapido(); };
-window.adicionarDinheiro = function(valor) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.adicionarDinheiro(valor); };
-window.removerDinheiro = function(valor) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.removerDinheiro(valor); };
-window.ajustarDinheiroManual = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.ajustarDinheiroManual(); };
-window.confirmarOperacao = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.confirmarOperacao(); };
-window.fecharModalSimples = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.fecharModalSimples(); };
-window.alternarSubTab = function(subtab) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.alternarSubTab(subtab); };
-window.comprarEquipamento = function(itemId, elemento) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.comprarEquipamento(itemId, elemento); };
-window.venderEquipamento = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.venderEquipamento(itemId); };
-window.equiparItem = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.equiparItem(itemId); };
-window.desequiparItem = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.desequiparItem(itemId); };
-window.colocarNoCorpo = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.colocarNoCorpo(itemId); };
-window.removerDoCorpo = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.removerDoCorpo(itemId); };
-window.moverParaDeposito = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.moverParaDeposito(itemId); };
-window.retirarDoDeposito = function(itemId) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.retirarDoDeposito(itemId); };
-window.moverTudoParaDeposito = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.moverTudoParaDeposito(); };
-window.retirarTudoDoDeposito = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.retirarTudoDoDeposito(); };
-window.limparDeposito = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.limparDeposito(); };
-window.consumirItem = function(itemId, quantidade) { if (window.sistemaEquipamentos) window.sistemaEquipamentos.consumirItem(itemId, quantidade); };
-window.atualizarCamposPorTipo = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.atualizarCamposPorTipo(); };
-window.atualizarCamposMagicos = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.atualizarCamposMagicos(); };
-window.criarItemPersonalizado = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.criarItemPersonalizado(); };
-window.limparFormCriacao = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.limparFormCriacao(); };
-window.atualizarPreviewItem = function() { if (window.sistemaEquipamentos) window.sistemaEquipamentos.atualizarPreviewItem(); };
+window.aumentarQuantidade = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.aumentarQuantidade) {
+        window.sistemaEquipamentos.aumentarQuantidade();
+    }
+};
+
+window.diminuirQuantidade = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.diminuirQuantidade) {
+        window.sistemaEquipamentos.diminuirQuantidade();
+    }
+};
+
+window.fecharSubmenuQuantidade = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.fecharSubmenuQuantidade) {
+        window.sistemaEquipamentos.fecharSubmenuQuantidade();
+    }
+};
+
+window.confirmarCompraQuantidade = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.confirmarCompraQuantidade) {
+        window.sistemaEquipamentos.confirmarCompraQuantidade();
+    }
+};
+
+window.receberDinheiroRapido = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.receberDinheiroRapido) {
+        window.sistemaEquipamentos.receberDinheiroRapido();
+    }
+};
+
+window.gastarDinheiroRapido = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.gastarDinheiroRapido) {
+        window.sistemaEquipamentos.gastarDinheiroRapido();
+    }
+};
+
+window.adicionarDinheiro = function(valor) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.adicionarDinheiro) {
+        window.sistemaEquipamentos.adicionarDinheiro(valor);
+    }
+};
+
+window.removerDinheiro = function(valor) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.removerDinheiro) {
+        window.sistemaEquipamentos.removerDinheiro(valor);
+    }
+};
+
+window.ajustarDinheiroManual = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.ajustarDinheiroManual) {
+        window.sistemaEquipamentos.ajustarDinheiroManual();
+    }
+};
+
+window.confirmarOperacao = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.confirmarOperacao) {
+        window.sistemaEquipamentos.confirmarOperacao();
+    }
+};
+
+window.fecharModalSimples = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.fecharModalSimples) {
+        window.sistemaEquipamentos.fecharModalSimples();
+    }
+};
+
+window.alternarSubTab = function(subtab) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.alternarSubTab) {
+        window.sistemaEquipamentos.alternarSubTab(subtab);
+    }
+};
+
+window.comprarEquipamento = function(itemId, elemento) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.comprarEquipamento) {
+        window.sistemaEquipamentos.comprarEquipamento(itemId, elemento);
+    }
+};
+
+window.venderEquipamento = function(itemId) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.venderEquipamento) {
+        window.sistemaEquipamentos.venderEquipamento(itemId);
+    }
+};
+
+window.equiparItem = function(itemId) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.equiparItem) {
+        window.sistemaEquipamentos.equiparItem(itemId);
+    }
+};
+
+window.desequiparItem = function(itemId) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.desequiparItem) {
+        window.sistemaEquipamentos.desequiparItem(itemId);
+    }
+};
+
+window.colocarNoCorpo = function(itemId) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.colocarNoCorpo) {
+        window.sistemaEquipamentos.colocarNoCorpo(itemId);
+    }
+};
+
+window.removerDoCorpo = function(itemId) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.removerDoCorpo) {
+        window.sistemaEquipamentos.removerDoCorpo(itemId);
+    }
+};
+
+window.moverParaDeposito = function(itemId) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.moverParaDeposito) {
+        window.sistemaEquipamentos.moverParaDeposito(itemId);
+    }
+};
+
+window.retirarDoDeposito = function(itemId) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.retirarDoDeposito) {
+        window.sistemaEquipamentos.retirarDoDeposito(itemId);
+    }
+};
+
+window.moverTudoParaDeposito = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.moverTudoParaDeposito) {
+        window.sistemaEquipamentos.moverTudoParaDeposito();
+    }
+};
+
+window.retirarTudoDoDeposito = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.retirarTudoDoDeposito) {
+        window.sistemaEquipamentos.retirarTudoDoDeposito();
+    }
+};
+
+window.limparDeposito = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparDeposito) {
+        window.sistemaEquipamentos.limparDeposito();
+    }
+};
+
+window.consumirItem = function(itemId, quantidade) { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.consumirItem) {
+        window.sistemaEquipamentos.consumirItem(itemId, quantidade);
+    }
+};
+
+window.atualizarCamposPorTipo = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposPorTipo) {
+        window.sistemaEquipamentos.atualizarCamposPorTipo();
+    }
+};
+
+window.atualizarCamposMagicos = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposMagicos) {
+        window.sistemaEquipamentos.atualizarCamposMagicos();
+    }
+};
+
+window.criarItemPersonalizado = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.criarItemPersonalizado) {
+        window.sistemaEquipamentos.criarItemPersonalizado();
+    }
+};
+
+window.limparFormCriacao = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparFormCriacao) {
+        window.sistemaEquipamentos.limparFormCriacao();
+    }
+};
+
+window.atualizarPreviewItem = function() { 
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarPreviewItem) {
+        window.sistemaEquipamentos.atualizarPreviewItem();
+    }
+};
+
 window.SistemaEquipamentos = SistemaEquipamentos;
+
+console.log('✅ equipamentos.js carregado com sucesso!');
