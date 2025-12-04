@@ -1,4 +1,4 @@
-// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO FUNCIONAL
+// SISTEMA DE VANTAGENS E DESVANTAGENS - VERSÃO 100% FUNCIONAL
 class GerenciadorVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -85,92 +85,124 @@ class GerenciadorVantagens {
         const titulo = document.getElementById('modal-titulo');
         const corpo = document.getElementById('modal-corpo');
         const btnConfirmar = document.querySelector('.btn-confirmar');
+        const btnCancelar = document.querySelector('.btn-cancelar');
+        const modalClose = document.querySelector('.modal-close');
 
-        if (!modal || !titulo || !corpo || !btnConfirmar) return;
+        if (!modal || !titulo || !corpo || !btnConfirmar || !btnCancelar || !modalClose) {
+            console.error('Elementos do modal não encontrados!');
+            return;
+        }
 
         titulo.textContent = item.nome;
         
+        // Limpa eventos anteriores
         btnConfirmar.onclick = null;
+        btnCancelar.onclick = null;
+        modalClose.onclick = null;
+
+        // Configura eventos do modal
+        const fecharModal = () => this.fecharModal();
+        btnCancelar.onclick = fecharModal;
+        modalClose.onclick = fecharModal;
+        
+        // Fechar modal ao clicar fora
+        modal.onclick = (e) => {
+            if (e.target === modal) fecharModal();
+        };
 
         switch(item.tipo) {
             case 'simples':
                 corpo.innerHTML = this.criarModalSimples(item);
-                btnConfirmar.onclick = () => this.adicionarItem(item, tipo);
+                btnConfirmar.onclick = () => {
+                    this.adicionarItem(item, tipo);
+                    fecharModal();
+                };
                 btnConfirmar.disabled = false;
                 break;
 
             case 'multipla':
                 corpo.innerHTML = this.criarModalMultipla(item);
-                btnConfirmar.onclick = () => this.confirmarMultipla(item, tipo);
+                btnConfirmar.onclick = () => {
+                    this.confirmarMultipla(item, tipo);
+                    fecharModal();
+                };
                 btnConfirmar.disabled = true;
-                this.configurarEventosMultipla();
+                
+                // Configura eventos para os radios
+                setTimeout(() => {
+                    this.configurarEventosMultipla();
+                }, 10);
                 break;
 
             case 'variavel':
                 corpo.innerHTML = this.criarModalVariavel(item);
-                btnConfirmar.onclick = () => this.confirmarVariavel(item, tipo);
+                btnConfirmar.onclick = () => {
+                    this.confirmarVariavel(item, tipo);
+                    fecharModal();
+                };
                 btnConfirmar.disabled = false;
-                this.configurarEventosVariavel(item);
+                
+                // Configura eventos para nível e ampliações
+                setTimeout(() => {
+                    this.configurarEventosVariavel(item);
+                }, 10);
                 break;
         }
 
         modal.style.display = 'block';
+        modal.style.zIndex = '9999';
     }
 
     configurarEventosMultipla() {
-        setTimeout(() => {
-            const radios = document.querySelectorAll('input[name="variacao"]');
-            const btnConfirmar = document.querySelector('.btn-confirmar');
-            
-            if (radios.length > 0 && btnConfirmar) {
-                radios.forEach(radio => {
-                    radio.addEventListener('change', () => {
-                        btnConfirmar.disabled = false;
-                    });
+        const radios = document.querySelectorAll('input[name="variacao"]');
+        const btnConfirmar = document.querySelector('.btn-confirmar');
+        
+        if (radios.length > 0 && btnConfirmar) {
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    btnConfirmar.disabled = false;
                 });
-            }
-        }, 10);
+            });
+        }
     }
 
     configurarEventosVariavel(item) {
-        setTimeout(() => {
-            const nivelBase = item.nivelBase || 1;
-            const custoPorNivel = Math.abs(item.custoPorNivel || 2);
-            const selectNivel = document.getElementById('nivel-vantagem');
-            const custoTotal = document.getElementById('custo-total');
-            const checkboxes = document.querySelectorAll('.ampliacao-checkbox');
+        const nivelBase = item.nivelBase || 1;
+        const custoPorNivel = Math.abs(item.custoPorNivel || 2);
+        const selectNivel = document.getElementById('nivel-vantagem');
+        const custoTotal = document.getElementById('custo-total');
+        const checkboxes = document.querySelectorAll('.ampliacao-checkbox');
 
-            if (!selectNivel || !custoTotal) return;
+        if (!selectNivel || !custoTotal) return;
 
-            const calcularCusto = () => {
-                const nivel = parseInt(selectNivel.value) || nivelBase;
-                let custoBase = nivel * custoPorNivel;
-                let multiplicadorTotal = 1.0;
-                let ampliacoesAtivas = [];
-                
-                checkboxes.forEach(checkbox => {
-                    if(checkbox.checked) {
-                        const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
-                        multiplicadorTotal *= multiplicador;
-                        ampliacoesAtivas.push(checkbox.dataset.nome);
-                    }
-                });
-                
-                const custoFinal = Math.round(custoBase * multiplicadorTotal);
-                
-                custoTotal.textContent = `${custoFinal} pts`;
-                selectNivel.dataset.custoFinal = custoFinal;
-                selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
-            };
-
-            calcularCusto();
-
-            selectNivel.addEventListener('change', calcularCusto);
+        const calcularCusto = () => {
+            const nivel = parseInt(selectNivel.value) || nivelBase;
+            let custoBase = nivel * custoPorNivel;
+            let multiplicadorTotal = 1.0;
+            let ampliacoesAtivas = [];
             
             checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', calcularCusto);
+                if(checkbox.checked) {
+                    const multiplicador = parseFloat(checkbox.dataset.multiplicador) || 1.0;
+                    multiplicadorTotal *= multiplicador;
+                    ampliacoesAtivas.push(checkbox.dataset.nome);
+                }
             });
-        }, 10);
+            
+            const custoFinal = Math.round(custoBase * multiplicadorTotal);
+            
+            custoTotal.textContent = `${custoFinal} pts`;
+            selectNivel.dataset.custoFinal = custoFinal;
+            selectNivel.dataset.ampliacoes = JSON.stringify(ampliacoesAtivas);
+        };
+
+        calcularCusto();
+
+        selectNivel.addEventListener('change', calcularCusto);
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', calcularCusto);
+        });
     }
 
     criarModalSimples(item) {
@@ -266,11 +298,19 @@ class GerenciadorVantagens {
 
     confirmarMultipla(item, tipo) {
         const radioSelecionado = document.querySelector('input[name="variacao"]:checked');
-        if (!radioSelecionado) return;
+        if (!radioSelecionado) {
+            alert('Selecione uma variação antes de confirmar!');
+            return;
+        }
 
         const variacaoId = radioSelecionado.value;
         const variacao = item.variacoes.find(v => v.id === variacaoId);
         
+        if (!variacao) {
+            alert('Variação não encontrada!');
+            return;
+        }
+
         const itemCompleto = {
             ...item,
             ...variacao,
@@ -349,8 +389,8 @@ class GerenciadorVantagens {
             this.renderizarListaAdquiridas('desvantagens-adquiridas', this.desvantagensAdquiridas, 'desvantagem');
         }
 
-        this.fecharModal();
         this.atualizarTotais();
+        alert(`${item.nome} adquirido com sucesso! Custo: ${custoCalculado} pontos`);
     }
 
     renderizarListaAdquiridas(containerId, itens, tipo) {
@@ -409,6 +449,7 @@ class GerenciadorVantagens {
             this.renderizarListaAdquiridas('desvantagens-adquiridas', this.desvantagensAdquiridas, 'desvantagem');
         }
         this.atualizarTotais();
+        alert('Item removido com sucesso!');
     }
 
     setupPeculiaridades() {
@@ -443,7 +484,10 @@ class GerenciadorVantagens {
     }
 
     adicionarPeculiaridade(texto) {
-        if (this.peculiaridades.length >= 5) return;
+        if (this.peculiaridades.length >= 5) {
+            alert('Limite de 5 peculiaridades atingido!');
+            return;
+        }
 
         this.peculiaridades.push({
             id: 'peculiaridade-' + Date.now(),
@@ -452,6 +496,7 @@ class GerenciadorVantagens {
 
         this.renderizarPeculiaridades();
         this.atualizarTotais();
+        alert('Peculiaridade adicionada! Custo: -1 ponto');
     }
 
     renderizarPeculiaridades() {
@@ -479,6 +524,7 @@ class GerenciadorVantagens {
         this.peculiaridades = this.peculiaridades.filter(pec => pec.id !== id);
         this.renderizarPeculiaridades();
         this.atualizarTotais();
+        alert('Peculiaridade removida!');
     }
 
     atualizarTotais() {
@@ -513,19 +559,7 @@ class GerenciadorVantagens {
     }
 
     setupEventListeners() {
-        const modalClose = document.querySelector('.modal-close');
-        const btnCancelar = document.querySelector('.btn-cancelar');
-        const modal = document.getElementById('modal-vantagem');
-        
-        if (modalClose) modalClose.addEventListener('click', () => this.fecharModal());
-        if (btnCancelar) btnCancelar.addEventListener('click', () => this.fecharModal());
-        
-        if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target.id === 'modal-vantagem') this.fecharModal();
-            });
-        }
-
+        // Event listeners para filtros
         const buscaVantagens = document.getElementById('busca-vantagens');
         const categoriaVantagens = document.getElementById('categoria-vantagens');
         const buscaDesvantagens = document.getElementById('busca-desvantagens');
@@ -576,7 +610,19 @@ class GerenciadorVantagens {
 
     fecharModal() {
         const modal = document.getElementById('modal-vantagem');
-        if (modal) modal.style.display = 'none';
+        if (modal) {
+            modal.style.display = 'none';
+            
+            // Limpa os event listeners para evitar acúmulo
+            const btnConfirmar = document.querySelector('.btn-confirmar');
+            const btnCancelar = document.querySelector('.btn-cancelar');
+            const modalClose = document.querySelector('.modal-close');
+            
+            if (btnConfirmar) btnConfirmar.onclick = null;
+            if (btnCancelar) btnCancelar.onclick = null;
+            if (modalClose) modalClose.onclick = null;
+            if (modal) modal.onclick = null;
+        }
     }
 }
 
