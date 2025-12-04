@@ -1315,10 +1315,10 @@ function toggleSubmenu(id) {
                     </div>
                     <div class="status-value" id="dinheiroEquipamento">$2.000</div>
                     <div class="status-actions">
-                        <button class="btn-status" onclick="sistemaEquipamentos.abrirModalFinanceiro('receber')">
+                        <button class="btn-status" onclick="window.receberDinheiroRapido && receberDinheiroRapido()">
                             <i class="fas fa-plus"></i> Receber
                         </button>
-                        <button class="btn-status" onclick="sistemaEquipamentos.abrirModalFinanceiro('gastar')">
+                        <button class="btn-status" onclick="window.gastarDinheiroRapido && gastarDinheiroRapido()">
                             <i class="fas fa-minus"></i> Gastar
                         </button>
                     </div>
@@ -1549,7 +1549,7 @@ function toggleSubmenu(id) {
                             <i class="fas fa-inbox fa-3x"></i>
                             <h4>Inventário Vazio</h4>
                             <p>Adquira equipamentos no catálogo para começar</p>
-                            <button class="btn-ir-catalogo" onclick="alternarSubTab('catalogo')">
+                            <button class="btn-ir-catalogo" onclick="window.alternarSubTab && alternarSubTab('catalogo')">
                                 <i class="fas fa-store"></i> Ir para Catálogo
                             </button>
                         </div>
@@ -1640,7 +1640,7 @@ function toggleSubmenu(id) {
                                 
                                 <div class="form-group">
                                     <label>Tipo de Item:</label>
-                                    <select id="item-tipo" onchange="atualizarCamposPorTipo()">
+                                    <select id="item-tipo">
                                         <option value="geral">Equipamento Geral</option>
                                         <option value="arma-cc">Arma Corpo-a-Corpo</option>
                                         <option value="arma-dist">Arma à Distância</option>
@@ -1677,7 +1677,7 @@ function toggleSubmenu(id) {
                                 </div>
                                 
                                 <div class="form-group checkbox-group">
-                                    <input type="checkbox" id="item-magico" onchange="atualizarCamposMagicos()">
+                                    <input type="checkbox" id="item-magico">
                                     <label>Item Mágico?</label>
                                 </div>
                                 
@@ -1696,10 +1696,10 @@ function toggleSubmenu(id) {
                             </div>
                             
                             <div class="form-actions">
-                                <button class="btn-cancelar" onclick="limparFormCriacao()">
+                                <button class="btn-cancelar" onclick="window.limparFormCriacao && limparFormCriacao()">
                                     <i class="fas fa-times"></i> Limpar
                                 </button>
-                                <button class="btn-confirmar" onclick="criarItemPersonalizado()">
+                                <button class="btn-confirmar" onclick="window.criarItemPersonalizado && criarItemPersonalizado()">
                                     <i class="fas fa-check"></i> Criar Item
                                 </button>
                             </div>
@@ -1740,13 +1740,13 @@ function toggleSubmenu(id) {
                         
                         <!-- BOTÕES GRANDES E CLAROS -->
                         <div class="botoes-rapidos">
-                            <button class="btn-receber-grande" onclick="sistemaEquipamentos.receberDinheiroRapido()">
+                            <button class="btn-receber-grande" onclick="window.receberDinheiroRapido && receberDinheiroRapido()">
                                 <i class="fas fa-plus-circle"></i> RECEBER
                             </button>
-                            <button class="btn-gastar-grande" onclick="sistemaEquipamentos.gastarDinheiroRapido()">
+                            <button class="btn-gastar-grande" onclick="window.gastarDinheiroRapido && gastarDinheiroRapido()">
                                 <i class="fas fa-minus-circle"></i> GASTAR
                             </button>
-                            <button class="btn-ajustar" onclick="sistemaEquipamentos.ajustarDinheiroManual()">
+                            <button class="btn-ajustar" onclick="window.ajustarDinheiroManual && ajustarDinheiroManual()">
                                 <i class="fas fa-edit"></i> AJUSTAR
                             </button>
                         </div>
@@ -1756,12 +1756,12 @@ function toggleSubmenu(id) {
                     <div class="valores-rapidos">
                         <h4>Valores Rápidos:</h4>
                         <div class="botoes-valores">
-                            <button onclick="sistemaEquipamentos.adicionarDinheiro(10)">+$10</button>
-                            <button onclick="sistemaEquipamentos.adicionarDinheiro(50)">+$50</button>
-                            <button onclick="sistemaEquipamentos.adicionarDinheiro(100)">+$100</button>
-                            <button onclick="sistemaEquipamentos.removerDinheiro(10)">-$10</button>
-                            <button onclick="sistemaEquipamentos.removerDinheiro(50)">-$50</button>
-                            <button onclick="sistemaEquipamentos.removerDinheiro(100)">-$100</button>
+                            <button onclick="window.adicionarDinheiro && adicionarDinheiro(10)">+$10</button>
+                            <button onclick="window.adicionarDinheiro && adicionarDinheiro(50)">+$50</button>
+                            <button onclick="window.adicionarDinheiro && adicionarDinheiro(100)">+$100</button>
+                            <button onclick="window.removerDinheiro && removerDinheiro(10)">-$10</button>
+                            <button onclick="window.removerDinheiro && removerDinheiro(50)">-$50</button>
+                            <button onclick="window.removerDinheiro && removerDinheiro(100)">-$100</button>
                         </div>
                     </div>
                     
@@ -1777,7 +1777,7 @@ function toggleSubmenu(id) {
             <div class="modal-simples">
                 <div class="modal-header">
                     <h3 id="modal-titulo">Receber Dinheiro</h3>
-                    <button onclick="sistemaEquipamentos.fecharModalSimples()">&times;</button>
+                    <button onclick="window.fecharModalSimples && fecharModalSimples()">&times;</button>
                 </div>
                 
                 <div class="modal-body">
@@ -1801,10 +1801,10 @@ function toggleSubmenu(id) {
                 </div>
                 
                 <div class="modal-footer">
-                    <button class="btn-cancelar" onclick="sistemaEquipamentos.fecharModalSimples()">
+                    <button class="btn-cancelar" onclick="window.fecharModalSimples && fecharModalSimples()">
                         Cancelar
                     </button>
-                    <button class="btn-confirmar" onclick="sistemaEquipamentos.confirmarOperacao()">
+                    <button class="btn-confirmar" onclick="window.confirmarOperacao && confirmarOperacao()">
                         Confirmar
                     </button>
                 </div>
@@ -1816,7 +1816,7 @@ function toggleSubmenu(id) {
             <div class="modal-simples">
                 <div class="modal-header">
                     <h3 id="quantidade-titulo">Quantidade para Comprar</h3>
-                    <button onclick="fecharSubmenuQuantidade()">&times;</button>
+                    <button onclick="window.fecharSubmenuQuantidade && fecharSubmenuQuantidade()">&times;</button>
                 </div>
                 
                 <div class="modal-body">
@@ -1829,15 +1829,14 @@ function toggleSubmenu(id) {
                     </div>
                     
                     <div class="controles-quantidade-modal">
-                        <button class="btn-quantidade-modal" onclick="diminuirQuantidade()">
+                        <button class="btn-quantidade-modal" onclick="window.diminuirQuantidade && diminuirQuantidade()">
                             <i class="fas fa-minus"></i>
                         </button>
                         
                         <input type="number" id="input-quantidade" 
-                               value="1" min="1" max="99" 
-                               oninput="window.sistemaEquipamentos?.atualizarTotaisQuantidade()">
+                               value="1" min="1" max="99">
                         
-                        <button class="btn-quantidade-modal" onclick="aumentarQuantidade()">
+                        <button class="btn-quantidade-modal" onclick="window.aumentarQuantidade && aumentarQuantidade()">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
@@ -1855,33 +1854,28 @@ function toggleSubmenu(id) {
                 </div>
                 
                 <div class="modal-footer">
-                    <button class="btn-cancelar" onclick="fecharSubmenuQuantidade()">
+                    <button class="btn-cancelar" onclick="window.fecharSubmenuQuantidade && fecharSubmenuQuantidade()">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
-                    <button class="btn-confirmar" onclick="confirmarCompraQuantidade()">
+                    <button class="btn-confirmar" onclick="window.confirmarCompraQuantidade && confirmarCompraQuantidade()">
                         <i class="fas fa-check"></i> Comprar
                     </button>
                 </div>
             </div>
         </div>
        
-        
     </div><!-- FIM DO equipamento-container -->
 </div><!-- FIM DA ABA EQUIPAMENTO -->
 <script>
-// Script inicial para navegação entre sub-abas - VERSÃO CORRIGIDA
-// Este script só lida com a navegação básica, o sistema será inicializado pelo equipamentos.js
-
-// Variável para controlar se já foi inicializado
-let sistemaInicializado = false;
+// Script de navegação básica para a aba equipamento
+// Este script só cuida da navegação entre sub-abas
+// Todo o sistema de funcionalidades é gerenciado pelo equipamentos.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 DOM Content Loaded - Configurando navegação básica da aba equipamento...');
-    
-    // 1. Configurar navegação entre sub-abas (APENAS UI)
+    // Configurar navegação entre sub-abas (APENAS UI)
     configurarNavegacaoSubAbas();
     
-    // 2. Configurar botão de mochila (apenas o event listener)
+    // Configurar botão de mochila (event listener básico)
     const btnLiberarMochila = document.getElementById('btn-liberar-mochila');
     if (btnLiberarMochila) {
         btnLiberarMochila.addEventListener('click', function() {
@@ -1891,14 +1885,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 3. Configurar botões de compra (delegação de eventos apenas)
-    configurarEventListenersCompraBasico();
+    // Configurar filtros do inventário (event listener básico)
+    configurarFiltrosInventarioBasico();
     
-    // 4. NÃO inicializar o sistema aqui - será feito pelo equipamentos.js
-    // 5. Esperar que o sistema seja carregado
-    esperarSistemaCarregar();
+    // Configurar botões de depósito (event listener básico)
+    configurarBotoesDepositoBasico();
     
-    console.log('✅ Navegação básica configurada - Aguardando sistema...');
+    // Configurar criação de itens (event listener básico)
+    configurarCriacaoItensBasico();
+    
+    // Configurar navegação do catálogo (event listener básico)
+    configurarNavegacaoCatalogoBasico();
 });
 
 // Função para configurar navegação entre sub-abas (APENAS UI)
@@ -1916,91 +1913,32 @@ function configurarNavegacaoSubAbas() {
             
             if (subtabContent) {
                 subtabContent.classList.add('active');
-                
-                // Se for a aba financeiro, atualizar interface
-                if (subtabId === 'financeiro' && window.sistemaEquipamentos) {
-                    setTimeout(() => {
-                        if (window.sistemaEquipamentos.atualizarInterfaceFinanceiro) {
-                            window.sistemaEquipamentos.atualizarInterfaceFinanceiro();
-                        }
-                    }, 100);
-                }
             }
         });
     });
 }
 
-// Configurar event listeners para botões de compra (APENAS delegação)
-function configurarEventListenersCompraBasico() {
-    console.log('🔧 Configurando event listeners básicos para botões de compra...');
-    
-    // Usar event delegation para capturar cliques nos botões de compra
-    document.addEventListener('click', function(e) {
-        const btnComprar = e.target.closest('.btn-comprar');
-        
-        if (btnComprar) {
+// Configurar filtros do inventário (APENAS UI)
+function configurarFiltrosInventarioBasico() {
+    document.querySelectorAll('.filtro-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation();
             
-            const itemId = btnComprar.getAttribute('data-item');
-            console.log('🎯 Botão de compra clicado - ID:', itemId);
+            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
             
-            if (itemId && window.sistemaEquipamentos && typeof window.sistemaEquipamentos.comprarEquipamento === 'function') {
-                window.sistemaEquipamentos.comprarEquipamento(itemId, btnComprar);
-            } else if (itemId) {
-                console.warn('⚠️ Sistema de equipamentos ainda não disponível, tentando novamente...');
-                // Tenta novamente após um delay
-                setTimeout(() => {
-                    if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.comprarEquipamento === 'function') {
-                        window.sistemaEquipamentos.comprarEquipamento(itemId, btnComprar);
-                    } else {
-                        console.error('❌ Sistema de equipamentos não disponível após timeout');
-                    }
-                }, 500);
+            this.classList.add('active');
+            const filtro = this.getAttribute('data-filtro');
+            
+            // Chamar função do sistema se disponível
+            if (window.sistemaEquipamentos && window.sistemaEquipamentos.filtrarListaEquipamentos) {
+                window.sistemaEquipamentos.filtrarListaEquipamentos(filtro);
             }
-        }
+        });
     });
-    
-    console.log('✅ Event listeners básicos configurados!');
 }
 
-// Esperar o sistema ser carregado
-function esperarSistemaCarregar() {
-    let tentativas = 0;
-    const maxTentativas = 50; // 5 segundos
-    
-    function verificarSistema() {
-        tentativas++;
-        
-        if (window.sistemaEquipamentos && typeof window.sistemaEquipamentos.inicializarSistema === 'function') {
-            console.log('✅ Sistema de equipamentos detectado!');
-            
-            if (!sistemaInicializado) {
-                sistemaInicializado = true;
-                
-                // Configurar botões de depósito
-                configurarBotoesDeposito();
-                
-                // Configurar botões de financeiro simples
-                configurarFinanceiroSimples();
-                
-                console.log('🚀 Sistema completamente inicializado!');
-            }
-            return;
-        }
-        
-        if (tentativas < maxTentativas) {
-            setTimeout(verificarSistema, 100);
-        } else {
-            console.error('❌ Sistema de equipamentos não carregado após timeout');
-        }
-    }
-    
-    verificarSistema();
-}
-
-// Configurar botões de depósito (apenas os event listeners)
-function configurarBotoesDeposito() {
+// Configurar botões de depósito (APENAS event listeners)
+function configurarBotoesDepositoBasico() {
     const btnGuardarTudo = document.getElementById('btn-guardar-tudo-deposito');
     const btnRetirarTudo = document.getElementById('btn-retirar-tudo-deposito');
     const btnLimpar = document.getElementById('btn-limpar-deposito');
@@ -2030,28 +1968,73 @@ function configurarBotoesDeposito() {
     }
 }
 
-// Configurar botões de financeiro simples
-function configurarFinanceiroSimples() {
-    // Botões de valores rápidos
-    const botoesValores = document.querySelector('.botoes-valores');
-    if (botoesValores) {
-        botoesValores.addEventListener('click', function(e) {
-            const botao = e.target.closest('button');
-            if (botao && window.sistemaEquipamentos) {
-                const texto = botao.textContent;
-                const valor = parseInt(texto.replace(/[^0-9]/g, ''));
-                
-                if (texto.startsWith('+') && window.sistemaEquipamentos.adicionarDinheiro) {
-                    window.sistemaEquipamentos.adicionarDinheiro(valor);
-                } else if (texto.startsWith('-') && window.sistemaEquipamentos.removerDinheiro) {
-                    window.sistemaEquipamentos.removerDinheiro(valor);
+// Configurar criação de itens (APENAS event listeners)
+function configurarCriacaoItensBasico() {
+    const itemTipoSelect = document.getElementById('item-tipo');
+    const itemMagicoCheckbox = document.getElementById('item-magico');
+    
+    if (itemTipoSelect) {
+        itemTipoSelect.addEventListener('change', function() {
+            if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposPorTipo) {
+                window.sistemaEquipamentos.atualizarCamposPorTipo();
+            }
+        });
+    }
+    
+    if (itemMagicoCheckbox) {
+        itemMagicoCheckbox.addEventListener('change', function() {
+            if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposMagicos) {
+                window.sistemaEquipamentos.atualizarCamposMagicos();
+            }
+        });
+    }
+    
+    // Adicionar listeners para atualizar preview em tempo real
+    const inputsPreview = ['item-nome', 'item-peso', 'item-custo', 'item-descricao'];
+    inputsPreview.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function() {
+                if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarPreviewItem) {
+                    window.sistemaEquipamentos.atualizarPreviewItem();
                 }
+            });
+        }
+    });
+}
+
+// Configurar navegação do catálogo (APENAS event listeners)
+function configurarNavegacaoCatalogoBasico() {
+    const filtroEra = document.getElementById('filtro-era');
+    const filtroTipo = document.getElementById('filtro-tipo');
+    const buscaCatalogo = document.getElementById('busca-catalogo');
+    
+    if (filtroEra) {
+        filtroEra.addEventListener('change', function() {
+            if (window.catalogoEquipamentos && window.catalogoEquipamentos.filtrarCatalogo) {
+                window.catalogoEquipamentos.filtrarCatalogo();
+            }
+        });
+    }
+    
+    if (filtroTipo) {
+        filtroTipo.addEventListener('change', function() {
+            if (window.catalogoEquipamentos && window.catalogoEquipamentos.filtrarCatalogo) {
+                window.catalogoEquipamentos.filtrarCatalogo();
+            }
+        });
+    }
+    
+    if (buscaCatalogo) {
+        buscaCatalogo.addEventListener('input', function() {
+            if (window.catalogoEquipamentos && window.catalogoEquipamentos.filtrarCatalogo) {
+                window.catalogoEquipamentos.filtrarCatalogo();
             }
         });
     }
 }
 
-// Funções wrapper para o sistema (mantidas para compatibilidade)
+// Função wrapper para alternar sub-aba (mantida para compatibilidade)
 function alternarSubTab(subtab) {
     document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
@@ -2069,31 +2052,28 @@ function alternarSubTab(subtab) {
     }
 }
 
-function atualizarCamposPorTipo() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposPorTipo) {
-        window.sistemaEquipamentos.atualizarCamposPorTipo();
+// Configurar botões de valores rápidos (financeiro)
+document.addEventListener('click', function(e) {
+    // Botões de valores rápidos
+    if (e.target.closest('.botoes-valores')) {
+        const botao = e.target.closest('button');
+        if (botao && window.sistemaEquipamentos) {
+            const texto = botao.textContent;
+            const valor = parseInt(texto.replace(/[^0-9]/g, ''));
+            
+            if (texto.startsWith('+') && window.sistemaEquipamentos.adicionarDinheiro) {
+                window.sistemaEquipamentos.adicionarDinheiro(valor);
+            } else if (texto.startsWith('-') && window.sistemaEquipamentos.removerDinheiro) {
+                window.sistemaEquipamentos.removerDinheiro(valor);
+            }
+        }
     }
-}
+});
 
-function atualizarCamposMagicos() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposMagicos) {
-        window.sistemaEquipamentos.atualizarCamposMagicos();
-    }
-}
+// Funções wrapper que serão chamadas pelo sistema principal
+// Estas funções apenas redirecionam para o sistemaEquipamentos
 
-function limparFormCriacao() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparFormCriacao) {
-        window.sistemaEquipamentos.limparFormCriacao();
-    }
-}
-
-function criarItemPersonalizado() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.criarItemPersonalizado) {
-        window.sistemaEquipamentos.criarItemPersonalizado();
-    }
-}
-
-// Funções do modal de quantidade (redirecionam para o sistema)
+// Funções do modal de quantidade
 function aumentarQuantidade() {
     if (window.sistemaEquipamentos && window.sistemaEquipamentos.aumentarQuantidade) {
         window.sistemaEquipamentos.aumentarQuantidade();
@@ -2118,7 +2098,7 @@ function confirmarCompraQuantidade() {
     }
 }
 
-// Funções do modal financeiro (redirecionam para o sistema)
+// Funções do modal financeiro
 function fecharModalSimples() {
     if (window.sistemaEquipamentos && window.sistemaEquipamentos.fecharModalSimples) {
         window.sistemaEquipamentos.fecharModalSimples();
@@ -2131,33 +2111,32 @@ function confirmarOperacao() {
     }
 }
 
-// Funções globais para acesso direto (mantidas para compatibilidade)
-window.guardarTudoDeposito = function() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.moverTudoParaDeposito) {
-        window.sistemaEquipamentos.moverTudoParaDeposito();
+// Funções de criação de itens
+function limparFormCriacao() {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparFormCriacao) {
+        window.sistemaEquipamentos.limparFormCriacao();
     }
-};
+}
 
-window.retirarTudoDeposito = function() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.retirarTudoDoDeposito) {
-        window.sistemaEquipamentos.retirarTudoDoDeposito();
+function criarItemPersonalizado() {
+    if (window.sistemaEquipamentos && window.sistemaEquipamentos.criarItemPersonalizado) {
+        window.sistemaEquipamentos.criarItemPersonalizado();
     }
-};
+}
 
-window.limparDeposito = function() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparDeposito) {
-        window.sistemaEquipamentos.limparDeposito();
-    }
-};
+// Registrar funções globalmente (para compatibilidade)
+window.alternarSubTab = alternarSubTab;
+window.aumentarQuantidade = aumentarQuantidade;
+window.diminuirQuantidade = diminuirQuantidade;
+window.fecharSubmenuQuantidade = fecharSubmenuQuantidade;
+window.confirmarCompraQuantidade = confirmarCompraQuantidade;
+window.fecharModalSimples = fecharModalSimples;
+window.confirmarOperacao = confirmarOperacao;
+window.limparFormCriacao = limparFormCriacao;
+window.criarItemPersonalizado = criarItemPersonalizado;
 
-// Ouvir evento de catálogo pronto
-document.addEventListener('catalogoPronto', function() {
-    console.log('📦 Catálogo pronto!');
-    // O sistema de equipamentos se inicializará sozinho
-});
-
-// Debug
-console.log('🔧 Script de navegação da aba equipamento carregado com sucesso!');
+// Funções globais de valores rápidos já estão registradas no equipamentos.js
+// Funções de sistema (mover para depósito, etc) já estão registradas no equipamentos.js
 </script>
 
         <!-- ABA RESUMO -->
