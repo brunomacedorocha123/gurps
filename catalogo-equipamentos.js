@@ -141,7 +141,7 @@ class CatalogoEquipamentos {
                     },
                     {
                         id: "M1003", nome: "Kit Básico para Primeiros Socorros", tipo: "geral", era: "medieval",
-                        categoria: "Saúde", custo: 10, peso: 1.0, cl: 4, maos: 0,
+                        categoria: "Saude", custo: 10, peso: 1.0, cl: 4, maos: 0,
                         quantificavel: true, descricao: "Kit Básico para Primeiros Socorros"
                     },
                     {
