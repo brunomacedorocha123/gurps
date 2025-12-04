@@ -1,8 +1,9 @@
-// equipamentos.js - SISTEMA COMPLETO COM DINHEIRO POR RIQUEZA - VERSÃO CORRIGIDA E ATUALIZADA
+// equipamentos.js - SISTEMA COMPLETO COM DINHEIRO POR RIQUEZA - VERSÃO COM INTEGRAÇÃO 100% DE ST → CARGA
 // ✅ Correção: escudo agora equipa corretamente com arma de 1 mão
 // ✅ Nova funcionalidade: botão "Excluir" (ícone de lixeira) em itens adquiridos
 // ✅ CORREÇÃO DE CARGA: agora mostra "Muito Pesada" como limite máximo (ex: ST10 → 100 kg)
-// ✅ INTEGRAÇÃO COM ATRIBUTOS: nível de carga atualiza em tempo real com ST
+// ✅ INTEGRAÇÃO 100%: Atualiza automaticamente a capacidade de carga quando ST muda na aba Atributos
+
 class SistemaEquipamentos {
     constructor() {
         this.equipamentosAdquiridos = [];
@@ -45,7 +46,6 @@ class SistemaEquipamentos {
         this.quantidadeAtual = 1;
         this.operacaoAtual = null;
         this.sistemaRiquezaDisponivel = false;
-        this.inicializarEventListeners();
     }
 
     // ========== INICIALIZAÇÃO PRINCIPAL ==========
@@ -60,6 +60,8 @@ class SistemaEquipamentos {
         this.inicializarSistema();
         this.configurarObservadorRiqueza();
         this.inicializarDinheiroPorRiqueza();
+        // ✅ INTEGRAÇÃO 100%: Inicia o monitoramento do ST da aba Atributos
+        this.iniciarMonitoramentoST();
         this.inicializacaoEmAndamento = false;
     }
 
@@ -98,16 +100,6 @@ class SistemaEquipamentos {
                 }
             };
             verificarCatalogo();
-        });
-    }
-
-    // ========== INTEGRAÇÃO COM ATRIBUTOS ==========
-    inicializarEventListeners() {
-        // ✅ OUVE EVENTO DE ATRIBUTOS ALTERADOS
-        document.addEventListener('atributosAlterados', (e) => {
-            if (e.detail && e.detail.ST !== undefined) {
-                this.atualizarST(e.detail.ST);
-            }
         });
     }
 
@@ -202,8 +194,6 @@ class SistemaEquipamentos {
         this.criarDisplayMaos();
         this.atualizarSistemaCombate();
         this.atualizarInterface();
-        this.iniciarMonitoramentoST();
-        
         const btnMochila = document.getElementById('btn-liberar-mochila');
         if (btnMochila) {
             btnMochila.addEventListener('click', () => this.alternarMochila());
@@ -257,11 +247,9 @@ class SistemaEquipamentos {
             19: { nenhuma: 36.0, leve: 72.0, media: 108.0, pesada: 216.0, muitoPesada: 360.0 },
             20: { nenhuma: 40.0, leve: 80.0, media: 120.0, pesada: 240.0, muitoPesada: 400.0 }
         };
-        
         let stKey = ST;
         if (ST > 20) stKey = 20;
         if (ST < 1) stKey = 1;
-        
         return cargasTable[stKey] || cargasTable[10];
     }
 
@@ -271,7 +259,6 @@ class SistemaEquipamentos {
         const { nenhuma, leve, media, pesada, muitoPesada } = this.capacidadeCarga;
         let novoNivel = 'nenhuma';
         let novasPenalidades = 'MOV +0 / DODGE +0';
-
         if (peso <= nenhuma) {
             novoNivel = 'nenhuma';
             novasPenalidades = 'MOV +0 / DODGE +0';
@@ -291,7 +278,6 @@ class SistemaEquipamentos {
             novoNivel = 'sobrecarregado';
             novasPenalidades = 'MOV -4 / DODGE -4 / Não pode correr';
         }
-
         if (this.nivelCargaAtual !== novoNivel || this.penalidadesCarga !== novasPenalidades) {
             this.nivelCargaAtual = novoNivel;
             this.penalidadesCarga = novasPenalidades;
@@ -319,7 +305,6 @@ class SistemaEquipamentos {
     atualizarPeso() {
         this.pesoAtual = this.calcularPesoAtual();
         this.atualizarNivelCarga();
-        this.atualizarInterface();
     }
 
     alternarMochila() {
@@ -1330,7 +1315,7 @@ class SistemaEquipamentos {
 
     // ✅ NOVA FUNÇÃO: Excluir item permanentemente
     excluirItem(itemId) {
-        if (!confirm('⚠️ Excluir permanentemente?\nEsta ação não pode ser desfeita.')) {
+        if (!confirm('⚠️ Excluir permanentemente?\n\nEsta ação não pode ser desfeita.')) {
             return;
         }
         const index = this.equipamentosAdquiridos.findIndex(item => item.idUnico === itemId);
@@ -1879,34 +1864,36 @@ class SistemaEquipamentos {
         }
     }
 
-    // ✅ NOVO: Monitoramento em tempo real do ST
+    // ========== MONITORAMENTO DO ST DA ABA ATRIBUTOS ==========
     iniciarMonitoramentoST() {
-        // Tenta pegar o ST do sistema de atributos
+        // Também ouve mudanças locais (em caso de ST na própria aba)
         const inputST = document.getElementById('ST');
         if (inputST) {
-            this.ST = parseInt(inputST.value) || 10;
-            this.atualizarCapacidadeCarga();
+            inputST.addEventListener('change', () => {
+                this.atualizarST(parseInt(inputST.value) || 10);
+            });
+            inputST.addEventListener('input', () => {
+                this.atualizarST(parseInt(inputST.value) || 10);
+            });
+            this.atualizarST(parseInt(inputST.value) || 10);
         }
+        // ✅ OUVINDO EVENTO GLOBAL DE ALTERAÇÃO DE ATRIBUTOS
+        document.addEventListener('atributosAlterados', (e) => {
+            if (e.detail && e.detail.ST !== undefined) {
+                this.atualizarST(e.detail.ST);
+            }
+        });
     }
 
-    // ✅ NOVO: Atualizar ST quando atributo mudar
     atualizarST(novoST) {
         if (this.ST !== novoST) {
-            console.log(`🔧 ST alterado: ${this.ST} → ${novoST}`);
             this.ST = novoST;
-            this.atualizarCapacidadeCarga();
-            this.mostrarFeedback(`ST alterado para ${novoST}. Capacidade de carga atualizada.`, 'sucesso');
+            this.capacidadeCarga = this.calcularCapacidadeCarga();
+            // ✅ Atualiza também o pesoMaximo quando ST muda
+            this.pesoMaximo = this.capacidadeCarga.muitoPesada;
+            this.atualizarNivelCarga();
+            this.atualizarInterface();
         }
-    }
-
-    // ✅ NOVO: Atualizar capacidade de carga baseado no ST
-    atualizarCapacidadeCarga() {
-        this.capacidadeCarga = this.calcularCapacidadeCarga();
-        this.pesoMaximo = this.capacidadeCarga.muitoPesada;
-        this.atualizarNivelCarga();
-        this.atualizarInterface();
-        
-        console.log(`📊 Capacidade atualizada: ST ${this.ST}, Muito Pesada: ${this.pesoMaximo}kg`);
     }
 }
 
@@ -2077,4 +2064,3 @@ window.atualizarPreviewItem = function() {
     }
 };
 window.SistemaEquipamentos = SistemaEquipamentos;
-console.log('✅ equipamentos.js carregado com sucesso!');
