@@ -1515,12 +1515,38 @@ button,
     margin-bottom: 30px !important;
 }
 
-/* Espaço final para garantir que o último item apareça */
+/* CORREÇÃO DO SCROLL - ADICIONE AO SEU CSS */
 .lista-container {
-    padding-bottom: 50px !important;
+    max-height: 500px !important; /* Altura fixa maior */
+    overflow-y: auto !important;
+    padding-bottom: 60px !important; /* Espaço extra no final */
+    scroll-padding-bottom: 30px !important; /* Para scroll mostrar tudo */
 }
 
-/* Remove qualquer limite de altura que possa cortar */
 .atributo-card {
-    max-height: none !important;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 650px; /* Altura mínima maior */
+}
+
+.espacador-scroll {
+    flex-shrink: 0;
+    height: 50px;
+    background: transparent;
+}
+
+/* Garantir que o último item seja visível */
+.grupo-pericias:last-child .grupo-conteudo {
+    padding-bottom: 20px;
+}
+
+/* Ajuste para mobile */
+@media (max-width: 768px) {
+    .lista-container {
+        max-height: 450px !important;
+    }
+    .atributo-card {
+        min-height: 550px;
+    }
 }
