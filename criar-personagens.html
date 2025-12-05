@@ -1013,108 +1013,136 @@
 </div>
   
 
-<!-- ABA PERÍCIAS - VERSÃO CORRIGIDA SIMPLES -->
-<div id="pericias" class="tab-content active">
-    <div class="atributos-container">
-        <!-- CARD DE RESUMO DE PONTOS -->
-        <div class="pontos-section">
-            <div class="ponto-card">
-                <h3>Perícias</h3>
-                <div class="ponto-valor" id="total-pericias">+0</div>
-            </div>
-            <div class="ponto-card gastos">
-                <h3>Pontos Gastos</h3>
-                <div class="ponto-valor" id="total-pericias-adquiridas">0 pts</div>
-            </div>
-            <div class="ponto-card saldo">
-                <h3>Saldo Disponível</h3>
-                <div class="ponto-valor" id="saldo-total-pericias">150</div>
-            </div>
+<!-- ABA PERÍCIAS -->
+<div id="pericias" class="tab-content">
+  <div class="container-principal">
+    
+    <!-- STATUS PERÍCIAS -->
+    <div class="status-cards-container">
+      <div class="card-pericias-status">
+        <h3><i class="fas fa-graduation-cap"></i> Status das Perícias</h3>
+        <div class="pericias-status-grid">
+          <div class="pericias-status-item">
+            <label><i class="fas fa-coins"></i> Pontos em Perícias:</label>
+            <span id="pontos-pericias">0</span> pts
+          </div>
+          <div class="pericias-status-item">
+            <label><i class="fas fa-crosshairs"></i> Pontos em Combate:</label>
+            <span id="pontos-combate">0</span> pts
+          </div>
+          <div class="pericias-status-item">
+            <label><i class="fas fa-list-check"></i> Total de Perícias:</label>
+            <span id="total-pericias">0</span>
+          </div>
+          <div class="pericias-status-item">
+            <label><i class="fas fa-fist-raised"></i> Perícias de Combate:</label>
+            <span id="total-combate">0</span>
+          </div>
+          <div class="pericias-status-item">
+            <label><i class="fas fa-brain"></i> Perícias DX (não combate):</label>
+            <span id="total-dx">0</span>
+          </div>
+          <div class="pericias-status-item total">
+            <label><i class="fas fa-coins"></i> Total Gasto:</label>
+            <span id="total-gasto-pericias">0</span> pts
+          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- SEÇÃO PERÍCIAS -->
-        <h2 class="secao-titulo">Perícias</h2>
+    <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
+    <div class="sistema-aquisicao-pericias">
+      
+      <!-- COLUNA ESQUERDA - CATÁLOGO -->
+      <div class="catalog-column-pericias">
+        <div class="catalog-section-pericias">
+          <h3><i class="fas fa-book-open"></i> Catálogo de Perícias</h3>
+          
+          <!-- BARRA DE BUSCA -->
+          <div class="busca-pericias">
+            <input type="text" placeholder="🔍 Buscar perícias..." class="search-input" id="busca-pericias">
+          </div>
+          
+          <!-- FILTROS POR ATRIBUTO E COMBATE -->
+          <div class="filtros-container-pericias">
+            <div class="filtro-buttons">
+              <button class="filtro-btn active" data-filtro="todas">
+                <i class="fas fa-layer-group"></i> Todas
+              </button>
+              <button class="filtro-btn" data-filtro="dx">
+                <i class="fas fa-running"></i> DX
+              </button>
+              <button class="filtro-btn" data-filtro="iq">
+                <i class="fas fa-brain"></i> IQ
+              </button>
+              <button class="filtro-btn" data-filtro="ht">
+                <i class="fas fa-heartbeat"></i> HT
+              </button>
+              <button class="filtro-btn" data-filtro="perc">
+                <i class="fas fa-eye"></i> PERC
+              </button>
+              <button class="filtro-btn" data-filtro="combate">
+                <i class="fas fa-fist-raised"></i> Combate
+              </button>
+            </div>
+          </div>
+          
+          <!-- LISTA DE PERÍCIAS DO CATÁLOGO -->
+          <div class="catalog-list-pericias" id="lista-pericias">
+            <!-- As perícias serão carregadas dinamicamente pelo JavaScript -->
+            <div class="nenhuma-pericia">
+              <i class="fas fa-spinner fa-spin"></i>
+              <div>Carregando catálogo de perícias...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- COLUNA DIREITA - PERÍCIAS APRENDIDAS -->
+      <div class="acquired-column-pericias">
         
-        <!-- SISTEMA DE BUSCA SIMPLES -->
-        <div class="busca-simples">
-            <input type="text" id="busca-pericias" placeholder="🔍 Buscar perícia por nome..." 
-                   class="busca-input" autocomplete="off">
-            <select id="filtro-atributo" class="filtro-select">
-                <option value="Todos">Todos os Atributos</option>
-                <option value="DX">Destreza (DX)</option>
-                <option value="IQ">Inteligência (IQ)</option>
-                <option value="HT">Vigor (HT)</option>
-                <option value="PERC">Percepção (PERC)</option>
-                <option value="Combate">Combate</option>
-            </select>
-        </div>
-
-        <div class="cards-grid principais-grid">
-            <!-- CARD PERÍCIAS DISPONÍVEIS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>🎯 Perícias Disponíveis</h3>
-                    <div class="contador" id="contador-pericias">0 perícias</div>
-                </div>
-                
-                <!-- LISTA SIMPLES - SEM CONTAINERS EXTRAS -->
-                <div class="lista-container" id="lista-pericias" style="max-height: 550px;">
-                    <!-- Conteúdo será preenchido por JavaScript -->
-                    <div class="lista-vazia">
-                        <div class="spinner"></div>
-                        <p>Carregando perícias...</p>
-                    </div>
-                </div>
+        <!-- PERÍCIAS APRENDIDAS -->
+        <div class="acquired-section-pericias">
+          <h3><i class="fas fa-graduation-cap"></i> Perícias Aprendidas 
+            <span class="points-badge" id="pontos-pericias-total">[0 pts]</span>
+          </h3>
+          <div class="acquired-list-pericias" id="pericias-aprendidas">
+            <div class="nenhuma-pericia-aprendida">
+              <i class="fas fa-graduation-cap"></i>
+              <div>Nenhuma perícia aprendida</div>
+              <small>As perícias que você aprender aparecerão aqui</small>
             </div>
+          </div>
+        </div>
 
-            <!-- CARD PERÍCIAS ADQUIRIDAS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>✅ Perícias Adquiridas</h3>
-                    <div class="custo-pontos" id="total-pericias-adquiridas-label">0 pts</div>
-                </div>
-                
-                <!-- LISTA SIMPLES - SEM CONTAINERS EXTRAS -->
-                <div class="lista-container" id="pericias-adquiridas" style="max-height: 550px;">
-                    <div class="lista-vazia">Nenhuma perícia adquirida</div>
-                </div>
+        <!-- DETALHES DA PERÍCIA SELECIONADA -->
+        <div class="detalhes-pericia-section">
+          <div class="detalhes-pericia-content" id="detalhes-pericia-content">
+            <div class="nenhuma-pericia-selecionada">
+              <i class="fas fa-search"></i>
+              <div>Selecione uma perícia para ver os detalhes</div>
             </div>
+          </div>
         </div>
-    </div>
-</div>
 
-<!-- MODAL PARA PERÍCIAS -->
-<div id="modal-pericia" class="modal">
-    <div class="modal-content modal-pericia">
-        <span class="modal-close">&times;</span>
-        <div class="modal-header">
-            <h3 id="modal-titulo-pericia">Selecionar Perícia</h3>
-        </div>
-        <div class="modal-body" id="modal-corpo-pericia">
-            <!-- Conteúdo será preenchido dinamicamente -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-cancelar">Cancelar</button>
-            <button class="btn btn-confirmar" disabled>Confirmar</button>
-        </div>
+      </div>
     </div>
-</div>
 
-<!-- MODAL PARA ESCOLHA DE ESPECIALIZAÇÃO -->
-<div id="modal-escolha-pericia" class="modal">
-    <div class="modal-content modal-escolha">
-        <span class="modal-close">&times;</span>
-        <div class="modal-header">
-            <h3 id="modal-titulo-escolha">Escolha uma Especialização</h3>
-        </div>
-        <div class="modal-body" id="modal-corpo-escolha">
-            <!-- Conteúdo será preenchido dinamicamente -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-cancelar">Voltar</button>
-            <button class="btn btn-confirmar" disabled>Selecionar</button>
-        </div>
+    <!-- MODAL DE COMPRA/EDIÇÃO DE PERÍCIA -->
+    <div class="modal-pericia-overlay" style="display: none;">
+      <div class="modal-pericia">
+        <!-- Conteúdo será preenchido pelo JavaScript -->
+      </div>
     </div>
+
+    <!-- MODAL DE ESCOLHA DE ESPECIALIZAÇÃO (Para Armas, etc) -->
+    <div class="modal-especializacao-overlay" style="display: none;">
+      <div class="modal-especializacao">
+        <!-- Conteúdo será preenchido pelo JavaScript -->
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- ABA TÉCNICAS -->
