@@ -823,134 +823,147 @@
     </div>
 </div>
 
-        <!-- ABA VANTAGENS -->
-        <div id="vantagens" class="tab-content">
-            <div class="atributos-container">
-                <!-- CARD DE RESUMO DE PONTOS -->
-                <div class="pontos-section">
-                    <div class="ponto-card">
-                        <h3>Vantagens</h3>
-                        <div class="ponto-valor" id="total-vantagens">+0</div>
-                    </div>
-                    <div class="ponto-card gastos">
-                        <h3>Desvantagens</h3>
-                        <div class="ponto-valor" id="total-desvantagens">-0</div>
-                    </div>
-                    <div class="ponto-card gastos">
-                        <h3>Peculiaridades</h3>
-                        <div class="ponto-valor" id="total-peculiaridades">-0</div>
-                    </div>
-                    <div class="ponto-card saldo">
-                        <h3>Saldo Total</h3>
-                        <div class="ponto-valor" id="saldo-total">0</div>
-                    </div>
+        <!-- ABA VANTAGENS - VERSÃO FUNCIONAL -->
+<div id="vantagens" class="tab-content">
+    <div class="atributos-container">
+        <!-- TOTUAIS SIMPLES -->
+        <div class="pontos-section">
+            <div class="ponto-card vantagens-card">
+                <h3>Vantagens</h3>
+                <div class="ponto-valor" id="total-vantagens-simple">+0</div>
+            </div>
+            <div class="ponto-card desvantagens-card">
+                <h3>Desvantagens</h3>
+                <div class="ponto-valor" id="total-desvantagens-simple">-0</div>
+            </div>
+            <div class="ponto-card peculiaridades-card">
+                <h3>Peculiaridades</h3>
+                <div class="ponto-valor" id="total-peculiaridades-simple">-0</div>
+            </div>
+            <div class="ponto-card saldo-card">
+                <h3>Saldo Total</h3>
+                <div class="ponto-valor" id="saldo-total-simple">0</div>
+            </div>
+        </div>
+
+        <!-- VANTAGENS -->
+        <h2 class="secao-titulo">Vantagens</h2>
+        <div class="cards-grid">
+            <!-- DISPONÍVEIS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>🎯 Disponíveis</h3>
+                    <div class="custo-pontos" id="contador-vantagens">0 itens</div>
                 </div>
-
-                <!-- SEÇÃO VANTAGENS -->
-                <h2 class="secao-titulo">Vantagens</h2>
-                <div class="cards-grid principais-grid">
-                    <!-- CARD VANTAGENS DISPONÍVEIS -->
-                    <div class="atributo-card">
-                        <div class="atributo-header">
-                            <h3>🎯 Vantagens Disponíveis</h3>
-                        </div>
-                        
-                        <!-- SISTEMA DE BUSCA -->
-                        <div class="busca-container">
-                            <input type="text" id="busca-vantagens" placeholder="Buscar vantagens..." class="atributo-input">
-                            <select id="categoria-vantagens" class="atributo-input">
-                                <option value="">Todas as Categorias</option>
-                                <option value="mental">Mental/Sobrenatural</option>
-                                <option value="fisica">Física</option>
-                                <option value="supers">Supers</option>
-                                <option value="social">Social</option>
-                            </select>
-                        </div>
-
-                        <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
-                        <div class="lista-container" id="lista-vantagens">
-                            <div class="lista-vazia">Carregando vantagens...</div>
-                        </div>
-                    </div>
-
-                    <!-- CARD VANTAGENS ADQUIRIDAS -->
-                    <div class="atributo-card">
-                        <div class="atributo-header">
-                            <h3>✅ Vantagens Adquiridas</h3>
-                            <div class="custo-pontos" id="total-vantagens-adquiridas">0 pts</div>
-                        </div>
-                        
-                        <div class="lista-container" id="vantagens-adquiridas">
-                            <div class="lista-vazia">Nenhuma vantagem adquirida</div>
-                        </div>
-                    </div>
+                
+                <!-- Busca -->
+                <div class="busca-container">
+                    <input type="text" id="busca-vant-simple" placeholder="Buscar..." 
+                           class="atributo-input" style="flex: 1;">
                 </div>
-
-                <!-- SEÇÃO DESVANTAGENS -->
-                <h2 class="secao-titulo">Desvantagens</h2>
-                <div class="cards-grid principais-grid">
-                    <!-- CARD DESVANTAGENS DISPONÍVEIS -->
-                    <div class="atributo-card">
-                        <div class="atributo-header">
-                            <h3>⚠️ Desvantagens Disponíveis</h3>
-                        </div>
-                        
-                        <!-- SISTEMA DE BUSCA -->
-                        <div class="busca-container">
-                            <input type="text" id="busca-desvantagens" placeholder="Buscar desvantagens..." class="atributo-input">
-                            <select id="categoria-desvantagens" class="atributo-input">
-                                <option value="">Todas as Categorias</option>
-                                <option value="mental">Mental/Sobrenatural</option>
-                                <option value="fisica">Física</option>
-                                <option value="supers">Supers</option>
-                                <option value="social">Social</option>
-                            </select>
-                        </div>
-
-                        <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
-                        <div class="lista-container" id="lista-desvantagens">
-                            <div class="lista-vazia">Carregando desvantagens...</div>
-                        </div>
-                    </div>
-
-                    <!-- CARD DESVANTAGENS ADQUIRIDAS -->
-                    <div class="atributo-card">
-                        <div class="atributo-header">
-                            <h3>❌ Desvantagens Adquiridas</h3>
-                            <div class="custo-pontos" id="total-desvantagens-adquiridas">0 pts</div>
-                        </div>
-                        
-                        <div class="lista-container" id="desvantagens-adquiridas">
-                            <div class="lista-vazia">Nenhuma desvantagem adquirida</div>
-                        </div>
-                    </div>
+                
+                <!-- Lista -->
+                <div class="lista-container" id="lista-vant-simple">
+                    <div class="lista-vazia">Carregando...</div>
                 </div>
-
-                <!-- SEÇÃO PECULIARIDADES -->
-                <h2 class="secao-titulo">Peculiaridades</h2>
-                <div class="cards-grid secundarios-grid">
-                    <div class="atributo-card">
-                        <div class="atributo-header">
-                            <h3>🏷️ Peculiaridades</h3>
-                            <div class="custo-pontos" id="contador-peculiaridades">0/5</div>
-                        </div>
-                        
-                        <!-- FORMULÁRIO PARA ADICIONAR -->
-                        <div class="peculiaridade-form">
-                            <input type="text" id="nova-peculiaridade" placeholder="Digite uma peculiaridade (max 30 caracteres)" 
-                                   maxlength="30" class="atributo-input">
-                            <div class="contador-chars"><span id="contador-chars">0</span>/30</div>
-                            <button id="btn-adicionar-peculiaridade" class="btn-controle" disabled>+</button>
-                        </div>
-
-                        <!-- LISTA DE PECULIARIDADES -->
-                        <div class="lista-container" id="lista-peculiaridades">
-                            <div class="lista-vazia">Nenhuma peculiaridade adicionada</div>
-                        </div>
-                    </div>
+            </div>
+            
+            <!-- ADQUIRIDAS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>✅ Adquiridas</h3>
+                    <div class="custo-pontos" id="total-vant-adquiridas">0 pts</div>
+                </div>
+                
+                <div class="lista-container" id="vantagens-adquiridas-simple">
+                    <div class="lista-vazia">Nenhuma adquirida</div>
                 </div>
             </div>
         </div>
+
+        <!-- DESVANTAGENS -->
+        <h2 class="secao-titulo">Desvantagens</h2>
+        <div class="cards-grid">
+            <!-- DISPONÍVEIS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>⚠️ Disponíveis</h3>
+                    <div class="custo-pontos" id="contador-desvantagens">0 itens</div>
+                </div>
+                
+                <!-- Busca -->
+                <div class="busca-container">
+                    <input type="text" id="busca-desvant-simple" placeholder="Buscar..." 
+                           class="atributo-input" style="flex: 1;">
+                </div>
+                
+                <!-- Lista -->
+                <div class="lista-container" id="lista-desvant-simple">
+                    <div class="lista-vazia">Carregando...</div>
+                </div>
+            </div>
+            
+            <!-- ADQUIRIDAS -->
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>❌ Adquiridas</h3>
+                    <div class="custo-pontos" id="total-desvant-adquiridas">0 pts</div>
+                </div>
+                
+                <div class="lista-container" id="desvantagens-adquiridas-simple">
+                    <div class="lista-vazia">Nenhuma adquirida</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PECULIARIDADES -->
+        <h2 class="secao-titulo">Peculiaridades</h2>
+        <div class="cards-grid">
+            <div class="atributo-card">
+                <div class="atributo-header">
+                    <h3>🏷️ Peculiaridades</h3>
+                    <div class="custo-pontos" id="contador-pec-simple">0/5</div>
+                </div>
+                
+                <!-- Formulário -->
+                <div class="busca-container" style="flex-direction: column; gap: 5px;">
+                    <textarea id="nova-pec-simple" placeholder="Digite uma peculiaridade (max 30 caracteres)" 
+                              maxlength="30" rows="2" style="width: 100%; resize: vertical;"></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="contador-chars">
+                            <span id="contador-pec-chars">0</span>/30
+                        </div>
+                        <button id="btn-adicionar-pec-simple" class="btn-controle" style="padding: 8px 16px;">
+                            + Adicionar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Lista -->
+                <div class="lista-container" id="lista-peculiaridades-simple">
+                    <div class="lista-vazia">Nenhuma adicionada</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SIMPLES -->
+<div id="modal-simple" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #1e1e28; border: 2px solid #ff8c00; border-radius: 12px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;">
+        <div style="padding: 20px; border-bottom: 1px solid rgba(255,140,0,0.3); display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="modal-titulo-simple" style="margin: 0; color: #ffd700;">Título</h3>
+            <button id="fechar-modal-simple" style="background: none; border: none; color: #ff8c00; font-size: 24px; cursor: pointer;">×</button>
+        </div>
+        <div style="padding: 20px;" id="modal-corpo-simple">
+            <!-- Conteúdo aqui -->
+        </div>
+        <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; justify-content: flex-end;">
+            <button id="cancelar-modal-simple" class="btn-cancelar" style="padding: 10px 20px;">Cancelar</button>
+            <button id="confirmar-modal-simple" class="btn-confirmar" style="padding: 10px 20px;">Confirmar</button>
+        </div>
+    </div>
+</div>
 
       <!-- ABA PERÍCIAS - VERSÃO REFORMULADA -->
 <div id="pericias" class="tab-content">
