@@ -1499,3 +1499,18 @@ button,
     z-index: 1;
 }
 
+/* ADICIONE ISSO NO FINAL DO SEU CSS ATUAL */
+.lista-container {
+    padding-bottom: 60px !important;
+    margin-bottom: 20px !important;
+    overflow-y: scroll !important;
+}
+
+.atributo-card {
+    min-height: 700px !important;
+    height: auto !important;
+}
+
+.item-lista:last-child {
+    margin-bottom: 30px !important;
+}
