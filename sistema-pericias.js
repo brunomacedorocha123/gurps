@@ -234,20 +234,39 @@ function adicionarPericiasArray(container, arrayPericias, termoBusca) {
     }
 }
 
-// ===== ADICIONAR PERÍCIAS DE COMBATE =====
-
 function adicionarPericiasCombate(container, objetoCombate, termoBusca) {
     let encontrouAlguma = false;
     
     for (const [grupoNome, dadosGrupo] of Object.entries(objetoCombate)) {
-        if (termoBusca && !grupoNome.toLowerCase().includes(termoBusca.toLowerCase())) {
-            let temPericiaNaBusca = false;
-            if (dadosGrupo.tipo === 'modal-escolha') {
-                temPericiaNaBusca = dadosGrupo.pericias.some(p => 
-                    p.nome.toLowerCase().includes(termoBusca.toLowerCase())
-                );
+        // VERIFICAÇÃO ÚNICA PARA TODOS OS TIPOS:
+        if (termoBusca) {
+            const termo = termoBusca.toLowerCase();
+            let corresponde = false;
+            
+            // 1. Primeiro verifica o NOME DO GRUPO
+            if (grupoNome.toLowerCase().includes(termo)) {
+                corresponde = true;
             }
-            if (!temPericiaNaBusca) continue;
+            // 2. Se não, verifica conforme o tipo
+            else if (dadosGrupo.tipo === 'pericia-simples') {
+                // Para pericia-simples (ARCO), verifica o nome da perícia
+                if (dadosGrupo.nome.toLowerCase().includes(termo)) {
+                    corresponde = true;
+                }
+            }
+            else if (dadosGrupo.tipo === 'modal-escolha') {
+                // Para modal-escolha, verifica as perícias dentro
+                if (dadosGrupo.pericias.some(p => 
+                    p.nome.toLowerCase().includes(termo)
+                )) {
+                    corresponde = true;
+                }
+            }
+            
+            // Se não corresponde à busca, pula este grupo
+            if (!corresponde) {
+                continue;
+            }
         }
         
         encontrouAlguma = true;
@@ -261,11 +280,15 @@ function adicionarPericiasCombate(container, objetoCombate, termoBusca) {
         }
     }
     
+    // ESPAÇO NO FINAL PARA GARANTIR VISIBILIDADE
+    const espacoFinal = document.createElement('div');
+    espacoFinal.style.cssText = 'height: 40px; width: 100%; display: block;';
+    container.appendChild(espacoFinal);
+    
     if (!encontrouAlguma && termoBusca) {
         container.innerHTML = '<div class="lista-vazia">Nenhuma perícia de combate encontrada</div>';
     }
 }
-
 // ===== CRIAR ITEM DE PERÍCIA SIMPLES =====
 
 function criarItemPericia(pericia) {

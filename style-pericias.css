@@ -1514,3 +1514,13 @@ button,
 .item-lista:last-child {
     margin-bottom: 30px !important;
 }
+
+/* Espaço final para garantir que o último item apareça */
+.lista-container {
+    padding-bottom: 50px !important;
+}
+
+/* Remove qualquer limite de altura que possa cortar */
+.atributo-card {
+    max-height: none !important;
+}
