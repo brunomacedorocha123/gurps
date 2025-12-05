@@ -411,10 +411,9 @@ function obterTodasPericiasSimples() {
                         });
                     });
                 } else if (catalogoPericias[categoria][grupo].tipo === "modal-escolha") {
-                    // CORREÇÃO: Criamos um ID único para o grupo de especialização
-                    // Usamos um prefixo 'grupo-' para diferenciar das perícias normais
+                    // CORREÇÃO CRÍTICA: O ID do grupo deve ser ÚNICO e IDENTIFICÁVEL
                     todas.push({
-                        id: `grupo-${grupo.toLowerCase().replace(/ /g, '-')}`,
+                        id: `grupo-especializacao-${grupo.toLowerCase().replace(/ /g, '-')}`, // ID ÚNICO!
                         nome: catalogoPericias[categoria][grupo].nome,
                         atributo: catalogoPericias[categoria][grupo].atributo,
                         dificuldade: "Média",
@@ -424,7 +423,8 @@ function obterTodasPericiasSimples() {
                         default: "Varia por especialização",
                         categoria: categoria,
                         tipo: "grupo-especializacao",
-                        grupo: grupo,
+                        grupo: grupo, // Mantém o nome original do grupo
+                        grupoOriginal: grupo, // Backup
                         origem: `${categoria} - ${grupo}`
                     });
                 }
@@ -443,31 +443,61 @@ function obterTodasPericiasSimples() {
     return todas;
 }
 
-// CORREÇÃO: Esta função agora funciona corretamente
 function obterEspecializacoes(grupo) {
-    // Verifica se o catálogo existe
-    if (!window.catalogoPericias || !window.catalogoPericias["Combate"]) {
+    console.log("Buscando especializações para grupo:", grupo);
+    
+    // Acesso DIRETO e SEGURO ao catálogo
+    const catalogo = window.catalogoPericias || {};
+    
+    if (!catalogo["Combate"]) {
+        console.error("Categoria Combate não existe no catálogo");
         return [];
     }
     
-    // Verifica se o grupo existe no catálogo
-    if (!window.catalogoPericias["Combate"][grupo]) {
+    if (!catalogo["Combate"][grupo]) {
+        console.error(`Grupo "${grupo}" não existe em Combate`);
         return [];
     }
     
-    const dadosGrupo = window.catalogoPericias["Combate"][grupo];
+    const dadosGrupo = catalogo["Combate"][grupo];
     
-    // Retorna as especializações se existirem
     if (dadosGrupo.pericias && Array.isArray(dadosGrupo.pericias)) {
+        console.log(`Encontradas ${dadosGrupo.pericias.length} especializações`);
         return dadosGrupo.pericias;
     }
     
     return [];
 }
 
+// CORREÇÃO: Busca perícia incluindo especializações
 function buscarPericiaPorId(id) {
     const todas = obterTodasPericiasSimples();
-    return todas.find(p => p.id === id);
+    
+    // Primeiro busca nas perícias simples
+    let pericia = todas.find(p => p.id === id);
+    
+    if (!pericia) {
+        // Se não encontrou, busca nas especializações dos grupos
+        for (const categoria in catalogoPericias) {
+            if (categoria === "Combate") {
+                for (const grupo in catalogoPericias[categoria]) {
+                    if (catalogoPericias[categoria][grupo].pericias) {
+                        const especializacao = catalogoPericias[categoria][grupo].pericias.find(p => p.id === id);
+                        if (especializacao) {
+                            return {
+                                ...especializacao,
+                                categoria: 'Combate',
+                                grupo: grupo,
+                                especializacaoDe: grupo
+                            };
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return pericia;
 }
 
 function buscarPericiaPorNome(nome) {
