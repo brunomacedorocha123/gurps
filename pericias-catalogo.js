@@ -444,10 +444,25 @@ function obterTodasPericiasSimples() {
     return todas;
 }
 
+// FUNÇÃO CORRIGIDA: Agora funciona!
 function obterEspecializacoes(grupo) {
-    if (catalogoPericias["Combate"] && catalogoPericias["Combate"][grupo]) {
-        return catalogoPericias["Combate"][grupo].pericias || [];
+    // Verifica se existe o catálogo de Combate
+    if (!catalogoPericias["Combate"]) {
+        return [];
     }
+    
+    // Verifica se o grupo existe
+    if (!catalogoPericias["Combate"][grupo]) {
+        return [];
+    }
+    
+    const dadosGrupo = catalogoPericias["Combate"][grupo];
+    
+    // Retorna as especializações se existirem
+    if (dadosGrupo.pericias && Array.isArray(dadosGrupo.pericias)) {
+        return dadosGrupo.pericias;
+    }
+    
     return [];
 }
 
