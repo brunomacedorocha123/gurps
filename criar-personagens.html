@@ -1011,10 +1011,10 @@
         </div>
     </div>
 </div>
-      <!-- ABA PERÍCIAS - VERSÃO REFORMULADA -->
+      <!-- ABA PERÍCIAS - VERSÃO CORRIGIDA (SCROLL FUNCIONANDO) -->
 <div id="pericias" class="tab-content">
     <div class="atributos-container">
-        <!-- CARD DE RESUMO DE PONTOS (MANTIDO) -->
+        <!-- CARD DE RESUMO DE PONTOS -->
         <div class="pontos-section">
             <div class="ponto-card">
                 <h3>Perícias</h3>
@@ -1048,66 +1048,21 @@
         </div>
 
         <div class="cards-grid principais-grid">
-            <!-- CARD PERÍCIAS DISPONÍVEIS -->
+            <!-- CARD PERÍCIAS DISPONÍVEIS (CORRIGIDO) -->
             <div class="atributo-card">
                 <div class="atributo-header">
                     <h3>🎯 Perícias Disponíveis</h3>
                     <div class="contador" id="contador-pericias">0 perícias</div>
                 </div>
                 
-                <!-- LISTA COM GRUPOS COLABSÁVEIS -->
+                <!-- LISTA COM SCROLL CORRIGIDO -->
                 <div class="lista-container" id="lista-pericias">
-                    <div class="grupo-pericias ativo" data-tipo="Combate">
-                        <div class="grupo-header">
-                            <h4>⚔️ Perícias de Combate</h4>
-                            <span class="grupo-icone">▼</span>
-                        </div>
-                        <div class="grupo-conteudo">
-                            <!-- Conteúdo será preenchido por JavaScript -->
-                            <div class="lista-vazia">Carregando perícias de combate...</div>
-                        </div>
-                    </div>
-                    
-                    <div class="grupo-pericias ativo" data-tipo="DX">
-                        <div class="grupo-header">
-                            <h4>🏃‍♂️ Destreza (DX)</h4>
-                            <span class="grupo-icone">▼</span>
-                        </div>
-                        <div class="grupo-conteudo">
-                            <div class="lista-vazia">Carregando perícias de DX...</div>
-                        </div>
-                    </div>
-                    
-                    <div class="grupo-pericias ativo" data-tipo="IQ">
-                        <div class="grupo-header">
-                            <h4>🧠 Inteligência (IQ)</h4>
-                            <span class="grupo-icone">▼</span>
-                        </div>
-                        <div class="grupo-conteudo">
-                            <div class="lista-vazia">Carregando perícias de IQ...</div>
-                        </div>
-                    </div>
-                    
-                    <div class="grupo-pericias ativo" data-tipo="HT">
-                        <div class="grupo-header">
-                            <h4>💪 Vigor (HT)</h4>
-                            <span class="grupo-icone">▼</span>
-                        </div>
-                        <div class="grupo-conteudo">
-                            <div class="lista-vazia">Carregando perícias de HT...</div>
-                        </div>
-                    </div>
-                    
-                    <div class="grupo-pericias ativo" data-tipo="PERC">
-                        <div class="grupo-header">
-                            <h4>👁️ Percepção (PERC)</h4>
-                            <span class="grupo-icone">▼</span>
-                        </div>
-                        <div class="grupo-conteudo">
-                            <div class="lista-vazia">Carregando perícias de PERC...</div>
-                        </div>
-                    </div>
+                    <!-- Conteúdo será preenchido por JavaScript -->
+                    <div class="lista-vazia">Carregando todas as perícias...</div>
                 </div>
+                
+                <!-- ESPAÇADOR INVISÍVEL PARA GARANTIR SCROLL COMPLETO -->
+                <div class="espacador-scroll" style="height: 50px;"></div>
             </div>
 
             <!-- CARD PERÍCIAS ADQUIRIDAS -->
@@ -1120,12 +1075,15 @@
                 <div class="lista-container" id="pericias-adquiridas">
                     <div class="lista-vazia">Nenhuma perícia adquirida</div>
                 </div>
+                
+                <!-- ESPAÇADOR INVISÍVEL -->
+                <div class="espacador-scroll" style="height: 50px;"></div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODAL PARA PERÍCIAS (SIMPLIFICADO) -->
+<!-- MODAL PARA PERÍCIAS -->
 <div id="modal-pericia" class="modal">
     <div class="modal-content modal-pericia">
         <span class="modal-close">&times;</span>
@@ -1142,7 +1100,7 @@
     </div>
 </div>
 
-<!-- MODAL PARA TÉCNICAS (SE NECESSÁRIO FUTURAMENTE) -->
+<!-- MODAL PARA TÉCNICAS -->
 <div id="modal-tecnicas" class="modal">
     <div class="modal-content modal-tecnicas">
         <span class="modal-close">&times;</span>
@@ -1154,13 +1112,13 @@
         </div>
     </div>
 </div>
-        <!-- ABA TÉCNICAS -->
-        <div id="tecnicas" class="tab-content">
-            <div class="loading">
-                <div class="spinner"></div>
-            </div>
-        </div>
 
+<!-- ABA TÉCNICAS -->
+<div id="tecnicas" class="tab-content">
+    <div class="loading">
+        <div class="spinner"></div>
+    </div>
+</div>
       <!-- ABA MAGIA -->
 <div id="magia" class="tab-content">
   <div class="container-principal">
