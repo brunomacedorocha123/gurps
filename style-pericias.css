@@ -1413,3 +1413,47 @@ button,
 .grupo-pericias[data-categoria="Combate"]:last-child {
     border: 2px solid #00ff00 !important; /* Destaca o último grupo */
 }
+
+/* ===== CORREÇÃO ESPECÍFICA PARA O ÚLTIMO GRUPO DE PERÍCIAS ===== */
+/* Estas regras vão fazer o último item aparecer completamente */
+
+/* 1. Aumentar a altura máxima do container de lista */
+.lista-container {
+    max-height: 450px !important; /* Aumenta 50px */
+}
+
+/* 2. Adicionar espaço extra no final do container */
+.lista-container::after {
+    content: '';
+    display: block;
+    height: 30px; /* Espaço extra no final */
+}
+
+/* 3. Garantir que o último grupo tenha espaço para expandir */
+.grupo-pericias:last-child .grupo-conteudo {
+    padding-bottom: 15px; /* Espaço extra no conteúdo */
+}
+
+/* 4. Se ainda tiver problema, ajustar o scroll para mostrar o final */
+.lista-container {
+    scroll-padding-bottom: 20px; /* Garante espaço no scroll */
+}
+
+/* 5. DEBUG: Para ver qual é o último grupo (pode remover depois) */
+.grupo-pericias:last-child {
+    position: relative;
+}
+
+.grupo-pericias:last-child::after {
+    content: 'ÚLTIMO GRUPO - DEVERIA SER VISÍVEL';
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    right: 0;
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff0000;
+    font-size: 10px;
+    text-align: center;
+    padding: 2px;
+    border: 1px dashed red;
+}
