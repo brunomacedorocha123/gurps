@@ -287,8 +287,8 @@ window.catalogoPericias = {
             ]
         },
 
-        // === ARMAS DE DISTÂNCIA (PERÍCIAS DIRETAS - NÃO ABRE MODAL) ===
-        "Arco": {
+       
+      "Arco": {
             tipo: "pericia-simples",
             id: "arco",
             nome: "Arco",
@@ -298,9 +298,8 @@ window.catalogoPericias = {
             descricao: "Uso de arcos longos, arcos curtos e todos os arcos similares. Cobre também arcos compostos. Penalidade de -2 por falta de familiaridade com arcos compostos para quem nunca os viu.",
             prereq: "DX-5",
             default: "DX-5"
-        }
+        },  // ← ADICIONA ESTA VÍRGULA AQUI!
 
-        // ADICIONAR MAIS PERÍCIAS DE DISTÂNCIA AQUI...
     },
 
     // ===== PERÍCIAS DE DESTREZA (DX) =====
@@ -346,8 +345,8 @@ window.catalogoPericias = {
     // ===== PERÍCIAS DE VIGOR (HT) =====
     "HT": [
         {
-            id: "correr",
-            nome: "Correr",
+            id: "corrida",
+            nome: "Corrida",
             atributo: "HT",
             dificuldade: "Fácil",
             custoBase: 1,
