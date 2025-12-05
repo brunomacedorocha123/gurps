@@ -1383,3 +1383,24 @@ button,
         transform: translateX(100%);
     }
 }
+
+
+/* CORREÇÃO PARA ÚLTIMO GRUPO DE PERÍCIAS */
+#lista-pericias {
+    max-height: none !important;
+    overflow-y: visible !important;
+}
+
+.atributo-card {
+    max-height: none !important;
+}
+
+.grupo-pericias:last-child .grupo-conteudo {
+    padding-bottom: 20px; /* Espaço extra no último */
+}
+
+/* Garantir que todos os itens sejam visíveis */
+.lista-container {
+    max-height: none;
+    overflow-y: visible;
+}
