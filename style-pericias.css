@@ -1515,38 +1515,189 @@ button,
     margin-bottom: 30px !important;
 }
 
-/* CORREÇÃO DO SCROLL - ADICIONE AO SEU CSS */
-.lista-container {
-    max-height: 500px !important; /* Altura fixa maior */
-    overflow-y: auto !important;
-    padding-bottom: 60px !important; /* Espaço extra no final */
-    scroll-padding-bottom: 30px !important; /* Para scroll mostrar tudo */
+/* ===== CORREÇÃO COMPLETA DO SCROLL ===== */
+
+/* 1. REMOVER QUALQUER OVERFLOW: HIDDEN QUE ESTEJA BLOQUEANDO */
+.atributos-container,
+.cards-grid,
+.principais-grid {
+    overflow: visible !important;
+    position: relative;
 }
 
+/* 2. CARD PRINCIPAL */
 .atributo-card {
+    background: rgba(30, 30, 40, 0.95);
+    border: 1px solid rgba(255, 140, 0, 0.25);
+    border-radius: 12px;
+    padding: 0;
+    backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 650px; /* Altura mínima maior */
+    min-height: 600px;
+    position: relative;
+    overflow: visible !important; /* CRÍTICO: permite scroll interno */
 }
 
-.espacador-scroll {
+/* 3. HEADER DO CARD (fixo no topo) */
+.atributo-header {
+    background: linear-gradient(135deg, rgba(40, 40, 50, 0.95), rgba(50, 50, 65, 0.95));
+    color: #ffd700;
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 140, 0, 0.3);
+    flex-shrink: 0; /* Não encolhe */
+    z-index: 10;
+    position: relative;
+}
+
+/* 4. CONTAINER DE SCROLL DEDICADO */
+.lista-scroll-container {
+    flex: 1; /* Ocupa todo espaço restante */
+    min-height: 400px;
+    max-height: 500px; /* Altura máxima controlada */
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    position: relative;
+    
+    /* Scroll suave e configurado */
+    scroll-behavior: smooth;
+    scroll-padding-bottom: 30px;
+    -webkit-overflow-scrolling: touch;
+    
+    /* Remove barra de scroll padrão se quiser */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 140, 0, 0.5) rgba(255, 255, 255, 0.05);
+}
+
+/* 5. CONTAINER DA LISTA (onde ficam os itens) */
+.lista-container {
+    padding: 15px;
+    padding-bottom: 60px !important; /* ESPAÇO EXTRA CRÍTICO */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: min-content;
+}
+
+/* 6. ESPAÇADOR INVISÍVEL NO FINAL */
+.lista-container::after {
+    content: '';
+    display: block;
+    height: 40px; /* Altura do espaçador */
+    width: 100%;
     flex-shrink: 0;
-    height: 50px;
     background: transparent;
 }
 
-/* Garantir que o último item seja visível */
-.grupo-pericias:last-child .grupo-conteudo {
-    padding-bottom: 20px;
+/* 7. GRUPOS DE PERÍCIAS */
+.grupo-pericias {
+    margin-bottom: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 140, 0, 0.2);
 }
 
-/* Ajuste para mobile */
+.grupo-header {
+    background: linear-gradient(135deg, rgba(50, 50, 65, 0.95), rgba(60, 60, 75, 0.95));
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.grupo-conteudo {
+    padding: 12px;
+    background: rgba(25, 25, 35, 0.8);
+    display: none;
+}
+
+.grupo-pericias.ativo .grupo-conteudo {
+    display: block;
+}
+
+/* 8. ITENS DA LISTA */
+.item-lista {
+    background: rgba(40, 40, 50, 0.9);
+    border: 1px solid rgba(255, 140, 0, 0.3);
+    border-radius: 8px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.item-lista:last-child {
+    margin-bottom: 20px !important; /* Extra para o último */
+}
+
+.item-lista:hover {
+    border-color: #ff8c00;
+    background: rgba(255, 140, 0, 0.1);
+    transform: translateX(3px);
+}
+
+/* 9. SCROLLBAR PERSONALIZADA */
+.lista-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lista-scroll-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.lista-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.5);
+    border-radius: 4px;
+}
+
+.lista-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.7);
+}
+
+/* 10. RESPONSIVIDADE */
 @media (max-width: 768px) {
-    .lista-container {
-        max-height: 450px !important;
+    .lista-scroll-container {
+        max-height: 450px;
     }
+    
     .atributo-card {
         min-height: 550px;
     }
+}
+
+@media (min-height: 800px) {
+    .lista-scroll-container {
+        max-height: 600px;
+    }
+}
+
+/* 11. LOADING SPINNER */
+.lista-vazia .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 140, 0, 0.3);
+    border-top: 3px solid #ff8c00;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.lista-vazia {
+    text-align: center;
+    color: #95a5a6;
+    padding: 30px 15px;
+    font-style: italic;
 }

@@ -1011,8 +1011,8 @@
         </div>
     </div>
 </div>
-      <!-- ABA PERÍCIAS - VERSÃO CORRIGIDA (SCROLL FUNCIONANDO) -->
-<div id="pericias" class="tab-content">
+     <!-- ABA PERÍCIAS - VERSÃO COMPLETA COM SCROLL FUNCIONAL -->
+<div id="pericias" class="tab-content active">
     <div class="atributos-container">
         <!-- CARD DE RESUMO DE PONTOS -->
         <div class="pontos-section">
@@ -1048,36 +1048,38 @@
         </div>
 
         <div class="cards-grid principais-grid">
-            <!-- CARD PERÍCIAS DISPONÍVEIS (CORRIGIDO) -->
+            <!-- CARD PERÍCIAS DISPONÍVEIS (COM SCROLL CORRIGIDO) -->
             <div class="atributo-card">
                 <div class="atributo-header">
                     <h3>🎯 Perícias Disponíveis</h3>
                     <div class="contador" id="contador-pericias">0 perícias</div>
                 </div>
                 
-                <!-- LISTA COM SCROLL CORRIGIDO -->
-                <div class="lista-container" id="lista-pericias">
-                    <!-- Conteúdo será preenchido por JavaScript -->
-                    <div class="lista-vazia">Carregando todas as perícias...</div>
+                <!-- CONTAINER COM SCROLL DEDICADO -->
+                <div class="lista-scroll-container">
+                    <div class="lista-container" id="lista-pericias">
+                        <!-- Conteúdo será preenchido por JavaScript -->
+                        <div class="lista-vazia">
+                            <div class="spinner"></div>
+                            <p>Carregando perícias...</p>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- ESPAÇADOR INVISÍVEL PARA GARANTIR SCROLL COMPLETO -->
-                <div class="espacador-scroll" style="height: 50px;"></div>
             </div>
 
-            <!-- CARD PERÍCIAS ADQUIRIDAS -->
+            <!-- CARD PERÍCIAS ADQUIRIDAS (COM SCROLL CORRIGIDO) -->
             <div class="atributo-card">
                 <div class="atributo-header">
                     <h3>✅ Perícias Adquiridas</h3>
-                    <div class="custo-pontos" id="total-pericias-adquiridas">0 pts</div>
+                    <div class="custo-pontos" id="total-pericias-adquiridas-label">0 pts</div>
                 </div>
                 
-                <div class="lista-container" id="pericias-adquiridas">
-                    <div class="lista-vazia">Nenhuma perícia adquirida</div>
+                <!-- CONTAINER COM SCROLL DEDICADO -->
+                <div class="lista-scroll-container">
+                    <div class="lista-container" id="pericias-adquiridas">
+                        <div class="lista-vazia">Nenhuma perícia adquirida</div>
+                    </div>
                 </div>
-                
-                <!-- ESPAÇADOR INVISÍVEL -->
-                <div class="espacador-scroll" style="height: 50px;"></div>
             </div>
         </div>
     </div>
@@ -1090,12 +1092,29 @@
         <div class="modal-header">
             <h3 id="modal-titulo-pericia">Selecionar Perícia</h3>
         </div>
-        <div id="modal-corpo-pericia">
+        <div class="modal-body" id="modal-corpo-pericia">
             <!-- Conteúdo será preenchido dinamicamente -->
         </div>
         <div class="modal-actions">
             <button class="btn btn-cancelar">Cancelar</button>
             <button class="btn btn-confirmar" disabled>Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA ESCOLHA DE ESPECIALIZAÇÃO -->
+<div id="modal-escolha-pericia" class="modal">
+    <div class="modal-content modal-escolha">
+        <span class="modal-close">&times;</span>
+        <div class="modal-header">
+            <h3 id="modal-titulo-escolha">Escolha uma Especialização</h3>
+        </div>
+        <div class="modal-body" id="modal-corpo-escolha">
+            <!-- Conteúdo será preenchido dinamicamente -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-cancelar">Voltar</button>
+            <button class="btn btn-confirmar" disabled>Selecionar</button>
         </div>
     </div>
 </div>
@@ -1107,8 +1126,11 @@
         <div class="modal-header">
             <h3>Técnicas Relacionadas</h3>
         </div>
-        <div id="modal-corpo-tecnicas">
+        <div class="modal-body" id="modal-corpo-tecnicas">
             <!-- Para futuro: lista de técnicas que usam esta perícia -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-cancelar">Fechar</button>
         </div>
     </div>
 </div>

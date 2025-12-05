@@ -1,49 +1,40 @@
-// ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA 100% FUNCIONAL =====
-// Sistema completo para gerenciar perícias com modal de escolha
-// Integração automática com sistema de atributos
+// ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA CORRIGIDA =====
+// Mantém todas as funcionalidades, só corrige o problema do scroll
 
 let estadoPericias = {
-    adquiridas: [],      // Perícias adquiridas pelo jogador
-    pontosGastos: 0,     // Total de pontos gastos
-    pontosDisponiveis: 150  // Pontos disponíveis para gastar
+    adquiridas: [],
+    pontosGastos: 0,
+    pontosDisponiveis: 150
 };
 
 // ===== FUNÇÕES PARA OBTER ATRIBUTOS ATUAIS =====
-
 function obterAtributosAtuais() {
-    // Busca valores dos atributos no sistema principal
     let ST = 10, DX = 10, IQ = 10, HT = 10, PERC = 10;
     
-    // Buscar ST
     const inputST = document.getElementById('ST');
     if (inputST && inputST.value) ST = parseInt(inputST.value) || 10;
     
-    // Buscar DX
     const inputDX = document.getElementById('DX');
     if (inputDX && inputDX.value) DX = parseInt(inputDX.value) || 10;
     
-    // Buscar IQ
     const inputIQ = document.getElementById('IQ');
     if (inputIQ && inputIQ.value) IQ = parseInt(inputIQ.value) || 10;
     
-    // Buscar HT
     const inputHT = document.getElementById('HT');
     if (inputHT && inputHT.value) HT = parseInt(inputHT.value) || 10;
     
-    // Buscar Percepção (PERC)
     const percElement = document.getElementById('PercepcaoTotal');
     if (percElement) {
         const percText = percElement.textContent || percElement.innerText || '10';
         PERC = parseInt(percText.replace(/[^0-9]/g, '')) || IQ;
     } else {
-        PERC = IQ; // Se não encontrar, usa IQ
+        PERC = IQ;
     }
     
     return { ST, DX, IQ, HT, PERC };
 }
 
 function obterPontosGastosAtributos() {
-    // Buscar pontos gastos em atributos
     const elemento = document.getElementById('pontosGastos') || 
                      document.getElementById('total-atributos-adquiridos');
     
@@ -58,7 +49,6 @@ function obterPontosGastosAtributos() {
 }
 
 // ===== FUNÇÕES DE TABELA DE CUSTOS =====
-
 function obterTabelaCusto(dificuldade) {
     const tabela = {
         'Fácil': [
@@ -109,21 +99,11 @@ function getInfoRedutores(dificuldade) {
 }
 
 // ===== INICIALIZAÇÃO DO SISTEMA =====
-
 function inicializarSistemaPericias() {
-    // Configurar busca e filtros
     configurarBuscaEFiltros();
-    
-    // Carregar perícias na lista
     carregarPericiasNaLista();
-    
-    // Atualizar interface
     atualizarInterfacePericias();
-    
-    // Configurar eventos dos modais
     configurarEventosModais();
-    
-    // Configurar escuta de atributos
     configurarEscutaAtributos();
 }
 
@@ -145,7 +125,6 @@ function configurarBuscaEFiltros() {
 }
 
 function configurarEscutaAtributos() {
-    // Escutar mudanças nos atributos principais
     ['ST', 'DX', 'IQ', 'HT'].forEach(atributo => {
         const input = document.getElementById(atributo);
         if (input) {
@@ -159,7 +138,6 @@ function configurarEscutaAtributos() {
 }
 
 // ===== FILTRAGEM DE PERÍCIAS =====
-
 function filtrarPericias(termoBusca, filtroAtributo) {
     const listaContainer = document.getElementById('lista-pericias');
     if (!listaContainer) return;
@@ -168,10 +146,12 @@ function filtrarPericias(termoBusca, filtroAtributo) {
     criarGruposPericias(termoBusca, filtroAtributo);
     adicionarEventosGrupos();
     atualizarContadorPericias();
+    
+    // ⭐⭐ CORREÇÃO DO SCROLL: Ajustar após carregar
+    setTimeout(ajustarScrollContainers, 100);
 }
 
 // ===== CRIAÇÃO DOS GRUPOS DE PERÍCIAS =====
-
 function criarGruposPericias(termoBusca = '', filtroAtributo = 'Todos') {
     const listaContainer = document.getElementById('lista-pericias');
     
@@ -212,10 +192,15 @@ function criarGruposPericias(termoBusca = '', filtroAtributo = 'Todos') {
             adicionarPericiasCombate(grupoConteudo, conteudoCategoria, termoBusca);
         }
     }
+    
+    // ⭐⭐ CORREÇÃO: Adicionar espaçador no final
+    const espacadorFinal = document.createElement('div');
+    espacadorFinal.className = 'espacador-final';
+    espacadorFinal.style.cssText = 'height: 40px; width: 100%; flex-shrink: 0;';
+    listaContainer.appendChild(espacadorFinal);
 }
 
 // ===== ADICIONAR PERÍCIAS DE ARRAY =====
-
 function adicionarPericiasArray(container, arrayPericias, termoBusca) {
     let encontrouAlguma = false;
     
@@ -234,28 +219,28 @@ function adicionarPericiasArray(container, arrayPericias, termoBusca) {
     }
 }
 
+// ===== ADICIONAR PERÍCIAS DE COMBATE =====
 function adicionarPericiasCombate(container, objetoCombate, termoBusca) {
     let encontrouAlguma = false;
     
     for (const [grupoNome, dadosGrupo] of Object.entries(objetoCombate)) {
-        // VERIFICAÇÃO ÚNICA PARA TODOS OS TIPOS:
+        // VERIFICAÇÃO COMPLETA DE BUSCA
         if (termoBusca) {
             const termo = termoBusca.toLowerCase();
             let corresponde = false;
             
-            // 1. Primeiro verifica o NOME DO GRUPO
+            // 1. Verifica nome do grupo
             if (grupoNome.toLowerCase().includes(termo)) {
                 corresponde = true;
             }
-            // 2. Se não, verifica conforme o tipo
+            // 2. Verifica se é pericia-simples e nome corresponde
             else if (dadosGrupo.tipo === 'pericia-simples') {
-                // Para pericia-simples (ARCO), verifica o nome da perícia
                 if (dadosGrupo.nome.toLowerCase().includes(termo)) {
                     corresponde = true;
                 }
             }
+            // 3. Verifica se é modal-escolha e alguma perícia corresponde
             else if (dadosGrupo.tipo === 'modal-escolha') {
-                // Para modal-escolha, verifica as perícias dentro
                 if (dadosGrupo.pericias.some(p => 
                     p.nome.toLowerCase().includes(termo)
                 )) {
@@ -263,7 +248,6 @@ function adicionarPericiasCombate(container, objetoCombate, termoBusca) {
                 }
             }
             
-            // Se não corresponde à busca, pula este grupo
             if (!corresponde) {
                 continue;
             }
@@ -280,17 +264,12 @@ function adicionarPericiasCombate(container, objetoCombate, termoBusca) {
         }
     }
     
-    // ESPAÇO NO FINAL PARA GARANTIR VISIBILIDADE
-    const espacoFinal = document.createElement('div');
-    espacoFinal.style.cssText = 'height: 40px; width: 100%; display: block;';
-    container.appendChild(espacoFinal);
-    
     if (!encontrouAlguma && termoBusca) {
         container.innerHTML = '<div class="lista-vazia">Nenhuma perícia de combate encontrada</div>';
     }
 }
-// ===== CRIAR ITEM DE PERÍCIA SIMPLES =====
 
+// ===== CRIAR ITEM DE PERÍCIA SIMPLES =====
 function criarItemPericia(pericia) {
     const item = document.createElement('div');
     item.className = 'item-lista';
@@ -321,7 +300,6 @@ function criarItemPericia(pericia) {
 }
 
 // ===== CRIAR ITEM DE GRUPO MODAL =====
-
 function criarItemGrupoModal(grupo) {
     const item = document.createElement('div');
     item.className = 'item-lista item-grupo-modal';
@@ -348,7 +326,6 @@ function criarItemGrupoModal(grupo) {
 }
 
 // ===== MODAL DE ESCOLHA DE PERÍCIA =====
-
 function abrirModalEscolhaPericia(grupo) {
     const modal = document.getElementById('modal-pericia');
     const titulo = document.getElementById('modal-titulo-pericia');
@@ -448,7 +425,6 @@ function abrirModalEscolhaPericia(grupo) {
 }
 
 // ===== MODAL DE NÍVEL DE PERÍCIA =====
-
 function abrirModalNivelPericia(pericia) {
     const modal = document.getElementById('modal-pericia');
     const titulo = document.getElementById('modal-titulo-pericia');
@@ -568,7 +544,6 @@ function abrirModalNivelPericia(pericia) {
                                          custoExtra < 0 ? '#e74c3c' : '#ccc';
         }
         
-        // AQUI ESTÁ A CORREÇÃO: SEMPRE HABILITAR O BOTÃO CONFIRMAR
         btnConfirmar.disabled = false;
     }
     
@@ -600,7 +575,6 @@ function abrirModalNivelPericia(pericia) {
         const nivel = parseInt(nivelHidden.value);
         const custoTotal = calcularCustoPericia(nivel, pericia.dificuldade);
         
-        // ADICIONAR OU ATUALIZAR A PERÍCIA
         adicionarOuAtualizarPericia(pericia, nivel, custoTotal);
         modal.style.display = 'none';
     };
@@ -625,7 +599,6 @@ function abrirModalNivelPericia(pericia) {
 }
 
 // ===== GERENCIAMENTO DE PERÍCIAS ADQUIRIDAS =====
-
 function adicionarOuAtualizarPericia(pericia, nivel, custo) {
     const indexExistente = estadoPericias.adquiridas.findIndex(p => p.id === pericia.id);
     
@@ -655,6 +628,9 @@ function adicionarOuAtualizarPericia(pericia, nivel, custo) {
     }
     
     atualizarInterfacePericias();
+    
+    // ⭐⭐ CORREÇÃO: Ajustar scroll após adicionar/atualizar
+    setTimeout(ajustarScrollContainers, 100);
 }
 
 function removerPericia(id) {
@@ -664,12 +640,15 @@ function removerPericia(id) {
         estadoPericias.adquiridas.splice(index, 1);
         estadoPericias.pontosGastos -= custo;
         atualizarInterfacePericias();
+        
+        // ⭐⭐ CORREÇÃO: Ajustar scroll após remover
+        setTimeout(ajustarScrollContainers, 100);
     }
 }
 
 function carregarPericiasAdquiridas() {
     const lista = document.getElementById('pericias-adquiridas');
-    const totalElement = document.getElementById('total-pericias-adquiridas');
+    const totalElement = document.getElementById('total-pericias-adquiridas-label');
     
     if (!lista) return;
     
@@ -715,11 +694,16 @@ function carregarPericiasAdquiridas() {
         lista.appendChild(item);
     });
     
+    // ⭐⭐ CORREÇÃO: Adicionar espaçador no final da lista de adquiridas
+    const espacadorFinal = document.createElement('div');
+    espacadorFinal.className = 'espacador-final';
+    espacadorFinal.style.cssText = 'height: 40px; width: 100%; flex-shrink: 0;';
+    lista.appendChild(espacadorFinal);
+    
     if (totalElement) totalElement.textContent = `${estadoPericias.pontosGastos} pts`;
 }
 
 // ===== FUNÇÕES AUXILIARES =====
-
 function encontrarPericiaNoCatalogo(id) {
     for (const [categoria, conteudo] of Object.entries(window.catalogoPericias)) {
         if (Array.isArray(conteudo)) {
@@ -745,6 +729,9 @@ function adicionarEventosGrupos() {
         grupo.addEventListener('click', () => {
             const grupoDiv = grupo.parentElement;
             grupoDiv.classList.toggle('ativo');
+            
+            // ⭐⭐ CORREÇÃO: Ajustar scroll após expandir/recolher
+            setTimeout(ajustarScrollContainers, 200);
         });
     });
 }
@@ -775,9 +762,12 @@ function atualizarPontuacaoPericias() {
     const totalPericias = document.getElementById('total-pericias');
     const saldoTotal = document.getElementById('saldo-total-pericias');
     const totalAdquiridas = document.getElementById('total-pericias-adquiridas');
+    const totalAdquiridasLabel = document.getElementById('total-pericias-adquiridas-label');
     
     if (totalPericias) totalPericias.textContent = `+${estadoPericias.pontosGastos}`;
+    if (totalAdquiridasLabel) totalAdquiridasLabel.textContent = `${estadoPericias.pontosGastos} pts`;
     if (totalAdquiridas) totalAdquiridas.textContent = `${estadoPericias.pontosGastos} pts`;
+    
     if (saldoTotal) {
         const pontosAtributos = obterPontosGastosAtributos();
         const saldo = estadoPericias.pontosDisponiveis - pontosAtributos - estadoPericias.pontosGastos;
@@ -797,16 +787,59 @@ function atualizarInterfacePericias() {
 }
 
 function configurarEventosModais() {
-    // Configuração já feita nas funções dos modais
+    // Configurações já feitas nas funções dos modais
+}
+
+// ===== FUNÇÃO DE CORREÇÃO DO SCROLL (NOVA) =====
+function ajustarScrollContainers() {
+    // Ajusta ambos os containers (disponíveis e adquiridas)
+    const containers = [
+        { id: 'lista-pericias', selector: '#lista-pericias' },
+        { id: 'pericias-adquiridas', selector: '#pericias-adquiridas' }
+    ];
+    
+    containers.forEach(container => {
+        const element = document.querySelector(container.selector);
+        if (!element) return;
+        
+        // 1. Forçar cálculo da altura total
+        const alturaTotal = element.scrollHeight;
+        const alturaVisivel = element.parentElement?.clientHeight || element.clientHeight;
+        
+        // 2. Se o conteúdo for maior que o visível, ajustar padding
+        if (alturaTotal > alturaVisivel) {
+            // Garantir padding extra no final
+            element.style.paddingBottom = '60px';
+            
+            // Adicionar espaçador se não existir
+            if (!element.querySelector('.espacador-final')) {
+                const espacador = document.createElement('div');
+                espacador.className = 'espacador-final';
+                espacador.style.cssText = 'height: 50px; width: 100%; flex-shrink: 0;';
+                element.appendChild(espacador);
+            }
+        }
+        
+        // 3. Garantir que o scroll possa chegar até o final
+        setTimeout(() => {
+            if (element.parentElement && element.parentElement.scrollHeight > element.parentElement.clientHeight) {
+                element.parentElement.scrollTop = element.parentElement.scrollHeight;
+                // Voltar um pouco para garantir que funciona
+                element.parentElement.scrollTop = element.parentElement.scrollHeight - element.parentElement.clientHeight - 50;
+            }
+        }, 50);
+    });
 }
 
 // ===== INICIALIZAÇÃO AUTOMÁTICA =====
-
 document.addEventListener('DOMContentLoaded', function() {
     const periciasTab = document.getElementById('pericias');
     if (periciasTab && periciasTab.classList.contains('active')) {
         setTimeout(() => {
             inicializarSistemaPericias();
+            
+            // ⭐⭐ CORREÇÃO: Ajustar scroll após inicialização
+            setTimeout(ajustarScrollContainers, 500);
         }, 100);
     }
     
@@ -817,6 +850,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (tab.id === 'pericias' && tab.classList.contains('active')) {
                     setTimeout(() => {
                         inicializarSistemaPericias();
+                        
+                        // ⭐⭐ CORREÇÃO: Ajustar scroll quando abrir a aba
+                        setTimeout(ajustarScrollContainers, 500);
                     }, 100);
                 }
             }
@@ -834,3 +870,34 @@ window.removerPericia = removerPericia;
 window.carregarPericiasNaLista = carregarPericiasNaLista;
 window.obterAtributosAtuais = obterAtributosAtuais;
 window.obterPontosGastosAtributos = obterPontosGastosAtributos;
+window.ajustarScrollContainers = ajustarScrollContainers; // ⭐⭐ NOVA função exportada
+
+// ⭐⭐ CSS DINÂMICO PARA CORREÇÃO DO SCROLL
+if (typeof document !== 'undefined') {
+    const style = document.createElement('style');
+    style.textContent = `
+        /* CORREÇÃO DO SCROLL - ADICIONADO DINAMICAMENTE */
+        .espacador-final {
+            height: 50px !important;
+            min-height: 50px !important;
+            width: 100% !important;
+            flex-shrink: 0 !important;
+            background: transparent !important;
+            display: block !important;
+        }
+        
+        .lista-container {
+            padding-bottom: 60px !important;
+        }
+        
+        .item-lista:last-child {
+            margin-bottom: 20px !important;
+        }
+        
+        /* Garantir que containers de scroll funcionem */
+        .atributo-card > div:last-child {
+            overflow: visible !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
