@@ -1,4 +1,4 @@
-// desvantagens.js - SISTEMA INDEPENDENTE E CORRIGIDO
+// desvantagens.js - CORRIGIDO BUG DO "SELECIONAR OPÇÃO"
 console.log("🚀 desvantagens.js carregando...");
 
 class SistemaDesvantagens {
@@ -49,25 +49,16 @@ class SistemaDesvantagens {
         // Modais
         this.configurarModais();
         
-        // Configurar eventos de clique nos itens da lista (CRÍTICO!)
+        // Configurar eventos de clique nos itens da lista
         setTimeout(() => {
             this.configurarEventosLista();
         }, 100);
     }
     
     configurarEventosLista() {
-        // Este é o problema principal! Os itens da lista não têm eventos
         const listaContainer = document.getElementById('lista-desvantagens');
         if (listaContainer) {
             console.log("🎯 Configurando eventos para os itens da lista...");
-            
-            // Remover event listeners antigos
-            const itensAntigos = listaContainer.querySelectorAll('.item-lista[data-initialized="true"]');
-            itensAntigos.forEach(item => {
-                item.removeEventListener('click', this.itemClickHandler);
-            });
-            
-            // Adicionar eventos aos itens existentes
             this.configurarEventosItensLista();
         }
     }
@@ -77,14 +68,12 @@ class SistemaDesvantagens {
         console.log(`🎯 Encontrados ${itens.length} itens para configurar eventos`);
         
         itens.forEach(item => {
-            // Remover eventos antigos
-            const novoItem = item.cloneNode(true);
-            item.parentNode.replaceChild(novoItem, item);
+            // Se já tem evento configurado, pular
+            if (item.dataset.initialized === "true") return;
             
-            // Adicionar novo evento
-            novoItem.addEventListener('click', (e) => {
+            item.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const id = novoItem.dataset.id;
+                const id = item.dataset.id;
                 const desvantagem = this.desvantagensDisponiveis.find(d => d.id === id);
                 if (desvantagem) {
                     console.log(`🔍 Clicou em: ${desvantagem.nome}`);
@@ -92,8 +81,8 @@ class SistemaDesvantagens {
                 }
             });
             
-            novoItem.style.cursor = 'pointer';
-            novoItem.dataset.initialized = "true";
+            item.style.cursor = 'pointer';
+            item.dataset.initialized = "true";
         });
     }
     
@@ -233,7 +222,6 @@ class SistemaDesvantagens {
         `;
         
         item.style.cursor = 'pointer';
-        item.dataset.initialized = "true";
         
         return item;
     }
@@ -275,6 +263,7 @@ class SistemaDesvantagens {
             const opcaoItem = document.createElement('div');
             opcaoItem.className = 'opcao-item';
             opcaoItem.dataset.index = index;
+            opcaoItem.dataset.opcaoId = opcao.id;
             
             const custoClass = opcao.custo < 0 ? 'negativo' : '';
             
@@ -299,6 +288,9 @@ class SistemaDesvantagens {
                 this.opcaoSelecionada = opcao;
                 btnConfirmar.disabled = false;
                 console.log(`✅ Opção selecionada: ${opcao.nome} (${opcao.custo} pts)`);
+                
+                // Atualizar visualmente que está selecionado
+                this.atualizarVisualSelecaoOpcao(opcaoItem);
             });
             
             corpo.appendChild(opcaoItem);
@@ -309,6 +301,22 @@ class SistemaDesvantagens {
         btnConfirmar.disabled = true;
         
         this.abrirModal('opcoes');
+    }
+    
+    atualizarVisualSelecaoOpcao(opcaoItemSelecionada) {
+        // Adicionar classe de seleção a todos os itens
+        document.querySelectorAll('.opcao-item').forEach(item => {
+            item.classList.remove('selecionada');
+        });
+        
+        // Adicionar classe ao item selecionado
+        opcaoItemSelecionada.classList.add('selecionada');
+        
+        // Garantir que o botão de confirmar está habilitado
+        const btnConfirmar = document.querySelector('#modal-opcoes .btn-confirmar');
+        if (btnConfirmar) {
+            btnConfirmar.disabled = false;
+        }
     }
     
     abrirModalDesvantagem(desvantagem) {
@@ -366,12 +374,45 @@ class SistemaDesvantagens {
     
     selecionarOpcao() {
         console.log('✅ Confirmando seleção de opção no modal...');
+        console.log('📊 Estado atual:');
+        console.log('- opcaoSelecionada:', this.opcaoSelecionada);
+        console.log('- desvantagemSelecionada:', this.desvantagemSelecionada);
         
-        if (!this.opcaoSelecionada || !this.desvantagemSelecionada) {
-            console.error('❌ Faltam dados para selecionar opção!');
-            console.log('opcaoSelecionada:', this.opcaoSelecionada);
-            console.log('desvantagemSelecionada:', this.desvantagemSelecionada);
-            alert('Por favor, selecione uma opção primeiro.');
+        // VERIFICAÇÃO MELHORADA
+        if (!this.opcaoSelecionada) {
+            console.error('❌ Nenhuma opção selecionada! Verificando visualmente...');
+            
+            // Verificar se há alguma opção visualmente selecionada
+            const opcaoSelecionadaVisual = document.querySelector('.opcao-item.selecionada');
+            if (opcaoSelecionadaVisual) {
+                // Recuperar dados da opção selecionada visualmente
+                const index = opcaoSelecionadaVisual.dataset.index;
+                const opcaoId = opcaoSelecionadaVisual.dataset.opcaoId;
+                
+                if (this.desvantagemSelecionada && this.desvantagemSelecionada.opcoes) {
+                    // Encontrar a opção correspondente
+                    const opcaoEncontrada = this.desvantagemSelecionada.opcoes.find(op => 
+                        op.id === opcaoId || this.desvantagemSelecionada.opcoes.indexOf(op) == index
+                    );
+                    
+                    if (opcaoEncontrada) {
+                        console.log(`🔍 Opção recuperada visualmente: ${opcaoEncontrada.nome}`);
+                        this.opcaoSelecionada = opcaoEncontrada;
+                    }
+                }
+            }
+            
+            // Se ainda não tem opção selecionada, mostrar alerta
+            if (!this.opcaoSelecionada) {
+                console.error('❌ Nenhuma opção selecionada após verificação visual!');
+                alert('Por favor, selecione uma opção primeiro.');
+                return;
+            }
+        }
+        
+        // Verificar se tem desvantagem selecionada
+        if (!this.desvantagemSelecionada) {
+            console.error('❌ Nenhuma desvantagem selecionada!');
             return;
         }
         
@@ -427,6 +468,8 @@ class SistemaDesvantagens {
         let nomeExibicao = this.desvantagemSelecionada.nome;
         
         console.log(`📝 Processando: ${nomeExibicao}`);
+        console.log(`📊 temOpcoes: ${this.desvantagemSelecionada.temOpcoes}`);
+        console.log(`📊 opcaoSelecionada:`, this.opcaoSelecionada);
         
         // Determinar custo e nome baseado nas opções
         if (this.desvantagemSelecionada.temOpcoes) {
@@ -434,20 +477,24 @@ class SistemaDesvantagens {
                 // Usar opção selecionada
                 custo = this.opcaoSelecionada.custo;
                 nomeExibicao = this.opcaoSelecionada.nome;
+                console.log(`📊 Usando opção selecionada: ${nomeExibicao} (${custo} pts)`);
             } else if (this.desvantagemSelecionada.opcoes && this.desvantagemSelecionada.opcoes.length === 1) {
                 // Usar única opção disponível
                 const opcao = this.desvantagemSelecionada.opcoes[0];
                 custo = opcao.custo;
                 nomeExibicao = opcao.nome;
                 this.opcaoSelecionada = opcao;
+                console.log(`📊 Usando única opção: ${nomeExibicao} (${custo} pts)`);
             } else {
                 console.error("❌ Nenhuma opção selecionada para desvantagem com opções múltiplas");
+                console.log("📊 Número de opções:", this.desvantagemSelecionada.opcoes ? this.desvantagemSelecionada.opcoes.length : 0);
                 alert('Por favor, selecione uma opção primeiro.');
                 return;
             }
         } else {
             // Sem opções
             custo = this.desvantagemSelecionada.custo;
+            console.log(`📊 Sem opções, usando custo padrão: ${custo} pts`);
         }
         
         // Adicionar à lista de adquiridas
