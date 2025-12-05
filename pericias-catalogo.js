@@ -1,14 +1,10 @@
-// ===== CATÁLOGO COMPLETO DE PERÍCIAS - ESTRUTURA FINAL CORRETA =====
-// Baseado no texto do manual GURPS
-
+// ===== CATÁLOGO CORRIGIDO =====
 window.catalogoPericias = {
-    // ===== PERÍCIAS DE COMBATE =====
     "Combate": {
-        // === ARMAS DE ESGRIMA (CLICÁVEL - ABRE MODAL) ===
         "Armas de Esgrima": {
             tipo: "modal-escolha",
             nome: "Armas de Esgrima",
-            descricao: "Armas leves, empunhadas com uma mão (lâminas com cabos) e otimizadas para aparar. Bônus de recuar ampliado. Penalidade igual ao nível de carga. Default = NH em qualquer outra -3.",
+            descricao: "Armas leves...",
             pericias: [
                 {
                     id: "adaga-esgrima",
@@ -16,7 +12,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer arma normalmente empunhada como Faca ou Jitte/Sai utilizada com a mão 'inábil'. Evita penalidade ao usar mão inábil para defesa.",
+                    descricao: "Qualquer arma...",
                     prereq: "Jitte/Sai-4 ou Faca-4",
                     default: "Jitte/Sai-4 ou Faca-4"
                 },
@@ -26,7 +22,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer arma longa (mais de um metro) e leve de estocar.",
+                    descricao: "Qualquer arma longa...",
                     prereq: "Espadas de Lâmina Larga-4",
                     default: "Espadas de Lâmina Larga-4"
                 },
@@ -36,7 +32,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer arma leve, de cortar e de estocar. Sabres da cavalaria usam Espadas de Lâmina Larga.",
+                    descricao: "Qualquer arma leve...",
                     prereq: "Espadas de Lâmina Larga-4 ou Espadas Curtas-4",
                     default: "Espadas de Lâmina Larga-4 ou Espadas Curtas-4"
                 },
@@ -46,18 +42,16 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer arma curta (até 1 metro) e leve de estocar ou bastão curto de uma mão (escrima/kali).",
+                    descricao: "Qualquer arma curta...",
                     prereq: "Espadas Curtas-4",
                     default: "Espadas Curtas-4"
                 }
             ]
         },
-
-        // === ARMAS DE HASTE (CLICÁVEL - ABRE MODAL) ===
         "Armas de Haste": {
             tipo: "modal-escolha",
             nome: "Armas de Haste",
-            descricao: "Bastões longos (geralmente de madeira) com cabeças pesadas. Todas devem ser empunhadas com as duas mãos.",
+            descricao: "Bastões longos...",
             pericias: [
                 {
                     id: "armas-haste",
@@ -65,7 +59,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer arma muito longa (pelo menos 2m) e desbalanceada com cabeça pesada: glaive, alabarda, machado de haste, etc. Fica despreparada após ataque.",
+                    descricao: "Qualquer arma muito longa...",
                     prereq: "Lança-4, Bastão-4 ou Maça/Machado de Duas Mãos-4",
                     default: "Lança-4, Bastão-4 ou Maça/Machado de Duas Mãos-4"
                 },
@@ -75,7 +69,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer haste longa e equilibrada sem cabeça pesada. +2 em Aparar.",
+                    descricao: "Qualquer haste longa...",
                     prereq: "Armas de Haste-4 ou Lança-4",
                     default: "Armas de Haste-4 ou Lança-4"
                 },
@@ -85,18 +79,16 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer arma de haste longa e equilibrada com ponta: lanças, dardos, tridentes, baionetas.",
+                    descricao: "Qualquer arma de haste...",
                     prereq: "Armas de Haste-4 ou Bastão-4",
                     default: "Armas de Haste-4 ou Bastão-4"
                 }
             ]
         },
-
-        // === ARMAS DE IMPACTO (CLICÁVEL - ABRE MODAL) ===
         "Armas de Impacto": {
             tipo: "modal-escolha",
             nome: "Armas de Impacto",
-            descricao: "Armas rígidas, desbalanceadas com massa concentrada na cabeça. Não podem aparar se já atacou no turno. Default = NH em qualquer outra -3.",
+            descricao: "Armas rígidas...",
             pericias: [
                 {
                     id: "maca-machado",
@@ -104,7 +96,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer arma de impacto curta ou média empunhada com uma só mão: machado, machadinha, maça, picareta, etc.",
+                    descricao: "Qualquer arma de impacto...",
                     prereq: "Mangual-4",
                     default: "Mangual-4"
                 },
@@ -114,18 +106,16 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer arma de impacto longa empunhada com duas mãos: bastão de beisebol, marreta, martelo de guerra, etc.",
+                    descricao: "Qualquer arma de impacto longa...",
                     prereq: "Armas de Haste-4 ou Mangual de Duas Mãos-4",
                     default: "Armas de Haste-4 ou Mangual de Duas Mãos-4"
                 }
             ]
         },
-
-        // === CHICOTES (CLICÁVEL - ABRE MODAL) ===
         "Chicotes": {
             tipo: "modal-escolha",
             nome: "Chicotes",
-            descricao: "Armas flexíveis feitas de corrente, couro, arame, etc. Ótimas para desarmar e prender. Ruins para aparar. Default = NH em qualquer outra -3.",
+            descricao: "Armas flexíveis...",
             pericias: [
                 {
                     id: "chicote",
@@ -133,7 +123,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer tipo de chicote. Até 7m de comprimento. Não pode golpear a menos de 1m se tiver 2m+.",
+                    descricao: "Qualquer tipo de chicote...",
                     prereq: "DX-5",
                     default: "DX-5"
                 },
@@ -143,7 +133,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Chicote feito de energia pura (alta tecnologia, mágico ou psíquico). Geralmente não prende alvo.",
+                    descricao: "Chicote feito de energia...",
                     prereq: "Chicote-4",
                     default: "Chicote-4"
                 },
@@ -153,7 +143,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Difícil",
                     custoBase: 4,
-                    descricao: "Chicote feito com fio monomolecular pesado e preso a um cabo.",
+                    descricao: "Chicote feito com fio monomolecular...",
                     prereq: "Chicote-6",
                     default: "Chicote-6"
                 },
@@ -163,18 +153,16 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Difícil",
                     custoBase: 4,
-                    descricao: "Corrente pesada empunhada com as duas mãos.",
+                    descricao: "Corrente pesada...",
                     prereq: "Mangual de Duas Mãos-4",
                     default: "Mangual de Duas Mãos-4"
                 }
             ]
         },
-
-        // === ESPADAS (CLICÁVEL - ABRE MODAL) ===
         "Espadas": {
             tipo: "modal-escolha",
             nome: "Espadas",
-            descricao: "Lâminas rígidas com cabo, com ponta perfurante e/ou fio cortante. Equilibradas, podem atacar ou aparar sem ficar despreparadas.",
+            descricao: "Lâminas rígidas...",
             pericias: [
                 {
                     id: "faca",
@@ -182,7 +170,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Fácil",
                     custoBase: 1,
-                    descricao: "Qualquer lâmina rígida com menos de 30cm (canivete a faca Bowie). Penalidade -1 em Aparar.",
+                    descricao: "Qualquer lâmina rígida...",
                     prereq: "Adaga de Esgrima-3, Espadas Curtas-3 ou Espada de Energia-3",
                     default: "Adaga de Esgrima-3, Espadas Curtas-3 ou Espada de Energia-3"
                 },
@@ -192,7 +180,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Espada pontiaguda para apanhar armas rígidas. +2 em Disputa Rápida para desarmar. Permite desarmar após aparar sem teste prévio.",
+                    descricao: "Espada pontiaguda...",
                     prereq: "Adaga de Esgrima-4, Espadas Curtas-3 ou Espada de Energia-4",
                     default: "Adaga de Esgrima-4, Espadas Curtas-3 ou Espada de Energia-4"
                 },
@@ -202,7 +190,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer arma equilibrada com 30 a 60cm empunhada com uma só mão, incluindo terçado e clavas similares.",
+                    descricao: "Qualquer arma equilibrada...",
                     prereq: "Espada de Energia-4, Espadas de Lâmina Larga-2, Faca-4, Jitte/Sai-3, Sabre-4, Terçado-4 ou Tonfa-3",
                     default: "Espada de Energia-4, Espadas de Lâmina Larga-2, Faca-4, Jitte/Sai-3, Sabre-4, Terçado-4 ou Tonfa-3"
                 },
@@ -212,7 +200,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer lâmina equilibrada de 60 a 120cm para uma mão: espada larga, cimitarra, espada bastarda/katana/grande com uma mão.",
+                    descricao: "Qualquer lâmina equilibrada...",
                     prereq: "Espadas Curtas-2, Espada de Duas Mãos-4, Espada de Energia-4, Rapieira-4 ou Sabre-4",
                     default: "Espadas Curtas-2, Espada de Duas Mãos-4, Espada de Energia-4, Rapieira-4 ou Sabre-4"
                 },
@@ -222,7 +210,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer lâmina equilibrada com 120cm+ empunhada com duas mãos: espada grande, zweihander, espada bastarda/katana/grande com duas mãos.",
+                    descricao: "Qualquer lâmina equilibrada...",
                     prereq: "Espada de Energia-4 ou Espadas de Lâmina Larga-4",
                     default: "Espada de Energia-4 ou Espadas de Lâmina Larga-4"
                 },
@@ -232,18 +220,16 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Qualquer espada com 'lâmina' de energia (alta tecnologia, mágica ou psíquica).",
+                    descricao: "Qualquer espada com 'lâmina' de energia...",
                     prereq: "NH em qualquer espada -3",
                     default: "NH em qualquer espada -3"
                 }
             ]
         },
-
-        // === MANGUAIIS (CLICÁVEL - ABRE MODAL) ===
         "Manguais": {
             tipo: "modal-escolha",
             nome: "Manguais",
-            descricao: "Armas flexíveis desbalanceadas com massa concentrada no pírtigo. Não pode aparar se já atacou. Bloqueio: -2, Aparar: -4. Facas e Esgrima não podem aparar mangual. Default = NH em qualquer outra -3.",
+            descricao: "Armas flexíveis...",
             pericias: [
                 {
                     id: "mangual",
@@ -251,7 +237,7 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Difícil",
                     custoBase: 4,
-                    descricao: "Qualquer mangual de uma mão: maça-estrela, nunchaku, etc.",
+                    descricao: "Qualquer mangual de uma mão...",
                     prereq: "Maça/Machado-4",
                     default: "Maça/Machado-4"
                 },
@@ -261,14 +247,12 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Difícil",
                     custoBase: 4,
-                    descricao: "Qualquer mangual de duas mãos.",
+                    descricao: "Qualquer mangual de duas mãos...",
                     prereq: "Kusari-4 ou Maça/Machado de Duas Mãos-4",
                     default: "Kusari-4 ou Maça/Machado de Duas Mãos-4"
                 }
             ]
         },
-
-        // === OUTRAS ARMAS (CLICÁVEL - ABRE MODAL) ===
         "Outras Armas": {
             tipo: "modal-escolha",
             nome: "Outras Armas",
@@ -280,29 +264,24 @@ window.catalogoPericias = {
                     atributo: "DX",
                     dificuldade: "Média",
                     custoBase: 2,
-                    descricao: "Bastão com cabo protuberante. Usada junto ao antebraço permite jab (GdP+1) e aparar com (NH/2)+3. Teste para mudar modo de empunhar.",
+                    descricao: "Bastão com cabo protuberante...",
                     prereq: "Espadas Curtas-3",
                     default: "Espadas Curtas-3"
                 }
             ]
         },
-
-       
-      "Arco": {
+        "Arco": {
             tipo: "pericia-simples",
             id: "arco",
             nome: "Arco",
             atributo: "DX",
             dificuldade: "Média",
             custoBase: 2,
-            descricao: "Uso de arcos longos, arcos curtos e todos os arcos similares. Cobre também arcos compostos. Penalidade de -2 por falta de familiaridade com arcos compostos para quem nunca os viu.",
+            descricao: "Uso de arcos longos, arcos curtos e todos os arcos similares...",
             prereq: "DX-5",
             default: "DX-5"
-        },  // ← ADICIONA ESTA VÍRGULA AQUI!
-
+        }
     },
-
-    // ===== PERÍCIAS DE DESTREZA (DX) =====
     "DX": [
         {
             id: "acrobacia",
@@ -310,7 +289,7 @@ window.catalogoPericias = {
             atributo: "DX",
             dificuldade: "Difícil",
             custoBase: 4,
-            descricao: "Realizar acrobacias, cambalhotas, saltos mortais, equilibrar-se em cordas, etc.",
+            descricao: "Realizar acrobacias...",
             prereq: "DX-6",
             default: "DX-6"
         },
@@ -320,14 +299,11 @@ window.catalogoPericias = {
             atributo: "DX",
             dificuldade: "Fácil",
             custoBase: 1,
-            descricao: "Habilidade geral para atividades atléticas: saltar, escalar, nadar, etc.",
+            descricao: "Habilidade geral...",
             prereq: "DX-4",
             default: "DX-4"
         }
-        // ADICIONAR MAIS PERÍCIAS DE DX...
     ],
-
-    // ===== PERÍCIAS DE INTELIGÊNCIA (IQ) =====
     "IQ": [
         {
             id: "atualidades",
@@ -335,14 +311,11 @@ window.catalogoPericias = {
             atributo: "IQ",
             dificuldade: "Fácil",
             custoBase: 1,
-            descricao: "Conhecimento sobre eventos atuais, celebridades, notícias, tendências, etc.",
+            descricao: "Conhecimento sobre eventos atuais...",
             prereq: "IQ-4",
             default: "IQ-4"
         }
-        // ADICIONAR MAIS PERÍCIAS DE IQ...
     ],
-
-    // ===== PERÍCIAS DE VIGOR (HT) =====
     "HT": [
         {
             id: "corrida",
@@ -350,14 +323,11 @@ window.catalogoPericias = {
             atributo: "HT",
             dificuldade: "Fácil",
             custoBase: 1,
-            descricao: "Habilidade em correr de forma eficiente. Afeta velocidade de movimento.",
+            descricao: "Habilidade em correr...",
             prereq: "HT-4",
             default: "HT-4"
         }
-        // ADICIONAR MAIS PERÍCIAS DE HT...
     ],
-
-    // ===== PERÍCIAS DE PERCEPÇÃO (PERC) =====
     "PERC": [
         {
             id: "observacao",
@@ -365,10 +335,9 @@ window.catalogoPericias = {
             atributo: "PERC",
             dificuldade: "Fácil",
             custoBase: 1,
-            descricao: "Perceber detalhes visuais, encontrar objetos escondidos, notar coisas incomuns.",
+            descricao: "Perceber detalhes visuais...",
             prereq: "PERC-4",
             default: "PERC-4"
         }
-        // ADICIONAR MAIS PERÍCIAS DE PERCEPÇÃO...
     ]
 };
