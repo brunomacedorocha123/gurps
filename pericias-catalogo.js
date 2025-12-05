@@ -411,13 +411,14 @@ function obterTodasPericiasSimples() {
                         });
                     });
                 } else if (catalogoPericias[categoria][grupo].tipo === "modal-escolha") {
-                    // Para grupos com especializações, adiciona o grupo principal
+                    // CORREÇÃO: Criamos um ID único para o grupo de especialização
+                    // Usamos um prefixo 'grupo-' para diferenciar das perícias normais
                     todas.push({
-                        id: catalogoPericias[categoria][grupo].nome.toLowerCase().replace(/ /g, '-'),
+                        id: `grupo-${grupo.toLowerCase().replace(/ /g, '-')}`,
                         nome: catalogoPericias[categoria][grupo].nome,
                         atributo: catalogoPericias[categoria][grupo].atributo,
-                        dificuldade: "Média", // Default
-                        custoBase: 2, // Default para armas
+                        dificuldade: "Média",
+                        custoBase: 2,
                         descricao: catalogoPericias[categoria][grupo].descricao,
                         prereq: "Varia por especialização",
                         default: "Varia por especialização",
@@ -442,17 +443,21 @@ function obterTodasPericiasSimples() {
     return todas;
 }
 
+// CORREÇÃO: Esta função agora funciona corretamente
 function obterEspecializacoes(grupo) {
-    if (!catalogoPericias["Combate"]) {
+    // Verifica se o catálogo existe
+    if (!window.catalogoPericias || !window.catalogoPericias["Combate"]) {
         return [];
     }
     
-    if (!catalogoPericias["Combate"][grupo]) {
+    // Verifica se o grupo existe no catálogo
+    if (!window.catalogoPericias["Combate"][grupo]) {
         return [];
     }
     
-    const dadosGrupo = catalogoPericias["Combate"][grupo];
+    const dadosGrupo = window.catalogoPericias["Combate"][grupo];
     
+    // Retorna as especializações se existirem
     if (dadosGrupo.pericias && Array.isArray(dadosGrupo.pericias)) {
         return dadosGrupo.pericias;
     }

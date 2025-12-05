@@ -297,7 +297,7 @@ function renderizarPericiasAprendidas() {
 function abrirModalPericia(pericia, periciaEditando = null) {
     estadoPericias.modalPericiaAtiva = pericia;
     
-    // CORREÇÃO: Verifica se é um grupo de especialização
+    // Verifica se é um grupo de especialização
     if (pericia.tipo === 'grupo-especializacao') {
         abrirModalEspecializacao(pericia.grupo);
         return;
@@ -439,7 +439,6 @@ function alterarNivelPericiaDropdown(valorSelecionado) {
     }
 }
 
-// CORREÇÃO COMPLETA: Modal de especialização
 function abrirModalEspecializacao(grupo) {
     estadoPericias.modalEspecializacaoAtiva = grupo;
     estadoPericias.especializacaoSelecionada = null;
@@ -454,10 +453,10 @@ function abrirModalEspecializacao(grupo) {
         modalContent.innerHTML = `
             <div class="modal-header-especializacao">
                 <span class="modal-close" onclick="fecharModalEspecializacao()">&times;</span>
-                <h3>Erro</h3>
+                <h3>${grupoInfo?.nome || grupo}</h3>
             </div>
             <div class="modal-body-especializacao">
-                <p>Nenhuma especialização encontrada para ${grupo}.</p>
+                <p>Nenhuma especialização disponível para este grupo.</p>
             </div>
         `;
     } else {
@@ -530,10 +529,12 @@ function continuarParaNivel() {
     
     const especializacoes = window.obterEspecializacoes ? 
         window.obterEspecializacoes(estadoPericias.modalEspecializacaoAtiva) : [];
+    
+    // CORREÇÃO: Busca a especialização pelo ID
     const especializacao = especializacoes.find(e => e.id === estadoPericias.especializacaoSelecionada);
     
     if (!especializacao) {
-        alert("Erro: Especialização não encontrada.");
+        alert(`Erro: Especialização "${estadoPericias.especializacaoSelecionada}" não encontrada no grupo "${estadoPericias.modalEspecializacaoAtiva}".`);
         return;
     }
     
@@ -554,7 +555,7 @@ function continuarParaNivel() {
     
     setTimeout(() => {
         abrirModalPericia(periciaCompleta);
-    }, 300);
+    }, 100);
 }
 
 function confirmarPericia() {
