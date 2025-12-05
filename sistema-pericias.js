@@ -1,5 +1,4 @@
-// ===== SISTEMA DE PERÍCIAS - VERSÃO CORRIGIDA =====
-// Sistema completo para gerenciamento de perícias GURPS
+// ===== SISTEMA DE PERÍCIAS - VERSÃO FINAL CORRIGIDA =====
 
 // Estado do sistema
 let estadoPericias = {
@@ -23,7 +22,7 @@ let estadoPericias = {
     nivelPericia: 0
 };
 
-// ===== TABELA DE CUSTOS EXATA (SUA TABELA) =====
+// ===== TABELA DE CUSTOS EXATA =====
 function obterTabelaCusto(dificuldade) {
     const tabela = {
         'Fácil': [
@@ -294,7 +293,7 @@ function renderizarPericiasAprendidas() {
     });
 }
 
-// ===== FUNÇÕES DE MODAL CORRIGIDAS =====
+// ===== FUNÇÕES DE MODAL =====
 function abrirModalPericia(pericia, periciaEditando = null) {
     estadoPericias.modalPericiaAtiva = pericia;
     
@@ -440,7 +439,7 @@ function alterarNivelPericiaDropdown(valorSelecionado) {
     }
 }
 
-// CORREÇÃO COMPLETA: Modal de especialização funcionando
+// CORREÇÃO COMPLETA: Modal de especialização
 function abrirModalEspecializacao(grupo) {
     estadoPericias.modalEspecializacaoAtiva = grupo;
     estadoPericias.especializacaoSelecionada = null;
@@ -521,7 +520,6 @@ function selecionarEspecializacao(idEspecializacao) {
     }
 }
 
-// CORREÇÃO FINAL: Esta função agora funciona!
 function continuarParaNivel() {
     if (!estadoPericias.modalEspecializacaoAtiva || !estadoPericias.especializacaoSelecionada) {
         alert("Por favor, selecione uma especialização primeiro.");
@@ -646,7 +644,7 @@ function carregarPericias() {
 
 // ===== FUNÇÕES DE INTEGRAÇÃO COM ATRIBUTOS =====
 function configurarOuvinteAtributos() {
-    document.addEventListener('atributosAlterados', function(e) {
+    document.addEventListener('atributosAlterados', function() {
         atualizarAtributosLocais();
         atualizarTodosNH();
         renderizarPericiasAprendidas();
@@ -828,5 +826,3 @@ window.obterDadosPericias = obterDadosPericias;
 window.carregarDadosPericias = carregarDadosPericias;
 window.resetarPericias = resetarPericias;
 window.inicializarSistemaPericias = inicializarSistemaPericias;
-
-console.log('Sistema de Perícias GURPS carregado e pronto!');

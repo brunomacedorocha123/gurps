@@ -1,6 +1,4 @@
 // ===== CATÁLOGO COMPLETO DE PERÍCIAS =====
-// Baseado no exemplo fornecido pelo usuário
-
 const catalogoPericias = {
     // CATEGORIA COMBATE - Todas as perícias de combate vão aqui
     "Combate": {
@@ -444,21 +442,17 @@ function obterTodasPericiasSimples() {
     return todas;
 }
 
-// FUNÇÃO CORRIGIDA: Agora funciona!
 function obterEspecializacoes(grupo) {
-    // Verifica se existe o catálogo de Combate
     if (!catalogoPericias["Combate"]) {
         return [];
     }
     
-    // Verifica se o grupo existe
     if (!catalogoPericias["Combate"][grupo]) {
         return [];
     }
     
     const dadosGrupo = catalogoPericias["Combate"][grupo];
     
-    // Retorna as especializações se existirem
     if (dadosGrupo.pericias && Array.isArray(dadosGrupo.pericias)) {
         return dadosGrupo.pericias;
     }
