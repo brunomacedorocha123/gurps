@@ -1011,9 +1011,11 @@
         </div>
     </div>
 </div>
-  <!-- ABA PERÍCIAS - VERSÃO CORRIGIDA SIMPLES -->
+  
+
+<!-- ABA PERÍCIAS - VERSÃO CORRIGIDA PARA SCROLL -->
 <div id="pericias" class="tab-content active">
-    <div class="atributos-container">
+    <div class="atributos-container" style="height: calc(100vh - 30px); overflow: hidden;">
         <!-- CARD DE RESUMO DE PONTOS -->
         <div class="pontos-section">
             <div class="ponto-card">
@@ -1047,34 +1049,37 @@
             </select>
         </div>
 
-        <div class="cards-grid principais-grid">
+        <div class="cards-grid principais-grid" style="flex: 1; min-height: 0;">
             <!-- CARD PERÍCIAS DISPONÍVEIS -->
-            <div class="atributo-card">
+            <div class="atributo-card" style="display: flex; flex-direction: column; height: 100%; min-height: 0;">
                 <div class="atributo-header">
                     <h3>🎯 Perícias Disponíveis</h3>
                     <div class="contador" id="contador-pericias">0 perícias</div>
                 </div>
                 
-                <!-- LISTA SIMPLES - SEM CONTAINERS EXTRAS -->
-                <div class="lista-container" id="lista-pericias" style="max-height: 550px;">
+                <!-- LISTA COM SCROLL CORRIGIDO -->
+                <div class="lista-container" id="lista-pericias" style="flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 60px;">
                     <!-- Conteúdo será preenchido por JavaScript -->
                     <div class="lista-vazia">
-                        <div class="spinner"></div>
                         <p>Carregando perícias...</p>
                     </div>
+                    <!-- ESPAÇADOR FIXO PARA GARANTIR SCROLL -->
+                    <div style="height: 50px; width: 100%; flex-shrink: 0;"></div>
                 </div>
             </div>
 
             <!-- CARD PERÍCIAS ADQUIRIDAS -->
-            <div class="atributo-card">
+            <div class="atributo-card" style="display: flex; flex-direction: column; height: 100%; min-height: 0;">
                 <div class="atributo-header">
                     <h3>✅ Perícias Adquiridas</h3>
                     <div class="custo-pontos" id="total-pericias-adquiridas-label">0 pts</div>
                 </div>
                 
-                <!-- LISTA SIMPLES - SEM CONTAINERS EXTRAS -->
-                <div class="lista-container" id="pericias-adquiridas" style="max-height: 550px;">
+                <!-- LISTA COM SCROLL CORRIGIDO -->
+                <div class="lista-container" id="pericias-adquiridas" style="flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 60px;">
                     <div class="lista-vazia">Nenhuma perícia adquirida</div>
+                    <!-- ESPAÇADOR FIXO PARA GARANTIR SCROLL -->
+                    <div style="height: 50px; width: 100%; flex-shrink: 0;"></div>
                 </div>
             </div>
         </div>
