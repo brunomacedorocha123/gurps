@@ -824,280 +824,247 @@
     </div>
 </div>
 
-       <!-- ABA VANTAGENS - SISTEMA COMPLETO -->
+      <!-- ABA VANTAGENS - VERSÃO LIMPA E FUNCIONAL -->
 <div id="vantagens" class="tab-content">
     <div class="atributos-container">
         
-        <!-- TOTAIS - TOPO -->
-        <div class="pontos-section">
-            <div class="ponto-card vantagens-card">
-                <h3><i class="fas fa-plus-circle"></i> Vantagens</h3>
-                <div class="ponto-valor" id="total-vantagens">+0</div>
-                <div class="ponto-detalhe" id="contador-vant">0 itens</div>
+        <!-- TOTAIS - CABEÇALHO SIMPLES -->
+        <div class="cabecalho-pontos">
+            <div class="status-container">
+                <div class="status-item">
+                    <span class="status-label">Pontos Disponíveis:</span>
+                    <span class="status-valor positivo" id="pontos-disponiveis">100</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Saldo:</span>
+                    <span class="status-valor neutro" id="saldo-total">0</span>
+                </div>
             </div>
             
-            <div class="ponto-card desvantagens-card">
-                <h3><i class="fas fa-minus-circle"></i> Desvantagens</h3>
-                <div class="ponto-valor" id="total-desvantagens">-0</div>
-                <div class="ponto-detalhe" id="contador-desv">0 itens</div>
-            </div>
-            
-            <div class="ponto-card peculiaridades-card">
-                <h3><i class="fas fa-tag"></i> Peculiaridades</h3>
-                <div class="ponto-valor" id="total-peculiaridades">-0</div>
-                <div class="ponto-detalhe" id="contador-pec">0/5</div>
-            </div>
-            
-            <div class="ponto-card saldo-card">
-                <h3><i class="fas fa-balance-scale"></i> Saldo Total</h3>
-                <div class="ponto-valor" id="saldo-total">0</div>
-                <div class="ponto-detalhe" id="saldo-status">Neutro</div>
+            <div class="acoes-rapidas">
+                <button class="btn-rapido btn-resetar" id="btn-reset-rapido">
+                    <i class="fas fa-redo"></i> Resetar
+                </button>
+                <button class="btn-rapido btn-salvar" id="btn-salvar-rapido">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
             </div>
         </div>
 
         <!-- VANTAGENS -->
-        <h2 class="secao-titulo">
-            <i class="fas fa-crown"></i> Vantagens
-            <span class="secao-subtitulo">Custo: <span id="custo-vantagens">0</span> pontos</span>
-        </h2>
-        
-        <div class="cards-grid">
-            <!-- VANTAGENS DISPONÍVEIS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3><i class="fas fa-list"></i> Disponíveis</h3>
-                    <div class="contador-itens">
-                        <span id="num-vant-disponiveis">0</span> itens
-                    </div>
-                </div>
-                
-                <!-- Filtros -->
-                <div class="filtros-container">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="busca-vantagens" placeholder="Buscar vantagem..." 
-                               class="atributo-input">
-                    </div>
-                    <select id="filtro-categoria-vant" class="atributo-select">
-                        <option value="">Todas as Categorias</option>
-                        <option value="mental">Mental</option>
-                        <option value="fisica">Física</option>
-                        <option value="social">Social</option>
-                        <option value="sobrenatural">Sobrenatural</option>
-                    </select>
-                </div>
-                
-                <!-- Lista -->
-                <div class="lista-container" id="lista-vantagens">
-                    <div class="loading-state">
-                        <i class="fas fa-spinner fa-spin"></i> Carregando...
-                    </div>
-                </div>
-                
-                <!-- Controles -->
-                <div class="controles-container">
-                    <button class="btn btn-secundario" id="limpar-filtros-vant">
-                        <i class="fas fa-times"></i> Limpar Filtros
-                    </button>
-                    <div class="info-pontos">
-                        <i class="fas fa-coins"></i> Pontos Disponíveis: 
-                        <span id="pontos-restantes">100</span>
-                    </div>
+        <section class="secao-vantagens">
+            <div class="secao-header">
+                <h2>
+                    <i class="fas fa-crown"></i>
+                    Vantagens
+                    <span class="badge" id="contador-vantagens">0</span>
+                </h2>
+                <div class="secao-info">
+                    <span class="info-custo">Custo total: <span id="custo-vantagens">0</span> pts</span>
                 </div>
             </div>
             
-            <!-- VANTAGENS ADQUIRIDAS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3><i class="fas fa-check-circle"></i> Adquiridas</h3>
-                    <div class="contador-itens">
-                        <span id="num-vant-adquiridas">0</span> itens
-                    </div>
-                </div>
-                
-                <!-- Lista de adquiridas -->
-                <div class="lista-container" id="vantagens-adquiridas">
-                    <div class="lista-vazia">
-                        <i class="fas fa-inbox"></i>
-                        <p>Nenhuma vantagem adquirida</p>
-                        <small>Clique em uma vantagem disponível para adicionar</small>
-                    </div>
-                </div>
-                
-                <!-- Controles das adquiridas -->
-                <div class="controles-container">
-                    <button class="btn btn-perigo" id="limpar-vantagens">
-                        <i class="fas fa-trash"></i> Limpar Todas
-                    </button>
-                    <button class="btn btn-info" id="exportar-vantagens">
-                        <i class="fas fa-download"></i> Exportar
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- DESVANTAGENS -->
-        <h2 class="secao-titulo">
-            <i class="fas fa-skull-crossbones"></i> Desvantagens
-            <span class="secao-subtitulo">Pontos: <span id="pontos-desvantagens">0</span></span>
-        </h2>
-        
-        <div class="cards-grid">
-            <!-- DESVANTAGENS DISPONÍVEIS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3><i class="fas fa-list"></i> Disponíveis</h3>
-                    <div class="contador-itens">
-                        <span id="num-desv-disponiveis">0</span> itens
-                    </div>
-                </div>
-                
-                <!-- Filtros -->
-                <div class="filtros-container">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="busca-desvantagens" placeholder="Buscar desvantagem..." 
-                               class="atributo-input">
-                    </div>
-                    <select id="filtro-categoria-desv" class="atributo-select">
-                        <option value="">Todas as Categorias</option>
-                        <option value="mental">Mental</option>
-                        <option value="fisica">Física</option>
-                        <option value="social">Social</option>
-                        <option value="sobrenatural">Sobrenatural</option>
-                    </select>
-                </div>
-                
-                <!-- Lista -->
-                <div class="lista-container" id="lista-desvantagens">
-                    <div class="loading-state">
-                        <i class="fas fa-spinner fa-spin"></i> Carregando...
-                    </div>
-                </div>
-                
-                <div class="controles-container">
-                    <button class="btn btn-secundario" id="limpar-filtros-desv">
-                        <i class="fas fa-times"></i> Limpar Filtros
-                    </button>
-                </div>
-            </div>
-            
-            <!-- DESVANTAGENS ADQUIRIDAS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Adquiridas</h3>
-                    <div class="contador-itens">
-                        <span id="num-desv-adquiridas">0</span> itens
-                    </div>
-                </div>
-                
-                <!-- Lista -->
-                <div class="lista-container" id="desvantagens-adquiridas">
-                    <div class="lista-vazia">
-                        <i class="fas fa-inbox"></i>
-                        <p>Nenhuma desvantagem adquirida</p>
-                    </div>
-                </div>
-                
-                <div class="controles-container">
-                    <button class="btn btn-perigo" id="limpar-desvantagens">
-                        <i class="fas fa-trash"></i> Limpar Todas
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- PECULIARIDADES -->
-        <h2 class="secao-titulo">
-            <i class="fas fa-tags"></i> Peculiaridades
-            <span class="secao-subtitulo">Limite: 5 | 1 ponto cada</span>
-        </h2>
-        
-        <div class="cards-grid peculiaridades-grid">
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3><i class="fas fa-edit"></i> Adicionar Peculiaridades</h3>
-                    <div class="contador-itens" id="contador-pec-atual">0/5</div>
-                </div>
-                
-                <!-- Formulário -->
-                <div class="pec-form-container">
-                    <div class="input-group">
-                        <input type="text" id="input-peculiaridade" 
-                               placeholder="Ex: Medo de aranhas, Alérgico a metais..." 
-                               maxlength="50" class="pec-input">
-                        <div class="input-feedback">
-                            <span id="contador-chars">0</span>/50 caracteres
+            <div class="grid-duplo">
+                <!-- COLUNA ESQUERDA - DISPONÍVEIS -->
+                <div class="coluna">
+                    <div class="coluna-header">
+                        <h3><i class="fas fa-list"></i> Disponíveis</h3>
+                        <div class="controles-busca">
+                            <div class="input-busca">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="busca-vantagens" placeholder="Buscar vantagem...">
+                            </div>
+                            <select id="filtro-vantagens" class="select-filtro">
+                                <option value="">Todas</option>
+                                <option value="mental">Mental</option>
+                                <option value="fisica">Física</option>
+                                <option value="social">Social</option>
+                            </select>
                         </div>
                     </div>
                     
-                    <div class="pec-botoes">
-                        <button class="btn btn-peculiaridade" id="btn-adicionar-pec">
-                            <i class="fas fa-plus"></i> Adicionar (1 ponto)
-                        </button>
-                        <button class="btn btn-secundario" id="limpar-peculiaridades">
-                            <i class="fas fa-broom"></i> Limpar
+                    <div class="lista-items" id="lista-vantagens-disponiveis">
+                        <!-- Itens serão carregados aqui -->
+                        <div class="vazio-mensagem">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- COLUNA DIREITA - ADQUIRIDAS -->
+                <div class="coluna">
+                    <div class="coluna-header">
+                        <h3><i class="fas fa-check-circle"></i> Adquiridas</h3>
+                        <div class="acoes-coluna">
+                            <button class="btn-pequeno btn-limpar" id="limpar-vantagens">
+                                <i class="fas fa-trash"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="lista-items" id="lista-vantagens-adquiridas">
+                        <div class="vazio-mensagem">
+                            <i class="fas fa-inbox"></i>
+                            <p>Nenhuma vantagem</p>
+                            <small>Selecione uma vantagem à esquerda</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DESVANTAGENS -->
+        <section class="secao-desvantagens">
+            <div class="secao-header">
+                <h2>
+                    <i class="fas fa-skull-crossbones"></i>
+                    Desvantagens
+                    <span class="badge" id="contador-desvantagens">0</span>
+                </h2>
+                <div class="secao-info">
+                    <span class="info-custo">Pontos ganhos: <span id="pontos-desvantagens">0</span></span>
+                </div>
+            </div>
+            
+            <div class="grid-duplo">
+                <!-- COLUNA ESQUERDA - DISPONÍVEIS -->
+                <div class="coluna">
+                    <div class="coluna-header">
+                        <h3><i class="fas fa-list"></i> Disponíveis</h3>
+                        <div class="controles-busca">
+                            <div class="input-busca">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="busca-desvantagens" placeholder="Buscar desvantagem...">
+                            </div>
+                            <select id="filtro-desvantagens" class="select-filtro">
+                                <option value="">Todas</option>
+                                <option value="mental">Mental</option>
+                                <option value="fisica">Física</option>
+                                <option value="social">Social</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="lista-items" id="lista-desvantagens-disponiveis">
+                        <div class="vazio-mensagem">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- COLUNA DIREITA - ADQUIRIDAS -->
+                <div class="coluna">
+                    <div class="coluna-header">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Adquiridas</h3>
+                        <div class="acoes-coluna">
+                            <button class="btn-pequeno btn-limpar" id="limpar-desvantagens">
+                                <i class="fas fa-trash"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="lista-items" id="lista-desvantagens-adquiridas">
+                        <div class="vazio-mensagem">
+                            <i class="fas fa-inbox"></i>
+                            <p>Nenhuma desvantagem</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PECULIARIDADES -->
+        <section class="secao-peculiaridades">
+            <div class="secao-header">
+                <h2>
+                    <i class="fas fa-tags"></i>
+                    Peculiaridades
+                    <span class="badge" id="contador-peculiaridades">0/5</span>
+                </h2>
+                <div class="secao-info">
+                    <span class="info-custo">Custo: 1 ponto cada</span>
+                </div>
+            </div>
+            
+            <div class="peculiaridades-container">
+                <div class="input-peculiaridade">
+                    <textarea id="nova-peculiaridade" 
+                              placeholder="Descreva uma peculiaridade do personagem (máx 50 caracteres)..."
+                              maxlength="50"></textarea>
+                    <div class="controles-peculiaridade">
+                        <div class="contador">
+                            <span id="contador-caracteres">0</span>/50
+                        </div>
+                        <button class="btn-adicionar" id="btn-adicionar-pec">
+                            <i class="fas fa-plus"></i> Adicionar (-1 ponto)
                         </button>
                     </div>
                 </div>
                 
-                <!-- Lista -->
-                <div class="lista-container" id="lista-peculiaridades">
-                    <div class="lista-vazia">
+                <div class="lista-peculiaridades" id="lista-peculiaridades">
+                    <div class="vazio-mensagem">
                         <i class="fas fa-sticky-note"></i>
-                        <p>Nenhuma peculiaridade adicionada</p>
+                        <p>Nenhuma peculiaridade</p>
                         <small>Adicione traços específicos do personagem</small>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- BARRA DE AÇÕES -->
-        <div class="acoes-bar">
-            <div class="acoes-info">
-                <span class="status-ativo" id="status-sistema">
-                    <i class="fas fa-circle"></i> Sistema Pronto
-                </span>
+        <!-- RESUMO FINAL -->
+        <footer class="resumo-footer">
+            <div class="resumo-totais">
+                <div class="total-item">
+                    <span>Vantagens:</span>
+                    <span class="valor positivo" id="resumo-vantagens">+0</span>
+                </div>
+                <div class="total-item">
+                    <span>Desvantagens:</span>
+                    <span class="valor negativo" id="resumo-desvantagens">-0</span>
+                </div>
+                <div class="total-item">
+                    <span>Peculiaridades:</span>
+                    <span class="valor neutro" id="resumo-peculiaridades">-0</span>
+                </div>
+                <div class="total-item destaque">
+                    <span>Saldo Final:</span>
+                    <span class="valor saldo" id="resumo-saldo">0</span>
+                </div>
             </div>
-            <div class="acoes-botoes">
-                <button class="btn btn-secundario" id="btn-reset-tudo">
-                    <i class="fas fa-redo"></i> Resetar Tudo
+            
+            <div class="acoes-finais">
+                <button class="btn-final btn-exportar" id="btn-exportar">
+                    <i class="fas fa-download"></i> Exportar
                 </button>
-                <button class="btn btn-sucesso" id="btn-salvar">
-                    <i class="fas fa-save"></i> Salvar Personagem
-                </button>
-                <button class="btn btn-primario" id="btn-gerar-ficha">
-                    <i class="fas fa-file-pdf"></i> Gerar Ficha
+                <button class="btn-final btn-imprimir" id="btn-imprimir">
+                    <i class="fas fa-print"></i> Imprimir
                 </button>
             </div>
-        </div>
+        </footer>
     </div>
 </div>
 
-<!-- MODAL DETALHADO -->
-<div id="modal-detalhes" class="modal">
-    <div class="modal-conteudo">
+<!-- MODAL SIMPLES E FUNCIONAL -->
+<div id="modal-compra" class="modal-overlay">
+    <div class="modal-container">
         <div class="modal-header">
             <h3 id="modal-titulo">
-                <i class="fas fa-info-circle"></i> Detalhes
+                <i class="fas fa-shopping-cart"></i> Adquirir Item
             </h3>
-            <button class="btn-fechar-modal" id="fechar-modal">&times;</button>
+            <button class="btn-fechar" id="fechar-modal">&times;</button>
         </div>
         
-        <div class="modal-body" id="modal-corpo">
-            <!-- Conteúdo dinâmico -->
-        </div>
-        
-        <div class="modal-footer">
-            <div class="modal-info" id="modal-info">
-                <!-- Informações de custo -->
+        <div class="modal-body">
+            <div id="modal-conteudo">
+                <!-- Conteúdo dinâmico -->
             </div>
+            
             <div class="modal-acoes">
-                <button class="btn btn-cancelar" id="btn-cancelar-modal">
+                <button class="btn btn-secundario" id="btn-cancelar">
                     <i class="fas fa-times"></i> Cancelar
                 </button>
-                <button class="btn btn-confirmar" id="btn-confirmar-modal">
-                    <i class="fas fa-check"></i> Adicionar
+                <button class="btn btn-primario" id="btn-adquirir">
+                    <i class="fas fa-check"></i> Adquirir Item
                 </button>
             </div>
         </div>
