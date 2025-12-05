@@ -1,4 +1,5 @@
-// ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA =====
+// ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA CORRIGIDA =====
+// Mantém todas as funcionalidades, só corrige o problema do scroll
 
 let estadoPericias = {
     adquiridas: [],
@@ -146,8 +147,8 @@ function filtrarPericias(termoBusca, filtroAtributo) {
     adicionarEventosGrupos();
     atualizarContadorPericias();
     
-    // CORREÇÃO DO SCROLL
-    setTimeout(fixScroll, 100);
+    // ⭐⭐ CORREÇÃO DO SCROLL: Ajustar após carregar
+    setTimeout(ajustarScrollContainers, 100);
 }
 
 // ===== CRIAÇÃO DOS GRUPOS DE PERÍCIAS =====
@@ -192,7 +193,7 @@ function criarGruposPericias(termoBusca = '', filtroAtributo = 'Todos') {
         }
     }
     
-    // ESPAÇADOR PARA SCROLL
+    // ⭐⭐ CORREÇÃO: Adicionar espaçador no final
     const espacadorFinal = document.createElement('div');
     espacadorFinal.className = 'espacador-final';
     espacadorFinal.style.cssText = 'height: 40px; width: 100%; flex-shrink: 0;';
@@ -223,18 +224,22 @@ function adicionarPericiasCombate(container, objetoCombate, termoBusca) {
     let encontrouAlguma = false;
     
     for (const [grupoNome, dadosGrupo] of Object.entries(objetoCombate)) {
+        // VERIFICAÇÃO COMPLETA DE BUSCA
         if (termoBusca) {
             const termo = termoBusca.toLowerCase();
             let corresponde = false;
             
+            // 1. Verifica nome do grupo
             if (grupoNome.toLowerCase().includes(termo)) {
                 corresponde = true;
             }
+            // 2. Verifica se é pericia-simples e nome corresponde
             else if (dadosGrupo.tipo === 'pericia-simples') {
                 if (dadosGrupo.nome.toLowerCase().includes(termo)) {
                     corresponde = true;
                 }
             }
+            // 3. Verifica se é modal-escolha e alguma perícia corresponde
             else if (dadosGrupo.tipo === 'modal-escolha') {
                 if (dadosGrupo.pericias.some(p => 
                     p.nome.toLowerCase().includes(termo)
@@ -624,8 +629,8 @@ function adicionarOuAtualizarPericia(pericia, nivel, custo) {
     
     atualizarInterfacePericias();
     
-    // CORREÇÃO DO SCROLL
-    setTimeout(fixScroll, 100);
+    // ⭐⭐ CORREÇÃO: Ajustar scroll após adicionar/atualizar
+    setTimeout(ajustarScrollContainers, 100);
 }
 
 function removerPericia(id) {
@@ -636,8 +641,8 @@ function removerPericia(id) {
         estadoPericias.pontosGastos -= custo;
         atualizarInterfacePericias();
         
-        // CORREÇÃO DO SCROLL
-        setTimeout(fixScroll, 100);
+        // ⭐⭐ CORREÇÃO: Ajustar scroll após remover
+        setTimeout(ajustarScrollContainers, 100);
     }
 }
 
@@ -689,7 +694,7 @@ function carregarPericiasAdquiridas() {
         lista.appendChild(item);
     });
     
-    // ESPAÇADOR PARA SCROLL
+    // ⭐⭐ CORREÇÃO: Adicionar espaçador no final da lista de adquiridas
     const espacadorFinal = document.createElement('div');
     espacadorFinal.className = 'espacador-final';
     espacadorFinal.style.cssText = 'height: 40px; width: 100%; flex-shrink: 0;';
@@ -725,8 +730,8 @@ function adicionarEventosGrupos() {
             const grupoDiv = grupo.parentElement;
             grupoDiv.classList.toggle('ativo');
             
-            // CORREÇÃO DO SCROLL
-            setTimeout(fixScroll, 200);
+            // ⭐⭐ CORREÇÃO: Ajustar scroll após expandir/recolher
+            setTimeout(ajustarScrollContainers, 200);
         });
     });
 }
@@ -785,41 +790,45 @@ function configurarEventosModais() {
     // Configurações já feitas nas funções dos modais
 }
 
-// ===== CORREÇÃO DO SCROLL (FUNÇÃO PRINCIPAL) =====
-function fixScroll() {
-    setTimeout(() => {
-        const containers = [
-            document.getElementById('lista-pericias'),
-            document.getElementById('pericias-adquiridas')
-        ];
+// ===== FUNÇÃO DE CORREÇÃO DO SCROLL (NOVA) =====
+function ajustarScrollContainers() {
+    // Ajusta ambos os containers (disponíveis e adquiridas)
+    const containers = [
+        { id: 'lista-pericias', selector: '#lista-pericias' },
+        { id: 'pericias-adquiridas', selector: '#pericias-adquiridas' }
+    ];
+    
+    containers.forEach(container => {
+        const element = document.querySelector(container.selector);
+        if (!element) return;
         
-        containers.forEach(container => {
-            if (!container) return;
+        // 1. Forçar cálculo da altura total
+        const alturaTotal = element.scrollHeight;
+        const alturaVisivel = element.parentElement?.clientHeight || element.clientHeight;
+        
+        // 2. Se o conteúdo for maior que o visível, ajustar padding
+        if (alturaTotal > alturaVisivel) {
+            // Garantir padding extra no final
+            element.style.paddingBottom = '60px';
             
-            // Remover espaçadores duplicados
-            const espacadores = container.querySelectorAll('.espacador-final');
-            espacadores.forEach((esp, index) => {
-                if (index > 0) esp.remove();
-            });
-            
-            // Garantir que o último item seja visível
-            const ultimoItem = container.querySelector('.item-lista:last-child');
-            if (ultimoItem) {
-                ultimoItem.style.marginBottom = '30px';
+            // Adicionar espaçador se não existir
+            if (!element.querySelector('.espacador-final')) {
+                const espacador = document.createElement('div');
+                espacador.className = 'espacador-final';
+                espacador.style.cssText = 'height: 50px; width: 100%; flex-shrink: 0;';
+                element.appendChild(espacador);
             }
-            
-            // Ajustar altura do container
-            const alturaContainer = container.clientHeight;
-            const alturaConteudo = container.scrollHeight;
-            
-            if (alturaConteudo < alturaContainer + 50) {
-                container.style.paddingBottom = '50px';
+        }
+        
+        // 3. Garantir que o scroll possa chegar até o final
+        setTimeout(() => {
+            if (element.parentElement && element.parentElement.scrollHeight > element.parentElement.clientHeight) {
+                element.parentElement.scrollTop = element.parentElement.scrollHeight;
+                // Voltar um pouco para garantir que funciona
+                element.parentElement.scrollTop = element.parentElement.scrollHeight - element.parentElement.clientHeight - 50;
             }
-            
-            // Forçar reflow
-            void container.offsetWidth;
-        });
-    }, 50);
+        }, 50);
+    });
 }
 
 // ===== INICIALIZAÇÃO AUTOMÁTICA =====
@@ -828,8 +837,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (periciasTab && periciasTab.classList.contains('active')) {
         setTimeout(() => {
             inicializarSistemaPericias();
-            fixScroll();
-        }, 300);
+            
+            // ⭐⭐ CORREÇÃO: Ajustar scroll após inicialização
+            setTimeout(ajustarScrollContainers, 500);
+        }, 100);
     }
     
     const observer = new MutationObserver(function(mutations) {
@@ -839,8 +850,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (tab.id === 'pericias' && tab.classList.contains('active')) {
                     setTimeout(() => {
                         inicializarSistemaPericias();
-                        fixScroll();
-                        setTimeout(fixScroll, 500);
+                        
+                        // ⭐⭐ CORREÇÃO: Ajustar scroll quando abrir a aba
+                        setTimeout(ajustarScrollContainers, 500);
                     }, 100);
                 }
             }
@@ -850,10 +862,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.tab-content').forEach(tab => {
         observer.observe(tab, { attributes: true });
     });
-    
-    window.addEventListener('resize', function() {
-        setTimeout(fixScroll, 200);
-    });
 });
 
 // ===== EXPORTAÇÃO DE FUNÇÕES =====
@@ -862,37 +870,33 @@ window.removerPericia = removerPericia;
 window.carregarPericiasNaLista = carregarPericiasNaLista;
 window.obterAtributosAtuais = obterAtributosAtuais;
 window.obterPontosGastosAtributos = obterPontosGastosAtributos;
-window.fixScroll = fixScroll;
+window.ajustarScrollContainers = ajustarScrollContainers; // ⭐⭐ NOVA função exportada
 
-// ===== ESTILOS DINÂMICOS PARA CORREÇÃO DO SCROLL =====
+// ⭐⭐ CSS DINÂMICO PARA CORREÇÃO DO SCROLL
 if (typeof document !== 'undefined') {
     const style = document.createElement('style');
     style.textContent = `
-        /* CORREÇÃO DO SCROLL - ESTILOS DINÂMICOS */
+        /* CORREÇÃO DO SCROLL - ADICIONADO DINAMICAMENTE */
         .espacador-final {
-            height: 40px !important;
-            min-height: 40px !important;
+            height: 50px !important;
+            min-height: 50px !important;
             width: 100% !important;
             flex-shrink: 0 !important;
             background: transparent !important;
-        }
-        
-        /* Garantir que containers de scroll funcionem */
-        .atributo-card {
-            display: flex !important;
-            flex-direction: column !important;
-            height: 100% !important;
-            min-height: 0 !important;
+            display: block !important;
         }
         
         .lista-container {
-            flex: 1 !important;
-            min-height: 0 !important;
+            padding-bottom: 60px !important;
         }
         
-        /* Último item visível */
         .item-lista:last-child {
-            margin-bottom: 30px !important;
+            margin-bottom: 20px !important;
+        }
+        
+        /* Garantir que containers de scroll funcionem */
+        .atributo-card > div:last-child {
+            overflow: visible !important;
         }
     `;
     document.head.appendChild(style);

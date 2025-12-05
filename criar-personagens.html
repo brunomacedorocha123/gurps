@@ -1013,9 +1013,9 @@
 </div>
   
 
-<!-- ABA PERÍCIAS - VERSÃO CORRIGIDA PARA SCROLL -->
+<!-- ABA PERÍCIAS - VERSÃO CORRIGIDA SIMPLES -->
 <div id="pericias" class="tab-content active">
-    <div class="atributos-container" style="height: calc(100vh - 30px); overflow: hidden;">
+    <div class="atributos-container">
         <!-- CARD DE RESUMO DE PONTOS -->
         <div class="pontos-section">
             <div class="ponto-card">
@@ -1049,37 +1049,34 @@
             </select>
         </div>
 
-        <div class="cards-grid principais-grid" style="flex: 1; min-height: 0;">
+        <div class="cards-grid principais-grid">
             <!-- CARD PERÍCIAS DISPONÍVEIS -->
-            <div class="atributo-card" style="display: flex; flex-direction: column; height: 100%; min-height: 0;">
+            <div class="atributo-card">
                 <div class="atributo-header">
                     <h3>🎯 Perícias Disponíveis</h3>
                     <div class="contador" id="contador-pericias">0 perícias</div>
                 </div>
                 
-                <!-- LISTA COM SCROLL CORRIGIDO -->
-                <div class="lista-container" id="lista-pericias" style="flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 60px;">
+                <!-- LISTA SIMPLES - SEM CONTAINERS EXTRAS -->
+                <div class="lista-container" id="lista-pericias" style="max-height: 550px;">
                     <!-- Conteúdo será preenchido por JavaScript -->
                     <div class="lista-vazia">
+                        <div class="spinner"></div>
                         <p>Carregando perícias...</p>
                     </div>
-                    <!-- ESPAÇADOR FIXO PARA GARANTIR SCROLL -->
-                    <div style="height: 50px; width: 100%; flex-shrink: 0;"></div>
                 </div>
             </div>
 
             <!-- CARD PERÍCIAS ADQUIRIDAS -->
-            <div class="atributo-card" style="display: flex; flex-direction: column; height: 100%; min-height: 0;">
+            <div class="atributo-card">
                 <div class="atributo-header">
                     <h3>✅ Perícias Adquiridas</h3>
                     <div class="custo-pontos" id="total-pericias-adquiridas-label">0 pts</div>
                 </div>
                 
-                <!-- LISTA COM SCROLL CORRIGIDO -->
-                <div class="lista-container" id="pericias-adquiridas" style="flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 60px;">
+                <!-- LISTA SIMPLES - SEM CONTAINERS EXTRAS -->
+                <div class="lista-container" id="pericias-adquiridas" style="max-height: 550px;">
                     <div class="lista-vazia">Nenhuma perícia adquirida</div>
-                    <!-- ESPAÇADOR FIXO PARA GARANTIR SCROLL -->
-                    <div style="height: 50px; width: 100%; flex-shrink: 0;"></div>
                 </div>
             </div>
         </div>
@@ -1116,22 +1113,6 @@
         <div class="modal-actions">
             <button class="btn btn-cancelar">Voltar</button>
             <button class="btn btn-confirmar" disabled>Selecionar</button>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL PARA TÉCNICAS -->
-<div id="modal-tecnicas" class="modal">
-    <div class="modal-content modal-tecnicas">
-        <span class="modal-close">&times;</span>
-        <div class="modal-header">
-            <h3>Técnicas Relacionadas</h3>
-        </div>
-        <div class="modal-body" id="modal-corpo-tecnicas">
-            <!-- Para futuro: lista de técnicas que usam esta perícia -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-cancelar">Fechar</button>
         </div>
     </div>
 </div>
