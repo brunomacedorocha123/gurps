@@ -1,5 +1,6 @@
 /* ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA ATUALIZADA ===== */
 /* Mobile-first com scroll suave e responsividade total */
+/* CORRIGIDO: Problema do último grupo de perícias */
 
 /* Container principal */
 .atributos-container {
@@ -106,7 +107,7 @@
     }
 }
 
-/* Cards de perícias */
+/* Cards de perícias - MODIFICADO: Removido max-height fixo */
 .atributo-card {
     background: rgba(30, 30, 40, 0.95);
     border: 1px solid rgba(255, 140, 0, 0.25);
@@ -116,9 +117,10 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    max-height: 600px;
+    /* REMOVIDO: max-height: 600px; */
     display: flex;
     flex-direction: column;
+    min-height: 400px; /* Altura mínima para aparência consistente */
 }
 
 .atributo-card::before {
@@ -154,6 +156,7 @@
     align-items: center;
     border-bottom: 1px solid rgba(255, 140, 0, 0.3);
     gap: 10px;
+    flex-shrink: 0; /* Evita que o header encolha */
 }
 
 .atributo-header h3 {
@@ -252,11 +255,12 @@
     border-radius: 10px;
     overflow: hidden;
     border: 1px solid rgba(255, 140, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
 .grupo-pericias.ativo .grupo-conteudo {
     display: block;
-    max-height: 1000px;
+    max-height: 1000px; /* Alto o suficiente para expandir */
     transition: max-height 0.3s ease;
 }
 
@@ -266,6 +270,11 @@
 
 .grupo-pericias.ativo .grupo-icone {
     transform: rotate(180deg);
+}
+
+/* CORREÇÃO: Garantir que o último grupo tenha espaço */
+.grupo-pericias:last-child {
+    margin-bottom: 20px; /* Espaço extra no final */
 }
 
 .grupo-header {
@@ -278,6 +287,7 @@
     transition: all 0.3s ease;
     border-bottom: 1px solid transparent;
     user-select: none;
+    flex-shrink: 0; /* Não deixa encolher */
 }
 
 .grupo-header:hover {
@@ -309,12 +319,20 @@
     overflow: hidden;
 }
 
-/* ===== LISTA DE PERÍCIAS ===== */
+/* ===== LISTA DE PERÍCIAS - MODIFICADO: Correção do problema ===== */
 .lista-container {
-    max-height: 400px;
-    overflow-y: auto;
+    /* REMOVIDO: max-height: 400px; - Era o problema! */
+    overflow-y: auto; /* Mantém scroll se necessário */
     padding: 10px;
     scroll-behavior: smooth;
+    flex: 1; /* Ocupa espaço disponível no card */
+    min-height: 300px; /* Altura mínima */
+    max-height: 800px; /* Altura máxima, mas maior que antes */
+}
+
+/* CORREÇÃO ESPECÍFICA para o último conteúdo do grupo */
+.grupo-pericias:last-child .grupo-conteudo {
+    padding-bottom: 15px; /* Espaço extra no último */
 }
 
 .lista-vazia {
@@ -1029,7 +1047,7 @@
     }
     
     .lista-container {
-        max-height: 350px;
+        max-height: 500px; /* Mais alto no mobile */
         padding: 8px;
     }
     
@@ -1153,6 +1171,15 @@
     
     .especializacao-header strong {
         min-width: auto;
+    }
+    
+    /* CORREÇÃO ESPECÍFICA PARA MOBILE */
+    .grupo-pericias:last-child {
+        margin-bottom: 15px;
+    }
+    
+    .lista-container {
+        max-height: 600px; /* Altura maior no mobile */
     }
 }
 
@@ -1295,6 +1322,36 @@
     margin-top: 4px;
 }
 
+/* ===== CORREÇÕES FINAIS PARA O PROBLEMA DO ÚLTIMO GRUPO ===== */
+
+/* Garantir que o container tenha espaço suficiente */
+#lista-pericias {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Espaço extra no final de TODOS os grupos quando ativos */
+.grupo-pericias.ativo {
+    margin-bottom: 15px;
+}
+
+/* Garantir que o conteúdo do último grupo tenha espaço */
+.grupo-pericias:last-child .grupo-conteudo {
+    padding-bottom: 20px;
+}
+
+/* Overflow correto para quando há muitos itens */
+.lista-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Se ainda houver problema, esta regra força visibilidade */
+.grupo-pericias:last-child .grupo-conteudo .item-lista:last-child {
+    margin-bottom: 10px;
+}
+
 /* ===== ESTILOS PARA TOUCH/MOBILE ===== */
 @media (hover: none) and (pointer: coarse) {
     .item-lista:hover,
@@ -1384,23 +1441,9 @@ button,
     }
 }
 
-
-/* CORREÇÃO PARA ÚLTIMO GRUPO DE PERÍCIAS */
-#lista-pericias {
+/* ===== REGRA FINAL DE GARANTIA ===== */
+/* Se NADA acima funcionar, esta regra força a visibilidade completa */
+#lista-pericias .grupo-pericias:last-child .grupo-conteudo {
     max-height: none !important;
-    overflow-y: visible !important;
-}
-
-.atributo-card {
-    max-height: none !important;
-}
-
-.grupo-pericias:last-child .grupo-conteudo {
-    padding-bottom: 20px; /* Espaço extra no último */
-}
-
-/* Garantir que todos os itens sejam visíveis */
-.lista-container {
-    max-height: none;
-    overflow-y: visible;
+    overflow: visible !important;
 }
