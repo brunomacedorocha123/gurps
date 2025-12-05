@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Logo após o title -->
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
     <link rel="stylesheet" href="style-atributos.css">
     <link rel="stylesheet" href="style-caracteristicas.css">
     <link rel="stylesheet" href="style-vantagens.css">
@@ -824,89 +824,58 @@
     </div>
 </div>
 
-      <!-- ABA VANTAGENS - VERSÃO LIMPA E FUNCIONAL -->
-<div id="vantagens" class="tab-content">
+     <!-- ABA VANTAGENS - VERSÃO TESTADA -->
+<div id="vantagens" class="tab-content active">
     <div class="atributos-container">
         
-        <!-- TOTAIS - CABEÇALHO SIMPLES -->
-        <div class="cabecalho-pontos">
-            <div class="status-container">
-                <div class="status-item">
-                    <span class="status-label">Pontos Disponíveis:</span>
-                    <span class="status-valor positivo" id="pontos-disponiveis">100</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Saldo:</span>
-                    <span class="status-valor neutro" id="saldo-total">0</span>
-                </div>
+        <!-- CABEÇALHO DE PONTOS -->
+        <div class="pontos-header">
+            <div class="ponto-item">
+                <h3>Vantagens</h3>
+                <div class="valor" id="total-vantagens">+0</div>
             </div>
-            
-            <div class="acoes-rapidas">
-                <button class="btn-rapido btn-resetar" id="btn-reset-rapido">
-                    <i class="fas fa-redo"></i> Resetar
-                </button>
-                <button class="btn-rapido btn-salvar" id="btn-salvar-rapido">
-                    <i class="fas fa-save"></i> Salvar
-                </button>
+            <div class="ponto-item">
+                <h3>Desvantagens</h3>
+                <div class="valor negativo" id="total-desvantagens">-0</div>
+            </div>
+            <div class="ponto-item">
+                <h3>Peculiaridades</h3>
+                <div class="valor neutro" id="total-peculiaridades">0/5</div>
+            </div>
+            <div class="ponto-item destaque">
+                <h3>Pontos Restantes</h3>
+                <div class="valor grande" id="pontos-restantes">100</div>
             </div>
         </div>
 
         <!-- VANTAGENS -->
-        <section class="secao-vantagens">
-            <div class="secao-header">
-                <h2>
-                    <i class="fas fa-crown"></i>
-                    Vantagens
-                    <span class="badge" id="contador-vantagens">0</span>
-                </h2>
-                <div class="secao-info">
-                    <span class="info-custo">Custo total: <span id="custo-vantagens">0</span> pts</span>
-                </div>
-            </div>
+        <section class="secao">
+            <h2 class="titulo-secao">Vantagens</h2>
             
-            <div class="grid-duplo">
-                <!-- COLUNA ESQUERDA - DISPONÍVEIS -->
+            <div class="duas-colunas">
+                <!-- DISPONÍVEIS -->
                 <div class="coluna">
                     <div class="coluna-header">
-                        <h3><i class="fas fa-list"></i> Disponíveis</h3>
-                        <div class="controles-busca">
-                            <div class="input-busca">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="busca-vantagens" placeholder="Buscar vantagem...">
-                            </div>
-                            <select id="filtro-vantagens" class="select-filtro">
-                                <option value="">Todas</option>
-                                <option value="mental">Mental</option>
-                                <option value="fisica">Física</option>
-                                <option value="social">Social</option>
-                            </select>
-                        </div>
+                        <h3>Disponíveis</h3>
+                        <input type="text" class="filtro" placeholder="Buscar..." id="filtro-vant">
                     </div>
                     
-                    <div class="lista-items" id="lista-vantagens-disponiveis">
-                        <!-- Itens serão carregados aqui -->
-                        <div class="vazio-mensagem">
-                            <i class="fas fa-spinner fa-spin"></i> Carregando...
-                        </div>
+                    <div class="lista" id="lista-vantagens">
+                        <!-- Itens carregados via JS -->
                     </div>
                 </div>
                 
-                <!-- COLUNA DIREITA - ADQUIRIDAS -->
+                <!-- ADQUIRIDAS -->
                 <div class="coluna">
                     <div class="coluna-header">
-                        <h3><i class="fas fa-check-circle"></i> Adquiridas</h3>
-                        <div class="acoes-coluna">
-                            <button class="btn-pequeno btn-limpar" id="limpar-vantagens">
-                                <i class="fas fa-trash"></i> Limpar
-                            </button>
-                        </div>
+                        <h3>Adquiridas <span id="contador-vantagens">(0)</span></h3>
+                        <button class="btn-limpar" onclick="limparVantagens()">Limpar</button>
                     </div>
                     
-                    <div class="lista-items" id="lista-vantagens-adquiridas">
-                        <div class="vazio-mensagem">
+                    <div class="lista" id="lista-vantagens-adquiridas">
+                        <div class="vazio">
                             <i class="fas fa-inbox"></i>
                             <p>Nenhuma vantagem</p>
-                            <small>Selecione uma vantagem à esquerda</small>
                         </div>
                     </div>
                 </div>
@@ -914,57 +883,31 @@
         </section>
 
         <!-- DESVANTAGENS -->
-        <section class="secao-desvantagens">
-            <div class="secao-header">
-                <h2>
-                    <i class="fas fa-skull-crossbones"></i>
-                    Desvantagens
-                    <span class="badge" id="contador-desvantagens">0</span>
-                </h2>
-                <div class="secao-info">
-                    <span class="info-custo">Pontos ganhos: <span id="pontos-desvantagens">0</span></span>
-                </div>
-            </div>
+        <section class="secao">
+            <h2 class="titulo-secao">Desvantagens</h2>
             
-            <div class="grid-duplo">
-                <!-- COLUNA ESQUERDA - DISPONÍVEIS -->
+            <div class="duas-colunas">
+                <!-- DISPONÍVEIS -->
                 <div class="coluna">
                     <div class="coluna-header">
-                        <h3><i class="fas fa-list"></i> Disponíveis</h3>
-                        <div class="controles-busca">
-                            <div class="input-busca">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="busca-desvantagens" placeholder="Buscar desvantagem...">
-                            </div>
-                            <select id="filtro-desvantagens" class="select-filtro">
-                                <option value="">Todas</option>
-                                <option value="mental">Mental</option>
-                                <option value="fisica">Física</option>
-                                <option value="social">Social</option>
-                            </select>
-                        </div>
+                        <h3>Disponíveis</h3>
+                        <input type="text" class="filtro" placeholder="Buscar..." id="filtro-desv">
                     </div>
                     
-                    <div class="lista-items" id="lista-desvantagens-disponiveis">
-                        <div class="vazio-mensagem">
-                            <i class="fas fa-spinner fa-spin"></i> Carregando...
-                        </div>
+                    <div class="lista" id="lista-desvantagens">
+                        <!-- Itens carregados via JS -->
                     </div>
                 </div>
                 
-                <!-- COLUNA DIREITA - ADQUIRIDAS -->
+                <!-- ADQUIRIDAS -->
                 <div class="coluna">
                     <div class="coluna-header">
-                        <h3><i class="fas fa-exclamation-triangle"></i> Adquiridas</h3>
-                        <div class="acoes-coluna">
-                            <button class="btn-pequeno btn-limpar" id="limpar-desvantagens">
-                                <i class="fas fa-trash"></i> Limpar
-                            </button>
-                        </div>
+                        <h3>Adquiridas <span id="contador-desvantagens">(0)</span></h3>
+                        <button class="btn-limpar" onclick="limparDesvantagens()">Limpar</button>
                     </div>
                     
-                    <div class="lista-items" id="lista-desvantagens-adquiridas">
-                        <div class="vazio-mensagem">
+                    <div class="lista" id="lista-desvantagens-adquiridas">
+                        <div class="vazio">
                             <i class="fas fa-inbox"></i>
                             <p>Nenhuma desvantagem</p>
                         </div>
@@ -974,99 +917,53 @@
         </section>
 
         <!-- PECULIARIDADES -->
-        <section class="secao-peculiaridades">
-            <div class="secao-header">
-                <h2>
-                    <i class="fas fa-tags"></i>
-                    Peculiaridades
-                    <span class="badge" id="contador-peculiaridades">0/5</span>
-                </h2>
-                <div class="secao-info">
-                    <span class="info-custo">Custo: 1 ponto cada</span>
-                </div>
-            </div>
+        <section class="secao">
+            <h2 class="titulo-secao">Peculiaridades <small>(1 ponto cada)</small></h2>
             
-            <div class="peculiaridades-container">
-                <div class="input-peculiaridade">
-                    <textarea id="nova-peculiaridade" 
-                              placeholder="Descreva uma peculiaridade do personagem (máx 50 caracteres)..."
-                              maxlength="50"></textarea>
-                    <div class="controles-peculiaridade">
-                        <div class="contador">
-                            <span id="contador-caracteres">0</span>/50
-                        </div>
-                        <button class="btn-adicionar" id="btn-adicionar-pec">
-                            <i class="fas fa-plus"></i> Adicionar (-1 ponto)
-                        </button>
+            <div class="peculiaridades-box">
+                <div class="input-pec">
+                    <textarea id="nova-pec" placeholder="Digite uma peculiaridade (max 50 chars)" 
+                              maxlength="50" rows="2"></textarea>
+                    <div class="controles-pec">
+                        <span class="contador" id="contador-pec">0/50</span>
+                        <button class="btn-adicionar" onclick="adicionarPeculiaridade()">Adicionar</button>
                     </div>
                 </div>
                 
-                <div class="lista-peculiaridades" id="lista-peculiaridades">
-                    <div class="vazio-mensagem">
+                <div class="lista-pec" id="lista-peculiaridades">
+                    <div class="vazio">
                         <i class="fas fa-sticky-note"></i>
                         <p>Nenhuma peculiaridade</p>
-                        <small>Adicione traços específicos do personagem</small>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- RESUMO FINAL -->
-        <footer class="resumo-footer">
-            <div class="resumo-totais">
-                <div class="total-item">
-                    <span>Vantagens:</span>
-                    <span class="valor positivo" id="resumo-vantagens">+0</span>
-                </div>
-                <div class="total-item">
-                    <span>Desvantagens:</span>
-                    <span class="valor negativo" id="resumo-desvantagens">-0</span>
-                </div>
-                <div class="total-item">
-                    <span>Peculiaridades:</span>
-                    <span class="valor neutro" id="resumo-peculiaridades">-0</span>
-                </div>
-                <div class="total-item destaque">
-                    <span>Saldo Final:</span>
-                    <span class="valor saldo" id="resumo-saldo">0</span>
-                </div>
-            </div>
-            
-            <div class="acoes-finais">
-                <button class="btn-final btn-exportar" id="btn-exportar">
-                    <i class="fas fa-download"></i> Exportar
-                </button>
-                <button class="btn-final btn-imprimir" id="btn-imprimir">
-                    <i class="fas fa-print"></i> Imprimir
-                </button>
-            </div>
-        </footer>
+        <!-- BOTÕES DE AÇÃO -->
+        <div class="acoes-finais">
+            <button class="btn btn-secundario" onclick="resetarTudo()">
+                <i class="fas fa-redo"></i> Resetar Tudo
+            </button>
+            <button class="btn btn-primario" onclick="salvarDados()">
+                <i class="fas fa-save"></i> Salvar
+            </button>
+        </div>
     </div>
 </div>
 
-<!-- MODAL SIMPLES E FUNCIONAL -->
-<div id="modal-compra" class="modal-overlay">
-    <div class="modal-container">
+<!-- MODAL SIMPLES -->
+<div id="modal" class="modal">
+    <div class="modal-conteudo">
         <div class="modal-header">
-            <h3 id="modal-titulo">
-                <i class="fas fa-shopping-cart"></i> Adquirir Item
-            </h3>
-            <button class="btn-fechar" id="fechar-modal">&times;</button>
+            <h3 id="modal-titulo">Adquirir Item</h3>
+            <button class="fechar-modal" onclick="fecharModal()">&times;</button>
         </div>
-        
-        <div class="modal-body">
-            <div id="modal-conteudo">
-                <!-- Conteúdo dinâmico -->
-            </div>
-            
-            <div class="modal-acoes">
-                <button class="btn btn-secundario" id="btn-cancelar">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
-                <button class="btn btn-primario" id="btn-adquirir">
-                    <i class="fas fa-check"></i> Adquirir Item
-                </button>
-            </div>
+        <div class="modal-body" id="modal-corpo">
+            <!-- Conteúdo dinâmico -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancelar" onclick="fecharModal()">Cancelar</button>
+            <button class="btn btn-confirmar" onclick="confirmarAdquirir()">Adquirir</button>
         </div>
     </div>
 </div>
