@@ -1,5 +1,4 @@
-/* ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA CORRIGIDA ===== */
-/* Correção do problema do último item cortado */
+/* ===== SISTEMA DE PERÍCIAS - VERSÃO FINAL ===== */
 
 /* ===== RESET E CONFIGURAÇÕES GERAIS ===== */
 * {
@@ -131,7 +130,7 @@ button,
     }
 }
 
-/* ===== CARDS DE PERÍCIAS (CORREÇÃO DO CORTE) ===== */
+/* ===== CARDS DE PERÍCIAS ===== */
 .atributo-card {
     background: rgba(30, 30, 40, 0.95);
     border: 1px solid rgba(255, 140, 0, 0.25);
@@ -140,11 +139,11 @@ button,
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 100%; /* CORREÇÃO: usa 100% do espaço disponível */
-    min-height: 500px; /* Altura mínima */
+    height: 100%;
+    min-height: 650px;
+    overflow: visible !important;
 }
 
 .atributo-card::before {
@@ -271,7 +270,7 @@ button,
     padding: 12px;
 }
 
-/* ===== GRUPOS DE PERÍCIAS COLABSÁVEIS (CORREÇÃO DO CORTE) ===== */
+/* ===== GRUPOS DE PERÍCIAS ===== */
 .grupo-pericias {
     margin-bottom: 12px;
     border-radius: 10px;
@@ -280,13 +279,9 @@ button,
     flex-shrink: 0;
 }
 
-.grupo-pericias:last-child {
-    margin-bottom: 0; /* Remove margem do último grupo */
-}
-
 .grupo-pericias.ativo .grupo-conteudo {
     display: block;
-    max-height: 1000px; /* Valor alto suficiente */
+    max-height: 1000px;
     transition: max-height 0.3s ease;
 }
 
@@ -336,27 +331,33 @@ button,
     display: none;
     padding: 10px;
     background: rgba(25, 25, 35, 0.8);
-    overflow: visible; /* CORREÇÃO: permite conteúdo visível */
+    overflow: visible;
 }
 
-/* ===== LISTA DE PERÍCIAS (CORREÇÃO DO CORTE) ===== */
+/* ===== LISTA DE PERÍCIAS (SCROLL CORRIGIDO) ===== */
 .lista-container {
-    flex: 1; /* CORREÇÃO: Ocupa todo espaço disponível */
-    min-height: 300px; /* Altura mínima */
-    overflow-y: auto; /* Scroll apenas se necessário */
-    padding: 10px;
+    max-height: 550px !important;
+    min-height: 400px;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    padding: 15px;
+    padding-bottom: 70px !important;
     scroll-behavior: smooth;
+    scroll-padding-bottom: 20px;
     display: flex;
     flex-direction: column;
     position: relative;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Espaço extra no final para garantir visibilidade */
+/* Espaçador crítico para garantir scroll completo */
 .lista-container::after {
     content: '';
     display: block;
-    height: 20px;
+    height: 60px;
+    width: 100%;
     flex-shrink: 0;
+    background: transparent;
 }
 
 .lista-vazia {
@@ -387,7 +388,7 @@ button,
 }
 
 .item-lista:last-child {
-    margin-bottom: 0; /* Remove margem do último item */
+    margin-bottom: 25px !important;
 }
 
 .item-lista:hover {
@@ -1117,14 +1118,14 @@ button,
         margin-bottom: 15px;
     }
     
-    /* CORREÇÃO ESPECÍFICA PARA MOBILE */
     .atributo-card {
-        min-height: 400px; /* Reduz altura mínima no mobile */
-        height: auto; /* Altura automática */
+        min-height: 550px;
     }
     
     .lista-container {
-        min-height: 250px; /* Altura mínima menor */
+        max-height: 500px !important;
+        min-height: 350px;
+        padding-bottom: 60px !important;
     }
     
     .atributo-header {
@@ -1153,10 +1154,6 @@ button,
     .filtro-select {
         flex: 1 1 auto;
         min-width: 100%;
-    }
-    
-    .lista-container {
-        padding: 8px;
     }
     
     .item-lista {
@@ -1302,11 +1299,12 @@ button,
     }
     
     .atributo-card {
-        min-height: 350px; /* Altura ainda menor em telas pequenas */
+        min-height: 500px;
     }
     
     .lista-container {
-        min-height: 200px;
+        max-height: 450px !important;
+        min-height: 300px;
     }
     
     .grupo-header {
@@ -1437,267 +1435,4 @@ button,
     100% {
         transform: translateX(100%);
     }
-}
-
-/* ===== CORREÇÕES ESPECÍFICAS PARA O PROBLEMA DO CORTE ===== */
-
-/* 1. Garantir que o container da lista use flexbox corretamente */
-.lista-container {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0; /* Crucial para scroll interno funcionar */
-}
-
-/* 2. Garantir que os grupos se expandam corretamente */
-.grupo-pericias {
-    flex: 0 0 auto; /* Não cresce, não encolhe */
-}
-
-.grupo-conteudo {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* 3. Espaço extra para o último item ser visível */
-.grupo-pericias:last-child .grupo-conteudo {
-    padding-bottom: 10px;
-}
-
-/* 4. Ajuste para quando há muitos itens - scroll suave */
-.atributo-card {
-    /* Remove qualquer max-height que possa limitar */
-    max-height: none;
-}
-
-/* 5. Melhorar a visualização em telas grandes */
-@media (min-height: 800px) and (min-width: 768px) {
-    .atributo-card {
-        height: 70vh;
-    }
-}
-
-/* 6. Ajuste específico para a categoria Combate (que geralmente tem mais itens) */
-.grupo-pericias[data-categoria="Combate"] .grupo-conteudo {
-    min-height: 200px; /* Garante altura mínima */
-}
-
-/* 7. Garantir que o botão de fechar modal não sobreponha conteúdo */
-.modal-close {
-    z-index: 1001;
-}
-
-/* 8. Correção para scroll no iOS */
-.lista-container {
-    -webkit-overflow-scrolling: touch;
-}
-
-/* 9. Garantir que o último item não fique escondido atrás de nada */
-.item-lista:last-child {
-    position: relative;
-    z-index: 1;
-}
-
-/* ADICIONE ISSO NO FINAL DO SEU CSS ATUAL */
-.lista-container {
-    padding-bottom: 60px !important;
-    margin-bottom: 20px !important;
-    overflow-y: scroll !important;
-}
-
-.atributo-card {
-    min-height: 700px !important;
-    height: auto !important;
-}
-
-.item-lista:last-child {
-    margin-bottom: 30px !important;
-}
-
-/* ===== CORREÇÃO COMPLETA DO SCROLL ===== */
-
-/* 1. REMOVER QUALQUER OVERFLOW: HIDDEN QUE ESTEJA BLOQUEANDO */
-.atributos-container,
-.cards-grid,
-.principais-grid {
-    overflow: visible !important;
-    position: relative;
-}
-
-/* 2. CARD PRINCIPAL */
-.atributo-card {
-    background: rgba(30, 30, 40, 0.95);
-    border: 1px solid rgba(255, 140, 0, 0.25);
-    border-radius: 12px;
-    padding: 0;
-    backdrop-filter: blur(10px);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 600px;
-    position: relative;
-    overflow: visible !important; /* CRÍTICO: permite scroll interno */
-}
-
-/* 3. HEADER DO CARD (fixo no topo) */
-.atributo-header {
-    background: linear-gradient(135deg, rgba(40, 40, 50, 0.95), rgba(50, 50, 65, 0.95));
-    color: #ffd700;
-    padding: 16px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(255, 140, 0, 0.3);
-    flex-shrink: 0; /* Não encolhe */
-    z-index: 10;
-    position: relative;
-}
-
-/* 4. CONTAINER DE SCROLL DEDICADO */
-.lista-scroll-container {
-    flex: 1; /* Ocupa todo espaço restante */
-    min-height: 400px;
-    max-height: 500px; /* Altura máxima controlada */
-    overflow-y: auto !important;
-    overflow-x: hidden;
-    position: relative;
-    
-    /* Scroll suave e configurado */
-    scroll-behavior: smooth;
-    scroll-padding-bottom: 30px;
-    -webkit-overflow-scrolling: touch;
-    
-    /* Remove barra de scroll padrão se quiser */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 140, 0, 0.5) rgba(255, 255, 255, 0.05);
-}
-
-/* 5. CONTAINER DA LISTA (onde ficam os itens) */
-.lista-container {
-    padding: 15px;
-    padding-bottom: 60px !important; /* ESPAÇO EXTRA CRÍTICO */
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-height: min-content;
-}
-
-/* 6. ESPAÇADOR INVISÍVEL NO FINAL */
-.lista-container::after {
-    content: '';
-    display: block;
-    height: 40px; /* Altura do espaçador */
-    width: 100%;
-    flex-shrink: 0;
-    background: transparent;
-}
-
-/* 7. GRUPOS DE PERÍCIAS */
-.grupo-pericias {
-    margin-bottom: 12px;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 140, 0, 0.2);
-}
-
-.grupo-header {
-    background: linear-gradient(135deg, rgba(50, 50, 65, 0.95), rgba(60, 60, 75, 0.95));
-    padding: 14px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.grupo-conteudo {
-    padding: 12px;
-    background: rgba(25, 25, 35, 0.8);
-    display: none;
-}
-
-.grupo-pericias.ativo .grupo-conteudo {
-    display: block;
-}
-
-/* 8. ITENS DA LISTA */
-.item-lista {
-    background: rgba(40, 40, 50, 0.9);
-    border: 1px solid rgba(255, 140, 0, 0.3);
-    border-radius: 8px;
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    margin-bottom: 10px;
-}
-
-.item-lista:last-child {
-    margin-bottom: 20px !important; /* Extra para o último */
-}
-
-.item-lista:hover {
-    border-color: #ff8c00;
-    background: rgba(255, 140, 0, 0.1);
-    transform: translateX(3px);
-}
-
-/* 9. SCROLLBAR PERSONALIZADA */
-.lista-scroll-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-.lista-scroll-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.lista-scroll-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 140, 0, 0.5);
-    border-radius: 4px;
-}
-
-.lista-scroll-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 140, 0, 0.7);
-}
-
-/* 10. RESPONSIVIDADE */
-@media (max-width: 768px) {
-    .lista-scroll-container {
-        max-height: 450px;
-    }
-    
-    .atributo-card {
-        min-height: 550px;
-    }
-}
-
-@media (min-height: 800px) {
-    .lista-scroll-container {
-        max-height: 600px;
-    }
-}
-
-/* 11. LOADING SPINNER */
-.lista-vazia .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(255, 140, 0, 0.3);
-    border-top: 3px solid #ff8c00;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 20px auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.lista-vazia {
-    text-align: center;
-    color: #95a5a6;
-    padding: 30px 15px;
-    font-style: italic;
 }

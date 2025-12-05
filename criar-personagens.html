@@ -1011,7 +1011,7 @@
         </div>
     </div>
 </div>
-     <!-- ABA PERÍCIAS - VERSÃO COMPLETA COM SCROLL FUNCIONAL -->
+  <!-- ABA PERÍCIAS - VERSÃO CORRIGIDA SIMPLES -->
 <div id="pericias" class="tab-content active">
     <div class="atributos-container">
         <!-- CARD DE RESUMO DE PONTOS -->
@@ -1048,37 +1048,33 @@
         </div>
 
         <div class="cards-grid principais-grid">
-            <!-- CARD PERÍCIAS DISPONÍVEIS (COM SCROLL CORRIGIDO) -->
+            <!-- CARD PERÍCIAS DISPONÍVEIS -->
             <div class="atributo-card">
                 <div class="atributo-header">
                     <h3>🎯 Perícias Disponíveis</h3>
                     <div class="contador" id="contador-pericias">0 perícias</div>
                 </div>
                 
-                <!-- CONTAINER COM SCROLL DEDICADO -->
-                <div class="lista-scroll-container">
-                    <div class="lista-container" id="lista-pericias">
-                        <!-- Conteúdo será preenchido por JavaScript -->
-                        <div class="lista-vazia">
-                            <div class="spinner"></div>
-                            <p>Carregando perícias...</p>
-                        </div>
+                <!-- LISTA SIMPLES - SEM CONTAINERS EXTRAS -->
+                <div class="lista-container" id="lista-pericias" style="max-height: 550px;">
+                    <!-- Conteúdo será preenchido por JavaScript -->
+                    <div class="lista-vazia">
+                        <div class="spinner"></div>
+                        <p>Carregando perícias...</p>
                     </div>
                 </div>
             </div>
 
-            <!-- CARD PERÍCIAS ADQUIRIDAS (COM SCROLL CORRIGIDO) -->
+            <!-- CARD PERÍCIAS ADQUIRIDAS -->
             <div class="atributo-card">
                 <div class="atributo-header">
                     <h3>✅ Perícias Adquiridas</h3>
                     <div class="custo-pontos" id="total-pericias-adquiridas-label">0 pts</div>
                 </div>
                 
-                <!-- CONTAINER COM SCROLL DEDICADO -->
-                <div class="lista-scroll-container">
-                    <div class="lista-container" id="pericias-adquiridas">
-                        <div class="lista-vazia">Nenhuma perícia adquirida</div>
-                    </div>
+                <!-- LISTA SIMPLES - SEM CONTAINERS EXTRAS -->
+                <div class="lista-container" id="pericias-adquiridas" style="max-height: 550px;">
+                    <div class="lista-vazia">Nenhuma perícia adquirida</div>
                 </div>
             </div>
         </div>
