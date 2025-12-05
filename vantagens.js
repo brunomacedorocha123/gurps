@@ -1,193 +1,192 @@
 // ============================================
-// SISTEMA DE VANTAGENS - JS FUNCIONAL
+// SISTEMA DE VANTAGENS E DESVANTAGENS - COMPLETO
 // ============================================
 
-// Dados do catálogo
-const catalogo = {
-    vantagens: [
-        {
-            id: "abencoado",
-            nome: "Abençoado",
-            categoria: "sobrenatural",
-            tipo: "multipla",
-            descricao: "Sintonizado com uma entidade divina/demoníaca/espiritual.",
-            variacoes: [
-                { id: "abencoado-basico", nome: "Abençoado", custo: 10, descricao: "Recebe visões após 1h de ritual." },
-                { id: "muito-abencoado", nome: "Muito Abençoado", custo: 20, descricao: "+5 no teste de IQ para visões." },
-                { id: "feitos-heroicos", nome: "Feitos Heroicos", custo: 15, descricao: "1x por sessão: +1 dado em ST, DX ou HT." }
-            ]
-        },
-        {
-            id: "resistencia-magia",
-            nome: "Resistência à Magia",
-            categoria: "sobrenatural",
-            tipo: "variavel",
-            descricao: "Resistência natural contra efeitos mágicos.",
-            niveis: 5,
-            custoPorNivel: 3,
-            nivelBase: 1
-        },
-        {
-            id: "sentidos-aguçados",
-            nome: "Sentidos Aguçados",
-            categoria: "fisica",
-            tipo: "simples",
-            custo: 5,
-            descricao: "Visão, audição ou olfato excepcionais. +2 em percepção."
-        },
-        {
-            id: "carisma",
-            nome: "Carisma",
-            categoria: "social",
-            tipo: "variavel",
-            descricao: "Habilidade natural de influenciar pessoas.",
-            niveis: 4,
-            custoPorNivel: 5,
-            nivelBase: 1
-        },
-        {
-            id: "reflexos-rapidos",
-            nome: "Reflexos Rápidos",
-            categoria: "fisica",
-            tipo: "simples",
-            custo: 15,
-            descricao: "+1 em todos os testes de iniciativa e esquiva."
-        }
-    ],
-    desvantagens: [
-        {
-            id: "alcoolismo",
-            nome: "Alcoolismo",
-            categoria: "mental",
-            tipo: "multipla",
-            descricao: "Vício em álcool que afeta o julgamento.",
-            variacoes: [
-                { id: "alcoolismo-leve", nome: "Alcoolismo (Leve)", custo: -10, descricao: "Precisa beber regularmente." },
-                { id: "alcoolismo-grave", nome: "Alcoolismo (Grave)", custo: -20, descricao: "Dependente. Testes diários." }
-            ]
-        },
-        {
-            id: "medo-de-altura",
-            nome: "Medo de Altura",
-            categoria: "mental",
-            tipo: "simples",
-            custo: -15,
-            descricao: "Fobia incapacitante de lugares altos."
-        },
-        {
-            id: "codigo-honra",
-            nome: "Código de Honra",
-            categoria: "social",
-            tipo: "multipla",
-            descricao: "Seguir um código rígido de conduta.",
-            variacoes: [
-                { id: "honra-samurai", nome: "Código do Samurai", custo: -15, descricao: "Bushido - Lealdade, honra, coragem." },
-                { id: "honra-cavaleiro", nome: "Código do Cavaleiro", custo: -10, descricao: "Proteger os fracos, ser cortês." }
-            ]
-        },
-        {
-            id: "pobre",
-            nome: "Pobre",
-            categoria: "social",
-            tipo: "variavel",
-            descricao: "Falta de recursos financeiros.",
-            niveis: 3,
-            custoPorNivel: -5,
-            nivelBase: 1
-        },
-        {
-            id: "doenca-cronica",
-            nome: "Doença Crônica",
-            categoria: "fisica",
-            tipo: "simples",
-            custo: -10,
-            descricao: "Doença persistente que requer tratamento."
-        }
-    ]
-};
-
-// Estado do sistema
-let estado = {
-    pontosDisponiveis: 100,
+// Estado global do sistema
+const estadoVantagens = {
+    pontosTotais: 100,
     vantagensAdquiridas: [],
     desvantagensAdquiridas: [],
     peculiaridades: [],
-    itemSelecionado: null,
-    tipoSelecionado: null,
-    variacaoSelecionada: null,
-    nivelSelecionado: 1
+    vantagensCompradas: 0,
+    desvantagensCompradas: 0
 };
 
+// Catálogo de Vantagens
+const vantagensCatalogo = [
+    {
+        id: "abencoado",
+        nome: "Abençoado",
+        categoria: "sobrenatural",
+        tipo: "multipla",
+        descricao: "Sintonizado com uma entidade divina/demoníaca/espiritual.",
+        variacoes: [
+            { id: "abencoado-basico", nome: "Abençoado", custo: 10, descricao: "Recebe visões após 1h de ritual." },
+            { id: "muito-abencoado", nome: "Muito Abençoado", custo: 20, descricao: "+5 no teste de IQ para visões." },
+            { id: "feitos-heroicos", nome: "Feitos Heroicos", custo: 15, descricao: "1x por sessão: +1 dado em ST, DX ou HT." }
+        ]
+    },
+    {
+        id: "carisma",
+        nome: "Carisma",
+        categoria: "social",
+        tipo: "variavel",
+        descricao: "Habilidade natural de influenciar pessoas.",
+        niveis: 4,
+        custoPorNivel: 5,
+        nivelBase: 1
+    },
+    {
+        id: "reflexos-rapidos",
+        nome: "Reflexos de Combate",
+        categoria: "fisica",
+        tipo: "simples",
+        custo: 15,
+        descricao: "+1 em todos os testes de iniciativa e esquiva."
+    },
+    {
+        id: "agilidade",
+        nome: "Agilidade",
+        categoria: "fisica",
+        tipo: "variavel",
+        descricao: "Movimentos rápidos e precisos.",
+        niveis: 3,
+        custoPorNivel: 10,
+        nivelBase: 1
+    },
+    {
+        id: "intuicao",
+        nome: "Intuição",
+        categoria: "mental",
+        tipo: "simples",
+        custo: 12,
+        descricao: "+2 em testes de percepção e detecção de perigo."
+    }
+];
+
+// Catálogo de Desvantagens
+const desvantagensCatalogo = [
+    {
+        id: "alcoolismo",
+        nome: "Alcoolismo",
+        categoria: "mental",
+        tipo: "multipla",
+        descricao: "Vício em álcool que afeta o julgamento.",
+        variacoes: [
+            { id: "alcoolismo-leve", nome: "Alcoolismo (Leve)", custo: -10, descricao: "Precisa beber regularmente." },
+            { id: "alcoolismo-grave", nome: "Alcoolismo (Grave)", custo: -20, descricao: "Dependente. Testes diários." }
+        ]
+    },
+    {
+        id: "medo-de-altura",
+        nome: "Medo de Altura",
+        categoria: "mental",
+        tipo: "simples",
+        custo: -15,
+        descricao: "Fobia incapacitante de lugares altos."
+    },
+    {
+        id: "codigo-honra",
+        nome: "Código de Honra",
+        categoria: "social",
+        tipo: "multipla",
+        descricao: "Seguir um código rígido de conduta.",
+        variacoes: [
+            { id: "honra-samurai", nome: "Código do Samurai", custo: -15, descricao: "Bushido - Lealdade, honra, coragem." },
+            { id: "honra-cavaleiro", nome: "Código do Cavaleiro", custo: -10, descricao: "Proteger os fracos, ser cortês." }
+        ]
+    },
+    {
+        id: "teimosia",
+        nome: "Teimosia",
+        categoria: "mental",
+        tipo: "simples",
+        custo: -8,
+        descricao: "Relutância em mudar de opinião."
+    },
+    {
+        id: "vicio-fumar",
+        nome: "Vício em Fumar",
+        categoria: "fisica",
+        tipo: "simples",
+        custo: -12,
+        descricao: "Dependência de tabaco."
+    }
+];
+
 // ========== INICIALIZAÇÃO ==========
-function inicializar() {
-    console.log("Inicializando sistema...");
+function inicializarSistemaVantagens() {
+    console.log("🔄 Inicializando sistema de Vantagens/Desvantagens...");
     
     // Carregar dados salvos
-    carregarDados();
-    
-    // Carregar listas
-    carregarVantagens();
-    carregarDesvantagens();
+    carregarDadosSalvos();
     
     // Configurar eventos
-    configurarEventos();
+    configurarEventosVantagens();
+    
+    // Carregar listas
+    carregarListaVantagens();
+    carregarListaDesvantagens();
+    carregarPeculiaridades();
     
     // Atualizar interface
-    atualizarTudo();
+    atualizarInterfaceVantagens();
     
-    console.log("Sistema pronto!");
+    console.log("✅ Sistema de Vantagens/Desvantagens pronto!");
 }
 
 // ========== CARREGAR DADOS SALVOS ==========
-function carregarDados() {
+function carregarDadosSalvos() {
     try {
-        const dados = localStorage.getItem('vantagensDados');
+        const dados = localStorage.getItem('sistemaVantagensDados');
         if (dados) {
             const parsed = JSON.parse(dados);
-            estado.vantagensAdquiridas = parsed.vantagensAdquiridas || [];
-            estado.desvantagensAdquiridas = parsed.desvantagensAdquiridas || [];
-            estado.peculiaridades = parsed.peculiaridades || [];
-            estado.pontosDisponiveis = parsed.pontosDisponiveis || 100;
-            console.log("Dados carregados do localStorage");
+            estadoVantagens.vantagensAdquiridas = parsed.vantagensAdquiridas || [];
+            estadoVantagens.desvantagensAdquiridas = parsed.desvantagensAdquiridas || [];
+            estadoVantagens.peculiaridades = parsed.peculiaridades || [];
+            estadoVantagens.pontosTotais = parsed.pontosTotais || 100;
+            console.log("📁 Dados carregados do localStorage");
         }
     } catch (e) {
-        console.error("Erro ao carregar dados:", e);
+        console.error("❌ Erro ao carregar dados:", e);
+        // Resetar se houver erro
+        resetarDadosVantagens();
     }
 }
 
 // ========== SALVAR DADOS ==========
-function salvarDados() {
+function salvarDadosVantagens() {
     try {
         const dados = {
-            vantagensAdquiridas: estado.vantagensAdquiridas,
-            desvantagensAdquiridas: estado.desvantagensAdquiridas,
-            peculiaridades: estado.peculiaridades,
-            pontosDisponiveis: estado.pontosDisponiveis,
+            vantagensAdquiridas: estadoVantagens.vantagensAdquiridas,
+            desvantagensAdquiridas: estadoVantagens.desvantagensAdquiridas,
+            peculiaridades: estadoVantagens.peculiaridades,
+            pontosTotais: estadoVantagens.pontosTotais,
             timestamp: new Date().toISOString()
         };
         
-        localStorage.setItem('vantagensDados', JSON.stringify(dados));
-        mostrarNotificacao("Dados salvos!", "success");
-        console.log("Dados salvos");
+        localStorage.setItem('sistemaVantagensDados', JSON.stringify(dados));
+        mostrarNotificacaoVantagens("💾 Dados salvos com sucesso!", "success");
+        console.log("💾 Dados salvos");
     } catch (e) {
-        console.error("Erro ao salvar:", e);
-        mostrarNotificacao("Erro ao salvar!", "error");
+        console.error("❌ Erro ao salvar:", e);
+        mostrarNotificacaoVantagens("❌ Erro ao salvar dados!", "error");
     }
 }
 
-// ========== CARREGAR VANTAGENS ==========
-function carregarVantagens() {
+// ========== CARREGAR LISTA DE VANTAGENS ==========
+function carregarListaVantagens() {
     const container = document.getElementById('lista-vantagens');
     if (!container) return;
     
     container.innerHTML = '';
     
-    catalogo.vantagens.forEach(vantagem => {
+    vantagensCatalogo.forEach(vantagem => {
         // Verificar se já foi adquirida
-        const jaAdquirida = estado.vantagensAdquiridas.some(v => v.baseId === vantagem.id);
+        const jaAdquirida = estadoVantagens.vantagensAdquiridas.some(v => v.baseId === vantagem.id);
         if (jaAdquirida) return;
         
-        const item = criarItemElemento(vantagem, 'vantagem');
+        const item = criarElementoItem(vantagem, 'vantagem');
         container.appendChild(item);
     });
     
@@ -195,19 +194,19 @@ function carregarVantagens() {
     atualizarVantagensAdquiridas();
 }
 
-// ========== CARREGAR DESVANTAGENS ==========
-function carregarDesvantagens() {
+// ========== CARREGAR LISTA DE DESVANTAGENS ==========
+function carregarListaDesvantagens() {
     const container = document.getElementById('lista-desvantagens');
     if (!container) return;
     
     container.innerHTML = '';
     
-    catalogo.desvantagens.forEach(desvantagem => {
+    desvantagensCatalogo.forEach(desvantagem => {
         // Verificar se já foi adquirida
-        const jaAdquirida = estado.desvantagensAdquiridas.some(d => d.baseId === desvantagem.id);
+        const jaAdquirida = estadoVantagens.desvantagensAdquiridas.some(d => d.baseId === desvantagem.id);
         if (jaAdquirida) return;
         
-        const item = criarItemElemento(desvantagem, 'desvantagem');
+        const item = criarElementoItem(desvantagem, 'desvantagem');
         container.appendChild(item);
     });
     
@@ -216,7 +215,7 @@ function carregarDesvantagens() {
 }
 
 // ========== CRIAR ELEMENTO DE ITEM ==========
-function criarItemElemento(item, tipo) {
+function criarElementoItem(item, tipo) {
     const div = document.createElement('div');
     div.className = `item ${tipo === 'desvantagem' ? 'item-desvantagem' : ''}`;
     div.dataset.id = item.id;
@@ -225,7 +224,7 @@ function criarItemElemento(item, tipo) {
     // Calcular custo para exibição
     let custoDisplay = '';
     if (item.tipo === 'variavel') {
-        const custo = Math.abs(item.custoPorNivel) || 2;
+        const custo = Math.abs(item.custoPorNivel);
         custoDisplay = `${custo} pts/nível`;
     } else if (item.tipo === 'multipla') {
         const custos = item.variacoes.map(v => Math.abs(v.custo));
@@ -249,27 +248,37 @@ function criarItemElemento(item, tipo) {
             <div class="item-custo">${custoDisplay}</div>
         </div>
         <div class="item-descricao">${item.descricao}</div>
+        <div class="item-info">
+            <span class="item-categoria">${item.categoria}</span>
+            <span class="item-tipo">${item.tipo}</span>
+        </div>
     `;
     
-    div.addEventListener('click', () => selecionarItem(item, tipo));
+    div.addEventListener('click', () => selecionarItemVantagem(item, tipo));
     
     return div;
 }
 
 // ========== SELECIONAR ITEM ==========
-function selecionarItem(item, tipo) {
-    console.log("Selecionado:", item.nome, tipo);
+function selecionarItemVantagem(item, tipo) {
+    console.log("🎯 Selecionado:", item.nome, tipo);
     
-    estado.itemSelecionado = item;
-    estado.tipoSelecionado = tipo;
-    estado.variacaoSelecionada = null;
-    estado.nivelSelecionado = item.nivelBase || 1;
-    
-    abrirModal(item, tipo);
+    // Configurar modal
+    abrirModalVantagem(item, tipo);
 }
 
 // ========== MODAL ==========
-function abrirModal(item, tipo) {
+let itemSelecionadoModal = null;
+let tipoSelecionadoModal = null;
+let variacaoSelecionadaModal = null;
+let nivelSelecionadoModal = 1;
+
+function abrirModalVantagem(item, tipo) {
+    itemSelecionadoModal = item;
+    tipoSelecionadoModal = tipo;
+    variacaoSelecionadaModal = null;
+    nivelSelecionadoModal = item.nivelBase || 1;
+    
     const modal = document.getElementById('modal');
     const titulo = document.getElementById('modal-titulo');
     const corpo = document.getElementById('modal-corpo');
@@ -277,17 +286,17 @@ function abrirModal(item, tipo) {
     if (!modal || !titulo || !corpo) return;
     
     // Configurar título
-    titulo.textContent = `Adquirir ${tipo === 'vantagem' ? 'Vantagem' : 'Desvantagem'}: ${item.nome}`;
+    titulo.textContent = `${tipo === 'vantagem' ? 'Vantagem' : 'Desvantagem'}: ${item.nome}`;
     
     // Gerar conteúdo baseado no tipo
     let conteudo = '';
     
     if (item.tipo === 'multipla') {
-        conteudo = gerarConteudoMultipla(item, tipo);
+        conteudo = gerarConteudoModalMultipla(item, tipo);
     } else if (item.tipo === 'variavel') {
-        conteudo = gerarConteudoVariavel(item, tipo);
+        conteudo = gerarConteudoModalVariavel(item, tipo);
     } else {
-        conteudo = gerarConteudoSimples(item, tipo);
+        conteudo = gerarConteudoModalSimples(item, tipo);
     }
     
     corpo.innerHTML = conteudo;
@@ -298,20 +307,23 @@ function abrirModal(item, tipo) {
     // Configurar eventos específicos
     setTimeout(() => {
         if (item.tipo === 'multipla') {
-            configurarVariacoes();
+            configurarVariacoesModal();
         } else if (item.tipo === 'variavel') {
-            configurarNiveis();
+            configurarNiveisModal();
         }
     }, 10);
 }
 
-function gerarConteudoSimples(item, tipo) {
+function gerarConteudoModalSimples(item, tipo) {
     const custo = Math.abs(item.custo);
     const sinal = tipo === 'vantagem' ? '+' : '-';
     
     return `
         <div style="margin-bottom: 20px; line-height: 1.6;">
-            ${item.descricao}
+            <strong>Descrição:</strong> ${item.descricao}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <strong>Categoria:</strong> ${item.categoria}
         </div>
         <div class="custo-display">
             Custo: ${sinal}${custo} pontos
@@ -319,24 +331,32 @@ function gerarConteudoSimples(item, tipo) {
     `;
 }
 
-function gerarConteudoMultipla(item, tipo) {
+function gerarConteudoModalMultipla(item, tipo) {
     let html = `
         <div style="margin-bottom: 15px; line-height: 1.6;">
-            ${item.descricao}
+            <strong>Descrição:</strong> ${item.descricao}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <strong>Categoria:</strong> ${item.categoria}
         </div>
         <div style="margin-bottom: 20px;">
             <p><strong>Escolha uma variação:</strong></p>
     `;
     
     item.variacoes.forEach((variacao, index) => {
-        const sinal = variacao.custo > 0 ? '+' : '-';
+        const sinal = tipo === 'vantagem' ? '+' : '-';
+        const custoAbs = Math.abs(variacao.custo);
+        const selecionada = index === 0 ? 'selecionada' : '';
+        
         html += `
-            <div class="opcao-variacao" data-id="${variacao.id}" ${index === 0 ? 'onclick="selecionarVariacao(this)"' : ''}>
+            <div class="opcao-variacao ${selecionada}" 
+                 data-id="${variacao.id}" 
+                 onclick="selecionarVariacaoModal(this)">
                 <div class="variacao-header">
                     <strong>${variacao.nome}</strong>
-                    <span class="variacao-custo">${sinal}${Math.abs(variacao.custo)} pts</span>
+                    <span class="variacao-custo">${sinal}${custoAbs} pts</span>
                 </div>
-                <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
+                <div style="font-size: 0.9em; color: #ccc; margin-top: 5px;">
                     ${variacao.descricao}
                 </div>
             </div>
@@ -344,20 +364,29 @@ function gerarConteudoMultipla(item, tipo) {
     });
     
     html += '</div>';
+    
+    // Selecionar primeira variação por padrão
+    if (item.variacoes[0]) {
+        variacaoSelecionadaModal = item.variacoes[0];
+    }
+    
     return html;
 }
 
-function gerarConteudoVariavel(item, tipo) {
+function gerarConteudoModalVariavel(item, tipo) {
     const sinal = tipo === 'vantagem' ? '+' : '-';
     let html = `
         <div style="margin-bottom: 15px; line-height: 1.6;">
-            ${item.descricao}
+            <strong>Descrição:</strong> ${item.descricao}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <strong>Categoria:</strong> ${item.categoria}
         </div>
         <div style="margin-bottom: 20px;">
             <label style="display: block; margin-bottom: 10px; font-weight: bold;">
                 Selecione o nível (cada nível: ${sinal}${Math.abs(item.custoPorNivel)} pts):
             </label>
-            <select class="select-nivel" id="seletor-nivel" onchange="atualizarCustoNivel()">
+            <select class="select-nivel" id="seletor-nivel" onchange="atualizarCustoNivelModal()">
     `;
     
     for (let i = item.nivelBase || 1; i <= item.niveis; i++) {
@@ -367,7 +396,7 @@ function gerarConteudoVariavel(item, tipo) {
     
     html += `
             </select>
-            <div class="custo-display" id="custo-total">
+            <div class="custo-display" id="custo-total-modal">
                 Custo total: ${sinal}${Math.abs(item.nivelBase * item.custoPorNivel)} pontos
             </div>
         </div>
@@ -376,24 +405,16 @@ function gerarConteudoVariavel(item, tipo) {
     return html;
 }
 
-function configurarVariacoes() {
+function configurarVariacoesModal() {
     const opcoes = document.querySelectorAll('.opcao-variacao');
     opcoes.forEach(opcao => {
         opcao.addEventListener('click', function() {
-            selecionarVariacao(this);
+            selecionarVariacaoModal(this);
         });
     });
-    
-    // Selecionar primeira
-    if (opcoes[0]) {
-        opcoes[0].classList.add('selecionada');
-        const variacaoId = opcoes[0].dataset.id;
-        const item = estado.itemSelecionado;
-        estado.variacaoSelecionada = item.variacoes.find(v => v.id === variacaoId);
-    }
 }
 
-function selecionarVariacao(elemento) {
+function selecionarVariacaoModal(elemento) {
     // Remover seleção de todas
     document.querySelectorAll('.opcao-variacao').forEach(o => {
         o.classList.remove('selecionada');
@@ -404,186 +425,199 @@ function selecionarVariacao(elemento) {
     
     // Encontrar variação
     const variacaoId = elemento.dataset.id;
-    const item = estado.itemSelecionado;
-    estado.variacaoSelecionada = item.variacoes.find(v => v.id === variacaoId);
+    const item = itemSelecionadoModal;
+    variacaoSelecionadaModal = item.variacoes.find(v => v.id === variacaoId);
 }
 
-function configurarNiveis() {
+function configurarNiveisModal() {
     const seletor = document.getElementById('seletor-nivel');
     if (seletor) {
-        seletor.addEventListener('change', atualizarCustoNivel);
+        seletor.addEventListener('change', atualizarCustoNivelModal);
     }
 }
 
-function atualizarCustoNivel() {
+function atualizarCustoNivelModal() {
     const seletor = document.getElementById('seletor-nivel');
-    if (!seletor || !estado.itemSelecionado) return;
+    if (!seletor || !itemSelecionadoModal) return;
     
-    estado.nivelSelecionado = parseInt(seletor.value);
-    const custo = estado.nivelSelecionado * estado.itemSelecionado.custoPorNivel;
-    const sinal = estado.tipoSelecionado === 'vantagem' ? '+' : '-';
+    nivelSelecionadoModal = parseInt(seletor.value);
+    const custo = nivelSelecionadoModal * itemSelecionadoModal.custoPorNivel;
+    const sinal = tipoSelecionadoModal === 'vantagem' ? '+' : '-';
     
-    const display = document.getElementById('custo-total');
+    const display = document.getElementById('custo-total-modal');
     if (display) {
         display.textContent = `Custo total: ${sinal}${Math.abs(custo)} pontos`;
     }
 }
 
-function fecharModal() {
+function fecharModalVantagem() {
     const modal = document.getElementById('modal');
     if (modal) {
         modal.style.display = 'none';
     }
-    estado.itemSelecionado = null;
-    estado.tipoSelecionado = null;
-    estado.variacaoSelecionada = null;
-    estado.nivelSelecionado = 1;
+    itemSelecionadoModal = null;
+    tipoSelecionadoModal = null;
+    variacaoSelecionadaModal = null;
+    nivelSelecionadoModal = 1;
 }
 
-function confirmarAdquirir() {
-    if (!estado.itemSelecionado || !estado.tipoSelecionado) {
-        mostrarNotificacao("Nenhum item selecionado!", "error");
+function adquirirItemModal() {
+    if (!itemSelecionadoModal || !tipoSelecionadoModal) {
+        mostrarNotificacaoVantagens("⚠️ Nenhum item selecionado!", "error");
         return;
     }
     
     // Criar item adquirido
     let itemAdquirido = {
-        id: `${estado.itemSelecionado.id}-${Date.now()}`,
-        baseId: estado.itemSelecionado.id,
-        nome: estado.itemSelecionado.nome,
-        descricao: estado.itemSelecionado.descricao,
-        tipo: estado.itemSelecionado.tipo
+        id: `${itemSelecionadoModal.id}-${Date.now()}`,
+        baseId: itemSelecionadoModal.id,
+        nome: itemSelecionadoModal.nome,
+        descricao: itemSelecionadoModal.descricao,
+        tipo: itemSelecionadoModal.tipo,
+        categoria: itemSelecionadoModal.categoria
     };
     
     // Calcular custo
     let custo = 0;
     
-    if (estado.itemSelecionado.tipo === 'multipla') {
-        if (estado.variacaoSelecionada) {
-            itemAdquirido.nome = estado.variacaoSelecionada.nome;
-            itemAdquirido.descricao = estado.variacaoSelecionada.descricao;
-            custo = estado.variacaoSelecionada.custo;
-        } else if (estado.itemSelecionado.variacoes[0]) {
-            const primeira = estado.itemSelecionado.variacoes[0];
+    if (itemSelecionadoModal.tipo === 'multipla') {
+        if (variacaoSelecionadaModal) {
+            itemAdquirido.nome = variacaoSelecionadaModal.nome;
+            itemAdquirido.descricao = variacaoSelecionadaModal.descricao;
+            custo = variacaoSelecionadaModal.custo;
+        } else if (itemSelecionadoModal.variacoes[0]) {
+            const primeira = itemSelecionadoModal.variacoes[0];
             itemAdquirido.nome = primeira.nome;
             itemAdquirido.descricao = primeira.descricao;
             custo = primeira.custo;
         }
-    } else if (estado.itemSelecionado.tipo === 'variavel') {
-        custo = estado.nivelSelecionado * estado.itemSelecionado.custoPorNivel;
-        itemAdquirido.nivel = estado.nivelSelecionado;
+    } else if (itemSelecionadoModal.tipo === 'variavel') {
+        custo = nivelSelecionadoModal * itemSelecionadoModal.custoPorNivel;
+        itemAdquirido.nivel = nivelSelecionadoModal;
+        itemAdquirido.nivelMax = itemSelecionadoModal.niveis;
     } else {
-        custo = estado.itemSelecionado.custo;
+        custo = itemSelecionadoModal.custo;
     }
     
     // Para desvantagens, custo é negativo
-    if (estado.tipoSelecionado === 'desvantagem') {
+    if (tipoSelecionadoModal === 'desvantagem') {
         custo = -Math.abs(custo);
     }
     
     itemAdquirido.custo = custo;
+    itemAdquirido.dataAquisição = new Date().toISOString();
     
     // Verificar pontos
-    if (estado.tipoSelecionado === 'vantagem') {
+    if (tipoSelecionadoModal === 'vantagem') {
         const custoAbs = Math.abs(custo);
-        if (custoAbs > estado.pontosDisponiveis) {
-            mostrarNotificacao("Pontos insuficientes!", "error");
+        if (custoAbs > estadoVantagens.pontosTotais) {
+            mostrarNotificacaoVantagens("❌ Pontos insuficientes!", "error");
             return;
         }
-        estado.pontosDisponiveis -= custoAbs;
-        estado.vantagensAdquiridas.push(itemAdquirido);
+        estadoVantagens.pontosTotais -= custoAbs;
+        estadoVantagens.vantagensAdquiridas.push(itemAdquirido);
+        estadoVantagens.vantagensCompradas++;
     } else {
         const pontosGanhos = Math.abs(custo);
-        estado.pontosDisponiveis += pontosGanhos;
-        estado.desvantagensAdquiridas.push(itemAdquirido);
+        estadoVantagens.pontosTotais += pontosGanhos;
+        estadoVantagens.desvantagensAdquiridas.push(itemAdquirido);
+        estadoVantagens.desvantagensCompradas++;
     }
     
     // Atualizar interface
-    atualizarTudo();
-    fecharModal();
+    carregarListaVantagens();
+    carregarListaDesvantagens();
+    atualizarInterfaceVantagens();
+    fecharModalVantagem();
     
-    mostrarNotificacao("Item adquirido!", "success");
-    salvarDados();
+    mostrarNotificacaoVantagens("✅ Item adquirido com sucesso!", "success");
+    salvarDadosVantagens();
 }
 
-// ========== ATUALIZAR LISTAS ADQUIRIDAS ==========
+// ========== ATUALIZAR VANTAGENS ADQUIRIDAS ==========
 function atualizarVantagensAdquiridas() {
-    const container = document.getElementById('lista-vantagens-adquiridas');
-    const contador = document.getElementById('contador-vantagens');
+    const container = document.getElementById('vantagens-adquiridas');
+    const contador = document.getElementById('num-vantagens');
     
     if (!container) return;
     
-    if (estado.vantagensAdquiridas.length === 0) {
+    if (estadoVantagens.vantagensAdquiridas.length === 0) {
         container.innerHTML = `
-            <div class="vazio">
+            <div class="mensagem-vazia">
                 <i class="fas fa-inbox"></i>
-                <p>Nenhuma vantagem</p>
+                <p>Nenhuma vantagem adquirida</p>
             </div>
         `;
     } else {
         let html = '';
-        estado.vantagensAdquiridas.forEach((item, index) => {
-            html += criarItemAdquirido(item, 'vantagem', index);
+        estadoVantagens.vantagensAdquiridas.forEach((item, index) => {
+            html += criarItemAdquiridoElemento(item, 'vantagem', index);
         });
         container.innerHTML = html;
         
         // Adicionar eventos de remoção
         setTimeout(() => {
-            document.querySelectorAll('#lista-vantagens-adquiridas .btn-remover').forEach(btn => {
+            document.querySelectorAll('#vantagens-adquiridas .btn-remover').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const index = parseInt(this.dataset.index);
-                    removerVantagem(index);
+                    removerVantagemAdquirida(index);
                 });
             });
         }, 10);
     }
     
     if (contador) {
-        contador.textContent = `(${estado.vantagensAdquiridas.length})`;
+        contador.textContent = estadoVantagens.vantagensAdquiridas.length;
     }
 }
 
+// ========== ATUALIZAR DESVANTAGENS ADQUIRIDAS ==========
 function atualizarDesvantagensAdquiridas() {
-    const container = document.getElementById('lista-desvantagens-adquiridas');
-    const contador = document.getElementById('contador-desvantagens');
+    const container = document.getElementById('desvantagens-adquiridas');
+    const contador = document.getElementById('num-desvantagens');
     
     if (!container) return;
     
-    if (estado.desvantagensAdquiridas.length === 0) {
+    if (estadoVantagens.desvantagensAdquiridas.length === 0) {
         container.innerHTML = `
-            <div class="vazio">
+            <div class="mensagem-vazia">
                 <i class="fas fa-inbox"></i>
-                <p>Nenhuma desvantagem</p>
+                <p>Nenhuma desvantagem adquirida</p>
             </div>
         `;
     } else {
         let html = '';
-        estado.desvantagensAdquiridas.forEach((item, index) => {
-            html += criarItemAdquirido(item, 'desvantagem', index);
+        estadoVantagens.desvantagensAdquiridas.forEach((item, index) => {
+            html += criarItemAdquiridoElemento(item, 'desvantagem', index);
         });
         container.innerHTML = html;
         
         // Adicionar eventos de remoção
         setTimeout(() => {
-            document.querySelectorAll('#lista-desvantagens-adquiridas .btn-remover').forEach(btn => {
+            document.querySelectorAll('#desvantagens-adquiridas .btn-remover').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const index = parseInt(this.dataset.index);
-                    removerDesvantagem(index);
+                    removerDesvantagemAdquirida(index);
                 });
             });
         }, 10);
     }
     
     if (contador) {
-        contador.textContent = `(${estado.desvantagensAdquiridas.length})`;
+        contador.textContent = estadoVantagens.desvantagensAdquiridas.length;
     }
 }
 
-function criarItemAdquirido(item, tipo, index) {
-    const cor = tipo === 'vantagem' ? 'var(--cor-vantagem)' : 'var(--cor-desvantagem)';
+function criarItemAdquiridoElemento(item, tipo, index) {
+    const cor = tipo === 'vantagem' ? '#27ae60' : '#e74c3c';
     const sinal = item.custo >= 0 ? '+' : '-';
+    
+    let nivelInfo = '';
+    if (item.nivel) {
+        nivelInfo = `<div class="item-nivel">Nível ${item.nivel}/${item.nivelMax}</div>`;
+    }
     
     return `
         <div class="item item-adquirido ${tipo === 'desvantagem' ? 'item-desvantagem' : ''}" 
@@ -593,6 +627,11 @@ function criarItemAdquirido(item, tipo, index) {
                 <div class="item-custo" style="background: ${cor}">${sinal}${Math.abs(item.custo)} pts</div>
             </div>
             <div class="item-descricao">${item.descricao}</div>
+            ${nivelInfo}
+            <div class="item-info">
+                <span class="item-categoria">${item.categoria}</span>
+                <span class="item-tipo">${item.tipo}</span>
+            </div>
             <button class="btn-remover" data-index="${index}">
                 <i class="fas fa-times"></i>
             </button>
@@ -600,157 +639,100 @@ function criarItemAdquirido(item, tipo, index) {
     `;
 }
 
-// ========== REMOVER ITENS ==========
-function removerVantagem(index) {
-    if (index < 0 || index >= estado.vantagensAdquiridas.length) return;
+// ========== REMOVER ITENS ADQUIRIDOS ==========
+function removerVantagemAdquirida(index) {
+    if (index < 0 || index >= estadoVantagens.vantagensAdquiridas.length) return;
     
-    if (!confirm("Remover esta vantagem?")) return;
+    if (!confirm("Remover esta vantagem?\nOs pontos gastos serão devolvidos.")) return;
     
-    const item = estado.vantagensAdquiridas[index];
-    estado.pontosDisponiveis += Math.abs(item.custo);
-    estado.vantagensAdquiridas.splice(index, 1);
+    const item = estadoVantagens.vantagensAdquiridas[index];
+    estadoVantagens.pontosTotais += Math.abs(item.custo);
+    estadoVantagens.vantagensAdquiridas.splice(index, 1);
     
-    atualizarTudo();
-    salvarDados();
-    mostrarNotificacao("Vantagem removida!", "info");
+    carregarListaVantagens();
+    atualizarInterfaceVantagens();
+    salvarDadosVantagens();
+    
+    mostrarNotificacaoVantagens("🗑️ Vantagem removida!", "info");
 }
 
-function removerDesvantagem(index) {
-    if (index < 0 || index >= estado.desvantagensAdquiridas.length) return;
+function removerDesvantagemAdquirida(index) {
+    if (index < 0 || index >= estadoVantagens.desvantagensAdquiridas.length) return;
     
-    if (!confirm("Remover esta desvantagem?")) return;
+    if (!confirm("Remover esta desvantagem?\nVocê perderá os pontos ganhos.")) return;
     
-    const item = estado.desvantagensAdquiridas[index];
-    estado.pontosDisponiveis -= Math.abs(item.custo);
-    estado.desvantagensAdquiridas.splice(index, 1);
+    const item = estadoVantagens.desvantagensAdquiridas[index];
+    estadoVantagens.pontosTotais -= Math.abs(item.custo);
+    estadoVantagens.desvantagensAdquiridas.splice(index, 1);
     
-    atualizarTudo();
-    salvarDados();
-    mostrarNotificacao("Desvantagem removida!", "info");
+    carregarListaDesvantagens();
+    atualizarInterfaceVantagens();
+    salvarDadosVantagens();
+    
+    mostrarNotificacaoVantagens("🗑️ Desvantagem removida!", "info");
 }
 
 function limparVantagens() {
-    if (estado.vantagensAdquiridas.length === 0) {
-        mostrarNotificacao("Não há vantagens para limpar!", "info");
+    if (estadoVantagens.vantagensAdquiridas.length === 0) {
+        mostrarNotificacaoVantagens("ℹ️ Não há vantagens para limpar!", "info");
         return;
     }
     
-    if (!confirm(`Limpar TODAS as ${estado.vantagensAdquiridas.length} vantagens?`)) return;
+    if (!confirm(`Limpar TODAS as ${estadoVantagens.vantagensAdquiridas.length} vantagens?\nTodos os pontos serão devolvidos.`)) return;
     
     // Recuperar pontos
-    const totalPontos = estado.vantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
-    estado.pontosDisponiveis += totalPontos;
-    estado.vantagensAdquiridas = [];
+    const totalPontos = estadoVantagens.vantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
+    estadoVantagens.pontosTotais += totalPontos;
+    estadoVantagens.vantagensAdquiridas = [];
     
-    atualizarTudo();
-    salvarDados();
-    mostrarNotificacao("Todas as vantagens removidas!", "success");
+    carregarListaVantagens();
+    atualizarInterfaceVantagens();
+    salvarDadosVantagens();
+    
+    mostrarNotificacaoVantagens("✅ Todas as vantagens removidas!", "success");
 }
 
 function limparDesvantagens() {
-    if (estado.desvantagensAdquiridas.length === 0) {
-        mostrarNotificacao("Não há desvantagens para limpar!", "info");
+    if (estadoVantagens.desvantagensAdquiridas.length === 0) {
+        mostrarNotificacaoVantagens("ℹ️ Não há desvantagens para limpar!", "info");
         return;
     }
     
-    if (!confirm(`Limpar TODAS as ${estado.desvantagensAdquiridas.length} desvantagens?`)) return;
+    if (!confirm(`Limpar TODAS as ${estadoVantagens.desvantagensAdquiridas.length} desvantagens?\nVocê perderá os pontos ganhos.`)) return;
     
     // Perder pontos ganhos
-    const totalPontos = estado.desvantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
-    estado.pontosDisponiveis -= totalPontos;
-    estado.desvantagensAdquiridas = [];
+    const totalPontos = estadoVantagens.desvantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
+    estadoVantagens.pontosTotais -= totalPontos;
+    estadoVantagens.desvantagensAdquiridas = [];
     
-    atualizarTudo();
-    salvarDados();
-    mostrarNotificacao("Todas as desvantagens removidas!", "success");
+    carregarListaDesvantagens();
+    atualizarInterfaceVantagens();
+    salvarDadosVantagens();
+    
+    mostrarNotificacaoVantagens("✅ Todas as desvantagens removidas!", "success");
 }
 
 // ========== PECULIARIDADES ==========
-function configurarEventosPeculiaridades() {
-    const textarea = document.getElementById('nova-pec');
-    const contador = document.getElementById('contador-pec');
-    
-    if (textarea && contador) {
-        textarea.addEventListener('input', function() {
-            const comprimento = this.value.length;
-            contador.textContent = `${comprimento}/50`;
-            
-            if (comprimento > 50) {
-                contador.style.color = 'var(--cor-erro)';
-            } else if (comprimento > 40) {
-                contador.style.color = 'var(--cor-alerta)';
-            } else {
-                contador.style.color = 'var(--cor-texto-claro)';
-            }
-        });
-    }
-}
-
-function adicionarPeculiaridade() {
-    const textarea = document.getElementById('nova-pec');
-    const texto = textarea.value.trim();
-    
-    if (!texto) {
-        mostrarNotificacao("Digite uma peculiaridade!", "error");
-        return;
-    }
-    
-    if (texto.length > 50) {
-        mostrarNotificacao("Máximo 50 caracteres!", "error");
-        return;
-    }
-    
-    if (estado.peculiaridades.length >= 5) {
-        mostrarNotificacao("Limite de 5 peculiaridades!", "error");
-        return;
-    }
-    
-    if (estado.pontosDisponiveis < 1) {
-        mostrarNotificacao("Pontos insuficientes!", "error");
-        return;
-    }
-    
-    // Adicionar peculiaridade
-    estado.peculiaridades.push({
-        id: `pec-${Date.now()}`,
-        texto: texto,
-        custo: -1
-    });
-    
-    // Gastar ponto
-    estado.pontosDisponiveis -= 1;
-    
-    // Limpar campo
-    textarea.value = '';
-    document.getElementById('contador-pec').textContent = '0/50';
-    
-    atualizarPeculiaridades();
-    atualizarTudo();
-    salvarDados();
-    
-    mostrarNotificacao("Peculiaridade adicionada! (-1 ponto)", "success");
-}
-
-function atualizarPeculiaridades() {
+function carregarPeculiaridades() {
     const container = document.getElementById('lista-peculiaridades');
-    const contadorGeral = document.getElementById('total-peculiaridades');
+    const contador = document.getElementById('total-peculiaridades');
     
     if (!container) return;
     
-    if (estado.peculiaridades.length === 0) {
+    if (estadoVantagens.peculiaridades.length === 0) {
         container.innerHTML = `
-            <div class="vazio">
+            <div class="mensagem-vazia">
                 <i class="fas fa-sticky-note"></i>
-                <p>Nenhuma peculiaridade</p>
+                <p>Nenhuma peculiaridade adicionada</p>
             </div>
         `;
     } else {
         let html = '';
-        estado.peculiaridades.forEach((pec, index) => {
+        estadoVantagens.peculiaridades.forEach((pec, index) => {
             html += `
                 <div class="pec-item">
                     <div class="peculiaridade-texto">${pec.texto}</div>
-                    <button class="btn-remover" onclick="removerPeculiaridade(${index})">
+                    <button class="btn-remover" onclick="removerPeculiaridadeVantagens(${index})">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -759,107 +741,244 @@ function atualizarPeculiaridades() {
         container.innerHTML = html;
     }
     
-    if (contadorGeral) {
-        contadorGeral.textContent = `${estado.peculiaridades.length}/5`;
+    if (contador) {
+        contador.textContent = `${estadoVantagens.peculiaridades.length}/5`;
     }
 }
 
-function removerPeculiaridade(index) {
-    if (index < 0 || index >= estado.peculiaridades.length) return;
+function adicionarPeculiaridadeVantagens() {
+    const textarea = document.getElementById('nova-pec');
+    const texto = textarea.value.trim();
+    const contador = document.getElementById('contador-pec');
     
-    if (!confirm("Remover esta peculiaridade?")) return;
-    
-    estado.peculiaridades.splice(index, 1);
-    estado.pontosDisponiveis += 1; // Recupera ponto
-    
-    atualizarPeculiaridades();
-    atualizarTudo();
-    salvarDados();
-    
-    mostrarNotificacao("Peculiaridade removida! (+1 ponto)", "info");
-}
-
-// ========== ATUALIZAR TUDO ==========
-function atualizarTudo() {
-    // Calcular totais
-    const totalVantagens = estado.vantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
-    const totalDesvantagens = estado.desvantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
-    const totalPeculiaridades = estado.peculiaridades.length;
-    
-    // Atualizar elementos
-    const pontosRestantes = document.getElementById('pontos-restantes');
-    const totalVantagensEl = document.getElementById('total-vantagens');
-    const totalDesvantagensEl = document.getElementById('total-desvantagens');
-    
-    if (pontosRestantes) {
-        pontosRestantes.textContent = estado.pontosDisponiveis;
-        pontosRestantes.className = 'valor grande';
-        
-        if (estado.pontosDisponiveis > 0) {
-            pontosRestantes.classList.add('positivo');
-        } else if (estado.pontosDisponiveis < 0) {
-            pontosRestantes.classList.add('negativo');
-        } else {
-            pontosRestantes.classList.add('neutro');
-        }
-    }
-    
-    if (totalVantagensEl) totalVantagensEl.textContent = `+${totalVantagens}`;
-    if (totalDesvantagensEl) totalDesvantagensEl.textContent = `-${totalDesvantagens}`;
-    
-    // Recarregar listas disponíveis (para remover itens já adquiridos)
-    carregarVantagens();
-    carregarDesvantagens();
-}
-
-// ========== RESETAR TUDO ==========
-function resetarTudo() {
-    const totalItens = estado.vantagensAdquiridas.length + 
-                      estado.desvantagensAdquiridas.length + 
-                      estado.peculiaridades.length;
-    
-    if (totalItens === 0) {
-        mostrarNotificacao("Não há nada para resetar!", "info");
+    if (!texto) {
+        mostrarNotificacaoVantagens("⚠️ Digite uma peculiaridade!", "error");
         return;
     }
     
-    if (!confirm(`Resetar TODOS os dados (${totalItens} itens)?`)) return;
+    if (texto.length > 50) {
+        mostrarNotificacaoVantagens("⚠️ Máximo 50 caracteres!", "error");
+        return;
+    }
     
-    estado.vantagensAdquiridas = [];
-    estado.desvantagensAdquiridas = [];
-    estado.peculiaridades = [];
-    estado.pontosDisponiveis = 100;
+    if (estadoVantagens.peculiaridades.length >= 5) {
+        mostrarNotificacaoVantagens("⚠️ Limite de 5 peculiaridades!", "error");
+        return;
+    }
     
-    atualizarTudo();
-    localStorage.removeItem('vantagensDados');
+    if (estadoVantagens.pontosTotais < 1) {
+        mostrarNotificacaoVantagens("❌ Pontos insuficientes!", "error");
+        return;
+    }
     
-    mostrarNotificacao("Sistema resetado com sucesso!", "success");
+    // Adicionar peculiaridade
+    estadoVantagens.peculiaridades.push({
+        id: `pec-${Date.now()}`,
+        texto: texto,
+        custo: -1
+    });
+    
+    // Gastar ponto
+    estadoVantagens.pontosTotais -= 1;
+    
+    // Limpar campo
+    textarea.value = '';
+    if (contador) contador.textContent = '0/50';
+    
+    carregarPeculiaridades();
+    atualizarInterfaceVantagens();
+    salvarDadosVantagens();
+    
+    mostrarNotificacaoVantagens("✅ Peculiaridade adicionada! (-1 ponto)", "success");
+}
+
+function removerPeculiaridadeVantagens(index) {
+    if (index < 0 || index >= estadoVantagens.peculiaridades.length) return;
+    
+    if (!confirm("Remover esta peculiaridade?\nVocê recuperará 1 ponto.")) return;
+    
+    estadoVantagens.peculiaridades.splice(index, 1);
+    estadoVantagens.pontosTotais += 1; // Recupera ponto
+    
+    carregarPeculiaridades();
+    atualizarInterfaceVantagens();
+    salvarDadosVantagens();
+    
+    mostrarNotificacaoVantagens("🗑️ Peculiaridade removida! (+1 ponto)", "info");
+}
+
+// ========== ATUALIZAR INTERFACE COMPLETA ==========
+function atualizarInterfaceVantagens() {
+    // Calcular totais
+    const totalVantagens = estadoVantagens.vantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
+    const totalDesvantagens = estadoVantagens.desvantagensAdquiridas.reduce((sum, item) => sum + Math.abs(item.custo), 0);
+    const saldoTotal = estadoVantagens.pontosTotais;
+    
+    // Atualizar elementos
+    const totalVantagensEl = document.getElementById('total-vantagens');
+    const totalDesvantagensEl = document.getElementById('total-desvantagens');
+    const totalPeculiaridadesEl = document.getElementById('total-peculiaridades');
+    const saldoTotalEl = document.getElementById('saldo-total');
+    
+    if (totalVantagensEl) totalVantagensEl.textContent = `+${totalVantagens}`;
+    if (totalDesvantagensEl) totalDesvantagensEl.textContent = `-${totalDesvantagens}`;
+    if (totalPeculiaridadesEl) totalPeculiaridadesEl.textContent = `${estadoVantagens.peculiaridades.length}/5`;
+    if (saldoTotalEl) saldoTotalEl.textContent = saldoTotal;
+    
+    // Atualizar contadores de peculiaridades
+    const contadorPec = document.getElementById('contador-pec');
+    if (contadorPec) {
+        const textarea = document.getElementById('nova-pec');
+        const comprimento = textarea ? textarea.value.length : 0;
+        contadorPec.textContent = `${comprimento}/50`;
+        
+        if (comprimento > 50) {
+            contadorPec.style.color = '#e74c3c';
+        } else if (comprimento > 40) {
+            contadorPec.style.color = '#f39c12';
+        } else {
+            contadorPec.style.color = '#ffd700';
+        }
+    }
+}
+
+// ========== RESETAR TUDO ==========
+function resetarDadosVantagens() {
+    const totalItens = estadoVantagens.vantagensAdquiridas.length + 
+                      estadoVantagens.desvantagensAdquiridas.length + 
+                      estadoVantagens.peculiaridades.length;
+    
+    if (totalItens === 0) {
+        mostrarNotificacaoVantagens("ℹ️ Não há nada para resetar!", "info");
+        return;
+    }
+    
+    if (!confirm(`Resetar TODOS os dados (${totalItens} itens)?\nTodos os dados serão perdidos.`)) return;
+    
+    estadoVantagens.vantagensAdquiridas = [];
+    estadoVantagens.desvantagensAdquiridas = [];
+    estadoVantagens.peculiaridades = [];
+    estadoVantagens.pontosTotais = 100;
+    estadoVantagens.vantagensCompradas = 0;
+    estadoVantagens.desvantagensCompradas = 0;
+    
+    carregarListaVantagens();
+    carregarListaDesvantagens();
+    carregarPeculiaridades();
+    atualizarInterfaceVantagens();
+    localStorage.removeItem('sistemaVantagensDados');
+    
+    mostrarNotificacaoVantagens("🔄 Sistema resetado com sucesso!", "success");
+}
+
+// ========== CONFIGURAR EVENTOS ==========
+function configurarEventosVantagens() {
+    // Filtros
+    const filtroVant = document.getElementById('filtro-vant');
+    const filtroDesv = document.getElementById('filtro-desv');
+    
+    if (filtroVant) {
+        filtroVant.addEventListener('input', function() {
+            filtrarListaVantagens(this.value);
+        });
+    }
+    
+    if (filtroDesv) {
+        filtroDesv.addEventListener('input', function() {
+            filtrarListaDesvantagens(this.value);
+        });
+    }
+    
+    // Contador de peculiaridades
+    const textareaPec = document.getElementById('nova-pec');
+    if (textareaPec) {
+        textareaPec.addEventListener('input', function() {
+            const contador = document.getElementById('contador-pec');
+            if (contador) {
+                const comprimento = this.value.length;
+                contador.textContent = `${comprimento}/50`;
+                
+                if (comprimento > 50) {
+                    contador.style.color = '#e74c3c';
+                } else if (comprimento > 40) {
+                    contador.style.color = '#f39c12';
+                } else {
+                    contador.style.color = '#ffd700';
+                }
+            }
+        });
+    }
+    
+    // Fechar modal com ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            fecharModalVantagem();
+        }
+    });
+    
+    // Click fora do modal para fechar
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('modal');
+        if (modal && e.target === modal) {
+            fecharModalVantagem();
+        }
+    });
+}
+
+function filtrarListaVantagens(termo) {
+    const container = document.getElementById('lista-vantagens');
+    if (!container) return;
+    
+    const itens = container.querySelectorAll('.item');
+    termo = termo.toLowerCase();
+    
+    itens.forEach(item => {
+        const nome = item.querySelector('.item-nome').textContent.toLowerCase();
+        const desc = item.querySelector('.item-descricao').textContent.toLowerCase();
+        const match = nome.includes(termo) || desc.includes(termo);
+        item.style.display = match ? 'block' : 'none';
+    });
+}
+
+function filtrarListaDesvantagens(termo) {
+    const container = document.getElementById('lista-desvantagens');
+    if (!container) return;
+    
+    const itens = container.querySelectorAll('.item');
+    termo = termo.toLowerCase();
+    
+    itens.forEach(item => {
+        const nome = item.querySelector('.item-nome').textContent.toLowerCase();
+        const desc = item.querySelector('.item-descricao').textContent.toLowerCase();
+        const match = nome.includes(termo) || desc.includes(termo);
+        item.style.display = match ? 'block' : 'none';
+    });
 }
 
 // ========== NOTIFICAÇÕES ==========
-function mostrarNotificacao(mensagem, tipo = 'info') {
+function mostrarNotificacaoVantagens(mensagem, tipo = 'info') {
     // Remover notificações anteriores
-    const notificacoesAntigas = document.querySelectorAll('.notificacao');
+    const notificacoesAntigas = document.querySelectorAll('.notificacao-vantagens');
     notificacoesAntigas.forEach(n => n.remove());
     
     // Criar notificação
     const notificacao = document.createElement('div');
-    notificacao.className = `notificacao notificacao-${tipo}`;
+    notificacao.className = `notificacao-vantagens`;
     notificacao.innerHTML = `
         <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
         <span>${mensagem}</span>
     `;
     
-    document.body.appendChild(notificacao);
-    
-    // Estilizar
+    // Estilizar baseado no tipo
     notificacao.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
         padding: 15px 25px;
         border-radius: 8px;
-        background: ${tipo === 'success' ? '#27ae60' : tipo === 'error' ? '#e74c3c' : '#3498db'};
+        background: ${tipo === 'success' ? 'rgba(39, 174, 96, 0.95)' : 
+                     tipo === 'error' ? 'rgba(231, 76, 60, 0.95)' : 
+                     'rgba(52, 152, 219, 0.95)'};
         color: white;
         font-weight: 600;
         display: flex;
@@ -867,20 +986,24 @@ function mostrarNotificacao(mensagem, tipo = 'info') {
         gap: 12px;
         z-index: 99999;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        animation: slideInRightVantagens 0.3s ease, fadeOutVantagens 0.3s ease 2.7s forwards;
         max-width: 400px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
     `;
     
+    document.body.appendChild(notificacao);
+    
     // Adicionar animação
-    if (!document.querySelector('#animacao-notificacoes')) {
+    if (!document.querySelector('#animacao-notificacoes-vantagens')) {
         const style = document.createElement('style');
-        style.id = 'animacao-notificacoes';
+        style.id = 'animacao-notificacoes-vantagens';
         style.textContent = `
-            @keyframes slideInRight {
+            @keyframes slideInRightVantagens {
                 from { transform: translateX(100%); opacity: 0; }
                 to { transform: translateX(0); opacity: 1; }
             }
-            @keyframes fadeOut {
+            @keyframes fadeOutVantagens {
                 to { opacity: 0; transform: translateX(100%); }
             }
         `;
@@ -895,67 +1018,34 @@ function mostrarNotificacao(mensagem, tipo = 'info') {
     }, 3000);
 }
 
-// ========== CONFIGURAR EVENTOS ==========
-function configurarEventos() {
-    // Filtros
-    const filtroVant = document.getElementById('filtro-vant');
-    const filtroDesv = document.getElementById('filtro-desv');
-    
-    if (filtroVant) {
-        filtroVant.addEventListener('input', function() {
-            filtrarLista('vantagens', this.value);
-        });
+// ========== INICIALIZAÇÃO AUTOMÁTICA ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar se estamos na aba de vantagens
+    const vantagensTab = document.getElementById('vantagens');
+    if (vantagensTab && vantagensTab.classList.contains('active')) {
+        setTimeout(inicializarSistemaVantagens, 100);
     }
     
-    if (filtroDesv) {
-        filtroDesv.addEventListener('input', function() {
-            filtrarLista('desvantagens', this.value);
-        });
-    }
-    
-    // Peculiaridades
-    configurarEventosPeculiaridades();
-    
-    // Fechar modal com ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            fecharModal();
+    // Adicionar listener para quando a aba for ativada
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.tab-btn') && e.target.closest('.tab-btn').dataset.tab === 'vantagens') {
+            setTimeout(inicializarSistemaVantagens, 100);
         }
     });
-}
-
-function filtrarLista(tipo, termo) {
-    const containerId = tipo === 'vantagens' ? 'lista-vantagens' : 'lista-desvantagens';
-    const container = document.getElementById(containerId);
-    
-    if (!container) return;
-    
-    const itens = container.querySelectorAll('.item');
-    termo = termo.toLowerCase();
-    
-    itens.forEach(item => {
-        const nome = item.querySelector('.item-nome').textContent.toLowerCase();
-        const desc = item.querySelector('.item-descricao').textContent.toLowerCase();
-        const match = nome.includes(termo) || desc.includes(termo);
-        item.style.display = match ? 'block' : 'none';
-    });
-}
-
-// ========== INICIALIZAR ==========
-// Inicializar quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM carregado - inicializando sistema...");
-    setTimeout(inicializar, 100);
 });
 
-// Expor funções globais para botões HTML
+// ========== EXPOR FUNÇÕES GLOBAIS ==========
+// Para botões HTML
 window.limparVantagens = limparVantagens;
 window.limparDesvantagens = limparDesvantagens;
-window.adicionarPeculiaridade = adicionarPeculiaridade;
-window.removerPeculiaridade = removerPeculiaridade;
-window.fecharModal = fecharModal;
-window.confirmarAdquirir = confirmarAdquirir;
-window.selecionarVariacao = selecionarVariacao;
-window.atualizarCustoNivel = atualizarCustoNivel;
-window.resetarTudo = resetarTudo;
-window.salvarDados = salvarDados;
+window.adicionarPeculiaridade = adicionarPeculiaridadeVantagens;
+window.removerPeculiaridade = removerPeculiaridadeVantagens;
+window.fecharModal = fecharModalVantagem;
+window.adquirirItem = adquirirItemModal;
+window.selecionarVariacaoModal = selecionarVariacaoModal;
+window.atualizarCustoNivelModal = atualizarCustoNivelModal;
+window.resetarTudo = resetarDadosVantagens;
+window.salvarDados = salvarDadosVantagens;
+
+// Inicialização global
+window.inicializarSistemaVantagens = inicializarSistemaVantagens;
