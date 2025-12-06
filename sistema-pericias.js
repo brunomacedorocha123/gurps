@@ -281,8 +281,14 @@ function renderizarStatusPericias() {
     }
 }
 
-// ===== FUNÇÃO NOVA: CALCULAR PONTOS POR CATEGORIA =====
+// ===== FUNÇÃO REESCRITA: CALCULAR PONTOS POR CATEGORIA =====
 function calcularPontosPorCategoria(categoria) {
+    // Se for Combate, retorna diretamente do estado
+    if (categoria === 'Combate') {
+        return estadoPericias.pontosCombate;
+    }
+    
+    // Para outras categorias, calcula
     let total = 0;
     estadoPericias.periciasAprendidas.forEach(pericia => {
         if (pericia.categoria === categoria) {
@@ -290,6 +296,43 @@ function calcularPontosPorCategoria(categoria) {
         }
     });
     return total;
+}
+
+// ===== FUNÇÕES DE RENDERIZAÇÃO =====
+function renderizarStatusPericias() {
+    atualizarEstatisticas();
+    
+    // Atualiza o novo status compacto
+    document.getElementById('qtd-combate').textContent = estadoPericias.totalCombate;
+    document.getElementById('pts-combate').textContent = `(${estadoPericias.pontosCombate} pts)`;
+    
+    document.getElementById('qtd-dx').textContent = estadoPericias.totalDX;
+    document.getElementById('pts-dx').textContent = `(${calcularPontosPorCategoria('DX')} pts)`;
+    
+    document.getElementById('qtd-iq').textContent = estadoPericias.totalIQ;
+    document.getElementById('pts-iq').textContent = `(${calcularPontosPorCategoria('IQ')} pts)`;
+    
+    document.getElementById('qtd-ht').textContent = estadoPericias.totalHT;
+    document.getElementById('pts-ht').textContent = `(${calcularPontosPorCategoria('HT')} pts)`;
+    
+    document.getElementById('qtd-perc').textContent = estadoPericias.totalPERC;
+    document.getElementById('pts-perc').textContent = `(${calcularPontosPorCategoria('PERC')} pts)`;
+    
+    // Totais
+    const totalQtd = estadoPericias.totalCombate + estadoPericias.totalDX + 
+                     estadoPericias.totalIQ + estadoPericias.totalHT + estadoPericias.totalPERC;
+    
+    // Soma total de pontos JÁ CALCULADA em atualizarEstatisticas()
+    const totalPontos = estadoPericias.pontosCombate + estadoPericias.pontosPericias;
+    
+    document.getElementById('qtd-total').textContent = totalQtd;
+    document.getElementById('pts-total').textContent = `(${totalPontos} pts)`;
+    
+    // Mantém o badge lateral (se ainda existir)
+    const badgeElement = document.getElementById('pontos-pericias-total');
+    if (badgeElement) {
+        badgeElement.textContent = `[${totalPontos} pts]`;
+    }
 }
 
 function atualizarEstatisticas() {
