@@ -1,4 +1,4 @@
-// ===== SISTEMA DE PERÍCIAS - VERSÃO FINAL COM DIGITAÇÃO GENÉRICA =====
+// ===== SISTEMA DE PERÍCIAS - VERSÃO COM INVESTIMENTO ACUMULADO =====
 
 // Estado do sistema
 let estadoPericias = {
@@ -81,6 +81,66 @@ function getNiveisDisponiveis(dificuldade) {
     }));
 }
 
+// ===== FUNÇÃO NOVA: OBTER CUSTO PARA EVOLUIR =====
+function obterCustoParaEvoluir(periciaEditando = null, nivelDesejado, dificuldade) {
+    const tabelaCusto = obterTabelaCusto(dificuldade);
+    const entradaDesejada = tabelaCusto.find(item => item.nivel === nivelDesejado);
+    
+    if (!entradaDesejada) return 0;
+    
+    if (!periciaEditando) {
+        // Se é uma perícia nova, paga o custo completo
+        return entradaDesejada.custo;
+    }
+    
+    // Se já existe, verifica se tem investimento acumulado
+    if (periciaEditando.investimentoAcumulado !== undefined) {
+        // Se tem investimento acumulado, calcula diferença
+        const diferenca = entradaDesejada.custo - periciaEditando.investimentoAcumulado;
+        return Math.max(0, diferenca);
+    } else {
+        // Se não tem investimento acumulado (perícias antigas), calcula baseado no nível
+        const entradaAtual = tabelaCusto.find(item => item.nivel === periciaEditando.nivel);
+        if (!entradaAtual) return entradaDesejada.custo;
+        
+        const diferenca = entradaDesejada.custo - entradaAtual.custo;
+        return Math.max(0, diferenca);
+    }
+}
+
+// ===== FUNÇÃO NOVA: OBTER INFO DETALHADA DA PROGRESSÃO =====
+function obterInfoProgressaoPericia(periciaEditando = null, nivelDesejado, dificuldade) {
+    const tabelaCusto = obterTabelaCusto(dificuldade);
+    const entradaDesejada = tabelaCusto.find(item => item.nivel === nivelDesejado);
+    
+    if (!entradaDesejada) return null;
+    
+    const custoTotalDesejado = entradaDesejada.custo;
+    let investimentoAtual = 0;
+    let custoAPagar = custoTotalDesejado;
+    
+    if (periciaEditando) {
+        if (periciaEditando.investimentoAcumulado !== undefined) {
+            investimentoAtual = periciaEditando.investimentoAcumulado;
+        } else {
+            // Para perícias antigas sem investimento acumulado, calcula baseado no nível
+            const entradaAtual = tabelaCusto.find(item => item.nivel === periciaEditando.nivel);
+            investimentoAtual = entradaAtual ? entradaAtual.custo : 0;
+        }
+        
+        custoAPagar = Math.max(0, custoTotalDesejado - investimentoAtual);
+    }
+    
+    return {
+        nivelDesejado: nivelDesejado,
+        custoTotalDesejado: custoTotalDesejado,
+        investimentoAtual: investimentoAtual,
+        custoAPagar: custoAPagar,
+        ehMelhoria: custoAPagar > 0 && investimentoAtual > 0,
+        ehPrimeiraCompra: investimentoAtual === 0
+    };
+}
+
 // ===== FUNÇÕES PARA OBTER ATRIBUTOS EM TEMPO REAL =====
 function obterAtributoAtual(atributo) {
     const dadosAtributos = window.obterDadosAtributos ? window.obterDadosAtributos() : null;
@@ -130,10 +190,10 @@ function atualizarEstatisticas() {
     
     estadoPericias.periciasAprendidas.forEach(pericia => {
         if (pericia.categoria === 'Combate') {
-            estadoPericias.pontosCombate += pericia.custo;
+            estadoPericias.pontosCombate += pericia.investimentoAcumulado || pericia.custo;
             estadoPericias.totalCombate++;
         } else {
-            estadoPericias.pontosPericias += pericia.custo;
+            estadoPericias.pontosPericias += pericia.investimentoAcumulado || pericia.custo;
             if (pericia.categoria === 'DX') estadoPericias.totalDX++;
         }
         estadoPericias.totalPericias++;
@@ -260,13 +320,18 @@ function renderizarPericiasAprendidas() {
             nomeDisplay += ` <span class="pericia-especializacao-nome">(${pericia.especializacao})</span>`;
         }
         
+        // Mostra investimento acumulado se existir
+        const custoDisplay = pericia.investimentoAcumulado ? 
+            `${pericia.investimentoAcumulado} pts (nível ${pericia.nivel})` : 
+            `${pericia.custo} pts`;
+        
         const html = `
             <div class="pericia-aprendida-header">
                 <h4 class="pericia-aprendida-nome">${nomeDisplay}</h4>
                 <div class="pericia-aprendida-info">
                     <span class="pericia-aprendida-nivel">${pericia.nivel >= 0 ? '+' : ''}${pericia.nivel}</span>
                     <span class="pericia-aprendida-nh">NH ${nhAtual}</span>
-                    <span class="pericia-aprendida-custo">${pericia.custo} pts</span>
+                    <span class="pericia-aprendida-custo">${custoDisplay}</span>
                 </div>
             </div>
             <button class="btn-remover-pericia" data-id="${pericia.id}">
@@ -324,8 +389,23 @@ function abrirModalPericia(pericia, periciaEditando = null) {
     
     const atributoBase = obterAtributoAtual(pericia.atributo);
     const nhAtual = atributoBase + estadoPericias.nivelPericia;
-    const custoAtual = calcularCustoPericia(estadoPericias.nivelPericia, pericia.dificuldade);
+    const infoProgressao = obterInfoProgressaoPericia(periciaEditando, estadoPericias.nivelPericia, pericia.dificuldade);
+    const custoAPagar = infoProgressao ? infoProgressao.custoAPagar : 0;
     const niveisDisponiveis = getNiveisDisponiveis(pericia.dificuldade);
+    
+    let textoCusto = '';
+    if (infoProgressao) {
+        if (infoProgressao.ehPrimeiraCompra) {
+            textoCusto = `<span class="custo-novo">${custoAPagar} pontos</span>`;
+        } else if (infoProgressao.ehMelhoria) {
+            textoCusto = `
+                <span class="custo-melhoria">
+                    ${custoAPagar} pontos (já investiu ${infoProgressao.investimentoAtual})
+                </span>`;
+        } else if (custoAPagar === 0) {
+            textoCusto = `<span class="custo-ja-pago">Já possui este nível</span>`;
+        }
+    }
     
     modalContent.innerHTML = `
         <div class="modal-header-pericia">
@@ -354,12 +434,17 @@ function abrirModalPericia(pericia, periciaEditando = null) {
                 
                 <div class="custo-info">
                     <div class="custo-total">
-                        <label>Custo Total</label>
-                        <span id="custo-atual">${custoAtual} pontos</span>
+                        <label>Custo para ${periciaEditando ? 'Evoluir' : 'Adquirir'}</label>
+                        <div id="custo-atual">${textoCusto}</div>
                     </div>
                     <div class="custo-detalhes">
                         ${getInfoRedutores(pericia.dificuldade)}
                     </div>
+                    ${infoProgressao && infoProgressao.ehMelhoria ? `
+                    <div class="custo-progressao">
+                        <small>Progresso: ${infoProgressao.investimentoAtual} → ${infoProgressao.custoTotalDesejado} pontos</small>
+                    </div>
+                    ` : ''}
                 </div>
                 
                 <div class="nh-info">
@@ -404,8 +489,8 @@ function abrirModalPericia(pericia, periciaEditando = null) {
         <div class="modal-actions-pericia">
             <button class="btn-modal btn-cancelar" onclick="fecharModalPericia()">Cancelar</button>
             <button class="btn-modal btn-confirmar" id="btn-confirmar-pericia" onclick="confirmarPericia()" 
-                ${custoAtual === 0 ? 'disabled' : ''}>
-                ${periciaEditando ? 'Atualizar' : 'Adquirir'}
+                ${custoAPagar === 0 ? 'disabled' : ''}>
+                ${periciaEditando ? (custoAPagar > 0 ? 'Evoluir' : 'Atualizar') : 'Adquirir'}
             </button>
         </div>
     `;
@@ -420,15 +505,36 @@ function alterarNivelPericiaDropdown(valorSelecionado) {
     estadoPericias.nivelPericia = novoNivel;
     
     const pericia = estadoPericias.modalPericiaAtiva;
+    const periciaEditando = estadoPericias.periciasAprendidas.find(p => p.id === pericia.id);
     const atributoBase = obterAtributoAtual(pericia.atributo);
     const nhAtual = atributoBase + novoNivel;
-    const custoAtual = calcularCustoPericia(novoNivel, pericia.dificuldade);
+    const infoProgressao = obterInfoProgressaoPericia(periciaEditando, novoNivel, pericia.dificuldade);
+    const custoAPagar = infoProgressao ? infoProgressao.custoAPagar : 0;
     
+    // Atualiza custo
     const custoElement = document.getElementById('custo-atual');
-    if (custoElement) {
-        custoElement.textContent = `${custoAtual} pontos`;
+    if (custoElement && infoProgressao) {
+        let textoCusto = '';
+        if (infoProgressao.ehPrimeiraCompra) {
+            textoCusto = `<span class="custo-novo">${custoAPagar} pontos</span>`;
+        } else if (infoProgressao.ehMelhoria) {
+            textoCusto = `
+                <span class="custo-melhoria">
+                    ${custoAPagar} pontos (já investiu ${infoProgressao.investimentoAtual})
+                </span>`;
+        } else if (custoAPagar === 0) {
+            textoCusto = `<span class="custo-ja-pago">Já possui este nível</span>`;
+        }
+        custoElement.innerHTML = textoCusto;
+        
+        // Atualiza progresso se existir
+        const progressoElement = document.querySelector('.custo-progressao');
+        if (progressoElement && infoProgressao.ehMelhoria) {
+            progressoElement.innerHTML = `<small>Progresso: ${infoProgressao.investimentoAtual} → ${infoProgressao.custoTotalDesejado} pontos</small>`;
+        }
     }
     
+    // Atualiza NH
     const nhElement = document.getElementById('nh-atual');
     if (nhElement) {
         nhElement.textContent = nhAtual;
@@ -439,9 +545,17 @@ function alterarNivelPericiaDropdown(valorSelecionado) {
         nhDetalhes.innerHTML = `${atributoBase} (${pericia.atributo}) + ${novoNivel >= 0 ? '+' : ''}${novoNivel} (nível)`;
     }
     
+    // Atualiza botão
     const btnConfirmar = document.getElementById('btn-confirmar-pericia');
     if (btnConfirmar) {
-        btnConfirmar.disabled = custoAtual === 0;
+        btnConfirmar.disabled = custoAPagar === 0;
+        if (periciaEditando && custoAPagar > 0) {
+            btnConfirmar.textContent = 'Evoluir';
+        } else if (periciaEditando && custoAPagar === 0) {
+            btnConfirmar.textContent = 'Atualizar';
+        } else {
+            btnConfirmar.textContent = 'Adquirir';
+        }
     }
 }
 
@@ -483,7 +597,6 @@ function abrirModalEspecializacao(grupo) {
                 
                 <div class="especializacoes-grid" id="grid-especializacoes">
                     ${especializacoes.map(espec => {
-                        // Verifica se é uma opção de digitação
                         const ehDigitavel = espec.tipo === 'personalizado' || espec.id === 'cavalgar-digitar';
                         
                         return `
@@ -537,7 +650,6 @@ function selecionarEspecializacao(idEspecializacao, grupo, ehDigitavel = false) 
     if (itemSelecionado) {
         itemSelecionado.classList.add('selecionada');
         
-        // Salva no estado
         estadoPericias.especializacaoSelecionada = {
             id: idEspecializacao,
             grupo: grupo,
@@ -565,9 +677,7 @@ function processarEspecializacao() {
     
     let periciaCompleta;
     
-    // ===== VERIFICAÇÃO GENÉRICA PARA DIGITAÇÃO =====
     if (selecao.ehDigitavel) {
-        // Busca os dados da especialização selecionada
         const especializacoes = window.obterEspecializacoes(grupo);
         const especializacaoBase = especializacoes.find(e => e.id === selecao.id);
         
@@ -576,7 +686,6 @@ function processarEspecializacao() {
             return;
         }
         
-        // Determina o tipo de prompt baseado no grupo
         let promptMensagem, placeholder;
         
         if (grupo === "Cavalgar") {
@@ -593,7 +702,6 @@ function processarEspecializacao() {
             placeholder = "Ex: Especialização personalizada";
         }
         
-        // Abre prompt para digitação
         const textoDigitado = prompt(`${promptMensagem}\n\n${placeholder}`, "");
         
         if (!textoDigitado || textoDigitado.trim() === '') {
@@ -603,7 +711,6 @@ function processarEspecializacao() {
         
         const textoLimpo = textoDigitado.trim();
         
-        // Cria perícia personalizada
         periciaCompleta = {
             id: `${grupo.toLowerCase().replace(/ /g, '-')}-${textoLimpo.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
             nome: `${grupoInfo?.nome || grupo} (${textoLimpo})`,
@@ -621,7 +728,6 @@ function processarEspecializacao() {
             textoDigitado: textoLimpo
         };
     } else {
-        // Especialização pré-definida normal
         const especializacoes = window.obterEspecializacoes(grupo);
         const especializacao = especializacoes.find(e => e.id === selecao.id);
         
@@ -639,36 +745,82 @@ function processarEspecializacao() {
     
     fecharModalEspecializacao();
     
-    // Aguarda um pouco para garantir que o modal fechou
     setTimeout(() => {
         abrirModalPericia(periciaCompleta);
     }, 300);
 }
 
+// ===== FUNÇÃO MODIFICADA: confirmarPericia() COM INVESTIMENTO ACUMULADO =====
 function confirmarPericia() {
     if (!estadoPericias.modalPericiaAtiva) return;
     
     const pericia = estadoPericias.modalPericiaAtiva;
     const nivel = estadoPericias.nivelPericia;
-    const custo = calcularCustoPericia(nivel, pericia.dificuldade);
+    
+    // Obtém informações da progressão
+    const periciaEditando = estadoPericias.periciasAprendidas.find(p => p.id === pericia.id);
+    const infoProgressao = obterInfoProgressaoPericia(periciaEditando, nivel, pericia.dificuldade);
+    
+    if (!infoProgressao) return;
+    
+    const custoAPagar = infoProgressao.custoAPagar;
+    
+    // Verifica se realmente precisa pagar
+    if (custoAPagar === 0) {
+        // Apenas atualiza o nível sem custo adicional
+        if (periciaEditando) {
+            estadoPericias.periciasAprendidas = estadoPericias.periciasAprendidas.filter(p => p.id !== pericia.id);
+        }
+        return;
+    }
     
     const indexExistente = estadoPericias.periciasAprendidas.findIndex(p => p.id === pericia.id);
     
     if (indexExistente >= 0) {
+        // EVOLUIR PERÍCIA EXISTENTE
+        const periciaAtual = estadoPericias.periciasAprendidas[indexExistente];
+        
+        // Calcula novo investimento acumulado
+        let novoInvestimentoAcumulado;
+        if (periciaAtual.investimentoAcumulado !== undefined) {
+            novoInvestimentoAcumulado = periciaAtual.investimentoAcumulado + custoAPagar;
+        } else {
+            // Para perícias antigas sem investimento acumulado
+            const tabela = obterTabelaCusto(pericia.dificuldade);
+            const entradaAtual = tabela.find(item => item.nivel === periciaAtual.nivel);
+            const custoAtual = entradaAtual ? entradaAtual.custo : 0;
+            novoInvestimentoAcumulado = custoAtual + custoAPagar;
+        }
+        
         estadoPericias.periciasAprendidas[indexExistente] = {
-            ...estadoPericias.periciasAprendidas[indexExistente],
+            ...periciaAtual,
             nivel: nivel,
-            custo: custo,
-            nh: obterAtributoAtual(pericia.atributo) + nivel
+            custo: custoAPagar, // Custo da melhoria
+            investimentoAcumulado: novoInvestimentoAcumulado,
+            nh: obterAtributoAtual(pericia.atributo) + nivel,
+            // Mantém outras propriedades
+            nome: pericia.nome,
+            atributo: pericia.atributo,
+            dificuldade: pericia.dificuldade,
+            categoria: pericia.categoria,
+            descricao: pericia.descricao,
+            default: pericia.default,
+            prereq: pericia.prereq,
+            grupo: pericia.grupo,
+            especializacao: pericia.especializacaoDe || null,
+            digitadoPeloJogador: pericia.digitadoPeloJogador || false,
+            textoDigitado: pericia.textoDigitado || null
         };
     } else {
+        // NOVA PERÍCIA
         const novaPericia = {
             id: pericia.id,
             nome: pericia.nome,
             atributo: pericia.atributo,
             dificuldade: pericia.dificuldade,
             nivel: nivel,
-            custo: custo,
+            custo: custoAPagar, // Custo total da aquisição
+            investimentoAcumulado: custoAPagar, // Investimento inicial
             categoria: pericia.categoria,
             descricao: pericia.descricao,
             default: pericia.default,
@@ -715,7 +867,21 @@ function fecharModalEspecializacao() {
 // ===== FUNÇÕES DE PERSISTÊNCIA =====
 function salvarPericias() {
     try {
-        localStorage.setItem('periciasAprendidas', JSON.stringify(estadoPericias.periciasAprendidas));
+        // Converte perícias antigas para o novo formato
+        const periciasParaSalvar = estadoPericias.periciasAprendidas.map(pericia => {
+            // Se é uma perícia antiga sem investimento acumulado, calcula
+            if (pericia.investimentoAcumulado === undefined) {
+                const tabela = obterTabelaCusto(pericia.dificuldade);
+                const entrada = tabela.find(item => item.nivel === pericia.nivel);
+                return {
+                    ...pericia,
+                    investimentoAcumulado: entrada ? entrada.custo : pericia.custo
+                };
+            }
+            return pericia;
+        });
+        
+        localStorage.setItem('periciasAprendidas', JSON.stringify(periciasParaSalvar));
     } catch (e) {
         console.error('Erro ao salvar perícias:', e);
     }
@@ -726,6 +892,19 @@ function carregarPericias() {
         const salvo = localStorage.getItem('periciasAprendidas');
         if (salvo) {
             estadoPericias.periciasAprendidas = JSON.parse(salvo);
+            
+            // Garante que todas as perícias tenham investimentoAcumulado
+            estadoPericias.periciasAprendidas = estadoPericias.periciasAprendidas.map(pericia => {
+                if (pericia.investimentoAcumulado === undefined) {
+                    const tabela = obterTabelaCusto(pericia.dificuldade);
+                    const entrada = tabela.find(item => item.nivel === pericia.nivel);
+                    return {
+                        ...pericia,
+                        investimentoAcumulado: entrada ? entrada.custo : pericia.custo
+                    };
+                }
+                return pericia;
+            });
         }
     } catch (e) {
         console.error('Erro ao carregar perícias:', e);
@@ -868,6 +1047,27 @@ function resetarPericias() {
     }
 }
 
+// ===== FUNÇÃO ADICIONAL: MIGRAR PERÍCIAS ANTIGAS =====
+function migrarPericiasAntigas() {
+    if (!confirm('Esta função migrará suas perícias antigas para o novo sistema de investimento acumulado. Continuar?')) {
+        return;
+    }
+    
+    estadoPericias.periciasAprendidas.forEach(pericia => {
+        if (pericia.investimentoAcumulado === undefined) {
+            const tabela = obterTabelaCusto(pericia.dificuldade);
+            const entrada = tabela.find(item => item.nivel === pericia.nivel);
+            if (entrada) {
+                pericia.investimentoAcumulado = entrada.custo;
+            }
+        }
+    });
+    
+    salvarPericias();
+    renderizarPericiasAprendidas();
+    alert('Migração concluída! As perícias agora usam o sistema de investimento acumulado.');
+}
+
 // ===== INICIALIZAÇÃO AUTOMÁTICA =====
 document.addEventListener('DOMContentLoaded', function() {
     const periciasTab = document.getElementById('pericias');
@@ -916,3 +1116,4 @@ window.obterDadosPericias = obterDadosPericias;
 window.carregarDadosPericias = carregarDadosPericias;
 window.resetarPericias = resetarPericias;
 window.inicializarSistemaPericias = inicializarSistemaPericias;
+window.migrarPericiasAntigas = migrarPericiasAntigas;
