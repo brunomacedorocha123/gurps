@@ -36,12 +36,28 @@ function calcularCustoTecnica(niveisAcima, dificuldade) {
 function obterNHPericiaAtual(idPericia) {
     if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) return 0;
     
-    const pericia = window.estadoPericias.periciasAprendidas.find(p => p.id === idPericia);
+    // Procura por ID EXATO primeiro
+    let pericia = window.estadoPericias.periciasAprendidas.find(p => p.id === idPericia);
+    
+    // Se não encontrou, procura por NOME (para Arco que pode ter especializações)
+    if (!pericia) {
+        // Para Arco, pode ser "arco-curto", "arco-longo", etc
+        pericia = window.estadoPericias.periciasAprendidas.find(p => 
+            p.id && p.id.includes('arco')
+        );
+    }
+    
+    // Se ainda não encontrou, procura por nome da perícia
+    if (!pericia) {
+        pericia = window.estadoPericias.periciasAprendidas.find(p => 
+            p.nome && p.nome.toLowerCase().includes('arco')
+        );
+    }
+    
     if (!pericia) return 0;
     
     let atributoBase = 10;
     
-    // USA SUA FUNÇÃO REAL obterDadosAtributos()
     if (window.obterDadosAtributos) {
         const dadosAtributos = window.obterDadosAtributos();
         if (dadosAtributos) {
@@ -57,7 +73,7 @@ function obterNHPericiaAtual(idPericia) {
     return atributoBase + (pericia.nivel || 0);
 }
 
-// ===== VERIFICAR PRÉ-REQUISITOS =====
+// ===== VERIFICAR PRÉ-REQUISITOS (CORRIGIDA) =====
 function verificarPreRequisitosTecnica(tecnica) {
     if (!tecnica || !tecnica.preRequisitos) {
         return { passou: false, motivo: "Técnica inválida" };
@@ -66,14 +82,34 @@ function verificarPreRequisitosTecnica(tecnica) {
     for (const prereq of tecnica.preRequisitos) {
         let periciaEncontrada = null;
         
+        // MÉTODO 1: Procura por ID exato
         if (prereq.idPericia) {
-            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
+            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
+                p.id === prereq.idPericia
+            );
         }
         
+        // MÉTODO 2: Se for Arco, procura por qualquer arco
+        if (!periciaEncontrada && prereq.nomePericia && prereq.nomePericia.toLowerCase().includes('arco')) {
+            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
+                p.id && p.id.includes('arco')
+            );
+            
+            if (!periciaEncontrada) {
+                periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
+                    p.nome && p.nome.toLowerCase().includes('arco')
+                );
+            }
+        }
+        
+        // MÉTODO 3: Se for Cavalgar, usa a lista de IDs
         if (!periciaEncontrada && prereq.idsCavalgar) {
-            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => prereq.idsCavalgar.includes(p.id));
+            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
+                prereq.idsCavalgar.includes(p.id)
+            );
         }
         
+        // MÉTODO 4: Procura por nome genérico
         if (!periciaEncontrada && prereq.nomePericia) {
             const nomeBusca = prereq.nomePericia.toLowerCase();
             periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
@@ -103,10 +139,25 @@ function calcularNHBaseTecnica(tecnica) {
     const prereq = tecnica.preRequisitos[0];
     let periciaAprendida = null;
     
-    if (prereq.idPericia) {
+    // Para Arco: procura qualquer arco aprendido
+    if (prereq.nomePericia && prereq.nomePericia.toLowerCase().includes('arco')) {
+        periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => 
+            p.id && p.id.includes('arco')
+        );
+        
+        if (!periciaAprendida) {
+            periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => 
+                p.nome && p.nome.toLowerCase().includes('arco')
+            );
+        }
+    }
+    
+    // Se não encontrou arco, procura por ID
+    if (!periciaAprendida && prereq.idPericia) {
         periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
     }
     
+    // Se ainda não, procura por lista de IDs (Cavalgar)
     if (!periciaAprendida && prereq.idsCavalgar) {
         periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => prereq.idsCavalgar.includes(p.id));
     }
@@ -123,10 +174,25 @@ function calcularNHMaximoTecnica(tecnica) {
     const prereq = tecnica.preRequisitos[0];
     let periciaAprendida = null;
     
-    if (prereq.idPericia) {
+    // Para Arco: procura qualquer arco aprendido
+    if (prereq.nomePericia && prereq.nomePericia.toLowerCase().includes('arco')) {
+        periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => 
+            p.id && p.id.includes('arco')
+        );
+        
+        if (!periciaAprendida) {
+            periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => 
+                p.nome && p.nome.toLowerCase().includes('arco')
+            );
+        }
+    }
+    
+    // Se não encontrou arco, procura por ID
+    if (!periciaAprendida && prereq.idPericia) {
         periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
     }
     
+    // Se ainda não, procura por lista de IDs (Cavalgar)
     if (!periciaAprendida && prereq.idsCavalgar) {
         periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => prereq.idsCavalgar.includes(p.id));
     }
@@ -179,25 +245,19 @@ function atualizarTecnicasDisponiveis() {
 
 // ===== CONECTAR AO EVENTO DOS ATRIBUTOS =====
 function configurarOuvinteAtributosTecnicas() {
-    console.log('Técnicas: Configurando ouvinte para atributos...');
-    
     // ESCUTA O EVENTO QUE SEU SISTEMA DE ATRIBUTOS DISPARA
     document.addEventListener('atributosAlterados', function(evento) {
-        console.log('Técnicas: Evento atributosAlterados recebido!', evento.detail);
-        
-        // Força atualização IMEDIATA quando atributos mudam
         atualizarTecnicasDisponiveis();
         renderizarStatusTecnicas();
         renderizarTecnicasAprendidas();
     });
     
-    // Também monitora mudanças diretas nos inputs de atributos
+    // Também monitora mudanças nos atributos
     const atributosInputs = ['ST', 'DX', 'IQ', 'HT'];
     atributosInputs.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
             input.addEventListener('change', function() {
-                console.log(`Técnicas: Atributo ${id} mudou para ${this.value}`);
                 setTimeout(() => {
                     atualizarTecnicasDisponiveis();
                     renderizarStatusTecnicas();
@@ -637,10 +697,9 @@ function renderizarFiltrosTecnicas() {
 
 // ===== INICIALIZAR =====
 function inicializarSistemaTecnicas() {
-    console.log('Inicializando sistema de técnicas...');
     carregarTecnicas();
     configurarEventListenersTecnicas();
-    configurarOuvinteAtributosTecnicas(); // CONECTA AOS ATRIBUTOS
+    configurarOuvinteAtributosTecnicas();
     atualizarTecnicasDisponiveis();
     renderizarStatusTecnicas();
     renderizarFiltrosTecnicas();
