@@ -9,12 +9,14 @@
     box-sizing: border-box;
 }
 
-/* Status das Perícias - Cards no topo */
+/* ===== STATUS COMPACTO DAS PERÍCIAS ===== */
 .status-cards-container {
     margin-bottom: 25px;
+    display: flex;
+    justify-content: center;
 }
 
-.card-pericias-status {
+.card-status-resumo {
     background: rgba(30, 30, 40, 0.95);
     border: 1px solid rgba(255, 140, 0, 0.25);
     border-radius: 12px;
@@ -23,9 +25,11 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    max-width: 400px;
+    width: 100%;
 }
 
-.card-pericias-status::before {
+.card-status-resumo::before {
     content: '';
     position: absolute;
     top: 0;
@@ -37,16 +41,16 @@
     transition: transform 0.3s ease;
 }
 
-.card-pericias-status:hover::before {
+.card-status-resumo:hover::before {
     transform: scaleX(1);
 }
 
-.card-pericias-status:hover {
+.card-status-resumo:hover {
     border-color: rgba(255, 140, 0, 0.5);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
 }
 
-.card-pericias-status h3 {
+.card-status-resumo h3 {
     color: #ffd700;
     font-size: 1.4em;
     margin: 0 0 20px 0;
@@ -57,52 +61,89 @@
     gap: 10px;
 }
 
-.pericias-status-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
+.status-linhas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.pericias-status-item {
+.status-linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
     background: rgba(40, 40, 50, 0.8);
     border: 1px solid rgba(255, 140, 0, 0.2);
     border-radius: 8px;
-    padding: 15px;
-    text-align: center;
     transition: all 0.3s ease;
 }
 
-.pericias-status-item:hover {
+.status-linha:hover {
     border-color: rgba(255, 140, 0, 0.4);
-    transform: translateY(-2px);
+    transform: translateX(3px);
 }
 
-.pericias-status-item label {
-    display: block;
-    color: #95a5a6;
-    font-size: 0.9em;
-    margin-bottom: 8px;
+.status-linha.total {
+    background: rgba(39, 174, 96, 0.15);
+    border: 2px solid rgba(39, 174, 96, 0.4);
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.status-linha.total:hover {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.2);
+}
+
+.status-categoria {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-weight: 500;
-}
-
-.pericias-status-item span {
-    display: block;
     color: #ffd700;
-    font-size: 1.4em;
-    font-weight: 700;
-    line-height: 1;
 }
 
-.pericias-status-item.total span {
-    font-size: 1.6em;
-    color: #27ae60;
+.status-categoria i {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
 }
 
-.pericias-status-item i {
-    margin-right: 8px;
-    color: #ff8c00;
+/* Ícones por categoria */
+.status-linha:nth-child(1) .status-categoria i { color: #dc3545; } /* Combate */
+.status-linha:nth-child(2) .status-categoria i { color: #28a745; } /* DX */
+.status-linha:nth-child(3) .status-categoria i { color: #007bff; } /* IQ */
+.status-linha:nth-child(4) .status-categoria i { color: #fd7e14; } /* HT */
+.status-linha:nth-child(5) .status-categoria i { color: #6f42c1; } /* PERC */
+.status-linha.total .status-categoria i { color: #e67e22; } /* Total */
+
+.status-valores {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 14px;
 }
 
+.status-qtd {
+    font-weight: bold;
+    color: #ffd700;
+    min-width: 20px;
+    text-align: right;
+}
+
+.status-pontos {
+    color: #95a5a6;
+    font-style: italic;
+    min-width: 70px;
+    text-align: right;
+}
+
+.status-separador {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #ff8c00, transparent);
+    margin: 5px 0;
+    opacity: 0.3;
+}
 /* Sistema de Aquisição - Layout Lado a Lado */
 .sistema-aquisicao-pericias {
     display: grid;

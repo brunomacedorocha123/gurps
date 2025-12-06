@@ -7,6 +7,9 @@ let estadoPericias = {
     totalPericias: 0,
     totalCombate: 0,
     totalDX: 0,
+    totalIQ: 0,
+    totalHT: 0,
+    totalPERC: 0,
     periciasAprendidas: [],
     filtroAtivo: 'todas',
     buscaAtiva: '',
@@ -248,30 +251,77 @@ function atualizarAtributosLocais() {
 function renderizarStatusPericias() {
     atualizarEstatisticas();
     
-    document.getElementById('pontos-pericias').textContent = estadoPericias.pontosPericias;
-    document.getElementById('pontos-combate').textContent = estadoPericias.pontosCombate;
-    document.getElementById('total-pericias').textContent = estadoPericias.totalPericias;
-    document.getElementById('total-combate').textContent = estadoPericias.totalCombate;
-    document.getElementById('total-dx').textContent = estadoPericias.totalDX;
-    document.getElementById('total-gasto-pericias').textContent = estadoPericias.pontosPericias + estadoPericias.pontosCombate;
-    document.getElementById('pontos-pericias-total').textContent = `[${estadoPericias.pontosPericias + estadoPericias.pontosCombate} pts]`;
+    // Atualiza o novo status compacto
+    document.getElementById('qtd-combate').textContent = estadoPericias.totalCombate;
+    document.getElementById('pts-combate').textContent = `(${estadoPericias.pontosCombate} pts)`;
+    
+    document.getElementById('qtd-dx').textContent = estadoPericias.totalDX;
+    document.getElementById('pts-dx').textContent = `(${calcularPontosPorCategoria('DX')} pts)`;
+    
+    document.getElementById('qtd-iq').textContent = estadoPericias.totalIQ;
+    document.getElementById('pts-iq').textContent = `(${calcularPontosPorCategoria('IQ')} pts)`;
+    
+    document.getElementById('qtd-ht').textContent = estadoPericias.totalHT;
+    document.getElementById('pts-ht').textContent = `(${calcularPontosPorCategoria('HT')} pts)`;
+    
+    document.getElementById('qtd-perc').textContent = estadoPericias.totalPERC;
+    document.getElementById('pts-perc').textContent = `(${calcularPontosPorCategoria('PERC')} pts)`;
+    
+    // Totais
+    const totalQtd = estadoPericias.totalCombate + estadoPericias.totalDX + estadoPericias.totalIQ + estadoPericias.totalHT + estadoPericias.totalPERC;
+    const totalPontos = estadoPericias.pontosCombate + estadoPericias.pontosPericias;
+    
+    document.getElementById('qtd-total').textContent = totalQtd;
+    document.getElementById('pts-total').textContent = `(${totalPontos} pts)`;
+    
+    // Mantém o badge lateral (se ainda existir)
+    const badgeElement = document.getElementById('pontos-pericias-total');
+    if (badgeElement) {
+        badgeElement.textContent = `[${totalPontos} pts]`;
+    }
+}
+
+// ===== FUNÇÃO NOVA: CALCULAR PONTOS POR CATEGORIA =====
+function calcularPontosPorCategoria(categoria) {
+    let total = 0;
+    estadoPericias.periciasAprendidas.forEach(pericia => {
+        if (pericia.categoria === categoria) {
+            total += pericia.investimentoAcumulado || pericia.custo || 0;
+        }
+    });
+    return total;
 }
 
 function atualizarEstatisticas() {
+    // Zerar todos os contadores
     estadoPericias.pontosPericias = 0;
     estadoPericias.pontosCombate = 0;
     estadoPericias.totalPericias = 0;
     estadoPericias.totalCombate = 0;
     estadoPericias.totalDX = 0;
+    estadoPericias.totalIQ = 0;
+    estadoPericias.totalHT = 0;
+    estadoPericias.totalPERC = 0;
     
+    // Calcular estatísticas
     estadoPericias.periciasAprendidas.forEach(pericia => {
+        const investimento = pericia.investimentoAcumulado || pericia.custo || 0;
+        
         if (pericia.categoria === 'Combate') {
-            estadoPericias.pontosCombate += pericia.investimentoAcumulado || pericia.custo;
+            estadoPericias.pontosCombate += investimento;
             estadoPericias.totalCombate++;
         } else {
-            estadoPericias.pontosPericias += pericia.investimentoAcumulado || pericia.custo;
-            if (pericia.categoria === 'DX') estadoPericias.totalDX++;
+            estadoPericias.pontosPericias += investimento;
+            
+            // Contar por categoria
+            switch(pericia.categoria) {
+                case 'DX': estadoPericias.totalDX++; break;
+                case 'IQ': estadoPericias.totalIQ++; break;
+                case 'HT': estadoPericias.totalHT++; break;
+                case 'PERC': estadoPericias.totalPERC++; break;
+            }
         }
+        
         estadoPericias.totalPericias++;
     });
 }
@@ -908,7 +958,7 @@ function processarEspecializacao() {
             placeholder = "Ex: Especialização personalizada";
         }
         
-        const textoDigitado = prompt(`${promMensagem}\n\n${placeholder}`, "");
+        const textoDigitado = prompt(`${promptMensagem}\n\n${placeholder}`, "");
         
         if (!textoDigitado || textoDigitado.trim() === '') {
             alert("Você precisa digitar a especialização.");
@@ -1219,7 +1269,11 @@ function obterDadosPericias() {
         pontosPericias: estadoPericias.pontosPericias,
         pontosCombate: estadoPericias.pontosCombate,
         totalPericias: estadoPericias.totalPericias,
-        totalCombate: estadoPericias.totalCombate
+        totalCombate: estadoPericias.totalCombate,
+        totalDX: estadoPericias.totalDX,
+        totalIQ: estadoPericias.totalIQ,
+        totalHT: estadoPericias.totalHT,
+        totalPERC: estadoPericias.totalPERC
     };
 }
 
@@ -1241,6 +1295,9 @@ function resetarPericias() {
         estadoPericias.totalPericias = 0;
         estadoPericias.totalCombate = 0;
         estadoPericias.totalDX = 0;
+        estadoPericias.totalIQ = 0;
+        estadoPericias.totalHT = 0;
+        estadoPericias.totalPERC = 0;
         
         salvarPericias();
         renderizarStatusPericias();

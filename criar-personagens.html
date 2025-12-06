@@ -1017,39 +1017,89 @@
 <div id="pericias" class="tab-content">
   <div class="container-principal">
     
-    <!-- STATUS PERÍCIAS -->
-    <div class="status-cards-container">
-      <div class="card-pericias-status">
-        <h3><i class="fas fa-graduation-cap"></i> Status das Perícias</h3>
-        <div class="pericias-status-grid">
-          <div class="pericias-status-item">
-            <label><i class="fas fa-coins"></i> Pontos em Perícias:</label>
-            <span id="pontos-pericias">0</span> pts
-          </div>
-          <div class="pericias-status-item">
-            <label><i class="fas fa-crosshairs"></i> Pontos em Combate:</label>
-            <span id="pontos-combate">0</span> pts
-          </div>
-          <div class="pericias-status-item">
-            <label><i class="fas fa-list-check"></i> Total de Perícias:</label>
-            <span id="total-pericias">0</span>
-          </div>
-          <div class="pericias-status-item">
-            <label><i class="fas fa-fist-raised"></i> Perícias de Combate:</label>
-            <span id="total-combate">0</span>
-          </div>
-          <div class="pericias-status-item">
-            <label><i class="fas fa-brain"></i> Perícias DX (não combate):</label>
-            <span id="total-dx">0</span>
-          </div>
-          <div class="pericias-status-item total">
-            <label><i class="fas fa-coins"></i> Total Gasto:</label>
-            <span id="total-gasto-pericias">0</span> pts
-          </div>
+    <!-- STATUS PERÍCIAS - VERSÃO COMPACTA -->
+<div class="status-cards-container">
+  <div class="card-status-resumo">
+    <h3><i class="fas fa-chart-pie"></i> Resumo das Perícias</h3>
+    
+    <div class="status-linhas-container">
+      <!-- COMBATE -->
+      <div class="status-linha">
+        <div class="status-categoria">
+          <i class="fas fa-fist-raised"></i>
+          <span>Combate</span>
+        </div>
+        <div class="status-valores">
+          <span class="status-qtd" id="qtd-combate">0</span>
+          <span class="status-pontos" id="pts-combate">(0 pts)</span>
+        </div>
+      </div>
+      
+      <!-- DX -->
+      <div class="status-linha">
+        <div class="status-categoria">
+          <i class="fas fa-running"></i>
+          <span>DX</span>
+        </div>
+        <div class="status-valores">
+          <span class="status-qtd" id="qtd-dx">0</span>
+          <span class="status-pontos" id="pts-dx">(0 pts)</span>
+        </div>
+      </div>
+      
+      <!-- IQ -->
+      <div class="status-linha">
+        <div class="status-categoria">
+          <i class="fas fa-brain"></i>
+          <span>IQ</span>
+        </div>
+        <div class="status-valores">
+          <span class="status-qtd" id="qtd-iq">0</span>
+          <span class="status-pontos" id="pts-iq">(0 pts)</span>
+        </div>
+      </div>
+      
+      <!-- HT -->
+      <div class="status-linha">
+        <div class="status-categoria">
+          <i class="fas fa-heartbeat"></i>
+          <span>HT</span>
+        </div>
+        <div class="status-valores">
+          <span class="status-qtd" id="qtd-ht">0</span>
+          <span class="status-pontos" id="pts-ht">(0 pts)</span>
+        </div>
+      </div>
+      
+      <!-- PERC -->
+      <div class="status-linha">
+        <div class="status-categoria">
+          <i class="fas fa-eye"></i>
+          <span>PERC</span>
+        </div>
+        <div class="status-valores">
+          <span class="status-qtd" id="qtd-perc">0</span>
+          <span class="status-pontos" id="pts-perc">(0 pts)</span>
+        </div>
+      </div>
+      
+      <!-- SEPARADOR -->
+      <div class="status-separador"></div>
+      
+      <!-- TOTAL -->
+      <div class="status-linha total">
+        <div class="status-categoria">
+          <i class="fas fa-box"></i>
+          <span>TOTAL</span>
+        </div>
+        <div class="status-valores">
+          <span class="status-qtd" id="qtd-total">0</span>
+          <span class="status-pontos" id="pts-total">(0 pts)</span>
         </div>
       </div>
     </div>
-
+  </div>
+</div>
     <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
     <div class="sistema-aquisicao-pericias">
       
