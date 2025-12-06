@@ -1,4 +1,4 @@
-// vantagens.js - VERSÃO CORRIGIDA E FUNCIONAL
+// vantagens.js - VERSÃO CORRIGIDA E 100% FUNCIONAL
 class SistemaVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -50,8 +50,8 @@ class SistemaVantagens {
             }
         }
         
-        // Configurar modais
-        this.configurarModais();
+        // Configurar modais (só o de vantagem principal)
+        this.configurarModalVantagem();
         
         // Fechar modal clicando fora
         window.addEventListener('click', (e) => {
@@ -66,11 +66,6 @@ class SistemaVantagens {
                 this.fecharModalAtivo();
             }
         });
-    }
-    
-    configurarModais() {
-        this.configurarModalVantagem();
-        this.configurarModalOpcoes();
     }
     
     configurarModalVantagem() {
@@ -89,51 +84,6 @@ class SistemaVantagens {
         btnConfirmar.addEventListener('click', () => {
             this.confirmarAdicionarVantagem();
         });
-    }
-    
-    configurarModalOpcoes() {
-        const modal = document.getElementById('modal-opcoes');
-        if (!modal) return;
-        
-        // Fechar modal
-        modal.querySelector('.modal-close').addEventListener('click', () => {
-            this.fecharModal('opcoes');
-        });
-        
-        // Botão Voltar
-        modal.querySelector('.btn-cancelar').addEventListener('click', () => {
-            this.fecharModal('opcoes');
-            // Voltar para vantagem
-            if (this.vantagemSelecionada) {
-                setTimeout(() => {
-                    this.abrirModalVantagem(this.vantagemSelecionada);
-                }, 100);
-            }
-        });
-        
-        // BOTÃO SELECIONAR - CORREÇÃO DIRETA (SEM CLONENODE)
-        const btnSelecionar = modal.querySelector('.btn-confirmar');
-        btnSelecionar.textContent = 'Selecionar';
-        
-        // REMOVI O CLONENODE - AGORA ADICIONA DIRETO
-        btnSelecionar.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.confirmarSelecaoOpcao();
-        });
-    }
-    
-    confirmarSelecaoOpcao() {
-        // Verificar se tem opção selecionada
-        if (!this.opcaoSelecionada) {
-            alert('Por favor, selecione uma opção primeiro.');
-            return;
-        }
-        
-        // Adicionar a vantagem com a opção selecionada
-        this.adicionarVantagemComOpcao();
-        
-        // Fechar modal
-        this.fecharModal('opcoes');
     }
     
     filtrarVantagens(termo) {
@@ -164,7 +114,6 @@ class SistemaVantagens {
             listaContainer.appendChild(item);
         });
         
-        // Atualizar contador
         const contador = document.getElementById('contador-vantagens');
         if (contador) {
             contador.textContent = `${vantagensFiltradas.length} vantagem${vantagensFiltradas.length !== 1 ? 's' : ''}`;
@@ -209,22 +158,17 @@ class SistemaVantagens {
         const modal = document.getElementById('modal-opcoes');
         const corpo = document.getElementById('modal-corpo-opcoes');
         const titulo = document.getElementById('modal-titulo-opcoes');
-        const btnSelecionar = modal.querySelector('.btn-confirmar');
         
         if (!modal || !corpo) return;
         
         titulo.textContent = `Escolha uma opção: ${vantagem.nome}`;
         corpo.innerHTML = '';
-        
-        // Limpar seleção anterior
         this.opcaoSelecionada = null;
-        btnSelecionar.disabled = true;
         
-        // Criar opções
-        vantagem.opcoes.forEach((opcao, index) => {
+        // Renderizar opções
+        vantagem.opcoes.forEach((opcao) => {
             const opcaoItem = document.createElement('div');
             opcaoItem.className = 'opcao-item';
-            opcaoItem.dataset.index = index;
             
             opcaoItem.innerHTML = `
                 <div class="opcao-header">
@@ -235,21 +179,32 @@ class SistemaVantagens {
             `;
             
             opcaoItem.addEventListener('click', () => {
-                // Remover seleção anterior
                 document.querySelectorAll('.opcao-item').forEach(item => {
                     item.classList.remove('selecionada');
                 });
-                
-                // Selecionar esta opção
                 opcaoItem.classList.add('selecionada');
                 this.opcaoSelecionada = opcao;
-                btnSelecionar.disabled = false;
+                
+                // ✅ HABILITAR BOTÃO AO SELECIONAR
+                const btn = modal.querySelector('.btn-confirmar');
+                if (btn) btn.disabled = false;
             });
             
             corpo.appendChild(opcaoItem);
         });
         
-        // Abrir modal
+        // ✅ CONFIGURAR BOTÃO "SELECIONAR" NO MOMENTO DA ABERTURA
+        const btnSelecionar = modal.querySelector('.btn-confirmar');
+        if (btnSelecionar) {
+            // Remover qualquer handler antigo (segurança)
+            btnSelecionar.onclick = null;
+            btnSelecionar.textContent = 'Selecionar';
+            btnSelecionar.disabled = true; // começa desabilitado
+            btnSelecionar.onclick = () => {
+                this.confirmarSelecaoOpcao();
+            };
+        }
+        
         this.abrirModal('opcoes');
     }
     
@@ -267,7 +222,6 @@ class SistemaVantagens {
         
         let custo = vantagem.custo || 0;
         
-        // Se tem opções mas só uma, usar ela
         if (vantagem.temOpcoes && vantagem.opcoes && vantagem.opcoes.length === 1) {
             const opcao = vantagem.opcoes[0];
             custo = opcao.custo;
@@ -292,14 +246,22 @@ class SistemaVantagens {
         `;
         
         btnConfirmar.disabled = false;
-        
         this.abrirModal('vantagem');
+    }
+    
+    confirmarSelecaoOpcao() {
+        if (!this.opcaoSelecionada || !this.vantagemSelecionada) {
+            alert('Por favor, selecione uma opção primeiro.');
+            return;
+        }
+        
+        this.adicionarVantagemComOpcao();
+        this.fecharModal('opcoes');
     }
     
     confirmarAdicionarVantagem() {
         if (!this.vantagemSelecionada) return;
         
-        // Verificar se precisa de opção
         if (this.vantagemSelecionada.temOpcoes) {
             if (this.opcaoSelecionada) {
                 this.adicionarVantagemComOpcao();
@@ -318,8 +280,6 @@ class SistemaVantagens {
     }
     
     adicionarVantagemComOpcao() {
-        if (!this.vantagemSelecionada || !this.opcaoSelecionada) return;
-        
         const vantagemAdquirida = {
             id: `${this.vantagemSelecionada.id}-${Date.now()}`,
             baseId: this.vantagemSelecionada.id,
@@ -333,21 +293,13 @@ class SistemaVantagens {
         };
         
         this.vantagensAdquiridas.push(vantagemAdquirida);
-        
-        // Atualizar tudo
         this.atualizarInterface();
-        
-        // Limpar seleções
         this.vantagemSelecionada = null;
         this.opcaoSelecionada = null;
-        
-        // Feedback
         alert(`✅ Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
     }
     
     adicionarVantagemSemOpcao() {
-        if (!this.vantagemSelecionada) return;
-        
         const vantagemAdquirida = {
             id: `${this.vantagemSelecionada.id}-${Date.now()}`,
             baseId: this.vantagemSelecionada.id,
@@ -362,10 +314,7 @@ class SistemaVantagens {
         
         this.vantagensAdquiridas.push(vantagemAdquirida);
         this.atualizarInterface();
-        
         this.vantagemSelecionada = null;
-        
-        // Feedback
         alert(`✅ Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
     }
     
@@ -438,13 +387,11 @@ class SistemaVantagens {
     }
     
     atualizarContadores() {
-        // Contador de vantagens disponíveis
         const contadorVantagens = document.getElementById('contador-vantagens');
         if (contadorVantagens) {
             contadorVantagens.textContent = `${this.vantagensDisponiveis.length} vantagem${this.vantagensDisponiveis.length !== 1 ? 's' : ''}`;
         }
         
-        // Total de vantagens adquiridas
         const totalVantagensAdquiridas = document.getElementById('total-vantagens-adquiridas');
         if (totalVantagensAdquiridas) {
             const total = this.vantagensAdquiridas.reduce((sum, v) => sum + v.custo, 0);
@@ -453,23 +400,18 @@ class SistemaVantagens {
     }
     
     atualizarTotais() {
-        // Total vantagens
         const totalVantagens = this.vantagensAdquiridas.reduce((sum, v) => sum + v.custo, 0);
         
-        // Total desvantagens (do outro sistema)
         let totalDesvantagens = 0;
         if (window.sistemaDesvantagens && window.sistemaDesvantagens.desvantagensAdquiridas) {
             totalDesvantagens = window.sistemaDesvantagens.desvantagensAdquiridas.reduce((sum, d) => sum + d.custo, 0);
         }
         
-        // Total peculiaridades
         const peculiaridades = this.obterPeculiaridades();
         const totalPeculiaridades = -peculiaridades.length;
         
-        // Saldo total
         const saldoTotal = totalVantagens + totalDesvantagens + totalPeculiaridades;
         
-        // Atualizar elementos
         const elTotalVantagens = document.getElementById('total-vantagens');
         if (elTotalVantagens) {
             elTotalVantagens.textContent = totalVantagens >= 0 ? `+${totalVantagens} pts` : `${totalVantagens} pts`;
@@ -581,7 +523,7 @@ class SistemaVantagens {
         });
     }
     
-    // FUNÇÕES DE MODAL
+    // MODAIS
     abrirModal(tipo) {
         const modal = document.getElementById(`modal-${tipo}`);
         if (modal) {
@@ -600,12 +542,12 @@ class SistemaVantagens {
             this.vantagemSelecionada = null;
             this.opcaoSelecionada = null;
         }
+        // Não limpar vantagemSelecionada no fechar de 'opcoes', pois pode voltar
         
         document.body.style.overflow = 'auto';
     }
     
     fecharModalAtivo() {
-        // Fechar qualquer modal aberto
         const modais = ['vantagem', 'desvantagem', 'opcoes'];
         modais.forEach(tipo => {
             const modal = document.getElementById(`modal-${tipo}`);
@@ -616,11 +558,10 @@ class SistemaVantagens {
     }
 }
 
-// Inicializar quando o DOM carregar
+// Inicializar
 document.addEventListener('DOMContentLoaded', () => {
     window.sistemaVantagens = new SistemaVantagens();
     
-    // Atualizar peculiaridades ao carregar
     setTimeout(() => {
         if (window.sistemaVantagens) {
             window.sistemaVantagens.atualizarListaPeculiaridades();
@@ -628,7 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 });
 
-// Exportar para uso global
+// Exportar
 if (typeof window !== 'undefined') {
     window.SistemaVantagens = SistemaVantagens;
 }
