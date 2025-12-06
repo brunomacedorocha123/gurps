@@ -5,7 +5,7 @@ class SistemaVantagens {
         this.vantagensDisponiveis = [];
         this.vantagemSelecionada = null;
         this.opcaoSelecionada = null;
-        this.touchStartY = 0; // Para controle de swipe
+        this.touchStartY = 0;
         
         this.init();
     }
@@ -34,15 +34,6 @@ class SistemaVantagens {
         if (buscaVantagens) {
             buscaVantagens.addEventListener('input', (e) => {
                 this.filtrarVantagens(e.target.value);
-            });
-            
-            // Mobile: limpar foco ao tocar fora
-            buscaVantagens.addEventListener('blur', () => {
-                setTimeout(() => {
-                    if (document.activeElement !== buscaVantagens) {
-                        window.scrollTo(0, 0);
-                    }
-                }, 100);
             });
         }
         
@@ -88,22 +79,6 @@ class SistemaVantagens {
         // Detectar mobile
         if (!this.isMobile()) return;
         
-        // Prevenir zoom em inputs
-        document.querySelectorAll('input, textarea, select').forEach(input => {
-            input.addEventListener('touchstart', (e) => {
-                if (e.target.type === 'number') {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-            
-            input.addEventListener('focus', () => {
-                setTimeout(() => {
-                    // Rolar suavemente para o input
-                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
-            });
-        });
-        
         // Melhorar toque em botões
         document.querySelectorAll('.btn, .btn-remover, .peculiaridade-remover, .modal-close').forEach(btn => {
             btn.addEventListener('touchstart', () => {
@@ -115,64 +90,26 @@ class SistemaVantagens {
                 btn.style.transform = '';
                 btn.style.opacity = '';
             }, { passive: true });
-            
-            btn.addEventListener('touchcancel', () => {
-                btn.style.transform = '';
-                btn.style.opacity = '';
-            }, { passive: true });
-        });
-        
-        // Melhorar toque em itens da lista
-        document.querySelectorAll('.item-lista, .opcao-item, .peculiaridade-item').forEach(item => {
-            item.addEventListener('touchstart', () => {
-                item.style.backgroundColor = 'rgba(255, 140, 0, 0.15)';
-            }, { passive: true });
-            
-            item.addEventListener('touchend', () => {
-                setTimeout(() => {
-                    item.style.backgroundColor = '';
-                }, 150);
-            }, { passive: true });
-            
-            item.addEventListener('touchcancel', () => {
-                item.style.backgroundColor = '';
-            }, { passive: true });
         });
     }
     
     configurarModaisMobile() {
         const modais = document.querySelectorAll('.modal');
         modais.forEach(modal => {
-            // Prevenir scroll no modal aberto
-            modal.addEventListener('touchmove', (e) => {
-                if (modal.style.display === 'block') {
-                    const modalContent = modal.querySelector('.modal-content');
-                    if (modalContent && !modalContent.contains(e.target)) {
-                        e.preventDefault();
-                    }
-                }
-            }, { passive: false });
-            
-            // Fechar modal com swipe para baixo (apenas no header)
+            // Fechar modal com swipe para baixo
             const modalHeader = modal.querySelector('.modal-header');
             if (modalHeader) {
                 modalHeader.addEventListener('touchstart', (e) => {
                     this.touchStartY = e.touches[0].clientY;
                 }, { passive: true });
                 
-                modalHeader.addEventListener('touchmove', (e) => {
-                    if (!this.touchStartY) return;
+                modalHeader.addEventListener('touchend', (e) => {
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const diff = touchEndY - this.touchStartY;
                     
-                    const touchY = e.touches[0].clientY;
-                    const diff = touchY - this.touchStartY;
-                    
-                    if (diff > 50) { // Swipe para baixo de 50px
+                    if (diff > 100) { // Swipe para baixo de 100px
                         this.fecharModalAtivo();
-                        this.touchStartY = 0;
                     }
-                }, { passive: true });
-                
-                modalHeader.addEventListener('touchend', () => {
                     this.touchStartY = 0;
                 }, { passive: true });
             }
@@ -191,6 +128,14 @@ class SistemaVantagens {
             closeBtn.addEventListener('click', () => {
                 this.fecharModal('vantagem');
             });
+            
+            // Mobile
+            if (this.isMobile()) {
+                closeBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.fecharModal('vantagem');
+                }, { passive: false });
+            }
         }
         
         if (cancelBtn) {
@@ -203,6 +148,14 @@ class SistemaVantagens {
             confirmBtn.addEventListener('click', () => {
                 this.confirmarAdicionarVantagem();
             });
+            
+            // ✅ CORREÇÃO CRÍTICA: Adicionar evento para mobile
+            if (this.isMobile()) {
+                confirmBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.confirmarAdicionarVantagem();
+                }, { passive: false });
+            }
         }
     }
     
@@ -218,18 +171,42 @@ class SistemaVantagens {
             closeBtn.addEventListener('click', () => {
                 this.fecharModal('opcoes');
             });
+            
+            // Mobile
+            if (this.isMobile()) {
+                closeBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.fecharModal('opcoes');
+                }, { passive: false });
+            }
         }
         
         if (cancelBtn) {
             cancelBtn.addEventListener('click', () => {
                 this.fecharModal('opcoes');
             });
+            
+            // Mobile
+            if (this.isMobile()) {
+                cancelBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.fecharModal('opcoes');
+                }, { passive: false });
+            }
         }
         
         if (confirmBtn) {
             confirmBtn.addEventListener('click', () => {
                 this.confirmarSelecaoOpcao();
             });
+            
+            // ✅ CORREÇÃO CRÍTICA: Adicionar evento para mobile
+            if (this.isMobile()) {
+                confirmBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.confirmarSelecaoOpcao();
+                }, { passive: false });
+            }
         }
     }
     
@@ -288,41 +265,19 @@ class SistemaVantagens {
             ${vantagem.categoria ? `<span class="item-categoria">${vantagem.categoria}</span>` : ''}
         `;
         
-        // Desktop: click normal
-        item.addEventListener('click', (e) => {
-            if (!this.isMobile()) {
+        // Evento único para desktop e mobile
+        const selecionarHandler = (e) => {
+            if (e.type === 'touchstart') {
                 e.preventDefault();
-                this.selecionarVantagem(vantagem);
             }
-        });
+            this.selecionarVantagem(vantagem);
+        };
         
-        // Mobile: touch events
+        item.addEventListener('click', selecionarHandler);
+        
+        // Mobile: também adicionar touch
         if (this.isMobile()) {
-            let touchStartTime = 0;
-            let touchStartX = 0;
-            let touchStartY = 0;
-            
-            item.addEventListener('touchstart', (e) => {
-                touchStartTime = Date.now();
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-                e.preventDefault();
-            }, { passive: false });
-            
-            item.addEventListener('touchend', (e) => {
-                const touchEndTime = Date.now();
-                const touchDuration = touchEndTime - touchStartTime;
-                const touchEndX = e.changedTouches[0].clientX;
-                const touchEndY = e.changedTouches[0].clientY;
-                const diffX = Math.abs(touchEndX - touchStartX);
-                const diffY = Math.abs(touchEndY - touchStartY);
-                
-                // Apenas se for um toque rápido e sem arrastar muito
-                if (touchDuration < 300 && diffX < 10 && diffY < 10) {
-                    e.preventDefault();
-                    this.selecionarVantagem(vantagem);
-                }
-            }, { passive: false });
+            item.addEventListener('touchstart', selecionarHandler, { passive: false });
         }
         
         return item;
@@ -331,14 +286,6 @@ class SistemaVantagens {
     selecionarVantagem(vantagem) {
         this.vantagemSelecionada = vantagem;
         this.opcaoSelecionada = null;
-        
-        // Fechar teclado se aberto no mobile
-        if (this.isMobile()) {
-            const activeElement = document.activeElement;
-            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
-                activeElement.blur();
-            }
-        }
         
         if (vantagem.temOpcoes && vantagem.opcoes && vantagem.opcoes.length > 1) {
             this.abrirModalOpcoes(vantagem);
@@ -351,71 +298,55 @@ class SistemaVantagens {
         const modal = document.getElementById('modal-opcoes');
         if (!modal) return;
         
-        // Pequeno delay para garantir que o DOM esteja pronto
-        setTimeout(() => {
-            const corpo = document.getElementById('modal-corpo-opcoes');
-            const titulo = document.getElementById('modal-titulo-opcoes');
+        const corpo = document.getElementById('modal-corpo-opcoes');
+        const titulo = document.getElementById('modal-titulo-opcoes');
+        const btnSelecionar = modal.querySelector('.btn-confirmar');
+        
+        if (!corpo || !titulo || !btnSelecionar) return;
+        
+        titulo.textContent = `Escolha uma opção: ${vantagem.nome}`;
+        corpo.innerHTML = '';
+        this.opcaoSelecionada = null;
+        
+        vantagem.opcoes.forEach((opcao) => {
+            const opcaoItem = document.createElement('div');
+            opcaoItem.className = 'opcao-item';
             
-            if (!corpo || !titulo) return;
+            opcaoItem.innerHTML = `
+                <div class="opcao-header">
+                    <h4 class="opcao-nome">${opcao.nome}</h4>
+                    <span class="opcao-custo">${opcao.custo} pts</span>
+                </div>
+                <p class="opcao-descricao">${opcao.descricao || ''}</p>
+            `;
             
-            titulo.textContent = `Escolha uma opção: ${vantagem.nome}`;
-            corpo.innerHTML = '';
-            this.opcaoSelecionada = null;
-            
-            vantagem.opcoes.forEach((opcao) => {
-                const opcaoItem = document.createElement('div');
-                opcaoItem.className = 'opcao-item';
-                
-                opcaoItem.innerHTML = `
-                    <div class="opcao-header">
-                        <h4 class="opcao-nome">${opcao.nome}</h4>
-                        <span class="opcao-custo">${opcao.custo} pts</span>
-                    </div>
-                    <p class="opcao-descricao">${opcao.descricao || ''}</p>
-                `;
-                
-                // Eventos para desktop e mobile
-                const selecionarOpcao = () => {
-                    document.querySelectorAll('.opcao-item').forEach(item => {
-                        item.classList.remove('selecionada');
-                    });
-                    opcaoItem.classList.add('selecionada');
-                    this.opcaoSelecionada = opcao;
-                    
-                    const btn = modal.querySelector('.btn-confirmar');
-                    if (btn) btn.disabled = false;
-                };
-                
-                // Desktop
-                opcaoItem.addEventListener('click', selecionarOpcao);
-                
-                // Mobile
-                if (this.isMobile()) {
-                    opcaoItem.addEventListener('touchstart', (e) => {
-                        e.preventDefault();
-                    }, { passive: false });
-                    
-                    opcaoItem.addEventListener('touchend', (e) => {
-                        e.preventDefault();
-                        selecionarOpcao();
-                    }, { passive: false });
+            // Evento para selecionar opção
+            const selecionarOpcao = (e) => {
+                if (e.type === 'touchstart') {
+                    e.preventDefault();
                 }
                 
-                corpo.appendChild(opcaoItem);
-            });
+                document.querySelectorAll('.opcao-item').forEach(item => {
+                    item.classList.remove('selecionada');
+                });
+                opcaoItem.classList.add('selecionada');
+                this.opcaoSelecionada = opcao;
+                btnSelecionar.disabled = false;
+            };
             
-            const btnSelecionar = modal.querySelector('.btn-confirmar');
-            if (btnSelecionar) {
-                btnSelecionar.onclick = null;
-                btnSelecionar.textContent = 'Selecionar';
-                btnSelecionar.disabled = true;
-                btnSelecionar.onclick = () => {
-                    this.confirmarSelecaoOpcao();
-                };
+            opcaoItem.addEventListener('click', selecionarOpcao);
+            
+            // Mobile
+            if (this.isMobile()) {
+                opcaoItem.addEventListener('touchstart', selecionarOpcao, { passive: false });
             }
             
-            this.abrirModal('opcoes');
-        }, 10);
+            corpo.appendChild(opcaoItem);
+        });
+        
+        btnSelecionar.disabled = true;
+        
+        this.abrirModal('opcoes');
     }
     
     abrirModalVantagem(vantagem) {
@@ -461,7 +392,7 @@ class SistemaVantagens {
     
     confirmarSelecaoOpcao() {
         if (!this.opcaoSelecionada || !this.vantagemSelecionada) {
-            alert('Por favor, selecione uma opção primeiro.');
+            this.mostrarAlertaMobile('Por favor, selecione uma opção primeiro.');
             return;
         }
         
@@ -479,7 +410,7 @@ class SistemaVantagens {
                 this.opcaoSelecionada = this.vantagemSelecionada.opcoes[0];
                 this.adicionarVantagemComOpcao();
             } else {
-                alert('Por favor, selecione uma opção primeiro.');
+                this.mostrarAlertaMobile('Por favor, selecione uma opção primeiro.');
                 return;
             }
         } else {
@@ -487,6 +418,15 @@ class SistemaVantagens {
         }
         
         this.fecharModal('vantagem');
+    }
+    
+    mostrarAlertaMobile(mensagem) {
+        if (this.isMobile()) {
+            // Usar alert nativo no mobile
+            alert(mensagem);
+        } else {
+            alert(mensagem);
+        }
     }
     
     adicionarVantagemComOpcao() {
@@ -507,8 +447,8 @@ class SistemaVantagens {
         this.vantagemSelecionada = null;
         this.opcaoSelecionada = null;
         
-        // Feedback visual
-        alert(`✅ Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
+        // ✅ CORREÇÃO: Feedback que funciona no mobile
+        this.mostrarFeedbackSucesso(`✅ Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
     }
     
     adicionarVantagemSemOpcao() {
@@ -528,7 +468,36 @@ class SistemaVantagens {
         this.atualizarInterface();
         this.vantagemSelecionada = null;
         
-        alert(`✅ Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
+        this.mostrarFeedbackSucesso(`✅ Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
+    }
+    
+    mostrarFeedbackSucesso(mensagem) {
+        // Usar alert nativo que funciona em todos os dispositivos
+        alert(mensagem);
+        
+        // Opcional: adicionar feedback visual temporário
+        if (!this.isMobile()) {
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #27ae60;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 10001;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease;
+            `;
+            feedback.textContent = mensagem;
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => feedback.remove(), 300);
+            }, 3000);
+        }
     }
     
     removerVantagem(id) {
@@ -590,27 +559,23 @@ class SistemaVantagens {
             
             const btnRemover = item.querySelector('.btn-remover');
             
-            // Desktop
-            btnRemover.addEventListener('click', (e) => {
+            // Evento unificado para desktop e mobile
+            const removerHandler = (e) => {
                 e.stopPropagation();
+                if (e.type === 'touchstart') {
+                    e.preventDefault();
+                }
+                
                 if (confirm(`Remover "${vantagem.nome}"?`)) {
                     this.removerVantagem(vantagem.id);
                 }
-            });
+            };
+            
+            btnRemover.addEventListener('click', removerHandler);
             
             // Mobile
             if (this.isMobile()) {
-                btnRemover.addEventListener('touchstart', (e) => {
-                    e.stopPropagation();
-                }, { passive: true });
-                
-                btnRemover.addEventListener('touchend', (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    if (confirm(`Remover "${vantagem.nome}"?`)) {
-                        this.removerVantagem(vantagem.id);
-                    }
-                }, { passive: false });
+                btnRemover.addEventListener('touchstart', removerHandler, { passive: false });
             }
             
             listaContainer.appendChild(item);
@@ -673,13 +638,13 @@ class SistemaVantagens {
         
         const texto = input.value.trim();
         if (!texto) {
-            alert('Por favor, digite uma peculiaridade.');
+            this.mostrarAlertaMobile('Por favor, digite uma peculiaridade.');
             return;
         }
         
         const peculiaridades = this.obterPeculiaridades();
         if (peculiaridades.length >= 5) {
-            alert('Limite máximo de 5 peculiaridades atingido!');
+            this.mostrarAlertaMobile('Limite máximo de 5 peculiaridades atingido!');
             return;
         }
         
@@ -691,11 +656,6 @@ class SistemaVantagens {
         
         localStorage.setItem('peculiaridades', JSON.stringify(peculiaridades));
         input.value = '';
-        
-        // Fechar teclado no mobile
-        if (this.isMobile()) {
-            input.blur();
-        }
         
         this.atualizarListaPeculiaridades();
         this.atualizarTotais();
@@ -754,46 +714,36 @@ class SistemaVantagens {
             
             const btnRemover = item.querySelector('.peculiaridade-remover');
             
-            // Desktop
-            btnRemover.addEventListener('click', () => {
+            // Evento unificado
+            const removerHandler = (e) => {
+                if (e.type === 'touchstart') {
+                    e.preventDefault();
+                }
                 this.removerPeculiaridade(peculiaridade.id);
-            });
+            };
+            
+            btnRemover.addEventListener('click', removerHandler);
             
             // Mobile
             if (this.isMobile()) {
-                btnRemover.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    this.removerPeculiaridade(peculiaridade.id);
-                }, { passive: false });
+                btnRemover.addEventListener('touchstart', removerHandler, { passive: false });
             }
             
             listaContainer.appendChild(item);
         });
     }
     
-    // ===== CORREÇÃO DOS MÉTODOS DE MODAL =====
-    
+    // MODAIS
     abrirModal(tipo) {
         const modal = document.getElementById(`modal-${tipo}`);
         if (modal) {
             modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
             
-            // ✅ CORREÇÃO: Usar classe CSS em vez de inline styles
-            document.body.classList.add('modal-aberto');
-            
-            // ✅ Preservar a posição de scroll antes de abrir o modal
-            const scrollY = window.scrollY;
-            document.body.style.top = `-${scrollY}px`;
-            document.body.dataset.scrollY = scrollY;
-            
-            // Garantir que o modal esteja no topo
-            setTimeout(() => {
-                modal.scrollTop = 0;
-                const modalContent = modal.querySelector('.modal-content');
-                if (modalContent) {
-                    modalContent.scrollTop = 0;
-                }
-            }, 10);
+            // No mobile, garantir que o teclado não interfira
+            if (this.isMobile()) {
+                document.activeElement?.blur();
+            }
         }
     }
     
@@ -801,16 +751,7 @@ class SistemaVantagens {
         const modal = document.getElementById(`modal-${tipo}`);
         if (modal) {
             modal.style.display = 'none';
-            
-            // ✅ CORREÇÃO: Restaurar posição de scroll
-            document.body.classList.remove('modal-aberto');
-            
-            if (document.body.dataset.scrollY) {
-                const scrollY = parseInt(document.body.dataset.scrollY);
-                document.body.style.top = '';
-                window.scrollTo(0, scrollY);
-                delete document.body.dataset.scrollY;
-            }
+            document.body.style.overflow = '';
         }
         
         if (tipo === 'vantagem') {
@@ -857,5 +798,4 @@ if (typeof window !== 'undefined') {
     window.SistemaVantagens = SistemaVantagens;
 }
 
-// Para compatibilidade com outros scripts
 console.log('Sistema de Vantagens carregado com sucesso!');
