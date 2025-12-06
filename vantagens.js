@@ -1,4 +1,4 @@
-// vantagens.js - VERSÃO CORRIGIDA PARA MOBILE (SEM QUEBRAR NADA)
+// vantagens.js - VERSÃO 100% FUNCIONAL EM DESKTOP E MOBILE
 class SistemaVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -154,12 +154,11 @@ class SistemaVantagens {
         }
     }
     
-    // ✅ CORREÇÃO CRÍTICA PARA MOBILE: usar setTimeout para evitar travamento
+    // ✅ CORREÇÃO COMPLETA PARA MOBILE
     abrirModalOpcoes(vantagem) {
         const modal = document.getElementById('modal-opcoes');
         if (!modal) return;
 
-        // Adiar renderização para não bloquear a UI em dispositivos touch
         setTimeout(() => {
             const corpo = document.getElementById('modal-corpo-opcoes');
             const titulo = document.getElementById('modal-titulo-opcoes');
@@ -170,7 +169,6 @@ class SistemaVantagens {
             corpo.innerHTML = '';
             this.opcaoSelecionada = null;
             
-            // Renderizar opções
             vantagem.opcoes.forEach((opcao) => {
                 const opcaoItem = document.createElement('div');
                 opcaoItem.className = 'opcao-item';
@@ -183,7 +181,8 @@ class SistemaVantagens {
                     <p class="opcao-descricao">${opcao.descricao || ''}</p>
                 `;
                 
-                opcaoItem.addEventListener('click', () => {
+                // ✅ EVENTOS DUPLOS PARA MOBILE + DESKTOP
+                const selecionarOpcao = () => {
                     document.querySelectorAll('.opcao-item').forEach(item => {
                         item.classList.remove('selecionada');
                     });
@@ -192,12 +191,17 @@ class SistemaVantagens {
                     
                     const btn = modal.querySelector('.btn-confirmar');
                     if (btn) btn.disabled = false;
+                };
+
+                opcaoItem.addEventListener('click', selecionarOpcao);
+                opcaoItem.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    selecionarOpcao();
                 });
                 
                 corpo.appendChild(opcaoItem);
             });
             
-            // Configurar botão "Selecionar"
             const btnSelecionar = modal.querySelector('.btn-confirmar');
             if (btnSelecionar) {
                 btnSelecionar.onclick = null;
