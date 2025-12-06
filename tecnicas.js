@@ -20,17 +20,32 @@ const tabelasCustoTecnicas = {
     'Difícil': { 0:0, 1:2, 2:3, 3:4, 4:5 }
 };
 
-// ===== FUNÇÃO: CALCULAR CUSTO =====
+// ===== FUNÇÃO CORRIGIDA: CALCULAR CUSTO =====
 function calcularCustoTecnica(diferenca, dificuldade) {
-    if (!dificuldade) return 0;
-    const tabela = tabelasCustoTecnicas[dificuldade];
-    if (!tabela) return 0;
+    if (diferenca < 0) return 0;
     
-    if (tabela[diferenca] !== undefined) return tabela[diferenca];
-    if (diferenca >= 5) {
-        const base = dificuldade === 'Difícil' ? 5 : 4;
-        return base + (diferenca - 4);
+    // Tabela DIFÍCIL (Arquearia Montada é Difícil)
+    if (dificuldade === 'Difícil') {
+        if (diferenca === 0) return 0;      // Exatamente no requisito
+        if (diferenca === 1) return 2;      // +1 acima
+        if (diferenca === 2) return 3;      // +2 acima
+        if (diferenca === 3) return 4;      // +3 acima
+        if (diferenca === 4) return 5;      // +4 acima
+        // +5 ou mais: 5 pontos + (diferença - 4) * 1
+        return 5 + (diferenca - 4);
     }
+    
+    // Tabela MÉDIA
+    if (dificuldade === 'Média') {
+        if (diferenca === 0) return 0;      // Exatamente no requisito
+        if (diferenca === 1) return 1;      // +1 acima
+        if (diferenca === 2) return 2;      // +2 acima
+        if (diferenca === 3) return 3;      // +3 acima
+        if (diferenca === 4) return 4;      // +4 acima
+        // +5 ou mais: 4 pontos + (diferença - 4) * 1
+        return 4 + (diferenca - 4);
+    }
+    
     return 0;
 }
 
