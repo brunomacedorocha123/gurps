@@ -1,28 +1,19 @@
-// vantagens.js - VERSÃO 100% FUNCIONAL PARA DESKTOP E MOBILE (CORRIGIDA)
+// vantagens.js - VERSÃO 100% FUNCIONAL PARA DESKTOP E MOBILE (CORREÇÃO SIMPLES)
 class SistemaVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
         this.vantagensDisponiveis = [];
         this.vantagemSelecionada = null;
         this.opcaoSelecionada = null;
-        this.isTouchDevice = false;
         
         this.init();
     }
     
     init() {
-        this.detectarTouchDevice();
         this.carregarCatalogoVantagens();
         this.configurarEventos();
         this.renderizarListaVantagens();
         this.atualizarInterface();
-        this.configurarModais();
-    }
-    
-    detectarTouchDevice() {
-        this.isTouchDevice = 'ontouchstart' in window || 
-                           navigator.maxTouchPoints > 0 || 
-                           navigator.msMaxTouchPoints > 0;
     }
     
     carregarCatalogoVantagens() {
@@ -60,8 +51,12 @@ class SistemaVantagens {
             }
         }
         
+        // Configurar modais - CORREÇÃO AQUI
+        this.configurarModalVantagem();
+        this.configurarModalOpcoes();
+        
         // Fechar modal clicando fora
-        document.addEventListener('click', (e) => {
+        window.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal')) {
                 this.fecharModalAtivo();
             }
@@ -75,60 +70,73 @@ class SistemaVantagens {
         });
     }
     
-    configurarModais() {
-        // Configurar todos os botões dos modais
-        this.configurarBotoesModal('modal-vantagem');
-        this.configurarBotoesModal('modal-opcoes');
-        this.configurarBotoesModal('modal-desvantagem');
-    }
-    
-    configurarBotoesModal(modalId) {
-        const modal = document.getElementById(modalId);
+    configurarModalVantagem() {
+        const modal = document.getElementById('modal-vantagem');
         if (!modal) return;
         
-        // Botão fechar (X)
         const closeBtn = modal.querySelector('.modal-close');
+        const cancelBtn = modal.querySelector('.btn-cancelar');
+        const confirmBtn = modal.querySelector('.btn-confirmar');
+        
         if (closeBtn) {
-            // ✅ USAR APENAS CLICK - funciona em todos os dispositivos
             closeBtn.addEventListener('click', () => {
-                this.fecharModal(modalId.replace('modal-', ''));
+                this.fecharModal('vantagem');
             });
         }
         
-        // Botão cancelar
-        const cancelBtn = modal.querySelector('.btn-cancelar');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', () => {
-                this.fecharModal(modalId.replace('modal-', ''));
+                this.fecharModal('vantagem');
             });
         }
         
-        // Botão confirmar/selecionar
-        const confirmBtn = modal.querySelector('.btn-confirmar');
         if (confirmBtn) {
-            // ✅ CORREÇÃO CRÍTICA: Usar evento de click que funciona em todos os dispositivos
-            confirmBtn.addEventListener('click', () => {
-                if (modalId === 'modal-opcoes') {
-                    this.confirmarSelecaoOpcao();
-                } else if (modalId === 'modal-vantagem') {
-                    this.confirmarAdicionarVantagem();
-                }
+            // ✅ CORREÇÃO: Remover event listener antigo e adicionar novo
+            const novoConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(novoConfirmBtn, confirmBtn);
+            
+            novoConfirmBtn.addEventListener('click', () => {
+                this.confirmarAdicionarVantagem();
+            });
+        }
+    }
+    
+    configurarModalOpcoes() {
+        const modal = document.getElementById('modal-opcoes');
+        if (!modal) return;
+        
+        const closeBtn = modal.querySelector('.modal-close');
+        const cancelBtn = modal.querySelector('.btn-cancelar');
+        const confirmBtn = modal.querySelector('.btn-confirmar');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.fecharModal('opcoes');
+            });
+        }
+        
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                this.fecharModal('opcoes');
+            });
+        }
+        
+        if (confirmBtn) {
+            // ✅ CORREÇÃO CRÍTICA PARA MOBILE: Substituir botão para evitar conflitos
+            const novoConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(novoConfirmBtn, confirmBtn);
+            
+            // Adicionar evento que funciona em desktop e mobile
+            novoConfirmBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.confirmarSelecaoOpcao();
             });
             
-            // ✅ ADICIONAR EVENTO DE TOUCHSTART PARA MOBILE (sem preventDefault)
-            if (this.isTouchDevice) {
-                confirmBtn.addEventListener('touchstart', () => {
-                    // Adicionar feedback visual
-                    confirmBtn.style.opacity = '0.8';
-                    confirmBtn.style.transform = 'scale(0.98)';
-                    
-                    // Remover feedback após 200ms
-                    setTimeout(() => {
-                        confirmBtn.style.opacity = '';
-                        confirmBtn.style.transform = '';
-                    }, 200);
-                }, { passive: true });
-            }
+            // Adicionar também touchstart para mobile
+            novoConfirmBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                this.confirmarSelecaoOpcao();
+            }, { passive: false });
         }
     }
     
@@ -182,10 +190,14 @@ class SistemaVantagens {
             ${vantagem.categoria ? `<span class="item-categoria">${vantagem.categoria}</span>` : ''}
         `;
         
-        // ✅ CORREÇÃO: Usar apenas evento de click que funciona em todos os dispositivos
-        item.addEventListener('click', () => {
+        // Evento para desktop e mobile
+        const selecionarHandler = (e) => {
+            e.preventDefault();
             this.selecionarVantagem(vantagem);
-        });
+        };
+        
+        item.addEventListener('click', selecionarHandler);
+        item.addEventListener('touchstart', selecionarHandler, { passive: false });
         
         return item;
     }
@@ -227,28 +239,26 @@ class SistemaVantagens {
                 <p class="opcao-descricao">${opcao.descricao || ''}</p>
             `;
             
-            // ✅ CORREÇÃO: Usar apenas evento de click
-            opcaoItem.addEventListener('click', () => {
-                // Desselecionar todas
+            // Evento para selecionar opção
+            const selecionarOpcao = (e) => {
+                e.preventDefault();
+                
                 document.querySelectorAll('.opcao-item').forEach(item => {
                     item.classList.remove('selecionada');
                 });
-                
-                // Selecionar esta
                 opcaoItem.classList.add('selecionada');
                 this.opcaoSelecionada = opcao;
                 btnSelecionar.disabled = false;
-                
-                // Feedback visual no mobile
-                if (this.isTouchDevice) {
-                    opcaoItem.style.backgroundColor = 'rgba(39, 174, 96, 0.25)';
-                }
-            });
+            };
+            
+            opcaoItem.addEventListener('click', selecionarOpcao);
+            opcaoItem.addEventListener('touchstart', selecionarOpcao, { passive: false });
             
             corpo.appendChild(opcaoItem);
         });
         
         btnSelecionar.disabled = true;
+        
         this.abrirModal('opcoes');
     }
     
@@ -295,7 +305,7 @@ class SistemaVantagens {
     
     confirmarSelecaoOpcao() {
         if (!this.opcaoSelecionada || !this.vantagemSelecionada) {
-            this.mostrarFeedback('Por favor, selecione uma opção primeiro.', 'error');
+            alert('Por favor, selecione uma opção primeiro.');
             return;
         }
         
@@ -313,7 +323,7 @@ class SistemaVantagens {
                 this.opcaoSelecionada = this.vantagemSelecionada.opcoes[0];
                 this.adicionarVantagemComOpcao();
             } else {
-                this.mostrarFeedback('Por favor, selecione uma opção primeiro.', 'error');
+                alert('Por favor, selecione uma opção primeiro.');
                 return;
             }
         } else {
@@ -321,46 +331,6 @@ class SistemaVantagens {
         }
         
         this.fecharModal('vantagem');
-    }
-    
-    mostrarFeedback(mensagem, tipo = 'success') {
-        // Feedback simples que funciona em todos os dispositivos
-        const alerta = tipo === 'error' ? '⚠️ ' : '✅ ';
-        
-        if (this.isTouchDevice) {
-            // No mobile, usar alert nativo
-            alert(alerta + mensagem);
-        } else {
-            // No desktop, mostrar feedback visual
-            this.criarNotificacao(alerta + mensagem, tipo);
-        }
-    }
-    
-    criarNotificacao(mensagem, tipo) {
-        const notificacao = document.createElement('div');
-        notificacao.className = `notificacao-feedback ${tipo}`;
-        notificacao.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${tipo === 'error' ? '#e74c3c' : '#27ae60'};
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            z-index: 10001;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s ease;
-            font-weight: 500;
-            max-width: 350px;
-            word-break: break-word;
-        `;
-        notificacao.textContent = mensagem;
-        document.body.appendChild(notificacao);
-        
-        setTimeout(() => {
-            notificacao.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => notificacao.remove(), 300);
-        }, 3000);
     }
     
     adicionarVantagemComOpcao() {
@@ -381,7 +351,7 @@ class SistemaVantagens {
         this.vantagemSelecionada = null;
         this.opcaoSelecionada = null;
         
-        this.mostrarFeedback(`Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
+        alert(`✅ Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
     }
     
     adicionarVantagemSemOpcao() {
@@ -401,14 +371,13 @@ class SistemaVantagens {
         this.atualizarInterface();
         this.vantagemSelecionada = null;
         
-        this.mostrarFeedback(`Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
+        alert(`✅ Vantagem "${vantagemAdquirida.nome}" adicionada por ${vantagemAdquirida.custo} pontos!`);
     }
     
     removerVantagem(id) {
         if (confirm('Remover esta vantagem?')) {
             this.vantagensAdquiridas = this.vantagensAdquiridas.filter(v => v.id !== id);
             this.atualizarInterface();
-            this.mostrarFeedback('Vantagem removida com sucesso!');
         }
     }
     
@@ -524,13 +493,13 @@ class SistemaVantagens {
         
         const texto = input.value.trim();
         if (!texto) {
-            this.mostrarFeedback('Por favor, digite uma peculiaridade.', 'error');
+            alert('Por favor, digite uma peculiaridade.');
             return;
         }
         
         const peculiaridades = this.obterPeculiaridades();
         if (peculiaridades.length >= 5) {
-            this.mostrarFeedback('Limite máximo de 5 peculiaridades atingido!', 'error');
+            alert('Limite máximo de 5 peculiaridades atingido!');
             return;
         }
         
@@ -545,8 +514,6 @@ class SistemaVantagens {
         
         this.atualizarListaPeculiaridades();
         this.atualizarTotais();
-        
-        this.mostrarFeedback('Peculiaridade adicionada! (-1 ponto)');
     }
     
     removerPeculiaridade(id) {
@@ -557,8 +524,6 @@ class SistemaVantagens {
             localStorage.setItem('peculiaridades', JSON.stringify(novasPeculiaridades));
             this.atualizarListaPeculiaridades();
             this.atualizarTotais();
-            
-            this.mostrarFeedback('Peculiaridade removida!');
         }
     }
     
@@ -618,7 +583,7 @@ class SistemaVantagens {
         const modal = document.getElementById(`modal-${tipo}`);
         if (modal) {
             modal.style.display = 'block';
-            document.body.classList.add('modal-aberto');
+            document.body.style.overflow = 'hidden';
         }
     }
     
@@ -626,7 +591,7 @@ class SistemaVantagens {
         const modal = document.getElementById(`modal-${tipo}`);
         if (modal) {
             modal.style.display = 'none';
-            document.body.classList.remove('modal-aberto');
+            document.body.style.overflow = '';
         }
         
         if (tipo === 'vantagem') {
@@ -648,7 +613,6 @@ class SistemaVantagens {
 
 // Inicialização segura
 document.addEventListener('DOMContentLoaded', () => {
-    // Verificar se já existe uma instância
     if (window.sistemaVantagens) {
         try {
             window.sistemaVantagens.fecharModalAtivo();
@@ -657,10 +621,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Criar nova instância
     window.sistemaVantagens = new SistemaVantagens();
     
-    // Garantir que peculiaridades sejam carregadas
     setTimeout(() => {
         if (window.sistemaVantagens) {
             window.sistemaVantagens.atualizarListaPeculiaridades();
@@ -668,35 +630,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 300);
 });
 
-// Adicionar animações CSS dinamicamente
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .modal-aberto {
-        overflow: hidden !important;
-    }
-`;
-document.head.appendChild(style);
+if (typeof window !== 'undefined') {
+    window.SistemaVantagens = SistemaVantagens;
+}
 
-console.log('✅ Sistema de Vantagens carregado com sucesso!');
+console.log('✅ Sistema de Vantagens carregado!');
