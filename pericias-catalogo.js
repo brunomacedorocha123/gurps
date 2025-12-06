@@ -482,20 +482,32 @@ function obterTodasPericiasSimples() {
         if (categoria === "Combate" || categoria === "Especializacao") {
             // Ambas têm estrutura de grupos
             for (const grupo in catalogoPericias[categoria]) {
-                if (catalogoPericias[categoria][grupo].tipo === "modal-escolha") {
+                const dadosGrupo = catalogoPericias[categoria][grupo];
+                
+                // Se for um grupo de especialização (tem propriedade "tipo")
+                if (dadosGrupo.tipo === "modal-escolha") {
                     todas.push({
                         id: `grupo-${grupo.toLowerCase().replace(/ /g, '-')}`,
-                        nome: catalogoPericias[categoria][grupo].nome,
-                        atributo: catalogoPericias[categoria][grupo].atributo,
+                        nome: dadosGrupo.nome,
+                        atributo: dadosGrupo.atributo,
                         dificuldade: "Média",
                         custoBase: 2,
-                        descricao: catalogoPericias[categoria][grupo].descricao,
+                        descricao: dadosGrupo.descricao,
                         prereq: "Varia por especialização",
                         default: "Varia por especialização",
-                        categoria: catalogoPericias[categoria][grupo].categoria,
+                        categoria: dadosGrupo.categoria,
                         tipo: "grupo-especializacao",
                         grupo: grupo,
                         origem: `${categoria} - ${grupo}`
+                    });
+                }
+                // Se for um array direto de perícias (como "Simples")
+                else if (Array.isArray(dadosGrupo)) {
+                    dadosGrupo.forEach(pericia => {
+                        todas.push({
+                            ...pericia,
+                            origem: `${categoria} - ${grupo}`
+                        });
                     });
                 }
             }
