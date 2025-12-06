@@ -823,7 +823,7 @@ class SistemaVantagens {
         });
     }
     
-    // FUNÇÕES DE MODAL
+   // FUNÇÕES DE MODAL
     abrirModal(tipo) {
         console.log(`📂 Abrindo modal: ${tipo}`);
         
@@ -861,24 +861,92 @@ class SistemaVantagens {
             document.body.classList.remove('modal-aberto');
         }
         
-        // Resetar seleções se for modal de item
-        if (tipo === 'vantagem' || tipo === 'desvantagem') {
+        // Resetar seleções se for modal de vantagem
+        if (tipo === 'vantagem') {
             this.itemSelecionado = null;
             this.tipoSelecionado = null;
             this.opcaoSelecionada = null;
         }
     }
     
+    selecionarOpcao() {
+        console.log('✅ Confirmando seleção de opção...');
+        
+        if (!this.opcaoSelecionada || !this.itemSelecionado || !this.tipoSelecionado) {
+            console.error('❌ Faltam dados para selecionar opções!');
+            alert('Por favor, selecione uma opção primeiro.');
+            return;
+        }
+        
+        console.log(`🎯 Opção selecionada: ${this.opcaoSelecionada.nome} (${this.opcaoSelecionada.custo} pts)`);
+        
+        // Fechar modal de opções
+        this.fecharModal('opcoes');
+        
+        // Aguardar um pouco para garantir que o modal fechou
+        setTimeout(() => {
+            // Abrir o modal principal de VANTAGENS com os dados da opção selecionada
+            const modal = document.getElementById('modal-vantagem');
+            
+            if (!modal) {
+                console.error('Modal vantagem não encontrado!');
+                // Se não encontrar, adicionar diretamente
+                this.adicionarItemComOpcaoSelecionada();
+                return;
+            }
+            
+            const corpo = document.getElementById('modal-corpo-vantagem');
+            const titulo = document.getElementById('modal-titulo-vantagem');
+            const btnConfirmar = modal.querySelector('.btn-confirmar');
+            
+            if (!corpo || !titulo || !btnConfirmar) {
+                console.error('Elementos do modal não encontrados!');
+                this.adicionarItemComOpcaoSelecionada();
+                return;
+            }
+            
+            // Configurar o modal com os dados da opção selecionada
+            titulo.textContent = this.opcaoSelecionada.nome;
+            
+            corpo.innerHTML = `
+                <div class="modal-info">
+                    <p><strong>Descrição:</strong> ${this.opcaoSelecionada.descricao || this.itemSelecionado.descricao || ''}</p>
+                    ${this.itemSelecionado.categoria ? `<p><strong>Categoria:</strong> ${this.itemSelecionado.categoria}</p>` : ''}
+                    ${this.itemSelecionado.prerequisitos && this.itemSelecionado.prerequisitos.length > 0 ? 
+                      `<p><strong>Pré-requisitos:</strong> ${this.itemSelecionado.prerequisitos.join(', ')}</p>` : ''}
+                    ${this.itemSelecionado.notas ? `<p><strong>Notas:</strong> ${this.itemSelecionado.notas}</p>` : ''}
+                </div>
+                <div class="pericia-custo-container">
+                    <div class="pericia-custo">
+                        Custo: ${this.opcaoSelecionada.custo} pontos
+                    </div>
+                    <div class="pericia-custo-adicional">
+                        (${this.itemSelecionado.nome} - Opção selecionada)
+                    </div>
+                </div>
+            `;
+            
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = 'Adicionar Vantagem';
+            
+            // Configurar evento do botão confirmar
+            const btnConfirmarClone = btnConfirmar.cloneNode(true);
+            btnConfirmar.parentNode.replaceChild(btnConfirmarClone, btnConfirmar);
+            
+            btnConfirmarClone.addEventListener('click', () => {
+                this.adicionarItemComOpcaoSelecionada();
+                this.fecharModal('vantagem');
+            });
+            
+            // Abrir o modal de vantagens
+            this.abrirModal('vantagem');
+            
+        }, 150);
+    }
+    
     // Função para obter todas as vantagens adquiridas
     obterVantagensAdquiridas() {
         return [...this.vantagensAdquiridas];
-    }
-    
-    // Função para obter todas as desvantagens adquiridas
-    obterDesvantagensAdquiridas() {
-        return window.sistemaDesvantagens ? 
-            [...window.sistemaDesvantagens.desvantagensAdquiridas] : 
-            [];
     }
     
     // Função para calcular saldo total
