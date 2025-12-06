@@ -6,6 +6,7 @@
     max-width: 1400px;
     margin: 0 auto;
     box-sizing: border-box;
+    -webkit-overflow-scrolling: touch; /* ✅ Suaviza scroll no iOS */
 }
 
 /* Seção de pontos - Responsiva */
@@ -30,6 +31,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    touch-action: manipulation; /* ✅ Melhora toque no mobile */
 }
 
 .ponto-card::before {
@@ -138,6 +140,7 @@
     max-height: 500px;
     display: flex;
     flex-direction: column;
+    touch-action: manipulation; /* ✅ */
 }
 
 .atributo-card::before {
@@ -239,6 +242,9 @@
     transition: all 0.2s ease;
     box-sizing: border-box;
     height: 38px;
+    -webkit-appearance: none; /* ✅ Remove estilos nativos iOS */
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .busca-input:focus {
@@ -259,6 +265,7 @@
     padding: 8px;
     scroll-behavior: smooth;
     flex: 1;
+    -webkit-overflow-scrolling: touch; /* ✅ Scroll suave iOS */
 }
 
 .lista-vazia {
@@ -283,6 +290,7 @@
     overflow: hidden;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    user-select: none; /* ✅ Previne seleção de texto no mobile */
 }
 
 /* Header otimizado */
@@ -366,6 +374,8 @@
     flex-shrink: 0;
     touch-action: manipulation;
     min-height: 24px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-remover:active {
@@ -395,6 +405,9 @@
     background: rgba(30, 30, 40, 0.95);
     color: #ffd700;
     transition: all 0.2s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .peculiaridade-input:focus {
@@ -428,6 +441,7 @@
     transition: all 0.2s ease;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 .peculiaridade-texto {
@@ -464,6 +478,7 @@
     margin-left: 6px;
     transition: all 0.2s ease;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .peculiaridade-remover:active {
@@ -503,7 +518,7 @@
     color: #e74c3c;
 }
 
-/* ===== MODAIS ===== */
+/* ===== MODAIS - CORREÇÃO CRÍTICA PARA MOBILE ===== */
 .modal {
     display: none;
     position: fixed;
@@ -511,12 +526,20 @@
     left: 0;
     top: 0;
     width: 100%;
-    height: 100dvh; /* ✅ Correção para mobile */
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(5px);
-    overflow-y: auto;
+    overflow-y: auto; /* ✅ Permite scroll */
     padding: 10px;
     box-sizing: border-box;
+    -webkit-overflow-scrolling: touch; /* ✅ Scroll suave no iOS */
+}
+
+/* Classe para quando modal está aberto - Gerenciada por JS */
+.body-modal-aberto {
+    overflow: hidden; /* ✅ Apenas esconde scroll do body */
+    position: relative; /* ✅ NÃO usar fixed! */
+    height: 100%;
 }
 
 .modal-content {
@@ -529,7 +552,7 @@
     max-width: 500px;
     position: relative;
     animation: modalAparecer 0.3s ease;
-    max-height: calc(100dvh - 20px); /* ✅ */
+    max-height: 90vh; /* ✅ Usa vh em vez de dvh */
     display: flex;
     flex-direction: column;
 }
@@ -563,6 +586,7 @@
     transition: all 0.2s ease;
     touch-action: manipulation;
     background: rgba(0, 0, 0, 0.3);
+    user-select: none;
 }
 
 .modal-close:active {
@@ -576,6 +600,7 @@
     padding: 16px;
     border-bottom: 1px solid rgba(255, 140, 0, 0.3);
     flex-shrink: 0;
+    touch-action: pan-y; /* ✅ Permite scroll vertical no header */
 }
 
 .modal-header h3 {
@@ -592,8 +617,9 @@
     color: #ccc;
     flex: 1;
     overflow-y: auto;
-    max-height: calc(100dvh - 200px); /* ✅ */
+    max-height: calc(90vh - 200px); /* ✅ Ajustado */
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; /* ✅ Evita scroll da página principal */
 }
 
 .modal-actions {
@@ -623,6 +649,7 @@
     touch-action: manipulation;
     min-height: 48px;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 .btn-cancelar {
@@ -662,6 +689,7 @@
     transition: all 0.2s ease;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 .opcao-item.selecionada {
@@ -785,26 +813,40 @@
     outline-offset: 2px;
 }
 
-/* ===== CORREÇÃO CRÍTICA PARA MOBILE: evitar cancelamento de clique ===== */
+/* ===== CORREÇÃO CRÍTICA PARA MOBILE ===== */
 @media (hover: none) and (pointer: coarse) {
-    /* Desativar transform em :active para evitar layout shift em touch */
+    /* Previne zoom em inputs no iOS */
+    input,
+    textarea {
+        font-size: 16px !important; /* ✅ Evita zoom automático */
+    }
+    
+    /* Melhora feedback de toque */
     .item-lista:active,
     .opcao-item:active,
     .peculiaridade-item:active,
     .btn:active,
     .btn-remover:active,
     .peculiaridade-remover:active {
-        transform: none !important;
-        scale: none !important;
-        background: rgba(255, 140, 0, 0.15) !important;
+        opacity: 0.7;
+        transform: translateY(1px);
     }
     
-    /* Garantir que elementos clicáveis respondam ao toque */
-    .item-lista,
-    .opcao-item,
-    .btn {
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
+    /* Remove efeitos hover problemáticos no mobile */
+    .item-lista:hover,
+    .opcao-item:hover,
+    .peculiaridade-item:hover,
+    .btn:hover,
+    .btn-remover:hover,
+    .peculiaridade-remover:hover,
+    .modal-close:hover {
+        transform: none !important;
+    }
+    
+    /* Garante que modais fiquem no topo */
+    .modal {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
     }
 }
 
@@ -1001,5 +1043,113 @@
     
     .modal-header h3 {
         font-size: 1.1em;
+    }
+    
+    .modal-content {
+        max-height: 85vh;
+    }
+    
+    .modal-body {
+        max-height: calc(85vh - 180px);
+    }
+}
+
+/* ✅ Correção para iOS Safari */
+@supports (-webkit-touch-callout: none) {
+    .modal {
+        height: -webkit-fill-available; /* ✅ Usa altura disponível no iOS */
+    }
+    
+    .modal-content {
+        max-height: -webkit-fill-available;
+    }
+    
+    .modal-body {
+        max-height: calc(-webkit-fill-available - 200px);
+    }
+}
+
+/* ADICIONE ESTES ESTILOS AO SEU CSS EXISTENTE */
+
+/* ✅ Classe para quando modal está aberto */
+.modal-aberto {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ✅ Correção para modais no mobile */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    overflow-y: auto;
+    padding: 10px;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-content {
+    background: rgba(30, 30, 40, 0.98);
+    border: 2px solid rgba(255, 140, 0, 0.3);
+    border-radius: 10px;
+    margin: 10px auto;
+    padding: 0;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    animation: modalAparecer 0.3s ease;
+    max-height: 85vh; /* ✅ Usa vh em vez de 100% */
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-body {
+    padding: 16px;
+    color: #ccc;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(85vh - 200px); /* ✅ Ajustado */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; /* ✅ Evita scroll da página principal */
+}
+
+/* ✅ Suporte para iOS */
+@supports (-webkit-touch-callout: none) {
+    .modal {
+        height: -webkit-fill-available;
+    }
+    
+    .modal-content {
+        max-height: -webkit-fill-available;
+    }
+    
+    .modal-body {
+        max-height: calc(-webkit-fill-available - 200px);
+    }
+}
+
+/* ✅ Melhorias para touch no mobile */
+@media (hover: none) and (pointer: coarse) {
+    .item-lista,
+    .opcao-item,
+    .peculiaridade-item,
+    .btn,
+    .btn-remover,
+    .peculiaridade-remover,
+    .modal-close {
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+    
+    .modal {
+        touch-action: pan-y;
     }
 }

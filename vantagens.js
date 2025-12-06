@@ -771,17 +771,20 @@ class SistemaVantagens {
         });
     }
     
-    // MODAIS - CORREÇÃO MOBILE
+    // ===== CORREÇÃO DOS MÉTODOS DE MODAL =====
+    
     abrirModal(tipo) {
         const modal = document.getElementById(`modal-${tipo}`);
         if (modal) {
             modal.style.display = 'block';
             
-            // Prevenir scroll no body
-            document.body.style.overflow = 'hidden';
-            document.body.style.position = 'fixed';
-            document.body.style.width = '100%';
-            document.body.style.height = '100%';
+            // ✅ CORREÇÃO: Usar classe CSS em vez de inline styles
+            document.body.classList.add('modal-aberto');
+            
+            // ✅ Preservar a posição de scroll antes de abrir o modal
+            const scrollY = window.scrollY;
+            document.body.style.top = `-${scrollY}px`;
+            document.body.dataset.scrollY = scrollY;
             
             // Garantir que o modal esteja no topo
             setTimeout(() => {
@@ -799,11 +802,15 @@ class SistemaVantagens {
         if (modal) {
             modal.style.display = 'none';
             
-            // Restaurar scroll do body
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
-            document.body.style.height = '';
+            // ✅ CORREÇÃO: Restaurar posição de scroll
+            document.body.classList.remove('modal-aberto');
+            
+            if (document.body.dataset.scrollY) {
+                const scrollY = parseInt(document.body.dataset.scrollY);
+                document.body.style.top = '';
+                window.scrollTo(0, scrollY);
+                delete document.body.dataset.scrollY;
+            }
         }
         
         if (tipo === 'vantagem') {
