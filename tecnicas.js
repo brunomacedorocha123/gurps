@@ -32,32 +32,16 @@ function calcularCustoTecnica(niveisAcima, dificuldade) {
     return 0;
 }
 
-// ===== OBTER NH DA PERÍCIA =====
+// ===== OBTER NH DA PERÍCIA (VERSÃO SIMPLES QUE FUNCIONA) =====
 function obterNHPericiaAtual(idPericia) {
     if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) return 0;
     
-    // Procura por ID EXATO primeiro
-    let pericia = window.estadoPericias.periciasAprendidas.find(p => p.id === idPericia);
-    
-    // Se não encontrou, procura por NOME (para Arco que pode ter especializações)
-    if (!pericia) {
-        // Para Arco, pode ser "arco-curto", "arco-longo", etc
-        pericia = window.estadoPericias.periciasAprendidas.find(p => 
-            p.id && p.id.includes('arco')
-        );
-    }
-    
-    // Se ainda não encontrou, procura por nome da perícia
-    if (!pericia) {
-        pericia = window.estadoPericias.periciasAprendidas.find(p => 
-            p.nome && p.nome.toLowerCase().includes('arco')
-        );
-    }
-    
+    const pericia = window.estadoPericias.periciasAprendidas.find(p => p.id === idPericia);
     if (!pericia) return 0;
     
     let atributoBase = 10;
     
+    // USA SUA FUNÇÃO REAL obterDadosAtributos()
     if (window.obterDadosAtributos) {
         const dadosAtributos = window.obterDadosAtributos();
         if (dadosAtributos) {
@@ -73,7 +57,7 @@ function obterNHPericiaAtual(idPericia) {
     return atributoBase + (pericia.nivel || 0);
 }
 
-// ===== VERIFICAR PRÉ-REQUISITOS (CORRIGIDA) =====
+// ===== VERIFICAR PRÉ-REQUISITOS (VOLTANDO PARA VERSÃO QUE FUNCIONAVA) =====
 function verificarPreRequisitosTecnica(tecnica) {
     if (!tecnica || !tecnica.preRequisitos) {
         return { passou: false, motivo: "Técnica inválida" };
@@ -82,34 +66,17 @@ function verificarPreRequisitosTecnica(tecnica) {
     for (const prereq of tecnica.preRequisitos) {
         let periciaEncontrada = null;
         
-        // MÉTODO 1: Procura por ID exato
+        // VERSÃO SIMPLES: Procura pelo ID EXATO do catálogo
         if (prereq.idPericia) {
-            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
-                p.id === prereq.idPericia
-            );
+            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
         }
         
-        // MÉTODO 2: Se for Arco, procura por qualquer arco
-        if (!periciaEncontrada && prereq.nomePericia && prereq.nomePericia.toLowerCase().includes('arco')) {
-            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
-                p.id && p.id.includes('arco')
-            );
-            
-            if (!periciaEncontrada) {
-                periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
-                    p.nome && p.nome.toLowerCase().includes('arco')
-                );
-            }
-        }
-        
-        // MÉTODO 3: Se for Cavalgar, usa a lista de IDs
+        // Para Cavalgar: usa a lista de IDs
         if (!periciaEncontrada && prereq.idsCavalgar) {
-            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
-                prereq.idsCavalgar.includes(p.id)
-            );
+            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => prereq.idsCavalgar.includes(p.id));
         }
         
-        // MÉTODO 4: Procura por nome genérico
+        // Se não encontrou pelo ID, tenta pelo nome (para compatibilidade)
         if (!periciaEncontrada && prereq.nomePericia) {
             const nomeBusca = prereq.nomePericia.toLowerCase();
             periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
@@ -132,32 +99,19 @@ function verificarPreRequisitosTecnica(tecnica) {
     return { passou: true, motivo: '' };
 }
 
-// ===== CALCULAR NH BASE E MÁXIMO =====
+// ===== CALCULAR NH BASE E MÁXIMO (VERSÃO SIMPLES) =====
 function calcularNHBaseTecnica(tecnica) {
     if (!tecnica.preRequisitos || tecnica.preRequisitos.length === 0) return 0;
     
     const prereq = tecnica.preRequisitos[0];
     let periciaAprendida = null;
     
-    // Para Arco: procura qualquer arco aprendido
-    if (prereq.nomePericia && prereq.nomePericia.toLowerCase().includes('arco')) {
-        periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => 
-            p.id && p.id.includes('arco')
-        );
-        
-        if (!periciaAprendida) {
-            periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => 
-                p.nome && p.nome.toLowerCase().includes('arco')
-            );
-        }
-    }
-    
-    // Se não encontrou arco, procura por ID
-    if (!periciaAprendida && prereq.idPericia) {
+    // Procura pelo ID exato primeiro
+    if (prereq.idPericia) {
         periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
     }
     
-    // Se ainda não, procura por lista de IDs (Cavalgar)
+    // Se não encontrou, procura na lista de IDs (Cavalgar)
     if (!periciaAprendida && prereq.idsCavalgar) {
         periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => prereq.idsCavalgar.includes(p.id));
     }
@@ -174,25 +128,12 @@ function calcularNHMaximoTecnica(tecnica) {
     const prereq = tecnica.preRequisitos[0];
     let periciaAprendida = null;
     
-    // Para Arco: procura qualquer arco aprendido
-    if (prereq.nomePericia && prereq.nomePericia.toLowerCase().includes('arco')) {
-        periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => 
-            p.id && p.id.includes('arco')
-        );
-        
-        if (!periciaAprendida) {
-            periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => 
-                p.nome && p.nome.toLowerCase().includes('arco')
-            );
-        }
-    }
-    
-    // Se não encontrou arco, procura por ID
-    if (!periciaAprendida && prereq.idPericia) {
+    // Procura pelo ID exato primeiro
+    if (prereq.idPericia) {
         periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
     }
     
-    // Se ainda não, procura por lista de IDs (Cavalgar)
+    // Se não encontrou, procura na lista de IDs (Cavalgar)
     if (!periciaAprendida && prereq.idsCavalgar) {
         periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => prereq.idsCavalgar.includes(p.id));
     }
@@ -243,29 +184,33 @@ function atualizarTecnicasDisponiveis() {
     renderizarCatalogoTecnicas();
 }
 
-// ===== CONECTAR AO EVENTO DOS ATRIBUTOS =====
-function configurarOuvinteAtributosTecnicas() {
-    // ESCUTA O EVENTO QUE SEU SISTEMA DE ATRIBUTOS DISPARA
-    document.addEventListener('atributosAlterados', function(evento) {
+// ===== ATUALIZAÇÃO EM TEMPO REAL (MANTENDO O QUE FUNCIONAVA) =====
+function configurarMonitoramento() {
+    // Escuta o evento dos atributos
+    document.addEventListener('atributosAlterados', function() {
+        console.log('Técnicas: Atributos alterados, atualizando...');
         atualizarTecnicasDisponiveis();
         renderizarStatusTecnicas();
         renderizarTecnicasAprendidas();
     });
     
-    // Também monitora mudanças nos atributos
-    const atributosInputs = ['ST', 'DX', 'IQ', 'HT'];
-    atributosInputs.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('change', function() {
-                setTimeout(() => {
-                    atualizarTecnicasDisponiveis();
-                    renderizarStatusTecnicas();
-                    renderizarTecnicasAprendidas();
-                }, 100);
-            });
-        }
-    });
+    // Monitora mudanças nas perícias (quando adiciona/remove)
+    if (window.estadoPericias) {
+        let ultimasPericias = JSON.stringify(window.estadoPericias.periciasAprendidas);
+        
+        setInterval(() => {
+            if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) return;
+            
+            const periciasAtuais = JSON.stringify(window.estadoPericias.periciasAprendidas);
+            if (periciasAtuais !== ultimasPericias) {
+                ultimasPericias = periciasAtuais;
+                console.log('Técnicas: Perícias alteradas, atualizando...');
+                atualizarTecnicasDisponiveis();
+                renderizarStatusTecnicas();
+                renderizarTecnicasAprendidas();
+            }
+        }, 500);
+    }
 }
 
 // ===== RENDERIZAR STATUS =====
@@ -699,7 +644,7 @@ function renderizarFiltrosTecnicas() {
 function inicializarSistemaTecnicas() {
     carregarTecnicas();
     configurarEventListenersTecnicas();
-    configurarOuvinteAtributosTecnicas();
+    configurarMonitoramento(); // ADICIONA ATUALIZAÇÃO EM TEMPO REAL
     atualizarTecnicasDisponiveis();
     renderizarStatusTecnicas();
     renderizarFiltrosTecnicas();
