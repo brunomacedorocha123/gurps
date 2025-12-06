@@ -1,8 +1,5 @@
 // ===== CATÁLOGO DE TÉCNICAS =====
-// APENAS UMA TÉCNICA PARA TESTE - Arquearia Montada
-
 const catalogoTecnicas = {
-    // TÉCNICA ÚNICA PARA TESTE
     "Arquearia Montada": {
         id: "arquearia-montada",
         nome: "Arquearia Montada",
@@ -10,14 +7,15 @@ const catalogoTecnicas = {
         dificuldade: "Difícil",
         preRequisitos: [
             {
-                idPericia: "arco",  // ID da perícia Arco do catálogo
+                idPericia: "arco",
                 nomePericia: "Arco",
-                nivelMinimo: 4  // Pré-definido: Arco-4
+                nivelMinimo: 4
             },
             {
-                idPericia: "grupo-cavalgar",  // ID da perícia Cavalgar do catálogo
+                idPrefix: "cavalgar-",
                 nomePericia: "Cavalgar",
-                nivelMinimo: 0  // Precisa ter a perícia, sem nível mínimo específico
+                nivelMinimo: 0,
+                tipoVerificacao: "prefixo"
             }
         ],
         regrasEspeciais: [
@@ -30,8 +28,6 @@ const catalogoTecnicas = {
 };
 
 // ===== FUNÇÕES BÁSICAS DO CATÁLOGO =====
-
-// Obter todas as técnicas do catálogo
 function obterTodasTecnicas() {
     const todas = [];
     
@@ -52,7 +48,6 @@ function obterTodasTecnicas() {
     return todas;
 }
 
-// Buscar técnica por ID
 function buscarTecnicaPorId(id) {
     for (const chave in catalogoTecnicas) {
         if (catalogoTecnicas[chave].id === id) {
@@ -62,7 +57,6 @@ function buscarTecnicaPorId(id) {
     return null;
 }
 
-// Buscar técnica por nome
 function buscarTecnicaPorNome(nome) {
     for (const chave in catalogoTecnicas) {
         if (catalogoTecnicas[chave].nome.toLowerCase() === nome.toLowerCase()) {
@@ -72,26 +66,24 @@ function buscarTecnicaPorNome(nome) {
     return null;
 }
 
-// Obter técnicas por dificuldade
 function obterTecnicasPorDificuldade(dificuldade) {
     const todas = obterTodasTecnicas();
     return todas.filter(tecnica => tecnica.dificuldade === dificuldade);
 }
 
-// Obter técnicas por perícia requisitada
 function obterTecnicasPorPericia(idPericia) {
     const todas = obterTodasTecnicas();
     return todas.filter(tecnica => 
-        tecnica.preRequisitos.some(prereq => prereq.idPericia === idPericia)
+        tecnica.preRequisitos.some(prereq => 
+            prereq.idPericia === idPericia || 
+            (prereq.idPrefix && idPericia.startsWith(prereq.idPrefix))
+        )
     );
 }
 
 // ===== EXPORTAÇÃO PARA USO GLOBAL =====
 window.catalogoTecnicas = {
-    // Dados
     dados: catalogoTecnicas,
-    
-    // Funções principais
     obterTodasTecnicas: obterTodasTecnicas,
     buscarTecnicaPorId: buscarTecnicaPorId,
     buscarTecnicaPorNome: buscarTecnicaPorNome,
@@ -99,5 +91,4 @@ window.catalogoTecnicas = {
     obterTecnicasPorPericia: obterTecnicasPorPericia
 };
 
-// Mensagem de inicialização
 console.log('Catálogo de técnicas carregado: 1 técnica disponível (Arquearia Montada)');

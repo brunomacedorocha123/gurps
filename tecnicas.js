@@ -1,116 +1,97 @@
-// ===== SISTEMA DE TÉCNICAS =====
-
-// Estado do sistema de técnicas
-let estadoTecnicas = {
-    pontosTecnicasTotal: 0,
-    pontosMedio: 0,
-    pontosDificil: 0,
-    qtdMedio: 0,
-    qtdDificil: 0,
-    qtdTotal: 0,
-    tecnicasAprendidas: [],
-    filtroAtivo: 'todas-tecnicas',
-    buscaAtiva: '',
-    tecnicasDisponiveis: [], // Será preenchido dinamicamente
-    modalTecnicaAtiva: null,
-    nivelTecnica: 0
-};
-
-// ===== TABELAS DE CUSTO DAS TÉCNICAS =====
-const tabelasCustoTecnicas = {
-    // TABELA PARA DIFICULDADE MÉDIA
-    'Média': {
-        nome: 'Média',
-        custos: {
-            0: 0,   // Exatamente no requisito
-            1: 1,   // +1 acima
-            2: 2,   // +2 acima  
-            3: 3,   // +3 acima
-            4: 4,   // +4 acima
-            // +5 ou mais: +1 ponto por +1
-        }
-    },
-    
-    // TABELA PARA DIFICULDADE DIFÍCIL
-    'Difícil': {
-        nome: 'Difícil',
-        custos: {
-            0: 0,   // Exatamente no requisito
-            1: 2,   // +1 acima
-            2: 3,   // +2 acima
-            3: 4,   // +3 acima
-            4: 5,   // +4 acima
-            // +5 ou mais: +1 ponto por +1
-        }
+// ===== CATÁLOGO DE TÉCNICAS =====
+const catalogoTecnicas = {
+    "Arquearia Montada": {
+        id: "arquearia-montada",
+        nome: "Arquearia Montada",
+        descricao: "Permite utilizar arco com eficiência enquanto cavalga. Os modificadores para disparar sobre um cavalo nunca podem reduzir o NH em Arco abaixo do NH do personagem em Arquearia Montada (as outras penalidades são aplicadas normalmente).",
+        dificuldade: "Difícil",
+        preRequisitos: [
+            {
+                idPericia: "arco",
+                nomePericia: "Arco",
+                nivelMinimo: 4
+            },
+            {
+                idPrefix: "cavalgar-",
+                nomePericia: "Cavalgar",
+                nivelMinimo: 0,
+                tipoVerificacao: "prefixo"
+            }
+        ],
+        regrasEspeciais: [
+            "Não pode exceder o NH em Arco",
+            "Exemplo: Se personagem tem Arco 13 e Arquearia Montada 11, as penalidades para disparar a cavalo nunca reduzem o NH abaixo de 11 antes de outros modificadores"
+        ],
+        referencia: "pág. 397",
+        tipo: "tecnica-combate"
     }
 };
 
-// ===== FUNÇÃO: CALCULAR CUSTO DA TÉCNICA =====
-function calcularCustoTecnica(diferencaNivel, dificuldade) {
-    const tabela = tabelasCustoTecnicas[dificuldade];
-    if (!tabela) return 0;
+// ===== FUNÇÕES BÁSICAS DO CATÁLOGO =====
+function obterTodasTecnicas() {
+    const todas = [];
     
-    // Se diferença for exatamente um valor da tabela
-    if (tabela.custos.hasOwnProperty(diferencaNivel)) {
-        return tabela.custos[diferencaNivel];
+    for (const chave in catalogoTecnicas) {
+        const tecnica = catalogoTecnicas[chave];
+        todas.push({
+            id: tecnica.id,
+            nome: tecnica.nome,
+            descricao: tecnica.descricao,
+            dificuldade: tecnica.dificuldade,
+            preRequisitos: tecnica.preRequisitos,
+            regrasEspeciais: tecnica.regrasEspeciais,
+            referencia: tecnica.referencia,
+            tipo: tecnica.tipo
+        });
     }
     
-    // Se diferença for 5 ou mais: 5 pontos + (diferença - 4) * 1
-    if (diferencaNivel >= 5) {
-        const base = dificuldade === 'Difícil' ? 5 : 4; // +4 já custa 5 ou 4
-        return base + (diferencaNivel - 4);
-    }
-    
-    return 0;
+    return todas;
 }
 
-// ===== FUNÇÃO: OBTER NH DA PERÍCIA EM TEMPO REAL =====
-function obterNHPericia(idPericia) {
-    // Busca a perícia aprendida
-    const periciaAprendida = estadoPericias.periciasAprendidas.find(p => p.id === idPericia);
-    if (!periciaAprendida) return null;
-    
-    // Calcula NH atual: atributo base + nível da perícia
-    const atributoBase = obterAtributoAtual(periciaAprendida.atributo);
-    return atributoBase + periciaAprendida.nivel;
-}
-
-// ===== FUNÇÃO: VERIFICAR PRÉ-REQUISITOS =====
-function verificarPreRequisitosTecnica(tecnica) {
-    // Verifica se tem todas as perícias requisitadas
-    for (const prereq of tecnica.preRequisitos) {
-        const periciaAprendida = estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
-        if (!periciaAprendida) {
-            return {
-                passou: false,
-                motivo: `Falta a perícia: ${prereq.nomePericia}`
-            };
-        }
-        
-        // Verifica se tem o nível mínimo na perícia
-        const nhPericia = obterNHPericia(prereq.idPericia);
-        if (nhPericia < prereq.nivelMinimo) {
-            return {
-                passou: false,
-                motivo: `${prereq.nomePericia} precisa ter NH ${prereq.nivelMinimo} (atual: ${nhPericia})`
-            };
+function buscarTecnicaPorId(id) {
+    for (const chave in catalogoTecnicas) {
+        if (catalogoTecnicas[chave].id === id) {
+            return catalogoTecnicas[chave];
         }
     }
-    
-    return { passou: true, motivo: '' };
+    return null;
 }
 
-// ===== FUNÇÃO: CALCULAR DIFERENÇA DO REQUISITO =====
-function calcularDiferencaRequisito(tecnica) {
-    // A técnica usa o requisito da primeira perícia da lista
-    const periciaPrincipal = tecnica.preRequisitos[0];
-    const nhAtual = obterNHPericia(periciaPrincipal.idPericia);
-    
-    if (nhAtual === null) return 0;
-    
-    // Diferença = NH atual - requisito
-    return Math.max(0, nhAtual - periciaPrincipal.nivelMinimo);
+function buscarTecnicaPorNome(nome) {
+    for (const chave in catalogoTecnicas) {
+        if (catalogoTecnicas[chave].nome.toLowerCase() === nome.toLowerCase()) {
+            return catalogoTecnicas[chave];
+        }
+    }
+    return null;
 }
+
+function obterTecnicasPorDificuldade(dificuldade) {
+    const todas = obterTodasTecnicas();
+    return todas.filter(tecnica => tecnica.dificuldade === dificuldade);
+}
+
+function obterTecnicasPorPericia(idPericia) {
+    const todas = obterTodasTecnicas();
+    return todas.filter(tecnica => 
+        tecnica.preRequisitos.some(prereq => 
+            prereq.idPericia === idPericia || 
+            (prereq.idPrefix && idPericia.startsWith(prereq.idPrefix))
+        )
+    );
+}
+
+// ===== EXPORTAÇÃO PARA USO GLOBAL =====
+window.catalogoTecnicas = {
+    dados: catalogoTecnicas,
+    obterTodasTecnicas: obterTodasTecnicas,
+    buscarTecnicaPorId: buscarTecnicaPorId,
+    buscarTecnicaPorNome: buscarTecnicaPorNome,
+    obterTecnicasPorDificuldade: obterTecnicasPorDificuldade,
+    obterTecnicasPorPericia: obterTecnicasPorPericia
+};
+
+console.log('Catálogo de técnicas carregado: 1 técnica disponível (Arquearia Montada)');
 
 // ===== FUNÇÃO: ATUALIZAR TÉCNICAS DISPONÍVEIS =====
 function atualizarTecnicasDisponiveis() {
@@ -119,13 +100,11 @@ function atualizarTecnicasDisponiveis() {
     const todasTecnicas = window.catalogoTecnicas.obterTodasTecnicas();
     const disponiveis = [];
     
-    // Filtra técnicas que o jogador tem pré-requisitos
     todasTecnicas.forEach(tecnica => {
         const verificacao = verificarPreRequisitosTecnica(tecnica);
         const jaAprendida = estadoTecnicas.tecnicasAprendidas.some(t => t.id === tecnica.id);
         
         if (verificacao.passou && !jaAprendida) {
-            // Calcula custo atual
             const diferenca = calcularDiferencaRequisito(tecnica);
             const custoAtual = calcularCustoTecnica(diferenca, tecnica.dificuldade);
             
@@ -137,7 +116,6 @@ function atualizarTecnicasDisponiveis() {
                 verificacao: verificacao
             });
         } else if (!jaAprendida) {
-            // Técnica não disponível (falta pré-requisitos)
             disponiveis.push({
                 ...tecnica,
                 disponivel: false,
@@ -152,7 +130,6 @@ function atualizarTecnicasDisponiveis() {
 
 // ===== FUNÇÃO: RENDERIZAR STATUS DAS TÉCNICAS =====
 function renderizarStatusTecnicas() {
-    // Calcula estatísticas
     estadoTecnicas.pontosTecnicasTotal = 0;
     estadoTecnicas.pontosMedio = 0;
     estadoTecnicas.pontosDificil = 0;
@@ -172,7 +149,6 @@ function renderizarStatusTecnicas() {
     
     estadoTecnicas.qtdTotal = estadoTecnicas.qtdMedio + estadoTecnicas.qtdDificil;
     
-    // Atualiza a interface
     document.getElementById('qtd-tecnicas-medio').textContent = estadoTecnicas.qtdMedio;
     document.getElementById('pts-tecnicas-medio').textContent = `(${estadoTecnicas.pontosMedio} pts)`;
     
@@ -195,16 +171,12 @@ function renderizarCatalogoTecnicas() {
     
     let tecnicasFiltradas = estadoTecnicas.tecnicasDisponiveis;
     
-    // Aplica filtro
     if (estadoTecnicas.filtroAtivo === 'medio-tecnicas') {
         tecnicasFiltradas = tecnicasFiltradas.filter(t => t.dificuldade === 'Média');
     } else if (estadoTecnicas.filtroAtivo === 'dificil-tecnicas') {
         tecnicasFiltradas = tecnicasFiltradas.filter(t => t.dificuldade === 'Difícil');
-    } else if (estadoTecnicas.filtroAtivo === 'pericia-tecnicas') {
-        // Mostrará depois quando implementarmos filtro por perícia
     }
     
-    // Aplica busca
     if (estadoTecnicas.buscaAtiva.trim() !== '') {
         const termo = estadoTecnicas.buscaAtiva.toLowerCase();
         tecnicasFiltradas = tecnicasFiltradas.filter(t => 
@@ -213,7 +185,6 @@ function renderizarCatalogoTecnicas() {
         );
     }
     
-    // Renderiza
     if (tecnicasFiltradas.length === 0) {
         if (estadoTecnicas.tecnicasDisponiveis.length === 0) {
             container.innerHTML = `
@@ -262,8 +233,9 @@ function renderizarCatalogoTecnicas() {
                 <i class="fas fa-lock"></i> ${tecnica.motivoIndisponivel || 'Pré-requisitos não atendidos'}
             </div>`;
         } else {
+            const requisitos = tecnica.preRequisitos.map(p => `${p.nomePericia} ${p.nivelMinimo}+`).join(', ');
             html += `<div class="pericia-requisitos">
-                <small><strong>Requisito:</strong> ${tecnica.preRequisitos.map(p => `${p.nomePericia} ${p.nivelMinimo}+`).join(', ')}</small>
+                <small><strong>Requisito:</strong> ${requisitos}</small>
             </div>`;
         }
         
@@ -307,7 +279,7 @@ function renderizarTecnicasAprendidas() {
             <div class="pericia-aprendida-header">
                 <h4 class="pericia-aprendida-nome">${tecnica.nome}</h4>
                 <div class="pericia-aprendida-info">
-                    <span class="pericia-aprendida-nivel">${tecnica.nhAtual}</span>
+                    <span class="pericia-aprendida-nivel">NH ${tecnica.nhAtual}</span>
                     <span class="pericia-dificuldade dificuldade-${tecnica.dificuldade.toLowerCase()}">
                         ${tecnica.dificuldade}
                     </span>
@@ -331,7 +303,6 @@ function renderizarTecnicasAprendidas() {
         });
         
         item.addEventListener('click', () => {
-            // Abre modal para ver detalhes
             const tecnicaOriginal = window.catalogoTecnicas.buscarTecnicaPorId(tecnica.id);
             if (tecnicaOriginal) {
                 abrirModalTecnica(tecnicaOriginal, tecnica);
@@ -346,17 +317,24 @@ function renderizarTecnicasAprendidas() {
 function abrirModalTecnica(tecnica, tecnicaAprendida = null) {
     estadoTecnicas.modalTecnicaAtiva = tecnica;
     
-    // Verifica pré-requisitos e calcula custo
     const verificacao = verificarPreRequisitosTecnica(tecnica);
     const diferenca = calcularDiferencaRequisito(tecnica);
     const custo = calcularCustoTecnica(diferenca, tecnica.dificuldade);
     
-    // Calcula NH máximo (não pode exceder o NH da perícia base)
     const periciaBase = tecnica.preRequisitos[0];
-    const nhPericiaBase = obterNHPericia(periciaBase.idPericia);
+    let periciaAprendidaBase = null;
+    
+    if (periciaBase.tipoVerificacao === "prefixo" && periciaBase.idPrefix) {
+        periciaAprendidaBase = estadoPericias.periciasAprendidas.find(p => 
+            p.id.startsWith(periciaBase.idPrefix)
+        );
+    } else {
+        periciaAprendidaBase = estadoPericias.periciasAprendidas.find(p => p.id === periciaBase.idPericia);
+    }
+    
+    const nhPericiaBase = periciaAprendidaBase ? obterNHPericia(periciaAprendidaBase.id) : 0;
     const nhMaximo = nhPericiaBase;
     
-    // Define nível inicial
     let nivelInicial = tecnicaAprendida ? tecnicaAprendida.nhAtual : nhPericiaBase;
     estadoTecnicas.nivelTecnica = Math.min(nivelInicial, nhMaximo);
     
@@ -419,6 +397,15 @@ function abrirModalTecnica(tecnica, tecnicaAprendida = null) {
                 <strong>Limite:</strong> Não pode exceder o NH em ${periciaBase.nomePericia}
             </div>
             
+            ${tecnica.regrasEspeciais && tecnica.regrasEspeciais.length > 0 ? `
+            <div class="regras-especiais">
+                <h5><i class="fas fa-exclamation-circle"></i> Regras Especiais</h5>
+                <ul>
+                    ${tecnica.regrasEspeciais.map(regra => `<li>${regra}</li>`).join('')}
+                </ul>
+            </div>
+            ` : ''}
+            
             ${!verificacao.passou ? `
             <div class="detalhes-pericia-default" style="background: rgba(231, 76, 60, 0.1); border-left-color: #e74c3c;">
                 <strong><i class="fas fa-exclamation-triangle"></i> Pré-requisitos não atendidos:</strong><br>
@@ -460,11 +447,9 @@ function confirmarTecnica() {
         return;
     }
     
-    // Verifica se já tem a técnica
     const indexExistente = estadoTecnicas.tecnicasAprendidas.findIndex(t => t.id === tecnica.id);
     
     if (indexExistente >= 0) {
-        // Melhorar técnica existente
         estadoTecnicas.tecnicasAprendidas[indexExistente] = {
             ...estadoTecnicas.tecnicasAprendidas[indexExistente],
             nhAtual: estadoTecnicas.nivelTecnica,
@@ -472,9 +457,18 @@ function confirmarTecnica() {
             dataMelhoria: new Date().toISOString()
         };
     } else {
-        // Nova técnica
         const periciaBase = tecnica.preRequisitos[0];
-        const nhPericiaBase = obterNHPericia(periciaBase.idPericia);
+        let periciaAprendidaBase = null;
+        
+        if (periciaBase.tipoVerificacao === "prefixo" && periciaBase.idPrefix) {
+            periciaAprendidaBase = estadoPericias.periciasAprendidas.find(p => 
+                p.id.startsWith(periciaBase.idPrefix)
+            );
+        } else {
+            periciaAprendidaBase = estadoPericias.periciasAprendidas.find(p => p.id === periciaBase.idPericia);
+        }
+        
+        const nhPericiaBase = periciaAprendidaBase ? obterNHPericia(periciaAprendidaBase.id) : 0;
         
         const novaTecnica = {
             id: tecnica.id,
@@ -500,7 +494,6 @@ function confirmarTecnica() {
     atualizarTecnicasDisponiveis();
     renderizarCatalogoTecnicas();
     
-    // Atualiza os pontos totais da ficha (se houver integração)
     if (window.atualizarPontosTotais) {
         window.atualizarPontosTotais();
     }
@@ -557,7 +550,6 @@ function inicializarSistemaTecnicas() {
 }
 
 function configurarEventListenersTecnicas() {
-    // Filtros das técnicas
     const filtroButtons = document.querySelectorAll('.filtro-btn[data-filtro*="tecnicas"]');
     filtroButtons.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -568,7 +560,6 @@ function configurarEventListenersTecnicas() {
         });
     });
     
-    // Busca de técnicas
     const buscaInput = document.getElementById('busca-tecnicas');
     if (buscaInput) {
         buscaInput.addEventListener('input', function() {
@@ -577,7 +568,6 @@ function configurarEventListenersTecnicas() {
         });
     }
     
-    // Overlay para fechar modal
     const modalOverlay = document.querySelector('.modal-tecnica-overlay');
     if (modalOverlay) {
         modalOverlay.addEventListener('click', function(e) {
@@ -587,14 +577,12 @@ function configurarEventListenersTecnicas() {
         });
     }
     
-    // Tecla ESC para fechar modal
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             fecharModalTecnica();
         }
     });
     
-    // Ouvinte para quando perícias forem alteradas
     document.addEventListener('periciasAlteradas', function() {
         setTimeout(() => {
             atualizarTecnicasDisponiveis();
