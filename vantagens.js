@@ -1,4 +1,4 @@
-// vantagens.js - SISTEMA COMPLETO DE VANTAGENS
+// vantagens.js - SISTEMA COMPLETO CORRIGIDO
 class SistemaVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -6,7 +6,6 @@ class SistemaVantagens {
         this.modalAtivo = null;
         this.opcaoSelecionada = null;
         this.vantagemSelecionada = null;
-        this.tipoSelecionado = 'vantagem';
         
         this.init();
     }
@@ -14,9 +13,7 @@ class SistemaVantagens {
     init() {
         this.carregarCatalogoVantagens();
         this.configurarEventos();
-        this.atualizarListas();
-        this.atualizarContadores();
-        this.atualizarTotais();
+        this.atualizarInterface();
     }
     
     carregarCatalogoVantagens() {
@@ -52,10 +49,10 @@ class SistemaVantagens {
         }
         
         this.configurarModais();
-        this.configurarTouchEvents();
     }
     
     configurarModais() {
+        // Modal de vantagem
         const modalVantagem = document.getElementById('modal-vantagem');
         if (modalVantagem) {
             modalVantagem.querySelector('.modal-close').addEventListener('click', () => {
@@ -66,11 +63,13 @@ class SistemaVantagens {
                 this.fecharModal('vantagem');
             });
             
-            modalVantagem.querySelector('.btn-confirmar').addEventListener('click', () => {
+            const btnConfirmarVantagem = modalVantagem.querySelector('.btn-confirmar');
+            btnConfirmarVantagem.addEventListener('click', () => {
                 this.confirmarAdicionarVantagem();
             });
         }
         
+        // Modal de opções - CORREÇÃO CRÍTICA AQUI
         const modalOpcoes = document.getElementById('modal-opcoes');
         if (modalOpcoes) {
             modalOpcoes.querySelector('.modal-close').addEventListener('click', () => {
@@ -86,7 +85,20 @@ class SistemaVantagens {
                 }
             });
             
-            modalOpcoes.querySelector('.btn-confirmar').addEventListener('click', () => {
+            // CORREÇÃO DO BOTÃO "SELECIONAR"
+            const btnConfirmarOpcoes = modalOpcoes.querySelector('.btn-confirmar');
+            // Remover todos os eventos antigos primeiro
+            const novoBtn = btnConfirmarOpcoes.cloneNode(true);
+            btnConfirmarOpcoes.parentNode.replaceChild(novoBtn, btnConfirmarOpcoes);
+            
+            // Adicionar novo evento
+            novoBtn.addEventListener('click', () => {
+                this.selecionarOpcaoVantagem();
+            });
+            
+            // Também para touch
+            novoBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
                 this.selecionarOpcaoVantagem();
             });
         }
@@ -102,27 +114,6 @@ class SistemaVantagens {
                 this.fecharModal(this.modalAtivo);
             }
         });
-    }
-    
-    configurarTouchEvents() {
-        document.querySelectorAll('.item-lista, .opcao-item').forEach(item => {
-            item.addEventListener('touchstart', function() {
-                this.classList.add('touch-active');
-            });
-            
-            item.addEventListener('touchend', function() {
-                this.classList.remove('touch-active');
-            });
-        });
-        
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
     }
     
     filtrarVantagens(termo) {
@@ -163,14 +154,8 @@ class SistemaVantagens {
         const itemElement = document.createElement('div');
         itemElement.className = 'item-lista';
         itemElement.dataset.id = vantagem.id;
-        itemElement.dataset.tipo = 'vantagem';
         
-        let custoTexto = '';
-        if (vantagem.temOpcoes) {
-            custoTexto = 'Varia';
-        } else {
-            custoTexto = `${vantagem.custo} pts`;
-        }
+        let custoTexto = vantagem.temOpcoes ? 'Varia' : `${vantagem.custo} pts`;
         
         itemElement.innerHTML = `
             <div class="item-header">
@@ -182,11 +167,6 @@ class SistemaVantagens {
         `;
         
         itemElement.addEventListener('click', () => {
-            this.selecionarVantagem(vantagem);
-        });
-        
-        itemElement.addEventListener('touchend', (e) => {
-            e.preventDefault();
             this.selecionarVantagem(vantagem);
         });
         
@@ -219,7 +199,6 @@ class SistemaVantagens {
             const opcaoItem = document.createElement('div');
             opcaoItem.className = 'opcao-item';
             opcaoItem.dataset.index = index;
-            opcaoItem.dataset.custo = opcao.custo;
             
             opcaoItem.innerHTML = `
                 <div class="opcao-header">
@@ -230,12 +209,13 @@ class SistemaVantagens {
             `;
             
             opcaoItem.addEventListener('click', () => {
-                this.selecionarOpcaoNoModal(opcao, opcaoItem, btnConfirmar);
-            });
-            
-            opcaoItem.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                this.selecionarOpcaoNoModal(opcao, opcaoItem, btnConfirmar);
+                document.querySelectorAll('.opcao-item').forEach(item => {
+                    item.classList.remove('selecionada');
+                });
+                
+                opcaoItem.classList.add('selecionada');
+                this.opcaoSelecionada = opcao;
+                btnConfirmar.disabled = false;
             });
             
             corpo.appendChild(opcaoItem);
@@ -247,16 +227,6 @@ class SistemaVantagens {
         this.abrirModal('opcoes');
     }
     
-    selecionarOpcaoNoModal(opcao, opcaoItem, btnConfirmar) {
-        document.querySelectorAll('.opcao-item').forEach(item => {
-            item.classList.remove('selecionada');
-        });
-        
-        opcaoItem.classList.add('selecionada');
-        this.opcaoSelecionada = opcao;
-        btnConfirmar.disabled = false;
-    }
-    
     selecionarOpcaoVantagem() {
         if (!this.opcaoSelecionada || !this.vantagemSelecionada) {
             alert('Por favor, selecione uma opção primeiro.');
@@ -265,48 +235,9 @@ class SistemaVantagens {
         
         this.fecharModal('opcoes');
         
-        const modal = document.getElementById('modal-vantagem');
-        const corpo = document.getElementById('modal-corpo-vantagem');
-        const titulo = document.getElementById('modal-titulo-vantagem');
-        const btnConfirmar = modal.querySelector('.btn-confirmar');
-        
-        if (!corpo || !titulo || !btnConfirmar) {
+        setTimeout(() => {
             this.adicionarVantagemComOpcao();
-            return;
-        }
-        
-        titulo.textContent = this.opcaoSelecionada.nome;
-        
-        corpo.innerHTML = `
-            <div class="modal-info">
-                <p><strong>Descrição:</strong> ${this.opcaoSelecionada.descricao || this.vantagemSelecionada.descricao || ''}</p>
-                ${this.vantagemSelecionada.categoria ? `<p><strong>Categoria:</strong> ${this.vantagemSelecionada.categoria}</p>` : ''}
-                ${this.vantagemSelecionada.prerequisitos && this.vantagemSelecionada.prerequisitos.length > 0 ? 
-                  `<p><strong>Pré-requisitos:</strong> ${this.vantagemSelecionada.prerequisitos.join(', ')}</p>` : ''}
-                ${this.vantagemSelecionada.notas ? `<p><strong>Notas:</strong> ${this.vantagemSelecionada.notas}</p>` : ''}
-            </div>
-            <div class="pericia-custo-container">
-                <div class="pericia-custo">
-                    Custo: ${this.opcaoSelecionada.custo} pontos
-                </div>
-                <div class="pericia-custo-adicional">
-                    (${this.vantagemSelecionada.nome} - Opção selecionada)
-                </div>
-            </div>
-        `;
-        
-        btnConfirmar.disabled = false;
-        btnConfirmar.textContent = 'Adicionar Vantagem';
-        
-        const btnConfirmarClone = btnConfirmar.cloneNode(true);
-        btnConfirmar.parentNode.replaceChild(btnConfirmarClone, btnConfirmar);
-        
-        btnConfirmarClone.addEventListener('click', () => {
-            this.adicionarVantagemComOpcao();
-            this.fecharModal('vantagem');
-        });
-        
-        this.abrirModal('vantagem');
+        }, 150);
     }
     
     abrirModalVantagem(vantagem) {
@@ -322,12 +253,10 @@ class SistemaVantagens {
         titulo.textContent = vantagem.nome;
         
         let custo = vantagem.custo || 0;
-        let nomeExibicao = vantagem.nome;
         
         if (vantagem.temOpcoes && vantagem.opcoes && vantagem.opcoes.length === 1) {
             const opcao = vantagem.opcoes[0];
             custo = opcao.custo;
-            nomeExibicao = opcao.nome;
             this.opcaoSelecionada = opcao;
         } else if (!vantagem.temOpcoes) {
             this.opcaoSelecionada = null;
@@ -349,7 +278,6 @@ class SistemaVantagens {
         `;
         
         btnConfirmar.disabled = false;
-        btnConfirmar.textContent = 'Adicionar Vantagem';
         
         this.abrirModal('vantagem');
     }
@@ -370,6 +298,8 @@ class SistemaVantagens {
         } else {
             this.adicionarVantagemSemOpcao();
         }
+        
+        this.fecharModal('vantagem');
     }
     
     adicionarVantagemComOpcao() {
@@ -388,9 +318,7 @@ class SistemaVantagens {
         };
         
         this.vantagensAdquiridas.push(vantagemAdquirida);
-        
         this.atualizarInterface();
-        this.fecharModal('vantagem');
         
         this.vantagemSelecionada = null;
         this.opcaoSelecionada = null;
@@ -412,12 +340,9 @@ class SistemaVantagens {
         };
         
         this.vantagensAdquiridas.push(vantagemAdquirida);
-        
         this.atualizarInterface();
-        this.fecharModal('vantagem');
         
         this.vantagemSelecionada = null;
-        this.opcaoSelecionada = null;
     }
     
     removerVantagem(id) {
@@ -430,12 +355,6 @@ class SistemaVantagens {
         this.atualizarListaAdquiridas();
         this.atualizarContadores();
         this.atualizarTotais();
-    }
-    
-    atualizarListas() {
-        this.atualizarListaDisponiveis();
-        this.atualizarListaAdquiridas();
-        this.atualizarListaPeculiaridades();
     }
     
     atualizarListaDisponiveis() {
@@ -475,7 +394,7 @@ class SistemaVantagens {
                 <div class="item-header">
                     <h4 class="item-nome">${vantagem.nome}</h4>
                     <span class="item-custo">${vantagem.custo} pts</span>
-                    <button class="btn-remover" title="Remover vantagem" aria-label="Remover vantagem">×</button>
+                    <button class="btn-remover" title="Remover vantagem">×</button>
                 </div>
                 <p class="item-descricao">${vantagem.descricao ? vantagem.descricao.substring(0, 120) + (vantagem.descricao.length > 120 ? '...' : '') : ''}</p>
                 ${vantagem.categoria ? `<span class="item-categoria">${vantagem.categoria}</span>` : ''}
@@ -539,15 +458,6 @@ class SistemaVantagens {
                 elSaldoTotal.style.color = '#ffd700';
             }
         }
-        
-        window.dispatchEvent(new CustomEvent('vantagensAtualizadas', {
-            detail: {
-                totalVantagens,
-                totalDesvantagens,
-                totalPeculiaridades,
-                saldoTotal
-            }
-        }));
     }
     
     adicionarPeculiaridade() {
@@ -625,7 +535,7 @@ class SistemaVantagens {
             item.innerHTML = `
                 <div class="peculiaridade-texto">${peculiaridade.texto}</div>
                 <div class="peculiaridade-custo">-1 pt</div>
-                <button class="peculiaridade-remover" title="Remover peculiaridade" aria-label="Remover peculiaridade">×</button>
+                <button class="peculiaridade-remover" title="Remover peculiaridade">×</button>
             `;
             
             const btnRemover = item.querySelector('.peculiaridade-remover');
@@ -644,14 +554,6 @@ class SistemaVantagens {
         if (modal) {
             modal.style.display = 'block';
             document.body.style.overflow = 'hidden';
-            document.body.classList.add('modal-aberto');
-            
-            setTimeout(() => {
-                const primeiroBotao = modal.querySelector('button');
-                if (primeiroBotao && !primeiroBotao.disabled) {
-                    primeiroBotao.focus();
-                }
-            }, 100);
         }
     }
     
@@ -664,7 +566,6 @@ class SistemaVantagens {
         if (tipo === this.modalAtivo) {
             this.modalAtivo = null;
             document.body.style.overflow = 'auto';
-            document.body.classList.remove('modal-aberto');
         }
         
         if (tipo === 'vantagem') {
@@ -672,27 +573,8 @@ class SistemaVantagens {
             this.opcaoSelecionada = null;
         }
     }
-    
-    obterVantagensAdquiridas() {
-        return [...this.vantagensAdquiridas];
-    }
-    
-    calcularSaldoTotal() {
-        return this.atualizarTotais();
-    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     window.sistemaVantagens = new SistemaVantagens();
-    
-    setTimeout(() => {
-        if (window.sistemaVantagens) {
-            window.sistemaVantagens.atualizarListas();
-            window.sistemaVantagens.atualizarTotais();
-        }
-    }, 500);
 });
-
-if (typeof window !== 'undefined') {
-    window.SistemaVantagens = SistemaVantagens;
-}
