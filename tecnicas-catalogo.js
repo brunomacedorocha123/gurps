@@ -1,94 +1,38 @@
-// ===== CATÁLOGO DE TÉCNICAS =====
+// CATÁLOGO SIMPLES QUE FUNCIONA
 const catalogoTecnicas = {
-    "Arquearia Montada": {
+    "arquearia-montada": {
         id: "arquearia-montada",
         nome: "Arquearia Montada",
-        descricao: "Permite utilizar arco com eficiência enquanto cavalga. Os modificadores para disparar sobre um cavalo nunca podem reduzir o NH em Arco abaixo do NH do personagem em Arquearia Montada (as outras penalidades são aplicadas normalmente).",
+        descricao: "Permite utilizar arco com eficiência enquanto cavalga.",
         dificuldade: "Difícil",
         preRequisitos: [
             {
-                idPericia: "arco",
+                idPericia: "arco",      // ID exato da perícia Arco
                 nomePericia: "Arco",
                 nivelMinimo: 4
             },
             {
-                idPrefix: "cavalgar-",
+                // PARA CAVALGAR - aceita QUALQUER um destes IDs
+                idsCavalgar: ["cavalgar-cavalo", "cavalgar-mula", "cavalgar-camelo", "cavalgar-dragao", "cavalgar-outro"],
                 nomePericia: "Cavalgar",
-                nivelMinimo: 0,
-                tipoVerificacao: "prefixo"
+                nivelMinimo: 0
             }
-        ],
-        regrasEspeciais: [
-            "Não pode exceder o NH em Arco",
-            "Exemplo: Se personagem tem Arco 13 e Arquearia Montada 11, as penalidades para disparar a cavalo nunca reduzem o NH abaixo de 11 antes de outros modificadores"
-        ],
-        referencia: "pág. 397",
-        tipo: "tecnica-combate"
+        ]
     }
 };
 
-// ===== FUNÇÕES BÁSICAS DO CATÁLOGO =====
+// FUNÇÕES BÁSICAS
 function obterTodasTecnicas() {
-    const todas = [];
-    
-    for (const chave in catalogoTecnicas) {
-        const tecnica = catalogoTecnicas[chave];
-        todas.push({
-            id: tecnica.id,
-            nome: tecnica.nome,
-            descricao: tecnica.descricao,
-            dificuldade: tecnica.dificuldade,
-            preRequisitos: tecnica.preRequisitos,
-            regrasEspeciais: tecnica.regrasEspeciais,
-            referencia: tecnica.referencia,
-            tipo: tecnica.tipo
-        });
-    }
-    
-    return todas;
+    return Object.values(catalogoTecnicas);
 }
 
 function buscarTecnicaPorId(id) {
-    for (const chave in catalogoTecnicas) {
-        if (catalogoTecnicas[chave].id === id) {
-            return catalogoTecnicas[chave];
-        }
-    }
-    return null;
+    return catalogoTecnicas[id];
 }
 
-function buscarTecnicaPorNome(nome) {
-    for (const chave in catalogoTecnicas) {
-        if (catalogoTecnicas[chave].nome.toLowerCase() === nome.toLowerCase()) {
-            return catalogoTecnicas[chave];
-        }
-    }
-    return null;
-}
-
-function obterTecnicasPorDificuldade(dificuldade) {
-    const todas = obterTodasTecnicas();
-    return todas.filter(tecnica => tecnica.dificuldade === dificuldade);
-}
-
-function obterTecnicasPorPericia(idPericia) {
-    const todas = obterTodasTecnicas();
-    return todas.filter(tecnica => 
-        tecnica.preRequisitos.some(prereq => 
-            prereq.idPericia === idPericia || 
-            (prereq.idPrefix && idPericia.startsWith(prereq.idPrefix))
-        )
-    );
-}
-
-// ===== EXPORTAÇÃO PARA USO GLOBAL =====
+// EXPORT
 window.catalogoTecnicas = {
     dados: catalogoTecnicas,
     obterTodasTecnicas: obterTodasTecnicas,
-    buscarTecnicaPorId: buscarTecnicaPorId,
-    buscarTecnicaPorNome: buscarTecnicaPorNome,
-    obterTecnicasPorDificuldade: obterTecnicasPorDificuldade,
-    obterTecnicasPorPericia: obterTecnicasPorPericia
+    buscarTecnicaPorId: buscarTecnicaPorId
 };
-
-console.log('Catálogo de técnicas carregado: 1 técnica disponível (Arquearia Montada)');
