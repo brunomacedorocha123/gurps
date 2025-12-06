@@ -1,4 +1,4 @@
-// vantagens.js - VERSÃO CORRIGIDA E 100% FUNCIONAL
+// vantagens.js - VERSÃO CORRIGIDA PARA MOBILE (SEM QUEBRAR NADA)
 class SistemaVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -154,58 +154,62 @@ class SistemaVantagens {
         }
     }
     
+    // ✅ CORREÇÃO CRÍTICA PARA MOBILE: usar setTimeout para evitar travamento
     abrirModalOpcoes(vantagem) {
         const modal = document.getElementById('modal-opcoes');
-        const corpo = document.getElementById('modal-corpo-opcoes');
-        const titulo = document.getElementById('modal-titulo-opcoes');
-        
-        if (!modal || !corpo) return;
-        
-        titulo.textContent = `Escolha uma opção: ${vantagem.nome}`;
-        corpo.innerHTML = '';
-        this.opcaoSelecionada = null;
-        
-        // Renderizar opções
-        vantagem.opcoes.forEach((opcao) => {
-            const opcaoItem = document.createElement('div');
-            opcaoItem.className = 'opcao-item';
+        if (!modal) return;
+
+        // Adiar renderização para não bloquear a UI em dispositivos touch
+        setTimeout(() => {
+            const corpo = document.getElementById('modal-corpo-opcoes');
+            const titulo = document.getElementById('modal-titulo-opcoes');
             
-            opcaoItem.innerHTML = `
-                <div class="opcao-header">
-                    <h4 class="opcao-nome">${opcao.nome}</h4>
-                    <span class="opcao-custo">${opcao.custo} pts</span>
-                </div>
-                <p class="opcao-descricao">${opcao.descricao || ''}</p>
-            `;
+            if (!corpo) return;
             
-            opcaoItem.addEventListener('click', () => {
-                document.querySelectorAll('.opcao-item').forEach(item => {
-                    item.classList.remove('selecionada');
-                });
-                opcaoItem.classList.add('selecionada');
-                this.opcaoSelecionada = opcao;
+            titulo.textContent = `Escolha uma opção: ${vantagem.nome}`;
+            corpo.innerHTML = '';
+            this.opcaoSelecionada = null;
+            
+            // Renderizar opções
+            vantagem.opcoes.forEach((opcao) => {
+                const opcaoItem = document.createElement('div');
+                opcaoItem.className = 'opcao-item';
                 
-                // ✅ HABILITAR BOTÃO AO SELECIONAR
-                const btn = modal.querySelector('.btn-confirmar');
-                if (btn) btn.disabled = false;
+                opcaoItem.innerHTML = `
+                    <div class="opcao-header">
+                        <h4 class="opcao-nome">${opcao.nome}</h4>
+                        <span class="opcao-custo">${opcao.custo} pts</span>
+                    </div>
+                    <p class="opcao-descricao">${opcao.descricao || ''}</p>
+                `;
+                
+                opcaoItem.addEventListener('click', () => {
+                    document.querySelectorAll('.opcao-item').forEach(item => {
+                        item.classList.remove('selecionada');
+                    });
+                    opcaoItem.classList.add('selecionada');
+                    this.opcaoSelecionada = opcao;
+                    
+                    const btn = modal.querySelector('.btn-confirmar');
+                    if (btn) btn.disabled = false;
+                });
+                
+                corpo.appendChild(opcaoItem);
             });
             
-            corpo.appendChild(opcaoItem);
-        });
-        
-        // ✅ CONFIGURAR BOTÃO "SELECIONAR" NO MOMENTO DA ABERTURA
-        const btnSelecionar = modal.querySelector('.btn-confirmar');
-        if (btnSelecionar) {
-            // Remover qualquer handler antigo (segurança)
-            btnSelecionar.onclick = null;
-            btnSelecionar.textContent = 'Selecionar';
-            btnSelecionar.disabled = true; // começa desabilitado
-            btnSelecionar.onclick = () => {
-                this.confirmarSelecaoOpcao();
-            };
-        }
-        
-        this.abrirModal('opcoes');
+            // Configurar botão "Selecionar"
+            const btnSelecionar = modal.querySelector('.btn-confirmar');
+            if (btnSelecionar) {
+                btnSelecionar.onclick = null;
+                btnSelecionar.textContent = 'Selecionar';
+                btnSelecionar.disabled = true;
+                btnSelecionar.onclick = () => {
+                    this.confirmarSelecaoOpcao();
+                };
+            }
+            
+            this.abrirModal('opcoes');
+        }, 0);
     }
     
     abrirModalVantagem(vantagem) {
@@ -542,7 +546,6 @@ class SistemaVantagens {
             this.vantagemSelecionada = null;
             this.opcaoSelecionada = null;
         }
-        // Não limpar vantagemSelecionada no fechar de 'opcoes', pois pode voltar
         
         document.body.style.overflow = 'auto';
     }
