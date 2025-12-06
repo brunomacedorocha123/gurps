@@ -316,6 +316,71 @@ const catalogoPericias = {
         ]
     },
     
+    // NOVA CATEGORIA: ESPECIALIZAÇÃO (adiciona DEPOIS de Combate)
+    "Especializacao": {
+        "Cavalgar": {
+            tipo: "modal-escolha",
+            nome: "Cavalgar",
+            descricao: "Habilidade em montar e controlar animais. Cada animal é uma especialização diferente.",
+            atributo: "DX",
+            categoria: "DX",
+            pericias: [
+                {
+                    id: "cavalgar-cavalo",
+                    nome: "Cavalgar (Cavalo)",
+                    atributo: "DX",
+                    dificuldade: "Média",
+                    custoBase: 2,
+                    descricao: "Montar e controlar cavalos. Default para Mula: 0, Camelo: -3, Golfinho: -6, Dragão: -10.",
+                    prereq: "DX-5 ou Adestramento de Animais (Cavalo)-3",
+                    default: "DX-5 ou Adestramento de Animais (Cavalo)-3"
+                },
+                {
+                    id: "cavalgar-mula",
+                    nome: "Cavalgar (Mula)", 
+                    atributo: "DX",
+                    dificuldade: "Média",
+                    custoBase: 2,
+                    descricao: "Montar e controlar mulas. Default de Cavalgar (Cavalo): 0.",
+                    prereq: "DX-5 ou Adestramento de Animais (Mula)-3",
+                    default: "DX-5 ou Adestramento de Animais (Mula)-3"
+                },
+                {
+                    id: "cavalgar-camelo",
+                    nome: "Cavalgar (Camelo)",
+                    atributo: "DX",
+                    dificuldade: "Média",
+                    custoBase: 2,
+                    descricao: "Montar e controlar camelos. Default de Cavalgar (Cavalo): -3.",
+                    prereq: "DX-5 ou Adestramento de Animais (Camelo)-3", 
+                    default: "DX-5 ou Adestramento de Animais (Camelo)-3"
+                },
+                {
+                    id: "cavalgar-dragao",
+                    nome: "Cavalgar (Dragão)",
+                    atributo: "DX",
+                    dificuldade: "Média",
+                    custoBase: 2,
+                    descricao: "Montar e controlar dragões. Default de Cavalgar (Cavalo): -10.",
+                    prereq: "DX-5 ou Adestramento de Animais (Dragão)-3",
+                    default: "DX-5 ou Adestramento de Animais (Dragão)-3"
+                },
+               {
+    id: "cavalgar-outro", // Pode manter este ID
+    nome: "🖊️ Cavalgar (Digitar Animal)", // Adiciona ícone
+    atributo: "DX",
+    dificuldade: "Média",
+    custoBase: 2,
+    descricao: "CLIQUE AQUI para digitar qualquer animal não listado (Elefante, Griffon, Pégaso, etc.).",
+    prereq: "DX-5 ou Adestramento de Animais-3",
+    default: "DX-5 ou Adestramento de Animais-3 (consultar mestre)",
+    tipo: "personalizado" 
+}
+
+            ]
+        }
+    },
+    
     // CATEGORIA DX (não combate)
     "DX": [
         {
@@ -341,6 +406,21 @@ const catalogoPericias = {
             default: "DX-4",
             categoria: "DX",
             tipo: "pericia-simples"
+        },
+        // PERÍCIA CAVALGAR (APARECE NO FILTRO DX)
+        {
+            id: "grupo-cavalgar",
+            nome: "Cavalgar",
+            atributo: "DX",
+            dificuldade: "Média",
+            custoBase: 2,
+            descricao: "Habilidade em montar e controlar animais. Cada animal é uma especialização diferente.",
+            prereq: "DX-5 ou Adestramento de Animais (mesma)-3",
+            default: "DX-5 ou Adestramento de Animais (mesma)-3. Defaults: Cavalo→Mula (0), Cavalo→Camelo (-3), Cavalo→Golfinho (-6), Cavalo→Dragão (-10)",
+            categoria: "DX",
+            tipo: "grupo-especializacao",
+            grupo: "Cavalgar",
+            origem: "Especializacao - Cavalgar"
         }
     ],
     
@@ -399,21 +479,12 @@ function obterTodasPericiasSimples() {
     
     // Percorre todas as categorias
     for (const categoria in catalogoPericias) {
-        if (categoria === "Combate") {
-            // Combate tem estrutura diferente
+        if (categoria === "Combate" || categoria === "Especializacao") {
+            // Ambas têm estrutura de grupos
             for (const grupo in catalogoPericias[categoria]) {
-                if (grupo === "Simples") {
-                    // Perícias simples de combate
-                    catalogoPericias[categoria][grupo].forEach(pericia => {
-                        todas.push({
-                            ...pericia,
-                            origem: `${categoria} - ${grupo}`
-                        });
-                    });
-                } else if (catalogoPericias[categoria][grupo].tipo === "modal-escolha") {
-                    // CORREÇÃO CRÍTICA: O ID do grupo deve ser ÚNICO e IDENTIFICÁVEL
+                if (catalogoPericias[categoria][grupo].tipo === "modal-escolha") {
                     todas.push({
-                        id: `grupo-especializacao-${grupo.toLowerCase().replace(/ /g, '-')}`, // ID ÚNICO!
+                        id: `grupo-${grupo.toLowerCase().replace(/ /g, '-')}`,
                         nome: catalogoPericias[categoria][grupo].nome,
                         atributo: catalogoPericias[categoria][grupo].atributo,
                         dificuldade: "Média",
@@ -421,10 +492,9 @@ function obterTodasPericiasSimples() {
                         descricao: catalogoPericias[categoria][grupo].descricao,
                         prereq: "Varia por especialização",
                         default: "Varia por especialização",
-                        categoria: categoria,
+                        categoria: catalogoPericias[categoria][grupo].categoria,
                         tipo: "grupo-especializacao",
-                        grupo: grupo, // Mantém o nome original do grupo
-                        grupoOriginal: grupo, // Backup
+                        grupo: grupo,
                         origem: `${categoria} - ${grupo}`
                     });
                 }
@@ -444,60 +514,24 @@ function obterTodasPericiasSimples() {
 }
 
 function obterEspecializacoes(grupo) {
-    console.log("Buscando especializações para grupo:", grupo);
+    // Procura em Combate E em Especializacao
+    const categorias = ["Combate", "Especializacao"];
     
-    // Acesso DIRETO e SEGURO ao catálogo
-    const catalogo = window.catalogoPericias || {};
-    
-    if (!catalogo["Combate"]) {
-        console.error("Categoria Combate não existe no catálogo");
-        return [];
-    }
-    
-    if (!catalogo["Combate"][grupo]) {
-        console.error(`Grupo "${grupo}" não existe em Combate`);
-        return [];
-    }
-    
-    const dadosGrupo = catalogo["Combate"][grupo];
-    
-    if (dadosGrupo.pericias && Array.isArray(dadosGrupo.pericias)) {
-        console.log(`Encontradas ${dadosGrupo.pericias.length} especializações`);
-        return dadosGrupo.pericias;
+    for (const categoria of categorias) {
+        if (catalogoPericias[categoria] && catalogoPericias[categoria][grupo]) {
+            const dadosGrupo = catalogoPericias[categoria][grupo];
+            if (dadosGrupo.pericias && Array.isArray(dadosGrupo.pericias)) {
+                return dadosGrupo.pericias;
+            }
+        }
     }
     
     return [];
 }
 
-// CORREÇÃO: Busca perícia incluindo especializações
 function buscarPericiaPorId(id) {
     const todas = obterTodasPericiasSimples();
-    
-    // Primeiro busca nas perícias simples
-    let pericia = todas.find(p => p.id === id);
-    
-    if (!pericia) {
-        // Se não encontrou, busca nas especializações dos grupos
-        for (const categoria in catalogoPericias) {
-            if (categoria === "Combate") {
-                for (const grupo in catalogoPericias[categoria]) {
-                    if (catalogoPericias[categoria][grupo].pericias) {
-                        const especializacao = catalogoPericias[categoria][grupo].pericias.find(p => p.id === id);
-                        if (especializacao) {
-                            return {
-                                ...especializacao,
-                                categoria: 'Combate',
-                                grupo: grupo,
-                                especializacaoDe: grupo
-                            };
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    return pericia;
+    return todas.find(p => p.id === id);
 }
 
 function buscarPericiaPorNome(nome) {
