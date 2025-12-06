@@ -32,7 +32,7 @@ function calcularCustoTecnica(niveisAcima, dificuldade) {
     return 0;
 }
 
-// ===== OBTER NH DA PERÍCIA =====
+// ===== OBTER NH DA PERÍCIA EM TEMPO REAL =====
 function obterNHPericiaAtual(idPericia) {
     if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) return 0;
     
@@ -130,11 +130,25 @@ function calcularNHMaximoTecnica(tecnica) {
 }
 
 // ===== ATUALIZAR EM TEMPO REAL =====
-function atualizarTecnicasDisponiveis() {
+function atualizarTecnicasDisponiveis(forcar = false) {
     if (!window.catalogoTecnicas || !window.catalogoTecnicas.obterTodasTecnicas) return;
     
     const todasTecnicas = window.catalogoTecnicas.obterTodasTecnicas();
     const disponiveis = [];
+    
+    // Atualizar NH das técnicas aprendidas primeiro
+    estadoTecnicas.tecnicasAprendidas.forEach(tecnica => {
+        const nhMaximo = calcularNHMaximoTecnica(tecnica);
+        const nhBase = calcularNHBaseTecnica(tecnica);
+        
+        // Ajusta NH se necessário
+        if (tecnica.nhAtual > nhMaximo) {
+            tecnica.nhAtual = nhMaximo;
+        }
+        if (tecnica.nhAtual < nhBase) {
+            tecnica.nhAtual = nhBase;
+        }
+    });
     
     todasTecnicas.forEach(tecnica => {
         const verificacao = verificarPreRequisitosTecnica(tecnica);
@@ -144,27 +158,14 @@ function atualizarTecnicasDisponiveis() {
         const jaAprendida = estadoTecnicas.tecnicasAprendidas.find(t => t.id === tecnica.id);
         let nhAtual = jaAprendida ? jaAprendida.nhAtual : nhBase;
         
-        // Garante que nhAtual esteja dentro dos limites
-        if (nhAtual > nhMaximo) {
-            nhAtual = nhMaximo;
-            if (jaAprendida) {
-                jaAprendida.nhAtual = nhMaximo;
-            }
-        }
-        if (nhAtual < nhBase) {
-            nhAtual = nhBase;
-            if (jaAprendida) {
-                jaAprendida.nhAtual = nhBase;
-            }
-        }
+        // Garante limites
+        nhAtual = Math.min(Math.max(nhAtual, nhBase), nhMaximo);
         
-        // CALCULA CUSTO MANTENDO O CUSTO PAGO ORIGINAL
+        // Mantém custo original para técnicas aprendidas
         let custoMostrar = 0;
         if (jaAprendida) {
-            // Mantém o custo pago original
             custoMostrar = jaAprendida.custoPago || 0;
         } else {
-            // Para técnicas não aprendidas, calcula o custo
             const niveisAcima = Math.max(0, nhAtual - nhBase);
             custoMostrar = calcularCustoTecnica(niveisAcima, tecnica.dificuldade);
         }
@@ -182,51 +183,58 @@ function atualizarTecnicasDisponiveis() {
     });
     
     estadoTecnicas.tecnicasDisponiveis = disponiveis;
-    renderizarCatalogoTecnicas();
+    
+    if (forcar) {
+        renderizarCatalogoTecnicas();
+        renderizarTecnicasAprendidas();
+    }
 }
 
 // ===== MONITORAR MUDANÇAS =====
-function iniciarMonitoramento() {
-    let ultimoEstado = '';
+function iniciarMonitoramentoTecnicas() {
+    let ultimoHash = '';
     
-    function getEstadoAtual() {
-        if (!window.estadoPericias) return '';
+    function calcularHashAtual() {
+        let hash = '';
         
-        let estado = '';
-        
-        // 1. Estado das perícias
-        if (window.estadoPericias.periciasAprendidas) {
-            estado += JSON.stringify(window.estadoPericias.periciasAprendidas.map(p => ({
-                id: p.id,
-                nivel: p.nivel,
-                atributo: p.atributo
-            })));
-        }
-        
-        // 2. Valores dos atributos
+        // 1. Hash dos atributos
         if (window.obterAtributoAtual) {
             ['DX', 'IQ', 'HT', 'PERC'].forEach(atributo => {
-                estado += atributo + ':' + window.obterAtributoAtual(atributo) + '|';
+                hash += atributo + window.obterAtributoAtual(atributo);
             });
         }
         
-        // 3. Estado das técnicas
-        estado += JSON.stringify(estadoTecnicas.tecnicasAprendidas);
+        // 2. Hash das perícias
+        if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
+            window.estadoPericias.periciasAprendidas.forEach(p => {
+                hash += p.id + p.nivel;
+            });
+        }
         
-        return estado;
+        return hash;
     }
     
-    // Verificar mudanças a cada 300ms
+    // Monitorar a cada 300ms
     setInterval(() => {
-        const estadoAtual = getEstadoAtual();
+        const hashAtual = calcularHashAtual();
         
-        if (estadoAtual !== ultimoEstado) {
-            ultimoEstado = estadoAtual;
-            atualizarTecnicasDisponiveis();
+        if (hashAtual !== ultimoHash) {
+            ultimoHash = hashAtual;
+            console.log('Hash mudou, atualizando técnicas...');
+            atualizarTecnicasDisponiveis(true);
             renderizarStatusTecnicas();
-            renderizarTecnicasAprendidas();
         }
     }, 300);
+    
+    // Também monitorar eventos de mudança de atributos
+    document.addEventListener('DOMSubtreeModified', function(e) {
+        // Se houver mudanças em elementos de atributos
+        if (e.target.id && e.target.id.match(/^(DX|IQ|HT|PERC)$/)) {
+            setTimeout(() => {
+                atualizarTecnicasDisponiveis(true);
+            }, 100);
+        }
+    });
 }
 
 // ===== RENDERIZAR STATUS =====
@@ -369,8 +377,8 @@ function renderizarTecnicasAprendidas() {
     
     let html = '';
     estadoTecnicas.tecnicasAprendidas.forEach(tecnica => {
-        const periciaBase = tecnica.preRequisitos && tecnica.preRequisitos[0] ? tecnica.preRequisitos[0].nomePericia : 'Técnica';
         const nhMaximo = calcularNHMaximoTecnica(tecnica);
+        const nhBase = calcularNHBaseTecnica(tecnica);
         
         html += `
             <div class="pericia-aprendida-item">
@@ -386,8 +394,8 @@ function renderizarTecnicasAprendidas() {
                 </div>
                 <div class="pericia-requisitos">
                     <small>
-                        <strong>Base:</strong> ${periciaBase}-4 | 
-                        <strong>Máximo Atual:</strong> NH ${nhMaximo}
+                        <strong>Base:</strong> NH ${nhBase} | 
+                        <strong>Máximo:</strong> NH ${nhMaximo}
                     </small>
                 </div>
                 <button class="btn-remover-pericia" data-id="${tecnica.id}">
@@ -408,7 +416,7 @@ function renderizarTecnicasAprendidas() {
                 salvarTecnicas();
                 renderizarStatusTecnicas();
                 renderizarTecnicasAprendidas();
-                atualizarTecnicasDisponiveis();
+                atualizarTecnicasDisponiveis(true);
             }
         });
     });
@@ -425,8 +433,6 @@ function abrirModalTecnica(tecnica) {
     const jaAprendida = estadoTecnicas.tecnicasAprendidas.find(t => t.id === tecnica.id);
     const nhAtual = jaAprendida ? jaAprendida.nhAtual : nhBase;
     
-    const periciaBase = tecnica.preRequisitos && tecnica.preRequisitos[0] ? tecnica.preRequisitos[0].nomePericia : 'Técnica';
-    
     const modal = document.querySelector('.modal-tecnica');
     if (!modal) return;
     
@@ -435,7 +441,7 @@ function abrirModalTecnica(tecnica) {
             <span class="modal-close" onclick="fecharModalTecnica()">&times;</span>
             <h3>${tecnica.nome} ${jaAprendida ? '(Aprendida)' : ''}</h3>
             <div class="modal-subtitulo">
-                ${tecnica.dificuldade} • Base: ${periciaBase}-4
+                ${tecnica.dificuldade} • Base: -4
             </div>
         </div>
         
@@ -524,11 +530,10 @@ function abrirModalTecnica(tecnica) {
                 const diferenca = custo - custoAtual;
                 if (diferenca > 0) {
                     btnConfirmar.textContent = `Melhorar (+${diferenca} pontos)`;
-                    btnConfirmar.disabled = false;
                 } else {
                     btnConfirmar.textContent = `Reduzir (${diferenca} pontos)`;
-                    btnConfirmar.disabled = false;
                 }
+                btnConfirmar.disabled = false;
             }
         } else {
             btnConfirmar.textContent = `Aprender (${custo} pontos)`;
@@ -566,19 +571,11 @@ function confirmarTecnica() {
     const index = estadoTecnicas.tecnicasAprendidas.findIndex(t => t.id === tecnica.id);
     
     if (index >= 0) {
-        // Atualizar técnica existente - MANTÉM O CUSTO PAGO ANTERIOR
-        const custoPagoAnterior = estadoTecnicas.tecnicasAprendidas[index].custoPago || 0;
-        
-        // Se está melhorando, soma ao custo anterior
-        // Se está reduzindo, mantém o custo pago (não devolve pontos)
-        const novoCustoPago = nhEscolhido > jaAprendida.nhAtual ? 
-            custoPagoAnterior + (custo - (jaAprendida.custoPago || 0)) : 
-            custoPagoAnterior;
-        
+        // Atualizar técnica existente
         estadoTecnicas.tecnicasAprendidas[index] = {
             ...estadoTecnicas.tecnicasAprendidas[index],
             nhAtual: nhEscolhido,
-            custoPago: novoCustoPago
+            custoPago: custo
         };
     } else {
         // Nova técnica
@@ -597,7 +594,7 @@ function confirmarTecnica() {
     salvarTecnicas();
     renderizarStatusTecnicas();
     renderizarTecnicasAprendidas();
-    atualizarTecnicasDisponiveis();
+    atualizarTecnicasDisponiveis(true);
     
     if (window.atualizarPontosTotais) {
         window.atualizarPontosTotais();
@@ -669,21 +666,30 @@ function renderizarFiltrosTecnicas() {
     });
 }
 
+// ===== FUNÇÃO PARA FORÇAR ATUALIZAÇÃO =====
+function forcarAtualizacaoTecnicas() {
+    console.log('Forçando atualização de técnicas...');
+    atualizarTecnicasDisponiveis(true);
+    renderizarStatusTecnicas();
+    renderizarTecnicasAprendidas();
+}
+
 // ===== INICIALIZAR =====
 function inicializarSistemaTecnicas() {
     carregarTecnicas();
     configurarEventListenersTecnicas();
-    atualizarTecnicasDisponiveis();
+    atualizarTecnicasDisponiveis(true);
     renderizarStatusTecnicas();
     renderizarFiltrosTecnicas();
     renderizarTecnicasAprendidas();
-    iniciarMonitoramento(); // INICIA MONITORAMENTO DE MUDANÇAS
+    iniciarMonitoramentoTecnicas(); // INICIA O MONITORAMENTO
 }
 
 // ===== EXPORTAR =====
 window.fecharModalTecnica = fecharModalTecnica;
 window.confirmarTecnica = confirmarTecnica;
 window.inicializarSistemaTecnicas = inicializarSistemaTecnicas;
+window.forcarAtualizacaoTecnicas = forcarAtualizacaoTecnicas;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
