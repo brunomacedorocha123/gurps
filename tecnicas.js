@@ -41,7 +41,7 @@ function obterNHPericiaAtual(idPericia) {
     
     let atributoBase = 10;
     
-    // USANDO O SISTEMA DE ATRIBUTOS CORRETAMENTE
+    // USA SUA FUNÇÃO REAL obterDadosAtributos()
     if (window.obterDadosAtributos) {
         const dadosAtributos = window.obterDadosAtributos();
         if (dadosAtributos) {
@@ -137,7 +137,7 @@ function calcularNHMaximoTecnica(tecnica) {
 }
 
 // ===== ATUALIZAR EM TEMPO REAL =====
-function atualizarTecnicasDisponiveis(forcar = false) {
+function atualizarTecnicasDisponiveis() {
     if (!window.catalogoTecnicas || !window.catalogoTecnicas.obterTodasTecnicas) return;
     
     const todasTecnicas = window.catalogoTecnicas.obterTodasTecnicas();
@@ -174,50 +174,38 @@ function atualizarTecnicasDisponiveis(forcar = false) {
     });
     
     estadoTecnicas.tecnicasDisponiveis = disponiveis;
-    
-    if (forcar) {
-        renderizarCatalogoTecnicas();
-        renderizarTecnicasAprendidas();
-    }
+    renderizarCatalogoTecnicas();
 }
 
-// ===== MONITORAR MUDANÇAS =====
-function iniciarMonitoramentoTecnicas() {
-    let ultimoHash = '';
+// ===== CONECTAR AO EVENTO DOS ATRIBUTOS =====
+function configurarOuvinteAtributosTecnicas() {
+    console.log('Técnicas: Configurando ouvinte para atributos...');
     
-    function calcularHashAtual() {
-        let hash = '';
+    // ESCUTA O EVENTO QUE SEU SISTEMA DE ATRIBUTOS DISPARA
+    document.addEventListener('atributosAlterados', function(evento) {
+        console.log('Técnicas: Evento atributosAlterados recebido!', evento.detail);
         
-        // 1. Hash dos atributos
-        if (window.obterDadosAtributos) {
-            const dados = window.obterDadosAtributos();
-            if (dados) {
-                hash += 'DX' + (dados.DX || 10);
-                hash += 'IQ' + (dados.IQ || 10);
-                hash += 'HT' + (dados.HT || 10);
-                hash += 'PERC' + (dados.Percepcao || 10);
-            }
-        }
-        
-        // 2. Hash das perícias
-        if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
-            window.estadoPericias.periciasAprendidas.forEach(p => {
-                hash += p.id + p.nivel;
+        // Força atualização IMEDIATA quando atributos mudam
+        atualizarTecnicasDisponiveis();
+        renderizarStatusTecnicas();
+        renderizarTecnicasAprendidas();
+    });
+    
+    // Também monitora mudanças diretas nos inputs de atributos
+    const atributosInputs = ['ST', 'DX', 'IQ', 'HT'];
+    atributosInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('change', function() {
+                console.log(`Técnicas: Atributo ${id} mudou para ${this.value}`);
+                setTimeout(() => {
+                    atualizarTecnicasDisponiveis();
+                    renderizarStatusTecnicas();
+                    renderizarTecnicasAprendidas();
+                }, 100);
             });
         }
-        
-        return hash;
-    }
-    
-    setInterval(() => {
-        const hashAtual = calcularHashAtual();
-        
-        if (hashAtual !== ultimoHash) {
-            ultimoHash = hashAtual;
-            atualizarTecnicasDisponiveis(true);
-            renderizarStatusTecnicas();
-        }
-    }, 500);
+    });
 }
 
 // ===== RENDERIZAR STATUS =====
@@ -399,7 +387,7 @@ function renderizarTecnicasAprendidas() {
                 salvarTecnicas();
                 renderizarStatusTecnicas();
                 renderizarTecnicasAprendidas();
-                atualizarTecnicasDisponiveis(true);
+                atualizarTecnicasDisponiveis();
             }
         });
     });
@@ -575,7 +563,7 @@ function confirmarTecnica() {
     salvarTecnicas();
     renderizarStatusTecnicas();
     renderizarTecnicasAprendidas();
-    atualizarTecnicasDisponiveis(true);
+    atualizarTecnicasDisponiveis();
     
     if (window.atualizarPontosTotais) {
         window.atualizarPontosTotais();
@@ -647,52 +635,22 @@ function renderizarFiltrosTecnicas() {
     });
 }
 
-// ===== FUNÇÃO PARA TESTE =====
-function testarTecnicas() {
-    console.log('=== TESTE TÉCNICAS ===');
-    console.log('1. Verificando sistema de atributos...');
-    
-    if (window.obterDadosAtributos) {
-        const dados = window.obterDadosAtributos();
-        console.log('Dados atributos:', dados);
-        
-        if (dados) {
-            console.log('DX:', dados.DX);
-            console.log('IQ:', dados.IQ);
-            console.log('HT:', dados.HT);
-            console.log('PERC:', dados.Percepcao);
-        }
-    } else {
-        console.log('ERRO: obterDadosAtributos não encontrado');
-    }
-    
-    console.log('2. Verificando perícias aprendidas...');
-    if (window.estadoPericias) {
-        console.log('Perícias:', window.estadoPericias.periciasAprendidas);
-    }
-    
-    console.log('3. Forçando atualização...');
-    atualizarTecnicasDisponiveis(true);
-    
-    console.log('=== FIM TESTE ===');
-}
-
 // ===== INICIALIZAR =====
 function inicializarSistemaTecnicas() {
+    console.log('Inicializando sistema de técnicas...');
     carregarTecnicas();
     configurarEventListenersTecnicas();
-    atualizarTecnicasDisponiveis(true);
+    configurarOuvinteAtributosTecnicas(); // CONECTA AOS ATRIBUTOS
+    atualizarTecnicasDisponiveis();
     renderizarStatusTecnicas();
     renderizarFiltrosTecnicas();
     renderizarTecnicasAprendidas();
-    iniciarMonitoramentoTecnicas();
 }
 
 // ===== EXPORTAR =====
 window.fecharModalTecnica = fecharModalTecnica;
 window.confirmarTecnica = confirmarTecnica;
 window.inicializarSistemaTecnicas = inicializarSistemaTecnicas;
-window.testarTecnicas = testarTecnicas;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
