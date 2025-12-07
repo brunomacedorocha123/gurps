@@ -1944,3 +1944,123 @@
 .tecnicas-section .catalog-list-pericias.scroll-fixed {
     max-height: 350px;
 }
+
+/* ===== OTIMIZAÇÃO DO ESPAÇO NAS PERÍCIAS ADQUIRIDAS ===== */
+
+/* Ajuste para a coluna da direita (perícias adquiridas) */
+.acquired-column-pericias {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Seção de perícias aprendidas - ocupar mais espaço */
+.acquired-section-pericias {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px; /* Aumentei a altura mínima */
+}
+
+/* Lista de perícias aprendidas - ocupar todo o espaço disponível */
+.acquired-list-pericias {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px; /* Altura mínima maior */
+    max-height: 450px; /* Altura máxima aumentada */
+    overflow-y: auto;
+    border: 1px solid rgba(39, 174, 96, 0.2);
+    border-radius: 8px;
+    background: rgba(40, 40, 50, 0.8);
+    padding: 15px;
+}
+
+/* Estado quando não há perícias aprendidas */
+.nenhuma-pericia-aprendida {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #95a5a6;
+    padding: 40px 20px;
+    font-style: italic;
+    min-height: 200px;
+}
+
+/* Para telas maiores (desktop) */
+@media (min-width: 1024px) {
+    .acquired-list-pericias {
+        max-height: 500px; /* Ainda mais espaço em telas grandes */
+    }
+}
+
+/* Para telas menores (tablet) */
+@media (max-width: 1024px) {
+    .acquired-list-pericias {
+        max-height: 400px;
+        min-height: 250px;
+    }
+}
+
+/* Para telas pequenas (mobile) */
+@media (max-width: 768px) {
+    .acquired-section-pericias {
+        min-height: 300px;
+    }
+    
+    .acquired-list-pericias {
+        max-height: 350px;
+        min-height: 200px;
+    }
+}
+
+/* ===== ESPECÍFICO PARA TÉCNICAS ===== */
+
+/* Container específico para técnicas aprendidas */
+#tecnicas-aprendidas {
+    min-height: 250px;
+    max-height: 400px;
+}
+
+/* Quando há poucas técnicas aprendidas, expande visualmente */
+#tecnicas-aprendidas:not(:empty) {
+    min-height: 300px;
+}
+
+/* ===== BALANCEAMENTO DAS COLUNAS ===== */
+
+/* Ajuste para as duas colunas terem proporção visual similar */
+.catalog-column-pericias .catalog-list-pericias.scroll-fixed {
+    max-height: 450px; /* Aumentei também para balancear */
+    min-height: 350px;
+}
+
+/* Para técnicas disponíveis */
+#lista-tecnicas.scroll-fixed {
+    min-height: 300px;
+    max-height: 400px;
+}
+
+/* ===== MELHORIAS NO SCROLL ===== */
+
+/* Scrollbar mais discreta para listas aprendidas */
+.acquired-list-pericias::-webkit-scrollbar {
+    width: 6px;
+}
+
+.acquired-list-pericias::-webkit-scrollbar-track {
+    background: rgba(39, 174, 96, 0.1);
+    border-radius: 3px;
+}
+
+.acquired-list-pericias::-webkit-scrollbar-thumb {
+    background: rgba(39, 174, 96, 0.5);
+    border-radius: 3px;
+}
+
+.acquired-list-pericias::-webkit-scrollbar-thumb:hover {
+    background: rgba(39, 174, 96, 0.7);
+}
