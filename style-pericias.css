@@ -1891,3 +1891,176 @@
 .pericia-item[data-tipo="tecnica"] {
   animation: tecnicaAparecer 0.3s ease;
 }
+
+/* ===== CLASSES FALTANTES PARA O SISTEMA DE TÉCNICAS ===== */
+
+/* Layout do modal */
+.nivel-selecao-container {
+  background: rgba(155, 89, 182, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(155, 89, 182, 0.2);
+}
+
+.nivel-info-box {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  gap: 15px;
+}
+
+.nivel-info-item {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.nivel-valor-grande {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #9b59b6;
+  margin-top: 5px;
+}
+
+.seletor-nivel-tecnica {
+  margin: 15px 0;
+}
+
+.seletor-nivel-tecnica label {
+  display: block;
+  margin-bottom: 8px;
+  color: #ccc;
+  font-weight: bold;
+}
+
+.select-nivel {
+  width: 100%;
+  padding: 10px 15px;
+  background: rgba(40, 40, 50, 0.9);
+  border: 2px solid rgba(155, 89, 182, 0.5);
+  border-radius: 8px;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.custo-final-box {
+  background: rgba(155, 89, 182, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  text-align: center;
+  border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+.custo-final-label {
+  color: #95a5a6;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+}
+
+.custo-final-valor {
+  font-size: 2em;
+  font-weight: bold;
+  color: #9b59b6;
+}
+
+/* Botões do modal */
+.modal-actions-pericia {
+  display: flex;
+  justify-content: flex-end;
+  padding: 15px 20px;
+  gap: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
+}
+
+.btn-modal {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1em;
+}
+
+.btn-cancelar {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+}
+
+.btn-confirmar {
+  background: linear-gradient(45deg, #9b59b6, #8e44ad);
+  color: white;
+  box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+}
+
+/* Elementos de exibição */
+.pericia-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.pericia-nome {
+  margin: 0;
+  color: white;
+  font-size: 1.1em;
+  flex: 1;
+}
+
+.pericia-info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.pericia-custo {
+  background: rgba(39, 174, 96, 0.2);
+  color: #27ae60;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+.pericia-aprendida-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pericia-aprendida-nome {
+  margin: 0;
+  color: white;
+  font-size: 1.1em;
+  flex: 1;
+}
+
+.pericia-aprendida-info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.pericia-aprendida-nivel {
+  background: rgba(155, 89, 182, 0.2);
+  color: #9b59b6;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.pericia-aprendida-custo {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.85em;
+}
