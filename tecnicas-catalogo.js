@@ -1,58 +1,24 @@
-// ===== CATÁLOGO DE TÉCNICAS - VERSÃO CORRIGIDA =====
+// ===== CATÁLOGO DE TÉCNICAS - SÓ ARQUEARIA MONTADA =====
 const catalogoTecnicas = {
-    // TÉCNICA: ARQUEARIA MONTADA
     "arquearia-montada": {
         id: "arquearia-montada",
         nome: "Arquearia Montada",
-        descricao: "Permite usar arco eficientemente enquanto cavalga.",
+        descricao: "Permite usar arco eficientemente enquanto cavalga. Base: Arco-4.",
         dificuldade: "Difícil",
-        
-        // BASE DE CÁLCULO (obrigatório)
-        basePericia: "arco", // ID da perícia base
-        redutor: -4,         // Redutor ao NH da perícia base
-        
-        // LIMITE MÁXIMO (opcional)
-        limitePericia: "arco", // Não pode passar o NH desta perícia
-        
-        // PRÉ-REQUISITOS (array simples)
+        basePericia: "arco",
+        redutor: -4,
+        limitePericia: null,
         preRequisitos: [
-            { tipo: "pericia", pericia: "arco", nivelMin: 4 }, // Arco nível 4+
-            { tipo: "cavalgar" } // Qualquer Cavalgar
-        ]
-    },
-    
-    // ADICIONAR MAIS TÉCNICAS AQUI DEPOIS
-    /*
-    "contra-ataque": {
-        id: "contra-ataque",
-        nome: "Contra-Ataque",
-        descricao: "Ataca imediatamente após defender.",
-        dificuldade: "Média",
-        basePericia: "espadas-curtas",
-        redutor: -2,
-        limitePericia: "espadas-curtas",
-        preRequisitos: [
-            { tipo: "pericia", pericia: "espadas-curtas", nivelMin: 3 }
+            { pericia: "arco" },
+            { tipo: "cavalgar" }
         ]
     }
-    */
 };
 
-// ===== FUNÇÕES CORRIGIDAS PARA O CATÁLOGO =====
+// ===== FUNÇÕES DO CATÁLOGO =====
 window.catalogoTecnicas = {
-    // Pega todas as técnicas
-    todas: function() {
-        return Object.values(catalogoTecnicas);
-    },
-    
-    // Busca uma técnica pelo ID
-    buscar: function(id) {
-        return catalogoTecnicas[id] || null;
-    },
-    
-    // Converte para formato compatível com tecnicas.js
     obterTodasTecnicas: function() {
-        return this.todas().map(tecnica => ({
+        return Object.values(catalogoTecnicas).map(tecnica => ({
             id: tecnica.id,
             nome: tecnica.nome,
             descricao: tecnica.descricao,
@@ -63,7 +29,7 @@ window.catalogoTecnicas = {
                 redutor: tecnica.redutor || 0
             },
             limiteMaximo: tecnica.limitePericia ? {
-                tipo: "pericia",
+                tipo: "pericia", 
                 idPericia: tecnica.limitePericia
             } : null,
             preRequisitos: tecnica.preRequisitos ? tecnica.preRequisitos.map(prereq => {
@@ -77,7 +43,7 @@ window.catalogoTecnicas = {
                     return {
                         idPericia: prereq.pericia,
                         nomePericia: prereq.pericia,
-                        nivelMinimo: prereq.nivelMin || 0
+                        nivelMinimo: 0
                     };
                 }
             }) : []
@@ -85,7 +51,7 @@ window.catalogoTecnicas = {
     },
     
     buscarTecnicaPorId: function(id) {
-        const tecnica = this.buscar(id);
+        const tecnica = catalogoTecnicas[id];
         if (!tecnica) return null;
         
         return {
@@ -106,14 +72,14 @@ window.catalogoTecnicas = {
                 if (prereq.tipo === "cavalgar") {
                     return {
                         verificarCavalgar: true,
-                        nomePericia: "Cavalgar",
+                        nomePericia: "Cavalgar", 
                         nivelMinimo: 0
                     };
                 } else {
                     return {
                         idPericia: prereq.pericia,
                         nomePericia: prereq.pericia,
-                        nivelMinimo: prereq.nivelMin || 0
+                        nivelMinimo: 0
                     };
                 }
             }) : []
@@ -121,4 +87,4 @@ window.catalogoTecnicas = {
     }
 };
 
-console.log("✅ Catálogo de técnicas corrigido e carregado");
+console.log("✅ Catálogo de técnicas carregado (Só Arquearia Montada)");
