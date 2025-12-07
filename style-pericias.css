@@ -2096,3 +2096,22 @@
 #lista-tecnicas .nenhuma-pericia {
   animation: fadeIn 0.5s ease !important;
 }
+
+/* CORREÇÃO DE EMERGÊNCIA: Garantir que técnicas sempre apareçam */
+#lista-tecnicas {
+  display: block !important;
+  height: auto !important;
+  min-height: 200px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  overflow-y: auto !important;
+}
+
+#lista-tecnicas .nenhuma-pericia,
+#lista-tecnicas .pericia-item {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+}
