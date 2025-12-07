@@ -1727,25 +1727,47 @@
     animation: tecnicaAparecer 0.3s ease;
 }
 
-/* Altura fixa para listas com scroll (~5 itens) */
+
+/* Scroll para listas de perícias */
+.catalog-list-pericias-scroll,
+.acquired-list-pericias-scroll {
+  max-height: 300px; /* Ajuste a altura conforme necessário */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
 .catalog-list-pericias,
 .acquired-list-pericias {
-  max-height: 320px; /* Ajuste conforme seu design */
-  min-height: 320px;
-  overflow-y: auto;
+  padding: 10px;
 }
 
-/* Garantir que .status-cards-container mostre os dois cards lado a lado */
-.status-cards-container {
-  display: flex;
-  gap: 25px;
-  justify-content: center;
-  flex-wrap: wrap;
+/* Para o conteúdo interno das listas */
+.pericia-item,
+.tecnica-item {
+  padding: 8px 12px;
+  margin: 5px 0;
+  background: #f8f9fa;
+  border-radius: 4px;
+  cursor: pointer;
+  border-left: 4px solid #007bff;
 }
 
-@media (max-width: 1024px) {
-  .status-cards-container {
-    flex-direction: column;
-    align-items: center;
-  }
+.pericia-item:hover,
+.tecnica-item:hover {
+  background: #e9ecef;
+}
+
+/* Detalhes da perícia */
+.detalhes-pericia-section {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.detalhes-pericia-content {
+  min-height: 100px;
 }
