@@ -652,33 +652,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
 });
 
-// ===== INICIALIZAÇÃO SEGURA DAS TÉCNICAS =====
-function inicializarSistemaTecnicasComSeguranca() {
-    if (
-        window.estadoPericias &&
-        Array.isArray(window.estadoPericias.periciasAprendidas) &&
-        window.catalogoTecnicas &&
-        typeof window.catalogoTecnicas.obterTodasTecnicas === 'function' &&
-        typeof window.obterDadosAtributos === 'function'
-    ) {
-        if (!window.tecnicasIniciadas) {
-            window.tecnicasIniciadas = true;
-            console.log("✅ Sistema de Técnicas inicializado com sucesso!");
-            window.inicializarSistemaTecnicas();
-        }
-    } else {
-        setTimeout(inicializarSistemaTecnicasComSeguranca, 600);
-    }
+// Inicializa TÉCNICAS SOMENTE QUANDO PERÍCIAS ESTIVEREM PRONTAS
+function tentarInicializarTecnicas() {
+  if (window.estadoPericias?.periciasAprendidas && window.catalogoTecnicas) {
+    window.inicializarSistemaTecnicas();
+  } else {
+    setTimeout(tentarInicializarTecnicas, 500); // Tenta de novo em 0.5s
+  }
 }
 
+// Quando a aba "Perícias" for aberta
 document.addEventListener('DOMContentLoaded', () => {
-    const observer = new MutationObserver(() => {
-        const aba = document.getElementById('pericias');
-        if (aba && aba.classList.contains('active')) {
-            inicializarSistemaTecnicasComSeguranca();
-        }
-    });
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        observer.observe(tab, { attributes: true, attributeFilter: ['class'] });
-    });
+  const observer = new MutationObserver(() => {
+    if (document.getElementById('pericias').classList.contains('active')) {
+      tentarInicializarTecnicas();
+    }
+  });
+  observer.observe(document.getElementById('pericias'), { attributes: true });
 });
