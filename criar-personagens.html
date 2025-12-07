@@ -1072,9 +1072,9 @@
       </div>
     </div>
 
-    <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
+    <!-- SISTEMA DE AQUISIÇÃO - PERÍCIAS -->
     <div class="sistema-aquisicao-pericias">
-      <!-- COLUNA ESQUERDA - CATÁLOGO -->
+      <!-- CATÁLOGO DE PERÍCIAS -->
       <div class="catalog-column-pericias">
         <div class="catalog-section-pericias">
           <h3><i class="fas fa-book-open"></i> Catálogo de Perícias</h3>
@@ -1112,13 +1112,13 @@
         </div>
       </div>
 
-      <!-- COLUNA DIREITA - PERÍCIAS APRENDIDAS (SEM DETALHES) -->
+      <!-- PERÍCIAS APRENDIDAS (SEM DETALHES, COM SCROLL) -->
       <div class="acquired-column-pericias">
         <div class="acquired-section-pericias">
           <h3><i class="fas fa-graduation-cap"></i> Perícias Aprendidas 
             <span class="points-badge" id="pontos-pericias-total">[0 pts]</span>
           </h3>
-          <div class="acquired-list-pericias limit-height" id="pericias-aprendidas">
+          <div class="acquired-list-pericias scroll-limitado" id="pericias-aprendidas">
             <div class="nenhuma-pericia-aprendida">
               <i class="fas fa-graduation-cap"></i>
               <div>Nenhuma perícia aprendida</div>
@@ -1171,9 +1171,9 @@
         </div>
       </div>
 
-      <!-- SISTEMA DE AQUISIÇÃO DE TÉCNICAS -->
+      <!-- SISTEMA DE AQUISIÇÃO - TÉCNICAS -->
       <div class="sistema-aquisicao-pericias" style="margin-top: 25px;">
-        <!-- COLUNA ESQUERDA - TÉCNICAS DISPONÍVEIS -->
+        <!-- CATÁLOGO DE TÉCNICAS -->
         <div class="catalog-column-pericias">
           <div class="catalog-section-pericias">
             <h3><i class="fas fa-book-open"></i> Técnicas Disponíveis</h3>
@@ -1203,13 +1203,13 @@
           </div>
         </div>
 
-        <!-- COLUNA DIREITA - TÉCNICAS APRENDIDAS (SEM DETALHES) -->
+        <!-- TÉCNICAS APRENDIDAS (SEM DETALHES, COM SCROLL) -->
         <div class="acquired-column-pericias">
           <div class="acquired-section-pericias">
             <h3><i class="fas fa-graduation-cap"></i> Técnicas Aprendidas 
               <span class="points-badge" id="pontos-tecnicas-total">[0 pts]</span>
             </h3>
-            <div class="acquired-list-pericias limit-height" id="tecnicas-aprendidas">
+            <div class="acquired-list-pericias scroll-limitado" id="tecnicas-aprendidas">
               <div class="nenhuma-pericia-aprendida">
                 <i class="fas fa-tools"></i>
                 <div>Nenhuma técnica aprendida</div>
@@ -1234,11 +1234,23 @@
   </div>
 </div>
 
-<!-- CSS ADICIONAL PARA LIMITAR ALTURA E ADICIONAR SCROLL -->
+<!-- CSS ADICIONAL PARA SCROLL LIMITADO -->
 <style>
-  .acquired-list-pericias.limit-height {
-    max-height: 320px; /* Aprox. 5 itens */
+  .acquired-list-pericias.scroll-limitado {
+    max-height: 320px;
     overflow-y: auto;
+    padding-right: 4px;
+  }
+  /* Scroll personalizado */
+  .acquired-list-pericias.scroll-limitado::-webkit-scrollbar {
+    width: 8px;
+  }
+  .acquired-list-pericias.scroll-limitado::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.5);
+    border-radius: 4px;
+  }
+  .acquired-list-pericias.scroll-limitado::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.7);
   }
 </style>
       <!-- ABA MAGIA -->
