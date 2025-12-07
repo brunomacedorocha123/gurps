@@ -1726,3 +1726,22 @@
 .pericia-item[data-tipo="tecnica"] {
     animation: tecnicaAparecer 0.3s ease;
 }
+
+/* Altura limitada para listas do catálogo (disponíveis) */
+.catalog-list-pericias {
+    max-height: 500px; /* ajustável — mostra ~8-10 perícias */
+    overflow-y: auto;
+    padding-right: 4px; /* evita corte do conteúdo */
+}
+
+/* Scroll personalizado para catálogo */
+.catalog-list-pericias::-webkit-scrollbar {
+    width: 8px;
+}
+.catalog-list-pericias::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.5);
+    border-radius: 4px;
+}
+.catalog-list-pericias::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.7);
+}
