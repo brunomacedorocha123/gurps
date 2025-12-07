@@ -1892,60 +1892,124 @@
   animation: tecnicaAparecer 0.3s ease;
 }
 
-/* ===== ADICIONE ESTAS REGRAS AO FINAL DO SEU CSS EXISTENTE ===== */
+/* ===== SCROLL PARA AS LISTAS DE PERÍCIAS E TÉCNICAS ===== */
 
-/* 1. SCROLL PARA LISTA DE PERÍCIAS DO CATÁLOGO */
+/* 1. LISTA DE PERÍCIAS DO CATÁLOGO (lado esquerdo) */
 .catalog-list-pericias {
-    max-height: 400px; /* Altura máxima ajustável */
+    max-height: 400px;
     overflow-y: auto;
     padding-right: 10px;
+    margin-top: 10px;
 }
 
-/* 2. SCROLL PARA LISTA DE TÉCNICAS DO CATÁLOGO */
+/* 2. LISTA DE TÉCNICAS DO CATÁLOGO (lado esquerdo) */
 #lista-tecnicas {
     max-height: 400px;
     overflow-y: auto;
     padding-right: 10px;
+    margin-top: 10px;
 }
 
-/* 3. SCROLL PARA PERÍCIAS APRENDIDAS */
+/* 3. LISTA DE PERÍCIAS APRENDIDAS (lado direito) */
 .acquired-list-pericias {
-    max-height: 250px; /* Altura menor que o catálogo */
+    max-height: 250px;
     overflow-y: auto;
     padding-right: 10px;
+    margin-top: 10px;
 }
 
-/* 4. SCROLL PARA TÉCNICAS APRENDIDAS */
+/* 4. LISTA DE TÉCNICAS APRENDIDAS (lado direito) */
 #tecnicas-aprendidas {
     max-height: 250px;
     overflow-y: auto;
     padding-right: 10px;
+    margin-top: 10px;
 }
 
-/* 5. SCROLL PARA DETALHES (caso tenha muito conteúdo) */
-.detalhes-pericia-content {
+/* ===== REMOVA ESTAS REGRAS DO SEU CSS EXISTENTE (se existirem) ===== */
+/* Procure e remova ou comente estas linhas se existirem: */
+/*
+.catalog-list-pericias {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 140, 0, 0.2);
+    border-radius: 8px;
+    background: rgba(40, 40, 50, 0.8);
+    padding: 15px;
+}
+*/
+
+/*
+.acquired-list-pericias {
+    min-height: 200px;
     max-height: 300px;
     overflow-y: auto;
-    padding-right: 10px;
+    border: 1px solid rgba(39, 174, 96, 0.2);
+    border-radius: 8px;
+    background: rgba(40, 40, 50, 0.8);
+    padding: 15px;
+}
+*/
+
+/* ===== CORREÇÃO: MANTENHA O ESTILO ORIGINAL MAS ADICIONE SCROLL ===== */
+/* Substitua as regras acima por estas: */
+
+/* Para catálogo de perícias */
+.catalog-list-pericias {
+    flex: 1;
+    overflow-y: auto; /* Já tem, mas vamos garantir */
+    border: 1px solid rgba(255, 140, 0, 0.2);
+    border-radius: 8px;
+    background: rgba(40, 40, 50, 0.8);
+    padding: 15px;
+    max-height: 400px; /* ADICIONE ESTA LINHA */
+}
+
+/* Para catálogo de técnicas */
+#lista-tecnicas {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 140, 0, 0.2);
+    border-radius: 8px;
+    background: rgba(40, 40, 50, 0.8);
+    padding: 15px;
+    max-height: 400px; /* ADICIONE ESTA LINHA */
+}
+
+/* Para perícias aprendidas */
+.acquired-list-pericias {
+    min-height: 200px;
+    overflow-y: auto;
+    border: 1px solid rgba(39, 174, 96, 0.2);
+    border-radius: 8px;
+    background: rgba(40, 40, 50, 0.8);
+    padding: 15px;
+    max-height: 250px; /* ADICIONE ESTA LINHA */
+}
+
+/* Para técnicas aprendidas */
+#tecnicas-aprendidas {
+    min-height: 200px;
+    overflow-y: auto;
+    border: 1px solid rgba(39, 174, 96, 0.2);
+    border-radius: 8px;
+    background: rgba(40, 40, 50, 0.8);
+    padding: 15px;
+    max-height: 250px; /* ADICIONE ESTA LINHA */
 }
 
 /* ===== ESTILIZAÇÃO DA BARRA DE SCROLL ===== */
-
-/* Para WebKit (Chrome, Safari, Edge) */
 .catalog-list-pericias::-webkit-scrollbar,
 #lista-tecnicas::-webkit-scrollbar,
 .acquired-list-pericias::-webkit-scrollbar,
-#tecnicas-aprendidas::-webkit-scrollbar,
-.detalhes-pericia-content::-webkit-scrollbar {
+#tecnicas-aprendidas::-webkit-scrollbar {
     width: 8px;
-    height: 8px;
 }
 
 .catalog-list-pericias::-webkit-scrollbar-track,
 #lista-tecnicas::-webkit-scrollbar-track,
 .acquired-list-pericias::-webkit-scrollbar-track,
-#tecnicas-aprendidas::-webkit-scrollbar-track,
-.detalhes-pericia-content::-webkit-scrollbar-track {
+#tecnicas-aprendidas::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
 }
@@ -1953,33 +2017,42 @@
 .catalog-list-pericias::-webkit-scrollbar-thumb,
 #lista-tecnicas::-webkit-scrollbar-thumb,
 .acquired-list-pericias::-webkit-scrollbar-thumb,
-#tecnicas-aprendidas::-webkit-scrollbar-thumb,
-.detalhes-pericia-content::-webkit-scrollbar-thumb {
+#tecnicas-aprendidas::-webkit-scrollbar-thumb {
     background: rgba(255, 140, 0, 0.5);
     border-radius: 4px;
-    transition: background 0.3s ease;
 }
 
 .catalog-list-pericias::-webkit-scrollbar-thumb:hover,
 #lista-tecnicas::-webkit-scrollbar-thumb:hover,
 .acquired-list-pericias::-webkit-scrollbar-thumb:hover,
-#tecnicas-aprendidas::-webkit-scrollbar-thumb:hover,
-.detalhes-pericia-content::-webkit-scrollbar-thumb:hover {
+#tecnicas-aprendidas::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 140, 0, 0.7);
 }
 
-/* Para Firefox */
+/* Firefox */
 .catalog-list-pericias,
 #lista-tecnicas,
 .acquired-list-pericias,
-#tecnicas-aprendidas,
-.detalhes-pericia-content {
+#tecnicas-aprendidas {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 140, 0, 0.5) rgba(255, 255, 255, 0.05);
 }
 
+/* ===== GARANTIR QUE OS CARDS TENHAM ALTURA FIXA ===== */
+.catalog-section-pericias,
+.acquired-section-pericias {
+    height: 500px; /* Altura fixa para os containers */
+    display: flex;
+    flex-direction: column;
+}
+
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 768px) {
+    .catalog-section-pericias,
+    .acquired-section-pericias {
+        height: 450px;
+    }
+    
     .catalog-list-pericias,
     #lista-tecnicas {
         max-height: 350px;
@@ -1989,25 +2062,4 @@
     #tecnicas-aprendidas {
         max-height: 200px;
     }
-}
-
-@media (max-width: 480px) {
-    .catalog-list-pericias,
-    #lista-tecnicas {
-        max-height: 300px;
-    }
-    
-    .acquired-list-pericias,
-    #tecnicas-aprendidas {
-        max-height: 180px;
-    }
-}
-
-/* ===== AJUSTES PARA NÃO QUEBRAR O LAYOUT EXISTENTE ===== */
-/* Garante que os itens dentro das listas tenham espaço suficiente */
-.catalog-list-pericias .pericia-item:last-child,
-#lista-tecnicas .pericia-item:last-child,
-.acquired-list-pericias .pericia-aprendida-item:last-child,
-#tecnicas-aprendidas .pericia-aprendida-item:last-child {
-    margin-bottom: 0;
 }
