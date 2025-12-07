@@ -225,15 +225,40 @@ function atualizarTecnicasDisponiveis() {
     renderizarCatalogoTecnicas();
 }
 
-// ===== ATUALIZAÇÃO EM TEMPO REAL (MELHORADA) =====
+// ===== ATUALIZAÇÃO EM TEMPO REAL (VERSÃO SIMPLIFICADA E FUNCIONAL) =====
 function configurarMonitoramento() {
     console.log('Técnicas: Configurando sincronização em tempo real...');
     
     // 1. Escuta mudanças nos atributos
     document.addEventListener('atributosAlterados', function() {
-        console.log('Técnicas: Atributos mudaram - atualizando NH');
-        // Força o recálculo do NH de todas as técnicas
-        setTimeout(atualizarNHTecnicas, 100);
+        console.log('Técnicas: Atributos alterados - recalculando NH...');
+        // Recalcula tudo imediatamente
+        setTimeout(function() {
+            // Força recálculo de tudo
+            estadoTecnicas.tecnicasAprendidas.forEach(tecnica => {
+                const nhBase = calcularNHBaseTecnica(tecnica);
+                const nhMaximo = calcularNHMaximoTecnica(tecnica);
+                
+                // Garante que está dentro dos limites
+                if (tecnica.nhAtual < nhBase) {
+                    tecnica.nhAtual = nhBase;
+                } else if (tecnica.nhAtual > nhMaximo) {
+                    tecnica.nhAtual = nhMaximo;
+                }
+                
+                // Recalcula custo
+                const niveisAcima = Math.max(0, tecnica.nhAtual - nhBase);
+                tecnica.custoPago = calcularCustoTecnica(niveisAcima, tecnica.dificuldade);
+            });
+            
+            // Atualiza a interface
+            atualizarTecnicasDisponiveis();
+            renderizarStatusTecnicas();
+            renderizarTecnicasAprendidas();
+            salvarTecnicas();
+            
+            console.log('Técnicas: NH atualizado após mudança de atributos');
+        }, 100);
     });
     
     // 2. Quando perícias mudam, atualiza tudo
@@ -246,44 +271,16 @@ function configurarMonitoramento() {
             const periciasAtuais = JSON.stringify(window.estadoPericias.periciasAprendidas);
             if (periciasAtuais !== ultimasPericias) {
                 ultimasPericias = periciasAtuais;
-                console.log('Técnicas: Perícias mudaram - atualizando');
-                // Atualiza tudo quando perícias mudam
-                atualizarTecnicasDisponiveis();
-                renderizarStatusTecnicas();
-                renderizarTecnicasAprendidas();
+                console.log('Técnicas: Perícias alteradas - recalculando...');
+                
+                // Recalcula tudo
+                setTimeout(() => {
+                    atualizarTecnicasDisponiveis();
+                    renderizarStatusTecnicas();
+                    renderizarTecnicasAprendidas();
+                }, 100);
             }
         }, 500);
-    }
-    
-    // 3. Adiciona um listener específico para quando o NH de uma perícia muda
-    // (quando o nível da perícia é alterado ou atributos mudam)
-    if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
-        // Cache dos NHs anteriores
-        let cacheNHs = {};
-        
-        setInterval(() => {
-            if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) return;
-            
-            let nhMudou = false;
-            
-            window.estadoPericias.periciasAprendidas.forEach(pericia => {
-                const nhAtual = obterNHPericiaAtual(pericia.id);
-                const nhAnterior = cacheNHs[pericia.id];
-                
-                if (nhAnterior !== undefined && nhAtual !== nhAnterior) {
-                    nhMudou = true;
-                    console.log(`Perícia ${pericia.nome}: NH mudou ${nhAnterior} → ${nhAtual}`);
-                }
-                
-                cacheNHs[pericia.id] = nhAtual;
-            });
-            
-            // Se algum NH mudou, atualiza as técnicas
-            if (nhMudou) {
-                console.log('Técnicas: NH de perícias mudou - atualizando técnicas');
-                atualizarNHTecnicas();
-            }
-        }, 300);
     }
 }
 
