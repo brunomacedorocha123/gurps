@@ -1,6 +1,3 @@
-JS
-
-
 // ===== SISTEMA DE PERÍCIAS - VERSÃO COM EVOLUÇÃO PROGRESSIVA =====
 
 
