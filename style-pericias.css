@@ -142,12 +142,12 @@
   opacity: 0.3;
 }
 
-/* ===== CORREÇÃO CRÍTICA: SISTEMA DE AQUISIÇÃO COM ALTURAS FIXAS ===== */
+/* ===== CORREÇÃO: SISTEMA DE AQUISIÇÃO - ESTRUTURA PRINCIPAL ===== */
 .sistema-aquisicao-pericias {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 25px;
-  height: 650px; /* ALTURA FIXA PARA PERÍCIAS */
+  height: 650px;
   min-height: 650px;
 }
 
@@ -160,7 +160,7 @@
   min-height: 600px;
 }
 
-/* Seção de Catálogo com flex para ocupar espaço */
+/* Seção de Catálogo */
 .catalog-section-pericias {
   background: rgba(30, 30, 40, 0.95);
   border: 1px solid rgba(255, 140, 0, 0.25);
@@ -170,7 +170,7 @@
   display: flex;
   flex-direction: column;
   backdrop-filter: blur(10px);
-  flex: 1; /* OCUPA ESPAÇO DISPONÍVEL */
+  flex: 1;
 }
 
 .catalog-section-pericias h3 {
@@ -182,13 +182,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-shrink: 0; /* NÃO ENCOLHE */
+  flex-shrink: 0;
 }
 
 /* Barra de Busca */
 .busca-pericias {
   margin-bottom: 20px;
-  flex-shrink: 0; /* NÃO ENCOLHE */
+  flex-shrink: 0;
 }
 
 .busca-pericias .search-input {
@@ -214,10 +214,10 @@
   font-size: 0.95em;
 }
 
-/* Filtros por Botão */
+/* Filtros */
 .filtros-container-pericias {
   margin-bottom: 20px;
-  flex-shrink: 0; /* NÃO ENCOLHE */
+  flex-shrink: 0;
 }
 
 .filtro-buttons {
@@ -264,15 +264,15 @@
   box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
 }
 
-/* ===== LISTA DE PERÍCIAS DO CATÁLOGO - COM SCROLL ===== */
+/* ===== LISTA DE PERÍCIAS DO CATÁLOGO ===== */
 .catalog-list-pericias {
-  flex: 1; /* OCUPA TODO ESPAÇO RESTANTE */
-  overflow-y: auto; /* SCROLL VERTICAL */
+  flex: 1;
+  overflow-y: auto;
   border: 1px solid rgba(255, 140, 0, 0.2);
   border-radius: 8px;
   background: rgba(40, 40, 50, 0.8);
   padding: 15px;
-  min-height: 200px; /* ALTURA MÍNIMA */
+  min-height: 200px;
 }
 
 .nenhuma-pericia {
@@ -288,7 +288,7 @@
   color: #ff8c00;
 }
 
-/* Itens da Lista de Catálogo */
+/* Itens da Lista */
 .pericia-item {
   background: rgba(50, 50, 65, 0.9);
   border: 1px solid rgba(255, 140, 0, 0.3);
@@ -386,7 +386,7 @@
   border: 1px solid rgba(230, 126, 34, 0.3);
 }
 
-/* ===== SEÇÃO DE PERÍCIAS APRENDIDAS - COM SCROLL ===== */
+/* ===== SEÇÃO DE PERÍCIAS APRENDIDAS ===== */
 .acquired-section-pericias {
   background: rgba(30, 30, 40, 0.95);
   border: 1px solid rgba(39, 174, 96, 0.25);
@@ -396,7 +396,7 @@
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
-  height: 48%; /* METADE DA COLUNA */
+  height: 48%;
   min-height: 300px;
 }
 
@@ -423,10 +423,10 @@
   border: 1px solid rgba(39, 174, 96, 0.3);
 }
 
-/* LISTA APRENDIDA COM SCROLL */
+/* LISTA APRENDIDA */
 .acquired-list-pericias {
-  flex: 1; /* OCUPA ESPAÇO RESTANTE */
-  overflow-y: auto; /* SCROLL VERTICAL */
+  flex: 1;
+  overflow-y: auto;
   border: 1px solid rgba(39, 174, 96, 0.2);
   border-radius: 8px;
   background: rgba(40, 40, 50, 0.8);
@@ -561,102 +561,13 @@
   box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
 }
 
-/* ===== SEÇÃO DE DETALHES DA PERÍCIA - COM SCROLL ===== */
-.detalhes-pericia-section {
-  background: rgba(30, 30, 40, 0.95);
-  border: 1px solid rgba(255, 140, 0, 0.25);
-  border-radius: 12px;
-  padding: 20px;
-  backdrop-filter: blur(10px);
-  flex: 1; /* OCUPA ESPAÇO RESTANTE */
-  display: flex;
-  flex-direction: column;
-  height: 48%; /* METADE DA COLUNA */
-  min-height: 300px;
-}
+/* ===== REMOÇÃO DOS CARDS DE DETALHES ===== */
+/* As seções de detalhes foram removidas, apenas mantemos o espaço para as seções aprendidas */
 
-.detalhes-pericia-content {
-  flex: 1; /* OCUPA TODO ESPAÇO */
-  overflow-y: auto; /* SCROLL VERTICAL */
-}
-
-.nenhuma-pericia-selecionada {
-  text-align: center;
-  color: #95a5a6;
-  padding: 60px 20px;
-  font-style: italic;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.nenhuma-pericia-selecionada i {
-  font-size: 2.5em;
-  margin-bottom: 20px;
-  color: #ff8c00;
-}
-
-/* Conteúdo dos Detalhes */
-.detalhes-pericia-titulo {
-  color: #ffd700;
-  font-size: 1.6em;
-  margin: 0 0 15px 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 140, 0, 0.3);
-}
-
-.detalhes-pericia-info {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.detalhes-info-item {
-  background: rgba(40, 40, 50, 0.8);
-  border: 1px solid rgba(255, 140, 0, 0.2);
-  border-radius: 8px;
-  padding: 12px;
-}
-
-.detalhes-info-item label {
-  display: block;
-  color: #95a5a6;
-  font-size: 0.85em;
-  margin-bottom: 5px;
-  font-weight: 500;
-}
-
-.detalhes-info-item span {
-  display: block;
-  color: #ffd700;
-  font-size: 1.1em;
-  font-weight: 600;
-}
-
-.detalhes-pericia-descricao {
-  color: #ccc;
-  font-size: 0.95em;
-  line-height: 1.5;
-  margin: 15px 0;
-}
-
-.detalhes-pericia-default {
-  color: #e67e22;
-  font-size: 0.9em;
-  font-style: italic;
-  margin-top: 10px;
-  padding: 10px;
-  background: rgba(230, 126, 34, 0.1);
-  border-radius: 6px;
-  border-left: 3px solid #e67e22;
-}
-
-/* Modais */
+/* ===== MODAIS ===== */
 .modal-pericia-overlay,
-.modal-especializacao-overlay {
+.modal-especializacao-overlay,
+.modal-tecnica-overlay {
   display: none;
   position: fixed;
   z-index: 1000;
@@ -672,7 +583,8 @@
 }
 
 .modal-pericia,
-.modal-especializacao {
+.modal-especializacao,
+.modal-tecnica {
   background: rgba(30, 30, 40, 0.98);
   border: 2px solid rgba(255, 140, 0, 0.3);
   border-radius: 12px;
@@ -685,6 +597,10 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+}
+
+.modal-tecnica {
+  border-color: rgba(155, 89, 182, 0.3);
 }
 
 @keyframes modalAparecer {
@@ -1015,7 +931,6 @@
 /* ===== SCROLLBAR PERSONALIZADA ===== */
 .catalog-list-pericias::-webkit-scrollbar,
 .acquired-list-pericias::-webkit-scrollbar,
-.detalhes-pericia-content::-webkit-scrollbar,
 .modal-body-pericia::-webkit-scrollbar,
 .modal-body-especializacao::-webkit-scrollbar {
   width: 8px;
@@ -1024,7 +939,6 @@
 
 .catalog-list-pericias::-webkit-scrollbar-track,
 .acquired-list-pericias::-webkit-scrollbar-track,
-.detalhes-pericia-content::-webkit-scrollbar-track,
 .modal-body-pericia::-webkit-scrollbar-track,
 .modal-body-especializacao::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
@@ -1033,7 +947,6 @@
 
 .catalog-list-pericias::-webkit-scrollbar-thumb,
 .acquired-list-pericias::-webkit-scrollbar-thumb,
-.detalhes-pericia-content::-webkit-scrollbar-thumb,
 .modal-body-pericia::-webkit-scrollbar-thumb,
 .modal-body-especializacao::-webkit-scrollbar-thumb {
   background: rgba(255, 140, 0, 0.5);
@@ -1043,41 +956,250 @@
 
 .catalog-list-pericias::-webkit-scrollbar-thumb:hover,
 .acquired-list-pericias::-webkit-scrollbar-thumb:hover,
-.detalhes-pericia-content::-webkit-scrollbar-thumb:hover,
 .modal-body-pericia::-webkit-scrollbar-thumb:hover,
 .modal-body-especializacao::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 140, 0, 0.7);
 }
 
-/* ===== CORREÇÃO ESPECIAL PARA SEÇÃO DE TÉCNICAS ===== */
+/* ===== CORREÇÃO PARA SEÇÃO DE TÉCNICAS ===== */
+.tecnicas-section {
+  margin-top: 40px;
+  border-top: 2px solid rgba(255, 140, 0, 0.3);
+  padding-top: 30px;
+}
+
+/* Status das Técnicas - estilos específicos */
+.tecnicas-section .card-status-resumo {
+  border-color: rgba(155, 89, 182, 0.25);
+}
+
+.tecnicas-section .card-status-resumo h3 {
+  color: #9b59b6;
+  border-bottom-color: rgba(155, 89, 182, 0.3);
+}
+
+.tecnicas-section .status-linha {
+  border-color: rgba(155, 89, 182, 0.2);
+}
+
+.tecnicas-section .status-linha:hover {
+  border-color: #9b59b6;
+}
+
+.tecnicas-section .status-categoria {
+  color: #9b59b6;
+}
+
+/* Sistema de Aquisição de Técnicas */
 .tecnicas-section .sistema-aquisicao-pericias {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 25px;
-  height: 700px; /* ALTURA MAIOR PARA TÉCNICAS */
+  height: 700px;
   min-height: 700px;
 }
 
 .tecnicas-section .catalog-column-pericias,
 .tecnicas-section .acquired-column-pericias {
-  height: 100%;
   min-height: 650px;
 }
 
-/* Ajustes específicos para técnicas dentro da seção */
-.tecnicas-section .catalog-section-pericias,
-.tecnicas-section .acquired-section-pericias {
-  height: 100%;
-  min-height: 300px;
+/* Catálogo de Técnicas */
+.tecnicas-section .catalog-section-pericias {
+  border-color: rgba(155, 89, 182, 0.25);
 }
 
-/* Ajuste para a lista de técnicas aprendidas */
-.tecnicas-section .acquired-section-pericias {
-  height: 48%;
+.tecnicas-section .catalog-section-pericias h3 {
+  color: #9b59b6;
+  border-bottom-color: rgba(155, 89, 182, 0.3);
 }
 
-.tecnicas-section .detalhes-pericia-section {
-  height: 48%;
+.tecnicas-section .search-input {
+  border-color: rgba(155, 89, 182, 0.3);
+}
+
+.tecnicas-section .search-input:focus {
+  border-color: #9b59b6;
+  box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.1);
+}
+
+.tecnicas-section .filtro-btn {
+  border-color: rgba(155, 89, 182, 0.3);
+}
+
+.tecnicas-section .filtro-btn:hover {
+  border-color: #9b59b6;
+  background: rgba(155, 89, 182, 0.1);
+}
+
+.tecnicas-section .filtro-btn.active {
+  background: linear-gradient(45deg, #9b59b6, #8e44ad);
+  color: white;
+  border-color: #9b59b6;
+  box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+}
+
+.tecnicas-section .catalog-list-pericias {
+  border-color: rgba(155, 89, 182, 0.2);
+}
+
+/* Técnicas Aprendidas */
+.tecnicas-section .acquired-section-pericias {
+  border-color: rgba(155, 89, 182, 0.25);
+}
+
+.tecnicas-section .acquired-section-pericias h3 {
+  color: #9b59b6;
+  border-bottom-color: rgba(155, 89, 182, 0.3);
+}
+
+.tecnicas-section .points-badge {
+  background: rgba(155, 89, 182, 0.9);
+  border-color: rgba(155, 89, 182, 0.3);
+}
+
+.tecnicas-section .acquired-list-pericias {
+  border-color: rgba(155, 89, 182, 0.2);
+}
+
+.tecnicas-section .pericia-aprendida-item {
+  background: rgba(155, 89, 182, 0.15);
+  border-color: rgba(155, 89, 182, 0.4);
+}
+
+.tecnicas-section .pericia-aprendida-item:hover {
+  border-color: #9b59b6;
+  background: rgba(155, 89, 182, 0.2);
+}
+
+.tecnicas-section .pericia-aprendida-nivel {
+  background: rgba(155, 89, 182, 0.9);
+}
+
+/* ===== ESTILOS ESPECÍFICOS PARA TÉCNICAS ===== */
+
+/* Indicador de técnica indisponível */
+.tecnica-indisponivel-badge {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  margin-top: 8px;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tecnica-indisponivel-badge i {
+  font-size: 0.9em;
+}
+
+/* Item de técnica indisponível */
+.pericia-item.item-indisponivel {
+  opacity: 0.7;
+  background: rgba(50, 50, 65, 0.7);
+}
+
+.pericia-item.item-indisponivel:hover {
+  transform: none;
+  cursor: not-allowed;
+  border-color: rgba(255, 140, 0, 0.2);
+}
+
+/* Requisitos da técnica */
+.pericia-requisitos {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: rgba(40, 40, 50, 0.8);
+  border-radius: 6px;
+  border-left: 3px solid #3498db;
+}
+
+.pericia-requisitos small {
+  color: #95a5a6;
+  font-size: 0.85em;
+  line-height: 1.3;
+}
+
+/* Header do modal de técnica com cor diferenciada */
+.modal-tecnica .modal-header-pericia {
+  background: linear-gradient(135deg, rgba(60, 40, 70, 0.95), rgba(80, 50, 90, 0.95));
+  border-bottom: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+/* Destaque para regras especiais */
+.regras-especiais {
+  margin-top: 15px;
+  padding: 12px;
+  background: rgba(155, 89, 182, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid #9b59b6;
+}
+
+.regras-especiais h5 {
+  color: #9b59b6;
+  margin: 0 0 8px 0;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.regras-especiais ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #ccc;
+}
+
+.regras-especiais li {
+  margin-bottom: 5px;
+  font-size: 0.9em;
+}
+
+/* Informação de custo da técnica */
+.info-custo-tecnica {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(39, 174, 96, 0.1);
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-top: 10px;
+  border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.info-custo-tecnica .valor {
+  color: #27ae60;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.info-custo-tecnica .detalhes {
+  color: #95a5a6;
+  font-size: 0.9em;
+  text-align: right;
+}
+
+/* Badge de dificuldade específico para técnicas */
+.dificuldade-medio {
+  background: rgba(243, 156, 18, 0.9) !important;
+  border-color: rgba(243, 156, 18, 0.3) !important;
+}
+
+.dificuldade-dificil {
+  background: rgba(231, 76, 60, 0.9) !important;
+  border-color: rgba(231, 76, 60, 0.3) !important;
+}
+
+/* Indicador visual na lista de que é uma técnica */
+.indicator-tecnica {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  background: #9b59b6;
+  border-radius: 50%;
+  border: 2px solid rgba(155, 89, 182, 0.3);
 }
 
 /* ===== RESPONSIVIDADE ===== */
@@ -1085,7 +1207,7 @@
   .sistema-aquisicao-pericias {
     grid-template-columns: 1fr;
     gap: 20px;
-    height: auto; /* Remove altura fixa em mobile */
+    height: auto;
     min-height: auto;
   }
   
@@ -1097,7 +1219,7 @@
   .catalog-column-pericias,
   .acquired-column-pericias {
     height: auto;
-    min-height: 500px; /* Altura menor em tablets */
+    min-height: 500px;
   }
   
   .tecnicas-section .catalog-column-pericias,
@@ -1109,19 +1231,6 @@
   .acquired-section-pericias {
     height: auto;
     min-height: 300px;
-  }
-  
-  .detalhes-pericia-section {
-    height: auto;
-    min-height: 300px;
-  }
-  
-  .tecnicas-section .acquired-section-pericias {
-    height: auto;
-  }
-  
-  .tecnicas-section .detalhes-pericia-section {
-    height: auto;
   }
 }
 
@@ -1168,14 +1277,12 @@
   }
   
   .catalog-section-pericias,
-  .acquired-section-pericias,
-  .detalhes-pericia-section {
+  .acquired-section-pericias {
     padding: 16px;
   }
   
   .catalog-section-pericias h3,
-  .acquired-section-pericias h3,
-  .detalhes-pericia-titulo {
+  .acquired-section-pericias h3 {
     font-size: 1.2em;
     margin-bottom: 16px;
   }
@@ -1249,24 +1356,16 @@
     right: 12px;
   }
   
-  /* Detalhes */
-  .detalhes-pericia-info {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  
-  .detalhes-info-item {
-    padding: 10px;
-  }
-  
   /* Modais Mobile */
   .modal-pericia-overlay,
-  .modal-especializacao-overlay {
+  .modal-especializacao-overlay,
+  .modal-tecnica-overlay {
     padding: 10px;
   }
   
   .modal-pericia,
-  .modal-especializacao {
+  .modal-especializacao,
+  .modal-tecnica {
     margin: 2vh auto;
     width: 95%;
     max-width: 95%;
@@ -1361,8 +1460,7 @@
   }
   
   .catalog-section-pericias,
-  .acquired-section-pericias,
-  .detalhes-pericia-section {
+  .acquired-section-pericias {
     padding: 14px;
   }
   
@@ -1391,10 +1489,6 @@
   .pericia-descricao {
     font-size: 0.85em;
     -webkit-line-clamp: 3;
-  }
-  
-  .detalhes-pericia-titulo {
-    font-size: 1.3em;
   }
   
   .modal-header-pericia h3,
@@ -1433,7 +1527,8 @@
   }
   
   .modal-pericia-overlay,
-  .modal-especializacao-overlay {
+  .modal-especializacao-overlay,
+  .modal-tecnica-overlay {
     -webkit-overflow-scrolling: touch;
   }
   
@@ -1495,623 +1590,10 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Mensagens de Estado Vazio */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: #95a5a6;
-}
-
-.empty-state i {
-  font-size: 3em;
-  margin-bottom: 20px;
-  color: rgba(255, 140, 0, 0.5);
-}
-
-.empty-state h4 {
-  color: #ffd700;
-  margin-bottom: 10px;
-  font-size: 1.2em;
-}
-
-.empty-state p {
-  font-size: 0.95em;
-  line-height: 1.5;
-}
-
 /* Destaque para Itens Selecionados */
 .pericia-item.selecionada,
 .especializacao-item.selecionada {
   border-color: #27ae60;
   background: rgba(39, 174, 96, 0.1);
   box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.2);
-}
-
-/* Tooltip para Dificuldade */
-[data-tooltip] {
-  position: relative;
-  cursor: help;
-}
-
-[data-tooltip]:hover::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(30, 30, 40, 0.95);
-  color: #ffd700;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.85em;
-  white-space: nowrap;
-  z-index: 1000;
-  border: 1px solid rgba(255, 140, 0, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Classes Utilitárias */
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-left { text-align: left; }
-.mt-10 { margin-top: 10px; }
-.mb-10 { margin-bottom: 10px; }
-.mt-20 { margin-top: 20px; }
-.mb-20 { margin-bottom: 20px; }
-
-/* Indicador de Novo Conteúdo */
-.new-badge {
-  background: #e74c3c;
-  color: white;
-  font-size: 0.7em;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-weight: bold;
-  margin-left: 8px;
-  vertical-align: middle;
-}
-
-/* Status de Dificuldade por Cores */
-.dificuldade-facil { color: #27ae60; }
-.dificuldade-media { color: #f39c12; }
-.dificuldade-dificil { color: #e74c3c; }
-.dificuldade-muito-dificil { color: #9b59b6; }
-
-/* ===== ESTILOS ESPECÍFICOS PARA TÉCNICAS ===== */
-
-/* Indicador de técnica indisponível */
-.tecnica-indisponivel-badge {
-  background: rgba(231, 76, 60, 0.2);
-  color: #e74c3c;
-  padding: 5px 10px;
-  border-radius: 12px;
-  font-size: 0.85em;
-  margin-top: 8px;
-  border: 1px solid rgba(231, 76, 60, 0.3);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.tecnica-indisponivel-badge i {
-  font-size: 0.9em;
-}
-
-/* Item de técnica indisponível */
-.pericia-item.item-indisponivel {
-  opacity: 0.7;
-  background: rgba(50, 50, 65, 0.7);
-}
-
-.pericia-item.item-indisponivel:hover {
-  transform: none;
-  cursor: not-allowed;
-  border-color: rgba(255, 140, 0, 0.2);
-}
-
-/* Requisitos da técnica */
-.pericia-requisitos {
-  margin-top: 8px;
-  padding: 6px 10px;
-  background: rgba(40, 40, 50, 0.8);
-  border-radius: 6px;
-  border-left: 3px solid #3498db;
-}
-
-.pericia-requisitos small {
-  color: #95a5a6;
-  font-size: 0.85em;
-  line-height: 1.3;
-}
-
-/* Modal específico para técnicas */
-.modal-tecnica {
-  background: rgba(30, 30, 40, 0.98);
-  border: 2px solid rgba(155, 89, 182, 0.3);
-  border-radius: 12px;
-  margin: 5vh auto;
-  padding: 0;
-  width: 90%;
-  max-width: 600px;
-  position: relative;
-  animation: modalAparecer 0.3s ease;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-tecnica-overlay {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(5px);
-  overflow-y: auto;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-/* Header do modal de técnica com cor diferenciada */
-.modal-tecnica .modal-header-pericia {
-  background: linear-gradient(135deg, rgba(60, 40, 70, 0.95), rgba(80, 50, 90, 0.95));
-  border-bottom: 1px solid rgba(155, 89, 182, 0.3);
-}
-
-/* Destaque para regras especiais */
-.regras-especiais {
-  margin-top: 15px;
-  padding: 12px;
-  background: rgba(155, 89, 182, 0.1);
-  border-radius: 8px;
-  border-left: 3px solid #9b59b6;
-}
-
-.regras-especiais h5 {
-  color: #9b59b6;
-  margin: 0 0 8px 0;
-  font-size: 1em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.regras-especiais ul {
-  margin: 0;
-  padding-left: 20px;
-  color: #ccc;
-}
-
-.regras-especiais li {
-  margin-bottom: 5px;
-  font-size: 0.9em;
-}
-
-/* Informação de custo da técnica */
-.info-custo-tecnica {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(39, 174, 96, 0.1);
-  border-radius: 8px;
-  padding: 10px 15px;
-  margin-top: 10px;
-  border: 1px solid rgba(39, 174, 96, 0.3);
-}
-
-.info-custo-tecnica .valor {
-  color: #27ae60;
-  font-weight: bold;
-  font-size: 1.2em;
-}
-
-.info-custo-tecnica .detalhes {
-  color: #95a5a6;
-  font-size: 0.9em;
-  text-align: right;
-}
-
-/* Badge de dificuldade específico para técnicas */
-.dificuldade-medio {
-  background: rgba(243, 156, 18, 0.9) !important;
-  border-color: rgba(243, 156, 18, 0.3) !important;
-}
-
-.dificuldade-dificil {
-  background: rgba(231, 76, 60, 0.9) !important;
-  border-color: rgba(231, 76, 60, 0.3) !important;
-}
-
-/* Seção de técnicas - título */
-.tecnicas-section h2 {
-  color: #9b59b6;
-  font-size: 1.6em;
-  margin: 0 0 20px 0;
-  padding-bottom: 10px;
-  border-bottom: 2px solid rgba(155, 89, 182, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.tecnicas-section h2 i {
-  font-size: 1.2em;
-}
-
-/* Botão de filtro específico para técnicas */
-.filtro-btn[data-filtro*="tecnicas"] {
-  border-color: rgba(155, 89, 182, 0.3);
-}
-
-.filtro-btn[data-filtro*="tecnicas"].active {
-  background: linear-gradient(45deg, #9b59b6, #8e44ad);
-  color: white;
-  border-color: #9b59b6;
-}
-
-/* Efeito visual para técnicas aprendidas */
-.pericia-aprendida-item[data-tipo="tecnica"] {
-  border-color: rgba(155, 89, 182, 0.4);
-  background: rgba(155, 89, 182, 0.1);
-}
-
-.pericia-aprendida-item[data-tipo="tecnica"]:hover {
-  border-color: #9b59b6;
-  background: rgba(155, 89, 182, 0.15);
-}
-
-/* Indicador visual na lista de que é uma técnica */
-.indicator-tecnica {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 8px;
-  height: 8px;
-  background: #9b59b6;
-  border-radius: 50%;
-  border: 2px solid rgba(155, 89, 182, 0.3);
-}
-
-/* Responsividade para seção de técnicas */
-@media (max-width: 768px) {
-  .tecnicas-section {
-    margin-top: 25px;
-    padding-top: 20px;
-  }
-  
-  .tecnicas-section h2 {
-    font-size: 1.4em;
-    margin-bottom: 15px;
-  }
-  
-  .regras-especiais {
-    padding: 10px;
-  }
-  
-  .info-custo-tecnica {
-    flex-direction: column;
-    gap: 8px;
-    text-align: center;
-  }
-  
-  .info-custo-tecnica .detalhes {
-    text-align: center;
-  }
-}
-
-/* Animações para aparecimento de técnicas */
-@keyframes tecnicaAparecer {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.pericia-item[data-tipo="tecnica"] {
-  animation: tecnicaAparecer 0.3s ease;
-}
-
-/* ===== CLASSES FALTANTES PARA O SISTEMA DE TÉCNICAS ===== */
-
-/* Layout do modal */
-.nivel-selecao-container {
-  background: rgba(155, 89, 182, 0.1);
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border: 1px solid rgba(155, 89, 182, 0.2);
-}
-
-.nivel-info-box {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  gap: 15px;
-}
-
-.nivel-info-item {
-  flex: 1;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 10px;
-  border-radius: 6px;
-  text-align: center;
-}
-
-.nivel-valor-grande {
-  font-size: 1.8em;
-  font-weight: bold;
-  color: #9b59b6;
-  margin-top: 5px;
-}
-
-.seletor-nivel-tecnica {
-  margin: 15px 0;
-}
-
-.seletor-nivel-tecnica label {
-  display: block;
-  margin-bottom: 8px;
-  color: #ccc;
-  font-weight: bold;
-}
-
-.select-nivel {
-  width: 100%;
-  padding: 10px 15px;
-  background: rgba(40, 40, 50, 0.9);
-  border: 2px solid rgba(155, 89, 182, 0.5);
-  border-radius: 8px;
-  color: white;
-  font-size: 1em;
-  cursor: pointer;
-}
-
-.custo-final-box {
-  background: rgba(155, 89, 182, 0.2);
-  padding: 15px;
-  border-radius: 8px;
-  margin-top: 15px;
-  text-align: center;
-  border: 1px solid rgba(155, 89, 182, 0.3);
-}
-
-.custo-final-label {
-  color: #95a5a6;
-  font-size: 0.9em;
-  margin-bottom: 5px;
-}
-
-.custo-final-valor {
-  font-size: 2em;
-  font-weight: bold;
-  color: #9b59b6;
-}
-
-/* Botões do modal */
-.modal-actions-pericia {
-  display: flex;
-  justify-content: flex-end;
-  padding: 15px 20px;
-  gap: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 20px;
-}
-
-.btn-modal {
-  padding: 10px 25px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1em;
-}
-
-.btn-cancelar {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ccc;
-}
-
-.btn-confirmar {
-  background: linear-gradient(45deg, #9b59b6, #8e44ad);
-  color: white;
-  box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
-}
-
-/* Elementos de exibição */
-.pericia-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
-
-.pericia-nome {
-  margin: 0;
-  color: white;
-  font-size: 1.1em;
-  flex: 1;
-}
-
-.pericia-info {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.pericia-custo {
-  background: rgba(39, 174, 96, 0.2);
-  color: #27ae60;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.85em;
-  font-weight: bold;
-}
-
-.pericia-aprendida-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.pericia-aprendida-nome {
-  margin: 0;
-  color: white;
-  font-size: 1.1em;
-  flex: 1;
-}
-
-.pericia-aprendida-info {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.pericia-aprendida-nivel {
-  background: rgba(155, 89, 182, 0.2);
-  color: #9b59b6;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-weight: bold;
-}
-
-.pericia-aprendida-custo {
-  background: rgba(52, 152, 219, 0.2);
-  color: #3498db;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.85em;
-}
-
-/* ===== CORREÇÕES FINAIS PARA SCROLL ===== */
-/* Garantir que todos os containers com scroll tenham altura fixa */
-#lista-pericias,
-#pericias-aprendidas,
-#lista-tecnicas,
-#tecnicas-aprendidas,
-#detalhes-pericia-content,
-#detalhes-tecnica-content {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 150px;
-}
-
-/* Ajustes finos para garantir que o conteúdo apareça */
-.catalog-list-pericias:empty,
-.acquired-list-pericias:empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Ajuste para quando há pouco conteúdo */
-.catalog-list-pericias:has(.pericia-item:only-child),
-.acquired-list-pericias:has(.pericia-aprendida-item:only-child) {
-  display: block;
-}
-
-/* ===== CORREÇÃO CRÍTICA: PROBLEMA COM LOADING NAS TÉCNICAS ===== */
-/* SPINNER APENAS para a lista de PERÍCIAS (não técnicas) */
-#lista-pericias .loading-spinner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
-
-/* GARANTIR que técnicas NÃO tenham spinner visível */
-#lista-tecnicas .loading-spinner {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  height: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-/* Garantir que o conteúdo apareça quando carregado */
-.catalog-list-pericias:not(:has(.loading-spinner)) {
-  display: block;
-}
-
-/* ===== CORREÇÃO PARA TÉCNICAS QUE NÃO APARECEM ===== */
-/* Garantir que o container de técnicas tenha conteúdo visível */
-#lista-tecnicas {
-  position: relative;
-  min-height: 200px;
-}
-
-/* CORREÇÃO FINAL: Remove qualquer pseudo-elemento problemático */
-#lista-tecnicas::before,
-#lista-tecnicas::after {
-  content: none !important;
-  display: none !important;
-}
-
-/* Garantir visibilidade do conteúdo das técnicas */
-#lista-tecnicas .nenhuma-pericia {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-  z-index: 10 !important;
-}
-
-/* Garantir que os itens de técnica sejam visíveis */
-#lista-tecnicas .pericia-item {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-  z-index: 20 !important;
-}
-
-/* Remove qualquer regra problemática de :empty */
-#lista-tecnicas:empty::before {
-  content: none !important;
-  display: none !important;
-}
-
-/* Remove regras de :has() que podem não ser suportadas */
-.catalog-list-pericias:not(:has(.loading-spinner)) {
-  display: block;
-}
-
-/* Versão segura sem :has() */
-#lista-tecnicas:not(:empty) {
-  display: block;
-}
-
-/* Garante que quando o JS adiciona itens, eles fiquem visíveis */
-#lista-tecnicas .pericia-item,
-#lista-tecnicas .nenhuma-pericia {
-  animation: fadeIn 0.5s ease !important;
-}
-
-/* CORREÇÃO DE EMERGÊNCIA: Garantir que técnicas sempre apareçam */
-#lista-tecnicas {
-  display: block !important;
-  height: auto !important;
-  min-height: 200px !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-  overflow-y: auto !important;
-}
-
-#lista-tecnicas .nenhuma-pericia,
-#lista-tecnicas .pericia-item {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
 }
