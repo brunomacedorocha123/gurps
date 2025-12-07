@@ -1448,5 +1448,3 @@ window.migrarPericiasAntigas = migrarPericiasAntigas;
 window.buscarPericiaEspecifica = buscarPericiaEspecifica;
 
 
-// Exportar estado para debug (opcional)
-window.estadoPericias = estadoPericias;
