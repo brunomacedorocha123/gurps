@@ -12,7 +12,7 @@ let estadoTecnicas = {
     tecnicasDisponiveis: []
 };
 
-// ===== TABELA DE CUSTO (NÃO MODIFICAR - FUNCIONA BEM) =====
+// ===== TABELA DE CUSTO =====
 function calcularCustoTecnica(niveisAcima, dificuldade) {
     if (niveisAcima <= 0) return 0;
     
@@ -32,53 +32,16 @@ function calcularCustoTecnica(niveisAcima, dificuldade) {
     return 0;
 }
 
-// ===== FUNÇÃO MELHORADA: ENCONTRAR PERÍCIA POR NOME OU ID =====
-function encontrarPericiaPorNomeOuId(nomeOuId) {
-    if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) return null;
-    
-    const pericias = window.estadoPericias.periciasAprendidas;
-    
-    // 1. Primeiro tenta pelo ID exato
-    let pericia = pericias.find(p => p.id === nomeOuId);
-    if (pericia) return pericia;
-    
-    // 2. Tenta pelo nome (comparação case-insensitive e parcial)
-    const nomeBusca = nomeOuId.toLowerCase().trim();
-    pericia = pericias.find(p => {
-        if (!p.nome) return false;
-        return p.nome.toLowerCase().includes(nomeBusca) || nomeBusca.includes(p.nome.toLowerCase());
-    });
-    
-    if (pericia) return pericia;
-    
-    // 3. Para Cavalgar, procura por qualquer perícia de cavalgar
-    if (nomeBusca.includes('cavalgar')) {
-        pericia = pericias.find(p => 
-            p.nome && p.nome.toLowerCase().includes('cavalgar')
-        );
-        if (pericia) return pericia;
-    }
-    
-    // 4. Para Arco, procura por "arco" no nome
-    if (nomeBusca.includes('arco')) {
-        pericia = pericias.find(p => 
-            p.nome && p.nome.toLowerCase().includes('arco')
-        );
-        if (pericia) return pericia;
-    }
-    
-    return null;
-}
-
-// ===== OBTER NH DA PERÍCIA (VERSÃO MELHORADA) =====
-function obterNHPericiaAtual(idPericiaOuNome) {
+// ===== OBTER NH DA PERÍCIA (VERSÃO SIMPLES QUE FUNCIONA) =====
+function obterNHPericiaAtual(idPericia) {
     if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) return 0;
     
-    const pericia = encontrarPericiaPorNomeOuId(idPericiaOuNome);
+    const pericia = window.estadoPericias.periciasAprendidas.find(p => p.id === idPericia);
     if (!pericia) return 0;
     
     let atributoBase = 10;
     
+    // USA SUA FUNÇÃO REAL obterDadosAtributos()
     if (window.obterDadosAtributos) {
         const dadosAtributos = window.obterDadosAtributos();
         if (dadosAtributos) {
@@ -94,7 +57,7 @@ function obterNHPericiaAtual(idPericiaOuNome) {
     return atributoBase + (pericia.nivel || 0);
 }
 
-// ===== VERIFICAR PRÉ-REQUISITOS (VERSÃO CORRIGIDA) =====
+// ===== VERIFICAR PRÉ-REQUISITOS (VOLTANDO PARA VERSÃO QUE FUNCIONAVA) =====
 function verificarPreRequisitosTecnica(tecnica) {
     if (!tecnica || !tecnica.preRequisitos) {
         return { passou: false, motivo: "Técnica inválida" };
@@ -103,22 +66,22 @@ function verificarPreRequisitosTecnica(tecnica) {
     for (const prereq of tecnica.preRequisitos) {
         let periciaEncontrada = null;
         
-        // 1. Tenta pelo ID exato primeiro
+        // VERSÃO SIMPLES: Procura pelo ID EXATO do catálogo
         if (prereq.idPericia) {
-            periciaEncontrada = encontrarPericiaPorNomeOuId(prereq.idPericia);
+            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
         }
         
-        // 2. Tenta pela lista de IDs (Cavalgar)
+        // Para Cavalgar: usa a lista de IDs
         if (!periciaEncontrada && prereq.idsCavalgar) {
-            for (const idCavalgar of prereq.idsCavalgar) {
-                periciaEncontrada = encontrarPericiaPorNomeOuId(idCavalgar);
-                if (periciaEncontrada) break;
-            }
+            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => prereq.idsCavalgar.includes(p.id));
         }
         
-        // 3. Tenta pelo nome da perícia (fallback)
+        // Se não encontrou pelo ID, tenta pelo nome (para compatibilidade)
         if (!periciaEncontrada && prereq.nomePericia) {
-            periciaEncontrada = encontrarPericiaPorNomeOuId(prereq.nomePericia);
+            const nomeBusca = prereq.nomePericia.toLowerCase();
+            periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
+                p.nome && p.nome.toLowerCase().includes(nomeBusca)
+            );
         }
         
         if (!periciaEncontrada) {
@@ -126,7 +89,7 @@ function verificarPreRequisitosTecnica(tecnica) {
         }
         
         if (prereq.nivelMinimo > 0) {
-            const nh = obterNHPericiaAtual(periciaEncontrada.id || periciaEncontrada.nome);
+            const nh = obterNHPericiaAtual(periciaEncontrada.id);
             if (nh < prereq.nivelMinimo) {
                 return { passou: false, motivo: `${prereq.nomePericia} precisa NH ${prereq.nivelMinimo} (tem ${nh})` };
             }
@@ -136,32 +99,26 @@ function verificarPreRequisitosTecnica(tecnica) {
     return { passou: true, motivo: '' };
 }
 
-// ===== CALCULAR NH BASE E MÁXIMO (VERSÃO CORRIGIDA) =====
+// ===== CALCULAR NH BASE E MÁXIMO (VERSÃO SIMPLES) =====
 function calcularNHBaseTecnica(tecnica) {
     if (!tecnica.preRequisitos || tecnica.preRequisitos.length === 0) return 0;
     
     const prereq = tecnica.preRequisitos[0];
     let periciaAprendida = null;
     
-    // Usa a nova função para encontrar a perícia
+    // Procura pelo ID exato primeiro
     if (prereq.idPericia) {
-        periciaAprendida = encontrarPericiaPorNomeOuId(prereq.idPericia);
+        periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
     }
     
+    // Se não encontrou, procura na lista de IDs (Cavalgar)
     if (!periciaAprendida && prereq.idsCavalgar) {
-        for (const idCavalgar of prereq.idsCavalgar) {
-            periciaAprendida = encontrarPericiaPorNomeOuId(idCavalgar);
-            if (periciaAprendida) break;
-        }
-    }
-    
-    if (!periciaAprendida && prereq.nomePericia) {
-        periciaAprendida = encontrarPericiaPorNomeOuId(prereq.nomePericia);
+        periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => prereq.idsCavalgar.includes(p.id));
     }
     
     if (!periciaAprendida) return 0;
     
-    const nhPericia = obterNHPericiaAtual(periciaAprendida.id || periciaAprendida.nome);
+    const nhPericia = obterNHPericiaAtual(periciaAprendida.id);
     return Math.max(0, nhPericia - 4);
 }
 
@@ -171,68 +128,55 @@ function calcularNHMaximoTecnica(tecnica) {
     const prereq = tecnica.preRequisitos[0];
     let periciaAprendida = null;
     
-    // Usa a nova função para encontrar a perícia
+    // Procura pelo ID exato primeiro
     if (prereq.idPericia) {
-        periciaAprendida = encontrarPericiaPorNomeOuId(prereq.idPericia);
+        periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => p.id === prereq.idPericia);
     }
     
+    // Se não encontrou, procura na lista de IDs (Cavalgar)
     if (!periciaAprendida && prereq.idsCavalgar) {
-        for (const idCavalgar of prereq.idsCavalgar) {
-            periciaAprendida = encontrarPericiaPorNomeOuId(idCavalgar);
-            if (periciaAprendida) break;
-        }
-    }
-    
-    if (!periciaAprendida && prereq.nomePericia) {
-        periciaAprendida = encontrarPericiaPorNomeOuId(prereq.nomePericia);
+        periciaAprendida = window.estadoPericias.periciasAprendidas.find(p => prereq.idsCavalgar.includes(p.id));
     }
     
     if (!periciaAprendida) return 0;
     
-    return obterNHPericiaAtual(periciaAprendida.id || periciaAprendida.nome);
+    return obterNHPericiaAtual(periciaAprendida.id);
 }
 
-// ===== FUNÇÃO NOVA: ATUALIZAR NH DE TODAS AS TÉCNICAS APRENDIDAS =====
-function atualizarNHTodasTecnicas() {
-    console.log('Técnicas: Atualizando NH de todas as técnicas aprendidas...');
+// ===== FUNÇÃO CRÍTICA: ATUALIZAR NH DAS TÉCNICAS EM TEMPO REAL =====
+function atualizarNHTecnicas() {
+    console.log('Técnicas: Atualizando NH em tempo real...');
     
-    let precisaAtualizar = false;
+    let mudouAlgo = false;
     
+    // Atualiza NH das técnicas aprendidas
     estadoTecnicas.tecnicasAprendidas.forEach(tecnica => {
-        // Recalcula NH base e máximo COM OS VALORES ATUAIS
         const nhBase = calcularNHBaseTecnica(tecnica);
         const nhMaximo = calcularNHMaximoTecnica(tecnica);
         
-        // Guarda o NH anterior para comparar
         const nhAnterior = tecnica.nhAtual;
         
-        // Garante que o NH atual está dentro dos limites
-        let nhAtual = tecnica.nhAtual;
-        if (nhAtual < nhBase) {
-            nhAtual = nhBase;
-            precisaAtualizar = true;
-        } else if (nhAtual > nhMaximo) {
-            nhAtual = nhMaximo;
-            precisaAtualizar = true;
+        // Ajusta NH se estiver fora dos limites
+        if (tecnica.nhAtual < nhBase) {
+            tecnica.nhAtual = nhBase;
+            mudouAlgo = true;
+        } else if (tecnica.nhAtual > nhMaximo) {
+            tecnica.nhAtual = nhMaximo;
+            mudouAlgo = true;
         }
         
-        // Se o NH mudou ou se o custo precisa ser recalculado
-        if (nhAtual !== nhAnterior) {
-            // Recalcula custo pago
-            const niveisAcima = Math.max(0, nhAtual - nhBase);
-            const novoCusto = calcularCustoTecnica(niveisAcima, tecnica.dificuldade);
+        // Recalcula custo se o NH mudou
+        if (tecnica.nhAtual !== nhAnterior) {
+            const niveisAcima = Math.max(0, tecnica.nhAtual - nhBase);
+            tecnica.custoPago = calcularCustoTecnica(niveisAcima, tecnica.dificuldade);
+            mudouAlgo = true;
             
-            // Atualiza a técnica
-            tecnica.nhAtual = nhAtual;
-            tecnica.custoPago = novoCusto;
-            precisaAtualizar = true;
-            
-            console.log(`Técnica ${tecnica.nome}: NH ${nhAnterior} → ${nhAtual}, Custo: ${tecnica.custoPago}pts`);
+            console.log(`Técnica ${tecnica.nome}: NH ajustado para ${tecnica.nhAtual}`);
         }
     });
     
-    // Se alguma técnica foi atualizada, renderiza tudo
-    if (precisaAtualizar) {
+    // Se algo mudou, atualiza a tela
+    if (mudouAlgo) {
         atualizarTecnicasDisponiveis();
         renderizarStatusTecnicas();
         renderizarTecnicasAprendidas();
@@ -281,19 +225,20 @@ function atualizarTecnicasDisponiveis() {
     renderizarCatalogoTecnicas();
 }
 
-// ===== ATUALIZAÇÃO EM TEMPO REAL - VERSÃO CORRIGIDA =====
+// ===== ATUALIZAÇÃO EM TEMPO REAL (MELHORADA) =====
 function configurarMonitoramento() {
-    console.log('Técnicas: Configurando monitoramento...');
+    console.log('Técnicas: Configurando sincronização em tempo real...');
     
-    // 1. Escuta o evento dos atributos
+    // 1. Escuta mudanças nos atributos
     document.addEventListener('atributosAlterados', function() {
-        console.log('Técnicas: Atributos alterados, atualizando NH...');
-        atualizarNHTodasTecnicas();
+        console.log('Técnicas: Atributos mudaram - atualizando NH');
+        // Força o recálculo do NH de todas as técnicas
+        setTimeout(atualizarNHTecnicas, 100);
     });
     
-    // 2. Monitora mudanças nas perícias
+    // 2. Quando perícias mudam, atualiza tudo
     if (window.estadoPericias) {
-        let ultimasPericias = JSON.stringify(window.estadoPericias.periciasAprendidas);
+        let ultimasPericias = JSON.stringify(window.estadoPericias.periciasAprendidas || []);
         
         setInterval(() => {
             if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) return;
@@ -301,12 +246,44 @@ function configurarMonitoramento() {
             const periciasAtuais = JSON.stringify(window.estadoPericias.periciasAprendidas);
             if (periciasAtuais !== ultimasPericias) {
                 ultimasPericias = periciasAtuais;
-                console.log('Técnicas: Perícias alteradas, atualizando...');
+                console.log('Técnicas: Perícias mudaram - atualizando');
+                // Atualiza tudo quando perícias mudam
                 atualizarTecnicasDisponiveis();
                 renderizarStatusTecnicas();
                 renderizarTecnicasAprendidas();
             }
         }, 500);
+    }
+    
+    // 3. Adiciona um listener específico para quando o NH de uma perícia muda
+    // (quando o nível da perícia é alterado ou atributos mudam)
+    if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
+        // Cache dos NHs anteriores
+        let cacheNHs = {};
+        
+        setInterval(() => {
+            if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) return;
+            
+            let nhMudou = false;
+            
+            window.estadoPericias.periciasAprendidas.forEach(pericia => {
+                const nhAtual = obterNHPericiaAtual(pericia.id);
+                const nhAnterior = cacheNHs[pericia.id];
+                
+                if (nhAnterior !== undefined && nhAtual !== nhAnterior) {
+                    nhMudou = true;
+                    console.log(`Perícia ${pericia.nome}: NH mudou ${nhAnterior} → ${nhAtual}`);
+                }
+                
+                cacheNHs[pericia.id] = nhAtual;
+            });
+            
+            // Se algum NH mudou, atualiza as técnicas
+            if (nhMudou) {
+                console.log('Técnicas: NH de perícias mudou - atualizando técnicas');
+                atualizarNHTecnicas();
+            }
+        }, 300);
     }
 }
 
@@ -741,7 +718,7 @@ function renderizarFiltrosTecnicas() {
 function inicializarSistemaTecnicas() {
     carregarTecnicas();
     configurarEventListenersTecnicas();
-    configurarMonitoramento();
+    configurarMonitoramento(); // CONFIGURA A SINCRONIZAÇÃO DO NH
     atualizarTecnicasDisponiveis();
     renderizarStatusTecnicas();
     renderizarFiltrosTecnicas();
