@@ -856,3 +856,33 @@
         touch-action: manipulation;
     }
 }
+
+/* ===== APENAS CORREÇÕES NECESSÁRIAS ===== */
+
+/* 1. Botão de remover perícia */
+.pericia-aprendida-header {
+    padding-right: 0 !important; /* Remove o padding que esconde o botão */
+}
+
+.btn-remover-pericia {
+    z-index: 100 !important;
+    pointer-events: auto !important;
+}
+
+/* 2. Espaço nas listas */
+.acquired-list-pericias {
+    min-height: 300px !important;
+    max-height: 450px !important;
+}
+
+.catalog-list-pericias.scroll-fixed {
+    max-height: 450px !important;
+    min-height: 350px !important;
+}
+
+/* 3. Cards lado a lado */
+.status-cards-container.grid-2-col {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+}
