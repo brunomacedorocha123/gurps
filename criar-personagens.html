@@ -1009,319 +1009,307 @@
     </div>
 </div>
 
- <!-- ABA PERÍCIAS -->
+<!-- ABA PERÍCIAS -->
 <div id="pericias" class="tab-content">
- <div class="container-principal">
-  
-  <!-- STATUS PERÍCIAS - VERSÃO POR ATRIBUTO -->
-  <div class="status-cards-container">
-   <div class="card-status-resumo">
-    <h3><i class="fas fa-chart-pie"></i> Resumo das Perícias</h3>
+  <div class="container-principal">
     
-    <div class="status-linhas-container">
-     <!-- DX -->
-     <div class="status-linha">
-      <div class="status-categoria">
-       <i class="fas fa-running"></i>
-       <span>DX</span>
+    <!-- STATUS PERÍCIAS - VERSÃO POR ATRIBUTO -->
+    <div class="status-cards-container">
+      <div class="card-status-resumo">
+        <h3><i class="fas fa-chart-pie"></i> Resumo das Perícias</h3>
+        
+        <div class="status-linhas-container">
+          <!-- DX -->
+          <div class="status-linha">
+            <div class="status-categoria">
+              <i class="fas fa-running"></i>
+              <span>DX</span>
+            </div>
+            <div class="status-valores">
+              <span class="status-qtd" id="qtd-dx">0</span>
+              <span class="status-pontos" id="pts-dx">(0 pts)</span>
+            </div>
+          </div>
+          
+          <!-- IQ -->
+          <div class="status-linha">
+            <div class="status-categoria">
+              <i class="fas fa-brain"></i>
+              <span>IQ</span>
+            </div>
+            <div class="status-valores">
+              <span class="status-qtd" id="qtd-iq">0</span>
+              <span class="status-pontos" id="pts-iq">(0 pts)</span>
+            </div>
+          </div>
+          
+          <!-- HT -->
+          <div class="status-linha">
+            <div class="status-categoria">
+              <i class="fas fa-heartbeat"></i>
+              <span>HT</span>
+            </div>
+            <div class="status-valores">
+              <span class="status-qtd" id="qtd-ht">0</span>
+              <span class="status-pontos" id="pts-ht">(0 pts)</span>
+            </div>
+          </div>
+          
+          <!-- PERC -->
+          <div class="status-linha">
+            <div class="status-categoria">
+              <i class="fas fa-eye"></i>
+              <span>PERC</span>
+            </div>
+            <div class="status-valores">
+              <span class="status-qtd" id="qtd-perc">0</span>
+              <span class="status-pontos" id="pts-perc">(0 pts)</span>
+            </div>
+          </div>
+          
+          <!-- SEPARADOR -->
+          <div class="status-separador"></div>
+          
+          <!-- TOTAL -->
+          <div class="status-linha total">
+            <div class="status-categoria">
+              <i class="fas fa-box"></i>
+              <span>TOTAL</span>
+            </div>
+            <div class="status-valores">
+              <span class="status-qtd" id="qtd-total">0</span>
+              <span class="status-pontos" id="pts-total">(0 pts)</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="status-valores">
-       <span class="status-qtd" id="qtd-dx">0</span>
-       <span class="status-pontos" id="pts-dx">(0 pts)</span>
-      </div>
-     </div>
-     
-     <!-- IQ -->
-     <div class="status-linha">
-      <div class="status-categoria">
-       <i class="fas fa-brain"></i>
-       <span>IQ</span>
-      </div>
-      <div class="status-valores">
-       <span class="status-qtd" id="qtd-iq">0</span>
-       <span class="status-pontos" id="pts-iq">(0 pts)</span>
-      </div>
-     </div>
-     
-     <!-- HT -->
-     <div class="status-linha">
-      <div class="status-categoria">
-       <i class="fas fa-heartbeat"></i>
-       <span>HT</span>
-      </div>
-      <div class="status-valores">
-       <span class="status-qtd" id="qtd-ht">0</span>
-       <span class="status-pontos" id="pts-ht">(0 pts)</span>
-      </div>
-     </div>
-     
-     <!-- PERC -->
-     <div class="status-linha">
-      <div class="status-categoria">
-       <i class="fas fa-eye"></i>
-       <span>PERC</span>
-      </div>
-      <div class="status-valores">
-       <span class="status-qtd" id="qtd-perc">0</span>
-       <span class="status-pontos" id="pts-perc">(0 pts)</span>
-      </div>
-     </div>
-     
-     <!-- SEPARADOR -->
-     <div class="status-separador"></div>
-     
-     <!-- TOTAL -->
-     <div class="status-linha total">
-      <div class="status-categoria">
-       <i class="fas fa-box"></i>
-       <span>TOTAL</span>
-      </div>
-      <div class="status-valores">
-       <span class="status-qtd" id="qtd-total">0</span>
-       <span class="status-pontos" id="pts-total">(0 pts)</span>
-      </div>
-     </div>
-    </div>
-   </div>
-  </div>
-
-
-  <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
-  <div class="sistema-aquisicao-pericias">
-   
-   <!-- COLUNA ESQUERDA - CATÁLOGO -->
-   <div class="catalog-column-pericias">
-    <div class="catalog-section-pericias">
-     <h3><i class="fas fa-book-open"></i> Catálogo de Perícias</h3>
-     
-     <!-- BARRA DE BUSCA -->
-     <div class="busca-pericias">
-      <input type="text" placeholder=" Buscar perícias..." class="search-input" id="busca-pericias">
-     </div>
-     
-     <!-- FILTROS POR ATRIBUTO E COMBATE -->
-     <div class="filtros-container-pericias">
-      <div class="filtro-buttons">
-       <button class="filtro-btn active" data-filtro="todas">
-        <i class="fas fa-layer-group"></i> Todas
-       </button>
-       <button class="filtro-btn" data-filtro="dx">
-        <i class="fas fa-running"></i> DX
-       </button>
-       <button class="filtro-btn" data-filtro="iq">
-        <i class="fas fa-brain"></i> IQ
-       </button>
-       <button class="filtro-btn" data-filtro="ht">
-        <i class="fas fa-heartbeat"></i> HT
-       </button>
-       <button class="filtro-btn" data-filtro="perc">
-        <i class="fas fa-eye"></i> PERC
-       </button>
-       <button class="filtro-btn" data-filtro="combate">
-        <i class="fas fa-fist-raised"></i> Combate
-       </button>
-      </div>
-     </div>
-     
-     <!-- LISTA DE PERÍCIAS DO CATÁLOGO -->
-     <div class="catalog-list-pericias" id="lista-pericias">
-      <!-- As perícias serão carregadas dinamicamente pelo JavaScript -->
-      <div class="loading-spinner">
-       <i class="fas fa-spinner fa-spin"></i>
-       <div>Carregando catálogo de perícias...</div>
-      </div>
-     </div>
-    </div>
-   </div>
-   
-   <!-- COLUNA DIREITA - PERÍCIAS APRENDIDAS -->
-   <div class="acquired-column-pericias">
-    
-    <!-- PERÍCIAS APRENDIDAS -->
-    <div class="acquired-section-pericias">
-     <h3><i class="fas fa-graduation-cap"></i> Perícias Aprendidas
-      <span class="points-badge" id="pontos-pericias-total">[0 pts]</span>
-     </h3>
-     <div class="acquired-list-pericias" id="pericias-aprendidas">
-      <div class="nenhuma-pericia-aprendida">
-       <i class="fas fa-graduation-cap"></i>
-       <div>Nenhuma perícia aprendida</div>
-       <small>As perícias que você aprender aparecerão aqui</small>
-      </div>
-     </div>
     </div>
 
-
-    <!-- DETALHES DA PERÍCIA SELECIONADA -->
-    <div class="detalhes-pericia-section">
-     <div class="detalhes-pericia-content" id="detalhes-pericia-content">
-      <div class="nenhuma-pericia-selecionada">
-       <i class="fas fa-search"></i>
-       <div>Selecione uma perícia para ver os detalhes</div>
-      </div>
-     </div>
-    </div>
-
-
-   </div>
-  </div>
-
-
-  <!-- ===== SEÇÃO DE TÉCNICAS - ABAIXO DAS PERÍCIAS ===== -->
-  <div class="tecnicas-section" style="margin-top: 40px; border-top: 2px solid rgba(255, 140, 0, 0.3); padding-top: 30px;">
-   
-   <!-- STATUS DAS TÉCNICAS -->
-   <div class="status-cards-container">
-    <div class="card-status-resumo">
-     <h3><i class="fas fa-tools"></i> Técnicas Especiais</h3>
-     
-     <div class="status-linhas-container">
-      <!-- TÉCNICAS MÉDIAS -->
-      <div class="status-linha">
-       <div class="status-categoria">
-        <i class="fas fa-star-half-alt"></i>
-        <span>Médias</span>
-       </div>
-       <div class="status-valores">
-        <span class="status-qtd" id="qtd-tecnicas-medio">0</span>
-        <span class="status-pontos" id="pts-tecnicas-medio">(0 pts)</span>
-       </div>
+    <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
+    <div class="sistema-aquisicao-pericias">
+      
+      <!-- COLUNA ESQUERDA - CATÁLOGO -->
+      <div class="catalog-column-pericias">
+        <div class="catalog-section-pericias">
+          <h3><i class="fas fa-book-open"></i> Catálogo de Perícias</h3>
+          
+          <!-- BARRA DE BUSCA -->
+          <div class="busca-pericias">
+            <input type="text" placeholder="🔍 Buscar perícias..." class="search-input" id="busca-pericias">
+          </div>
+          
+          <!-- FILTROS POR ATRIBUTO E COMBATE -->
+          <div class="filtros-container-pericias">
+            <div class="filtro-buttons">
+              <button class="filtro-btn active" data-filtro="todas">
+                <i class="fas fa-layer-group"></i> Todas
+              </button>
+              <button class="filtro-btn" data-filtro="dx">
+                <i class="fas fa-running"></i> DX
+              </button>
+              <button class="filtro-btn" data-filtro="iq">
+                <i class="fas fa-brain"></i> IQ
+              </button>
+              <button class="filtro-btn" data-filtro="ht">
+                <i class="fas fa-heartbeat"></i> HT
+              </button>
+              <button class="filtro-btn" data-filtro="perc">
+                <i class="fas fa-eye"></i> PERC
+              </button>
+              <button class="filtro-btn" data-filtro="combate">
+                <i class="fas fa-fist-raised"></i> Combate
+              </button>
+            </div>
+          </div>
+          
+          <!-- LISTA DE PERÍCIAS DO CATÁLOGO -->
+          <div class="catalog-list-pericias" id="lista-pericias">
+            <!-- As perícias serão carregadas dinamicamente pelo JavaScript -->
+            <div class="loading-spinner">
+              <i class="fas fa-spinner fa-spin"></i>
+              <div>Carregando catálogo de perícias...</div>
+            </div>
+          </div>
+        </div>
       </div>
       
-      <!-- TÉCNICAS DIFÍCEIS -->
-      <div class="status-linha">
-       <div class="status-categoria">
-        <i class="fas fa-star"></i>
-        <span>Difíceis</span>
-       </div>
-       <div class="status-valores">
-        <span class="status-qtd" id="qtd-tecnicas-dificil">0</span>
-        <span class="status-pontos" id="pts-tecnicas-dificil">(0 pts)</span>
-       </div>
+      <!-- COLUNA DIREITA - PERÍCIAS APRENDIDAS -->
+      <div class="acquired-column-pericias">
+        
+        <!-- PERÍCIAS APRENDIDAS -->
+        <div class="acquired-section-pericias">
+          <h3><i class="fas fa-graduation-cap"></i> Perícias Aprendidas 
+            <span class="points-badge" id="pontos-pericias-total">[0 pts]</span>
+          </h3>
+          <div class="acquired-list-pericias" id="pericias-aprendidas">
+            <div class="nenhuma-pericia-aprendida">
+              <i class="fas fa-graduation-cap"></i>
+              <div>Nenhuma perícia aprendida</div>
+              <small>As perícias que você aprender aparecerão aqui</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- DETALHES DA PERÍCIA SELECIONADA -->
+        <div class="detalhes-pericia-section">
+          <div class="detalhes-pericia-content" id="detalhes-pericia-content">
+            <div class="nenhuma-pericia-selecionada">
+              <i class="fas fa-search"></i>
+              <div>Selecione uma perícia para ver os detalhes</div>
+            </div>
+          </div>
+        </div>
+
       </div>
-      
-      <!-- SEPARADOR -->
-      <div class="status-separador"></div>
-      
-      <!-- TOTAL TÉCNICAS -->
-      <div class="status-linha total">
-       <div class="status-categoria">
-        <i class="fas fa-tools"></i>
-        <span>TOTAL TÉCNICAS</span>
-       </div>
-       <div class="status-valores">
-        <span class="status-qtd" id="qtd-tecnicas-total">0</span>
-        <span class="status-pontos" id="pts-tecnicas-total">(0 pts)</span>
-       </div>
-      </div>
-     </div>
     </div>
-   </div>
 
+    <!-- ===== SEÇÃO DE TÉCNICAS - ABAIXO DAS PERÍCIAS ===== -->
+    <div class="tecnicas-section" style="margin-top: 40px; border-top: 2px solid rgba(255, 140, 0, 0.3); padding-top: 30px;">
+      
+      <!-- STATUS DAS TÉCNICAS -->
+      <div class="status-cards-container">
+        <div class="card-status-resumo">
+          <h3><i class="fas fa-tools"></i> Técnicas Especiais</h3>
+          
+          <div class="status-linhas-container">
+            <!-- TÉCNICAS MÉDIAS -->
+            <div class="status-linha">
+              <div class="status-categoria">
+                <i class="fas fa-star-half-alt"></i>
+                <span>Médias</span>
+              </div>
+              <div class="status-valores">
+                <span class="status-qtd" id="qtd-tecnicas-medio">0</span>
+                <span class="status-pontos" id="pts-tecnicas-medio">(0 pts)</span>
+              </div>
+            </div>
+            
+            <!-- TÉCNICAS DIFÍCEIS -->
+            <div class="status-linha">
+              <div class="status-categoria">
+                <i class="fas fa-star"></i>
+                <span>Difíceis</span>
+              </div>
+              <div class="status-valores">
+                <span class="status-qtd" id="qtd-tecnicas-dificil">0</span>
+                <span class="status-pontos" id="pts-tecnicas-dificil">(0 pts)</span>
+              </div>
+            </div>
+            
+            <!-- SEPARADOR -->
+            <div class="status-separador"></div>
+            
+            <!-- TOTAL TÉCNICAS -->
+            <div class="status-linha total">
+              <div class="status-categoria">
+                <i class="fas fa-tools"></i>
+                <span>TOTAL TÉCNICAS</span>
+              </div>
+              <div class="status-valores">
+                <span class="status-qtd" id="qtd-tecnicas-total">0</span>
+                <span class="status-pontos" id="pts-tecnicas-total">(0 pts)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-   <!-- SISTEMA DE AQUISIÇÃO DE TÉCNICAS -->
-   <div class="sistema-aquisicao-pericias" style="margin-top: 25px;">
-    
-    <!-- COLUNA ESQUERDA - CATÁLOGO DE TÉCNICAS -->
-    <div class="catalog-column-pericias">
-     <div class="catalog-section-pericias">
-      <h3><i class="fas fa-book-open"></i> Técnicas Disponíveis</h3>
-      
-      <!-- BARRA DE BUSCA -->
-      <div class="busca-pericias">
-       <input type="text" placeholder=" Buscar técnicas..." class="search-input" id="busca-tecnicas">
+      <!-- SISTEMA DE AQUISIÇÃO DE TÉCNICAS -->
+      <div class="sistema-aquisicao-pericias" style="margin-top: 25px;">
+        
+        <!-- COLUNA ESQUERDA - CATÁLOGO DE TÉCNICAS -->
+        <div class="catalog-column-pericias">
+          <div class="catalog-section-pericias">
+            <h3><i class="fas fa-book-open"></i> Técnicas Disponíveis</h3>
+            
+            <!-- BARRA DE BUSCA -->
+            <div class="busca-pericias">
+              <input type="text" placeholder="🔍 Buscar técnicas..." class="search-input" id="busca-tecnicas">
+            </div>
+            
+            <!-- FILTROS POR DIFICULDADE -->
+            <div class="filtros-container-pericias">
+              <div class="filtro-buttons">
+                <button class="filtro-btn active" data-filtro="todas-tecnicas">
+                  <i class="fas fa-layer-group"></i> Todas
+                </button>
+                <button class="filtro-btn" data-filtro="medio-tecnicas">
+                  <i class="fas fa-star-half-alt"></i> Médias
+                </button>
+                <button class="filtro-btn" data-filtro="dificil-tecnicas">
+                  <i class="fas fa-star"></i> Difíceis
+                </button>
+                <button class="filtro-btn" data-filtro="pericia-tecnicas">
+                  <i class="fas fa-filter"></i> Por Perícia
+                </button>
+              </div>
+            </div>
+            
+            <!-- LISTA DE TÉCNICAS DISPONÍVEIS -->
+            <div class="catalog-list-pericias" id="lista-tecnicas">
+              <div class="nenhuma-pericia">
+                <i class="fas fa-info-circle"></i>
+                <div>Aprenda perícias primeiro</div>
+                <small>As técnicas aparecerão aqui quando você tiver as perícias necessárias</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- COLUNA DIREITA - TÉCNICAS APRENDIDAS -->
+        <div class="acquired-column-pericias">
+          
+          <!-- TÉCNICAS APRENDIDAS -->
+          <div class="acquired-section-pericias">
+            <h3><i class="fas fa-graduation-cap"></i> Técnicas Aprendidas 
+              <span class="points-badge" id="pontos-tecnicas-total">[0 pts]</span>
+            </h3>
+            <div class="acquired-list-pericias" id="tecnicas-aprendidas">
+              <div class="nenhuma-pericia-aprendida">
+                <i class="fas fa-tools"></i>
+                <div>Nenhuma técnica aprendida</div>
+                <small>As técnicas que você aprender aparecerão aqui</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- DETALHES DA TÉCNICA SELECIONADA -->
+          <div class="detalhes-pericia-section">
+            <div class="detalhes-pericia-content" id="detalhes-tecnica-content">
+              <div class="nenhuma-pericia-selecionada">
+                <i class="fas fa-search"></i>
+                <div>Selecione uma técnica para ver os detalhes</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
-      
-      <!-- FILTROS POR DIFICULDADE -->
-      <div class="filtros-container-pericias">
-       <div class="filtro-buttons">
-        <button class="filtro-btn active" data-filtro="todas-tecnicas">
-         <i class="fas fa-layer-group"></i> Todas
-        </button>
-        <button class="filtro-btn" data-filtro="medio-tecnicas">
-         <i class="fas fa-star-half-alt"></i> Médias
-        </button>
-        <button class="filtro-btn" data-filtro="dificil-tecnicas">
-         <i class="fas fa-star"></i> Difíceis
-        </button>
-        <button class="filtro-btn" data-filtro="pericia-tecnicas">
-         <i class="fas fa-filter"></i> Por Perícia
-        </button>
-       </div>
-      </div>
-      
-      <!-- LISTA DE TÉCNICAS DISPONÍVEIS -->
-      <div class="catalog-list-pericias" id="lista-tecnicas">
-       <div class="nenhuma-pericia">
-        <i class="fas fa-info-circle"></i>
-        <div>Aprenda perícias primeiro</div>
-        <small>As técnicas aparecerão aqui quando você tiver as perícias necessárias</small>
-       </div>
-      </div>
-     </div>
     </div>
-    
-    <!-- COLUNA DIREITA - TÉCNICAS APRENDIDAS -->
-    <div class="acquired-column-pericias">
-     
-     <!-- TÉCNICAS APRENDIDAS -->
-     <div class="acquired-section-pericias">
-      <h3><i class="fas fa-graduation-cap"></i> Técnicas Aprendidas
-       <span class="points-badge" id="pontos-tecnicas-total">[0 pts]</span>
-      </h3>
-      <div class="acquired-list-pericias" id="tecnicas-aprendidas">
-       <div class="nenhuma-pericia-aprendida">
-        <i class="fas fa-tools"></i>
-        <div>Nenhuma técnica aprendida</div>
-        <small>As técnicas que você aprender aparecerão aqui</small>
-       </div>
+
+    <!-- MODAL DE COMPRA/EDIÇÃO DE PERÍCIA -->
+    <div class="modal-pericia-overlay" style="display: none;">
+      <div class="modal-pericia">
+        <!-- Conteúdo será preenchido pelo JavaScript -->
       </div>
-     </div>
-
-
-     <!-- DETALHES DA TÉCNICA SELECIONADA -->
-     <div class="detalhes-pericia-section">
-      <div class="detalhes-pericia-content" id="detalhes-tecnica-content">
-       <div class="nenhuma-pericia-selecionada">
-        <i class="fas fa-search"></i>
-        <div>Selecione uma técnica para ver os detalhes</div>
-       </div>
-      </div>
-     </div>
-
-
     </div>
-   </div>
+
+    <!-- MODAL DE ESCOLHA DE ESPECIALIZAÇÃO (Para Armas, etc) -->
+    <div class="modal-especializacao-overlay" style="display: none;">
+      <div class="modal-especializacao">
+        <!-- Conteúdo será preenchido pelo JavaScript -->
+      </div>
+    </div>
+
+    <!-- MODAL DE COMPRA DE TÉCNICA -->
+    <div class="modal-tecnica-overlay" style="display: none;">
+      <div class="modal-tecnica">
+        <!-- Conteúdo será preenchido pelo JavaScript -->
+      </div>
+    </div>
+
   </div>
-
-
-  <!-- MODAL DE COMPRA/EDIÇÃO DE PERÍCIA -->
-  <div class="modal-pericia-overlay" style="display: none;">
-   <div class="modal-pericia">
-    <!-- Conteúdo será preenchido pelo JavaScript -->
-   </div>
-  </div>
-
-
-  <!-- MODAL DE ESCOLHA DE ESPECIALIZAÇÃO (Para Armas, etc) -->
-  <div class="modal-especializacao-overlay" style="display: none;">
-   <div class="modal-especializacao">
-    <!-- Conteúdo será preenchido pelo JavaScript -->
-   </div>
-  </div>
-
-
-  <!-- MODAL DE COMPRA DE TÉCNICA -->
-  <div class="modal-tecnica-overlay" style="display: none;">
-   <div class="modal-tecnica">
-    <!-- Conteúdo será preenchido pelo JavaScript -->
-   </div>
-  </div>
-
-
- </div>
 </div>
-
       <!-- ABA MAGIA -->
 <div id="magia" class="tab-content">
   <div class="container-principal">
