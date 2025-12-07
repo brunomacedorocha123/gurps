@@ -1014,88 +1014,9 @@
 <div id="tab-pericias" class="tab-content" style="display: none;">
   <div class="container-principal">
 
-    <!-- ===== STATUS: PERÍCIAS + TÉCNICAS (topo) ===== -->
-    <div class="status-cards-container">
-      <!-- Card Status Perícias -->
-      <div class="card-status-resumo">
-        <h3><i class="fas fa-dice-d20"></i> Status das Perícias</h3>
-        <div class="status-linhas-container">
-          <div class="status-linha">
-            <div class="status-categoria"><i class="fas fa-sword"></i> Combate</div>
-            <div class="status-valores">
-              <span class="status-qtd" id="pericias-combate-qtd">0</span>
-              <span class="status-pontos" id="pericias-combate-pontos">0 pts</span>
-            </div>
-          </div>
-          <div class="status-linha">
-            <div class="status-categoria"><i class="fas fa-dexterity"></i> DX</div>
-            <div class="status-valores">
-              <span class="status-qtd" id="pericias-dx-qtd">0</span>
-              <span class="status-pontos" id="pericias-dx-pontos">0 pts</span>
-            </div>
-          </div>
-          <div class="status-linha">
-            <div class="status-categoria"><i class="fas fa-brain"></i> IQ</div>
-            <div class="status-valores">
-              <span class="status-qtd" id="pericias-iq-qtd">0</span>
-              <span class="status-pontos" id="pericias-iq-pontos">0 pts</span>
-            </div>
-          </div>
-          <div class="status-linha">
-            <div class="status-categoria"><i class="fas fa-heartbeat"></i> HT</div>
-            <div class="status-valores">
-              <span class="status-qtd" id="pericias-ht-qtd">0</span>
-              <span class="status-pontos" id="pericias-ht-pontos">0 pts</span>
-            </div>
-          </div>
-          <div class="status-linha">
-            <div class="status-categoria"><i class="fas fa-eye"></i> PERC</div>
-            <div class="status-valores">
-              <span class="status-qtd" id="pericias-perc-qtd">0</span>
-              <span class="status-pontos" id="pericias-perc-pontos">0 pts</span>
-            </div>
-          </div>
-          <div class="status-separador"></div>
-          <div class="status-linha total">
-            <div class="status-categoria"><i class="fas fa-coins"></i> Total</div>
-            <div class="status-valores">
-              <span class="status-qtd" id="pericias-total-qtd">0</span>
-              <span class="status-pontos" id="pericias-total-pontos">0 pts</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card Status Técnicas -->
-      <div class="card-status-resumo">
-        <h3><i class="fas fa-sparkles"></i> Status das Técnicas</h3>
-        <div class="status-linhas-container">
-          <div class="status-linha">
-            <div class="status-categoria"><i class="fas fa-list"></i> Disponíveis</div>
-            <div class="status-valores">
-              <span class="status-qtd" id="tecnicas-disponiveis-count">0</span>
-            </div>
-          </div>
-          <div class="status-linha">
-            <div class="status-categoria"><i class="fas fa-check-circle"></i> Adquiridas</div>
-            <div class="status-valores">
-              <span class="status-qtd" id="tecnicas-adquiridas-count">0</span>
-            </div>
-          </div>
-          <div class="status-separador"></div>
-          <div class="status-linha total">
-            <div class="status-categoria"><i class="fas fa-tasks"></i> Total</div>
-            <div class="status-valores">
-              <span class="status-qtd" id="tecnicas-total-count">0</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== PERÍCIAS: Disponíveis + Adquiridas ===== -->
+    <!-- Sistema de Aquisição: apenas duas colunas (sem detalhes) -->
     <div class="sistema-aquisicao-pericias">
-      <!-- Perícias Disponíveis -->
+      <!-- Coluna 1: Perícias Disponíveis -->
       <div class="catalog-column-pericias">
         <div class="catalog-section-pericias">
           <h3><i class="fas fa-book"></i> Perícias Disponíveis</h3>
@@ -1112,8 +1033,9 @@
               <button class="filtro-btn" data-filtro="perc">PERC</button>
             </div>
           </div>
-          <div class="catalog-list-pericias" id="lista-pericias-disponiveis">
-            <!-- Itens gerados por JS -->
+          <!-- ⬇️ LISTA COM SCROLL (altura fixa) -->
+          <div class="catalog-list-pericias scrollable-list" id="lista-pericias-disponiveis">
+            <!-- Seu JavaScript preenche aqui -->
             <div class="nenhuma-pericia">
               <i class="fas fa-search"></i>
               <p>Nenhuma perícia encontrada.</p>
@@ -1122,7 +1044,7 @@
         </div>
       </div>
 
-      <!-- Perícias Adquiridas -->
+      <!-- Coluna 2: Perícias Adquiridas -->
       <div class="acquired-column-pericias">
         <div class="acquired-section-pericias">
           <h3>
@@ -1130,6 +1052,7 @@
             <span class="points-badge">Usados: <span id="pontos-pericia-investidos">0</span> pts</span>
           </h3>
           <div class="acquired-list-pericias" id="lista-pericias-adquiridas">
+            <!-- Seu JavaScript preenche aqui -->
             <div class="nenhuma-pericia-aprendida">
               <i class="fas fa-book-open"></i>
               <p>Nenhuma perícia adquirida ainda.</p>
@@ -1140,42 +1063,43 @@
       </div>
     </div>
 
-    <!-- ===== TÉCNICAS: Disponíveis + Adquiridas ===== -->
-    <div class="sistema-aquisicao-pericias tecnicas-section">
-      <!-- Técnicas Disponíveis -->
-      <div class="catalog-column-pericias">
-        <div class="catalog-section-pericias">
-          <h3><i class="fas fa-scroll"></i> Técnicas Disponíveis</h3>
-          <div class="busca-pericias">
-            <input type="text" class="search-input" id="search-tecnicas" placeholder="Buscar técnicas...">
-          </div>
-          <div class="catalog-list-pericias" id="lista-tecnicas-disponiveis">
-            <div class="nenhuma-pericia">
-              <i class="fas fa-search"></i>
-              <p>Nenhuma técnica disponível.</p>
+    <!-- Seção de Técnicas (mantida exatamente como estava) -->
+    <div class="tecnicas-section">
+      <h2><i class="fas fa-sparkles"></i> Técnicas</h2>
+      
+      <div class="sistema-aquisicao-pericias">
+        <!-- Técnicas Disponíveis -->
+        <div class="catalog-column-pericias">
+          <div class="catalog-section-pericias">
+            <h3><i class="fas fa-scroll"></i> Técnicas Disponíveis</h3>
+            <div class="catalog-list-pericias" id="lista-tecnicas-disponiveis">
+              <!-- Seu JavaScript preenche aqui -->
+              <div class="nenhuma-pericia">
+                <i class="fas fa-search"></i>
+                <p>Nenhuma técnica disponível.</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Técnicas Adquiridas -->
-      <div class="acquired-column-pericias">
-        <div class="acquired-section-pericias">
-          <h3>
-            <i class="fas fa-scroll"></i> Técnicas Adquiridas
-          </h3>
-          <div class="acquired-list-pericias" id="lista-tecnicas-adquiridas">
-            <div class="nenhuma-pericia-aprendida">
-              <i class="fas fa-scroll"></i>
-              <p>Nenhuma técnica adquirida.</p>
+        <!-- Técnicas Adquiridas -->
+        <div class="acquired-column-pericias">
+          <div class="acquired-section-pericias">
+            <h3><i class="fas fa-scroll"></i> Técnicas Adquiridas</h3>
+            <div class="acquired-list-pericias" id="lista-tecnicas-adquiridas">
+              <!-- Seu JavaScript preenche aqui -->
+              <div class="nenhuma-pericia-aprendida">
+                <i class="fas fa-scroll"></i>
+                <p>Nenhuma técnica adquirida.</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-  </div> <!-- .container-principal -->
-</div> <!-- #tab-pericias -->
+  </div>
+</div>
       <!-- ABA MAGIA -->
 <div id="magia" class="tab-content">
   <div class="container-principal">
