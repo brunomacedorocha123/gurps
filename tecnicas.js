@@ -652,125 +652,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
 });
 
-// ===== SOLUÇÃO DEFINITIVA =====
-
-// Função para verificar e forçar inicialização
-function verificarEInicializarTecnicas() {
-    console.log("🔍 Verificando sistema de técnicas...");
-    
-    // Verificar se o catálogo existe
-    if (!window.catalogoTecnicas) {
-        console.error("❌ Catálogo de técnicas não carregado!");
-        return;
-    }
-    
-    // Verificar se as funções existem
-    if (typeof window.catalogoTecnicas.obterTodasTecnicas !== 'function') {
-        console.error("❌ Função obterTodasTecnicas não existe!");
-        return;
-    }
-    
-    // Verificar se há técnicas no catálogo
-    const tecnicas = window.catalogoTecnicas.obterTodasTecnicas();
-    console.log(`📊 Técnicas no catálogo: ${tecnicas.length}`);
-    
-    // Inicializar se possível
-    if (typeof inicializarSistemaTecnicas === 'function') {
-        console.log("🚀 Inicializando sistema de técnicas...");
-        inicializarSistemaTecnicas();
+// ===== INICIALIZAÇÃO SEGURA DAS TÉCNICAS =====
+function inicializarSistemaTecnicasComSeguranca() {
+    if (
+        window.estadoPericias &&
+        Array.isArray(window.estadoPericias.periciasAprendidas) &&
+        window.catalogoTecnicas &&
+        typeof window.catalogoTecnicas.obterTodasTecnicas === 'function' &&
+        typeof window.obterDadosAtributos === 'function'
+    ) {
+        if (!window.tecnicasIniciadas) {
+            window.tecnicasIniciadas = true;
+            console.log("✅ Sistema de Técnicas inicializado com sucesso!");
+            window.inicializarSistemaTecnicas();
+        }
     } else {
-        console.error("❌ Função inicializarSistemaTecnicas não encontrada!");
+        setTimeout(inicializarSistemaTecnicasComSeguranca, 600);
     }
 }
 
-// Adicionar botão de teste (temporário)
-function adicionarBotaoTeste() {
-    const btnTeste = document.createElement('button');
-    btnTeste.innerHTML = '🔧 Testar Técnicas';
-    btnTeste.style.cssText = `
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: #9b59b6;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        z-index: 9999;
-        font-weight: bold;
-    `;
-    btnTeste.onclick = verificarEInicializarTecnicas;
-    document.body.appendChild(btnTeste);
-}
-
-// Inicializar quando a página carregar
-window.addEventListener('load', function() {
-    console.log("🌐 Página carregada, aguardando 1 segundo...");
-    
-    // Adicionar botão de teste
-    adicionarBotaoTeste();
-    
-    // Tentar inicializar após 1 segundo
-    setTimeout(() => {
-        verificarEInicializarTecnicas();
-    }, 1000);
+document.addEventListener('DOMContentLoaded', () => {
+    const observer = new MutationObserver(() => {
+        const aba = document.getElementById('pericias');
+        if (aba && aba.classList.contains('active')) {
+            inicializarSistemaTecnicasComSeguranca();
+        }
+    });
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        observer.observe(tab, { attributes: true, attributeFilter: ['class'] });
+    });
 });
-
-// Monitorar cliques nas abas
-document.addEventListener('click', function(e) {
-    // Verificar se clicou em uma aba
-    if (e.target.closest('.tab-link') || e.target.closest('[data-tab]')) {
-        setTimeout(() => {
-            const abaPericias = document.getElementById('pericias');
-            if (abaPericias && window.getComputedStyle(abaPericias).display !== 'none') {
-                console.log("📁 Aba de perícias aberta, inicializando técnicas...");
-                verificarEInicializarTecnicas();
-            }
-        }, 300);
-    }
-});
-
-// Função para forçar aparecimento de técnica (DEBUG)
-window.forcarTecnica = function() {
-    console.log("⚡ FORÇANDO APARECIMENTO DE TÉCNICA");
-    
-    // Criar catálogo se não existir
-    if (!window.catalogoTecnicas) {
-        window.catalogoTecnicas = {
-            obterTodasTecnicas: function() {
-                return [{
-                    id: "arquearia-montada",
-                    nome: "Arquearia Montada",
-                    descricao: "Permite utilizar arco com eficiência enquanto cavalga.",
-                    dificuldade: "Difícil",
-                    baseCalculo: { tipo: "pericia", idPericia: "arco", redutor: -4 },
-                    limiteMaximo: { tipo: "pericia", idPericia: "arco" },
-                    preRequisitos: []
-                }];
-            },
-            buscarTecnicaPorId: function(id) {
-                return {
-                    id: "arquearia-montada",
-                    nome: "Arquearia Montada",
-                    descricao: "Permite utilizar arco com eficiência enquanto cavalga.",
-                    dificuldade: "Difícil",
-                    baseCalculo: { tipo: "pericia", idPericia: "arco", redutor: -4 },
-                    limiteMaximo: { tipo: "pericia", idPericia: "arco" },
-                    preRequisitos: []
-                };
-            }
-        };
-    }
-    
-    // Forçar atualização
-    if (typeof atualizarTecnicasDisponiveis === 'function') {
-        atualizarTecnicasDisponiveis();
-        renderizarStatusTecnicas();
-        renderizarTecnicasAprendidas();
-        console.log("✅ Técnica forçada com sucesso!");
-    }
-};
-
-// Adicionar ao console
-console.log("ℹ️ Digite 'forcarTecnica()' no console para testar");
