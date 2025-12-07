@@ -1009,21 +1009,20 @@
     </div>
 </div>
   
-
 <!-- ABA PERÍCIAS -->
 <div id="pericias" class="tab-content">
   <div class="container-principal">
     
-    <!-- STATUS DAS PERÍCIAS -->
+    <!-- STATUS DAS PERÍCIAS (SIMPLIFICADO) -->
     <div class="status-cards-container">
       <div class="card-status-resumo">
-        <h3><i class="fas fa-chart-bar"></i> Status das Perícias</h3>
+        <h3><i class="fas fa-chart-bar"></i> Resumo de Perícias</h3>
         <div class="status-linhas-container">
           <!-- DX -->
           <div class="status-linha">
             <div class="status-categoria">
               <i class="fas fa-running"></i>
-              <span>Perícias DX</span>
+              <span>DX</span>
             </div>
             <div class="status-valores">
               <span class="status-qtd" id="qtd-dx">0</span>
@@ -1035,7 +1034,7 @@
           <div class="status-linha">
             <div class="status-categoria">
               <i class="fas fa-brain"></i>
-              <span>Perícias IQ</span>
+              <span>IQ</span>
             </div>
             <div class="status-valores">
               <span class="status-qtd" id="qtd-iq">0</span>
@@ -1047,7 +1046,7 @@
           <div class="status-linha">
             <div class="status-categoria">
               <i class="fas fa-heartbeat"></i>
-              <span>Perícias HT</span>
+              <span>HT</span>
             </div>
             <div class="status-valores">
               <span class="status-qtd" id="qtd-ht">0</span>
@@ -1059,7 +1058,7 @@
           <div class="status-linha">
             <div class="status-categoria">
               <i class="fas fa-eye"></i>
-              <span>Perícias PERC</span>
+              <span>PERC</span>
             </div>
             <div class="status-valores">
               <span class="status-qtd" id="qtd-perc">0</span>
@@ -1143,12 +1142,103 @@
       </div>
     </div>
 
-    <!-- SEÇÃO DE DETALHES -->
-    <div class="detalhes-pericia-section">
-      <div class="detalhes-pericia-content" id="detalhes-pericia-content">
-        <div class="nenhuma-pericia-selecionada">
-          <i class="fas fa-info-circle"></i>
-          <p>Selecione uma perícia para ver detalhes.</p>
+    <!-- TÉCNICAS -->
+    <div class="tecnicas-section">
+      <div class="status-cards-container" style="margin-bottom: 10px;">
+        <div class="card-status-resumo">
+          <h3><i class="fas fa-tools"></i> Resumo de Técnicas</h3>
+          <div class="status-linhas-container">
+            <!-- MÉDIO -->
+            <div class="status-linha">
+              <div class="status-categoria">
+                <i class="fas fa-star"></i>
+                <span>Média</span>
+              </div>
+              <div class="status-valores">
+                <span class="status-qtd" id="qtd-tecnicas-medio">0</span>
+                <span class="status-pontos" id="pts-tecnicas-medio">(0 pts)</span>
+              </div>
+            </div>
+            
+            <!-- DIFÍCIL -->
+            <div class="status-linha">
+              <div class="status-categoria">
+                <i class="fas fa-star-half-alt"></i>
+                <span>Difícil</span>
+              </div>
+              <div class="status-valores">
+                <span class="status-qtd" id="qtd-tecnicas-dificil">0</span>
+                <span class="status-pontos" id="pts-tecnicas-dificil">(0 pts)</span>
+              </div>
+            </div>
+            
+            <div class="status-separador"></div>
+            
+            <!-- TOTAL TÉCNICAS -->
+            <div class="status-linha total">
+              <div class="status-categoria">
+                <i class="fas fa-calculator"></i>
+                <span>TOTAL Técnicas</span>
+              </div>
+              <div class="status-valores">
+                <span class="status-qtd" id="qtd-tecnicas-total">0</span>
+                <span class="status-pontos" id="pts-tecnicas-total">(0 pts)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2><i class="fas fa-sparkles"></i> Técnicas</h2>
+      
+      <div class="sistema-aquisicao-pericias">
+        <div class="catalog-column-pericias">
+          <div class="catalog-section-pericias">
+            <h3><i class="fas fa-scroll"></i> Técnicas Disponíveis</h3>
+            
+            <!-- BARRA DE BUSCA TÉCNICAS -->
+            <div class="busca-pericias">
+              <input type="text" class="search-input" id="busca-tecnicas" placeholder="Buscar técnicas...">
+            </div>
+            
+            <!-- FILTROS TÉCNICAS -->
+            <div class="filtros-container-pericias">
+              <div class="filtro-buttons">
+                <button class="filtro-btn active" data-filtro="todas-tecnicas">Todas</button>
+                <button class="filtro-btn" data-filtro="medio-tecnicas">Média</button>
+                <button class="filtro-btn" data-filtro="dificil-tecnicas">Difícil</button>
+              </div>
+            </div>
+            
+            <!-- LISTA DE TÉCNICAS -->
+            <div class="catalog-list-pericias-scroll" id="lista-tecnicas">
+              <div class="catalog-list-pericias">
+                <div class="nenhuma-pericia">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <p>Carregando catálogo de técnicas...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="acquired-column-pericias">
+          <div class="acquired-section-pericias">
+            <h3>
+              <i class="fas fa-scroll"></i> Técnicas Adquiridas
+              <span class="points-badge">Usados: <span id="pontos-tecnicas-total">0</span> pts</span>
+            </h3>
+            
+            <div class="acquired-list-pericias-scroll" id="tecnicas-aprendidas">
+              <div class="acquired-list-pericias">
+                <div class="nenhuma-pericia-aprendida">
+                  <i class="fas fa-scroll"></i>
+                  <p>Nenhuma técnica adquirida.</p>
+                  <small>As técnicas aparecem quando você tem os pré-requisitos.</small>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1160,6 +1250,10 @@
 
     <div class="modal-especializacao-overlay">
       <div class="modal-especializacao"></div>
+    </div>
+
+    <div class="modal-tecnica-overlay" style="display: none;">
+      <div class="modal-tecnica"></div>
     </div>
 
   </div>
