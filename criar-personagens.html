@@ -1010,14 +1010,8 @@
 </div>
   
 
-<!-- Botão da aba no menu (já está correto) -->
-<button class="tab-btn" data-tab="pericias">
-    <i class="fas fa-graduation-cap"></i>
-    Perícias
-</button>
-
-<!-- Conteúdo da aba - CORRIGIDO -->
-<div id="pericias" class="tab-content">
+<!-- Aba de Perícias -->
+<div id="tab-pericias" class="tab-content">
   <div class="container-principal">
 
     <!-- Linha 1: Perícias (2 colunas) -->
@@ -1027,7 +1021,7 @@
         <div class="catalog-section-pericias">
           <h3><i class="fas fa-book"></i> Perícias Disponíveis</h3>
           <div class="busca-pericias">
-            <input type="text" class="search-input" id="search-pericias" placeholder="Buscar perícias...">
+            <input type="text" class="search-input" id="busca-pericias" placeholder="Buscar perícias...">
           </div>
           <div class="filtros-container-pericias">
             <div class="filtro-buttons">
@@ -1039,7 +1033,8 @@
               <button class="filtro-btn" data-filtro="perc">PERC</button>
             </div>
           </div>
-          <div class="catalog-list-pericias-scroll" id="lista-pericias-disponiveis">
+          <!-- MUDANÇA AQUI: ID correto -->
+          <div class="catalog-list-pericias-scroll" id="lista-pericias">
             <div class="catalog-list-pericias">
               <div class="nenhuma-pericia">
                 <i class="fas fa-search"></i>
@@ -1055,9 +1050,10 @@
         <div class="acquired-section-pericias">
           <h3>
             <i class="fas fa-user-graduate"></i> Perícias Adquiridas
-            <span class="points-badge">Usados: <span id="pontos-pericia-investidos">0</span> pts</span>
+            <span class="points-badge">Usados: <span id="pontos-pericias-total">0</span> pts</span>
           </h3>
-          <div class="acquired-list-pericias-scroll" id="lista-pericias-adquiridas">
+          <!-- MUDANÇA AQUI: ID correto -->
+          <div class="acquired-list-pericias-scroll" id="pericias-aprendidas">
             <div class="acquired-list-pericias">
               <div class="nenhuma-pericia-aprendida">
                 <i class="fas fa-book-open"></i>
@@ -1078,6 +1074,17 @@
           <p>Selecione uma perícia para ver detalhes.</p>
         </div>
       </div>
+    </div>
+
+    <!-- MODAIS (FORA DO FLUXO PRINCIPAL) -->
+    <!-- Modal Perícia -->
+    <div class="modal-pericia-overlay">
+      <div class="modal-pericia"></div>
+    </div>
+
+    <!-- Modal Especialização -->
+    <div class="modal-especializacao-overlay">
+      <div class="modal-especializacao"></div>
     </div>
 
     <!-- Técnicas -->

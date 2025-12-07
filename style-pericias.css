@@ -1771,3 +1771,23 @@
 .detalhes-pericia-content {
   min-height: 100px;
 }
+
+/* Scroll para listas de perícias */
+.catalog-list-pericias-scroll,
+.acquired-list-pericias-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #2d3748;
+  border-radius: 6px;
+  margin-top: 10px;
+  background: rgba(26, 32, 44, 0.8);
+}
+
+/* Garantir que o JavaScript encontre a aba */
+#tab-pericias {
+  display: none;
+}
+
+#tab-pericias.active {
+  display: block;
+}
