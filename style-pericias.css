@@ -2018,14 +2018,24 @@
   display: block;
 }
 
-/* ===== FIX PARA PROBLEMA DE CARREGAMENTO ===== */
-/* Se a lista estiver carregando, mostrar o spinner */
-.catalog-list-pericias .loading-spinner {
+/* ===== CORREÇÃO CRÍTICA: PROBLEMA COM LOADING NAS TÉCNICAS ===== */
+/* SPINNER APENAS para a lista de PERÍCIAS (não técnicas) */
+#lista-pericias .loading-spinner {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
+}
+
+/* GARANTIR que técnicas NÃO tenham spinner visível */
+#lista-tecnicas .loading-spinner {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Garantir que o conteúdo apareça quando carregado */
@@ -2037,14 +2047,52 @@
 /* Garantir que o container de técnicas tenha conteúdo visível */
 #lista-tecnicas {
   position: relative;
+  min-height: 200px;
 }
 
-/* Quando não há técnicas disponíveis, mostrar mensagem */
+/* CORREÇÃO FINAL: Remove qualquer pseudo-elemento problemático */
+#lista-tecnicas::before,
+#lista-tecnicas::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Garantir visibilidade do conteúdo das técnicas */
+#lista-tecnicas .nenhuma-pericia {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Garantir que os itens de técnica sejam visíveis */
+#lista-tecnicas .pericia-item {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 20 !important;
+}
+
+/* Remove qualquer regra problemática de :empty */
 #lista-tecnicas:empty::before {
-  content: "Carregando técnicas...";
+  content: none !important;
+  display: none !important;
+}
+
+/* Remove regras de :has() que podem não ser suportadas */
+.catalog-list-pericias:not(:has(.loading-spinner)) {
   display: block;
-  text-align: center;
-  color: #95a5a6;
-  padding: 40px;
-  font-style: italic;
+}
+
+/* Versão segura sem :has() */
+#lista-tecnicas:not(:empty) {
+  display: block;
+}
+
+/* Garante que quando o JS adiciona itens, eles fiquem visíveis */
+#lista-tecnicas .pericia-item,
+#lista-tecnicas .nenhuma-pericia {
+  animation: fadeIn 0.5s ease !important;
 }
