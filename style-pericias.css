@@ -1,3 +1,62 @@
+/* ===== SISTEMA DE PERÍCIAS E TÉCNICAS - CSS COMPLETO ===== */
+
+/* Container principal */
+.container-principal {
+    padding: 15px;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* ===== CARDS DE STATUS LADO A LADO ===== */
+.status-cards-container.grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+@media (max-width: 768px) {
+    .status-cards-container.grid-2-col {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* Card de status individual */
+.card-status-resumo {
+    background: rgba(30, 30, 40, 0.95);
+    border: 1px solid rgba(255, 140, 0, 0.25);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+
+.card-status-resumo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ff8c00, #ffd700);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.card-status-resumo:hover::before {
+    transform: scaleX(1);
+}
+
+.card-status-resumo:hover {
+    border-color: rgba(255, 140, 0, 0.5);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
 /* Título do card de status */
 .card-status-resumo h3 {
     color: #ffd700;
@@ -407,6 +466,7 @@
     border: 1px solid rgba(230, 126, 34, 0.3);
 }
 
+/* ===== CORREÇÃO DO BOTÃO DE REMOVER PERÍCIA ===== */
 /* Item de Perícia Aprendida */
 .pericia-aprendida-item {
     background: rgba(39, 174, 96, 0.15);
@@ -416,6 +476,8 @@
     margin-bottom: 12px;
     position: relative;
     transition: all 0.3s ease;
+    /* Garantir que o container tenha contexto de empilhamento */
+    isolation: isolate;
 }
 
 .pericia-aprendida-item:hover {
@@ -430,7 +492,11 @@
     align-items: flex-start;
     margin-bottom: 8px;
     gap: 10px;
-    padding-right: 40px;
+    /* CORREÇÃO: Remover padding-right que estava escondendo o botão */
+    padding-right: 0;
+    /* Garantir que o header não sobreponha o botão */
+    position: relative;
+    z-index: 1;
 }
 
 .pericia-aprendida-nome {
@@ -487,12 +553,13 @@
     white-space: nowrap;
 }
 
+/* BOTÃO DE REMOVER - CORREÇÃO CRÍTICA */
 .btn-remover-pericia {
     background: #e74c3c;
     color: white;
     border: none;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -504,14 +571,19 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    z-index: 3;
+    /* CORREÇÃO: Aumentar z-index significativamente */
+    z-index: 100;
     flex-shrink: 0;
+    /* Garantir que seja clicável em toda a área */
+    pointer-events: auto;
+    /* Garantir que não tenha elementos sobrepostos */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .btn-remover-pericia:hover {
     background: #c0392b;
-    transform: scale(1.1);
-    box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
+    transform: scale(1.15);
+    box-shadow: 0 3px 8px rgba(231, 76, 60, 0.4);
 }
 
 /* ===== SEPARADOR ENTRE PERÍCIAS E TÉCNICAS ===== */
@@ -642,6 +714,13 @@
         max-height: 400px;
         min-height: 250px;
     }
+    
+    .btn-remover-pericia {
+        width: 28px;
+        height: 28px;
+        top: 12px;
+        right: 12px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -696,55 +775,37 @@
     .pericia-aprendida-info {
         justify-content: flex-start;
     }
-}
-
-/* ===== MODAIS (MANTIDOS PARA FUNCIONALIDADE) ===== */
-.modal-pericia-overlay,
-.modal-especializacao-overlay,
-.modal-tecnica-overlay {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
-    overflow-y: auto;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-.modal-pericia,
-.modal-especializacao,
-.modal-tecnica {
-    background: rgba(30, 30, 40, 0.98);
-    border: 2px solid rgba(255, 140, 0, 0.3);
-    border-radius: 12px;
-    margin: 5vh auto;
-    padding: 0;
-    width: 90%;
-    max-width: 600px;
-    position: relative;
-    animation: modalAparecer 0.3s ease;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-}
-
-@keyframes modalAparecer {
-    from {
-        opacity: 0;
-        transform: translateY(-30px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
+    
+    .btn-remover-pericia {
+        width: 26px;
+        height: 26px;
+        top: 10px;
+        right: 10px;
+        font-size: 0.9em;
+        z-index: 150; /* Aumentar ainda mais em mobile */
     }
 }
 
-/* ===== ANIMAÇÕES E UTILITÁRIOS ===== */
+@media (max-width: 480px) {
+    .catalog-list-pericias.scroll-fixed {
+        max-height: 300px;
+        min-height: 200px;
+    }
+    
+    .acquired-list-pericias {
+        max-height: 300px;
+        min-height: 180px;
+    }
+    
+    .btn-remover-pericia {
+        width: 24px;
+        height: 24px;
+        top: 8px;
+        right: 8px;
+    }
+}
+
+/* ===== ANIMAÇÕES ===== */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -761,6 +822,11 @@
     animation: fadeIn 0.3s ease;
 }
 
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 .loading-spinner {
     text-align: center;
     padding: 30px;
@@ -773,15 +839,20 @@
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Acessibilidade */
+/* ===== ACESSIBILIDADE ===== */
 .filtro-btn:focus,
 .pericia-item:focus,
-.search-input:focus {
+.search-input:focus,
+.btn-remover-pericia:focus {
     outline: 2px solid #ff8c00;
     outline-offset: 2px;
+}
+
+/* Touch improvements para mobile */
+@media (max-width: 768px) {
+    .btn-remover-pericia {
+        min-width: 44px;
+        min-height: 44px;
+        touch-action: manipulation;
+    }
 }
