@@ -1014,9 +1014,8 @@
 <div id="tab-pericias" class="tab-content" style="display: none;">
   <div class="container-principal">
 
-    <!-- Sistema de Aquisição: apenas duas colunas (sem detalhes) -->
     <div class="sistema-aquisicao-pericias">
-      <!-- Coluna 1: Perícias Disponíveis -->
+      <!-- Coluna 1: Catálogo de Perícias -->
       <div class="catalog-column-pericias">
         <div class="catalog-section-pericias">
           <h3><i class="fas fa-book"></i> Perícias Disponíveis</h3>
@@ -1033,9 +1032,8 @@
               <button class="filtro-btn" data-filtro="perc">PERC</button>
             </div>
           </div>
-          <!-- ⬇️ LISTA COM SCROLL (altura fixa) -->
-          <div class="catalog-list-pericias scrollable-list" id="lista-pericias-disponiveis">
-            <!-- Seu JavaScript preenche aqui -->
+          <div class="catalog-list-pericias" id="lista-pericias-disponiveis">
+            <!-- Seu JavaScript popula aqui -->
             <div class="nenhuma-pericia">
               <i class="fas fa-search"></i>
               <p>Nenhuma perícia encontrada.</p>
@@ -1052,7 +1050,7 @@
             <span class="points-badge">Usados: <span id="pontos-pericia-investidos">0</span> pts</span>
           </h3>
           <div class="acquired-list-pericias" id="lista-pericias-adquiridas">
-            <!-- Seu JavaScript preenche aqui -->
+            <!-- Seu JavaScript popula aqui -->
             <div class="nenhuma-pericia-aprendida">
               <i class="fas fa-book-open"></i>
               <p>Nenhuma perícia adquirida ainda.</p>
@@ -1061,19 +1059,26 @@
           </div>
         </div>
       </div>
+
+      <!-- Coluna 3: Detalhes da Perícia (original) -->
+      <div class="detalhes-pericia-section">
+        <div class="detalhes-pericia-content" id="detalhes-pericia-content">
+          <div class="nenhuma-pericia-selecionada">
+            <i class="fas fa-info-circle"></i>
+            <p>Selecione uma perícia para ver detalhes.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Seção de Técnicas (mantida exatamente como estava) -->
+    <!-- Seção de Técnicas (mantida como no seu CSS) -->
     <div class="tecnicas-section">
       <h2><i class="fas fa-sparkles"></i> Técnicas</h2>
-      
       <div class="sistema-aquisicao-pericias">
-        <!-- Técnicas Disponíveis -->
         <div class="catalog-column-pericias">
           <div class="catalog-section-pericias">
             <h3><i class="fas fa-scroll"></i> Técnicas Disponíveis</h3>
             <div class="catalog-list-pericias" id="lista-tecnicas-disponiveis">
-              <!-- Seu JavaScript preenche aqui -->
               <div class="nenhuma-pericia">
                 <i class="fas fa-search"></i>
                 <p>Nenhuma técnica disponível.</p>
@@ -1081,13 +1086,10 @@
             </div>
           </div>
         </div>
-
-        <!-- Técnicas Adquiridas -->
         <div class="acquired-column-pericias">
           <div class="acquired-section-pericias">
             <h3><i class="fas fa-scroll"></i> Técnicas Adquiridas</h3>
             <div class="acquired-list-pericias" id="lista-tecnicas-adquiridas">
-              <!-- Seu JavaScript preenche aqui -->
               <div class="nenhuma-pericia-aprendida">
                 <i class="fas fa-scroll"></i>
                 <p>Nenhuma técnica adquirida.</p>
