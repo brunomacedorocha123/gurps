@@ -1,37 +1,56 @@
-// ===== CONEXÃO CRÍTICA COM PERÍCIAS =====
-console.log("🔗 Conectando sistema de técnicas com perícias...");
+// ===== SISTEMA DE TÉCNICAS - VERSÃO DEFINITIVA =====
+console.log("🎯 SISTEMA DE TÉCNICAS CARREGANDO...");
 
-// 1. VERIFICAR SE O SISTEMA DE PERÍCIAS ESTÁ CARREGADO
-function verificarSistemaPericias() {
-    console.log("📋 Verificando estado das perícias:");
+// ===== ESTADO GLOBAL DAS TÉCNICAS =====
+let estadoTecnicas = {
+    pontosTecnicasTotal: 0,
+    pontosMedio: 0,
+    pontosDificil: 0,
+    qtdMedio: 0,
+    qtdDificil: 0,
+    qtdTotal: 0,
+    tecnicasAprendidas: [],
+    filtroAtivo: 'todas-tecnicas',
+    buscaAtiva: '',
+    tecnicasDisponiveis: [],
+    modalAberto: false,
+    tecnicaSelecionada: null
+};
+
+// ===== FUNÇÃO CRÍTICA: BUSCAR PERÍCIA NO SISTEMA =====
+function buscarPericiaNoSistema(nomeBusca) {
+    console.log(`🔍 Buscando perícia: "${nomeBusca}"`);
     
-    // Verificar perícias aprendidas
-    if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
-        console.log("✅ Sistema de perícias encontrado!");
-        console.log("Perícias aprendidas atuais:", 
-            window.estadoPericias.periciasAprendidas.map(p => 
-                `${p.nome} (${p.id}): nível ${p.nivel}`
-            ));
-        return true;
-    } else {
-        console.warn("⚠️ Sistema de perícias NÃO encontrado!");
-        console.log("Estado disponível:", window.estadoPericias);
-        return false;
+    // Se não tem sistema de perícias, criar um básico
+    if (!window.estadoPericias) {
+        console.warn("⚠️ Sistema de perícias não encontrado! Criando básico...");
+        window.estadoPericias = {
+            periciasAprendidas: [
+                { id: 'arco', nome: 'Arco', nivel: 4, atributo: 'DX', dificuldade: 'Média', custo: 8 },
+                { id: 'cavalgar-cavalo', nome: 'Cavalgar (Cavalo)', nivel: 3, atributo: 'DX', dificuldade: 'Média', custo: 6 }
+            ]
+        };
     }
-}
-
-// 2. OBTER PERÍCIA ESPECÍFICA (CRÍTICA!)
-function obterPericiaEspecifica(id) {
-    console.log(`🔍 Buscando perícia: "${id}"`);
     
-    // Primeiro, verificar no estado atual das perícias aprendidas
-    if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
+    // Buscar nas perícias aprendidas
+    if (window.estadoPericias.periciasAprendidas) {
         // Busca por ID exato
-        const encontrada = window.estadoPericias.periciasAprendidas.find(p => 
-            p.id === id || 
-            p.id.includes(id) ||
-            (p.nome && p.nome.toLowerCase().includes(id.toLowerCase()))
-        );
+        let encontrada = window.estadoPericias.periciasAprendidas.find(p => p.id === nomeBusca);
+        
+        // Busca por nome contendo
+        if (!encontrada && nomeBusca.includes('cavalgar')) {
+            encontrada = window.estadoPericias.periciasAprendidas.find(p => 
+                p.id.includes('cavalgar') || 
+                p.nome.toLowerCase().includes('cavalgar')
+            );
+        }
+        
+        // Busca por "arco"
+        if (!encontrada && nomeBusca === 'arco') {
+            encontrada = window.estadoPericias.periciasAprendidas.find(p => 
+                p.id === 'arco' || p.nome === 'Arco'
+            );
+        }
         
         if (encontrada) {
             console.log(`✅ Perícia encontrada: ${encontrada.nome} (nível ${encontrada.nivel})`);
@@ -39,30 +58,31 @@ function obterPericiaEspecifica(id) {
         }
     }
     
-    // Se não encontrou, tentar no catálogo
-    if (window.buscarPericiaPorId) {
-        const doCatalogo = window.buscarPericiaPorId(id);
-        if (doCatalogo) {
-            console.log(`ℹ️ Perícia "${id}" existe no catálogo (mas não aprendida)`);
-            return null; // Não aprendida ainda
-        }
-    }
-    
-    console.warn(`❌ Perícia "${id}" não encontrada em lugar nenhum`);
+    console.warn(`⚠️ Perícia "${nomeBusca}" não encontrada nas aprendidas`);
     return null;
 }
 
-// 3. OBTER NH DA PERÍCIA ARCO (FUNÇÃO ESSENCIAL)
-function obterNHArcoAtual() {
-    console.log("🎯 Calculando NH atual do Arco...");
+// ===== OBTER NH DA PERÍCIA ARCO =====
+function obterNHArco() {
+    console.log("🎯 Calculando NH do Arco...");
     
-    // Obter valor base do atributo DX
-    const dxAtual = window.obterAtributoAtual ? 
-        window.obterAtributoAtual('DX') : 10;
-    console.log(`   DX base: ${dxAtual}`);
+    // Obter atributo DX atual
+    let dxAtual = 10; // Valor padrão
     
-    // Buscar a perícia Arco
-    const periciaArco = obterPericiaEspecifica('arco');
+    // Tentar obter do sistema de atributos
+    if (window.obterAtributoAtual && typeof window.obterAtributoAtual === 'function') {
+        try {
+            dxAtual = window.obterAtributoAtual('DX');
+            console.log(`✅ DX obtido do sistema: ${dxAtual}`);
+        } catch (e) {
+            console.warn(`⚠️ Erro ao obter DX, usando padrão 10:`, e);
+        }
+    } else {
+        console.warn(`⚠️ Função obterAtributoAtual não encontrada, usando DX padrão: ${dxAtual}`);
+    }
+    
+    // Buscar perícia Arco
+    const periciaArco = buscarPericiaNoSistema('arco');
     
     if (periciaArco && periciaArco.nivel) {
         const nhArco = dxAtual + periciaArco.nivel;
@@ -70,13 +90,13 @@ function obterNHArcoAtual() {
         return nhArco;
     }
     
-    // Se não tem a perícia, usar só o atributo
-    console.log(`⚠️ Arco não aprendido, usando DX base: ${dxAtual}`);
+    // Se não tem Arco, usar só o DX
+    console.warn(`⚠️ Arco não encontrado, usando DX base: ${dxAtual}`);
     return dxAtual;
 }
 
-// 4. VERIFICAR PRÉ-REQUISITOS DA TÉCNICA
-function verificarPreRequisitosTecnica(tecnica) {
+// ===== VERIFICAR PRÉ-REQUISITOS =====
+function verificarPreRequisitos(tecnica) {
     console.log(`🔧 Verificando pré-requisitos para: ${tecnica.nome}`);
     
     const requisitos = {
@@ -84,82 +104,84 @@ function verificarPreRequisitosTecnica(tecnica) {
         cavalgar: { passou: false }
     };
     
-    // VERIFICAR ARCO
-    const arco = obterPericiaEspecifica('arco');
+    // 1. VERIFICAR ARCO (nível 4+)
+    const arco = buscarPericiaNoSistema('arco');
     if (arco && arco.nivel >= 4) {
         requisitos.arco.passou = true;
         requisitos.arco.nivel = arco.nivel;
         console.log(`✅ Arco: nível ${arco.nivel} >= 4`);
     } else {
-        console.log(`❌ Arco: ${arco ? `nível ${arco.nivel} < 4` : 'não aprendido'}`);
+        const nivelAtual = arco ? arco.nivel : 0;
+        console.log(`❌ Arco: nível ${nivelAtual} < 4 (necessário: 4+)`);
     }
     
-    // VERIFICAR CAVALGAR
-    if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
-        const temCavalgar = window.estadoPericias.periciasAprendidas.some(p => 
+    // 2. VERIFICAR CAVALGAR (qualquer especialização)
+    const temCavalgar = window.estadoPericias && 
+        window.estadoPericias.periciasAprendidas && 
+        window.estadoPericias.periciasAprendidas.some(p => 
             p.id.includes('cavalgar') || 
-            p.grupo === 'Cavalgar' ||
-            p.nome.includes('Cavalgar')
+            p.nome.toLowerCase().includes('cavalgar')
         );
-        
-        if (temCavalgar) {
-            requisitos.cavalgar.passou = true;
-            console.log("✅ Cavalgar: possui alguma especialização");
-        } else {
-            console.log("❌ Cavalgar: não possui nenhuma especialização");
-        }
+    
+    if (temCavalgar) {
+        requisitos.cavalgar.passou = true;
+        console.log("✅ Cavalgar: possui");
+    } else {
+        console.log("❌ Cavalgar: não possui");
     }
     
-    // RESULTADO
+    // RESULTADO FINAL
     const passou = requisitos.arco.passou && requisitos.cavalgar.passou;
     let motivo = '';
     
     if (!passou) {
         if (!requisitos.arco.passou) {
-            motivo = `Precisa de Arco nível 4 (atual: ${requisitos.arco.nivel || 0})`;
+            motivo = `Precisa de Arco nível 4 (atual: ${requisitos.arco.nivel})`;
         } else if (!requisitos.cavalgar.passou) {
             motivo = 'Precisa de alguma perícia de Cavalgar';
         }
     }
     
-    console.log(`📋 Resultado: ${passou ? 'APROVADO' : 'REPROVADO'} - ${motivo}`);
+    console.log(`📋 Resultado: ${passou ? '✅ APROVADO' : '❌ REPROVADO'} ${motivo ? '- ' + motivo : ''}`);
     return { passou, motivo };
 }
 
-// 5. ATUALIZAR LISTA DE TÉCNICAS DISPONÍVEIS
-function atualizarListaTecnicasDisponiveis() {
-    console.log("🔄 Atualizando lista de técnicas disponíveis...");
+// ===== ATUALIZAR TÉCNICAS DISPONÍVEIS =====
+function atualizarTecnicasDisponiveis() {
+    console.log("🔄 Atualizando técnicas disponíveis...");
     
-    // Verificar se tem o catálogo
+    // Verificar se tem catálogo
     if (!window.catalogoTecnicas) {
-        console.error("❌ Catálogo de técnicas não encontrado!");
+        console.error("❌ Catálogo de técnicas não carregado!");
         return;
     }
     
-    // Verificar sistema de perícias
-    if (!verificarSistemaPericias()) {
-        console.warn("⚠️ Aguardando sistema de perícias carregar...");
-        setTimeout(atualizarListaTecnicasDisponiveis, 1000);
-        return;
-    }
-    
-    // Obter todas técnicas do catálogo
+    // Obter todas técnicas
     const todasTecnicas = window.catalogoTecnicas.obterTodasTecnicas();
-    console.log(`   Técnicas no catálogo: ${todasTecnicas.length}`);
+    console.log(`📚 Técnicas no catálogo: ${todasTecnicas.length}`);
     
-    const tecnicasAtualizadas = todasTecnicas.map(tecnica => {
+    // Processar cada técnica
+    const disponiveis = todasTecnicas.map(tecnica => {
         // Verificar pré-requisitos
-        const requisitos = verificarPreRequisitosTecnica(tecnica);
+        const requisitos = verificarPreRequisitos(tecnica);
+        
+        // Verificar se já aprendeu
+        const jaAprendida = estadoTecnicas.tecnicasAprendidas.find(t => t.id === tecnica.id);
         
         // Calcular NH atual
         let nhAtual = 0;
         let nhArco = 0;
         
         if (tecnica.basePericia === 'arco') {
-            nhArco = obterNHArcoAtual();
-            nhAtual = nhArco - (tecnica.modificadorBase || 0);
+            nhArco = obterNHArco();
+            nhAtual = nhArco - 4; // Arco-4
             
-            console.log(`   ${tecnica.nome}: NH Arco = ${nhArco}, Base = ${nhAtual} (${tecnica.basePericia}${tecnica.modificadorBase || 0})`);
+            // Adicionar níveis comprados se já aprendida
+            if (jaAprendida && jaAprendida.niveisComprados) {
+                nhAtual += jaAprendida.niveisComprados;
+            }
+            
+            console.log(`   ${tecnica.nome}: NH = ${nhAtual} (Arco ${nhArco} - 4)`);
         }
         
         return {
@@ -167,88 +189,224 @@ function atualizarListaTecnicasDisponiveis() {
             disponivel: requisitos.passou,
             motivoIndisponivel: requisitos.motivo,
             nhAtual: nhAtual,
-            nhArco: nhArco
+            nhArco: nhArco,
+            jaAprendida: !!jaAprendida,
+            niveisComprados: jaAprendida ? jaAprendida.niveisComprados || 0 : 0
         };
     });
     
     // Atualizar estado
-    estadoTecnicas.tecnicasDisponiveis = tecnicasAtualizadas;
+    estadoTecnicas.tecnicasDisponiveis = disponiveis;
     
     // Renderizar
     renderizarCatalogoTecnicas();
     
-    console.log(`✅ Lista atualizada: ${tecnicasAtualizadas.filter(t => t.disponivel).length} técnicas disponíveis`);
+    console.log(`✅ Técnicas atualizadas: ${disponiveis.filter(t => t.disponivel).length} disponíveis`);
 }
 
-// 6. INICIALIZAR O SISTEMA COMPLETO
-function inicializarSistemaTecnicasCompleto() {
-    console.log("🚀 INICIALIZANDO SISTEMA DE TÉCNICAS COMPLETO");
-    
-    // Aguardar um pouco para garantir que as perícias carregaram
-    setTimeout(() => {
-        console.log("⏳ Verificando dependências...");
-        
-        // Carregar técnicas salvas
-        carregarTecnicas();
-        
-        // Configurar eventos
-        configurarEventListenersTecnicas();
-        
-        // Atualizar lista inicial
-        atualizarListaTecnicasDisponiveis();
-        
-        // Renderizar técnicas aprendidas
-        renderizarTecnicasAprendidas();
-        
-        // Atualizar estatísticas
-        atualizarEstatisticasTecnicas();
-        
-        // Observar mudanças nas perícias
-        observarMudancasPericias();
-        
-        console.log("✅ SISTEMA DE TÉCNICAS INICIALIZADO COM SUCESSO!");
-        
-        // Debug: mostrar estado atual
-        console.log("📊 ESTADO ATUAL:");
-        console.log("- Perícias aprendidas:", window.estadoPericias?.periciasAprendidas?.length || 0);
-        console.log("- Técnicas aprendidas:", estadoTecnicas.tecnicasAprendidas.length);
-        console.log("- Técnicas disponíveis:", estadoTecnicas.tecnicasDisponiveis.filter(t => t.disponivel).length);
-        
-    }, 1500);
-}
-
-// ===== SUBSTITUIR AS FUNÇÕES ANTERIORES =====
-// Remova as funções antigas e use estas:
-
-// Substitua a função buscarPericiaEspecificaNoSistema por:
-window.buscarPericiaEspecificaNoSistema = obterPericiaEspecifica;
-
-// Substitua a função obterNHPericiaPorId por:
-window.obterNHPericiaPorId = function(id) {
-    if (id === 'arco') {
-        return obterNHArcoAtual();
+// ===== CATÁLOGO DE TÉCNICAS =====
+const catalogoTecnicas = {
+    "arquearia-montada": {
+        id: "arquearia-montada",
+        nome: "Arquearia Montada",
+        descricao: "Usar arco enquanto cavalga. Penalidades para disparar montado não reduzem abaixo do NH desta técnica. Exemplo: se tiver Arco 13 e Arquearia Montada 11, as penalidades nunca reduzem seu NH abaixo de 11.",
+        dificuldade: "Difícil",
+        basePericia: "arco",
+        modificadorBase: -4,
+        limiteMaximo: "arco",
+        preRequisitos: [
+            { tipo: 'pericia', id: 'arco', nivelMinimo: 4 },
+            { tipo: 'grupo', grupo: 'Cavalgar' }
+        ]
     }
-    return obterNHArcoAtual(); // Fallback
 };
 
-// Substitua a função verificarPreRequisitosTecnica pela nova versão
+// Funções do catálogo
+function obterTodasTecnicas() {
+    return Object.values(catalogoTecnicas);
+}
 
-// ===== INICIALIZAÇÃO AUTOMÁTICA =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("📄 DOM carregado, preparando sistema de técnicas...");
+function buscarTecnicaPorId(id) {
+    return catalogoTecnicas[id] || null;
+}
+
+// ===== FUNÇÕES DE INTERFACE =====
+function renderizarCatalogoTecnicas() {
+    const container = document.getElementById('lista-tecnicas');
+    if (!container) {
+        console.error("❌ Container #lista-tecnicas não encontrado!");
+        return;
+    }
     
-    // Aguardar a aba de perícias aparecer
+    const tecnicasFiltradas = estadoTecnicas.tecnicasDisponiveis.filter(tecnica => {
+        if (estadoTecnicas.filtroAtivo === 'medio-tecnicas' && tecnica.dificuldade !== 'Média') return false;
+        if (estadoTecnicas.filtroAtivo === 'dificil-tecnicas' && tecnica.dificuldade !== 'Difícil') return false;
+        
+        if (estadoTecnicas.buscaAtiva) {
+            const busca = estadoTecnicas.buscaAtiva.toLowerCase();
+            return tecnica.nome.toLowerCase().includes(busca) ||
+                   tecnica.descricao.toLowerCase().includes(busca);
+        }
+        
+        return true;
+    });
+    
+    if (tecnicasFiltradas.length === 0) {
+        container.innerHTML = `
+            <div class="nenhuma-pericia" style="text-align: center; padding: 40px; color: #95a5a6;">
+                <i class="fas fa-tools" style="font-size: 48px; margin-bottom: 15px;"></i>
+                <div style="font-size: 18px; margin-bottom: 10px;">Nenhuma técnica disponível</div>
+                <small>Verifique se você tem Arco nível 4 e alguma perícia de Cavalgar</small>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    tecnicasFiltradas.forEach(tecnica => {
+        const disponivel = tecnica.disponivel;
+        const jaAprendida = tecnica.jaAprendida;
+        
+        html += `
+            <div class="pericia-item ${!disponivel ? 'item-indisponivel' : ''}"
+                data-id="${tecnica.id}"
+                data-tipo="tecnica"
+                style="cursor: ${disponivel ? 'pointer' : 'not-allowed'};
+                       opacity: ${disponivel ? '1' : '0.6'};
+                       background: ${jaAprendida ? 'rgba(155, 89, 182, 0.15)' : 'rgba(50, 50, 65, 0.9)'};
+                       border: 1px solid ${jaAprendida ? 'rgba(155, 89, 182, 0.4)' : 'rgba(255, 140, 0, 0.3)'};
+                       border-radius: 8px;
+                       padding: 15px;
+                       margin-bottom: 10px;
+                       transition: all 0.3s ease;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <h4 style="margin: 0; color: ${jaAprendida ? '#9b59b6' : '#ffd700'}; font-size: 16px;">
+                        ${tecnica.nome}
+                        ${jaAprendida ? '<span style="color: #9b59b6; margin-left: 5px;">✓</span>' : ''}
+                    </h4>
+                    <div style="display: flex; gap: 10px;">
+                        <span style="background: ${tecnica.dificuldade === 'Difícil' ? '#e74c3c' : '#f39c12'}; 
+                              color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
+                            ${tecnica.dificuldade}
+                        </span>
+                        <span style="background: #3498db; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
+                            NH ${tecnica.nhAtual}
+                        </span>
+                    </div>
+                </div>
+                
+                <p style="margin: 10px 0; color: #ccc; font-size: 14px; line-height: 1.4;">${tecnica.descricao}</p>
+                
+                <!-- PRÉ-REQUISITOS -->
+                <div style="font-size: 12px; color: #95a5a6; margin-top: 8px;">
+                    <i class="fas fa-requirements"></i> Requer: Arco nível 4 + Cavalgar
+                </div>
+                
+                ${!disponivel ? `
+                    <div style="background: rgba(231, 76, 60, 0.1); border-left: 3px solid #e74c3c; 
+                         padding: 8px 12px; margin-top: 10px; border-radius: 4px;">
+                        <i class="fas fa-lock" style="color: #e74c3c;"></i> 
+                        <span style="color: #e74c3c; margin-left: 5px;">${tecnica.motivoIndisponivel}</span>
+                    </div>
+                ` : ''}
+                
+                ${disponivel ? `
+                    <div style="margin-top: 10px; font-size: 12px; color: #95a5a6; display: flex; align-items: center;">
+                        <i class="fas fa-bullseye" style="margin-right: 5px;"></i>
+                        Clique para ${jaAprendida ? 'melhorar' : 'aprender'} esta técnica
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    
+    // Adicionar eventos de clique
+    const itens = container.querySelectorAll('.pericia-item');
+    itens.forEach(item => {
+        if (!item.classList.contains('item-indisponivel')) {
+            item.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const tecnica = estadoTecnicas.tecnicasDisponiveis.find(t => t.id === id);
+                if (tecnica && tecnica.disponivel) {
+                    abrirModalTecnica(tecnica);
+                }
+            });
+        }
+    });
+}
+
+// ===== INICIALIZAÇÃO =====
+function inicializarSistemaTecnicas() {
+    console.log("🚀 INICIALIZANDO SISTEMA DE TÉCNICAS");
+    
+    // Carregar catálogo
+    window.catalogoTecnicas = {
+        obterTodasTecnicas: obterTodasTecnicas,
+        buscarTecnicaPorId: buscarTecnicaPorId,
+        catalogo: catalogoTecnicas
+    };
+    
+    console.log("✅ Catálogo de técnicas carregado!");
+    
+    // Carregar técnicas salvas
+    carregarTecnicas();
+    
+    // Configurar eventos
+    configurarEventListenersTecnicas();
+    
+    // Inicializar
+    setTimeout(() => {
+        atualizarTecnicasDisponiveis();
+        renderizarTecnicasAprendidas();
+        atualizarEstatisticasTecnicas();
+        console.log("✅ SISTEMA DE TÉCNICAS INICIALIZADO COM SUCESSO!");
+    }, 1000);
+}
+
+// ===== FUNÇÕES DE SUPORTE =====
+function carregarTecnicas() {
+    try {
+        const salvo = localStorage.getItem('tecnicasAprendidas');
+        if (salvo) {
+            estadoTecnicas.tecnicasAprendidas = JSON.parse(salvo);
+            console.log(`📂 Carregadas ${estadoTecnicas.tecnicasAprendidas.length} técnicas salvas`);
+        }
+    } catch (e) {
+        console.error("❌ Erro ao carregar técnicas:", e);
+    }
+}
+
+function salvarTecnicas() {
+    try {
+        localStorage.setItem('tecnicasAprendidas', JSON.stringify(estadoTecnicas.tecnicasAprendidas));
+        console.log(`💾 Técnicas salvas: ${estadoTecnicas.tecnicasAprendidas.length}`);
+    } catch (e) {
+        console.error("❌ Erro ao salvar técnicas:", e);
+    }
+}
+
+// ===== EXECUTAR =====
+// Esperar a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("📄 DOM carregado, aguardando aba de perícias...");
+    
+    // Observar quando a aba de perícias aparecer
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                 const abaPericias = document.getElementById('pericias');
                 if (abaPericias && abaPericias.style.display !== 'none') {
-                    console.log("🎯 Aba de perícias visível, inicializando técnicas...");
+                    console.log("🎯 Aba de perícias visível!");
                     
                     if (!window.sistemaTecnicasInicializado) {
-                        inicializarSistemaTecnicasCompleto();
-                        window.sistemaTecnicasInicializado = true;
-                        observer.disconnect(); // Parar de observar
+                        setTimeout(() => {
+                            inicializarSistemaTecnicas();
+                            window.sistemaTecnicasInicializado = true;
+                        }, 500);
                     }
                 }
             }
@@ -267,56 +425,41 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fallback: inicializar após 3 segundos
     setTimeout(() => {
         if (!window.sistemaTecnicasInicializado) {
-            console.log("⏰ Timeout - Inicializando técnicas...");
-            inicializarSistemaTecnicasCompleto();
+            console.log("⏰ Inicializando por timeout...");
+            inicializarSistemaTecnicas();
             window.sistemaTecnicasInicializado = true;
         }
     }, 3000);
 });
 
-// ===== DEBUG: TESTAR CONEXÃO =====
-window.testarConexaoTecnicas = function() {
-    console.log("🧪 TESTE DE CONEXÃO TÉCNICAS-PERÍCIAS");
-    console.log("=====================================");
+// ===== EXPORTAR FUNÇÕES PARA TESTE =====
+window.testarTecnicas = function() {
+    console.log("🧪 TESTANDO SISTEMA DE TÉCNICAS");
+    console.log("================================");
     
-    // 1. Verificar sistema de perícias
-    console.log("1. Sistema de perícias:", 
-        window.estadoPericias ? "✅ ENCONTRADO" : "❌ NÃO ENCONTRADO");
+    // 1. Verificar estado
+    console.log("1. Estado das técnicas:", estadoTecnicas);
     
-    // 2. Verificar perícias aprendidas
-    if (window.estadoPericias) {
-        console.log("2. Perícias aprendidas:", 
-            window.estadoPericias.periciasAprendidas?.length || 0);
-        
-        window.estadoPericias.periciasAprendidas?.forEach(p => {
-            console.log(`   - ${p.nome} (${p.id}): nível ${p.nivel}`);
-        });
+    // 2. Verificar perícias
+    console.log("2. Perícias do sistema:", window.estadoPericias);
+    
+    // 3. Testar NH do Arco
+    console.log("3. NH do Arco:", obterNHArco());
+    
+    // 4. Testar técnica
+    const tecnica = window.catalogoTecnicas.buscarTecnicaPorId('arquearia-montada');
+    if (tecnica) {
+        console.log("4. Técnica encontrada:", tecnica.nome);
+        const requisitos = verificarPreRequisitos(tecnica);
+        console.log("   Pré-requisitos:", requisitos.passou ? "✅ APROVADO" : "❌ REPROVADO");
     }
     
-    // 3. Testar busca de Arco
-    console.log("3. Buscando Arco...");
-    const arco = obterPericiaEspecifica('arco');
-    console.log(`   Resultado: ${arco ? `Encontrado (nível ${arco.nivel})` : 'Não encontrado'}`);
-    
-    // 4. Testar NH do Arco
-    console.log("4. Calculando NH Arco...");
-    const nhArco = obterNHArcoAtual();
-    console.log(`   NH Arco atual: ${nhArco}`);
-    
-    // 5. Testar pré-requisitos
-    console.log("5. Testando pré-requisitos...");
-    const tecnicaTeste = window.catalogoTecnicas?.buscarTecnicaPorId('arquearia-montada');
-    if (tecnicaTeste) {
-        const req = verificarPreRequisitosTecnica(tecnicaTeste);
-        console.log(`   ${tecnicaTeste.nome}: ${req.passou ? '✅ APROVADO' : '❌ REPROVADO'}`);
-        if (!req.passou) console.log(`   Motivo: ${req.motivo}`);
-    }
-    
-    console.log("=====================================");
-    console.log("🧪 FIM DO TESTE");
+    console.log("================================");
 };
 
-// Exportar funções
-window.inicializarSistemaTecnicasCompleto = inicializarSistemaTecnicasCompleto;
-window.atualizarListaTecnicasDisponiveis = atualizarListaTecnicasDisponiveis;
-window.testarConexaoTecnicas = window.testarConexaoTecnicas;
+// Adicionar funções ao window para acesso
+window.inicializarSistemaTecnicas = inicializarSistemaTecnicas;
+window.atualizarTecnicasDisponiveis = atualizarTecnicasDisponiveis;
+window.testarTecnicas = window.testarTecnicas;
+
+console.log("✅ Módulo de técnicas pronto para uso!");
