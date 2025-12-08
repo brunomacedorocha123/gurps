@@ -1,7 +1,5 @@
-/* ===== SISTEMA DE PERÍCIAS ===== */
-/* Versão adaptada da aba de Vantagens */
+/* ===== ABA DE PERÍCIAS COMPLETA ===== */
 
-/* Container principal */
 .container-principal {
     padding: 15px;
     max-width: 1400px;
@@ -9,7 +7,7 @@
     box-sizing: border-box;
 }
 
-/* ===== STATUS COMPACTO DAS PERÍCIAS ===== */
+/* ===== STATUS COMPACTO ===== */
 .status-cards-container {
     margin-bottom: 25px;
     display: flex;
@@ -27,22 +25,6 @@
     overflow: hidden;
     max-width: 400px;
     width: 100%;
-}
-
-.card-status-resumo::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #ff8c00, #ffd700);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-}
-
-.card-status-resumo:hover::before {
-    transform: scaleX(1);
 }
 
 .card-status-resumo:hover {
@@ -110,12 +92,12 @@
 }
 
 /* Ícones por categoria */
-.status-linha:nth-child(1) .status-categoria i { color: #dc3545; } /* Combate */
-.status-linha:nth-child(2) .status-categoria i { color: #28a745; } /* DX */
-.status-linha:nth-child(3) .status-categoria i { color: #007bff; } /* IQ */
-.status-linha:nth-child(4) .status-categoria i { color: #fd7e14; } /* HT */
-.status-linha:nth-child(5) .status-categoria i { color: #6f42c1; } /* PERC */
-.status-linha.total .status-categoria i { color: #e67e22; } /* Total */
+.status-linha:nth-child(1) .status-categoria i { color: #dc3545; }
+.status-linha:nth-child(2) .status-categoria i { color: #28a745; }
+.status-linha:nth-child(3) .status-categoria i { color: #007bff; }
+.status-linha:nth-child(4) .status-categoria i { color: #fd7e14; }
+.status-linha:nth-child(5) .status-categoria i { color: #6f42c1; }
+.status-linha.total .status-categoria i { color: #e67e22; }
 
 .status-valores {
     display: flex;
@@ -145,7 +127,7 @@
     opacity: 0.3;
 }
 
-/* Sistema de Aquisição - Layout Lado a Lado */
+/* ===== SISTEMA DE AQUISIÇÃO ===== */
 .sistema-aquisicao-pericias {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -160,7 +142,7 @@
     }
 }
 
-/* Colunas */
+/* COLUNAS */
 .catalog-column-pericias,
 .acquired-column-pericias {
     display: flex;
@@ -168,7 +150,7 @@
     height: 100%;
 }
 
-/* Seção de Catálogo */
+/* SEÇÃO DE CATÁLOGO */
 .catalog-section-pericias {
     background: rgba(30, 30, 40, 0.95);
     border: 1px solid rgba(255, 140, 0, 0.25);
@@ -191,7 +173,7 @@
     gap: 10px;
 }
 
-/* Barra de Busca */
+/* BARRA DE BUSCA */
 .busca-pericias {
     margin-bottom: 20px;
 }
@@ -219,7 +201,7 @@
     font-size: 0.95em;
 }
 
-/* Filtros por Botão */
+/* FILTROS */
 .filtros-container-pericias {
     margin-bottom: 20px;
 }
@@ -263,15 +245,11 @@
     box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
 }
 
-.filtro-btn.active:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
-}
-
-/* Lista de Perícias do Catálogo — COM SCROLL LIMITADO */
-.catalog-list-pericias {
+/* LISTA COM SCROLL */
+.catalog-list-pericias,
+.acquired-list-pericias {
     flex: 1;
-    max-height: 500px; /* ← SCROLL LIMITADO */
+    max-height: 500px;
     overflow-y: auto;
     border: 1px solid rgba(255, 140, 0, 0.2);
     border-radius: 8px;
@@ -279,33 +257,48 @@
     padding: 15px;
 }
 
-/* Scroll personalizado para catálogo */
-.catalog-list-pericias::-webkit-scrollbar {
+.acquired-list-pericias {
+    max-height: 300px;
+}
+
+/* SCROLLBAR PERSONALIZADA */
+.catalog-list-pericias::-webkit-scrollbar,
+.acquired-list-pericias::-webkit-scrollbar {
     width: 8px;
 }
-.catalog-list-pericias::-webkit-scrollbar-thumb {
+.catalog-list-pericias::-webkit-scrollbar-thumb,
+.acquired-list-pericias::-webkit-scrollbar-thumb {
     background: rgba(255, 140, 0, 0.5);
     border-radius: 4px;
 }
-.catalog-list-pericias::-webkit-scrollbar-thumb:hover {
+.catalog-list-pericias::-webkit-scrollbar-thumb:hover,
+.acquired-list-pericias::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 140, 0, 0.7);
 }
 
-.nenhuma-pericia {
+/* ESTADOS VAZIOS */
+.nenhuma-pericia,
+.nenhuma-pericia-aprendida,
+.nenhuma-pericia-selecionada {
     text-align: center;
     color: #95a5a6;
     padding: 40px 20px;
     font-style: italic;
 }
 
-.nenhama-pericia i {
+.nenhuma-pericia i,
+.nenhuma-pericia-aprendida i,
+.nenhuma-pericia-selecionada i {
     font-size: 2em;
     margin-bottom: 15px;
-    color: #ff8c00;
 }
 
-/* Itens da Lista de Catálogo */
-.pericia-item {
+.nenhuma-pericia-aprendida i { color: #27ae60; }
+.nenhuma-pericia-selecionada i { color: #ff8c00; }
+
+/* ITENS DA LISTA */
+.pericia-item,
+.pericia-aprendida-item {
     background: rgba(50, 50, 65, 0.9);
     border: 1px solid rgba(255, 140, 0, 0.3);
     border-radius: 8px;
@@ -322,7 +315,20 @@
     transform: translateX(5px);
 }
 
-.pericia-header {
+.pericia-aprendida-item {
+    background: rgba(39, 174, 96, 0.15);
+    border: 1px solid rgba(39, 174, 96, 0.4);
+}
+
+.pericia-aprendida-item:hover {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.2);
+    transform: translateX(3px);
+}
+
+/* HEADER DOS ITENS */
+.pericia-header,
+.pericia-aprendida-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -330,7 +336,12 @@
     gap: 10px;
 }
 
-.pericia-nome {
+.pericia-aprendida-header {
+    padding-right: 40px;
+}
+
+.pericia-nome,
+.pericia-aprendida-nome {
     color: #ffd700;
     font-weight: 600;
     font-size: 1.1em;
@@ -338,13 +349,20 @@
     flex: 1;
 }
 
-.pericia-info {
+/* INFORMAÇÕES */
+.pericia-info,
+.pericia-aprendida-info {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.pericia-atributo {
+.pericia-atributo,
+.pericia-dificuldade,
+.pericia-custo,
+.pericia-aprendida-nivel,
+.pericia-aprendida-nh,
+.pericia-aprendida-custo {
     background: rgba(52, 152, 219, 0.9);
     color: white;
     padding: 4px 10px;
@@ -355,28 +373,12 @@
     white-space: nowrap;
 }
 
-.pericia-dificuldade {
-    background: rgba(155, 89, 182, 0.9);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.85em;
-    font-weight: 600;
-    border: 1px solid rgba(155, 89, 182, 0.3);
-    white-space: nowrap;
-}
+.pericia-dificuldade { background: rgba(155, 89, 182, 0.9); }
+.pericia-custo,
+.pericia-aprendida-custo { background: rgba(39, 174, 96, 0.9); }
+.pericia-aprendida-nh { background: rgba(155, 89, 182, 0.9); }
 
-.pericia-custo {
-    background: rgba(39, 174, 96, 0.9);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.85em;
-    font-weight: 600;
-    border: 1px solid rgba(39, 174, 96, 0.3);
-    white-space: nowrap;
-}
-
+/* DESCRIÇÃO */
 .pericia-descricao {
     color: #ccc;
     font-size: 0.9em;
@@ -388,175 +390,7 @@
     overflow: hidden;
 }
 
-/* Badge para perícias com especialização */
-.pericia-especializacao-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(230, 126, 34, 0.9);
-    color: white;
-    padding: 3px 8px;
-    border-radius: 10px;
-    font-size: 0.75em;
-    font-weight: 600;
-    border: 1px solid rgba(230, 126, 34, 0.3);
-}
-
-/* Seção de Perícias Aprendidas */
-.acquired-section-pericias {
-    background: rgba(30, 30, 40, 0.95);
-    border: 1px solid rgba(39, 174, 96, 0.25);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 25px;
-    backdrop-filter: blur(10px);
-}
-
-.acquired-section-pericias h3 {
-    color: #ffd700;
-    font-size: 1.4em;
-    margin: 0 0 20px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(39, 174, 96, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.points-badge {
-    background: rgba(39, 174, 96, 0.9);
-    color: white;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: 600;
-    border: 1px solid rgba(39, 174, 96, 0.3);
-}
-
-/* Lista de Perícias Aprendidas — COM SCROLL LIMITADO */
-.acquired-list-pericias {
-    min-height: 200px;
-    max-height: 300px; /* ← SCROLL LIMITADO */
-    overflow-y: auto;
-    border: 1px solid rgba(39, 174, 96, 0.2);
-    border-radius: 8px;
-    background: rgba(40, 40, 50, 0.8);
-    padding: 15px;
-}
-
-/* Scroll personalizado para aprendidas */
-.acquired-list-pericias::-webkit-scrollbar {
-    width: 8px;
-}
-.acquired-list-pericias::-webkit-scrollbar-thumb {
-    background: rgba(39, 174, 96, 0.5);
-    border-radius: 4px;
-}
-.acquired-list-pericias::-webkit-scrollbar-thumb:hover {
-    background: rgba(39, 174, 96, 0.7);
-}
-
-.nenhuma-pericia-aprendida {
-    text-align: center;
-    color: #95a5a6;
-    padding: 40px 20px;
-    font-style: italic;
-}
-
-.nenhuma-pericia-aprendida i {
-    font-size: 2em;
-    margin-bottom: 15px;
-    color: #27ae60;
-}
-
-.nenhuma-pericia-aprendida small {
-    display: block;
-    margin-top: 8px;
-    font-size: 0.9em;
-    color: #7f8c8d;
-}
-
-/* Item de Perícia Aprendida */
-.pericia-aprendida-item {
-    background: rgba(39, 174, 96, 0.15);
-    border: 1px solid rgba(39, 174, 96, 0.4);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 12px;
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.pericia-aprendida-item:hover {
-    border-color: #27ae60;
-    background: rgba(39, 174, 96, 0.2);
-    transform: translateX(3px);
-}
-
-.pericia-aprendida-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
-    gap: 10px;
-    padding-right: 40px;
-}
-
-.pericia-aprendida-nome {
-    color: #ffd700;
-    font-weight: 600;
-    font-size: 1.1em;
-    margin: 0;
-    flex: 1;
-}
-
-.pericia-especializacao-nome {
-    color: #e67e22;
-    font-size: 0.9em;
-    font-style: italic;
-    margin-left: 5px;
-}
-
-.pericia-aprendida-info {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.pericia-aprendida-nivel {
-    background: rgba(52, 152, 219, 0.9);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.85em;
-    font-weight: 600;
-    border: 1px solid rgba(52, 152, 219, 0.3);
-    white-space: nowrap;
-}
-
-.pericia-aprendida-nh {
-    background: rgba(155, 89, 182, 0.9);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.85em;
-    font-weight: 600;
-    border: 1px solid rgba(155, 89, 182, 0.3);
-    white-space: nowrap;
-}
-
-.pericia-aprendida-custo {
-    background: rgba(39, 174, 96, 0.9);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.85em;
-    font-weight: 600;
-    border: 1px solid rgba(39, 174, 96, 0.3);
-    white-space: nowrap;
-}
-
+/* BOTÃO REMOVER */
 .btn-remover-pericia {
     background: #e74c3c;
     color: white;
@@ -584,7 +418,41 @@
     box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
 }
 
-/* Seção de Detalhes da Perícia */
+/* BADGES */
+.points-badge {
+    background: rgba(39, 174, 96, 0.9);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.pericia-aprendida-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(230, 126, 34, 0.9);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.75em;
+    font-weight: 600;
+    border: 1px solid rgba(230, 126, 34, 0.3);
+}
+
+/* SEÇÃO APRENDIDA */
+.acquired-section-pericias {
+    background: rgba(30, 30, 40, 0.95);
+    border: 1px solid rgba(39, 174, 96, 0.25);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    backdrop-filter: blur(10px);
+}
+
+/* SEÇÃO DETALHES */
 .detalhes-pericia-section {
     background: rgba(30, 30, 40, 0.95);
     border: 1px solid rgba(255, 140, 0, 0.25);
@@ -595,82 +463,10 @@
     min-height: 250px;
 }
 
-.detalhes-pericia-content {
-    height: 100%;
-}
-
-.nenhuma-pericia-selecionada {
-    text-align: center;
-    color: #95a5a6;
-    padding: 60px 20px;
-    font-style: italic;
-}
-
-.nenhuma-pericia-selecionada i {
-    font-size: 2.5em;
-    margin-bottom: 20px;
-    color: #ff8c00;
-}
-
-/* Conteúdo dos Detalhes */
-.detalhes-pericia-titulo {
-    color: #ffd700;
-    font-size: 1.6em;
-    margin: 0 0 15px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 140, 0, 0.3);
-}
-
-.detalhes-pericia-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.detalhes-info-item {
-    background: rgba(40, 40, 50, 0.8);
-    border: 1px solid rgba(255, 140, 0, 0.2);
-    border-radius: 8px;
-    padding: 12px;
-}
-
-.detalhes-info-item label {
-    display: block;
-    color: #95a5a6;
-    font-size: 0.85em;
-    margin-bottom: 5px;
-    font-weight: 500;
-}
-
-.detalhes-info-item span {
-    display: block;
-    color: #ffd700;
-    font-size: 1.1em;
-    font-weight: 600;
-}
-
-.detalhes-pericia-descricao {
-    color: #ccc;
-    font-size: 0.95em;
-    line-height: 1.5;
-    margin: 15px 0;
-}
-
-.detalhes-pericia-default {
-    color: #e67e22;
-    font-size: 0.9em;
-    font-style: italic;
-    margin-top: 10px;
-    padding: 10px;
-    background: rgba(230, 126, 34, 0.1);
-    border-radius: 6px;
-    border-left: 3px solid #e67e22;
-}
-
-/* Modais */
+/* ===== MODAIS ===== */
 .modal-pericia-overlay,
-.modal-especializacao-overlay {
+.modal-especializacao-overlay,
+.modal-tecnica-overlay {
     display: none;
     position: fixed;
     z-index: 1000;
@@ -686,7 +482,8 @@
 }
 
 .modal-pericia,
-.modal-especializacao {
+.modal-especializacao,
+.modal-tecnica {
     background: rgba(30, 30, 40, 0.98);
     border: 2px solid rgba(255, 140, 0, 0.3);
     border-radius: 12px;
@@ -736,7 +533,7 @@
     transform: rotate(90deg);
 }
 
-/* Header dos Modais */
+/* HEADER DOS MODAIS */
 .modal-header-pericia,
 .modal-header-especializacao {
     background: linear-gradient(135deg, rgba(40, 40, 50, 0.95), rgba(50, 50, 65, 0.95));
@@ -762,7 +559,7 @@
     font-style: italic;
 }
 
-/* Corpo dos Modais */
+/* CORPO DOS MODAIS */
 .modal-body-pericia,
 .modal-body-especializacao {
     padding: 20px;
@@ -772,22 +569,13 @@
     max-height: calc(90vh - 140px);
 }
 
-/* Controle de Nível no Modal */
+/* CONTROLE DE NÍVEL NO MODAL */
 .nivel-controle {
     background: rgba(40, 40, 50, 0.9);
     border: 1px solid rgba(255, 140, 0, 0.3);
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
-}
-
-.nivel-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 15px;
 }
 
 .nivel-atual {
@@ -803,47 +591,23 @@
     margin-bottom: 8px;
 }
 
-.nivel-valor {
-    color: #ffd700;
-    font-size: 2.5em;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.nivel-botoes {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.btn-nivel {
-    width: 50px;
-    height: 50px;
+.nivel-select {
+    width: 100%;
+    padding: 10px;
     border: 2px solid rgba(255, 140, 0, 0.3);
-    border-radius: 10px;
+    border-radius: 8px;
     background: rgba(40, 40, 50, 0.9);
     color: #ffd700;
-    font-size: 1.2em;
-    font-weight: bold;
+    font-size: 1em;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.btn-nivel:hover {
+.nivel-select:focus {
+    outline: none;
     border-color: #ff8c00;
-    background: rgba(255, 140, 0, 0.1);
-    transform: translateY(-2px);
 }
 
-.btn-nivel:active {
-    transform: translateY(0);
-}
-
-/* Info de Custo no Modal */
+/* CUSTO NO MODAL */
 .custo-info {
     background: rgba(50, 50, 65, 0.9);
     border: 1px solid rgba(39, 174, 96, 0.3);
@@ -864,11 +628,22 @@
     margin-bottom: 5px;
 }
 
-.custo-total span {
-    display: block;
+.custo-novo {
     color: #27ae60;
     font-size: 1.8em;
     font-weight: 700;
+}
+
+.custo-melhoria {
+    color: #3498db;
+    font-size: 1.8em;
+    font-weight: 700;
+}
+
+.custo-ja-pago {
+    color: #95a5a6;
+    font-size: 1.2em;
+    font-style: italic;
 }
 
 .custo-detalhes {
@@ -879,7 +654,7 @@
     margin-top: 10px;
 }
 
-/* Info de NH no Modal */
+/* NH NO MODAL */
 .nh-info {
     background: rgba(50, 50, 65, 0.9);
     border: 1px solid rgba(52, 152, 219, 0.3);
@@ -906,68 +681,26 @@
     font-weight: 700;
 }
 
-/* Opções de Especialização */
-.especializacoes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.especializacao-item {
-    background: rgba(50, 50, 65, 0.9);
-    border: 1px solid rgba(255, 140, 0, 0.3);
-    border-radius: 8px;
-    padding: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.especializacao-item:hover {
-    border-color: #ff8c00;
-    background: rgba(255, 140, 0, 0.1);
-    transform: translateY(-2px);
-}
-
-.especializacao-item.selecionada {
-    background: rgba(39, 174, 96, 0.2);
-    border-color: #27ae60;
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
-}
-
-.especializacao-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.especializacao-nome {
-    color: #ffd700;
-    font-weight: 600;
-    font-size: 1.1em;
-    margin: 0;
-}
-
-.especializacao-custo {
-    background: rgba(39, 174, 96, 0.9);
-    color: white;
-    padding: 3px 10px;
-    border-radius: 10px;
-    font-size: 0.85em;
-    font-weight: 600;
-    border: 1px solid rgba(39, 174, 96, 0.3);
-}
-
-.especializacao-descricao {
+/* DESCRIÇÃO NO MODAL */
+.detalhes-pericia-descricao {
     color: #ccc;
-    font-size: 0.9em;
-    line-height: 1.4;
-    margin: 0;
+    font-size: 0.95em;
+    line-height: 1.5;
+    margin: 15px 0;
 }
 
-/* Ações dos Modais */
+.detalhes-pericia-default {
+    color: #e67e22;
+    font-size: 0.9em;
+    font-style: italic;
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(230, 126, 34, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #e67e22;
+}
+
+/* AÇÕES DOS MODAIS */
 .modal-actions-pericia,
 .modal-actions-especializacao {
     padding: 20px;
@@ -1026,23 +759,53 @@
     box-shadow: none;
 }
 
-/* Scrollbar Personalizada (já definida acima) */
+/* ===== TÉCNICAS ESPECÍFICAS ===== */
+.tecnica-prereq {
+    margin-top: 8px;
+    color: #e67e22;
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+.tecnica-detalhes-aprendida {
+    margin-top: 5px;
+    color: #95a5a6;
+    font-size: 0.85em;
+}
+
+/* DIFICULDADES COLORIDAS */
+.dificuldade-fácil { background: rgba(39, 174, 96, 0.9) !important; }
+.dificuldade-média { background: rgba(52, 152, 219, 0.9) !important; }
+.dificuldade-difícil { background: rgba(231, 76, 60, 0.9) !important; }
+.dificuldade-muito-difícil { background: rgba(155, 89, 182, 0.9) !important; }
 
 /* ===== RESPONSIVIDADE ===== */
-/* (mantido igual — não alterei) */
-
-/* ===== ESTILOS ESPECÍFICOS PARA TÉCNICAS ===== */
-/* (mantido igual — já está no seu CSS) */
-
-/* ===== CORREÇÃO FINAL: Remover conflito de altura ===== */
-#lista-pericias,
-#lista-tecnicas {
-    max-height: 500px;
-    overflow-y: auto;
-}
-#acquired-list-pericias,
-#pericias-aprendidas,
-#tecnicas-aprendidas {
-    max-height: 300px;
-    overflow-y: auto;
+@media (max-width: 768px) {
+    .container-principal {
+        padding: 10px;
+    }
+    
+    .filtro-buttons {
+        flex-direction: column;
+    }
+    
+    .filtro-btn {
+        min-width: unset;
+    }
+    
+    .modal-pericia,
+    .modal-especializacao,
+    .modal-tecnica {
+        width: 95%;
+        margin: 2vh auto;
+    }
+    
+    .modal-actions-pericia,
+    .modal-actions-especializacao {
+        flex-direction: column;
+    }
+    
+    .btn-modal {
+        width: 100%;
+    }
 }
