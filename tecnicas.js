@@ -43,7 +43,7 @@ function calcularCustoTecnica(niveisAcima, dificuldade) {
     return 0;
 }
 
-// ===== OBTER NH REAL DA PERÍCIA - VERSÃO CORRIGIDA =====
+// ===== OBTER NH REAL DA PERÍCIA - VERSÃO DEFINITIVAMENTE CORRIGIDA =====
 function obterNHPericiaPorId(idPericia) {
     console.log("🔍 Buscando NH real para:", idPericia);
     
@@ -52,17 +52,25 @@ function obterNHPericiaPorId(idPericia) {
         if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
             const periciaArco = window.estadoPericias.periciasAprendidas.find(p => p.id === 'arco');
             if (periciaArco) {
-                // CORREÇÃO: Pegar DX atual CORRETAMENTE
+                // ✅ CORREÇÃO: Pegar DX atual CORRETAMENTE
                 let dxAtual = 10;
+                
+                // Tentar todas as formas de obter DX
                 if (window.obterAtributoAtual) {
                     dxAtual = window.obterAtributoAtual('DX');
+                    console.log("✅ DX obtido via obterAtributoAtual:", dxAtual);
                 } else if (window.estadoAtributos && window.estadoAtributos.DX) {
                     dxAtual = window.estadoAtributos.DX;
+                    console.log("✅ DX obtido via estadoAtributos:", dxAtual);
+                } else {
+                    console.log("⚠️ Usando DX padrão 10");
                 }
                 
-                // CORREÇÃO: Calcular NH CORRETO (DX + nível da perícia)
-                const nhArco = dxAtual + (periciaArco.nivel || 0);
-                console.log(`✅ NH Arco encontrado: ${dxAtual} (DX) + ${periciaArco.nivel} (nível) = ${nhArco}`);
+                // ✅ CORREÇÃO CRÍTICA: NH = DX + nível da perícia
+                const nivelPericia = periciaArco.nivel || 0;
+                const nhArco = dxAtual + nivelPericia;
+                
+                console.log(`✅✅✅ NH Arco CORRETO: ${dxAtual} (DX) + ${nivelPericia} (nível Arco) = ${nhArco}`);
                 return nhArco;
             } else {
                 // Arco não aprendido ainda
@@ -70,7 +78,7 @@ function obterNHPericiaPorId(idPericia) {
                 if (window.obterAtributoAtual) {
                     dxAtual = window.obterAtributoAtual('DX');
                 }
-                console.log("⚠️ Arco não aprendido, usando DX base:", dxAtual);
+                console.log("⚠️ Arco não aprendido, usando apenas DX:", dxAtual);
                 return dxAtual;
             }
         }
@@ -79,7 +87,7 @@ function obterNHPericiaPorId(idPericia) {
         if (window.obterAtributoAtual) {
             dxAtual = window.obterAtributoAtual('DX');
         }
-        console.log("⚠️ Arco não encontrado, usando base:", dxAtual);
+        console.log("⚠️ Sistema de perícias não encontrado, usando DX:", dxAtual);
         return dxAtual;
     }
     
@@ -96,9 +104,11 @@ function obterNHPericiaPorId(idPericia) {
                 if (window.obterAtributoAtual) {
                     dxAtual = window.obterAtributoAtual('DX');
                 }
-                // CORREÇÃO: Calcular NH CORRETO (DX + nível da perícia)
-                const nhCavalgar = dxAtual + (cavalgar.nivel || 0);
-                console.log(`✅ Cavalgar encontrado: ${cavalgar.nome}, NH: ${nhCavalgar}`);
+                // ✅ CORREÇÃO: NH = DX + nível da perícia
+                const nivelCavalgar = cavalgar.nivel || 0;
+                const nhCavalgar = dxAtual + nivelCavalgar;
+                
+                console.log(`✅ NH Cavalgar: ${dxAtual} (DX) + ${nivelCavalgar} (nível) = ${nhCavalgar}`);
                 return nhCavalgar;
             } else {
                 // Cavalgar não aprendido ainda
@@ -106,7 +116,7 @@ function obterNHPericiaPorId(idPericia) {
                 if (window.obterAtributoAtual) {
                     dxAtual = window.obterAtributoAtual('DX');
                 }
-                console.log("⚠️ Cavalgar não aprendido, usando DX base:", dxAtual);
+                console.log("⚠️ Cavalgar não aprendido, usando apenas DX:", dxAtual);
                 return dxAtual;
             }
         }
@@ -114,7 +124,7 @@ function obterNHPericiaPorId(idPericia) {
         if (window.obterAtributoAtual) {
             dxAtual = window.obterAtributoAtual('DX');
         }
-        console.log("⚠️ Cavalgar não encontrado, usando base:", dxAtual);
+        console.log("⚠️ Sistema de perícias não encontrado, usando DX:", dxAtual);
         return dxAtual;
     }
     
