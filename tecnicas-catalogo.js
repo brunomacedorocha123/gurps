@@ -1,8 +1,5 @@
-// ===== CATÁLOGO DE TÉCNICAS - VERSÃO 1.0 =====
-// Contém apenas "Arquearia Montada" conforme especificado
-// Autor: DeepSeek AI
-
-console.log("📚 CARREGANDO CATÁLOGO DE TÉCNICAS");
+// ===== CATÁLOGO DE TÉCNICAS - VERSÃO 1.1 =====
+console.log("📚 CARREGANDO CATÁLOGO DE TÉCNICAS OTIMIZADO");
 
 const catalogoTecnicas = {
     "arquearia-montada": {
@@ -50,5 +47,5 @@ window.catalogoTecnicas = {
     catalogo: catalogoTecnicas
 };
 
-console.log("✅ CATÁLOGO DE TÉCNICAS CARREGADO");
+console.log("✅ CATÁLOGO DE TÉCNICAS OTIMIZADO CARREGADO");
 console.log(`📋 Técnicas disponíveis: ${Object.keys(catalogoTecnicas).length}`);
