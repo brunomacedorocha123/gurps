@@ -13,7 +13,6 @@ const catalogoTecnicas = {
     }
 };
 
-// Funções auxiliares
 function obterTodasTecnicas() {
     return Object.values(catalogoTecnicas);
 }
@@ -22,7 +21,6 @@ function buscarTecnicaPorId(id) {
     return catalogoTecnicas[id] || null;
 }
 
-// Exportar para window
 window.catalogoTecnicas = {
     obterTodasTecnicas: obterTodasTecnicas,
     buscarTecnicaPorId: buscarTecnicaPorId,

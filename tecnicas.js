@@ -1,263 +1,272 @@
 // ===== SISTEMA DE TÉCNICAS - VERSÃO 100% FUNCIONAL =====
-// Integração perfeita com sistema-pericias.js
+// Baseado no seu código que já funciona
 
-console.log("🎯 SISTEMA DE TÉCNICAS - INICIANDO CARGA...");
+console.log("🎯 SISTEMA DE TÉCNICAS - INICIANDO...");
 
-// ===== CONFIGURAÇÃO DO SISTEMA =====
-const estadoTecnicas = {
+// ===== ESTADO DO SISTEMA =====
+let estadoTecnicas = {
+    pontosTecnicasTotal: 0,
+    pontosMedio: 0,
+    pontosDificil: 0,
+    qtdMedio: 0,
+    qtdDificil: 0,
+    qtdTotal: 0,
     tecnicasAprendidas: [],
+    filtroAtivo: 'todas-tecnicas',
+    buscaAtiva: '',
     tecnicasDisponiveis: [],
-    pontosTotal: 0,
-    modalAtivo: false,
-    tecnicaSelecionada: null,
-    filtroAtual: 'todas-tecnicas',
-    buscaAtual: ''
+    modalAberto: false,
+    tecnicaSelecionada: null
 };
 
 // ===== TABELA DE CUSTO SIMPLIFICADA =====
-const CUSTO_TECNICA = {
-    'Média': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    'Difícil': [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-};
-
-// ===== FUNÇÕES CORE - CONEXÃO COM PERÍCIAS =====
-
-function obterNHPericiaBase(idPericia) {
-    console.log(`📊 Calculando NH para: ${idPericia}`);
+function calcularCustoTecnica(niveisAcima, dificuldade) {
+    if (niveisAcima <= 0) return 0;
     
-    // 1. Verificar se o sistema de perícias está carregado
+    if (dificuldade === 'Difícil') {
+        const custos = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+        return custos[niveisAcima - 1] || (niveisAcima + 1);
+    }
+    
+    if (dificuldade === 'Média') {
+        return niveisAcima; // 1 ponto por nível
+    }
+    
+    return 0;
+}
+
+// ===== FUNÇÃO CHAVE: OBTER VALOR DE ATRIBUTO =====
+function obterValorAtributo(atributoId) {
+    // Método 1: Tentar do elemento HTML
+    const elemento = document.getElementById(atributoId);
+    if (elemento) {
+        const valor = parseInt(elemento.value);
+        if (!isNaN(valor)) return valor;
+    }
+    
+    // Método 2: Do sistema de atributos se existir
+    if (window.obterValorAtributoGlobal) {
+        return window.obterValorAtributoGlobal(atributoId);
+    }
+    
+    // Método 3: Valor padrão
+    return 10;
+}
+
+// ===== FUNÇÃO CHAVE: OBTER NH DA PERÍCIA =====
+function obterNHPericia(idPericia) {
+    console.log(`🎯 Calculando NH para: "${idPericia}"`);
+    
+    // Obter atributo base (Arco e Cavalgar são DX)
+    let atributoBase = obterValorAtributo('DX');
+    
+    // Verificar se o sistema de perícias está disponível
     if (!window.estadoPericias) {
-        console.error("❌ Sistema de perícias não encontrado em window.estadoPericias");
-        console.log("💡 Verificando window.sistemaPericias...");
+        console.error("❌ window.estadoPericias não encontrado!");
+        return atributoBase; // Retorna apenas o atributo base
+    }
+    
+    if (!window.estadoPericias.periciasAprendidas) {
+        console.error("❌ Perícias aprendidas não encontradas!");
+        return atributoBase;
+    }
+    
+    console.log(`📊 Perícias disponíveis:`, 
+        window.estadoPericias.periciasAprendidas.map(p => `${p.id}: ${p.nome} (nível ${p.nivel})`));
+    
+    // Buscar a perícia específica
+    let periciaEncontrada = null;
+    
+    // Para Arco
+    if (idPericia === 'arco') {
+        periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
+            p.id === 'arco' || 
+            (p.nome && p.nome.toLowerCase().includes('arco'))
+        );
         
-        // Tentar alternativa
-        if (window.sistemaPericias && window.sistemaPericias.estadoPericias) {
-            window.estadoPericias = window.sistemaPericias.estadoPericias;
-            console.log("✅ Usando sistemaPericias.estadoPericias");
+        if (periciaEncontrada) {
+            console.log(`✅ Arco encontrado: nível ${periciaEncontrada.nivel}`);
         } else {
-            console.log("⚠️ Usando valor padrão DX=10");
-            return 10; // Fallback
+            console.log(`⚠️ Arco NÃO encontrado nas perícias aprendidas`);
         }
     }
     
-    // 2. Buscar a perícia nas aprendidas
-    const periciaAprendida = window.estadoPericias.periciasAprendidas?.find(p => {
-        // Comparação direta por ID
-        if (p.id === idPericia) return true;
+    // Para Cavalgar (qualquer especialização)
+    if (idPericia.includes('cavalgar')) {
+        periciaEncontrada = window.estadoPericias.periciasAprendidas.find(p => 
+            p.id.includes('cavalgar') || 
+            (p.nome && p.nome.toLowerCase().includes('cavalgar')) ||
+            (p.grupo && p.grupo.toLowerCase() === 'cavalgar')
+        );
         
-        // Para Arco
-        if (idPericia === 'arco' && (p.id === 'arco' || p.nome?.includes('Arco'))) return true;
-        
-        // Para Cavalgar
-        if (idPericia.includes('cavalgar') && (p.id.includes('cavalgar') || p.nome?.includes('Cavalgar'))) return true;
-        
-        return false;
-    });
-    
-    // 3. Se encontrou a perícia, calcular NH
-    if (periciaAprendida) {
-        console.log(`✅ Perícia encontrada: ${periciaAprendida.nome} (nível ${periciaAprendida.nivel})`);
-        
-        // Obter atributo base
-        let atributoBase = 10;
-        const atributo = periciaAprendida.atributo || 'DX';
-        
-        switch(atributo) {
-            case 'DX':
-                atributoBase = parseInt(document.getElementById('DX')?.value) || 10;
-                break;
-            case 'IQ':
-                atributoBase = parseInt(document.getElementById('IQ')?.value) || 10;
-                break;
-            case 'HT':
-                atributoBase = parseInt(document.getElementById('HT')?.value) || 10;
-                break;
-            case 'PERC':
-                const iq = parseInt(document.getElementById('IQ')?.value) || 10;
-                const bonusPercepcao = parseInt(document.getElementById('bonusPercepcao')?.value) || 0;
-                atributoBase = iq + bonusPercepcao;
-                break;
+        if (periciaEncontrada) {
+            console.log(`✅ Cavalgar encontrado: ${periciaEncontrada.nome}, nível ${periciaEncontrada.nivel}`);
         }
-        
-        // Calcular NH: atributo + nível
-        const nivel = periciaAprendida.nivel || 0;
-        const nh = atributoBase + nivel;
-        
-        console.log(`🧮 NH ${periciaAprendida.nome}: ${atributoBase} (${atributo}) + ${nivel} = ${nh}`);
-        return nh;
     }
     
-    // 4. Se não encontrou, usar atributo base
-    console.log(`⚠️ Perícia "${idPericia}" não aprendida, usando atributo base`);
+    // Calcular NH
+    let nhFinal = atributoBase; // Começa com o atributo base
     
-    // Determinar qual atributo usar
-    let atributoBase = 10;
-    if (idPericia === 'arco' || idPericia.includes('arco')) {
-        atributoBase = parseInt(document.getElementById('DX')?.value) || 10;
-    } else if (idPericia.includes('cavalgar')) {
-        atributoBase = parseInt(document.getElementById('DX')?.value) || 10;
+    if (periciaEncontrada) {
+        const nivel = periciaEncontrada.nivel || 0;
+        nhFinal = atributoBase + nivel;
+        console.log(`🧮 NH ${periciaEncontrada.nome}: ${atributoBase} (DX) + ${nivel} = ${nhFinal}`);
+    } else {
+        console.log(`📊 NH base para ${idPericia}: ${atributoBase} (DX sem perícia)`);
     }
     
-    return atributoBase;
+    return nhFinal;
 }
 
 // ===== VERIFICAÇÃO DE PRÉ-REQUISITOS =====
-
-function verificarPreRequisitos(tecnica) {
+function verificarPreRequisitosTecnica(tecnica) {
     console.log(`🔍 Verificando pré-requisitos para: ${tecnica.nome}`);
     
-    const resultados = {
-        passou: true,
-        motivos: []
-    };
+    const motivos = [];
+    let passou = true;
     
-    // Verificar Arco nível 4
-    if (tecnica.basePericia === 'arco') {
-        const arco = window.estadoPericias?.periciasAprendidas?.find(p => 
-            p.id === 'arco' || p.nome?.includes('Arco')
-        );
-        
-        if (!arco) {
-            resultados.passou = false;
-            resultados.motivos.push("❌ Não possui a perícia Arco");
-        } else if ((arco.nivel || 0) < 4) {
-            resultados.passou = false;
-            resultados.motivos.push(`❌ Arco precisa nível 4 (atual: ${arco.nivel || 0})`);
-        } else {
-            resultados.motivos.push(`✅ Arco nível ${arco.nivel || 0} (mínimo: 4)`);
-        }
-    }
+    // VERIFICAR ARCO NÍVEL 4
+    const nhArco = obterNHPericia('arco');
+    const dx = obterValorAtributo('DX');
+    const nivelArco = nhArco - dx; // Calcula nível = NH - atributo
     
-    // Verificar Cavalgar
-    const cavalgar = window.estadoPericias?.periciasAprendidas?.find(p => 
-        p.id.includes('cavalgar') || p.nome?.includes('Cavalgar')
-    );
-    
-    if (!cavalgar) {
-        resultados.passou = false;
-        resultados.motivos.push("❌ Precisa de alguma perícia de Cavalgar");
+    if (nivelArco < 4) {
+        passou = false;
+        motivos.push(`❌ Arco precisa nível 4 (atual: ${nivelArco})`);
     } else {
-        resultados.motivos.push(`✅ ${cavalgar.nome}`);
+        motivos.push(`✅ Arco nível ${nivelArco} (mínimo: 4)`);
     }
     
-    return resultados;
-}
-
-// ===== FUNÇÕES DE CÁLCULO =====
-
-function calcularNHCompleto(tecnica, niveisExtras = 0) {
-    const nhPericia = obterNHPericiaBase(tecnica.basePericia);
-    const nhBase = nhPericia + tecnica.modificadorBase;
-    const nhComExtras = nhBase + niveisExtras;
-    const limiteMaximo = nhPericia;
+    // VERIFICAR CAVALGAR
+    const temCavalgar = window.estadoPericias && 
+        window.estadoPericias.periciasAprendidas && 
+        window.estadoPericias.periciasAprendidas.some(p => 
+            p.id.includes('cavalgar') || 
+            (p.nome && p.nome.toLowerCase().includes('cavalgar'))
+        );
+    
+    if (!temCavalgar) {
+        passou = false;
+        motivos.push('❌ Precisa de alguma perícia de Cavalgar');
+    } else {
+        motivos.push('✅ Possui perícia de Cavalgar');
+    }
     
     return {
-        nhFinal: Math.min(nhComExtras, limiteMaximo),
-        nhBase: nhBase,
-        nhPericia: nhPericia,
-        limiteMaximo: limiteMaximo
+        passou: passou,
+        motivos: motivos
     };
 }
 
-function calcularCusto(niveisAcima, dificuldade) {
-    if (niveisAcima < 0) return 0;
-    const tabela = CUSTO_TECNICA[dificuldade] || [];
-    return tabela[niveisAcima] || 0;
-}
-
-// ===== FUNÇÕES DE INTERFACE =====
-
+// ===== ATUALIZAR TÉCNICAS DISPONÍVEIS =====
 function atualizarTecnicasDisponiveis() {
     console.log("🔄 Atualizando técnicas disponíveis...");
     
-    // Verificar se o catálogo está carregado
-    if (!window.catalogoTecnicas) {
+    if (!window.catalogoTecnicas || !window.catalogoTecnicas.obterTodasTecnicas) {
         console.error("❌ Catálogo de técnicas não carregado!");
         return;
     }
     
-    // Obter todas as técnicas
     const todasTecnicas = window.catalogoTecnicas.obterTodasTecnicas();
     console.log(`📚 Técnicas no catálogo: ${todasTecnicas.length}`);
     
-    // Processar cada técnica
-    estadoTecnicas.tecnicasDisponiveis = todasTecnicas.map(tecnica => {
-        const preReq = verificarPreRequisitos(tecnica);
+    const tecnicasProcessadas = todasTecnicas.map(tecnica => {
+        // Verificar pré-requisitos
+        const verificacao = verificarPreRequisitosTecnica(tecnica);
+        
+        // Verificar se já aprendeu
         const jaAprendida = estadoTecnicas.tecnicasAprendidas.find(t => t.id === tecnica.id);
-        const niveisComprados = jaAprendida ? jaAprendida.niveisComprados || 0 : 0;
-        const calculo = calcularNHCompleto(tecnica, niveisComprados);
+        
+        // Calcular NH
+        const nhArco = obterNHPericia('arco');
+        const nhBase = nhArco - 4; // Arco-4
+        let nhAtual = nhBase;
+        
+        if (jaAprendida && jaAprendida.niveisComprados) {
+            nhAtual = nhBase + jaAprendida.niveisComprados;
+        }
+        
+        // Não pode exceder NH do Arco
+        if (nhAtual > nhArco) nhAtual = nhArco;
         
         return {
             ...tecnica,
-            disponivel: preReq.passou,
-            motivoIndisponivel: preReq.motivos.join(' | '),
+            disponivel: verificacao.passou,
+            motivoIndisponivel: verificacao.motivos.join(' | '),
             jaAprendida: !!jaAprendida,
-            niveisComprados: niveisComprados,
+            niveisComprados: jaAprendida ? jaAprendida.niveisComprados || 0 : 0,
             custoTotal: jaAprendida ? jaAprendida.custoTotal || 0 : 0,
-            nhAtual: calculo.nhFinal,
-            nhPericia: calculo.nhPericia
+            nhAtual: nhAtual,
+            nhArco: nhArco,
+            nhBase: nhBase
         };
     });
     
-    renderizarCatalogo();
+    estadoTecnicas.tecnicasDisponiveis = tecnicasProcessadas;
+    renderizarCatalogoTecnicas();
 }
 
-function renderizarCatalogo() {
+// ===== RENDERIZAR CATÁLOGO =====
+function renderizarCatalogoTecnicas() {
     const container = document.getElementById('lista-tecnicas');
     if (!container) {
         console.error("❌ Container #lista-tecnicas não encontrado!");
         return;
     }
     
-    // Filtrar técnicas
+    // Aplicar filtros
     let tecnicasFiltradas = estadoTecnicas.tecnicasDisponiveis;
     
-    // Aplicar filtro
-    if (estadoTecnicas.filtroAtual === 'medio-tecnicas') {
+    if (estadoTecnicas.filtroAtivo === 'medio-tecnicas') {
         tecnicasFiltradas = tecnicasFiltradas.filter(t => t.dificuldade === 'Média');
-    } else if (estadoTecnicas.filtroAtual === 'dificil-tecnicas') {
+    } else if (estadoTecnicas.filtroAtivo === 'dificil-tecnicas') {
         tecnicasFiltradas = tecnicasFiltradas.filter(t => t.dificuldade === 'Difícil');
     }
     
-    // Aplicar busca
-    if (estadoTecnicas.buscaAtual) {
-        const busca = estadoTecnicas.buscaAtual.toLowerCase();
+    if (estadoTecnicas.buscaAtiva) {
+        const busca = estadoTecnicas.buscaAtiva.toLowerCase();
         tecnicasFiltradas = tecnicasFiltradas.filter(t => 
             t.nome.toLowerCase().includes(busca) ||
             t.descricao.toLowerCase().includes(busca)
         );
     }
     
-    // Renderizar
+    // Se não houver técnicas
     if (tecnicasFiltradas.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 40px; color: #95a5a6;">
                 <i class="fas fa-tools" style="font-size: 48px; margin-bottom: 15px;"></i>
                 <div style="font-size: 18px; margin-bottom: 10px;">Nenhuma técnica encontrada</div>
-                <small>Verifique os pré-requisitos ou filtros</small>
+                <small>Verifique filtros ou pré-requisitos</small>
             </div>
         `;
         return;
     }
     
+    // Renderizar técnicas
     let html = '';
+    
     tecnicasFiltradas.forEach(tecnica => {
         const modificador = tecnica.modificadorBase >= 0 ? `+${tecnica.modificadorBase}` : tecnica.modificadorBase;
         
         html += `
-            <div class="pericia-item" 
-                 data-id="${tecnica.id}"
-                 style="background: ${tecnica.jaAprendida ? 'rgba(39, 174, 96, 0.15)' : 'rgba(50, 50, 65, 0.9)'};
-                        border: 1px solid ${tecnica.jaAprendida ? 'rgba(39, 174, 96, 0.4)' : 'rgba(255, 140, 0, 0.3)'};
-                        border-radius: 8px; padding: 15px; margin-bottom: 10px;
-                        cursor: ${tecnica.disponivel ? 'pointer' : 'not-allowed'};
-                        opacity: ${tecnica.disponivel ? '1' : '0.6'};">
+            <div class="pericia-item ${!tecnica.disponivel ? 'item-indisponivel' : ''}"
+                data-id="${tecnica.id}"
+                style="cursor: ${tecnica.disponivel ? 'pointer' : 'not-allowed'};
+                       opacity: ${tecnica.disponivel ? '1' : '0.6'};
+                       background: ${tecnica.jaAprendida ? 'rgba(39, 174, 96, 0.15)' : 'rgba(50, 50, 65, 0.9)'};
+                       border: 1px solid ${tecnica.jaAprendida ? 'rgba(39, 174, 96, 0.4)' : 'rgba(255, 140, 0, 0.3)'};
+                       border-radius: 8px;
+                       padding: 15px;
+                       margin-bottom: 10px;
+                       transition: all 0.3s ease;">
                 
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <h4 style="margin: 0; color: ${tecnica.jaAprendida ? '#27ae60' : '#ffd700'};">
-                        ${tecnica.nome} ${tecnica.jaAprendida ? '✓' : ''}
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <h4 style="margin: 0; color: ${tecnica.jaAprendida ? '#27ae60' : '#ffd700'}; font-size: 16px;">
+                        ${tecnica.nome}
+                        ${tecnica.jaAprendida ? '<span style="color: #27ae60; margin-left: 5px;">✓</span>' : ''}
                     </h4>
-                    <div style="display: flex; gap: 8px;">
+                    <div style="display: flex; gap: 10px;">
                         <span style="background: ${tecnica.dificuldade === 'Difícil' ? '#e74c3c' : '#f39c12'}; 
                               color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
                             ${tecnica.dificuldade}
@@ -268,22 +277,24 @@ function renderizarCatalogo() {
                     </div>
                 </div>
                 
-                <p style="margin: 10px 0; color: #ccc; font-size: 14px;">${tecnica.descricao}</p>
+                <p style="margin: 10px 0; color: #ccc; font-size: 14px; line-height: 1.4;">${tecnica.descricao}</p>
                 
-                <div style="font-size: 12px; color: #95a5a6;">
-                    <i class="fas fa-calculator"></i> Base: ${tecnica.basePericia}${modificador}
+                <div style="font-size: 12px; color: #95a5a6; margin-bottom: 8px;">
+                    <i class="fas fa-calculator"></i> Base: Arco-4 (NH Arco: ${tecnica.nhArco})
                 </div>
                 
                 ${!tecnica.disponivel ? `
                     <div style="background: rgba(231, 76, 60, 0.1); border-left: 3px solid #e74c3c; 
-                         padding: 8px; margin-top: 10px; border-radius: 4px; font-size: 12px;">
-                        <i class="fas fa-lock" style="color: #e74c3c;"></i> ${tecnica.motivoIndisponivel}
+                         padding: 8px 12px; margin-top: 10px; border-radius: 4px;">
+                        <i class="fas fa-lock" style="color: #e74c3c;"></i> 
+                        <span style="color: #e74c3c; margin-left: 5px; font-size: 12px;">${tecnica.motivoIndisponivel}</span>
                     </div>
                 ` : ''}
                 
                 ${tecnica.disponivel ? `
                     <div style="margin-top: 10px; font-size: 12px; color: #95a5a6;">
-                        <i class="fas fa-bullseye"></i> Clique para ${tecnica.jaAprendida ? 'melhorar' : 'aprender'}
+                        <i class="fas fa-bullseye" style="margin-right: 5px;"></i>
+                        Clique para ${tecnica.jaAprendida ? 'melhorar' : 'aprender'}
                     </div>
                 ` : ''}
             </div>
@@ -294,7 +305,7 @@ function renderizarCatalogo() {
     
     // Adicionar eventos de clique
     container.querySelectorAll('.pericia-item').forEach(item => {
-        if (!item.style.opacity || item.style.opacity !== '0.6') {
+        if (!item.classList.contains('item-indisponivel')) {
             item.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
                 const tecnica = estadoTecnicas.tecnicasDisponiveis.find(t => t.id === id);
@@ -306,6 +317,7 @@ function renderizarCatalogo() {
     });
 }
 
+// ===== ABRIR MODAL =====
 function abrirModalTecnica(tecnica) {
     console.log(`📖 Abrindo modal: ${tecnica.nome}`);
     
@@ -313,11 +325,11 @@ function abrirModalTecnica(tecnica) {
     const jaAprendida = estadoTecnicas.tecnicasAprendidas.find(t => t.id === tecnica.id);
     
     // Cálculos
-    const nhPericia = obterNHPericiaBase(tecnica.basePericia);
-    const modificador = tecnica.modificadorBase >= 0 ? `+${tecnica.modificadorBase}` : tecnica.modificadorBase;
-    const nhBase = nhPericia + tecnica.modificadorBase;
-    const limiteMaximo = nhPericia;
+    const nhArco = obterNHPericia('arco');
+    const nhBase = nhArco - 4; // Arco-4
+    const limiteMaximo = nhArco;
     
+    // Valores atuais
     let niveisCompradosAtuais = 0;
     let custoTotalAtual = 0;
     let nhAtual = nhBase;
@@ -332,62 +344,58 @@ function abrirModalTecnica(tecnica) {
     // Níveis possíveis
     const niveisPossiveis = Math.max(0, limiteMaximo - nhBase);
     
-    // Gerar opções
+    // Opções
     let opcoesHTML = '';
     for (let i = 0; i <= niveisPossiveis; i++) {
         const nhOpcao = nhBase + i;
-        const custo = calcularCusto(i, tecnica.dificuldade);
+        const custo = calcularCustoTecnica(i, tecnica.dificuldade);
         const selected = i === niveisCompradosAtuais ? 'selected' : '';
-        const textoNivel = i === 0 ? 'Base' : `+${i} nível${i > 1 ? 's' : ''}`;
+        const texto = i === 0 ? 'Base (Arco-4)' : `+${i} nível${i > 1 ? 's' : ''}`;
         
         opcoesHTML += `
-            <option value="${i}" ${selected}>
-                NH ${nhOpcao} - ${textoNivel} (${custo} pts)
+            <option value="${i}" ${selected} data-custo="${custo}">
+                NH ${nhOpcao} - ${texto} (${custo} pontos)
             </option>
         `;
     }
     
-    // Criar modal
+    // Modal HTML
     const modalHTML = `
         <div style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; 
              padding: 20px; border-radius: 8px 8px 0 0; position: relative;">
-            <span onclick="fecharModalTecnica()" 
-                  style="position: absolute; right: 20px; top: 20px; font-size: 24px; 
-                         cursor: pointer; color: #ffd700; font-weight: bold;">×</span>
+            <span onclick="fecharModalTecnica()" style="position: absolute; right: 20px; top: 20px; 
+                  font-size: 24px; cursor: pointer; color: #ffd700;">×</span>
             <h3 style="margin: 0; color: #ffd700;">${tecnica.nome}</h3>
             <div style="color: #95a5a6; margin-top: 5px;">
                 <span style="background: ${tecnica.dificuldade === 'Difícil' ? '#e74c3c' : '#f39c12'}; 
                       padding: 2px 8px; border-radius: 4px; font-size: 12px;">
                     ${tecnica.dificuldade}
                 </span>
-                • ${tecnica.basePericia}${modificador}
+                • Arco-4
             </div>
         </div>
         
         <div style="padding: 20px; background: #1e1e28; color: #ccc;">
             <!-- Pré-requisitos -->
-            <div style="background: rgba(155, 89, 182, 0.1); padding: 15px; border-radius: 8px; 
-                 border-left: 4px solid #9b59b6; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 10px 0; color: #9b59b6;">Pré-requisitos</h4>
-                <div>${verificarPreRequisitos(tecnica).motivos.join('<br>')}</div>
+            <div style="background: rgba(155, 89, 182, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="color: #9b59b6; margin: 0 0 10px 0;">Pré-requisitos</h4>
+                <div>Arco nível 4+ ✅</div>
+                <div>Cavalgar qualquer ✅</div>
             </div>
             
             <!-- Estatísticas -->
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
-                <div style="text-align: center; padding: 15px; background: rgba(52, 152, 219, 0.1); 
-                     border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: rgba(52, 152, 219, 0.1); border-radius: 8px;">
                     <div style="font-size: 12px; color: #95a5a6;">Base</div>
                     <div style="font-size: 28px; font-weight: bold; color: #3498db;">${nhBase}</div>
-                    <div style="font-size: 11px; color: #7f8c8d;">${tecnica.basePericia}${modificador}</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">Arco-4</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: rgba(39, 174, 96, 0.1); 
-                     border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: rgba(39, 174, 96, 0.1); border-radius: 8px;">
                     <div style="font-size: 12px; color: #95a5a6;">Máximo</div>
                     <div style="font-size: 28px; font-weight: bold; color: #27ae60;">${limiteMaximo}</div>
-                    <div style="font-size: 11px; color: #7f8c8d;">NH ${tecnica.basePericia}</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">NH Arco</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: rgba(243, 156, 18, 0.1); 
-                     border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: rgba(243, 156, 18, 0.1); border-radius: 8px;">
                     <div style="font-size: 12px; color: #95a5a6;">Atual</div>
                     <div style="font-size: 28px; font-weight: bold; color: #f39c12;">${nhAtual}</div>
                     <div style="font-size: 11px; color: #7f8c8d;">${niveisCompradosAtuais} nível(s)</div>
@@ -404,59 +412,51 @@ function abrirModalTecnica(tecnica) {
             </div>
             
             <!-- Custo -->
-            <div style="background: rgba(39, 174, 96, 0.1); padding: 15px; border-radius: 8px;
-                 border-left: 4px solid #27ae60; margin-bottom: 20px; text-align: center;">
+            <div style="background: rgba(39, 174, 96, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
                 <div style="font-size: 14px; color: #95a5a6;">Custo Total</div>
-                <div id="custo-display" style="font-size: 32px; font-weight: bold; color: #27ae60;">
-                    ${custoTotalAtual} pontos
-                </div>
+                <div id="custo-display" style="font-size: 32px; font-weight: bold; color: #27ae60;">${custoTotalAtual} pontos</div>
             </div>
             
             <!-- Descrição -->
             <div>
                 <h4 style="color: #ffd700; margin-bottom: 10px;">Descrição</h4>
-                <p style="line-height: 1.5; font-size: 14px;">${tecnica.descricao}</p>
+                <p style="line-height: 1.5;">${tecnica.descricao}</p>
             </div>
         </div>
         
         <!-- Ações -->
-        <div style="padding: 20px; background: #2c3e50; border-radius: 0 0 8px 8px; 
-             display: flex; gap: 15px; justify-content: flex-end;">
-            <button onclick="fecharModalTecnica()"
-                style="padding: 10px 20px; background: #7f8c8d; color: white; border: none; 
-                       border-radius: 6px; cursor: pointer;">
+        <div style="padding: 20px; background: #2c3e50; border-radius: 0 0 8px 8px; display: flex; gap: 15px; justify-content: flex-end;">
+            <button onclick="fecharModalTecnica()" style="padding: 10px 20px; background: #7f8c8d; color: white; border: none; border-radius: 6px; cursor: pointer;">
                 Cancelar
             </button>
-            <button onclick="comprarTecnica()" id="btn-comprar-tecnica"
-                style="padding: 10px 20px; background: linear-gradient(45deg, #9b59b6, #8e44ad);
-                       color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            <button onclick="comprarTecnica()" id="btn-comprar-tecnica" style="padding: 10px 20px; background: linear-gradient(45deg, #9b59b6, #8e44ad); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
                 ${jaAprendida ? 'Atualizar' : 'Comprar'}
             </button>
         </div>
     `;
     
-    // Inserir no modal
+    // Inserir modal
     const modal = document.querySelector('.modal-tecnica');
-    if (!modal) {
-        console.error("❌ Modal .modal-tecnica não encontrado!");
-        return;
-    }
+    const overlay = document.querySelector('.modal-tecnica-overlay');
     
-    modal.innerHTML = modalHTML;
-    document.querySelector('.modal-tecnica-overlay').style.display = 'flex';
-    estadoTecnicas.modalAtivo = true;
-    
-    // Configurar evento de seleção
-    const select = document.getElementById('select-niveis-tecnica');
-    if (select) {
-        select.addEventListener('change', function() {
-            const niveis = parseInt(this.value);
-            const custo = calcularCusto(niveis, tecnica.dificuldade);
-            document.getElementById('custo-display').textContent = `${custo} pontos`;
-        });
+    if (modal && overlay) {
+        modal.innerHTML = modalHTML;
+        overlay.style.display = 'flex';
+        estadoTecnicas.modalAberto = true;
+        
+        // Configurar evento de mudança
+        const select = document.getElementById('select-niveis-tecnica');
+        if (select) {
+            select.addEventListener('change', function() {
+                const niveis = parseInt(this.value);
+                const custo = calcularCustoTecnica(niveis, tecnica.dificuldade);
+                document.getElementById('custo-display').textContent = `${custo} pontos`;
+            });
+        }
     }
 }
 
+// ===== COMPRAR TÉCNICA =====
 function comprarTecnica() {
     if (!estadoTecnicas.tecnicaSelecionada) return;
     
@@ -464,7 +464,7 @@ function comprarTecnica() {
     if (!select) return;
     
     const niveisComprados = parseInt(select.value);
-    const custo = calcularCusto(niveisComprados, estadoTecnicas.tecnicaSelecionada.dificuldade);
+    const custo = calcularCustoTecnica(niveisComprados, estadoTecnicas.tecnicaSelecionada.dificuldade);
     const tecnicaId = estadoTecnicas.tecnicaSelecionada.id;
     
     const index = estadoTecnicas.tecnicasAprendidas.findIndex(t => t.id === tecnicaId);
@@ -477,40 +477,41 @@ function comprarTecnica() {
             custoTotal: custo
         };
     } else {
-        // Nova técnica
+        // Nova
         estadoTecnicas.tecnicasAprendidas.push({
             id: tecnicaId,
             nome: estadoTecnicas.tecnicaSelecionada.nome,
-            basePericia: estadoTecnicas.tecnicaSelecionada.basePericia,
-            modificadorBase: estadoTecnicas.tecnicaSelecionada.modificadorBase,
             dificuldade: estadoTecnicas.tecnicaSelecionada.dificuldade,
+            basePericia: 'arco',
+            modificadorBase: -4,
             niveisComprados: niveisComprados,
             custoTotal: custo
         });
     }
     
-    // Salvar e atualizar
+    // Salvar
     salvarTecnicas();
+    
+    // Atualizar
     atualizarTecnicasDisponiveis();
     fecharModalTecnica();
     
-    alert(`✅ ${estadoTecnicas.tecnicaSelecionada.nome} ${index >= 0 ? 'atualizada' : 'aprendida'}!\nCusto: ${custo} pontos`);
+    alert(`✅ ${estadoTecnicas.tecnicaSelecionada.nome} comprada!\nCusto: ${custo} pontos`);
 }
 
+// ===== FUNÇÕES AUXILIARES =====
 function fecharModalTecnica() {
     const overlay = document.querySelector('.modal-tecnica-overlay');
     if (overlay) overlay.style.display = 'none';
-    estadoTecnicas.modalAtivo = false;
+    estadoTecnicas.modalAberto = false;
     estadoTecnicas.tecnicaSelecionada = null;
 }
-
-// ===== PERSISTÊNCIA =====
 
 function salvarTecnicas() {
     try {
         localStorage.setItem('tecnicasAprendidas', JSON.stringify(estadoTecnicas.tecnicasAprendidas));
     } catch (e) {
-        console.error("Erro ao salvar técnicas:", e);
+        console.error("Erro ao salvar:", e);
     }
 }
 
@@ -521,67 +522,55 @@ function carregarTecnicas() {
             estadoTecnicas.tecnicasAprendidas = JSON.parse(salvo);
         }
     } catch (e) {
-        console.error("Erro ao carregar técnicas:", e);
+        console.error("Erro ao carregar:", e);
     }
 }
 
-// ===== INICIALIZAÇÃO =====
+// ===== OBSERVAR MUDANÇAS NAS PERÍCIAS =====
+function observarPericias() {
+    setInterval(() => {
+        if (window.estadoPericias) {
+            atualizarTecnicasDisponiveis();
+        }
+    }, 1000);
+}
 
+// ===== INICIALIZAR =====
 function inicializarSistemaTecnicas() {
     console.log("🚀 Inicializando sistema de técnicas...");
     
-    // Carregar dados salvos
+    // Carregar
     carregarTecnicas();
     
-    // Aguardar sistema de perícias
-    const verificarPericias = setInterval(() => {
-        if (window.estadoPericias) {
-            clearInterval(verificarPericias);
-            console.log("✅ Sistema de perícias detectado!");
-            
-            // Inicializar após 1 segundo
-            setTimeout(() => {
-                atualizarTecnicasDisponiveis();
-                console.log("✅ Sistema de técnicas pronto!");
-            }, 1000);
-        }
-    }, 500);
+    // Observar perícias
+    observarPericias();
     
     // Configurar eventos
-    configurarEventos();
-}
-
-function configurarEventos() {
-    // Filtros
-    document.querySelectorAll('.filtro-btn[data-filtro*="tecnicas"]').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const filtro = this.getAttribute('data-filtro');
-            estadoTecnicas.filtroAtual = filtro;
-            
-            // Atualizar classes ativas
-            document.querySelectorAll('.filtro-btn[data-filtro*="tecnicas"]').forEach(b => {
-                b.classList.remove('active');
-            });
-            this.classList.add('active');
-            
-            renderizarCatalogo();
-        });
-    });
-    
-    // Busca
     const buscaInput = document.getElementById('busca-tecnicas');
     if (buscaInput) {
         buscaInput.addEventListener('input', function() {
-            estadoTecnicas.buscaAtual = this.value;
-            renderizarCatalogo();
+            estadoTecnicas.buscaAtiva = this.value;
+            renderizarCatalogoTecnicas();
         });
     }
+    
+    // Filtros
+    document.querySelectorAll('.filtro-btn[data-filtro*="tecnicas"]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            estadoTecnicas.filtroAtivo = this.getAttribute('data-filtro');
+            renderizarCatalogoTecnicas();
+        });
+    });
+    
+    // Inicializar após 1 segundo
+    setTimeout(() => {
+        atualizarTecnicasDisponiveis();
+        console.log("✅ Sistema de técnicas pronto!");
+    }, 1000);
 }
 
 // ===== INICIALIZAÇÃO AUTOMÁTICA =====
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Aguardar um pouco para garantir que tudo está carregado
     setTimeout(() => {
         if (!window.sistemaTecnicasInicializado) {
             inicializarSistemaTecnicas();
@@ -590,10 +579,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 2000);
 });
 
-// ===== EXPORTAR FUNÇÕES =====
-
+// ===== EXPORTAR =====
 window.fecharModalTecnica = fecharModalTecnica;
 window.comprarTecnica = comprarTecnica;
 window.inicializarSistemaTecnicas = inicializarSistemaTecnicas;
 
-console.log("✅ SISTEMA DE TÉCNICAS CARREGADO - AGUARDANDO INICIALIZAÇÃO");
+console.log("✅ Módulo de técnicas carregado!");
