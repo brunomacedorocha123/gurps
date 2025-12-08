@@ -1,4 +1,6 @@
-// ===== CATÁLOGO DE TÉCNICAS =====
+// ===== CATÁLOGO DE TÉCNICAS - VERSÃO SIMPLES =====
+console.log("📚 Carregando catálogo de técnicas...");
+
 const catalogoTecnicas = {
     "arquearia-montada": {
         id: "arquearia-montada",
@@ -29,8 +31,8 @@ const catalogoTecnicas = {
     }
 };
 
-// ===== FUNÇÕES DO CATÁLOGO =====
 function obterTodasTecnicas() {
+    console.log("📋 Retornando todas as técnicas:", Object.values(catalogoTecnicas));
     return Object.values(catalogoTecnicas);
 }
 
@@ -38,11 +40,11 @@ function buscarTecnicaPorId(id) {
     return catalogoTecnicas[id] || null;
 }
 
-// ===== INICIALIZAR CATÁLOGO =====
+// Tornar global
 window.catalogoTecnicas = {
     dados: catalogoTecnicas,
     obterTodasTecnicas: obterTodasTecnicas,
     buscarTecnicaPorId: buscarTecnicaPorId
 };
 
-console.log("📚 Catálogo de técnicas carregado com 1 técnica");
+console.log("✅ Catálogo de técnicas carregado!");
