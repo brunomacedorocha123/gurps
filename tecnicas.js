@@ -43,94 +43,142 @@ function calcularCustoTecnica(niveisAcima, dificuldade) {
     return 0;
 }
 
-// ===== OBTER NH REAL DA PERÍCIA - VERSÃO DEFINITIVAMENTE CORRIGIDA =====
+// ===== FUNÇÃO QUE NUNCA USA VALOR PADRÃO 10 =====
 function obterNHPericiaPorId(idPericia) {
-    console.log("🔍 Buscando NH real para:", idPericia);
+    console.log("🎯 BUSCANDO NH - SEM VALOR PADRÃO");
     
-    // Se for 'arco', buscar perícia Arco
     if (idPericia === 'arco') {
+        console.log("=== BUSCANDO NH ARCO REAL ===");
+        
+        // ❌ REMOVER ESTE VALOR PADRÃO
+        // let nhArco = 10; ← ESTA LINHA É O PROBLEMA!
+        
+        // Em vez disso: BUSCAR ATÉ ENCONTRAR
+        let nhArco = null; // Começa como null, não 10!
+        
+        // 1. BUSCAR NO SISTEMA DE PERÍCIAS
         if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
             const periciaArco = window.estadoPericias.periciasAprendidas.find(p => p.id === 'arco');
             if (periciaArco) {
-                // ✅ CORREÇÃO: Pegar DX atual CORRETAMENTE
-                let dxAtual = 10;
+                console.log("✅ Perícia Arco encontrada:", periciaArco);
                 
-                // Tentar todas as formas de obter DX
-                if (window.obterAtributoAtual) {
-                    dxAtual = window.obterAtributoAtual('DX');
-                    console.log("✅ DX obtido via obterAtributoAtual:", dxAtual);
-                } else if (window.estadoAtributos && window.estadoAtributos.DX) {
-                    dxAtual = window.estadoAtributos.DX;
-                    console.log("✅ DX obtido via estadoAtributos:", dxAtual);
-                } else {
-                    console.log("⚠️ Usando DX padrão 10");
+                // O NH deve estar em alguma dessas propriedades:
+                if (periciaArco.nh !== undefined) {
+                    nhArco = periciaArco.nh;
+                    console.log(`✅ NH da propriedade .nh: ${nhArco}`);
+                } 
+                else if (periciaArco.NH !== undefined) {
+                    nhArco = periciaArco.NH;
+                    console.log(`✅ NH da propriedade .NH: ${nhArco}`);
                 }
-                
-                // ✅ CORREÇÃO CRÍTICA: NH = DX + nível da perícia
-                const nivelPericia = periciaArco.nivel || 0;
-                const nhArco = dxAtual + nivelPericia;
-                
-                console.log(`✅✅✅ NH Arco CORRETO: ${dxAtual} (DX) + ${nivelPericia} (nível Arco) = ${nhArco}`);
-                return nhArco;
-            } else {
-                // Arco não aprendido ainda
-                let dxAtual = 10;
-                if (window.obterAtributoAtual) {
-                    dxAtual = window.obterAtributoAtual('DX');
+                else if (periciaArco.valor !== undefined) {
+                    nhArco = periciaArco.valor;
+                    console.log(`✅ NH da propriedade .valor: ${nhArco}`);
                 }
-                console.log("⚠️ Arco não aprendido, usando apenas DX:", dxAtual);
-                return dxAtual;
+                else {
+                    console.log("ℹ️ Perícia encontrada, mas sem propriedade NH clara:", periciaArco);
+                    
+                    // Se tiver nível, podemos buscar DX e calcular
+                    if (periciaArco.nivel !== undefined) {
+                        const dx = obterDXDoSistema();
+                        nhArco = dx + periciaArco.nivel;
+                        console.log(`📊 NH calculado: DX ${dx} + nível ${periciaArco.nivel} = ${nhArco}`);
+                    }
+                }
             }
         }
-        // Fallback
-        let dxAtual = 10;
-        if (window.obterAtributoAtual) {
-            dxAtual = window.obterAtributoAtual('DX');
-        }
-        console.log("⚠️ Sistema de perícias não encontrado, usando DX:", dxAtual);
-        return dxAtual;
-    }
-    
-    // Se for cavalgar
-    if (idPericia.includes('cavalgar')) {
-        if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
-            // Procurar qualquer perícia de cavalgar
-            const cavalgar = window.estadoPericias.periciasAprendidas.find(p => 
-                p.id.includes('cavalgar') || p.nome.includes('Cavalgar')
-            );
+        
+        // 2. SE AINDA NÃO ENCONTROU, BUSCAR NA INTERFACE
+        if (nhArco === null) {
+            console.log("🔍 Procurando NH na interface...");
             
-            if (cavalgar) {
-                let dxAtual = 10;
-                if (window.obterAtributoAtual) {
-                    dxAtual = window.obterAtributoAtual('DX');
-                }
-                // ✅ CORREÇÃO: NH = DX + nível da perícia
-                const nivelCavalgar = cavalgar.nivel || 0;
-                const nhCavalgar = dxAtual + nivelCavalgar;
+            // Procurar elementos que mostram NH Arco
+            const elementos = document.querySelectorAll('.pericia-aprendida-nivel, .pericia-nh, [class*="nh"], [class*="NH"]');
+            
+            for (const el of elementos) {
+                const texto = el.textContent || '';
+                const parent = el.closest('.pericia-aprendida-item, .pericia-item');
                 
-                console.log(`✅ NH Cavalgar: ${dxAtual} (DX) + ${nivelCavalgar} (nível) = ${nhCavalgar}`);
-                return nhCavalgar;
-            } else {
-                // Cavalgar não aprendido ainda
-                let dxAtual = 10;
-                if (window.obterAtributoAtual) {
-                    dxAtual = window.obterAtributoAtual('DX');
+                if (parent) {
+                    const nome = parent.querySelector('.pericia-aprendida-nome, .pericia-nome');
+                    if (nome && nome.textContent.includes('Arco')) {
+                        const match = texto.match(/(\d+)/);
+                        if (match) {
+                            nhArco = parseInt(match[1]);
+                            console.log(`✅ NH encontrado na interface: ${nhArco}`);
+                            break;
+                        }
+                    }
                 }
-                console.log("⚠️ Cavalgar não aprendido, usando apenas DX:", dxAtual);
-                return dxAtual;
             }
         }
-        let dxAtual = 10;
-        if (window.obterAtributoAtual) {
-            dxAtual = window.obterAtributoAtual('DX');
+        
+        // 3. SE AINDA NÃO, BUSCAR NO LOCALSTORAGE
+        if (nhArco === null) {
+            try {
+                const salvo = localStorage.getItem('periciasAprendidas');
+                if (salvo) {
+                    const pericias = JSON.parse(salvo);
+                    const periciaArco = pericias.find(p => p.id === 'arco');
+                    if (periciaArco) {
+                        // Procurar qualquer propriedade numérica que possa ser o NH
+                        for (const key in periciaArco) {
+                            const valor = periciaArco[key];
+                            if (typeof valor === 'number' && valor > 5 && valor < 30) {
+                                nhArco = valor;
+                                console.log(`✅ NH do localStorage (chave ${key}): ${nhArco}`);
+                                break;
+                            }
+                        }
+                        
+                        // Se não encontrou propriedade numérica, ver nível
+                        if (nhArco === null && periciaArco.nivel !== undefined) {
+                            const dx = obterDXDoSistema();
+                            nhArco = dx + periciaArco.nivel;
+                            console.log(`📊 NH calculado do localStorage: DX ${dx} + nível ${periciaArco.nivel} = ${nhArco}`);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Erro localStorage:", e);
+            }
         }
-        console.log("⚠️ Sistema de perícias não encontrado, usando DX:", dxAtual);
-        return dxAtual;
+        
+        // 4. SE NADA FUNCIONOU, MOSTRAR ERRO CLARO
+        if (nhArco === null) {
+            console.error("❌❌❌ NÃO FOI POSSÍVEL ENCONTRAR O NH ARCO!");
+            console.error("Verifique se:");
+            console.error("1. A perícia Arco foi aprendida");
+            console.error("2. O sistema de perícias está carregado");
+            console.error("3. A propriedade 'nh' ou 'nivel' existe na perícia");
+            
+            // Para não quebrar tudo, usar um valor óbvio que mostre o erro
+            nhArco = 0; // Zero para mostrar que tem erro
+        }
+        
+        console.log(`✅ NH ARCO FINAL: ${nhArco}`);
+        console.log(`🔧 Arquearia Montada base: ${nhArco} - 4 = ${nhArco - 4}`);
+        
+        return nhArco;
     }
     
-    // Fallback geral
-    console.log("❌ Perícia não reconhecida, usando base 10");
-    return 10;
+    // Para outras perícias, retornar null se não encontrar
+    return null;
+}
+
+// ===== FUNÇÃO AUXILIAR PARA PEGAR DX =====
+function obterDXDoSistema() {
+    // Esta função só é usada se precisarmos calcular
+    let dx = 10;
+    
+    if (window.obterAtributoAtual) {
+        dx = window.obterAtributoAtual('DX');
+    } else {
+        const dxInput = document.getElementById('DX');
+        if (dxInput) dx = parseInt(dxInput.value) || 10;
+    }
+    
+    return dx;
 }
 
 // ===== FUNÇÃO ADICIONAL: ATUALIZAR TÉCNICA EM TEMPO REAL =====
