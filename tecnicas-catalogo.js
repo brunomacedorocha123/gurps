@@ -1,11 +1,9 @@
-// ===== CATÁLOGO DE TÉCNICAS - VERSÃO SIMPLES =====
-console.log("📚 Carregando catálogo de técnicas...");
-
+// ===== CATÁLOGO DE TÉCNICAS =====
 const catalogoTecnicas = {
     "arquearia-montada": {
         id: "arquearia-montada",
         nome: "Arquearia Montada",
-        descricao: "Permite utilizar arco com eficiência enquanto cavalga. Os modificadores para disparar sobre um cavalo nunca podem reduzir o NH em Arco abaixo do NH do personagem em Arquearia Montada.",
+        descricao: "Permite usar arco enquanto cavalga. NH base = Arco-4. Não pode exceder NH em Arco.",
         dificuldade: "Difícil",
         baseCalculo: {
             tipo: "pericia",
@@ -32,7 +30,6 @@ const catalogoTecnicas = {
 };
 
 function obterTodasTecnicas() {
-    console.log("📋 Retornando todas as técnicas:", Object.values(catalogoTecnicas));
     return Object.values(catalogoTecnicas);
 }
 
@@ -40,11 +37,7 @@ function buscarTecnicaPorId(id) {
     return catalogoTecnicas[id] || null;
 }
 
-// Tornar global
 window.catalogoTecnicas = {
-    dados: catalogoTecnicas,
     obterTodasTecnicas: obterTodasTecnicas,
     buscarTecnicaPorId: buscarTecnicaPorId
 };
-
-console.log("✅ Catálogo de técnicas carregado!");
