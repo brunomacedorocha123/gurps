@@ -61,6 +61,44 @@ function obterNivelPericiaBase(idPericia) {
   return 0;
 }
 
+// ===== FUNÇÃO CORRIGIDA: OBTER NÍVEL DA PERÍCIA (COM VERIFICAÇÃO) =====
+function obterNivelPericiaBase(idPericia) {
+  if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) {
+    console.warn("⚠️ Sistema de perícias não disponível");
+    return 0;
+  }
+  
+  if (idPericia === 'arco') {
+    const periciaArco = window.estadoPericias.periciasAprendidas.find(p => p.id === 'arco');
+    
+    if (!periciaArco) {
+      console.warn("⚠️ Perícia Arco não encontrada");
+      return 0;
+    }
+    
+    // DEBUG: Mostrar o que está sendo encontrado
+    console.log(`🔍 Perícia Arco encontrada:`, periciaArco);
+    console.log(`📊 Nível: ${periciaArco.nivel}, Tipo: ${typeof periciaArco.nivel}`);
+    
+    const nivel = periciaArco.nivel || 0;
+    
+    // Verificar atributo atual para cálculo
+    const atributoDX = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
+    console.log(`🎯 Cálculo: NH Arco = ${atributoDX} (DX) + ${nivel} = ${atributoDX + nivel}`);
+    
+    return nivel;
+  }
+  
+  if (idPericia.includes('cavalgar')) {
+    const cavalgar = window.estadoPericias.periciasAprendidas.find(p =>
+      p.id.includes('cavalgar') || p.nome.includes('Cavalgar')
+    );
+    return cavalgar ? (cavalgar.nivel || 0) : 0;
+  }
+  
+  return 0;
+}
+
 // ===== FUNÇÃO PRINCIPAL CORRIGIDA: CALCULAR NH DA TÉCNICA =====
 function calcularNHTecnica(tecnica, niveisComprados = 0) {
   if (!tecnica.baseCalculo || !tecnica.baseCalculo.idPericia) {
@@ -69,15 +107,52 @@ function calcularNHTecnica(tecnica, niveisComprados = 0) {
 
   // 1. PEGAR ATRIBUTO DX ATUAL
   const atributoDX = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
+  console.log(`🎯 Passo 1 - DX atual: ${atributoDX}`);
   
   // 2. PEGAR NÍVEL DA PERÍCIA ARCO (PODE SER NEGATIVO!)
   const nivelArco = obterNivelPericiaBase('arco');
+  console.log(`🎯 Passo 2 - Nível Arco: ${nivelArco}`);
   
   // 3. CÁLCULO CORRETO: DX + NÍVEL ARCO - 4 + NÍVEIS COMPRADOS
   const nhBase = atributoDX + nivelArco - 4;
   const nhFinal = nhBase + niveisComprados;
   
+  console.log(`🎯 Passo 3 - Cálculo: ${atributoDX} + ${nivelArco} - 4 = ${nhBase}`);
+  console.log(`🎯 Passo 4 - Com níveis comprados (${niveisComprados}): ${nhFinal}`);
+  
   return nhFinal;
+}
+
+// ===== FUNÇÃO PARA TESTE RÁPIDO NO CONSOLE =====
+function debugTecnicaArqueariaMontada() {
+  console.log("=== DEBUG TÉCNICA ARQUEARIA MONTADA ===");
+  
+  // Verificar dados da perícia Arco
+  if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
+    const periciaArco = window.estadoPericias.periciasAprendidas.find(p => p.id === 'arco');
+    console.log("📋 Perícia Arco:", periciaArco);
+    
+    if (periciaArco) {
+      console.log(`📊 ID: ${periciaArco.id}`);
+      console.log(`📊 Nome: ${periciaArco.nome}`);
+      console.log(`📊 Nível: ${periciaArco.nivel} (tipo: ${typeof periciaArco.nivel})`);
+      console.log(`📊 NH: ${periciaArco.nh || 'não definido'}`);
+    }
+  }
+  
+  // Calcular manualmente
+  const dx = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
+  const nivelArco = obterNivelPericiaBase('arco');
+  const nhArco = dx + nivelArco;
+  const nhTecnica = nhArco - 4;
+  
+  console.log(`🧮 Cálculo manual:`);
+  console.log(`  DX: ${dx}`);
+  console.log(`  Nível Arco: ${nivelArco}`);
+  console.log(`  NH Arco: ${dx} + ${nivelArco} = ${nhArco}`);
+  console.log(`  NH Técnica (Arco-4): ${nhArco} - 4 = ${nhTecnica}`);
+  
+  return nhTecnica;
 }
 
 // ===== VERIFICAR SE TEM PRÉ-REQUISITOS =====
@@ -99,6 +174,8 @@ function verificarPreRequisitosTecnica(tecnica) {
     
     // Usar a mesma lógica para verificar NH
     const nhArco = calcularNHTecnica({ baseCalculo: { idPericia: 'arco' } });
+    console.log(`🔍 Verificação pré-requisito - NH Arco: ${nhArco}, Mínimo: ${reqArco.nivelMinimo}`);
+    
     if (nhArco < reqArco.nivelMinimo) {
       return {
         passou: false,
@@ -124,6 +201,9 @@ function verificarPreRequisitosTecnica(tecnica) {
   
   return { passou: true, motivo: '' };
 }
+
+// ===== FUNÇÃO PARA TESTE NO CONSOLE (executar manualmente) =====
+window.debugTecnica = debugTecnicaArqueariaMontada;
 
 // ===== ATUALIZAR TÉCNICAS DISPONÍVEIS =====
 function atualizarTecnicasDisponiveis() {
