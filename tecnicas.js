@@ -43,7 +43,7 @@ function calcularCustoTecnica(niveisAcima, dificuldade) {
     return 0;
 }
 
-// ===== OBTER NH REAL DA PERÍCIA =====
+// ===== OBTER NH REAL DA PERÍCIA - VERSÃO CORRIGIDA =====
 function obterNHPericiaPorId(idPericia) {
     console.log("🔍 Buscando NH real para:", idPericia);
     
@@ -52,16 +52,35 @@ function obterNHPericiaPorId(idPericia) {
         if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
             const periciaArco = window.estadoPericias.periciasAprendidas.find(p => p.id === 'arco');
             if (periciaArco) {
-                const atributoBase = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
-                const nh = atributoBase + periciaArco.nivel;
-                console.log("✅ NH Arco encontrado:", nh);
-                return nh;
+                // CORREÇÃO: Pegar DX atual CORRETAMENTE
+                let dxAtual = 10;
+                if (window.obterAtributoAtual) {
+                    dxAtual = window.obterAtributoAtual('DX');
+                } else if (window.estadoAtributos && window.estadoAtributos.DX) {
+                    dxAtual = window.estadoAtributos.DX;
+                }
+                
+                // CORREÇÃO: Calcular NH CORRETO (DX + nível da perícia)
+                const nhArco = dxAtual + (periciaArco.nivel || 0);
+                console.log(`✅ NH Arco encontrado: ${dxAtual} (DX) + ${periciaArco.nivel} (nível) = ${nhArco}`);
+                return nhArco;
+            } else {
+                // Arco não aprendido ainda
+                let dxAtual = 10;
+                if (window.obterAtributoAtual) {
+                    dxAtual = window.obterAtributoAtual('DX');
+                }
+                console.log("⚠️ Arco não aprendido, usando DX base:", dxAtual);
+                return dxAtual;
             }
         }
         // Fallback
-        const atributoBase = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
-        console.log("⚠️ Arco não encontrado, usando base:", atributoBase);
-        return atributoBase;
+        let dxAtual = 10;
+        if (window.obterAtributoAtual) {
+            dxAtual = window.obterAtributoAtual('DX');
+        }
+        console.log("⚠️ Arco não encontrado, usando base:", dxAtual);
+        return dxAtual;
     }
     
     // Se for cavalgar
@@ -73,21 +92,66 @@ function obterNHPericiaPorId(idPericia) {
             );
             
             if (cavalgar) {
-                const atributoBase = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
-                const nh = atributoBase + cavalgar.nivel;
-                console.log("✅ Cavalgar encontrado:", cavalgar.nome, "NH:", nh);
-                return nh;
+                let dxAtual = 10;
+                if (window.obterAtributoAtual) {
+                    dxAtual = window.obterAtributoAtual('DX');
+                }
+                // CORREÇÃO: Calcular NH CORRETO (DX + nível da perícia)
+                const nhCavalgar = dxAtual + (cavalgar.nivel || 0);
+                console.log(`✅ Cavalgar encontrado: ${cavalgar.nome}, NH: ${nhCavalgar}`);
+                return nhCavalgar;
+            } else {
+                // Cavalgar não aprendido ainda
+                let dxAtual = 10;
+                if (window.obterAtributoAtual) {
+                    dxAtual = window.obterAtributoAtual('DX');
+                }
+                console.log("⚠️ Cavalgar não aprendido, usando DX base:", dxAtual);
+                return dxAtual;
             }
         }
-        const atributoBase = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
-        console.log("⚠️ Cavalgar não encontrado, usando base:", atributoBase);
-        return atributoBase;
+        let dxAtual = 10;
+        if (window.obterAtributoAtual) {
+            dxAtual = window.obterAtributoAtual('DX');
+        }
+        console.log("⚠️ Cavalgar não encontrado, usando base:", dxAtual);
+        return dxAtual;
     }
     
     // Fallback geral
-    const atributoBase = 10;
     console.log("❌ Perícia não reconhecida, usando base 10");
-    return atributoBase;
+    return 10;
+}
+
+// ===== FUNÇÃO ADICIONAL: ATUALIZAR TÉCNICA EM TEMPO REAL =====
+function atualizarTecnicaEmTempoReal() {
+    console.log("🔄 Atualizando técnica em tempo real...");
+    
+    // Atualizar técnicas aprendidas
+    estadoTecnicas.tecnicasAprendidas.forEach(tecnica => {
+        if (tecnica.baseCalculo && tecnica.baseCalculo.idPericia === 'arco') {
+            // Recalcular NH base baseado no Arco atual
+            const nhArcoAtual = obterNHPericiaPorId('arco');
+            const nhBaseAtual = nhArcoAtual - 4;
+            
+            console.log(`📊 Técnica "${tecnica.nome}" atualizada: NH Arco=${nhArcoAtual}, Base=${nhBaseAtual}`);
+        }
+    });
+    
+    // Atualizar display
+    if (estadoTecnicas.modalAberto && estadoTecnicas.tecnicaSelecionada) {
+        // Fechar e reabrir modal para atualizar valores
+        fecharModalTecnica();
+        setTimeout(() => {
+            const tecnica = estadoTecnicas.tecnicasDisponiveis.find(t => t.id === estadoTecnicas.tecnicaSelecionada.id);
+            if (tecnica) {
+                abrirModalTecnica(tecnica);
+            }
+        }, 100);
+    }
+    
+    // Atualizar lista de técnicas aprendidas
+    renderizarTecnicasAprendidas();
 }
 
 // ===== VERIFICAR SE TEM PRÉ-REQUISITOS =====
@@ -273,14 +337,14 @@ function renderizarCatalogoTecnicas() {
     });
 }
 
-// ===== ABRIR MODAL DE COMPRA =====
+// ===== ABRIR MODAL DE COMPRA - VERSÃO ATUALIZADA EM TEMPO REAL =====
 function abrirModalTecnica(tecnica) {
     console.log("🎯 Abrindo modal para:", tecnica.nome);
     
     estadoTecnicas.tecnicaSelecionada = tecnica;
     const jaAprendida = estadoTecnicas.tecnicasAprendidas.find(t => t.id === tecnica.id);
     
-    // Calcular valores base
+    // Calcular valores base COM VALORES ATUAIS
     const nhArco = obterNHPericiaPorId('arco');
     const nhBase = nhArco - 4; // Pré-definido: Arco-4
     const nhMaximo = nhArco; // Não pode exceder o NH em Arco
@@ -296,6 +360,12 @@ function abrirModalTecnica(tecnica) {
         nhAtual = nhBase + niveisComprados;
     }
     
+    // Garantir que não excede o máximo
+    if (nhAtual > nhMaximo) {
+        nhAtual = nhMaximo;
+        niveisComprados = nhMaximo - nhBase;
+    }
+    
     // Criar opções de NH
     let opcoesHTML = '';
     const niveisPossiveis = nhMaximo - nhBase;
@@ -303,7 +373,7 @@ function abrirModalTecnica(tecnica) {
     for (let i = 0; i <= niveisPossiveis; i++) {
         const nhOpcao = nhBase + i;
         const custo = calcularCustoTecnica(i, tecnica.dificuldade);
-        const selected = nhOpcao === nhAtual ? 'selected' : '';
+        const selected = i === niveisComprados ? 'selected' : '';
         
         opcoesHTML += `
             <option value="${i}" data-custo="${custo}" ${selected}>
@@ -326,14 +396,17 @@ function abrirModalTecnica(tecnica) {
                 <div style="text-align: center; padding: 10px; background: rgba(52, 152, 219, 0.1); border-radius: 8px;">
                     <div style="font-size: 12px; color: #95a5a6;">Base (Arco-4)</div>
                     <div style="font-size: 24px; font-weight: bold; color: #3498db;">${nhBase}</div>
+                    <div style="font-size: 11px; color: #95a5a6;">NH Arco: ${nhArco} - 4</div>
                 </div>
                 <div style="text-align: center; padding: 10px; background: rgba(39, 174, 96, 0.1); border-radius: 8px;">
                     <div style="font-size: 12px; color: #95a5a6;">Máximo (NH Arco)</div>
                     <div style="font-size: 24px; font-weight: bold; color: #27ae60;">${nhMaximo}</div>
+                    <div style="font-size: 11px; color: #95a5a6;">Limite máximo</div>
                 </div>
                 <div style="text-align: center; padding: 10px; background: rgba(243, 156, 18, 0.1); border-radius: 8px;">
                     <div style="font-size: 12px; color: #95a5a6;">Atual</div>
                     <div style="font-size: 24px; font-weight: bold; color: #f39c12;">${nhAtual}</div>
+                    <div style="font-size: 11px; color: #95a5a6;">Base + ${niveisComprados}</div>
                 </div>
             </div>
             
@@ -513,12 +586,8 @@ function renderizarTecnicasAprendidas() {
     let html = '';
     
     estadoTecnicas.tecnicasAprendidas.forEach(tecnica => {
-        // Calcular NH atual
-        let nhArco = 10;
-        if (tecnica.baseCalculo && tecnica.baseCalculo.idPericia === 'arco') {
-            nhArco = obterNHPericiaPorId('arco');
-        }
-        
+        // Calcular NH atual COM VALORES ATUAIS
+        let nhArco = obterNHPericiaPorId('arco');
         const nhBase = nhArco - 4; // Sempre Arco-4
         const nhAtual = nhBase + (tecnica.niveisComprados || 0);
         
@@ -685,20 +754,19 @@ function configurarEventListenersTecnicas() {
     });
 }
 
-// ===== OBSERVAR MUDANÇAS NAS PERÍCIAS =====
-function observarMudancasPericias() {
-    // Atualizar técnicas sempre que as perícias mudarem
-    if (window.estadoPericias) {
-        const observer = new MutationObserver(function() {
-            console.log("🔄 Perícias alteradas, atualizando técnicas...");
-            atualizarTecnicasDisponiveis();
-        });
-        
-        // Observar mudanças no estado das perícias
-        setInterval(() => {
-            atualizarTecnicasDisponiveis();
-        }, 1000);
-    }
+// ===== OBSERVAR MUDANÇAS NAS PERÍCIAS E ATRIBUTOS =====
+function observarMudancas() {
+    // Atualizar quando atributos mudarem
+    document.addEventListener('atributosAlterados', function() {
+        console.log("🎯 Atributos alterados, atualizando técnicas...");
+        atualizarTecnicaEmTempoReal();
+        atualizarTecnicasDisponiveis();
+    });
+    
+    // Observar mudanças no sistema de perícias
+    setInterval(() => {
+        atualizarTecnicasDisponiveis();
+    }, 1000);
 }
 
 // ===== INICIALIZAR =====
@@ -711,8 +779,8 @@ function inicializarSistemaTecnicas() {
     // 2. Configurar eventos
     configurarEventListenersTecnicas();
     
-    // 3. Observar mudanças nas perícias
-    observarMudancasPericias();
+    // 3. Observar mudanças nas perícias e atributos
+    observarMudancas();
     
     // 4. Inicializar
     setTimeout(() => {
@@ -773,5 +841,6 @@ window.fecharModalTecnica = fecharModalTecnica;
 window.comprarTecnica = comprarTecnica;
 window.removerTecnica = removerTecnica;
 window.inicializarSistemaTecnicas = inicializarSistemaTecnicas;
+window.atualizarTecnicaEmTempoReal = atualizarTecnicaEmTempoReal;
 
 console.log("🎮 Módulo de técnicas carregado e pronto!");
