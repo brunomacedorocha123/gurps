@@ -1,50 +1,98 @@
-// CATÁLOGO DE TÉCNICAS — ARQUEARIA MONTADA
+// ===== CATÁLOGO COMPLETO DE TÉCNICAS =====
 const catalogoTecnicas = {
     "arquearia-montada": {
         id: "arquearia-montada",
         nome: "Arquearia Montada",
-        descricao: "Permite utilizar arco com eficiência enquanto cavalga. Os modificadores para disparar sobre um cavalo nunca podem reduzir o NH em Arco abaixo do NH do personagem em Arquearia Montada.",
+        descricao: "Permite utilizar arco com eficiência enquanto cavalga. Os modificadores para disparar sobre um cavalo nunca podem reduzir o NH em Arco abaixo do NH do personagem em Arquearia Montada. Por exemplo, se o personagem tiver Arco 13 e Arquearia Montada 11, as penalidades para disparar contra o alvo a cavalo nunca reduzirem o NH do personagem abaixo de 11 antes de se aplicar outros modificadores.",
         dificuldade: "Difícil",
-        // Base: NH da perícia "Arco" - 4
         baseCalculo: {
             tipo: "pericia",
-            idPericia: "arco",  // ID da perícia Arco
-            redutor: -4         // Base é Arco - 4
+            idPericia: "arco",
+            redutor: -4
         },
-        // Limite: não pode exceder o NH da perícia "Arco"
         limiteMaximo: {
             tipo: "pericia",
-            idPericia: "arco"   // Não pode exceder NH em Arco
+            idPericia: "arco"
         },
         preRequisitos: [
             {
-                idPericia: "arco",      // ID da perícia Arco
-                nomePericia: "Arco",    // Nome para exibição
-                nivelMinimo: 4          // Precisa ter Arco 4+
+                idPericia: "arco",
+                nomePericia: "Arco",
+                nivelMinimo: 4
             },
             {
-                // Precisa ter qualquer especialização de Cavalgar
-                nomePericia: "Cavalgar", // Nome genérico
-                nivelMinimo: 0           // Precisa ter pelo menos 0 (qualquer nível)
+                idsCavalgar: ["cavalgar-cavalo", "cavalgar-mula", "cavalgar-camelo", "cavalgar-dragao", "cavalgar-outro"],
+                nomePericia: "Cavalgar",
+                nivelMinimo: 0
             }
         ]
     }
 };
 
-// FUNÇÕES BÁSICAS
+// ===== FUNÇÕES DO CATÁLOGO =====
 function obterTodasTecnicas() {
-    return Object.values(catalogoTecnicas);
+    return Object.values(catalogoTecnicas).map(tecnica => ({
+        ...tecnica,
+        preRequisitos: tecnica.preRequisitos || [],
+        baseCalculo: tecnica.baseCalculo || { tipo: "pericia", idPericia: "", redutor: 0 },
+        limiteMaximo: tecnica.limiteMaximo || null
+    }));
 }
 
 function buscarTecnicaPorId(id) {
-    return catalogoTecnicas[id];
+    const tecnica = catalogoTecnicas[id];
+    if (!tecnica) return null;
+    
+    return {
+        ...tecnica,
+        preRequisitos: tecnica.preRequisitos || [],
+        baseCalculo: tecnica.baseCalculo || { tipo: "pericia", idPericia: "", redutor: 0 },
+        limiteMaximo: tecnica.limiteMaximo || null
+    };
 }
 
-// EXPORT
-window.catalogoTecnicas = window.catalogoTecnicas || {
+function buscarTecnicasPorPericia(idPericia) {
+    return obterTodasTecnicas().filter(tecnica => 
+        (tecnica.baseCalculo && tecnica.baseCalculo.idPericia === idPericia) ||
+        (tecnica.limiteMaximo && tecnica.limiteMaximo.idPericia === idPericia) ||
+        (tecnica.preRequisitos && tecnica.preRequisitos.some(p => p.idPericia === idPericia))
+    );
+}
+
+function adicionarTecnica(tecnica) {
+    if (!tecnica || !tecnica.id) {
+        throw new Error("Técnica inválida: deve ter um ID");
+    }
+    
+    catalogoTecnicas[tecnica.id] = {
+        id: tecnica.id,
+        nome: tecnica.nome || "Técnica sem nome",
+        descricao: tecnica.descricao || "",
+        dificuldade: tecnica.dificuldade || "Média",
+        baseCalculo: tecnica.baseCalculo || { tipo: "pericia", idPericia: "", redutor: 0 },
+        limiteMaximo: tecnica.limiteMaximo || null,
+        preRequisitos: tecnica.preRequisitos || []
+    };
+    
+    return true;
+}
+
+function removerTecnica(id) {
+    if (catalogoTecnicas[id]) {
+        delete catalogoTecnicas[id];
+        return true;
+    }
+    return false;
+}
+
+// ===== EXPORTAR PARA ESCOPO GLOBAL =====
+window.catalogoTecnicas = {
     dados: catalogoTecnicas,
     obterTodasTecnicas: obterTodasTecnicas,
-    buscarTecnicaPorId: buscarTecnicaPorId
+    buscarTecnicaPorId: buscarTecnicaPorId,
+    buscarTecnicasPorPericia: buscarTecnicasPorPericia,
+    adicionarTecnica: adicionarTecnica,
+    removerTecnica: removerTecnica
 };
 
-console.log('✅ Catálogo de Técnicas carregado com', obterTodasTecnicas().length, 'técnica(s)');
+console.log('📚 Catálogo de técnicas carregado com', obterTodasTecnicas().length, 'técnica(s)');
