@@ -1,6 +1,5 @@
-// ===== SISTEMA DE TÉCNICAS - VERSÃO COMPLETA =====
-console.log(" INICIANDO SISTEMA DE TÉCNICAS");
-
+// ===== SISTEMA DE TÉCNICAS - VERSÃO COMPLETA CORRIGIDA =====
+console.log(" INICIANDO SISTEMA DE TÉCNICAS - VERSÃO CORRIGIDA");
 
 let estadoTecnicas = {
   pontosTecnicasTotal: 0,
@@ -16,7 +15,6 @@ let estadoTecnicas = {
   modalAberto: false,
   tecnicaSelecionada: null
 };
-
 
 // ===== TABELA DE CUSTO PARA TÉCNICAS =====
 function calcularCustoTecnica(niveisAcima, dificuldade) {
@@ -45,26 +43,25 @@ function calcularCustoTecnica(niveisAcima, dificuldade) {
   return 0;
 }
 
-
-// ===== OBTER NH REAL DA PERÍCIA =====
-function obterNHPericiaPorId(idPericia) {
-  console.log(" Buscando NH real para:", idPericia);
+// ===== OBTER NÍVEL DA PERÍCIA (CORRIGIDO) =====
+// IMPORTANTE: Para técnicas, precisamos do NÍVEL da perícia base, não do NH completo
+function obterNivelPericiaPorId(idPericia) {
+  console.log(" Buscando NÍVEL para:", idPericia);
+  
+  // REGRA PRINCIPAL: Técnicas usam o NÍVEL da perícia base, não (atributo + nível)
   
   // Se for 'arco', buscar perícia Arco
   if (idPericia === 'arco') {
     if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
       const periciaArco = window.estadoPericias.periciasAprendidas.find(p => p.id === 'arco');
       if (periciaArco) {
-        const atributoBase = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
-        const nh = atributoBase + periciaArco.nivel;
-        console.log("✅ NH Arco encontrado:", nh);
-        return nh;
+        // CORREÇÃO: Retornar apenas o NÍVEL da perícia
+        console.log("✅ Nível Arco encontrado:", periciaArco.nivel);
+        return periciaArco.nivel;
       }
     }
-    // Fallback
-    const atributoBase = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
-    console.log("⚠️ Arco não encontrado, usando base:", atributoBase);
-    return atributoBase;
+    console.log("⚠️ Arco não encontrado, usando nível 0");
+    return 0;
   }
   
   // Se for cavalgar
@@ -76,23 +73,32 @@ function obterNHPericiaPorId(idPericia) {
       );
       
       if (cavalgar) {
-        const atributoBase = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
-        const nh = atributoBase + cavalgar.nivel;
-        console.log("✅ Cavalgar encontrado:", cavalgar.nome, "NH:", nh);
-        return nh;
+        // CORREÇÃO: Retornar apenas o NÍVEL da perícia
+        console.log("✅ Cavalgar encontrado:", cavalgar.nome, "Nível:", cavalgar.nivel);
+        return cavalgar.nivel;
       }
     }
-    const atributoBase = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
-    console.log("⚠️ Cavalgar não encontrado, usando base:", atributoBase);
-    return atributoBase;
+    console.log("⚠️ Cavalgar não encontrado, usando nível 0");
+    return 0;
   }
   
-  // Fallback geral
-  const atributoBase = 10;
-  console.log("❌ Perícia não reconhecida, usando base 10");
-  return atributoBase;
+  console.log("❌ Perícia não reconhecida, usando nível 0");
+  return 0;
 }
 
+// ===== OBTER NH COMPLETO (ATRIBUTO + NÍVEL) - Para exibição =====
+function obterNHCompletoPericia(idPericia) {
+  const nivel = obterNivelPericiaPorId(idPericia);
+  let atributo = 10;
+  
+  if (idPericia === 'arco' || idPericia.includes('cavalgar')) {
+    atributo = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
+  }
+  
+  const nhCompleto = atributo + nivel;
+  console.log(`📊 NH completo ${idPericia}: ${atributo} + ${nivel} = ${nhCompleto}`);
+  return nhCompleto;
+}
 
 // ===== VERIFICAR SE TEM PRÉ-REQUISITOS =====
 function verificarPreRequisitosTecnica(tecnica) {
@@ -114,10 +120,12 @@ function verificarPreRequisitosTecnica(tecnica) {
       };
     }
     
-    if (periciaArco.nivel < reqArco.nivelMinimo) {
+    // Verificar usando NH completo (atributo + nível)
+    const nhArco = obterNHCompletoPericia('arco');
+    if (nhArco < reqArco.nivelMinimo) {
       return {
         passou: false,
-        motivo: `❌ Arco precisa ter nível ${reqArco.nivelMinimo} (atual: ${periciaArco.nivel})`
+        motivo: `❌ Arco precisa ter NH ${reqArco.nivelMinimo} (atual: ${nhArco})`
       };
     }
   }
@@ -141,8 +149,7 @@ function verificarPreRequisitosTecnica(tecnica) {
   return { passou: true, motivo: '' };
 }
 
-
-// ===== ATUALIZAR TÉCNICAS DISPONÍVEIS =====
+// ===== ATUALIZAR TÉCNICAS DISPONÍVEIS (CORRIGIDO) =====
 function atualizarTecnicasDisponiveis() {
   console.log(" Atualizando técnicas disponíveis...");
   
@@ -157,22 +164,34 @@ function atualizarTecnicasDisponiveis() {
     const verificacao = verificarPreRequisitosTecnica(tecnica);
     const jaAprendida = estadoTecnicas.tecnicasAprendidas.find(t => t.id === tecnica.id);
     
-    // Calcular NH base (Arco-4)
-    let nhBase = 0;
+    // CÁLCULO CORRIGIDO DO NH DA TÉCNICA
+    let nhBaseTecnica = 0;
+    let nivelBaseTecnica = 0;
+    
     if (tecnica.baseCalculo && tecnica.baseCalculo.idPericia) {
-      const nhPericia = obterNHPericiaPorId(tecnica.baseCalculo.idPericia);
-      nhBase = nhPericia + (tecnica.baseCalculo.redutor || 0);
+      // PASSO 1: Pegar o NÍVEL da perícia base (não o NH completo)
+      const nivelPericiaBase = obterNivelPericiaPorId(tecnica.baseCalculo.idPericia);
       
-      // Adicionar níveis comprados se já aprendida
+      // PASSO 2: Aplicar redutor (ex: Arco-4)
+      nivelBaseTecnica = nivelPericiaBase + (tecnica.baseCalculo.redutor || 0);
+      
+      // PASSO 3: Adicionar níveis comprados se já aprendida
       if (jaAprendida && jaAprendida.niveisComprados) {
-        nhBase += jaAprendida.niveisComprados;
+        nivelBaseTecnica += jaAprendida.niveisComprados;
       }
+      
+      // PASSO 4: Calcular NH completo da técnica para exibição
+      const atributo = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
+      nhBaseTecnica = atributo + nivelBaseTecnica;
+      
+      console.log(`📊 ${tecnica.nome}: Nível Arco(${nivelPericiaBase}) - 4 = ${nivelBaseTecnica}, NH: ${atributo} + ${nivelBaseTecnica} = ${nhBaseTecnica}`);
     }
     
     return {
       ...tecnica,
       disponivel: verificacao.passou,
-      nhAtual: nhBase,
+      nhAtual: nhBaseTecnica,
+      nivelAtual: nivelBaseTecnica, // Armazena também o nível para cálculos internos
       motivoIndisponivel: verificacao.motivo,
       jaAprendida: !!jaAprendida
     };
@@ -181,7 +200,6 @@ function atualizarTecnicasDisponiveis() {
   estadoTecnicas.tecnicasDisponiveis = disponiveis;
   renderizarCatalogoTecnicas();
 }
-
 
 // ===== RENDERIZAR CATÁLOGO =====
 function renderizarCatalogoTecnicas() {
@@ -223,6 +241,14 @@ function renderizarCatalogoTecnicas() {
     const jaAprendida = tecnica.jaAprendida;
     const disponivel = tecnica.disponivel;
     
+    // Exibir nível relativo também (ex: Arco-4 + níveis)
+    let infoNivel = '';
+    if (tecnica.baseCalculo) {
+      const redutor = tecnica.baseCalculo.redutor || 0;
+      const redutorTexto = redutor < 0 ? redutor : `+${redutor}`;
+      infoNivel = ` (${tecnica.baseCalculo.idPericia}${redutorTexto})`;
+    }
+    
     html += `
       <div class="pericia-item ${!disponivel ? 'item-indisponivel' : ''}"
          data-id="${tecnica.id}"
@@ -234,6 +260,7 @@ function renderizarCatalogoTecnicas() {
         <div class="pericia-header">
           <h4 class="pericia-nome">
             ${tecnica.nome}
+            ${infoNivel}
             ${jaAprendida ? '<span style="color: #27ae60; margin-left: 5px;">✓</span>' : ''}
           </h4>
           <div class="pericia-info">
@@ -279,42 +306,60 @@ function renderizarCatalogoTecnicas() {
   });
 }
 
-
-// ===== ABRIR MODAL DE COMPRA =====
+// ===== ABRIR MODAL DE COMPRA (CORRIGIDO) =====
 function abrirModalTecnica(tecnica) {
   console.log(" Abrindo modal para:", tecnica.nome);
   
   estadoTecnicas.tecnicaSelecionada = tecnica;
   const jaAprendida = estadoTecnicas.tecnicasAprendidas.find(t => t.id === tecnica.id);
   
-  // Calcular valores base
-  const nhArco = obterNHPericiaPorId('arco');
-  const nhBase = nhArco - 4; // Pré-definido: Arco-4
-  const nhMaximo = nhArco; // Não pode exceder o NH em Arco
+  // CÁLCULOS CORRIGIDOS:
+  // 1. Obter NÍVEL da perícia Arco (não NH completo)
+  const nivelArco = obterNivelPericiaPorId('arco');
+  
+  // 2. NH base da técnica = Nível Arco - 4
+  const nivelBaseTecnica = nivelArco - 4;
+  
+  // 3. NH máximo = Nível Arco (não pode exceder o nível em Arco)
+  const nivelMaximo = nivelArco;
+  
+  // 4. Calcular NH atual completo (para exibição)
+  const atributoDX = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
+  const nhBaseCompleto = atributoDX + nivelBaseTecnica;
+  const nhMaximoCompleto = atributoDX + nivelMaximo;
+  
+  console.log(`📊 Cálculos modal:
+  • Nível Arco: ${nivelArco}
+  • Nível base técnica (Arco-4): ${nivelBaseTecnica}
+  • NH base: ${atributoDX} + ${nivelBaseTecnica} = ${nhBaseCompleto}
+  • Nível máximo: ${nivelMaximo}
+  • NH máximo: ${atributoDX} + ${nivelMaximo} = ${nhMaximoCompleto}`);
   
   // Calcular NH atual (base + níveis comprados)
-  let nhAtual = nhBase;
+  let nhAtualCompleto = nhBaseCompleto;
   let niveisComprados = 0;
   let custoTotal = 0;
   
   if (jaAprendida) {
     niveisComprados = jaAprendida.niveisComprados || 0;
     custoTotal = jaAprendida.custoTotal || 0;
-    nhAtual = nhBase + niveisComprados;
+    const nivelAtualTecnica = nivelBaseTecnica + niveisComprados;
+    nhAtualCompleto = atributoDX + nivelAtualTecnica;
   }
   
   // Criar opções de NH
   let opcoesHTML = '';
-  const niveisPossiveis = nhMaximo - nhBase;
+  const niveisPossiveis = nivelMaximo - nivelBaseTecnica;
   
   for (let i = 0; i <= niveisPossiveis; i++) {
-    const nhOpcao = nhBase + i;
+    const nivelTecnica = nivelBaseTecnica + i;
+    const nhTecnica = atributoDX + nivelTecnica;
     const custo = calcularCustoTecnica(i, tecnica.dificuldade);
-    const selected = nhOpcao === nhAtual ? 'selected' : '';
+    const selected = i === niveisComprados ? 'selected' : '';
     
     opcoesHTML += `
-      <option value="${i}" data-custo="${custo}" ${selected}>
-        NH ${nhOpcao} (${custo} pontos)
+      <option value="${i}" data-custo="${custo}" data-nivel="${nivelTecnica}" ${selected}>
+        NH ${nhTecnica} (nível ${nivelTecnica >= 0 ? '+' : ''}${nivelTecnica}) - ${custo} pontos
       </option>
     `;
   }
@@ -332,15 +377,33 @@ function abrirModalTecnica(tecnica) {
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
         <div style="text-align: center; padding: 10px; background: rgba(52, 152, 219, 0.1); border-radius: 8px;">
           <div style="font-size: 12px; color: #95a5a6;">Base (Arco-4)</div>
-          <div style="font-size: 24px; font-weight: bold; color: #3498db;">${nhBase}</div>
+          <div style="font-size: 24px; font-weight: bold; color: #3498db;">NH ${nhBaseCompleto}</div>
+          <div style="font-size: 11px; color: #95a5a6;">nível ${nivelBaseTecnica >= 0 ? '+' : ''}${nivelBaseTecnica}</div>
         </div>
         <div style="text-align: center; padding: 10px; background: rgba(39, 174, 96, 0.1); border-radius: 8px;">
-          <div style="font-size: 12px; color: #95a5a6;">Máximo (NH Arco)</div>
-          <div style="font-size: 24px; font-weight: bold; color: #27ae60;">${nhMaximo}</div>
+          <div style="font-size: 12px; color: #95a5a6;">Máximo (nível Arco)</div>
+          <div style="font-size: 24px; font-weight: bold; color: #27ae60;">NH ${nhMaximoCompleto}</div>
+          <div style="font-size: 11px; color: #95a5a6;">nível ${nivelMaximo >= 0 ? '+' : ''}${nivelMaximo}</div>
         </div>
         <div style="text-align: center; padding: 10px; background: rgba(243, 156, 18, 0.1); border-radius: 8px;">
           <div style="font-size: 12px; color: #95a5a6;">Atual</div>
-          <div style="font-size: 24px; font-weight: bold; color: #f39c12;">${nhAtual}</div>
+          <div style="font-size: 24px; font-weight: bold; color: #f39c12;">NH ${nhAtualCompleto}</div>
+          <div style="font-size: 11px; color: #95a5a6;">nível ${nivelBaseTecnica + niveisComprados >= 0 ? '+' : ''}${nivelBaseTecnica + niveisComprados}</div>
+        </div>
+      </div>
+      
+      <!-- Status da Perícia Base -->
+      <div style="background: rgba(52, 152, 219, 0.1); padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #3498db;">
+        <div style="font-size: 12px; color: #95a5a6;">Perícia Base</div>
+        <div style="font-size: 16px; font-weight: bold; color: #3498db;">Arco</div>
+        <div style="font-size: 14px; color: #ccc; margin-top: 5px;">
+          <strong>NH:</strong> ${obterNHCompletoPericia('arco')} 
+          <span style="margin-left: 10px;">
+            <strong>Nível:</strong> ${nivelArco >= 0 ? '+' : ''}${nivelArco}
+          </span>
+          <span style="margin-left: 10px;">
+            <strong>Atributo:</strong> DX ${atributoDX}
+          </span>
         </div>
       </div>
       
@@ -381,9 +444,11 @@ function abrirModalTecnica(tecnica) {
           <i class="fas fa-info-circle"></i> Regras Importantes
         </h5>
         <ul style="margin: 0; padding-left: 20px; color: #ccc; font-size: 14px;">
-          <li>NH base = NH em Arco - 4 (pré-definido)</li>
+          <li><strong>NH base = Nível em Arco - 4</strong> (pré-definido)</li>
+          <li>Valor base usa o <strong>NÍVEL da perícia Arco</strong>, não o NH completo</li>
+          <li>Seu Nível Arco atual: ${nivelArco >= 0 ? '+' : ''}${nivelArco}</li>
           <li>Pode comprar níveis adicionais acima da base</li>
-          <li>O NH nesta técnica NUNCA pode exceder o NH em Arco</li>
+          <li>O NÍVEL nesta técnica NUNCA pode exceder o NÍVEL em Arco</li>
           <li>Penalidades para disparar montado não reduzem abaixo do NH nesta técnica</li>
         </ul>
       </div>
@@ -446,8 +511,7 @@ function abrirModalTecnica(tecnica) {
   }
 }
 
-
-// ===== COMPRAR/ATUALIZAR TÉCNICA =====
+// ===== COMPRAR/ATUALIZAR TÉCNICA (CORRIGIDO) =====
 function comprarTecnica() {
   if (!estadoTecnicas.tecnicaSelecionada) {
     alert("Erro: Nenhuma técnica selecionada!");
@@ -466,12 +530,22 @@ function comprarTecnica() {
   const tecnicaId = estadoTecnicas.tecnicaSelecionada.id;
   const index = estadoTecnicas.tecnicasAprendidas.findIndex(t => t.id === tecnicaId);
   
+  // Calcular NH final para armazenar
+  const nivelArco = obterNivelPericiaPorId('arco');
+  const nivelBaseTecnica = nivelArco - 4;
+  const nivelFinalTecnica = nivelBaseTecnica + niveisComprados;
+  const atributoDX = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
+  const nhFinal = atributoDX + nivelFinalTecnica;
+  
   if (index >= 0) {
     // Atualizar técnica existente
     estadoTecnicas.tecnicasAprendidas[index] = {
       ...estadoTecnicas.tecnicasAprendidas[index],
       niveisComprados: niveisComprados,
       custoTotal: custo,
+      nivelBase: nivelBaseTecnica,
+      nivelFinal: nivelFinalTecnica,
+      nhFinal: nhFinal,
       dataAtualizacao: new Date().toISOString()
     };
   } else {
@@ -482,6 +556,9 @@ function comprarTecnica() {
       dificuldade: estadoTecnicas.tecnicaSelecionada.dificuldade,
       niveisComprados: niveisComprados,
       custoTotal: custo,
+      nivelBase: nivelBaseTecnica,
+      nivelFinal: nivelFinalTecnica,
+      nhFinal: nhFinal,
       dataAquisicao: new Date().toISOString(),
       baseCalculo: estadoTecnicas.tecnicaSelecionada.baseCalculo
     });
@@ -499,11 +576,13 @@ function comprarTecnica() {
   fecharModalTecnica();
   
   // Mensagem
-  alert(`✅ ${estadoTecnicas.tecnicaSelecionada.nome} ${index >= 0 ? 'atualizada' : 'aprendida'} com sucesso!`);
+  alert(`✅ ${estadoTecnicas.tecnicaSelecionada.nome} ${index >= 0 ? 'atualizada' : 'aprendida'} com sucesso!
+    • Nível: ${nivelFinalTecnica >= 0 ? '+' : ''}${nivelFinalTecnica}
+    • NH: ${nhFinal}
+    • Custo: ${custo} pontos`);
 }
 
-
-// ===== RENDERIZAR TÉCNICAS APRENDIDAS =====
+// ===== RENDERIZAR TÉCNICAS APRENDIDAS (CORRIGIDO) =====
 function renderizarTecnicasAprendidas() {
   const container = document.getElementById('tecnicas-aprendidas');
   if (!container) return;
@@ -522,14 +601,15 @@ function renderizarTecnicasAprendidas() {
   let html = '';
   
   estadoTecnicas.tecnicasAprendidas.forEach(tecnica => {
-    // Calcular NH atual
-    let nhArco = 10;
-    if (tecnica.baseCalculo && tecnica.baseCalculo.idPericia === 'arco') {
-      nhArco = obterNHPericiaPorId('arco');
-    }
+    // Recalcular NH atual (pode ter mudado o atributo DX)
+    const atributoDX = window.obterAtributoAtual ? window.obterAtributoAtual('DX') : 10;
+    const nivelArco = obterNivelPericiaPorId('arco');
+    const nivelBase = nivelArco - 4;
+    const nivelFinal = nivelBase + (tecnica.niveisComprados || 0);
+    const nhAtual = atributoDX + nivelFinal;
     
-    const nhBase = nhArco - 4; // Sempre Arco-4
-    const nhAtual = nhBase + (tecnica.niveisComprados || 0);
+    // Informação da perícia base
+    const nhArco = obterNHCompletoPericia('arco');
     
     html += `
       <div class="pericia-aprendida-item" style="background: rgba(155, 89, 182, 0.15); border-color: rgba(155, 89, 182, 0.4);">
@@ -547,9 +627,10 @@ function renderizarTecnicasAprendidas() {
         </div>
         
         <div style="font-size: 13px; color: #95a5a6; margin-top: 5px;">
+          <div><strong>Nível:</strong> ${nivelFinal >= 0 ? '+' : ''}${nivelFinal} (Arco-4 + ${tecnica.niveisComprados || 0})</div>
+          <div><strong>Nível base (Arco-4):</strong> ${nivelBase >= 0 ? '+' : ''}${nivelBase}</div>
+          <div><strong>Nível em Arco:</strong> ${nivelArco >= 0 ? '+' : ''}${nivelArco} (NH ${nhArco})</div>
           <div><strong>Níveis comprados:</strong> ${tecnica.niveisComprados || 0}</div>
-          <div><strong>Base (Arco-4):</strong> ${nhBase}</div>
-          <div><strong>Máximo possível (NH Arco):</strong> ${nhArco}</div>
         </div>
         
         <button onclick="removerTecnica('${tecnica.id}')"
@@ -563,7 +644,6 @@ function renderizarTecnicasAprendidas() {
   container.innerHTML = html;
 }
 
-
 // ===== REMOVER TÉCNICA =====
 function removerTecnica(id) {
   if (confirm('Tem certeza que deseja remover esta técnica? Os pontos serão perdidos.')) {
@@ -574,7 +654,6 @@ function removerTecnica(id) {
     atualizarEstatisticasTecnicas();
   }
 }
-
 
 // ===== ATUALIZAR ESTATÍSTICAS =====
 function atualizarEstatisticasTecnicas() {
@@ -623,7 +702,6 @@ function atualizarEstatisticasTecnicas() {
   }
 }
 
-
 // ===== FECHAR MODAL =====
 function fecharModalTecnica() {
   const modal = document.querySelector('.modal-tecnica-overlay');
@@ -634,7 +712,6 @@ function fecharModalTecnica() {
   estadoTecnicas.tecnicaSelecionada = null;
 }
 
-
 // ===== SALVAR/CARREGAR =====
 function salvarTecnicas() {
   try {
@@ -643,7 +720,6 @@ function salvarTecnicas() {
     console.error("Erro ao salvar técnicas:", e);
   }
 }
-
 
 function carregarTecnicas() {
   try {
@@ -656,7 +732,6 @@ function carregarTecnicas() {
     console.error("Erro ao carregar técnicas:", e);
   }
 }
-
 
 // ===== CONFIGURAR EVENTOS =====
 function configurarEventListenersTecnicas() {
@@ -700,27 +775,20 @@ function configurarEventListenersTecnicas() {
   });
 }
 
-
 // ===== OBSERVAR MUDANÇAS NAS PERÍCIAS =====
 function observarMudancasPericias() {
   // Atualizar técnicas sempre que as perícias mudarem
   if (window.estadoPericias) {
-    const observer = new MutationObserver(function() {
-      console.log(" Perícias alteradas, atualizando técnicas...");
-      atualizarTecnicasDisponiveis();
-    });
-    
-    // Observar mudanças no estado das perícias
+    // Usar evento personalizado ou polling
     setInterval(() => {
       atualizarTecnicasDisponiveis();
     }, 1000);
   }
 }
 
-
 // ===== INICIALIZAR =====
 function inicializarSistemaTecnicas() {
-  console.log(" INICIALIZANDO SISTEMA DE TÉCNICAS");
+  console.log(" INICIALIZANDO SISTEMA DE TÉCNICAS CORRIGIDO");
   
   // 1. Carregar técnicas salvas
   carregarTecnicas();
@@ -739,7 +807,6 @@ function inicializarSistemaTecnicas() {
     console.log("✅ SISTEMA DE TÉCNICAS INICIALIZADO!");
   }, 500);
 }
-
 
 // ===== INICIALIZAÇÃO AUTOMÁTICA =====
 document.addEventListener('DOMContentLoaded', function() {
@@ -786,12 +853,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-
 // ===== EXPORTAR FUNÇÕES =====
 window.fecharModalTecnica = fecharModalTecnica;
 window.comprarTecnica = comprarTecnica;
 window.removerTecnica = removerTecnica;
 window.inicializarSistemaTecnicas = inicializarSistemaTecnicas;
+window.obterNivelPericiaPorId = obterNivelPericiaPorId;
+window.obterNHCompletoPericia = obterNHCompletoPericia;
 
-
-console.log(" Módulo de técnicas carregado e pronto!");
+console.log(" Módulo de técnicas corrigido carregado e pronto!");
