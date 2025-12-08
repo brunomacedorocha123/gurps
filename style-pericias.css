@@ -1,4 +1,4 @@
- /* ===== SISTEMA DE PERÍCIAS ===== */
+/* ===== SISTEMA DE PERÍCIAS ===== */
 /* Versão adaptada da aba de Vantagens */
 
 /* Container principal */
@@ -1725,69 +1725,4 @@
 
 .pericia-item[data-tipo="tecnica"] {
     animation: tecnicaAparecer 0.3s ease;
-}
-
-
-/* Scroll para listas de perícias */
-.catalog-list-pericias-scroll,
-.acquired-list-pericias-scroll {
-  max-height: 300px; /* Ajuste a altura conforme necessário */
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-top: 10px;
-}
-
-.catalog-list-pericias,
-.acquired-list-pericias {
-  padding: 10px;
-}
-
-/* Para o conteúdo interno das listas */
-.pericia-item,
-.tecnica-item {
-  padding: 8px 12px;
-  margin: 5px 0;
-  background: #f8f9fa;
-  border-radius: 4px;
-  cursor: pointer;
-  border-left: 4px solid #007bff;
-}
-
-.pericia-item:hover,
-.tecnica-item:hover {
-  background: #e9ecef;
-}
-
-/* Detalhes da perícia */
-.detalhes-pericia-section {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  background: #f8f9fa;
-}
-
-.detalhes-pericia-content {
-  min-height: 100px;
-}
-
-/* Scroll para listas de perícias */
-.catalog-list-pericias-scroll,
-.acquired-list-pericias-scroll {
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid #2d3748;
-  border-radius: 6px;
-  margin-top: 10px;
-  background: rgba(26, 32, 44, 0.8);
-}
-
-/* Garantir que o JavaScript encontre a aba */
-#tab-pericias {
-  display: none;
-}
-
-#tab-pericias.active {
-  display: block;
 }
