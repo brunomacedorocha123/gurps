@@ -756,17 +756,120 @@ function configurarEventListenersTecnicas() {
 
 // ===== OBSERVAR MUDANÇAS NAS PERÍCIAS E ATRIBUTOS =====
 function observarMudancas() {
-    // Atualizar quando atributos mudarem
-    document.addEventListener('atributosAlterados', function() {
+    console.log("👀 Sistema de Técnicas: Modo seguro ativado");
+    
+    // Flag para evitar atualizações simultâneas
+    let atualizando = false;
+    
+    // Função de atualização segura
+    function atualizarComSeguranca() {
+        if (atualizando) return;
+        
+        atualizando = true;
+        console.log("🔄 Atualizando técnicas (seguro)...");
+        
+        setTimeout(() => {
+            try {
+                atualizarTecnicasDisponiveis();
+            } catch (error) {
+                console.error("❌ Erro ao atualizar técnicas:", error);
+            }
+            atualizando = false;
+        }, 300);
+    }
+    
+    // Função específica para atualização por atributos
+    function atualizarPorAtributos() {
+        if (atualizando) return;
+        
+        atualizando = true;
         console.log("🎯 Atributos alterados, atualizando técnicas...");
-        atualizarTecnicaEmTempoReal();
-        atualizarTecnicasDisponiveis();
+        
+        setTimeout(() => {
+            try {
+                atualizarTecnicaEmTempoReal();
+                atualizarTecnicasDisponiveis();
+            } catch (error) {
+                console.error("❌ Erro ao atualizar por atributos:", error);
+            }
+            atualizando = false;
+        }, 500);
+    }
+    
+    // 1. Eventos que disparam atualização
+    document.addEventListener('atributosAlterados', atualizarPorAtributos);
+    
+    // 2. Atualizar quando o usuário interagir com a aba de perícias
+    document.addEventListener('click', function(e) {
+        // Só verificar se estamos na aba de perícias
+        const abaPericias = document.getElementById('pericias');
+        if (!abaPericias || abaPericias.style.display === 'none') {
+            return;
+        }
+        
+        // Verificar se clicou em elementos relacionados a perícias
+        const elementosPericia = [
+            '.pericia-item',
+            '.pericia-aprendida-item',
+            '.btn-remover-pericia',
+            '.filtro-btn[data-filtro]',
+            '#busca-pericias',
+            '#busca-tecnicas',
+            '.modal-pericia-overlay',
+            '.modal-especializacao-overlay'
+        ];
+        
+        // Verificar se o clique foi em algum desses elementos
+        for (const seletor of elementosPericia) {
+            if (e.target.closest(seletor)) {
+                setTimeout(() => {
+                    atualizarComSeguranca();
+                }, 1500); // Delay maior para garantir que a ação foi completada
+                break;
+            }
+        }
     });
     
-    // Observar mudanças no sistema de perícias
+    // 3. Atualizar periodicamente, mas com intervalo longo
+    // (Só quando o modal NÃO estiver aberto)
     setInterval(() => {
-        atualizarTecnicasDisponiveis();
-    }, 1000);
+        if (!estadoTecnicas.modalAberto && !atualizando) {
+            atualizarComSeguranca();
+        }
+    }, 15000); // 15 segundos é suficiente
+    
+    // 4. Adicionar também um listener para quando o usuário sai do modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && estadoTecnicas.modalAberto) {
+            // Quando fecha modal com ESC, atualizar depois
+            setTimeout(() => {
+                atualizarComSeguranca();
+            }, 500);
+        }
+    });
+    
+    // 5. Observar mudanças visíveis no DOM das perícias aprendidas
+    // (Versão simplificada que não causa flicker)
+    let ultimaContagemPericias = 0;
+    
+    const verificarMudancasPericias = () => {
+        if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) {
+            return;
+        }
+        
+        const novaContagem = window.estadoPericias.periciasAprendidas.length;
+        
+        if (novaContagem !== ultimaContagemPericias) {
+            console.log(`📊 Contagem de perícias mudou: ${ultimaContagemPericias} → ${novaContagem}`);
+            ultimaContagemPericias = novaContagem;
+            atualizarComSeguranca();
+        }
+    };
+    
+    // Verificar a cada 3 segundos
+    setInterval(verificarMudancasPericias, 3000);
+    
+    console.log("✅ Sistema de observação configurado com segurança");
 }
 
 // ===== INICIALIZAR =====
