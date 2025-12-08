@@ -1,90 +1,40 @@
-// ===== CATÁLOGO DE TÉCNICAS - SÓ ARQUEARIA MONTADA =====
-const catalogoTecnicas = {
-    "arquearia-montada": {
-        id: "arquearia-montada",
-        nome: "Arquearia Montada",
-        descricao: "Permite usar arco eficientemente enquanto cavalga. Base: Arco-4.",
-        dificuldade: "Difícil",
-        basePericia: "arco",
-        redutor: -4,
-        limitePericia: null,
-        preRequisitos: [
-            { pericia: "arco" },
-            { tipo: "cavalgar" }
-        ]
+// ===== VERIFICAR PRÉ-REQUISITOS ===== (VERSÃO CORRIGIDA)
+function verificarPreRequisitosTecnica(tecnica) {
+    if (!window.estadoPericias || !window.estadoPericias.periciasAprendidas) {
+        return { passou: false, motivo: 'Sistema de perícias não carregado' };
     }
-};
-
-// ===== FUNÇÕES DO CATÁLOGO =====
-window.catalogoTecnicas = {
-    obterTodasTecnicas: function() {
-        return Object.values(catalogoTecnicas).map(tecnica => ({
-            id: tecnica.id,
-            nome: tecnica.nome,
-            descricao: tecnica.descricao,
-            dificuldade: tecnica.dificuldade,
-            baseCalculo: {
-                tipo: "pericia",
-                idPericia: tecnica.basePericia,
-                redutor: tecnica.redutor || 0
-            },
-            limiteMaximo: tecnica.limitePericia ? {
-                tipo: "pericia", 
-                idPericia: tecnica.limitePericia
-            } : null,
-            preRequisitos: tecnica.preRequisitos ? tecnica.preRequisitos.map(prereq => {
-                if (prereq.tipo === "cavalgar") {
-                    return {
-                        verificarCavalgar: true,
-                        nomePericia: "Cavalgar",
-                        nivelMinimo: 0
-                    };
-                } else {
-                    return {
-                        idPericia: prereq.pericia,
-                        nomePericia: prereq.pericia,
-                        nivelMinimo: 0
-                    };
-                }
-            }) : []
-        }));
-    },
     
-    buscarTecnicaPorId: function(id) {
-        const tecnica = catalogoTecnicas[id];
-        if (!tecnica) return null;
+    const periciasAprendidas = window.estadoPericias.periciasAprendidas;
+    
+    for (const prereq of tecnica.preRequisitos) {
+        // Verificar Cavalgar (qualquer especialização)
+        if (prereq.verificarCavalgar === true) {
+            const temCavalgar = periciasAprendidas.some(p => 
+                p.id.startsWith('cavalgar-') ||          // Ex: cavalgar-cavalo, cavalgar-dragao
+                p.id === 'grupo-cavalgar'                // O grupo genérico no filtro DX
+            );
+            
+            if (!temCavalgar) {
+                return { passou: false, motivo: 'Falta: Cavalgar (qualquer animal)' };
+            }
+            continue;
+        }
         
-        return {
-            id: tecnica.id,
-            nome: tecnica.nome,
-            descricao: tecnica.descricao,
-            dificuldade: tecnica.dificuldade,
-            baseCalculo: {
-                tipo: "pericia",
-                idPericia: tecnica.basePericia,
-                redutor: tecnica.redutor || 0
-            },
-            limiteMaximo: tecnica.limitePericia ? {
-                tipo: "pericia",
-                idPericia: tecnica.limitePericia
-            } : null,
-            preRequisitos: tecnica.preRequisitos ? tecnica.preRequisitos.map(prereq => {
-                if (prereq.tipo === "cavalgar") {
-                    return {
-                        verificarCavalgar: true,
-                        nomePericia: "Cavalgar", 
-                        nivelMinimo: 0
-                    };
-                } else {
-                    return {
-                        idPericia: prereq.pericia,
-                        nomePericia: prereq.pericia,
-                        nivelMinimo: 0
-                    };
+        // Verificar perícia específica (ex: arco)
+        const idProcurado = prereq.idPericia;
+        if (idProcurado) {
+            const temPericia = periciasAprendidas.some(p => p.id === idProcurado);
+            if (!temPericia) {
+                // Tenta buscar por nome como fallback (opcional)
+                const porNome = periciasAprendidas.some(p => 
+                    p.nome.toLowerCase().includes(idProcurado.toLowerCase())
+                );
+                if (!porNome) {
+                    return { passou: false, motivo: `Falta: ${prereq.nomePericia || idProcurado}` };
                 }
-            }) : []
-        };
+            }
+        }
     }
-};
-
-console.log("✅ Catálogo de técnicas carregado (Só Arquearia Montada)");
+    
+    return { passou: true, motivo: '' };
+}
