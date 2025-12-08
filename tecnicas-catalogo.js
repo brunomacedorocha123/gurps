@@ -1,25 +1,38 @@
-// ===== CATÁLOGO DE TÉCNICAS =====
-// APENAS ARQUEARIA MONTADA POR ENQUANTO
+// ===== CATÁLOGO DE TÉCNICAS - APENAS ARQUEARIA MONTADA =====
 
 const catalogoTecnicas = {
-    "Arco": [
+    "Técnicas de Arco": [
         {
             id: "arquearia-montada",
             nome: "Arquearia Montada",
             descricao: "Permite usar arco com eficiência enquanto cavalga. <strong>Pré-definido: Arco-4</strong>. Os modificadores para disparar sobre um cavalo <strong>nunca podem reduzir o NH em Arco abaixo do NH do personagem em Arquearia Montada</strong>.",
-            prereq: "Arco e Cavalgar",
+            
+            // SISTEMA GENÉRICO: array de IDs de perícias necessárias
+            prereq: ["arco", "cavalgar"], // IDs das perícias requeridas
+            
             predefinido: "Arco-4",
-            dificuldade: "Difícil",
+            dificuldade: "Difícil", // Difícil: +1=2pts, +2=3pts, +3=4pts...
             atributoBase: "DX",
             limitacao: "Não pode exceder o NH em Arco",
             tipo: "tecnica-pericia",
-            periciaBase: "arco", 
-            origem: "Arco"
+            periciaBase: "arco", // Perícia à qual se aplica
+            origem: "Técnicas de Arco"
         }
     ]
+    // PARA ADICIONAR NOVA TÉCNICA FUTURA:
+    // "Técnicas de Espada": [
+    //     {
+    //         id: "ataque-retirada",
+    //         nome: "Ataque em Retirada",
+    //         prereq: ["espadas-lamina-larga"], // Só precisa de uma perícia
+    //         predefinido: "Espada-2",
+    //         dificuldade: "Média",
+    //         periciaBase: "espadas-lamina-larga"
+    //     }
+    // ]
 };
 
-// ===== FUNÇÕES AUXILIARES =====
+// ===== FUNÇÕES GENÉRICAS =====
 
 function obterTodasTecnicas() {
     const todas = [];
@@ -40,22 +53,30 @@ function obterTecnicasDisponiveis(periciasAprendidas) {
     const todasTecnicas = obterTodasTecnicas();
     const disponiveis = [];
     
-    // Verifica quais técnicas o personagem pode aprender
+    // IDs de todas as perícias aprendidas (para verificação rápida)
+    const idsPericiasAprendidas = periciasAprendidas.map(p => p.id);
+    
     todasTecnicas.forEach(tecnica => {
-        // Verifica pré-requisitos
-        let temPrereq = false;
-        
-        // Para Arquearia Montada: precisa ter Arco e Cavalgar
-        if (tecnica.id === "arquearia-montada") {
-            const temArco = periciasAprendidas.some(p => p.id === "arco");
-            const temCavalgar = periciasAprendidas.some(p => 
-                p.id.includes("cavalgar") || p.grupo === "Cavalgar"
-            );
+        // VERIFICAÇÃO GENÉRICA: precisa ter TODAS as perícias no array prereq
+        const temTodosPrereqs = tecnica.prereq.every(idPericiaNecessaria => {
+            // Verifica se tem a perícia pelo ID exato
+            if (idsPericiasAprendidas.includes(idPericiaNecessaria)) {
+                return true;
+            }
             
-            temPrereq = temArco && temCavalgar;
-        }
+            // Para Cavalgar: verifica especializações (cavalgar-*)
+            if (idPericiaNecessaria === "cavalgar") {
+                return periciasAprendidas.some(p => 
+                    p.id.startsWith("cavalgar-") || 
+                    (p.grupo && p.grupo === "Cavalgar") ||
+                    (p.nome && p.nome.includes("Cavalgar"))
+                );
+            }
+            
+            return false;
+        });
         
-        if (temPrereq) {
+        if (temTodosPrereqs) {
             disponiveis.push(tecnica);
         }
     });
@@ -68,13 +89,8 @@ function buscarTecnicaPorId(id) {
     return todas.find(t => t.id === id);
 }
 
-function buscarTecnicasPorCategoria(categoria) {
-    return catalogoTecnicas[categoria] || [];
-}
-
-// ===== EXPORTAR FUNÇÕES =====
+// ===== EXPORTAR =====
 window.catalogoTecnicas = catalogoTecnicas;
 window.obterTodasTecnicas = obterTodasTecnicas;
 window.obterTecnicasDisponiveis = obterTecnicasDisponiveis;
 window.buscarTecnicaPorId = buscarTecnicaPorId;
-window.buscarTecnicasPorCategoria = buscarTecnicasPorCategoria;

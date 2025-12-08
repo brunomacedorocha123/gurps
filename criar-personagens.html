@@ -1012,7 +1012,8 @@
 <!-- ABA PERÍCIAS -->
 <div id="pericias" class="tab-content">
   <div class="container-principal">
-    <!-- STATUS PERÍCIAS - VERSÃO POR ATRIBUTO -->
+    
+    <!-- ===== STATUS PERÍCIAS ===== -->
     <div class="status-cards-container">
       <div class="card-status-resumo">
         <h3><i class="fas fa-chart-pie"></i> Resumo das Perícias</h3>
@@ -1078,17 +1079,15 @@
       </div>
     </div>
 
-    <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
+    <!-- ===== SISTEMA DE PERÍCIAS ===== -->
     <div class="sistema-aquisicao-pericias">
-      <!-- COLUNA ESQUERDA - CATÁLOGO DE PERÍCIAS -->
+      <!-- COLUNA ESQUERDA - CATÁLOGO -->
       <div class="catalog-column-pericias">
         <div class="catalog-section-pericias">
           <h3><i class="fas fa-book-open"></i> Catálogo de Perícias</h3>
-          <!-- BARRA DE BUSCA -->
           <div class="busca-pericias">
             <input type="text" placeholder="🔍 Buscar perícias..." class="search-input" id="busca-pericias">
           </div>
-          <!-- FILTROS POR ATRIBUTO E COMBATE -->
           <div class="filtros-container-pericias">
             <div class="filtro-buttons">
               <button class="filtro-btn active" data-filtro="todas">
@@ -1111,39 +1110,33 @@
               </button>
             </div>
           </div>
-          <!-- LISTA DE PERÍCIAS DO CATÁLOGO -->
           <div class="catalog-list-pericias" id="lista-pericias">
-            <!-- Carregado dinamicamente -->
+            <!-- Carregado por JS -->
           </div>
         </div>
       </div>
 
-      <!-- COLUNA DIREITA - PERÍCIAS APRENDIDAS + DETALHES -->
+      <!-- COLUNA DIREITA - APRENDIDAS + DETALHES -->
       <div class="acquired-column-pericias">
-        <!-- SEÇÃO DE PERÍCIAS APRENDIDAS -->
         <div class="acquired-section-pericias">
           <h3><i class="fas fa-graduation-cap"></i> Perícias Aprendidas 
             <span class="points-badge" id="pontos-pericias-total">[0 pts]</span>
           </h3>
           <div class="acquired-list-pericias" id="pericias-aprendidas">
-            <!-- Carregado dinamicamente -->
+            <!-- Carregado por JS -->
           </div>
         </div>
-        <!-- SEÇÃO DE DETALHES DA PERÍCIA SELECIONADA -->
         <div class="detalhes-pericia-section">
           <div class="detalhes-pericia-content" id="detalhes-pericia-content">
-            <div class="nenhuma-pericia-selecionada">
-              <i class="fas fa-search"></i>
-              <div>Selecione uma perícia para ver os detalhes</div>
-            </div>
+            <!-- Carregado por JS -->
           </div>
         </div>
       </div>
     </div>
 
     <!-- ===== SEÇÃO DE TÉCNICAS ===== -->
-    <div class="tecnicas-section" style="margin-top: 40px; border-top: 2px solid rgba(255, 140, 0, 0.3); padding-top: 30px;">
-      <!-- STATUS DAS TÉCNICAS -->
+    <div class="tecnicas-section">
+      <!-- STATUS TÉCNICAS -->
       <div class="status-cards-container">
         <div class="card-status-resumo">
           <h3><i class="fas fa-tools"></i> Técnicas Especiais</h3>
@@ -1187,17 +1180,15 @@
         </div>
       </div>
 
-      <!-- SISTEMA DE AQUISIÇÃO DE TÉCNICAS -->
-      <div class="sistema-aquisicao-pericias" style="margin-top: 25px;">
-        <!-- COLUNA ESQUERDA - CATÁLOGO DE TÉCNICAS -->
+      <!-- SISTEMA DE TÉCNICAS -->
+      <div class="sistema-aquisicao-pericias">
+        <!-- CATÁLOGO TÉCNICAS -->
         <div class="catalog-column-pericias">
           <div class="catalog-section-pericias">
             <h3><i class="fas fa-book-open"></i> Técnicas Disponíveis</h3>
-            <!-- BARRA DE BUSCA -->
             <div class="busca-pericias">
               <input type="text" placeholder="🔍 Buscar técnicas..." class="search-input" id="busca-tecnicas">
             </div>
-            <!-- FILTROS POR DIFICULDADE -->
             <div class="filtros-container-pericias">
               <div class="filtro-buttons">
                 <button class="filtro-btn active" data-filtro="todas-tecnicas">
@@ -1211,58 +1202,53 @@
                 </button>
               </div>
             </div>
-            <!-- LISTA DE TÉCNICAS DISPONÍVEIS -->
             <div class="catalog-list-pericias" id="lista-tecnicas">
-              <!-- Carregado dinamicamente -->
+              <!-- Carregado por JS -->
             </div>
           </div>
         </div>
 
-        <!-- COLUNA DIREITA - TÉCNICAS APRENDIDAS + DETALHES -->
+        <!-- TÉCNICAS APRENDIDAS + DETALHES -->
         <div class="acquired-column-pericias">
-          <!-- TÉCNICAS APRENDIDAS -->
           <div class="acquired-section-pericias">
             <h3><i class="fas fa-graduation-cap"></i> Técnicas Aprendidas 
               <span class="points-badge" id="pontos-tecnicas-total">[0 pts]</span>
             </h3>
             <div class="acquired-list-pericias" id="tecnicas-aprendidas">
-              <!-- Carregado dinamicamente -->
+              <!-- Carregado por JS -->
             </div>
           </div>
-          <!-- DETALHES DA TÉCNICA SELECIONADA -->
           <div class="detalhes-pericia-section">
             <div class="detalhes-pericia-content" id="detalhes-tecnica-content">
-              <div class="nenhuma-pericia-selecionada">
-                <i class="fas fa-search"></i>
-                <div>Selecione uma técnica para ver os detalhes</div>
-              </div>
+              <!-- Carregado por JS -->
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- MODAIS -->
-    <!-- MODAL DE COMPRA/EDIÇÃO DE PERÍCIA -->
+    <!-- ===== MODAIS ===== -->
+    <!-- MODAL PERÍCIA -->
     <div class="modal-pericia-overlay" style="display: none;">
       <div class="modal-pericia">
-        <!-- Conteúdo preenchido dinamicamente -->
+        <!-- Conteúdo dinâmico -->
       </div>
     </div>
 
-    <!-- MODAL DE ESCOLHA DE ESPECIALIZAÇÃO -->
+    <!-- MODAL ESPECIALIZAÇÃO -->
     <div class="modal-especializacao-overlay" style="display: none;">
       <div class="modal-especializacao">
-        <!-- Conteúdo preenchido dinamicamente -->
+        <!-- Conteúdo dinâmico -->
       </div>
     </div>
 
-    <!-- MODAL DE COMPRA/EDIÇÃO DE TÉCNICA -->
+    <!-- MODAL TÉCNICA -->
     <div class="modal-tecnica-overlay" style="display: none;">
       <div class="modal-tecnica">
-        <!-- Conteúdo preenchido dinamicamente -->
+        <!-- Conteúdo dinâmico -->
       </div>
     </div>
+    
   </div>
 </div>
       <!-- ABA MAGIA -->
