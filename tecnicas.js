@@ -12,91 +12,185 @@ const estadoTecnicas = {
     tecnicasMedias: 0,
     tecnicasDificeis: 0,
     pontosMedias: 0,
-    pontosDificeis: 0
+    pontosDificeis: 0,
+    // Cache para debugging
+    debug: {
+        ultimaAtualizacao: null,
+        mudancasDetectadas: 0,
+        nhArcoHistorico: []
+    }
 };
 
 // ===== 2. FUNÇÕES PRINCIPAIS =====
 
-// 2.1 Obter NH REAL do Arco (COM CACHE)
+// 2.1 Obter NH REAL do Arco (COM CACHE E DEBUG)
 function obterNHArcoReal(forceUpdate = false) {
+    // DEBUG: Registrar tentativa
+    console.log("🎯 Calculando NH REAL do Arco...", {
+        forceUpdate,
+        cacheAtual: estadoTecnicas.ultimoNHArco
+    });
+    
     if (!forceUpdate && estadoTecnicas.ultimoNHArco > 0) {
+        console.log("📊 Usando cache do NH do Arco:", estadoTecnicas.ultimoNHArco);
         return estadoTecnicas.ultimoNHArco;
     }
     
-    console.log("🎯 Calculando NH REAL do Arco...");
-    
     let nhArco = 10; // Default
+    let fonte = 'default';
     
     // PRIMEIRO: Tentar pegar NH DIRETO da perícia
     if (window.estadoPericias?.periciasAprendidas) {
+        console.log("🔍 Procurando Arco em estadoPericias.periciasAprendidas");
         const arco = window.estadoPericias.periciasAprendidas.find(p => p.id === 'arco');
+        console.log("Resultado da busca:", arco);
+        
         if (arco && arco.nh) {
             nhArco = arco.nh;
-            console.log(`✅ NH do Arco (direto): ${nhArco}`);
+            fonte = 'estadoPericias (memória)';
+            console.log(`✅ NH do Arco (${fonte}): ${nhArco}`);
+        } else {
+            console.log("❌ Arco não encontrado em estadoPericias");
         }
+    } else {
+        console.log("⚠️ window.estadoPericias não existe ou não tem periciasAprendidas");
     }
     
     // SEGUNDO: Tentar do localStorage
     if (nhArco === 10) {
         try {
             const salvo = localStorage.getItem('periciasAprendidas');
+            console.log("📦 Tentando localStorage...");
+            
             if (salvo) {
                 const pericias = JSON.parse(salvo);
+                console.log("Perícias no localStorage:", pericias);
+                
                 const arco = pericias.find(p => p.id === 'arco');
                 if (arco && arco.nh) {
                     nhArco = arco.nh;
-                    console.log(`✅ NH do Arco (localStorage): ${nhArco}`);
+                    fonte = 'localStorage';
+                    console.log(`✅ NH do Arco (${fonte}): ${nhArco}`);
+                } else {
+                    console.log("❌ Arco não encontrado no localStorage");
                 }
+            } else {
+                console.log("📭 localStorage vazio para periciasAprendidas");
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error("❌ Erro ao ler localStorage:", e);
+        }
+    }
+    
+    // DEBUG: Registrar histórico
+    estadoTecnicas.debug.nhArcoHistorico.push({
+        timestamp: new Date().toISOString(),
+        nhArco: nhArco,
+        fonte: fonte
+    });
+    
+    // Manter apenas últimos 10 registros
+    if (estadoTecnicas.debug.nhArcoHistorico.length > 10) {
+        estadoTecnicas.debug.nhArcoHistorico.shift();
     }
     
     // Cache
     estadoTecnicas.ultimoNHArco = nhArco;
+    
+    console.log("📊 Cache atualizado:", {
+        nhArco: nhArco,
+        fonte: fonte,
+        historico: estadoTecnicas.debug.nhArcoHistorico
+    });
+    
     return nhArco;
 }
 
-// 2.2 Observar mudanças nas perícias (ATUALIZAÇÃO EM TEMPO REAL)
+// 2.2 Observar mudanças nas perícias (MELHORADO)
 function observarMudancasPericias() {
-    if (estadoTecnicas.observandoPericias) return;
+    if (estadoTecnicas.observandoPericias) {
+        console.log("👀 Já está observando perícias");
+        return;
+    }
     
-    console.log("👀 Observando mudanças nas perícias...");
+    console.log("👀 Iniciando observação de mudanças nas perícias...");
     
     // Observar localStorage (mudanças salvas)
     window.addEventListener('storage', function(e) {
         if (e.key === 'periciasAprendidas') {
-            console.log("📦 Perícias atualizadas no localStorage!");
+            console.log("📦 STORAGE EVENT: Perícias atualizadas no localStorage!");
             estadoTecnicas.ultimoNHArco = 0; // Reset cache
-            atualizarTecnicaNaTela();
+            estadoTecnicas.debug.mudancasDetectadas++;
+            
+            // Forçar atualização imediata
+            setTimeout(() => {
+                console.log("🔄 Forçando atualização após storage event");
+                atualizarTecnicaNaTela(true);
+                atualizarDisplayTecnicasAprendidas();
+            }, 100);
         }
     });
     
-    // Observar estadoPericias (mudanças em memória)
+    // Observar estadoPericias (mudanças em memória) - MELHORADO
     let ultimoEstado = '';
-    const intervalo = setInterval(() => {
-        if (window.estadoPericias?.periciasAprendidas) {
-            const estadoAtual = JSON.stringify(window.estadoPericias.periciasAprendidas);
-            if (estadoAtual !== ultimoEstado) {
-                console.log("🔄 Estado das perícias mudou!");
-                ultimoEstado = estadoAtual;
-                estadoTecnicas.ultimoNHArco = 0; // Reset cache
-                atualizarTecnicaNaTela();
-            }
+    let ultimoNH = 0;
+    
+    estadoTecnicas.intervaloObservacao = setInterval(() => {
+        // Verificar se o objeto existe
+        if (!window.estadoPericias) {
+            console.log("⚠️ estadoPericias não definido ainda");
+            return;
         }
-    }, 1000); // Verificar a cada 1 segundo
+        
+        if (!window.estadoPericias.periciasAprendidas) {
+            console.log("⚠️ periciasAprendidas não definido ainda");
+            return;
+        }
+        
+        // Verificar mudança no estado
+        const estadoAtual = JSON.stringify(window.estadoPericias.periciasAprendidas);
+        
+        // Verificar mudança específica no Arco
+        const arcoAtual = window.estadoPericias.periciasAprendidas.find(p => p.id === 'arco');
+        const nhArcoAtual = arcoAtual ? arcoAtual.nh : 0;
+        
+        if (estadoAtual !== ultimoEstado || nhArcoAtual !== ultimoNH) {
+            console.log("🔄 Mudança detectada no estado das perícias!", {
+                estadoMudou: estadoAtual !== ultimoEstado,
+                nhMudou: nhArcoAtual !== ultimoNH,
+                nhAnterior: ultimoNH,
+                nhAtual: nhArcoAtual
+            });
+            
+            ultimoEstado = estadoAtual;
+            ultimoNH = nhArcoAtual;
+            estadoTecnicas.ultimoNHArco = 0; // Reset cache
+            estadoTecnicas.debug.mudancasDetectadas++;
+            
+            // Atualizar imediatamente
+            atualizarTecnicaNaTela(true);
+            atualizarDisplayTecnicasAprendidas();
+        }
+    }, 500); // Verificar a cada 500ms (mais rápido)
     
     estadoTecnicas.observandoPericias = true;
-    estadoTecnicas.intervaloObservacao = intervalo;
+    console.log("✅ Observação de perícias iniciada!");
 }
 
-// 2.3 Verificar se tem Cavalgar
+// 2.3 Verificar se tem Cavalgar (COM DEBUG)
 function verificarTemCavalgar() {
+    console.log("🔍 Verificando se tem Cavalgar...");
+    
     // 1. No estadoPericias
     if (window.estadoPericias?.periciasAprendidas) {
         const cavalgar = window.estadoPericias.periciasAprendidas.find(p => 
             p.id.includes('cavalgar') || p.nome.includes('Cavalgar')
         );
-        if (cavalgar) return true;
+        
+        if (cavalgar) {
+            console.log("✅ Tem Cavalgar (encontrado em estadoPericias)");
+            return true;
+        }
     }
     
     // 2. No localStorage
@@ -104,12 +198,20 @@ function verificarTemCavalgar() {
         const salvo = localStorage.getItem('periciasAprendidas');
         if (salvo) {
             const pericias = JSON.parse(salvo);
-            return pericias.some(p => 
+            const temCavalgar = pericias.some(p => 
                 p.id.includes('cavalgar') || p.nome.includes('Cavalgar')
             );
+            
+            if (temCavalgar) {
+                console.log("✅ Tem Cavalgar (encontrado no localStorage)");
+                return true;
+            }
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error("❌ Erro ao verificar Cavalgar no localStorage:", e);
+    }
     
+    console.log("❌ Não tem Cavalgar");
     return false;
 }
 
@@ -124,10 +226,21 @@ function verificarPreRequisitosTecnica() {
     const temCavalgar = verificarTemCavalgar();
     const pode = temArcoNecessario && temCavalgar;
     
+    const motivo = !temArcoNecessario ? `Arco precisa ter pelo menos 1 ponto (nível atual: ${nivelArco})` : 
+                  !temCavalgar ? 'Falta Cavalgar' : 'OK';
+    
+    console.log("📋 Pré-requisitos:", {
+        nhArco: nhArco,
+        nivelArco: nivelArco,
+        temArcoNecessario: temArcoNecessario,
+        temCavalgar: temCavalgar,
+        pode: pode,
+        motivo: motivo
+    });
+    
     return {
         pode: pode,
-        motivo: !temArcoNecessario ? `Arco precisa ter pelo menos 1 ponto` : 
-                !temCavalgar ? 'Falta Cavalgar' : 'OK',
+        motivo: motivo,
         nhArco: nhArco,
         nivelArco: nivelArco
     };
@@ -142,6 +255,8 @@ function calcularCustoNiveis(niveis) {
 
 // 2.6 Atualizar estatísticas das técnicas
 function atualizarEstatisticasTecnicas() {
+    console.log("📊 Atualizando estatísticas das técnicas...");
+    
     // Reset contadores
     estadoTecnicas.tecnicasMedias = 0;
     estadoTecnicas.tecnicasDificeis = 0;
@@ -162,38 +277,120 @@ function atualizarEstatisticasTecnicas() {
     // Atualizar total
     estadoTecnicas.pontosTotal = estadoTecnicas.pontosMedias + estadoTecnicas.pontosDificeis;
     
+    console.log("📈 Estatísticas atualizadas:", {
+        medias: estadoTecnicas.tecnicasMedias,
+        dificeis: estadoTecnicas.tecnicasDificeis,
+        pontosMedias: estadoTecnicas.pontosMedias,
+        pontosDificeis: estadoTecnicas.pontosDificeis,
+        total: estadoTecnicas.pontosTotal
+    });
+    
     // Atualizar na interface
     atualizarDisplayEstatisticas();
 }
 
 // 2.7 Atualizar display das estatísticas
 function atualizarDisplayEstatisticas() {
+    console.log("🔄 Atualizando display das estatísticas...");
+    
     // Atualizar quantidade de técnicas
     const qtdMedio = document.getElementById('qtd-tecnicas-medio');
     const qtdDificil = document.getElementById('qtd-tecnicas-dificil');
     const qtdTotal = document.getElementById('qtd-tecnicas-total');
     
-    if (qtdMedio) qtdMedio.textContent = estadoTecnicas.tecnicasMedias;
-    if (qtdDificil) qtdDificil.textContent = estadoTecnicas.tecnicasDificeis;
-    if (qtdTotal) qtdTotal.textContent = estadoTecnicas.tecnicasMedias + estadoTecnicas.tecnicasDificeis;
+    if (qtdMedio) {
+        qtdMedio.textContent = estadoTecnicas.tecnicasMedias;
+        console.log("✅ qtd-tecnicas-medio:", estadoTecnicas.tecnicasMedias);
+    }
+    
+    if (qtdDificil) {
+        qtdDificil.textContent = estadoTecnicas.tecnicasDificeis;
+        console.log("✅ qtd-tecnicas-dificil:", estadoTecnicas.tecnicasDificeis);
+    }
+    
+    if (qtdTotal) {
+        qtdTotal.textContent = estadoTecnicas.tecnicasMedias + estadoTecnicas.tecnicasDificeis;
+        console.log("✅ qtd-tecnicas-total:", estadoTecnicas.tecnicasMedias + estadoTecnicas.tecnicasDificeis);
+    }
     
     // Atualizar pontos gastos
     const ptsMedio = document.getElementById('pts-tecnicas-medio');
     const ptsDificil = document.getElementById('pts-tecnicas-dificil');
     const ptsTotal = document.getElementById('pts-tecnicas-total');
     
-    if (ptsMedio) ptsMedio.textContent = `(${estadoTecnicas.pontosMedias} pts)`;
-    if (ptsDificil) ptsDificil.textContent = `(${estadoTecnicas.pontosDificeis} pts)`;
-    if (ptsTotal) ptsTotal.textContent = `(${estadoTecnicas.pontosTotal} pts)`;
+    if (ptsMedio) {
+        ptsMedio.textContent = `(${estadoTecnicas.pontosMedias} pts)`;
+        console.log("✅ pts-tecnicas-medio:", estadoTecnicas.pontosMedias);
+    }
+    
+    if (ptsDificil) {
+        ptsDificil.textContent = `(${estadoTecnicas.pontosDificeis} pts)`;
+        console.log("✅ pts-tecnicas-dificil:", estadoTecnicas.pontosDificeis);
+    }
+    
+    if (ptsTotal) {
+        ptsTotal.textContent = `(${estadoTecnicas.pontosTotal} pts)`;
+        console.log("✅ pts-tecnicas-total:", estadoTecnicas.pontosTotal);
+    }
     
     // Atualizar badge do total
     const badgeTotal = document.getElementById('pontos-tecnicas-total');
-    if (badgeTotal) badgeTotal.textContent = `[${estadoTecnicas.pontosTotal} pts]`;
+    if (badgeTotal) {
+        badgeTotal.textContent = `[${estadoTecnicas.pontosTotal} pts]`;
+        console.log("✅ pontos-tecnicas-total:", estadoTecnicas.pontosTotal);
+    }
+    
+    console.log("✅ Display de estatísticas atualizado!");
+}
+
+// 2.8 Remover técnica (EXCLUSÃO)
+function removerTecnica(idTecnica) {
+    console.log(`🗑️ Tentando remover técnica: ${idTecnica}`);
+    
+    const tecnicaIndex = estadoTecnicas.aprendidas.findIndex(t => t.id === idTecnica);
+    
+    if (tecnicaIndex === -1) {
+        console.log("❌ Técnica não encontrada para remover");
+        return false;
+    }
+    
+    const tecnica = estadoTecnicas.aprendidas[tecnicaIndex];
+    const custo = tecnica.custoTotal || 0;
+    
+    if (confirm(`Tem certeza que deseja remover a técnica "${tecnica.nome}"?\n\n` +
+               `Níveis: ${tecnica.niveisComprados}\n` +
+               `Custo recuperado: ${custo} pontos`)) {
+        
+        // Remover do array
+        estadoTecnicas.aprendidas.splice(tecnicaIndex, 1);
+        
+        // Salvar no localStorage
+        localStorage.setItem('tecnicasAprendidas', JSON.stringify(estadoTecnicas.aprendidas));
+        
+        // Atualizar estatísticas
+        atualizarEstatisticasTecnicas();
+        
+        // Atualizar displays
+        atualizarTecnicaNaTela(true);
+        atualizarDisplayTecnicasAprendidas();
+        
+        console.log(`✅ Técnica "${tecnica.nome}" removida com sucesso!`);
+        alert(`✅ Técnica "${tecnica.nome}" removida!\n${custo} pontos recuperados.`);
+        
+        return true;
+    }
+    
+    return false;
 }
 
 // ===== 3. ATUALIZAR TÉCNICA NA TELA (FUNÇÃO PRINCIPAL) =====
-function atualizarTecnicaNaTela() {
-    console.log("🔄 Atualizando técnica na tela...");
+function atualizarTecnicaNaTela(forcarAtualizacao = false) {
+    console.log("🔄 Atualizando técnica na tela...", {
+        forcarAtualizacao,
+        timestamp: new Date().toISOString()
+    });
+    
+    estadoTecnicas.debug.ultimaAtualizacao = new Date().toISOString();
     
     // Encontrar container
     let container = document.getElementById('lista-tecnicas');
@@ -202,10 +399,12 @@ function atualizarTecnicaNaTela() {
     }
     
     if (!container) {
-        console.warn("Container não encontrado, tentando novamente em 500ms...");
-        setTimeout(atualizarTecnicaNaTela, 500);
+        console.warn("❌ Container não encontrado, tentando novamente em 500ms...");
+        setTimeout(() => atualizarTecnicaNaTela(true), 500);
         return;
     }
+    
+    console.log("✅ Container encontrado:", container.id || container.className);
     
     // Verificar pré-requisitos ATUALIZADOS
     const prereq = verificarPreRequisitosTecnica();
@@ -216,6 +415,16 @@ function atualizarTecnicaNaTela() {
     const tecnicaAprendida = estadoTecnicas.aprendidas.find(t => t.id === 'arquearia-montada');
     const niveisComprados = tecnicaAprendida ? tecnicaAprendida.niveisComprados || 0 : 0;
     const nhAtual = nhBase + niveisComprados;
+    
+    console.log("📊 Dados da técnica:", {
+        nhArco: prereq.nhArco,
+        nhBase: nhBase,
+        maxNiveis: maxNiveis,
+        tecnicaAprendida: !!tecnicaAprendida,
+        niveisComprados: niveisComprados,
+        nhAtual: nhAtual,
+        pode: prereq.pode
+    });
     
     // Verificar se já existe um card de técnica
     const tecnicaExistente = document.getElementById('tecnica-arquearia-montada');
@@ -234,11 +443,16 @@ function atualizarTecnicaNaTela() {
             cursor: ${prereq.pode ? 'pointer' : 'not-allowed'};
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            position: relative;
         `;
         
         // Adicionar evento de clique apenas se disponível
         if (prereq.pode) {
             tecnicaDiv.onclick = function(e) {
+                // Não abrir modal se clicar no botão de exclusão
+                if (e.target.closest('.btn-excluir-tecnica')) {
+                    return;
+                }
                 e.stopPropagation();
                 abrirModalTecnicaCompleta();
             };
@@ -246,8 +460,17 @@ function atualizarTecnicaNaTela() {
         
         // Conteúdo HTML da técnica
         tecnicaDiv.innerHTML = `
+            <!-- BOTÃO DE EXCLUSÃO (se aprendida) -->
+            ${tecnicaAprendida ? `
+                <button class="btn-excluir-tecnica" 
+                        onclick="event.stopPropagation(); removerTecnica('arquearia-montada')"
+                        style="position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: #e74c3c; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 10;">
+                    ×
+                </button>
+            ` : ''}
+            
             <!-- CABEÇALHO -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; ${tecnicaAprendida ? 'padding-right: 30px;' : ''}">
                 <div>
                     <h3 style="color: ${prereq.pode ? '#ffd700' : '#95a5a6'}; margin: 0 0 5px 0; font-size: 18px;">
                         🏹 Arquearia Montada
@@ -307,6 +530,8 @@ function atualizarTecnicaNaTela() {
             <!-- ATUALIZAÇÃO EM TEMPO REAL -->
             <div style="color: #95a5a6; font-size: 11px; margin-top: 10px; text-align: right;">
                 <i class="fas fa-sync-alt"></i> Atualiza automaticamente
+                <br>
+                <small style="font-size: 9px;">Última atualização: ${new Date().toLocaleTimeString()}</small>
             </div>
         `;
         
@@ -318,18 +543,20 @@ function atualizarTecnicaNaTela() {
             
             // Inserir no início do container
             container.insertBefore(tecnicaDiv, container.firstChild);
-            console.log(`✅ Técnica atualizada na lista! NH: ${nhAtual} (Arco: ${prereq.nhArco})`);
+            console.log(`✅ Técnica criada na lista! NH: ${nhAtual} (Arco: ${prereq.nhArco})`);
         }
     } else {
         // Atualizar card existente
+        console.log("🔄 Atualizando card existente...");
+        
         tecnicaExistente.style.borderColor = prereq.pode ? (tecnicaAprendida ? '#9b59b6' : '#27ae60') : '#e74c3c';
         
         const titulo = tecnicaExistente.querySelector('h3');
         if (titulo) {
             titulo.style.color = prereq.pode ? '#ffd700' : '#95a5a6';
-            const iconSpan = titulo.querySelector('span');
-            if (iconSpan) {
-                iconSpan.textContent = tecnicaAprendida ? '✅' : (prereq.pode ? '▶' : '🔒');
+            const spans = titulo.querySelectorAll('span');
+            if (spans.length > 0) {
+                spans[0].textContent = tecnicaAprendida ? '✅' : (prereq.pode ? '▶' : '🔒');
             }
         }
         
@@ -339,6 +566,7 @@ function atualizarTecnicaNaTela() {
             badge.textContent = `NH ${nhAtual}${niveisComprados > 0 ? ` (+${niveisComprados})` : ''}`;
         }
         
+        // Atualizar status
         const statusDiv = tecnicaExistente.querySelector('div[style*="margin-top: 15px;"] > div');
         if (statusDiv) {
             statusDiv.innerHTML = !prereq.pode ? `
@@ -361,11 +589,64 @@ function atualizarTecnicaNaTela() {
                 </div>
             `;
         }
+        
+        // Atualizar valores numéricos
+        const baseDiv = tecnicaExistente.querySelector('div[style*="color: #3498db;"]');
+        const maxDiv = tecnicaExistente.querySelector('div[style*="color: #2ecc71;"]:last-child');
+        
+        if (baseDiv) baseDiv.textContent = nhBase;
+        if (maxDiv) maxDiv.textContent = prereq.nhArco;
+        
+        // Atualizar botão de exclusão
+        let btnExcluir = tecnicaExistente.querySelector('.btn-excluir-tecnica');
+        if (tecnicaAprendida && !btnExcluir) {
+            // Adicionar botão de exclusão
+            const novoBtn = document.createElement('button');
+            novoBtn.className = 'btn-excluir-tecnica';
+            novoBtn.innerHTML = '×';
+            novoBtn.style.cssText = `
+                position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; 
+                border-radius: 50%; background: #e74c3c; color: white; border: none; 
+                cursor: pointer; display: flex; align-items: center; justify-content: center; 
+                font-size: 18px; z-index: 10;
+            `;
+            novoBtn.onclick = function(e) {
+                e.stopPropagation();
+                removerTecnica('arquearia-montada');
+            };
+            
+            tecnicaExistente.appendChild(novoBtn);
+            
+            // Ajustar padding do cabeçalho
+            const cabecalho = tecnicaExistente.querySelector('div[style*="display: flex; justify-content: space-between;"]');
+            if (cabecalho) {
+                cabecalho.style.paddingRight = '30px';
+            }
+        } else if (!tecnicaAprendida && btnExcluir) {
+            // Remover botão de exclusão
+            btnExcluir.remove();
+            
+            // Ajustar padding do cabeçalho
+            const cabecalho = tecnicaExistente.querySelector('div[style*="display: flex; justify-content: space-between;"]');
+            if (cabecalho) {
+                cabecalho.style.paddingRight = '';
+            }
+        }
+        
+        // Atualizar timestamp
+        const timestampDiv = tecnicaExistente.querySelector('small');
+        if (timestampDiv) {
+            timestampDiv.textContent = `Última atualização: ${new Date().toLocaleTimeString()}`;
+        }
+        
+        console.log(`✅ Técnica atualizada na lista! NH: ${nhAtual} (Arco: ${prereq.nhArco})`);
     }
 }
 
 // ===== 4. MODAL DE COMPRA - USANDO OS MODAIS DO HTML =====
 function abrirModalTecnicaCompleta() {
+    console.log("🔄 Abrindo modal da técnica...");
+    
     const nhArco = obterNHArcoReal();
     const nhBase = nhArco - 4;
     const tecnicaAprendida = estadoTecnicas.aprendidas.find(t => t.id === 'arquearia-montada');
@@ -379,10 +660,12 @@ function abrirModalTecnicaCompleta() {
     const modalContent = document.querySelector('.modal-tecnica');
     
     if (!modalOverlay || !modalContent) {
-        console.error('Modal de técnica não encontrado!');
+        console.error('❌ Modal de técnica não encontrado!');
         alert('Erro: Modal de técnica não encontrado');
         return;
     }
+    
+    console.log("✅ Modal encontrado, preenchendo conteúdo...");
     
     // Preencher o modal
     modalContent.innerHTML = `
@@ -491,19 +774,30 @@ function abrirModalTecnicaCompleta() {
     
     // Mostrar o modal
     modalOverlay.style.display = 'flex';
+    console.log("✅ Modal exibido!");
     
     // Configurar eventos
     function configurarEventosModal() {
+        console.log("🔧 Configurando eventos do modal...");
+        
         // Fechar modal
         const fecharBtn = document.getElementById('fechar-modal-tecnica');
         const cancelarBtn = document.getElementById('btn-cancelar-tecnica');
         
         const fecharModal = function() {
+            console.log("❌ Fechando modal...");
             modalOverlay.style.display = 'none';
         };
         
-        if (fecharBtn) fecharBtn.onclick = fecharModal;
-        if (cancelarBtn) cancelarBtn.onclick = fecharModal;
+        if (fecharBtn) {
+            fecharBtn.onclick = fecharModal;
+            console.log("✅ Evento de fechar configurado");
+        }
+        
+        if (cancelarBtn) {
+            cancelarBtn.onclick = fecharModal;
+            console.log("✅ Evento de cancelar configurado");
+        }
         
         // Fechar ao clicar fora
         modalOverlay.onclick = function(e) {
@@ -514,9 +808,12 @@ function abrirModalTecnicaCompleta() {
         
         // Função para atualizar nível
         function mudarNivel(mudanca) {
+            console.log(`📈 Mudando nível: ${mudanca}`);
             const novoNivel = niveisSelecionados + mudanca;
             if (novoNivel >= 0 && novoNivel <= maxNiveis) {
                 niveisSelecionados = novoNivel;
+                
+                console.log("Novo nível selecionado:", niveisSelecionados);
                 
                 // Atualizar display
                 const nivelDisplay = document.getElementById('nivel-display-tecnica');
@@ -568,6 +865,8 @@ function abrirModalTecnicaCompleta() {
                         btnComprar.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
                     }
                 }
+                
+                console.log("✅ Display atualizado no modal");
             }
         }
         
@@ -575,25 +874,38 @@ function abrirModalTecnicaCompleta() {
         const btnMenos = document.getElementById('btn-menos-tecnica');
         const btnMais = document.getElementById('btn-mais-tecnica');
         
-        if (btnMenos) btnMenos.onclick = () => mudarNivel(-1);
-        if (btnMais) btnMais.onclick = () => mudarNivel(1);
+        if (btnMenos) {
+            btnMenos.onclick = () => mudarNivel(-1);
+            console.log("✅ Evento do botão - configurado");
+        }
+        
+        if (btnMais) {
+            btnMais.onclick = () => mudarNivel(1);
+            console.log("✅ Evento do botão + configurado");
+        }
         
         // Evento do botão comprar
         const btnComprar = document.getElementById('btn-comprar-tecnica');
         if (btnComprar) {
             btnComprar.onclick = function() {
+                console.log("🛒 Botão comprar clicado!");
                 const custo = calcularCustoNiveis(niveisSelecionados);
                 
                 if (niveisSelecionados === niveisAtuais) {
+                    console.log("ℹ️ Nenhuma alteração feita");
                     alert("Nenhuma alteração feita.");
                     modalOverlay.style.display = 'none';
                     return;
                 }
                 
+                console.log("Confirmação solicitada...");
+                
                 if (confirm(`Confirmar ${niveisSelecionados > niveisAtuais ? 'compra' : 'redução'}?\n\n` +
                            `Níveis: ${niveisAtuais} → ${niveisSelecionados}\n` +
                            `NH: ${nhBase + niveisAtuais} → ${nhBase + niveisSelecionados}\n` +
                            `Custo: ${custo} pontos`)) {
+                    
+                    console.log("✅ Confirmação recebida, atualizando técnica...");
                     
                     // Atualizar estado
                     const index = estadoTecnicas.aprendidas.findIndex(t => t.id === 'arquearia-montada');
@@ -610,6 +922,7 @@ function abrirModalTecnicaCompleta() {
                             modificadorBase: -4,
                             dataAtualizacao: new Date().toISOString()
                         };
+                        console.log("📝 Técnica atualizada");
                     } else {
                         // Nova técnica
                         estadoTecnicas.aprendidas.push({
@@ -623,17 +936,21 @@ function abrirModalTecnicaCompleta() {
                             modificadorBase: -4,
                             dataAquisicao: new Date().toISOString()
                         });
+                        console.log("🆕 Nova técnica criada");
                     }
                     
                     // Salvar no localStorage
                     localStorage.setItem('tecnicasAprendidas', JSON.stringify(estadoTecnicas.aprendidas));
+                    console.log("💾 Dados salvos no localStorage");
                     
                     // Atualizar estatísticas
                     atualizarEstatisticasTecnicas();
                     
                     // Atualizar display
                     atualizarDisplayTecnicasAprendidas();
-                    atualizarTecnicaNaTela();
+                    atualizarTecnicaNaTela(true);
+                    
+                    console.log("✅ Técnica salva com sucesso!");
                     
                     alert(`✅ Técnica ${niveisSelecionados > niveisAtuais ? 'comprada' : 'atualizada'} com sucesso!\n\n` +
                           `Níveis: ${niveisSelecionados}\n` +
@@ -641,9 +958,14 @@ function abrirModalTecnicaCompleta() {
                           `Custo: ${custo} pontos`);
                     
                     modalOverlay.style.display = 'none';
+                } else {
+                    console.log("❌ Confirmação cancelada");
                 }
             };
+            console.log("✅ Evento do botão comprar configurado");
         }
+        
+        console.log("✅ Todos os eventos do modal configurados!");
     }
     
     // Configurar eventos após o DOM ser atualizado
@@ -652,12 +974,16 @@ function abrirModalTecnicaCompleta() {
 
 // ===== 5. ATUALIZAR DISPLAY DE TÉCNICAS APRENDIDAS =====
 function atualizarDisplayTecnicasAprendidas() {
+    console.log("🔄 Atualizando display de técnicas aprendidas...");
+    
     const containerAprendidas = document.getElementById('tecnicas-aprendidas');
     
     if (!containerAprendidas) {
-        console.warn('Container de técnicas aprendidas não encontrado!');
+        console.warn('❌ Container de técnicas aprendidas não encontrado!');
         return;
     }
+    
+    console.log(`📊 Técnicas para mostrar: ${estadoTecnicas.aprendidas.length}`);
     
     // Limpar container
     containerAprendidas.innerHTML = '';
@@ -671,11 +997,12 @@ function atualizarDisplayTecnicasAprendidas() {
                 <small>As técnicas que você aprender aparecerão aqui</small>
             </div>
         `;
+        console.log("✅ Placeholder mostrado (nenhuma técnica)");
         return;
     }
     
     // Adicionar cada técnica aprendida
-    estadoTecnicas.aprendidas.forEach(tecnica => {
+    estadoTecnicas.aprendidas.forEach((tecnica, index) => {
         const nhArco = obterNHArcoReal();
         const nhBase = nhArco - 4;
         const nhAtual = nhBase + (tecnica.niveisComprados || 0);
@@ -690,11 +1017,19 @@ function atualizarDisplayTecnicasAprendidas() {
             margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
         `;
         item.onclick = () => abrirModalTecnicaCompleta();
         
         item.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <!-- BOTÃO DE EXCLUSÃO -->
+            <button class="btn-excluir-tecnica" 
+                    onclick="event.stopPropagation(); removerTecnica('${tecnica.id}')"
+                    style="position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: #e74c3c; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 10;">
+                ×
+            </button>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-right: 30px;">
                 <div style="flex: 1;">
                     <h4 style="color: #ffd700; margin: 0 0 5px 0; font-size: 16px;">
                         🏹 ${tecnica.nome}
@@ -727,6 +1062,7 @@ function atualizarDisplayTecnicasAprendidas() {
         `;
         
         containerAprendidas.appendChild(item);
+        console.log(`✅ Técnica ${index + 1} adicionada ao display: ${tecnica.nome}`);
     });
     
     console.log(`✅ Display atualizado: ${estadoTecnicas.aprendidas.length} técnicas aprendidas`);
@@ -734,17 +1070,20 @@ function atualizarDisplayTecnicasAprendidas() {
 
 // ===== 6. INICIALIZAÇÃO COMPLETA =====
 function inicializarSistemaTecnicas() {
-    console.log("🚀 Inicializando sistema de técnicas...");
+    console.log("🚀 INICIALIZAÇÃO: Sistema de técnicas...");
     
     // Carregar técnicas aprendidas
     try {
         const salvo = localStorage.getItem('tecnicasAprendidas');
         if (salvo) {
             estadoTecnicas.aprendidas = JSON.parse(salvo);
-            console.log(`📂 Carregadas ${estadoTecnicas.aprendidas.length} técnicas`);
+            console.log(`📂 Carregadas ${estadoTecnicas.aprendidas.length} técnicas do localStorage`);
+            console.log("Detalhes:", estadoTecnicas.aprendidas);
+        } else {
+            console.log("📭 Nenhuma técnica salva encontrada no localStorage");
         }
     } catch (e) {
-        console.log("⚠️ Nenhuma técnica salva encontrada");
+        console.error("❌ Erro ao carregar técnicas do localStorage:", e);
     }
     
     // Iniciar observação de mudanças
@@ -755,16 +1094,26 @@ function inicializarSistemaTecnicas() {
     
     // Atualizar display inicial
     setTimeout(() => {
-        atualizarTecnicaNaTela();
+        console.log("🔄 Primeira atualização da interface...");
+        atualizarTecnicaNaTela(true);
         atualizarDisplayTecnicasAprendidas();
     }, 1000);
     
-    // Atualizar periodicamente
-    setInterval(() => {
-        atualizarTecnicaNaTela();
+    // Atualizar periodicamente (backup)
+    estadoTecnicas.intervaloBackup = setInterval(() => {
+        console.log("⏰ Atualização periódica...");
+        atualizarTecnicaNaTela(false);
     }, 3000);
     
     console.log("✅ Sistema de técnicas inicializado!");
+    
+    // Log inicial do estado
+    console.log("📊 ESTADO INICIAL DO SISTEMA:", {
+        aprendidas: estadoTecnicas.aprendidas,
+        pontosTotal: estadoTecnicas.pontosTotal,
+        ultimoNHArco: estadoTecnicas.ultimoNHArco,
+        debug: estadoTecnicas.debug
+    });
 }
 
 // ===== 7. CARREGAR =====
@@ -774,8 +1123,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Aguardar outros sistemas carregarem
     setTimeout(() => {
         if (!window.sistemaTecnicasInicializado) {
+            console.log("⚡ Iniciando sistema de técnicas...");
             inicializarSistemaTecnicas();
             window.sistemaTecnicasInicializado = true;
+        } else {
+            console.log("⚠️ Sistema de técnicas já inicializado");
         }
     }, 2000);
 });
@@ -785,22 +1137,37 @@ window.abrirModalTecnica = abrirModalTecnicaCompleta;
 window.atualizarTecnicaNaTela = atualizarTecnicaNaTela;
 window.atualizarDisplayTecnicasAprendidas = atualizarDisplayTecnicasAprendidas;
 window.atualizarEstatisticasTecnicas = atualizarEstatisticasTecnicas;
+window.removerTecnica = removerTecnica;
+window.obterNHArcoReal = obterNHArcoReal;
 
-// Função de teste
+// Função de teste e debug
 window.testarSistemaTecnicas = function() {
-    console.log("🧪 Testando sistema de técnicas...");
-    console.log("NH Arco:", obterNHArcoReal());
-    console.log("Pré-requisitos:", verificarPreRequisitosTecnica());
-    console.log("Técnicas aprendidas:", estadoTecnicas.aprendidas);
-    console.log("Estatísticas:", {
+    console.log("🧪 === TESTE DO SISTEMA DE TÉCNICAS ===");
+    
+    console.log("1. NH do Arco atual:", obterNHArcoReal());
+    
+    console.log("2. Pré-requisitos:", verificarPreRequisitosTecnica());
+    
+    console.log("3. Técnicas aprendidas:", estadoTecnicas.aprendidas);
+    
+    console.log("4. Estatísticas:", {
         medias: estadoTecnicas.tecnicasMedias,
         dificeis: estadoTecnicas.tecnicasDificeis,
         total: estadoTecnicas.pontosTotal
     });
     
-    atualizarTecnicaNaTela();
+    console.log("5. Debug info:", {
+        ultimaAtualizacao: estadoTecnicas.debug.ultimaAtualizacao,
+        mudancasDetectadas: estadoTecnicas.debug.mudancasDetectadas,
+        nhArcoHistorico: estadoTecnicas.debug.nhArcoHistorico
+    });
+    
+    console.log("6. Forçando atualização da interface...");
+    atualizarTecnicaNaTela(true);
     atualizarDisplayTecnicasAprendidas();
     atualizarEstatisticasTecnicas();
+    
+    console.log("✅ Teste completo!");
 };
 
 // Função para limpar dados
@@ -812,10 +1179,20 @@ window.limparTecnicas = function() {
         estadoTecnicas.pontosTotal = 0;
         localStorage.removeItem('tecnicasAprendidas');
         alert("✅ Técnicas limpas!");
-        atualizarTecnicaNaTela();
+        atualizarTecnicaNaTela(true);
         atualizarDisplayTecnicasAprendidas();
         atualizarEstatisticasTecnicas();
     }
+};
+
+// Função para forçar atualização do NH do Arco
+window.forcarAtualizacaoNHArco = function() {
+    console.log("🔄 Forçando atualização do NH do Arco...");
+    estadoTecnicas.ultimoNHArco = 0;
+    const nh = obterNHArcoReal(true);
+    console.log("✅ Novo NH do Arco:", nh);
+    atualizarTecnicaNaTela(true);
+    return nh;
 };
 
 console.log("✅ Sistema de técnicas carregado (atualização em tempo real)!");
