@@ -9,6 +9,7 @@ let dashboardEstado = {
         gastosPericias: 0,
         gastosMagias: 0,
         gastosIdiomas: 0,
+        gastosTecnicas: 0, // ← NOVO: pontos gastos em técnicas
         desvantagensVantagens: 0,
         aparenciaDesvantagens: 0,
         riquezaDesvantagens: 0,
@@ -45,7 +46,7 @@ let dashboardEstado = {
     status: {
         ultimaAtualizacao: new Date().toISOString(),
         integridade: 'OK',
-        versao: '3.3'
+        versao: '3.4'
     }
 };
 
@@ -235,6 +236,7 @@ function monitorarOutrasAbas() {
         puxarDadosCaracteristicas();
         puxarDadosAparencia();
         puxarDadosRiqueza();
+        puxarDadosTecnicas(); // ← NOVA: Monitorar técnicas também
         
         calcularTotalDesvantagens();
         atualizarDisplayResumoGastos();
@@ -361,7 +363,7 @@ function puxarDadosMagias() {
     }
 }
 
-// ===== 5.6 MONITORAMENTO DE APARÊNCIA (VERSÃO CORRIGIDA) =====
+// ===== 5.6 MONITORAMENTO DE APARÊNCIA =====
 function puxarDadosAparencia() {
     try {
         dashboardEstado.pontos.aparenciaDesvantagens = 0;
@@ -370,13 +372,9 @@ function puxarDadosAparencia() {
         if (selectAparencia) {
             const valor = parseInt(selectAparencia.value) || 0;
             
-            // CORREÇÃO DO BUG: Se for negativo, é desvantagem (ganha pontos)
-            // Se for positivo, deve ser adicionado às vantagens (gasta pontos)
             if (valor < 0) {
                 dashboardEstado.pontos.aparenciaDesvantagens = Math.abs(valor);
             }
-            // Nota: Valor positivo não é tratado aqui porque aparência positiva
-            // deve ser incluída no cálculo de vantagens
         }
         
         calcularSaldoDisponivel();
@@ -447,6 +445,38 @@ function puxarDadosCaracteristicas() {
     }
 }
 
+// ===== 5.9 MONITORAMENTO DE TÉCNICAS (NOVA FUNÇÃO) =====
+function puxarDadosTecnicas() {
+    try {
+        dashboardEstado.pontos.gastosTecnicas = 0;
+        
+        // Ler diretamente do localStorage onde técnicas são salvas
+        const tecnicasSalvas = localStorage.getItem('tecnicasAprendidas');
+        
+        if (tecnicasSalvas) {
+            try {
+                const tecnicas = JSON.parse(tecnicasSalvas);
+                
+                // Somar pontos de todas as técnicas
+                let total = 0;
+                tecnicas.forEach(tecnica => {
+                    total += tecnica.custoTotal || 0;
+                });
+                
+                dashboardEstado.pontos.gastosTecnicas = total;
+                
+            } catch (e) {
+                console.log('Erro ao parsear técnicas:', e);
+            }
+        }
+        
+        calcularSaldoDisponivel();
+        
+    } catch (error) {
+        console.log('Erro ao puxar técnicas:', error);
+    }
+}
+
 // ===== 6. CÁLCULO DO TOTAL DE DESVANTAGENS =====
 function calcularTotalDesvantagens() {
     const total = 
@@ -460,7 +490,7 @@ function calcularTotalDesvantagens() {
     return total;
 }
 
-// ===== 7. CÁLCULO DO SALDO DISPONÍVEL (VERSÃO CORRIGIDA) =====
+// ===== 7. CÁLCULO DO SALDO DISPONÍVEL =====
 function calcularSaldoDisponivel() {
     calcularTotalDesvantagens();
     
@@ -471,11 +501,12 @@ function calcularSaldoDisponivel() {
         gastosPericias, 
         gastosMagias,
         gastosIdiomas,
+        gastosTecnicas, // ← NOVO: incluir técnicas
         riquezaVantagens,
         totalDesvantagens 
     } = dashboardEstado.pontos;
     
-    // CORREÇÃO: Precisamos também capturar pontos POSITIVOS de aparência
+    // CORREÇÃO: Incluir aparência positiva
     const selectAparencia = document.getElementById('nivelAparencia');
     let aparenciaVantagens = 0;
     if (selectAparencia) {
@@ -485,9 +516,12 @@ function calcularSaldoDisponivel() {
         }
     }
     
-    // Vantagens totais incluem agora aparência positiva
+    // Vantagens totais
     const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
-    const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
+    
+    // GASTOS TOTAIS: Agora inclui técnicas junto com perícias
+    const gastosTotais = gastosAtributos + vantagensTotais + 
+                        (gastosPericias + gastosTecnicas) + gastosMagias;
     
     dashboardEstado.pontos.saldoDisponivel = total - gastosTotais + totalDesvantagens;
     
@@ -554,13 +588,14 @@ function atualizarDisplayPontos() {
         gastosPericias, 
         gastosMagias,
         gastosIdiomas,
+        gastosTecnicas, // ← NOVO: incluir técnicas
         riquezaVantagens,
         totalDesvantagens,
         saldoDisponivel, 
         limiteDesvantagens 
     } = dashboardEstado.pontos;
     
-    // CORREÇÃO: Incluir aparência positiva no cálculo
+    // CORREÇÃO: Incluir aparência positiva
     const selectAparencia = document.getElementById('nivelAparencia');
     let aparenciaVantagens = 0;
     if (selectAparencia) {
@@ -571,7 +606,10 @@ function atualizarDisplayPontos() {
     }
     
     const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
-    const pontosGastosDashboard = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
+    
+    // PONTOS GASTOS: Agora inclui técnicas
+    const pontosGastosDashboard = gastosAtributos + vantagensTotais + 
+                                 (gastosPericias + gastosTecnicas) + gastosMagias;
     
     const pontosGastosElement = document.getElementById('pontosGastosDashboard');
     if (pontosGastosElement) {
@@ -605,7 +643,7 @@ function atualizarDisplayPontos() {
     }
 }
 
-// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS (VERSÃO CORRIGIDA) =====
+// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS =====
 function atualizarDisplayResumoGastos() {
     const { 
         gastosAtributos, 
@@ -613,6 +651,7 @@ function atualizarDisplayResumoGastos() {
         gastosPericias, 
         gastosMagias,
         gastosIdiomas,
+        gastosTecnicas, // ← NOVO: incluir técnicas
         riquezaVantagens,
         totalDesvantagens 
     } = dashboardEstado.pontos;
@@ -628,6 +667,9 @@ function atualizarDisplayResumoGastos() {
     }
     
     const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
+    
+    // PERÍCIAS + TÉCNICAS: Mostrar soma no card de Perícias
+    const totalPericiasETecnicas = gastosPericias + gastosTecnicas;
     
     const elementos = {
         gastosAtributos: document.getElementById('gastosAtributos'),
@@ -646,8 +688,15 @@ function atualizarDisplayResumoGastos() {
         elementos.gastosVantagens.textContent = vantagensTotais;
     }
     
+    // AQUI: Card de Perícias mostra PERÍCIAS + TÉCNICAS
     if (elementos.gastosPericias) {
-        elementos.gastosPericias.textContent = gastosPericias;
+        elementos.gastosPericias.textContent = totalPericiasETecnicas;
+        
+        // Adicionar tooltip se houver pontos em técnicas
+        if (gastosTecnicas > 0) {
+            elementos.gastosPericias.title = `Perícias: ${gastosPericias} pts | Técnicas: ${gastosTecnicas} pts`;
+            elementos.gastosPericias.style.cursor = 'help';
+        }
     }
     
     if (elementos.gastosMagias) {
@@ -659,7 +708,10 @@ function atualizarDisplayResumoGastos() {
         elementos.gastosDesvantagens.style.color = '#9b59b6';
     }
     
-    const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
+    // TOTAL GASTOS: Inclui tudo, inclusive técnicas
+    const gastosTotais = gastosAtributos + vantagensTotais + 
+                        totalPericiasETecnicas + gastosMagias;
+    
     const gastosLiquidos = gastosTotais - totalDesvantagens;
     
     if (elementos.gastosTotal) {
@@ -789,7 +841,7 @@ function exportarDadosDashboard() {
             dashboard: {
                 estado: dashboardEstado,
                 timestamp: new Date().toISOString(),
-                versao: '3.3'
+                versao: '3.4' // ← Atualizado para 3.4
             }
         };
         
@@ -828,9 +880,10 @@ function importarDadosDashboard() {
                 if (dados.dashboard && dados.dashboard.estado) {
                     dashboardEstado = dados.dashboard.estado;
                     
-                    if (!dashboardEstado.pontos.riquezaVantagens) dashboardEstado.pontos.riquezaVantagens = 0;
-                    if (!dashboardEstado.pontos.gastosIdiomas) dashboardEstado.pontos.gastosIdiomas = 0;
-                    if (!dashboardEstado.pontos.caracteristicasFisicasDesvantagens) dashboardEstado.pontos.caracteristicasFisicasDesvantagens = 0;
+                    // Garantir que o campo gastosTecnicas exista (para compatibilidade)
+                    if (!dashboardEstado.pontos.gastosTecnicas) {
+                        dashboardEstado.pontos.gastosTecnicas = 0;
+                    }
                     
                     atualizarDisplayPontos();
                     atualizarDisplayResumoGastos();
@@ -858,6 +911,7 @@ function resetarDashboardCompleto() {
                 gastosPericias: 0,
                 gastosMagias: 0,
                 gastosIdiomas: 0,
+                gastosTecnicas: 0, // ← NOVO: zerar também
                 desvantagensVantagens: 0,
                 aparenciaDesvantagens: 0,
                 riquezaDesvantagens: 0,
@@ -894,7 +948,7 @@ function resetarDashboardCompleto() {
             status: {
                 ultimaAtualizacao: new Date().toISOString(),
                 integridade: 'OK',
-                versao: '3.3'
+                versao: '3.4'
             }
         };
         
@@ -910,7 +964,7 @@ function resetarDashboardCompleto() {
 
 // ===== 12. INICIALIZAÇÃO COMPLETA =====
 function inicializarDashboard() {
-    console.log('🚀 Inicializando Dashboard v3.3 - COMPLETO');
+    console.log('🚀 Inicializando Dashboard v3.4 - COM TÉCNICAS');
     
     configurarSistemaFoto();
     configurarCamposIdentificacao();
@@ -930,6 +984,7 @@ function inicializarDashboard() {
         atualizarContadorDescricao();
         
         console.log('✅ Dashboard inicializado - Sistema completo funcionando');
+        console.log('🎯 Técnicas integradas ao sistema de pontos');
     }, 500);
 }
 
@@ -965,7 +1020,7 @@ window.importarDadosDashboard = importarDadosDashboard;
 window.resetarDashboardCompleto = resetarDashboardCompleto;
 
 // ===== 15. INICIALIZAÇÃO FINAL =====
-console.log('📊 Dashboard JS v3.3 - Sistema completo carregado');
+console.log('📊 Dashboard JS v3.4 - Sistema completo carregado (com técnicas)');
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     setTimeout(() => {
