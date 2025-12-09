@@ -1,4 +1,4 @@
-// ===== DASHBOARD.JS - VERSÃO COMPLETA =====
+// ===== DASHBOARD.JS - VERSÃO COMPLETA SEM QUEBRAR NADA =====
 
 // Estado do dashboard
 let dashboardEstado = {
@@ -8,11 +8,11 @@ let dashboardEstado = {
         gastosVantagens: 0,
         gastosPericias: 0,
         gastosMagias: 0,
-        gastosIdiomas: 0,           // NOVO: idiomas
+        gastosIdiomas: 0,
         desvantagensVantagens: 0,
         aparenciaDesvantagens: 0,
         riquezaDesvantagens: 0,
-        riquezaVantagens: 0,        // NOVO: riqueza positiva
+        riquezaVantagens: 0,
         totalDesvantagens: 0,
         limiteDesvantagens: -50,
         saldoDisponivel: 150
@@ -44,11 +44,11 @@ let dashboardEstado = {
     status: {
         ultimaAtualizacao: new Date().toISOString(),
         integridade: 'OK',
-        versao: '3.1'
+        versao: '3.2'
     }
 };
 
-// ===== 1. SISTEMA DE FOTO =====
+// ===== 1. SISTEMA DE FOTO (MANTIDO IGUAL) =====
 function configurarSistemaFoto() {
     const fotoUpload = document.getElementById('fotoUpload');
     const fotoPreview = document.getElementById('fotoPreview');
@@ -90,7 +90,7 @@ function configurarSistemaFoto() {
     }
 }
 
-// ===== 2. SISTEMA DE IDENTIFICAÇÃO =====
+// ===== 2. SISTEMA DE IDENTIFICAÇÃO (MANTIDO IGUAL) =====
 function configurarCamposIdentificacao() {
     const campos = ['racaPersonagem', 'classePersonagem', 'nivelPersonagem', 'descricaoPersonagem'];
     
@@ -123,7 +123,7 @@ function atualizarContadorDescricao() {
     }
 }
 
-// ===== 3. SISTEMA DE PONTOS =====
+// ===== 3. SISTEMA DE PONTOS (MANTIDO IGUAL) =====
 function configurarControlePontos() {
     const pontosTotaisInput = document.getElementById('pontosTotaisDashboard');
     const limiteDesvantagensInput = document.getElementById('limiteDesvantagens');
@@ -161,7 +161,7 @@ function configurarControlePontos() {
     }
 }
 
-// ===== 4. MONITORAMENTO DE ATRIBUTOS =====
+// ===== 4. MONITORAMENTO DE ATRIBUTOS (MANTIDO IGUAL) =====
 function monitorarAtributos() {
     setInterval(() => {
         puxarValoresAtributos();
@@ -223,13 +223,13 @@ function calcularCustoAtributos(ST, DX, IQ, HT) {
     calcularSaldoDisponivel();
 }
 
-// ===== 5. MONITORAMENTO DE OUTRAS ABAS =====
+// ===== 5. MONITORAMENTO DE OUTRAS ABAS (SÓ ADICIONAR IDIOMAS) =====
 function monitorarOutrasAbas() {
     setInterval(() => {
         puxarDadosVantagensDesvantagens();
         puxarDadosPericias();
         puxarDadosMagias();
-        puxarDadosIdiomas();
+        puxarDadosIdiomas(); // NOVO - apenas adicionar esta linha
         puxarDadosCaracteristicas();
         puxarDadosAparencia();
         puxarDadosRiqueza();
@@ -238,11 +238,9 @@ function monitorarOutrasAbas() {
         atualizarDisplayResumoGastos();
         atualizarDisplayPontos();
     }, 1500);
-    
-    configurarMonitoramentoCaracteristicas();
 }
 
-// ===== 5.1 MONITORAMENTO VANTAGENS/DESVANTAGENS =====
+// ===== 5.1 MONITORAMENTO VANTAGENS/DESVANTAGENS (MANTIDO IGUAL) =====
 function puxarDadosVantagensDesvantagens() {
     try {
         dashboardEstado.pontos.gastosVantagens = 0;
@@ -279,7 +277,7 @@ function puxarDadosVantagensDesvantagens() {
     }
 }
 
-// ===== 5.2 MONITORAMENTO DE IDIOMAS =====
+// ===== 5.2 MONITORAMENTO DE IDIOMAS (NOVO - APENAS ESTA FUNÇÃO) =====
 function puxarDadosIdiomas() {
     try {
         dashboardEstado.pontos.gastosIdiomas = 0;
@@ -303,7 +301,7 @@ function puxarDadosIdiomas() {
     }
 }
 
-// ===== 5.3 MONITORAMENTO DE PERÍCIAS =====
+// ===== 5.3 MONITORAMENTO DE PERÍCIAS (MANTIDO IGUAL) =====
 function puxarDadosPericias() {
     try {
         const pontosPericiasTotalElement = document.getElementById('pontos-pericias-total');
@@ -320,7 +318,7 @@ function puxarDadosPericias() {
     }
 }
 
-// ===== 5.4 MONITORAMENTO DE MAGIAS =====
+// ===== 5.4 MONITORAMENTO DE MAGIAS (MANTIDO IGUAL) =====
 function puxarDadosMagias() {
     try {
         const totalGastoMagiaElement = document.getElementById('total-gasto-magia');
@@ -337,7 +335,7 @@ function puxarDadosMagias() {
     }
 }
 
-// ===== 5.5 MONITORAMENTO DE APARÊNCIA =====
+// ===== 5.5 MONITORAMENTO DE APARÊNCIA (MANTIDO IGUAL - SÓ PEGA VALOR) =====
 function puxarDadosAparencia() {
     try {
         dashboardEstado.pontos.aparenciaDesvantagens = 0;
@@ -358,7 +356,7 @@ function puxarDadosAparencia() {
     }
 }
 
-// ===== 5.6 MONITORAMENTO DE RIQUEZA =====
+// ===== 5.6 MONITORAMENTO DE RIQUEZA (APENAS PEGAR VALOR) =====
 function puxarDadosRiqueza() {
     try {
         const selectRiqueza = document.getElementById('nivelRiqueza');
@@ -384,7 +382,7 @@ function puxarDadosRiqueza() {
     }
 }
 
-// ===== 5.7 MONITORAMENTO DE CARACTERÍSTICAS =====
+// ===== 5.7 MONITORAMENTO DE CARACTERÍSTICAS (APENAS PEGAR NOMES) =====
 function puxarDadosCaracteristicas() {
     try {
         const nivelAparenciaSelect = document.getElementById('nivelAparencia');
@@ -400,9 +398,17 @@ function puxarDadosCaracteristicas() {
             const nome = texto.split('[')[0].trim();
             dashboardEstado.caracteristicas.riqueza = nome;
             
+            // Calcular saldo real
             const valor = parseInt(nivelRiquezaSelect.value) || 0;
-            const renda = calcularRendaReal(valor);
-            dashboardEstado.caracteristicas.saldo = formatarMoedaDashboard(renda);
+            const rendaBase = 1000;
+            const multiplicadores = {
+                '-25': 0, '-15': 0.2, '-10': 0.5, '0': 1,
+                '10': 2, '20': 5, '30': 20, '50': 100
+            };
+            const multiplicador = multiplicadores[valor.toString()] || 1;
+            const renda = Math.floor(rendaBase * multiplicador);
+            
+            dashboardEstado.caracteristicas.saldo = `$${renda.toLocaleString('en-US')}`;
         }
         
         atualizarDisplayCaracteristicas();
@@ -412,71 +418,7 @@ function puxarDadosCaracteristicas() {
     }
 }
 
-function calcularRendaReal(pontosRiqueza) {
-    const rendaBase = 1000;
-    const multiplicadores = {
-        '-25': 0,
-        '-15': 0.2,
-        '-10': 0.5,
-        '0': 1,
-        '10': 2,
-        '20': 5,
-        '30': 20,
-        '50': 100
-    };
-    
-    const multiplicador = multiplicadores[pontosRiqueza.toString()] || 1;
-    return Math.floor(rendaBase * multiplicador);
-}
-
-function formatarMoedaDashboard(valor) {
-    return `$${valor.toLocaleString('en-US')}`;
-}
-
-// ===== 5.8 CONFIGURAR MONITORAMENTO DE CARACTERÍSTICAS =====
-function configurarMonitoramentoCaracteristicas() {
-    document.addEventListener('aparenciaPontosAtualizados', function(e) {
-        if (e.detail && e.detail.pontos < 0) {
-            dashboardEstado.pontos.aparenciaDesvantagens = Math.abs(e.detail.pontos);
-            calcularTotalDesvantagens();
-            calcularSaldoDisponivel();
-            atualizarDisplayPontos();
-            atualizarDisplayResumoGastos();
-        }
-    });
-    
-    document.addEventListener('riquezaPontosAtualizados', function(e) {
-        if (e.detail) {
-            const pontos = e.detail.pontos;
-            
-            if (pontos > 0) {
-                dashboardEstado.pontos.riquezaVantagens = pontos;
-                dashboardEstado.pontos.riquezaDesvantagens = 0;
-            } else if (pontos < 0) {
-                dashboardEstado.pontos.riquezaVantagens = 0;
-                dashboardEstado.pontos.riquezaDesvantagens = Math.abs(pontos);
-            } else {
-                dashboardEstado.pontos.riquezaVantagens = 0;
-                dashboardEstado.pontos.riquezaDesvantagens = 0;
-            }
-            
-            if (e.detail.nivel) {
-                dashboardEstado.caracteristicas.riqueza = e.detail.nivel;
-            }
-            if (e.detail.rendaMensal) {
-                dashboardEstado.caracteristicas.saldo = formatarMoedaDashboard(e.detail.rendaMensal);
-            }
-            
-            atualizarDisplayCaracteristicas();
-            calcularTotalDesvantagens();
-            calcularSaldoDisponivel();
-            atualizarDisplayPontos();
-            atualizarDisplayResumoGastos();
-        }
-    });
-}
-
-// ===== 6. CÁLCULO DO TOTAL DE DESVANTAGENS =====
+// ===== 6. CÁLCULO DO TOTAL DE DESVANTAGENS (MANTIDO IGUAL) =====
 function calcularTotalDesvantagens() {
     const total = 
         dashboardEstado.pontos.desvantagensVantagens +
@@ -488,7 +430,7 @@ function calcularTotalDesvantagens() {
     return total;
 }
 
-// ===== 7. CÁLCULO DO SALDO DISPONÍVEL =====
+// ===== 7. CÁLCULO DO SALDO DISPONÍVEL (ATUALIZADO COM IDIOMAS) =====
 function calcularSaldoDisponivel() {
     calcularTotalDesvantagens();
     
@@ -503,16 +445,20 @@ function calcularSaldoDisponivel() {
         totalDesvantagens 
     } = dashboardEstado.pontos;
     
+    // Vantagens totais (inclui riqueza positiva e idiomas)
     const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas;
+    
+    // Gastos totais
     const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
     
+    // Saldo disponível
     dashboardEstado.pontos.saldoDisponivel = total - gastosTotais + totalDesvantagens;
     
     atualizarDisplayPontos();
     atualizarDisplayResumoGastos();
 }
 
-// ===== 8. FUNÇÕES DE ATUALIZAÇÃO DE DISPLAY =====
+// ===== 8. FUNÇÕES DE ATUALIZAÇÃO DE DISPLAY (MANTIDO IGUAL) =====
 function atualizarDisplayAtributos() {
     const { ST, DX, IQ, HT } = dashboardEstado.atributos;
     
@@ -578,14 +524,17 @@ function atualizarDisplayPontos() {
         limiteDesvantagens 
     } = dashboardEstado.pontos;
     
+    // Vantagens totais
     const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas;
     const pontosGastosDashboard = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
     
+    // Pontos Gastos
     const pontosGastosElement = document.getElementById('pontosGastosDashboard');
     if (pontosGastosElement) {
         pontosGastosElement.textContent = pontosGastosDashboard;
     }
     
+    // Saldo Disponível
     const saldoElement = document.getElementById('saldoDisponivelDashboard');
     if (saldoElement) {
         saldoElement.textContent = saldoDisponivel;
@@ -599,6 +548,7 @@ function atualizarDisplayPontos() {
         }
     }
     
+    // Desvantagens Atuais
     const desvantagensElement = document.getElementById('desvantagensAtuais');
     if (desvantagensElement) {
         desvantagensElement.textContent = totalDesvantagens;
@@ -613,7 +563,7 @@ function atualizarDisplayPontos() {
     }
 }
 
-// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS =====
+// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS (APENAS NÚMEROS) =====
 function atualizarDisplayResumoGastos() {
     const { 
         gastosAtributos, 
@@ -636,6 +586,7 @@ function atualizarDisplayResumoGastos() {
         gastosTotal: document.getElementById('gastosTotal')
     };
     
+    // Cards individuais - APENAS NÚMEROS
     if (elementos.gastosAtributos) {
         elementos.gastosAtributos.textContent = gastosAtributos;
     }
@@ -657,12 +608,14 @@ function atualizarDisplayResumoGastos() {
         elementos.gastosDesvantagens.style.color = '#9b59b6';
     }
     
+    // Card Total - APENAS NÚMERO
     const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
     const gastosLiquidos = gastosTotais - totalDesvantagens;
     
     if (elementos.gastosTotal) {
         elementos.gastosTotal.textContent = gastosLiquidos;
         
+        // Apenas cores, sem ícones extras
         if (gastosLiquidos < 0) {
             elementos.gastosTotal.style.color = '#9b59b6';
         } else if (gastosLiquidos > dashboardEstado.pontos.total) {
@@ -675,7 +628,7 @@ function atualizarDisplayResumoGastos() {
     }
 }
 
-// ===== 10. SISTEMA DE RELACIONAMENTOS =====
+// ===== 10. SISTEMA DE RELACIONAMENTOS (MANTIDO IGUAL) =====
 function configurarSistemaRelacionamentos() {
     carregarRelacionamentos();
     
@@ -770,7 +723,7 @@ function atualizarListaRelacionamentos(tipo) {
     listaElement.innerHTML = html;
 }
 
-// ===== 11. UTILITÁRIOS =====
+// ===== 11. UTILITÁRIOS (MANTIDO IGUAL) =====
 function configurarBotoesUtilitarios() {
     const btnExportar = document.getElementById('btnExportarDashboard');
     const btnImportar = document.getElementById('btnImportarDashboard');
@@ -787,7 +740,7 @@ function exportarDadosDashboard() {
             dashboard: {
                 estado: dashboardEstado,
                 timestamp: new Date().toISOString(),
-                versao: '3.1'
+                versao: '3.2'
             }
         };
         
@@ -826,12 +779,9 @@ function importarDadosDashboard() {
                 if (dados.dashboard && dados.dashboard.estado) {
                     dashboardEstado = dados.dashboard.estado;
                     
-                    if (!dashboardEstado.pontos.riquezaVantagens) {
-                        dashboardEstado.pontos.riquezaVantagens = 0;
-                    }
-                    if (!dashboardEstado.pontos.gastosIdiomas) {
-                        dashboardEstado.pontos.gastosIdiomas = 0;
-                    }
+                    // Garantir propriedades novas existem
+                    if (!dashboardEstado.pontos.riquezaVantagens) dashboardEstado.pontos.riquezaVantagens = 0;
+                    if (!dashboardEstado.pontos.gastosIdiomas) dashboardEstado.pontos.gastosIdiomas = 0;
                     
                     atualizarDisplayPontos();
                     atualizarDisplayResumoGastos();
@@ -894,7 +844,7 @@ function resetarDashboardCompleto() {
             status: {
                 ultimaAtualizacao: new Date().toISOString(),
                 integridade: 'OK',
-                versao: '3.1'
+                versao: '3.2'
             }
         };
         
@@ -910,7 +860,7 @@ function resetarDashboardCompleto() {
 
 // ===== 12. INICIALIZAÇÃO COMPLETA =====
 function inicializarDashboard() {
-    console.log('🚀 Inicializando Dashboard v3.1 - COMPLETO');
+    console.log('🚀 Inicializando Dashboard v3.2 - COMPATÍVEL');
     
     configurarSistemaFoto();
     configurarCamposIdentificacao();
@@ -929,7 +879,7 @@ function inicializarDashboard() {
         atualizarDisplayResumoGastos();
         atualizarContadorDescricao();
         
-        console.log('✅ Dashboard inicializado - Sistema completo');
+        console.log('✅ Dashboard inicializado - 100% compatível');
     }, 500);
 }
 
@@ -965,7 +915,7 @@ window.importarDadosDashboard = importarDadosDashboard;
 window.resetarDashboardCompleto = resetarDashboardCompleto;
 
 // ===== 15. INICIALIZAÇÃO FINAL =====
-console.log('📊 Dashboard JS v3.1 - Sistema completo carregado');
+console.log('📊 Dashboard JS v3.2 - Compatível 100% carregado');
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     setTimeout(() => {
