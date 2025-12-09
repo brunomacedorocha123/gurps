@@ -13,7 +13,7 @@ let dashboardEstado = {
         aparenciaDesvantagens: 0,
         riquezaDesvantagens: 0,
         riquezaVantagens: 0,
-        caracteristicasFisicasDesvantagens: 0,  // NOVO
+        caracteristicasFisicasDesvantagens: 0,
         totalDesvantagens: 0,
         limiteDesvantagens: -50,
         saldoDisponivel: 150
@@ -231,7 +231,7 @@ function monitorarOutrasAbas() {
         puxarDadosPericias();
         puxarDadosMagias();
         puxarDadosIdiomas();
-        puxarDadosCaracteristicasFisicas();  // NOVO
+        puxarDadosCaracteristicasFisicas();
         puxarDadosCaracteristicas();
         puxarDadosAparencia();
         puxarDadosRiqueza();
@@ -303,7 +303,7 @@ function puxarDadosIdiomas() {
     }
 }
 
-// ===== 5.3 MONITORAMENTO DE CARACTERÍSTICAS FÍSICAS (NOVO) =====
+// ===== 5.3 MONITORAMENTO DE CARACTERÍSTICAS FÍSICAS =====
 function puxarDadosCaracteristicasFisicas() {
     try {
         dashboardEstado.pontos.caracteristicasFisicasDesvantagens = 0;
@@ -315,7 +315,6 @@ function puxarDadosCaracteristicasFisicas() {
             if (match) {
                 const pontos = parseInt(match[1]) || 0;
                 if (pontos < 0) {
-                    // Pontos negativos = desvantagens (ganha pontos)
                     dashboardEstado.pontos.caracteristicasFisicasDesvantagens = Math.abs(pontos);
                 }
             }
@@ -328,7 +327,6 @@ function puxarDadosCaracteristicasFisicas() {
     }
 }
 
-// CONTINUA NO PRÓXIMO COMENTÁRIO...
 // ===== 5.4 MONITORAMENTO DE PERÍCIAS =====
 function puxarDadosPericias() {
     try {
@@ -363,7 +361,7 @@ function puxarDadosMagias() {
     }
 }
 
-// ===== 5.6 MONITORAMENTO DE APARÊNCIA =====
+// ===== 5.6 MONITORAMENTO DE APARÊNCIA (VERSÃO CORRIGIDA) =====
 function puxarDadosAparencia() {
     try {
         dashboardEstado.pontos.aparenciaDesvantagens = 0;
@@ -372,9 +370,13 @@ function puxarDadosAparencia() {
         if (selectAparencia) {
             const valor = parseInt(selectAparencia.value) || 0;
             
+            // CORREÇÃO DO BUG: Se for negativo, é desvantagem (ganha pontos)
+            // Se for positivo, deve ser adicionado às vantagens (gasta pontos)
             if (valor < 0) {
                 dashboardEstado.pontos.aparenciaDesvantagens = Math.abs(valor);
             }
+            // Nota: Valor positivo não é tratado aqui porque aparência positiva
+            // deve ser incluída no cálculo de vantagens
         }
         
         calcularSaldoDisponivel();
@@ -445,28 +447,20 @@ function puxarDadosCaracteristicas() {
     }
 }
 
-// ===== 6. CÁLCULO DO TOTAL DE DESVANTAGENS (ATUALIZADO) =====
+// ===== 6. CÁLCULO DO TOTAL DE DESVANTAGENS =====
 function calcularTotalDesvantagens() {
     const total = 
         dashboardEstado.pontos.desvantagensVantagens +
         dashboardEstado.pontos.aparenciaDesvantagens +
         dashboardEstado.pontos.riquezaDesvantagens +
-        dashboardEstado.pontos.caracteristicasFisicasDesvantagens;  // NOVO
+        dashboardEstado.pontos.caracteristicasFisicasDesvantagens;
     
     dashboardEstado.pontos.totalDesvantagens = total;
-    
-    console.log('📊 TOTAL Desvantagens atualizado:', {
-        desvantagensVantagens: dashboardEstado.pontos.desvantagensVantagens,
-        aparenciaDesvantagens: dashboardEstado.pontos.aparenciaDesvantagens,
-        riquezaDesvantagens: dashboardEstado.pontos.riquezaDesvantagens,
-        caracteristicasFisicasDesvantagens: dashboardEstado.pontos.caracteristicasFisicasDesvantagens,
-        total: total
-    });
     
     return total;
 }
 
-// ===== 7. CÁLCULO DO SALDO DISPONÍVEL (ATUALIZADO) =====
+// ===== 7. CÁLCULO DO SALDO DISPONÍVEL (VERSÃO CORRIGIDA) =====
 function calcularSaldoDisponivel() {
     calcularTotalDesvantagens();
     
@@ -481,16 +475,23 @@ function calcularSaldoDisponivel() {
         totalDesvantagens 
     } = dashboardEstado.pontos;
     
-    const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas;
+    // CORREÇÃO: Precisamos também capturar pontos POSITIVOS de aparência
+    const selectAparencia = document.getElementById('nivelAparencia');
+    let aparenciaVantagens = 0;
+    if (selectAparencia) {
+        const valorAparencia = parseInt(selectAparencia.value) || 0;
+        if (valorAparencia > 0) {
+            aparenciaVantagens = valorAparencia;
+        }
+    }
+    
+    // Vantagens totais incluem agora aparência positiva
+    const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
     const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
     
     dashboardEstado.pontos.saldoDisponivel = total - gastosTotais + totalDesvantagens;
     
-    console.log('🧮 Cálculo do saldo:', 
-        total, '-', gastosTotais, '+', totalDesvantagens, '=', dashboardEstado.pontos.saldoDisponivel);
-    
-    atualizarDisplayPontos();
-    atualizarDisplayResumoGastos();
+    return dashboardEstado.pontos.saldoDisponivel;
 }
 
 // ===== 8. FUNÇÕES DE ATUALIZAÇÃO DE DISPLAY =====
@@ -559,7 +560,17 @@ function atualizarDisplayPontos() {
         limiteDesvantagens 
     } = dashboardEstado.pontos;
     
-    const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas;
+    // CORREÇÃO: Incluir aparência positiva no cálculo
+    const selectAparencia = document.getElementById('nivelAparencia');
+    let aparenciaVantagens = 0;
+    if (selectAparencia) {
+        const valorAparencia = parseInt(selectAparencia.value) || 0;
+        if (valorAparencia > 0) {
+            aparenciaVantagens = valorAparencia;
+        }
+    }
+    
+    const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
     const pontosGastosDashboard = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
     
     const pontosGastosElement = document.getElementById('pontosGastosDashboard');
@@ -594,8 +605,7 @@ function atualizarDisplayPontos() {
     }
 }
 
-// CONTINUA NO PRÓXIMO COMENTÁRIO...
-// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS =====
+// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS (VERSÃO CORRIGIDA) =====
 function atualizarDisplayResumoGastos() {
     const { 
         gastosAtributos, 
@@ -607,7 +617,17 @@ function atualizarDisplayResumoGastos() {
         totalDesvantagens 
     } = dashboardEstado.pontos;
     
-    const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas;
+    // CORREÇÃO: Incluir aparência positiva
+    const selectAparencia = document.getElementById('nivelAparencia');
+    let aparenciaVantagens = 0;
+    if (selectAparencia) {
+        const valorAparencia = parseInt(selectAparencia.value) || 0;
+        if (valorAparencia > 0) {
+            aparenciaVantagens = valorAparencia;
+        }
+    }
+    
+    const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
     
     const elementos = {
         gastosAtributos: document.getElementById('gastosAtributos'),
