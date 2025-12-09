@@ -1,5 +1,5 @@
-// ===== DASHBOARD.JS - VERSÃO COMPLETA 100% FUNCIONAL =====
-// Sistema completo da aba Dashboard com peculiaridades integradas
+// ===== DASHBOARD.JS - VERSÃO CORRIGIDA 100% FUNCIONAL =====
+// Sistema completo da aba Dashboard com cálculo CORRETO de peculiaridades
 
 // Estado do dashboard
 let dashboardEstado = {
@@ -9,7 +9,7 @@ let dashboardEstado = {
         gastosVantagens: 0,
         gastosPericias: 0,
         gastosMagias: 0,
-        desvantagens: 0, // Pontos NEGATIVOS de desvantagens
+        desvantagens: 0, // Pontos NEGATIVOS de desvantagens (inclui peculiaridades)
         limiteDesvantagens: -50,
         saldoDisponivel: 150 // Calculado: total - (gastosAtributos + vantagens + pericias + magias) + desvantagens
     },
@@ -228,7 +228,6 @@ function monitorarOutrasAbas() {
         puxarDadosPericias();
         puxarDadosMagias();
         puxarDadosCaracteristicas();
-        puxarDadosPeculiaridades(); // NOVO: Monitorar peculiaridades
         
         atualizarDisplayResumoGastos();
         atualizarDisplayPontos();
@@ -237,13 +236,20 @@ function monitorarOutrasAbas() {
 
 function puxarDadosVantagens() {
     try {
+        // Primeiro, zerar os valores para recalcular
+        dashboardEstado.pontos.gastosVantagens = 0;
+        dashboardEstado.pontos.desvantagens = 0;
+        
         // Buscar vantagens (valores positivos)
         const totalVantagensElement = document.getElementById('total-vantagens');
         if (totalVantagensElement) {
             const texto = totalVantagensElement.textContent;
             const match = texto.match(/([+-]?\d+)/);
             if (match) {
-                dashboardEstado.pontos.gastosVantagens = parseInt(match[1]) || 0;
+                const valor = parseInt(match[1]) || 0;
+                if (valor > 0) {
+                    dashboardEstado.pontos.gastosVantagens = valor;
+                }
             }
         }
         
@@ -257,6 +263,7 @@ function puxarDadosVantagens() {
                 // Mas para o cálculo, são pontos POSITIVOS que ADICIONAM ao saldo
                 const valorDesvantagens = parseInt(match[1]) || 0;
                 // Convertemos para positivo (ex: -20 vira 20)
+                // NOTA: O valor já inclui peculiaridades (vantagens.js linha ~265)
                 dashboardEstado.pontos.desvantagens = Math.abs(valorDesvantagens);
             }
         }
@@ -265,49 +272,6 @@ function puxarDadosVantagens() {
         
     } catch (error) {
         console.log('Erro ao puxar vantagens:', error);
-    }
-}
-
-// ===== 5.1 NOVO: MONITORAMENTO DE PECULIARIDADES =====
-function puxarDadosPeculiaridades() {
-    try {
-        // Método 1: Procurar pelo elemento de custo de peculiaridades
-        const custoPeculiaridadesElement = document.getElementById('custo-peculiaridades');
-        if (custoPeculiaridadesElement) {
-            const texto = custoPeculiaridadesElement.textContent;
-            const match = texto.match(/-?(\d+)/);
-            if (match) {
-                const peculiaridades = parseInt(match[1]) || 0;
-                // Peculiaridades são desvantagens (-1 ponto cada)
-                // Se mostra "-3 pts", significa 3 peculiaridades = -3 pontos
-                dashboardEstado.pontos.desvantagens += peculiaridades;
-            }
-        }
-        
-        // Método 2: Procurar pelo contador de peculiaridades
-        const contadorPeculiaridadesElement = document.getElementById('contador-peculiaridades');
-        if (contadorPeculiaridadesElement) {
-            const texto = contadorPeculiaridadesElement.textContent;
-            const match = texto.match(/(\d+)\/5/);
-            if (match) {
-                const peculiaridades = parseInt(match[1]) || 0;
-                // Cada peculiaridade vale -1 ponto
-                dashboardEstado.pontos.desvantagens += peculiaridades;
-            }
-        }
-        
-        // Método 3: Procurar pelo total de peculiaridades
-        const totalPeculiaridadesElement = document.getElementById('total-peculiaridades');
-        if (totalPeculiaridadesElement) {
-            const texto = totalPeculiaridadesElement.textContent;
-            const peculiaridades = parseInt(texto) || 0;
-            dashboardEstado.pontos.desvantagens += peculiaridades;
-        }
-        
-        calcularSaldoDisponivel();
-        
-    } catch (error) {
-        console.log('Erro ao puxar peculiaridades:', error);
     }
 }
 
@@ -377,6 +341,7 @@ function calcularSaldoDisponivel() {
     const gastosTotais = gastosAtributos + gastosVantagens + gastosPericias + gastosMagias;
     
     // Desvantagens ADICIONAM ao saldo (são pontos ganhos)
+    // IMPORTANTE: desvantagens já inclui peculiaridades (do vantagens.js)
     dashboardEstado.pontos.saldoDisponivel = total - gastosTotais + desvantagens;
     
     // Atualizar displays
@@ -596,7 +561,7 @@ function atualizarListaRelacionamentos(tipo) {
 
 // ===== 9. INICIALIZAÇÃO COMPLETA =====
 function inicializarDashboard() {
-    console.log('🚀 Inicializando Dashboard Estável');
+    console.log('🚀 Inicializando Dashboard Corrigido');
     
     // Configurar sistemas
     configurarSistemaFoto();
@@ -618,7 +583,7 @@ function inicializarDashboard() {
         atualizarContadorDescricao();
     }, 500);
     
-    console.log('✅ Dashboard inicializado com monitoramento de peculiaridades');
+    console.log('✅ Dashboard corrigido - Peculiaridades não duplicadas');
 }
 
 // ===== 10. INICIALIZAÇÃO AUTOMÁTICA =====
@@ -653,11 +618,5 @@ window.inicializarDashboard = inicializarDashboard;
 window.dashboardEstado = dashboardEstado;
 window.removerRelacionamento = removerRelacionamento;
 
-// Adicione esta função para testar peculiaridades
-window.testarPeculiaridades = function() {
-    console.log('Testando monitoramento de peculiaridades...');
-    puxarDadosPeculiaridades();
-    console.log('Desvantagens atuais:', dashboardEstado.pontos.desvantagens);
-};
+console.log('📊 Dashboard JS CORRIGIDO - Carregado com sucesso');
 
-console.log('📊 Dashboard JS carregado com suporte a peculiaridades');
