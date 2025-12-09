@@ -1,15 +1,16 @@
-// ===== DASHBOARD.JS - VERSÃO CORRIGIDA =====
-// Sistema completo da aba Dashboard - Versão 3.1
-// Corrige monitoramento sem CSS conflitante
+// ===== DASHBOARD.JS - VERSÃO CORRIGIDA E ESTÁVEL =====
 
 // Estado do dashboard
 let dashboardEstado = {
     pontos: {
         total: 150,
-        gastos: 0,
-        saldo: 150,
+        gastosAtributos: 0,
+        gastosVantagens: 0,
+        gastosPericias: 0,
+        gastosMagias: 0,
+        desvantagens: 0, // Pontos NEGATIVOS de desvantagens
         limiteDesvantagens: -50,
-        desvantagensAtuais: 0
+        saldoDisponivel: 150 // Calculado: total - (gastosAtributos + vantagens + pericias + magias) + desvantagens
     },
     atributos: {
         ST: 10,
@@ -30,14 +31,6 @@ let dashboardEstado = {
         aliados: [],
         dependentes: []
     },
-    gastos: {
-        atributos: 0,
-        vantagens: 0,
-        pericias: 0,
-        magias: 0,
-        desvantagens: 0,
-        total: 0
-    },
     caracteristicas: {
         aparencia: 'Comum',
         riqueza: 'Média',
@@ -45,7 +38,7 @@ let dashboardEstado = {
     }
 };
 
-// ===== 1. SISTEMA DE FOTO (JÁ FUNCIONA) =====
+// ===== 1. SISTEMA DE FOTO =====
 function configurarSistemaFoto() {
     const fotoUpload = document.getElementById('fotoUpload');
     const fotoPreview = document.getElementById('fotoPreview');
@@ -61,8 +54,6 @@ function configurarSistemaFoto() {
                 fotoPreview.style.display = 'block';
                 fotoPlaceholder.style.display = 'none';
                 btnRemoverFoto.style.display = 'inline-block';
-                
-                // Salvar no localStorage
                 localStorage.setItem('personagem_foto', e.target.result);
             };
             reader.readAsDataURL(file);
@@ -78,7 +69,6 @@ function configurarSistemaFoto() {
         localStorage.removeItem('personagem_foto');
     });
 
-    // Carregar foto salva
     const fotoSalva = localStorage.getItem('personagem_foto');
     if (fotoSalva) {
         fotoPreview.src = fotoSalva;
@@ -95,7 +85,6 @@ function configurarCamposIdentificacao() {
     campos.forEach(campoId => {
         const campo = document.getElementById(campoId);
         if (campo) {
-            // Carregar valor salvo
             const valorSalvo = localStorage.getItem(`personagem_${campoId}`);
             if (valorSalvo) {
                 campo.value = valorSalvo;
@@ -104,10 +93,8 @@ function configurarCamposIdentificacao() {
                 }
             }
             
-            // Salvar ao digitar
             campo.addEventListener('input', function() {
                 localStorage.setItem(`personagem_${campoId}`, campo.value);
-                
                 if (campoId === 'descricaoPersonagem') {
                     atualizarContadorDescricao();
                 }
@@ -129,7 +116,6 @@ function configurarControlePontos() {
     const pontosTotaisInput = document.getElementById('pontosTotaisDashboard');
     const limiteDesvantagensInput = document.getElementById('limiteDesvantagens');
     
-    // Carregar valores salvos
     const pontosSalvos = localStorage.getItem('dashboard_pontosTotais');
     const limiteSalvo = localStorage.getItem('dashboard_limiteDesvantagens');
     
@@ -143,12 +129,11 @@ function configurarControlePontos() {
         dashboardEstado.pontos.limiteDesvantagens = parseInt(limiteSalvo);
     }
     
-    // Salvar ao alterar
     if (pontosTotaisInput) {
         pontosTotaisInput.addEventListener('change', function() {
             const valor = parseInt(this.value) || 150;
             dashboardEstado.pontos.total = valor;
-            dashboardEstado.pontos.saldo = valor - dashboardEstado.pontos.gastos;
+            calcularSaldoDisponivel();
             localStorage.setItem('dashboard_pontosTotais', valor);
             atualizarDisplayPontos();
         });
@@ -164,26 +149,15 @@ function configurarControlePontos() {
     }
 }
 
-// ===== 4. SISTEMA DE MONITORAMENTO DE ATRIBUTOS =====
+// ===== 4. MONITORAMENTO DE ATRIBUTOS =====
 function monitorarAtributos() {
-    console.log('🔍 Iniciando monitoramento de atributos...');
-    
-    // Verificar se estamos na aba dashboard
-    const verificarEAtaulizar = () => {
-        const dashboardTab = document.getElementById('dashboard');
-        if (dashboardTab && dashboardTab.classList.contains('active')) {
-            puxarValoresAtributosAtivos();
-        }
-    };
-    
-    // Verificar a cada segundo
-    setInterval(verificarEAtaulizar, 1000);
-    
-    // Verificar imediatamente
-    setTimeout(verificarEAtaulizar, 500);
+    // Verificar periodicamente
+    setInterval(() => {
+        puxarValoresAtributos();
+    }, 1000);
 }
 
-function puxarValoresAtributosAtivos() {
+function puxarValoresAtributos() {
     try {
         // Puxar valores dos atributos
         const stInput = document.getElementById('ST');
@@ -197,17 +171,13 @@ function puxarValoresAtributosAtivos() {
             const IQ = parseInt(iqInput.value) || 10;
             const HT = parseInt(htInput.value) || 10;
             
-            // Atualizar estado
             dashboardEstado.atributos.ST = ST;
             dashboardEstado.atributos.DX = DX;
             dashboardEstado.atributos.IQ = IQ;
             dashboardEstado.atributos.HT = HT;
             
-            // Calcular custos dos atributos
-            calcularCustosAtributos();
-            
-            // Atualizar display
-            atualizarDisplayAtributos();
+            // Calcular custo dos atributos
+            calcularCustoAtributos(ST, DX, IQ, HT);
         }
         
         // Puxar PV e PF
@@ -218,37 +188,22 @@ function puxarValoresAtributosAtivos() {
             const pvText = pvTotalElement.textContent;
             const pfText = pfTotalElement.textContent;
             
-            // Extrair valores
             const pvValor = parseInt(pvText.split('/')[0]) || 10;
             const pfValor = parseInt(pfText.split('/')[0]) || 10;
             
             dashboardEstado.atributos.PV = { atual: pvValor, max: pvValor };
             dashboardEstado.atributos.PF = { atual: pfValor, max: pfValor };
-            
-            atualizarDisplayVitalidade();
         }
         
-        // Puxar pontos gastos em atributos
-        const pontosGastosElement = document.getElementById('pontosGastos');
-        if (pontosGastosElement) {
-            const texto = pontosGastosElement.textContent;
-            const pontosGastosAtributos = parseInt(texto) || 0;
-            
-            // Atualizar apenas atributos, não o total
-            dashboardEstado.gastos.atributos = pontosGastosAtributos;
-            
-            // Recalcular total
-            recalcualarTotalGastos();
-        }
+        atualizarDisplayAtributos();
+        atualizarDisplayVitalidade();
         
     } catch (error) {
         console.log('Erro ao puxar atributos:', error);
     }
 }
 
-function calcularCustosAtributos() {
-    const { ST, DX, IQ, HT } = dashboardEstado.atributos;
-    
+function calcularCustoAtributos(ST, DX, IQ, HT) {
     // Custo padrão GURPS
     const custoST = (ST - 10) * 10;
     const custoDX = (DX - 10) * 20;
@@ -256,50 +211,52 @@ function calcularCustosAtributos() {
     const custoHT = (HT - 10) * 10;
     
     const totalAtributos = custoST + custoDX + custoIQ + custoHT;
-    dashboardEstado.gastos.atributos = totalAtributos;
+    dashboardEstado.pontos.gastosAtributos = totalAtributos;
+    
+    // Recalcular saldo
+    calcularSaldoDisponivel();
 }
 
-// ===== 5. SISTEMA DE MONITORAMENTO DE OUTRAS ABAS =====
+// ===== 5. MONITORAMENTO DE OUTRAS ABAS =====
 function monitorarOutrasAbas() {
-    // Monitorar periodicamente
     setInterval(() => {
         puxarDadosVantagens();
         puxarDadosPericias();
         puxarDadosMagias();
         puxarDadosCaracteristicas();
         
-        // Recalcular total
-        recalcualarTotalGastos();
-        
-        // Atualizar displays
+        atualizarDisplayResumoGastos();
         atualizarDisplayPontos();
-        atualizarDisplayGastos();
     }, 1500);
 }
 
 function puxarDadosVantagens() {
     try {
-        // Buscar elementos de vantagens
+        // Buscar vantagens (valores positivos)
         const totalVantagensElement = document.getElementById('total-vantagens');
         if (totalVantagensElement) {
             const texto = totalVantagensElement.textContent;
             const match = texto.match(/([+-]?\d+)/);
             if (match) {
-                dashboardEstado.gastos.vantagens = parseInt(match[1]) || 0;
+                dashboardEstado.pontos.gastosVantagens = parseInt(match[1]) || 0;
             }
         }
         
-        // Buscar elementos de desvantagens
+        // Buscar desvantagens (valores negativos que viram pontos POSITIVOS)
         const totalDesvantagensElement = document.getElementById('total-desvantagens');
         if (totalDesvantagensElement) {
             const texto = totalDesvantagensElement.textContent;
             const match = texto.match(/([+-]?\d+)/);
             if (match) {
-                const valor = parseInt(match[1]) || 0;
-                dashboardEstado.pontos.desvantagensAtuais = Math.abs(valor);
-                dashboardEstado.gastos.desvantagens = Math.abs(valor);
+                // Desvantagens são valores negativos (ex: -20)
+                // Mas para o cálculo, são pontos POSITIVOS que ADICIONAM ao saldo
+                const valorDesvantagens = parseInt(match[1]) || 0;
+                // Convertemos para positivo (ex: -20 vira 20)
+                dashboardEstado.pontos.desvantagens = Math.abs(valorDesvantagens);
             }
         }
+        
+        calcularSaldoDisponivel();
         
     } catch (error) {
         console.log('Erro ao puxar vantagens:', error);
@@ -313,7 +270,8 @@ function puxarDadosPericias() {
             const texto = pontosPericiasTotalElement.textContent;
             const match = texto.match(/(\d+)/);
             if (match) {
-                dashboardEstado.gastos.pericias = parseInt(match[1]) || 0;
+                dashboardEstado.pontos.gastosPericias = parseInt(match[1]) || 0;
+                calcularSaldoDisponivel();
             }
         }
     } catch (error) {
@@ -328,7 +286,8 @@ function puxarDadosMagias() {
             const texto = totalGastoMagiaElement.textContent;
             const match = texto.match(/(\d+)/);
             if (match) {
-                dashboardEstado.gastos.magias = parseInt(match[1]) || 0;
+                dashboardEstado.pontos.gastosMagias = parseInt(match[1]) || 0;
+                calcularSaldoDisponivel();
             }
         }
     } catch (error) {
@@ -338,7 +297,6 @@ function puxarDadosMagias() {
 
 function puxarDadosCaracteristicas() {
     try {
-        // Puxar aparência
         const nivelAparenciaSelect = document.getElementById('nivelAparencia');
         if (nivelAparenciaSelect) {
             const texto = nivelAparenciaSelect.options[nivelAparenciaSelect.selectedIndex].text;
@@ -346,7 +304,6 @@ function puxarDadosCaracteristicas() {
             dashboardEstado.caracteristicas.aparencia = nome;
         }
         
-        // Puxar riqueza
         const nivelRiquezaSelect = document.getElementById('nivelRiqueza');
         if (nivelRiquezaSelect) {
             const texto = nivelRiquezaSelect.options[nivelRiquezaSelect.selectedIndex].text;
@@ -361,28 +318,127 @@ function puxarDadosCaracteristicas() {
     }
 }
 
-function recalcualarTotalGastos() {
-    // Somar todos os gastos positivos (atributos, vantagens, perícias, magias)
-    const gastosPositivos = 
-        dashboardEstado.gastos.atributos + 
-        dashboardEstado.gastos.vantagens + 
-        dashboardEstado.gastos.pericias + 
-        dashboardEstado.gastos.magias;
+// ===== 6. CÁLCULO CORRETO DO SALDO =====
+function calcularSaldoDisponivel() {
+    // Fórmula: Saldo = Total - (Gastos em Atributos, Vantagens, Perícias, Magias) + Desvantagens
+    // Desvantagens são pontos NEGATIVOS que ADICIONAM ao saldo
     
-    // Subtrair desvantagens (que são pontos negativos)
-    const totalGastos = gastosPositivos - dashboardEstado.gastos.desvantagens;
+    const { total, gastosAtributos, gastosVantagens, gastosPericias, gastosMagias, desvantagens } = dashboardEstado.pontos;
     
-    dashboardEstado.pontos.gastos = Math.max(totalGastos, 0);
-    dashboardEstado.pontos.saldo = dashboardEstado.pontos.total - dashboardEstado.pontos.gastos;
-    dashboardEstado.gastos.total = totalGastos;
+    // Gastos totais (positivos)
+    const gastosTotais = gastosAtributos + gastosVantagens + gastosPericias + gastosMagias;
+    
+    // Desvantagens ADICIONAM ao saldo (são pontos ganhos)
+    dashboardEstado.pontos.saldoDisponivel = total - gastosTotais + desvantagens;
+    
+    // Atualizar displays
+    atualizarDisplayPontos();
+    atualizarDisplayResumoGastos();
 }
 
-// ===== 6. SISTEMA DE RELACIONAMENTOS =====
+// ===== 7. FUNÇÕES DE ATUALIZAÇÃO DE DISPLAY =====
+function atualizarDisplayAtributos() {
+    const { ST, DX, IQ, HT } = dashboardEstado.atributos;
+    
+    document.getElementById('statusST').textContent = ST;
+    document.getElementById('statusDX').textContent = DX;
+    document.getElementById('statusIQ').textContent = IQ;
+    document.getElementById('statusHT').textContent = HT;
+}
+
+function atualizarDisplayVitalidade() {
+    const { PV, PF } = dashboardEstado.atributos;
+    
+    document.getElementById('statusPV').textContent = `${PV.atual}/${PV.max}`;
+    document.getElementById('statusPF').textContent = `${PF.atual}/${PF.max}`;
+    
+    const barPV = document.querySelector('.bar-pv');
+    const barPF = document.querySelector('.bar-pf');
+    
+    if (barPV) {
+        const percentPV = (PV.atual / PV.max) * 100;
+        barPV.style.width = `${percentPV}%`;
+    }
+    
+    if (barPF) {
+        const percentPF = (PF.atual / PF.max) * 100;
+        barPF.style.width = `${percentPF}%`;
+    }
+}
+
+function atualizarDisplayCaracteristicas() {
+    const { aparencia, riqueza, saldo } = dashboardEstado.caracteristicas;
+    
+    document.getElementById('statusAparencia').textContent = aparencia;
+    document.getElementById('statusRiqueza').textContent = riqueza;
+    document.getElementById('statusSaldo').textContent = saldo;
+}
+
+function atualizarDisplayPontos() {
+    const { total, gastosAtributos, gastosVantagens, gastosPericias, gastosMagias, desvantagens, saldoDisponivel, limiteDesvantagens } = dashboardEstado.pontos;
+    
+    // Pontos Gastos Dashboard (total de gastos POSITIVOS)
+    const pontosGastosDashboard = gastosAtributos + gastosVantagens + gastosPericias + gastosMagias;
+    document.getElementById('pontosGastosDashboard').textContent = pontosGastosDashboard;
+    
+    // Saldo Disponível (com desvantagens ADICIONANDO pontos)
+    const saldoElement = document.getElementById('saldoDisponivelDashboard');
+    if (saldoElement) {
+        saldoElement.textContent = saldoDisponivel;
+        
+        if (saldoDisponivel < 0) {
+            saldoElement.style.color = '#e74c3c';
+        } else if (saldoDisponivel < 50) {
+            saldoElement.style.color = '#f39c12';
+        } else {
+            saldoElement.style.color = '#3498db';
+        }
+    }
+    
+    // Desvantagens Atuais (valor absoluto para display)
+    const desvantagensElement = document.getElementById('desvantagensAtuais');
+    if (desvantagensElement) {
+        desvantagensElement.textContent = desvantagens;
+        
+        if (desvantagens > Math.abs(limiteDesvantagens)) {
+            desvantagensElement.style.color = '#e74c3c';
+        } else {
+            desvantagensElement.style.color = '#9b59b6';
+        }
+    }
+}
+
+function atualizarDisplayResumoGastos() {
+    const { gastosAtributos, gastosVantagens, gastosPericias, gastosMagias, desvantagens, saldoDisponivel } = dashboardEstado.pontos;
+    
+    // Cards individuais
+    document.getElementById('gastosAtributos').textContent = gastosAtributos;
+    document.getElementById('gastosVantagens').textContent = gastosVantagens;
+    document.getElementById('gastosPericias').textContent = gastosPericias;
+    document.getElementById('gastosMagias').textContent = gastosMagias;
+    document.getElementById('gastosDesvantagens').textContent = desvantagens;
+    
+    // Total Gastos (gastos positivos menos desvantagens que são pontos ganhos)
+    const gastosPositivos = gastosAtributos + gastosVantagens + gastosPericias + gastosMagias;
+    const gastosLiquidos = gastosPositivos - desvantagens; // Desvantagens SUBTRAEM do total gasto
+    document.getElementById('gastosTotal').textContent = gastosLiquidos;
+    
+    const totalElement = document.getElementById('gastosTotal');
+    if (totalElement) {
+        if (gastosLiquidos > dashboardEstado.pontos.total) {
+            totalElement.style.color = '#e74c3c';
+        } else if (gastosLiquidos > dashboardEstado.pontos.total * 0.8) {
+            totalElement.style.color = '#f39c12';
+        } else {
+            totalElement.style.color = '#ffd700';
+        }
+    }
+}
+
+// ===== 8. SISTEMA DE RELACIONAMENTOS =====
 function configurarSistemaRelacionamentos() {
-    // Carregar relacionamentos salvos
     carregarRelacionamentos();
     
-    // Configurar botões de adicionar
     document.querySelectorAll('.btn-adicionar').forEach(btn => {
         btn.addEventListener('click', function() {
             const tipo = this.getAttribute('data-tipo');
@@ -474,263 +530,35 @@ function atualizarListaRelacionamentos(tipo) {
     listaElement.innerHTML = html;
 }
 
-// ===== 7. FUNÇÕES DE ATUALIZAÇÃO DE DISPLAY =====
-function atualizarDisplayAtributos() {
-    const { ST, DX, IQ, HT } = dashboardEstado.atributos;
-    
-    document.getElementById('statusST').textContent = ST;
-    document.getElementById('statusDX').textContent = DX;
-    document.getElementById('statusIQ').textContent = IQ;
-    document.getElementById('statusHT').textContent = HT;
-    
-    // Efeito visual sutil
-    highlightElement('statusST');
-    highlightElement('statusDX');
-    highlightElement('statusIQ');
-    highlightElement('statusHT');
-}
-
-function atualizarDisplayVitalidade() {
-    const { PV, PF } = dashboardEstado.atributos;
-    
-    document.getElementById('statusPV').textContent = `${PV.atual}/${PV.max}`;
-    document.getElementById('statusPF').textContent = `${PF.atual}/${PF.max}`;
-    
-    // Atualizar barras
-    const barPV = document.querySelector('.bar-pv');
-    const barPF = document.querySelector('.bar-pf');
-    
-    if (barPV) {
-        const percentPV = (PV.atual / PV.max) * 100;
-        barPV.style.width = `${percentPV}%`;
-    }
-    
-    if (barPF) {
-        const percentPF = (PF.atual / PF.max) * 100;
-        barPF.style.width = `${percentPF}%`;
-    }
-}
-
-function atualizarDisplayCaracteristicas() {
-    const { aparencia, riqueza, saldo } = dashboardEstado.caracteristicas;
-    
-    document.getElementById('statusAparencia').textContent = aparencia;
-    document.getElementById('statusRiqueza').textContent = riqueza;
-    document.getElementById('statusSaldo').textContent = saldo;
-}
-
-function atualizarDisplayPontos() {
-    // Pontos Gastos
-    const pontosGastosElement = document.getElementById('pontosGastosDashboard');
-    if (pontosGastosElement) {
-        pontosGastosElement.textContent = dashboardEstado.pontos.gastos;
-    }
-    
-    // Saldo Disponível
-    const saldoElement = document.getElementById('saldoDisponivelDashboard');
-    if (saldoElement) {
-        const saldo = dashboardEstado.pontos.saldo;
-        saldoElement.textContent = saldo;
-        
-        // Cor baseada no saldo
-        if (saldo < 0) {
-            saldoElement.style.color = '#e74c3c';
-        } else if (saldo < 50) {
-            saldoElement.style.color = '#f39c12';
-        } else {
-            saldoElement.style.color = '#3498db';
-        }
-    }
-    
-    // Desvantagens Atuais
-    const desvantagensElement = document.getElementById('desvantagensAtuais');
-    if (desvantagensElement) {
-        desvantagensElement.textContent = dashboardEstado.pontos.desvantagensAtuais;
-        
-        // Verificar limite
-        if (dashboardEstado.pontos.desvantagensAtuais > Math.abs(dashboardEstado.pontos.limiteDesvantagens)) {
-            desvantagensElement.style.color = '#e74c3c';
-        } else {
-            desvantagensElement.style.color = '#9b59b6';
-        }
-    }
-}
-
-function atualizarDisplayGastos() {
-    // Atualizar cada card individualmente
-    const { atributos, vantagens, pericias, magias, desvantagens, total } = dashboardEstado.gastos;
-    
-    document.getElementById('gastosAtributos').textContent = atributos;
-    document.getElementById('gastosVantagens').textContent = vantagens;
-    document.getElementById('gastosPericias').textContent = pericias;
-    document.getElementById('gastosMagias').textContent = magias;
-    document.getElementById('gastosDesvantagens').textContent = desvantagens;
-    document.getElementById('gastosTotal').textContent = total;
-    
-    // Destacar elementos atualizados
-    ['gastosAtributos', 'gastosVantagens', 'gastosPericias', 'gastosMagias', 'gastosDesvantagens', 'gastosTotal']
-        .forEach(id => highlightElement(id));
-}
-
-function highlightElement(id) {
-    const element = document.getElementById(id);
-    if (element) {
-        element.classList.add('updated');
-        setTimeout(() => {
-            element.classList.remove('updated');
-        }, 800);
-    }
-}
-
-function atualizarTodosDisplays() {
-    atualizarDisplayAtributos();
-    atualizarDisplayVitalidade();
-    atualizarDisplayCaracteristicas();
-    atualizarDisplayPontos();
-    atualizarDisplayGastos();
-    atualizarContadorDescricao();
-    
-    // Atualizar relacionamentos
-    ['inimigos', 'aliados', 'dependentes'].forEach(tipo => {
-        atualizarListaRelacionamentos(tipo);
-    });
-}
-
-// ===== 8. CARREGAR E SALVAR ESTADO =====
-function carregarEstadoLocalStorage() {
-    try {
-        const salvo = localStorage.getItem('dashboard_estado');
-        if (salvo) {
-            const dados = JSON.parse(salvo);
-            
-            // Carregar apenas dados não sensíveis
-            if (dados.pontos) dashboardEstado.pontos = { ...dashboardEstado.pontos, ...dados.pontos };
-            if (dados.identificacao) dashboardEstado.identificacao = { ...dashboardEstado.identificacao, ...dados.identificacao };
-            if (dados.caracteristicas) dashboardEstado.caracteristicas = { ...dashboardEstado.caracteristicas, ...dados.caracteristicas };
-            
-            // Atualizar inputs
-            if (dashboardEstado.pontos.total) {
-                const pontosInput = document.getElementById('pontosTotaisDashboard');
-                if (pontosInput) pontosInput.value = dashboardEstado.pontos.total;
-            }
-            
-            if (dashboardEstado.pontos.limiteDesvantagens) {
-                const limiteInput = document.getElementById('limiteDesvantagens');
-                if (limiteInput) limiteInput.value = dashboardEstado.pontos.limiteDesvantagens;
-            }
-        }
-    } catch (error) {
-        console.error('Erro ao carregar estado:', error);
-    }
-}
-
 // ===== 9. INICIALIZAÇÃO COMPLETA =====
 function inicializarDashboard() {
-    console.log('🚀 Inicializando Dashboard');
+    console.log('🚀 Inicializando Dashboard Estável');
     
-    // Configurar sistemas do dashboard
+    // Configurar sistemas
     configurarSistemaFoto();
     configurarCamposIdentificacao();
     configurarControlePontos();
     configurarSistemaRelacionamentos();
     
-    // Carregar estado salvo
-    carregarEstadoLocalStorage();
-    
     // Iniciar monitoramento
     monitorarAtributos();
     monitorarOutrasAbas();
     
-    // Atualizar todos os displays inicialmente
-    setTimeout(atualizarTodosDisplays, 500);
+    // Atualizar displays
+    setTimeout(() => {
+        atualizarDisplayAtributos();
+        atualizarDisplayVitalidade();
+        atualizarDisplayCaracteristicas();
+        atualizarDisplayPontos();
+        atualizarDisplayResumoGastos();
+        atualizarContadorDescricao();
+    }, 500);
     
     console.log('✅ Dashboard inicializado');
 }
 
 // ===== 10. INICIALIZAÇÃO AUTOMÁTICA =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Adicionar CSS minimalista apenas para animações
-    const estiloAnimacao = `
-    @keyframes highlightPulse {
-        0% { background-color: rgba(255, 140, 0, 0.1); }
-        50% { background-color: rgba(255, 140, 0, 0.3); }
-        100% { background-color: transparent; }
-    }
-    
-    .updated {
-        animation: highlightPulse 0.8s ease;
-        border-radius: 4px;
-        padding: 2px 4px;
-    }
-    
-    /* Estilos para relacionamentos */
-    .relacionamento-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        padding: 10px;
-        margin-bottom: 8px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 6px;
-        border-left: 4px solid;
-    }
-    
-    .card-inimigo .relacionamento-item {
-        border-left-color: #e74c3c;
-    }
-    
-    .card-aliado .relacionamento-item {
-        border-left-color: #2ecc71;
-    }
-    
-    .card-dependente .relacionamento-item {
-        border-left-color: #3498db;
-    }
-    
-    .relacionamento-info {
-        flex: 1;
-    }
-    
-    .relacionamento-pontos {
-        display: inline-block;
-        margin-left: 10px;
-        padding: 2px 6px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 3px;
-        font-size: 0.85em;
-    }
-    
-    .relacionamento-descricao {
-        font-size: 0.9em;
-        color: rgba(255,255,255,0.8);
-        margin-top: 5px;
-        margin-bottom: 5px;
-    }
-    
-    .relacionamento-data {
-        font-size: 0.8em;
-        color: rgba(255,255,255,0.5);
-        display: block;
-    }
-    
-    .btn-remover-relacionamento {
-        background: none;
-        border: none;
-        color: rgba(255,255,255,0.5);
-        cursor: pointer;
-        padding: 5px;
-        margin-left: 10px;
-    }
-    
-    .btn-remover-relacionamento:hover {
-        color: #e74c3c;
-    }
-    `;
-    
-    const style = document.createElement('style');
-    style.textContent = estiloAnimacao;
-    document.head.appendChild(style);
-    
     // Inicializar quando a aba dashboard ficar ativa
     const dashboardTab = document.getElementById('dashboard');
     
@@ -760,8 +588,5 @@ document.addEventListener('DOMContentLoaded', function() {
 window.inicializarDashboard = inicializarDashboard;
 window.dashboardEstado = dashboardEstado;
 window.removerRelacionamento = removerRelacionamento;
-window.obterEstadoDashboard = function() {
-    return dashboardEstado;
-};
 
 console.log('📊 Dashboard JS carregado');

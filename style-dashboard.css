@@ -1,4 +1,4 @@
-/* ===== ESTILOS DA ABA DASHBOARD ===== */
+/* ===== ESTILOS DA ABA DASHBOARD - VERSÃO ESTÁVEL ===== */
 .dashboard-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -488,7 +488,6 @@
     text-align: center;
 }
 
-/* Estilo especial para o card de Desvantagens & Peculiaridades */
 .resumo-card:nth-child(5) {
     border-color: rgba(155, 89, 182, 0.3);
 }
@@ -612,19 +611,6 @@
     margin-left: 10px;
 }
 
-/* ===== ANIMAÇÕES SUAVES E ESTÁVEIS ===== */
-@keyframes highlightPulse {
-    0% { background-color: rgba(255, 140, 0, 0.1); }
-    50% { background-color: rgba(255, 140, 0, 0.2); }
-    100% { background-color: transparent; }
-}
-
-.updated {
-    animation: highlightPulse 0.8s ease;
-    border-radius: 4px;
-    padding: 2px 4px;
-}
-
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 1200px) {
     .identificacao-grid {
@@ -723,3 +709,5 @@
         height: 250px;
     }
 }
+
+/* REMOVIDO: Todas as animações problemáticas */
