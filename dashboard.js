@@ -730,53 +730,23 @@ function atualizarDisplayResumoGastos() {
         }
     }
     
-    // CARD TOTAL GASTOS LÍQUIDOS
-    const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
-    const gastosLiquidos = gastosTotais - totalDesvantagens;
+   // CARD TOTAL GASTOS LÍQUIDOS
+const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
+const gastosLiquidos = gastosTotais - totalDesvantagens;
+
+if (elementos.gastosTotal) {
+    elementos.gastosTotal.textContent = gastosLiquidos;
     
-    if (elementos.gastosTotal) {
-        elementos.gastosTotal.textContent = gastosLiquidos;
-        
-        if (gastosLiquidos < 0) {
-            elementos.gastosTotal.style.color = '#9b59b6';
-            elementos.gastosTotal.innerHTML = `
-                <span style="display: flex; align-items: center; gap: 5px;">
-                    <i class="fas fa-arrow-down"></i>
-                    ${gastosLiquidos}
-                    <small style="font-size: 0.7em;">(ganhos líquidos)</small>
-                </span>
-            `;
-        } else if (gastosLiquidos > dashboardEstado.pontos.total) {
-            elementos.gastosTotal.style.color = '#e74c3c';
-            elementos.gastosTotal.innerHTML = `
-                <span style="display: flex; align-items: center; gap: 5px;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    ${gastosLiquidos}
-                    <small style="font-size: 0.7em;">(excede limite)</small>
-                </span>
-            `;
-        } else if (gastosLiquidos > dashboardEstado.pontos.total * 0.8) {
-            elementos.gastosTotal.style.color = '#f39c12';
-            elementos.gastosTotal.innerHTML = `
-                <span style="display: flex; align-items: center; gap: 5px;">
-                    <i class="fas fa-exclamation"></i>
-                    ${gastosLiquidos}
-                    <small style="font-size: 0.7em;">(alto)</small>
-                </span>
-            `;
-        } else {
-            elementos.gastosTotal.style.color = '#27ae60';
-            elementos.gastosTotal.innerHTML = `
-                <span style="display: flex; align-items: center; gap: 5px;">
-                    <i class="fas fa-check-circle"></i>
-                    ${gastosLiquidos}
-                    <small style="font-size: 0.7em;">(dentro do limite)</small>
-                </span>
-            `;
-        }
+    if (gastosLiquidos < 0) {
+        elementos.gastosTotal.style.color = '#9b59b6';
+    } else if (gastosLiquidos > dashboardEstado.pontos.total) {
+        elementos.gastosTotal.style.color = '#e74c3c';
+    } else if (gastosLiquidos > dashboardEstado.pontos.total * 0.8) {
+        elementos.gastosTotal.style.color = '#f39c12';
+    } else {
+        elementos.gastosTotal.style.color = '#27ae60';
     }
 }
-
 // ===== 10. SISTEMA DE RELACIONAMENTOS (MANTIDO IGUAL) =====
 function configurarSistemaRelacionamentos() {
     carregarRelacionamentos();
