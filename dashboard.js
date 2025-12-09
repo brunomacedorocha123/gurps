@@ -1,4 +1,4 @@
-// ===== DASHBOARD.JS - VERSÃO COMPLETA SEM QUEBRAR NADA =====
+// ===== DASHBOARD.JS - VERSÃO COMPLETA COM TUDO =====
 
 // Estado do dashboard
 let dashboardEstado = {
@@ -13,6 +13,7 @@ let dashboardEstado = {
         aparenciaDesvantagens: 0,
         riquezaDesvantagens: 0,
         riquezaVantagens: 0,
+        caracteristicasFisicasDesvantagens: 0,  // NOVO
         totalDesvantagens: 0,
         limiteDesvantagens: -50,
         saldoDisponivel: 150
@@ -44,11 +45,11 @@ let dashboardEstado = {
     status: {
         ultimaAtualizacao: new Date().toISOString(),
         integridade: 'OK',
-        versao: '3.2'
+        versao: '3.3'
     }
 };
 
-// ===== 1. SISTEMA DE FOTO (MANTIDO IGUAL) =====
+// ===== 1. SISTEMA DE FOTO =====
 function configurarSistemaFoto() {
     const fotoUpload = document.getElementById('fotoUpload');
     const fotoPreview = document.getElementById('fotoPreview');
@@ -90,7 +91,7 @@ function configurarSistemaFoto() {
     }
 }
 
-// ===== 2. SISTEMA DE IDENTIFICAÇÃO (MANTIDO IGUAL) =====
+// ===== 2. SISTEMA DE IDENTIFICAÇÃO =====
 function configurarCamposIdentificacao() {
     const campos = ['racaPersonagem', 'classePersonagem', 'nivelPersonagem', 'descricaoPersonagem'];
     
@@ -123,7 +124,7 @@ function atualizarContadorDescricao() {
     }
 }
 
-// ===== 3. SISTEMA DE PONTOS (MANTIDO IGUAL) =====
+// ===== 3. SISTEMA DE PONTOS =====
 function configurarControlePontos() {
     const pontosTotaisInput = document.getElementById('pontosTotaisDashboard');
     const limiteDesvantagensInput = document.getElementById('limiteDesvantagens');
@@ -161,7 +162,7 @@ function configurarControlePontos() {
     }
 }
 
-// ===== 4. MONITORAMENTO DE ATRIBUTOS (MANTIDO IGUAL) =====
+// ===== 4. MONITORAMENTO DE ATRIBUTOS =====
 function monitorarAtributos() {
     setInterval(() => {
         puxarValoresAtributos();
@@ -223,13 +224,14 @@ function calcularCustoAtributos(ST, DX, IQ, HT) {
     calcularSaldoDisponivel();
 }
 
-// ===== 5. MONITORAMENTO DE OUTRAS ABAS (SÓ ADICIONAR IDIOMAS) =====
+// ===== 5. MONITORAMENTO DE OUTRAS ABAS =====
 function monitorarOutrasAbas() {
     setInterval(() => {
         puxarDadosVantagensDesvantagens();
         puxarDadosPericias();
         puxarDadosMagias();
-        puxarDadosIdiomas(); // NOVO - apenas adicionar esta linha
+        puxarDadosIdiomas();
+        puxarDadosCaracteristicasFisicas();  // NOVO
         puxarDadosCaracteristicas();
         puxarDadosAparencia();
         puxarDadosRiqueza();
@@ -240,7 +242,7 @@ function monitorarOutrasAbas() {
     }, 1500);
 }
 
-// ===== 5.1 MONITORAMENTO VANTAGENS/DESVANTAGENS (MANTIDO IGUAL) =====
+// ===== 5.1 MONITORAMENTO VANTAGENS/DESVANTAGENS =====
 function puxarDadosVantagensDesvantagens() {
     try {
         dashboardEstado.pontos.gastosVantagens = 0;
@@ -277,7 +279,7 @@ function puxarDadosVantagensDesvantagens() {
     }
 }
 
-// ===== 5.2 MONITORAMENTO DE IDIOMAS (NOVO - APENAS ESTA FUNÇÃO) =====
+// ===== 5.2 MONITORAMENTO DE IDIOMAS =====
 function puxarDadosIdiomas() {
     try {
         dashboardEstado.pontos.gastosIdiomas = 0;
@@ -301,7 +303,33 @@ function puxarDadosIdiomas() {
     }
 }
 
-// ===== 5.3 MONITORAMENTO DE PERÍCIAS (MANTIDO IGUAL) =====
+// ===== 5.3 MONITORAMENTO DE CARACTERÍSTICAS FÍSICAS (NOVO) =====
+function puxarDadosCaracteristicasFisicas() {
+    try {
+        dashboardEstado.pontos.caracteristicasFisicasDesvantagens = 0;
+        
+        const badgeCaracteristicas = document.getElementById('pontosCaracteristicas');
+        if (badgeCaracteristicas) {
+            const texto = badgeCaracteristicas.textContent;
+            const match = texto.match(/([+-]?\d+)/);
+            if (match) {
+                const pontos = parseInt(match[1]) || 0;
+                if (pontos < 0) {
+                    // Pontos negativos = desvantagens (ganha pontos)
+                    dashboardEstado.pontos.caracteristicasFisicasDesvantagens = Math.abs(pontos);
+                }
+            }
+        }
+        
+        calcularSaldoDisponivel();
+        
+    } catch (error) {
+        console.log('Erro ao puxar dados de características físicas:', error);
+    }
+}
+
+// CONTINUA NO PRÓXIMO COMENTÁRIO...
+// ===== 5.4 MONITORAMENTO DE PERÍCIAS =====
 function puxarDadosPericias() {
     try {
         const pontosPericiasTotalElement = document.getElementById('pontos-pericias-total');
@@ -318,7 +346,7 @@ function puxarDadosPericias() {
     }
 }
 
-// ===== 5.4 MONITORAMENTO DE MAGIAS (MANTIDO IGUAL) =====
+// ===== 5.5 MONITORAMENTO DE MAGIAS =====
 function puxarDadosMagias() {
     try {
         const totalGastoMagiaElement = document.getElementById('total-gasto-magia');
@@ -335,7 +363,7 @@ function puxarDadosMagias() {
     }
 }
 
-// ===== 5.5 MONITORAMENTO DE APARÊNCIA (MANTIDO IGUAL - SÓ PEGA VALOR) =====
+// ===== 5.6 MONITORAMENTO DE APARÊNCIA =====
 function puxarDadosAparencia() {
     try {
         dashboardEstado.pontos.aparenciaDesvantagens = 0;
@@ -356,7 +384,7 @@ function puxarDadosAparencia() {
     }
 }
 
-// ===== 5.6 MONITORAMENTO DE RIQUEZA (APENAS PEGAR VALOR) =====
+// ===== 5.7 MONITORAMENTO DE RIQUEZA =====
 function puxarDadosRiqueza() {
     try {
         const selectRiqueza = document.getElementById('nivelRiqueza');
@@ -382,7 +410,7 @@ function puxarDadosRiqueza() {
     }
 }
 
-// ===== 5.7 MONITORAMENTO DE CARACTERÍSTICAS (APENAS PEGAR NOMES) =====
+// ===== 5.8 MONITORAMENTO DE CARACTERÍSTICAS =====
 function puxarDadosCaracteristicas() {
     try {
         const nivelAparenciaSelect = document.getElementById('nivelAparencia');
@@ -398,7 +426,6 @@ function puxarDadosCaracteristicas() {
             const nome = texto.split('[')[0].trim();
             dashboardEstado.caracteristicas.riqueza = nome;
             
-            // Calcular saldo real
             const valor = parseInt(nivelRiquezaSelect.value) || 0;
             const rendaBase = 1000;
             const multiplicadores = {
@@ -418,19 +445,28 @@ function puxarDadosCaracteristicas() {
     }
 }
 
-// ===== 6. CÁLCULO DO TOTAL DE DESVANTAGENS (MANTIDO IGUAL) =====
+// ===== 6. CÁLCULO DO TOTAL DE DESVANTAGENS (ATUALIZADO) =====
 function calcularTotalDesvantagens() {
     const total = 
         dashboardEstado.pontos.desvantagensVantagens +
         dashboardEstado.pontos.aparenciaDesvantagens +
-        dashboardEstado.pontos.riquezaDesvantagens;
+        dashboardEstado.pontos.riquezaDesvantagens +
+        dashboardEstado.pontos.caracteristicasFisicasDesvantagens;  // NOVO
     
     dashboardEstado.pontos.totalDesvantagens = total;
+    
+    console.log('📊 TOTAL Desvantagens atualizado:', {
+        desvantagensVantagens: dashboardEstado.pontos.desvantagensVantagens,
+        aparenciaDesvantagens: dashboardEstado.pontos.aparenciaDesvantagens,
+        riquezaDesvantagens: dashboardEstado.pontos.riquezaDesvantagens,
+        caracteristicasFisicasDesvantagens: dashboardEstado.pontos.caracteristicasFisicasDesvantagens,
+        total: total
+    });
     
     return total;
 }
 
-// ===== 7. CÁLCULO DO SALDO DISPONÍVEL (ATUALIZADO COM IDIOMAS) =====
+// ===== 7. CÁLCULO DO SALDO DISPONÍVEL (ATUALIZADO) =====
 function calcularSaldoDisponivel() {
     calcularTotalDesvantagens();
     
@@ -445,20 +481,19 @@ function calcularSaldoDisponivel() {
         totalDesvantagens 
     } = dashboardEstado.pontos;
     
-    // Vantagens totais (inclui riqueza positiva e idiomas)
     const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas;
-    
-    // Gastos totais
     const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
     
-    // Saldo disponível
     dashboardEstado.pontos.saldoDisponivel = total - gastosTotais + totalDesvantagens;
+    
+    console.log('🧮 Cálculo do saldo:', 
+        total, '-', gastosTotais, '+', totalDesvantagens, '=', dashboardEstado.pontos.saldoDisponivel);
     
     atualizarDisplayPontos();
     atualizarDisplayResumoGastos();
 }
 
-// ===== 8. FUNÇÕES DE ATUALIZAÇÃO DE DISPLAY (MANTIDO IGUAL) =====
+// ===== 8. FUNÇÕES DE ATUALIZAÇÃO DE DISPLAY =====
 function atualizarDisplayAtributos() {
     const { ST, DX, IQ, HT } = dashboardEstado.atributos;
     
@@ -524,17 +559,14 @@ function atualizarDisplayPontos() {
         limiteDesvantagens 
     } = dashboardEstado.pontos;
     
-    // Vantagens totais
     const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas;
     const pontosGastosDashboard = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
     
-    // Pontos Gastos
     const pontosGastosElement = document.getElementById('pontosGastosDashboard');
     if (pontosGastosElement) {
         pontosGastosElement.textContent = pontosGastosDashboard;
     }
     
-    // Saldo Disponível
     const saldoElement = document.getElementById('saldoDisponivelDashboard');
     if (saldoElement) {
         saldoElement.textContent = saldoDisponivel;
@@ -548,7 +580,6 @@ function atualizarDisplayPontos() {
         }
     }
     
-    // Desvantagens Atuais
     const desvantagensElement = document.getElementById('desvantagensAtuais');
     if (desvantagensElement) {
         desvantagensElement.textContent = totalDesvantagens;
@@ -563,7 +594,8 @@ function atualizarDisplayPontos() {
     }
 }
 
-// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS (APENAS NÚMEROS) =====
+// CONTINUA NO PRÓXIMO COMENTÁRIO...
+// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS =====
 function atualizarDisplayResumoGastos() {
     const { 
         gastosAtributos, 
@@ -586,7 +618,6 @@ function atualizarDisplayResumoGastos() {
         gastosTotal: document.getElementById('gastosTotal')
     };
     
-    // Cards individuais - APENAS NÚMEROS
     if (elementos.gastosAtributos) {
         elementos.gastosAtributos.textContent = gastosAtributos;
     }
@@ -608,14 +639,12 @@ function atualizarDisplayResumoGastos() {
         elementos.gastosDesvantagens.style.color = '#9b59b6';
     }
     
-    // Card Total - APENAS NÚMERO
     const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
     const gastosLiquidos = gastosTotais - totalDesvantagens;
     
     if (elementos.gastosTotal) {
         elementos.gastosTotal.textContent = gastosLiquidos;
         
-        // Apenas cores, sem ícones extras
         if (gastosLiquidos < 0) {
             elementos.gastosTotal.style.color = '#9b59b6';
         } else if (gastosLiquidos > dashboardEstado.pontos.total) {
@@ -628,7 +657,7 @@ function atualizarDisplayResumoGastos() {
     }
 }
 
-// ===== 10. SISTEMA DE RELACIONAMENTOS (MANTIDO IGUAL) =====
+// ===== 10. SISTEMA DE RELACIONAMENTOS =====
 function configurarSistemaRelacionamentos() {
     carregarRelacionamentos();
     
@@ -723,7 +752,7 @@ function atualizarListaRelacionamentos(tipo) {
     listaElement.innerHTML = html;
 }
 
-// ===== 11. UTILITÁRIOS (MANTIDO IGUAL) =====
+// ===== 11. UTILITÁRIOS =====
 function configurarBotoesUtilitarios() {
     const btnExportar = document.getElementById('btnExportarDashboard');
     const btnImportar = document.getElementById('btnImportarDashboard');
@@ -740,7 +769,7 @@ function exportarDadosDashboard() {
             dashboard: {
                 estado: dashboardEstado,
                 timestamp: new Date().toISOString(),
-                versao: '3.2'
+                versao: '3.3'
             }
         };
         
@@ -779,9 +808,9 @@ function importarDadosDashboard() {
                 if (dados.dashboard && dados.dashboard.estado) {
                     dashboardEstado = dados.dashboard.estado;
                     
-                    // Garantir propriedades novas existem
                     if (!dashboardEstado.pontos.riquezaVantagens) dashboardEstado.pontos.riquezaVantagens = 0;
                     if (!dashboardEstado.pontos.gastosIdiomas) dashboardEstado.pontos.gastosIdiomas = 0;
+                    if (!dashboardEstado.pontos.caracteristicasFisicasDesvantagens) dashboardEstado.pontos.caracteristicasFisicasDesvantagens = 0;
                     
                     atualizarDisplayPontos();
                     atualizarDisplayResumoGastos();
@@ -813,6 +842,7 @@ function resetarDashboardCompleto() {
                 aparenciaDesvantagens: 0,
                 riquezaDesvantagens: 0,
                 riquezaVantagens: 0,
+                caracteristicasFisicasDesvantagens: 0,
                 totalDesvantagens: 0,
                 limiteDesvantagens: -50,
                 saldoDisponivel: 150
@@ -844,7 +874,7 @@ function resetarDashboardCompleto() {
             status: {
                 ultimaAtualizacao: new Date().toISOString(),
                 integridade: 'OK',
-                versao: '3.2'
+                versao: '3.3'
             }
         };
         
@@ -860,7 +890,7 @@ function resetarDashboardCompleto() {
 
 // ===== 12. INICIALIZAÇÃO COMPLETA =====
 function inicializarDashboard() {
-    console.log('🚀 Inicializando Dashboard v3.2 - COMPATÍVEL');
+    console.log('🚀 Inicializando Dashboard v3.3 - COMPLETO');
     
     configurarSistemaFoto();
     configurarCamposIdentificacao();
@@ -879,7 +909,7 @@ function inicializarDashboard() {
         atualizarDisplayResumoGastos();
         atualizarContadorDescricao();
         
-        console.log('✅ Dashboard inicializado - 100% compatível');
+        console.log('✅ Dashboard inicializado - Sistema completo funcionando');
     }, 500);
 }
 
@@ -915,7 +945,7 @@ window.importarDadosDashboard = importarDadosDashboard;
 window.resetarDashboardCompleto = resetarDashboardCompleto;
 
 // ===== 15. INICIALIZAÇÃO FINAL =====
-console.log('📊 Dashboard JS v3.2 - Compatível 100% carregado');
+console.log('📊 Dashboard JS v3.3 - Sistema completo carregado');
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     setTimeout(() => {
