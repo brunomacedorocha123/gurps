@@ -1,7 +1,6 @@
-// ===== DASHBOARD.JS - VERSÃO CORRIGIDA SEM DUPLICAÇÃO =====
-// Sistema completo com correção da duplicação de peculiaridades
+// ===== DASHBOARD.JS - VERSÃO 3.0 COM RIQUEZA POSITIVA =====
 
-// Estado do dashboard
+// Estado do dashboard - ATUALIZADO
 let dashboardEstado = {
     pontos: {
         total: 150,
@@ -9,10 +8,11 @@ let dashboardEstado = {
         gastosVantagens: 0,
         gastosPericias: 0,
         gastosMagias: 0,
-        desvantagensVantagens: 0,     // Total de desvantagens da aba Vantagens (JÁ INCLUI peculiaridades)
-        aparenciaDesvantagens: 0,     // Aparência negativa (Feio, Hediondo, etc.)
-        riquezaDesvantagens: 0,       // Riqueza negativa (Pobre, etc.)
-        totalDesvantagens: 0,         // Soma de TODAS as desvantagens
+        desvantagensVantagens: 0,
+        aparenciaDesvantagens: 0,
+        riquezaDesvantagens: 0,
+        riquezaVantagens: 0,           // NOVO: Riqueza positiva (Confortável, Rico, etc)
+        totalDesvantagens: 0,
         limiteDesvantagens: -50,
         saldoDisponivel: 150
     },
@@ -43,11 +43,11 @@ let dashboardEstado = {
     status: {
         ultimaAtualizacao: new Date().toISOString(),
         integridade: 'OK',
-        versao: '2.2'
+        versao: '3.0'
     }
 };
 
-// ===== 1. SISTEMA DE FOTO =====
+// ===== 1. SISTEMA DE FOTO (MANTIDO IGUAL) =====
 function configurarSistemaFoto() {
     const fotoUpload = document.getElementById('fotoUpload');
     const fotoPreview = document.getElementById('fotoPreview');
@@ -89,7 +89,7 @@ function configurarSistemaFoto() {
     }
 }
 
-// ===== 2. SISTEMA DE IDENTIFICAÇÃO =====
+// ===== 2. SISTEMA DE IDENTIFICAÇÃO (MANTIDO IGUAL) =====
 function configurarCamposIdentificacao() {
     const campos = ['racaPersonagem', 'classePersonagem', 'nivelPersonagem', 'descricaoPersonagem'];
     
@@ -122,7 +122,7 @@ function atualizarContadorDescricao() {
     }
 }
 
-// ===== 3. SISTEMA DE PONTOS =====
+// ===== 3. SISTEMA DE PONTOS (MANTIDO IGUAL) =====
 function configurarControlePontos() {
     const pontosTotaisInput = document.getElementById('pontosTotaisDashboard');
     const limiteDesvantagensInput = document.getElementById('limiteDesvantagens');
@@ -160,7 +160,7 @@ function configurarControlePontos() {
     }
 }
 
-// ===== 4. MONITORAMENTO DE ATRIBUTOS =====
+// ===== 4. MONITORAMENTO DE ATRIBUTOS (MANTIDO IGUAL) =====
 function monitorarAtributos() {
     setInterval(() => {
         puxarValoresAtributos();
@@ -238,16 +238,15 @@ function monitorarOutrasAbas() {
     }, 1500);
     
     configurarMonitoramentoCaracteristicas();
+    configurarMonitoramentoRiqueza(); // NOVO
 }
 
-// ===== 5.1 MONITORAMENTO CORRETO SEM DUPLICAÇÃO =====
+// ===== 5.1 MONITORAMENTO VANTAGENS/DESVANTAGENS (MANTIDO IGUAL) =====
 function puxarDadosVantagensDesvantagens() {
     try {
-        // Zerar valores
         dashboardEstado.pontos.gastosVantagens = 0;
         dashboardEstado.pontos.desvantagensVantagens = 0;
         
-        // 1. VANTAGENS (positivas = GASTA pontos)
         const totalVantagensElement = document.getElementById('total-vantagens');
         if (totalVantagensElement) {
             const texto = totalVantagensElement.textContent;
@@ -260,8 +259,6 @@ function puxarDadosVantagensDesvantagens() {
             }
         }
         
-        // 2. DESVANTAGENS da aba Vantagens (JÁ INCLUI PECULIARIDADES)
-        // O elemento 'total-desvantagens' já soma: Desvantagens + Peculiaridades
         const totalDesvantagensElement = document.getElementById('total-desvantagens');
         if (totalDesvantagensElement) {
             const texto = totalDesvantagensElement.textContent;
@@ -269,16 +266,10 @@ function puxarDadosVantagensDesvantagens() {
             if (match) {
                 const valor = parseInt(match[1]) || 0;
                 if (valor < 0) {
-                    // IMPORTANTE: valor é NEGATIVO (ex: -20)
-                    // Convertemos para POSITIVO (20) porque são pontos GANHOS
                     dashboardEstado.pontos.desvantagensVantagens = Math.abs(valor);
-                    console.log('📊 Desvantagens da aba Vantagens:', Math.abs(valor), '(inclui peculiaridades)');
                 }
             }
         }
-        
-        // 3. NÃO PEGAR PECULIARIDADES SEPARADAMENTE - JÁ ESTÃO NO TOTAL-DESVANTAGENS
-        // Isso evita duplicação
         
         calcularSaldoDisponivel();
         
@@ -287,7 +278,6 @@ function puxarDadosVantagensDesvantagens() {
     }
 }
 
-// CONTINUA NO PRÓXIMO COMENTÁRIO...
 // ===== 5.2 MONITORAMENTO DE APARÊNCIA =====
 function puxarDadosAparencia() {
     try {
@@ -297,10 +287,8 @@ function puxarDadosAparencia() {
         if (selectAparencia) {
             const valor = parseInt(selectAparencia.value) || 0;
             
-            // Se for negativo, é desvantagem
             if (valor < 0) {
                 dashboardEstado.pontos.aparenciaDesvantagens = Math.abs(valor);
-                console.log('🎭 Desvantagem de Aparência:', Math.abs(valor), 'pontos');
             }
         }
         
@@ -311,19 +299,27 @@ function puxarDadosAparencia() {
     }
 }
 
-// ===== 5.3 MONITORAMENTO DE RIQUEZA =====
+// ===== 5.3 MONITORAMENTO DE RIQUEZA - ATUALIZADO =====
 function puxarDadosRiqueza() {
     try {
-        dashboardEstado.pontos.riquezaDesvantagens = 0;
-        
         const selectRiqueza = document.getElementById('nivelRiqueza');
         if (selectRiqueza) {
             const valor = parseInt(selectRiqueza.value) || 0;
             
-            // Se for negativo, é desvantagem
+            // Se for negativo, é desvantagem (ganha pontos)
             if (valor < 0) {
                 dashboardEstado.pontos.riquezaDesvantagens = Math.abs(valor);
-                console.log('💰 Desvantagem de Riqueza:', Math.abs(valor), 'pontos');
+                dashboardEstado.pontos.riquezaVantagens = 0;
+            } 
+            // Se for positivo, é vantagem (gasta pontos)
+            else if (valor > 0) {
+                dashboardEstado.pontos.riquezaDesvantagens = 0;
+                dashboardEstado.pontos.riquezaVantagens = valor;
+            }
+            // Se for 0, é neutro
+            else {
+                dashboardEstado.pontos.riquezaDesvantagens = 0;
+                dashboardEstado.pontos.riquezaVantagens = 0;
             }
         }
         
@@ -334,7 +330,7 @@ function puxarDadosRiqueza() {
     }
 }
 
-// ===== 5.4 MONITORAMENTO DE PERÍCIAS =====
+// ===== 5.4 MONITORAMENTO DE PERÍCIAS (MANTIDO) =====
 function puxarDadosPericias() {
     try {
         const pontosPericiasTotalElement = document.getElementById('pontos-pericias-total');
@@ -351,7 +347,7 @@ function puxarDadosPericias() {
     }
 }
 
-// ===== 5.5 MONITORAMENTO DE MAGIAS =====
+// ===== 5.5 MONITORAMENTO DE MAGIAS (MANTIDO) =====
 function puxarDadosMagias() {
     try {
         const totalGastoMagiaElement = document.getElementById('total-gasto-magia');
@@ -368,9 +364,10 @@ function puxarDadosMagias() {
     }
 }
 
-// ===== 5.6 MONITORAMENTO DE CARACTERÍSTICAS (Nomes) =====
+// ===== 5.6 MONITORAMENTO DE CARACTERÍSTICAS (ATUALIZADO) =====
 function puxarDadosCaracteristicas() {
     try {
+        // APARÊNCIA
         const nivelAparenciaSelect = document.getElementById('nivelAparencia');
         if (nivelAparenciaSelect) {
             const texto = nivelAparenciaSelect.options[nivelAparenciaSelect.selectedIndex].text;
@@ -378,11 +375,17 @@ function puxarDadosCaracteristicas() {
             dashboardEstado.caracteristicas.aparencia = nome;
         }
         
+        // RIQUEZA (ATUALIZADO)
         const nivelRiquezaSelect = document.getElementById('nivelRiqueza');
         if (nivelRiquezaSelect) {
             const texto = nivelRiquezaSelect.options[nivelRiquezaSelect.selectedIndex].text;
             const nome = texto.split('[')[0].trim();
             dashboardEstado.caracteristicas.riqueza = nome;
+            
+            // Calcular renda real
+            const valor = parseInt(nivelRiquezaSelect.value) || 0;
+            const renda = calcularRendaReal(valor);
+            dashboardEstado.caracteristicas.saldo = formatarMoedaDashboard(renda);
         }
         
         atualizarDisplayCaracteristicas();
@@ -392,12 +395,36 @@ function puxarDadosCaracteristicas() {
     }
 }
 
-// ===== 5.7 CONFIGURAR MONITORAMENTO DE CARACTERÍSTICAS =====
+// ===== 5.7 CALCULAR RENDA REAL =====
+function calcularRendaReal(pontosRiqueza) {
+    // Base: R$ 1.000 para nível Médio (0 pontos)
+    const rendaBase = 1000;
+    
+    // Multiplicadores baseados nos pontos
+    const multiplicadores = {
+        '-25': 0,      // Falido
+        '-15': 0.2,    // Pobre
+        '-10': 0.5,    // Batalhador
+        '0': 1,        // Médio
+        '10': 2,       // Confortável
+        '20': 5,       // Rico
+        '30': 20,      // Muito Rico
+        '50': 100      // Podre de Rico
+    };
+    
+    const multiplicador = multiplicadores[pontosRiqueza.toString()] || 1;
+    return Math.floor(rendaBase * multiplicador);
+}
+
+function formatarMoedaDashboard(valor) {
+    return `$${valor.toLocaleString('en-US')}`;
+}
+
+// ===== 5.8 CONFIGURAR MONITORAMENTO DE CARACTERÍSTICAS =====
 function configurarMonitoramentoCaracteristicas() {
     document.addEventListener('aparenciaPontosAtualizados', function(e) {
         if (e.detail && e.detail.pontos < 0) {
             dashboardEstado.pontos.aparenciaDesvantagens = Math.abs(e.detail.pontos);
-            console.log('🎭 Evento: Aparência negativa atualizada:', Math.abs(e.detail.pontos));
             calcularTotalDesvantagens();
             calcularSaldoDisponivel();
             atualizarDisplayPontos();
@@ -406,9 +433,29 @@ function configurarMonitoramentoCaracteristicas() {
     });
     
     document.addEventListener('riquezaPontosAtualizados', function(e) {
-        if (e.detail && e.detail.pontos < 0) {
-            dashboardEstado.pontos.riquezaDesvantagens = Math.abs(e.detail.pontos);
-            console.log('💰 Evento: Riqueza negativa atualizada:', Math.abs(e.detail.pontos));
+        if (e.detail) {
+            const pontos = e.detail.pontos;
+            
+            if (pontos > 0) {
+                dashboardEstado.pontos.riquezaVantagens = pontos;
+                dashboardEstado.pontos.riquezaDesvantagens = 0;
+            } else if (pontos < 0) {
+                dashboardEstado.pontos.riquezaVantagens = 0;
+                dashboardEstado.pontos.riquezaDesvantagens = Math.abs(pontos);
+            } else {
+                dashboardEstado.pontos.riquezaVantagens = 0;
+                dashboardEstado.pontos.riquezaDesvantagens = 0;
+            }
+            
+            // Atualizar características
+            if (e.detail.nivel) {
+                dashboardEstado.caracteristicas.riqueza = e.detail.nivel;
+            }
+            if (e.detail.rendaMensal) {
+                dashboardEstado.caracteristicas.saldo = formatarMoedaDashboard(e.detail.rendaMensal);
+            }
+            
+            atualizarDisplayCaracteristicas();
             calcularTotalDesvantagens();
             calcularSaldoDisponivel();
             atualizarDisplayPontos();
@@ -417,12 +464,24 @@ function configurarMonitoramentoCaracteristicas() {
     });
 }
 
-// ===== 6. CÁLCULO DO TOTAL DE DESVANTAGENS (CORRETO) =====
+// ===== 5.9 CONFIGURAR MONITORAMENTO DE RIQUEZA (NOVO) =====
+function configurarMonitoramentoRiqueza() {
+    console.log('💰 Configurando monitoramento de riqueza...');
+    
+    // Monitorar mudanças no select de riqueza
+    const selectRiqueza = document.getElementById('nivelRiqueza');
+    if (selectRiqueza) {
+        selectRiqueza.addEventListener('change', function() {
+            setTimeout(() => {
+                puxarDadosRiqueza();
+                puxarDadosCaracteristicas();
+            }, 100);
+        });
+    }
+}
+
+// ===== 6. CÁLCULO DO TOTAL DE DESVANTAGENS (ATUALIZADO) =====
 function calcularTotalDesvantagens() {
-    // Soma TODAS as desvantagens:
-    // 1. Desvantagens da aba Vantagens (já inclui peculiaridades)
-    // 2. Aparência negativa
-    // 3. Riqueza negativa
     const total = 
         dashboardEstado.pontos.desvantagensVantagens +
         dashboardEstado.pontos.aparenciaDesvantagens +
@@ -430,17 +489,15 @@ function calcularTotalDesvantagens() {
     
     dashboardEstado.pontos.totalDesvantagens = total;
     
-    console.log('📊 TOTAL Desvantagens calculado:', {
-        desvantagensVantagens: dashboardEstado.pontos.desvantagensVantagens,
-        aparenciaDesvantagens: dashboardEstado.pontos.aparenciaDesvantagens,
-        riquezaDesvantagens: dashboardEstado.pontos.riquezaDesvantagens,
-        total: total
-    });
+    console.log('📊 TOTAL Desvantagens:', total, 
+        ' (Desv.Vantagens:', dashboardEstado.pontos.desvantagensVantagens,
+        ' + Aparência:', dashboardEstado.pontos.aparenciaDesvantagens,
+        ' + Riqueza:', dashboardEstado.pontos.riquezaDesvantagens, ')');
     
     return total;
 }
 
-// ===== 7. CÁLCULO CORRETO DO SALDO =====
+// ===== 7. CÁLCULO CORRETO DO SALDO (ATUALIZADO) =====
 function calcularSaldoDisponivel() {
     calcularTotalDesvantagens();
     
@@ -449,18 +506,24 @@ function calcularSaldoDisponivel() {
         gastosAtributos, 
         gastosVantagens, 
         gastosPericias, 
-        gastosMagias, 
+        gastosMagias,
+        riquezaVantagens,
         totalDesvantagens 
     } = dashboardEstado.pontos;
     
-    // Gastos totais (tudo que DEBITA do saldo)
-    const gastosTotais = gastosAtributos + gastosVantagens + gastosPericias + gastosMagias;
+    // Vantagens totais (inclui riqueza positiva)
+    const vantagensTotais = gastosVantagens + riquezaVantagens;
     
-    // Desvantagens ADICIONAM pontos ao saldo
+    // Gastos totais (tudo que DEBITA pontos)
+    const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
+    
+    // Desvantagens ADICIONAM pontos (são pontos GANHOS)
     dashboardEstado.pontos.saldoDisponivel = total - gastosTotais + totalDesvantagens;
     
-    console.log('🧮 Cálculo do saldo:', 
+    console.log('🧮 Cálculo do saldo v3:', 
         total, '-', gastosTotais, '+', totalDesvantagens, '=', dashboardEstado.pontos.saldoDisponivel);
+    console.log('   - Vantagens totais:', vantagensTotais, 
+                '(Vantagens:', gastosVantagens, '+ Riqueza:', riquezaVantagens, ')');
     
     atualizarDisplayPontos();
     atualizarDisplayResumoGastos();
@@ -513,9 +576,42 @@ function atualizarDisplayCaracteristicas() {
     const riquezaElement = document.getElementById('statusRiqueza');
     const saldoElement = document.getElementById('statusSaldo');
     
-    if (aparenciaElement) aparenciaElement.textContent = aparencia;
-    if (riquezaElement) riquezaElement.textContent = riqueza;
-    if (saldoElement) saldoElement.textContent = saldo;
+    if (aparenciaElement) {
+        aparenciaElement.textContent = aparencia;
+        // Colorir baseado no valor
+        if (aparencia.includes('Feio') || aparencia.includes('Hediondo')) {
+            aparenciaElement.style.color = '#e74c3c';
+        } else if (aparencia.includes('Atraente') || aparencia.includes('Muito')) {
+            aparenciaElement.style.color = '#27ae60';
+        } else {
+            aparenciaElement.style.color = '#3498db';
+        }
+    }
+    
+    if (riquezaElement) {
+        riquezaElement.textContent = riqueza;
+        // Colorir baseado no valor
+        if (riqueza.includes('Pobre') || riqueza.includes('Falido') || riqueza.includes('Batalhador')) {
+            riquezaElement.style.color = '#e74c3c';
+        } else if (riqueza.includes('Confortável') || riqueza.includes('Rico')) {
+            riquezaElement.style.color = '#27ae60';
+        } else {
+            riquezaElement.style.color = '#3498db';
+        }
+    }
+    
+    if (saldoElement) {
+        saldoElement.textContent = saldo;
+        // Colorir baseado no valor
+        if (saldo === '$0' || saldo.includes('$0')) {
+            saldoElement.style.color = '#e74c3c';
+        } else if (parseInt(saldo.replace(/[^0-9]/g, '')) > 2000) {
+            saldoElement.style.color = '#27ae60';
+            saldoElement.style.fontWeight = 'bold';
+        } else {
+            saldoElement.style.color = '#3498db';
+        }
+    }
 }
 
 function atualizarDisplayPontos() {
@@ -524,14 +620,17 @@ function atualizarDisplayPontos() {
         gastosAtributos, 
         gastosVantagens, 
         gastosPericias, 
-        gastosMagias, 
+        gastosMagias,
+        riquezaVantagens,
         totalDesvantagens,
         saldoDisponivel, 
         limiteDesvantagens 
     } = dashboardEstado.pontos;
     
-    // Pontos Gastos Dashboard
-    const pontosGastosDashboard = gastosAtributos + gastosVantagens + gastosPericias + gastosMagias;
+    // Pontos Gastos Dashboard (INCLUI RIQUEZA POSITIVA)
+    const vantagensTotais = gastosVantagens + riquezaVantagens;
+    const pontosGastosDashboard = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
+    
     const pontosGastosElement = document.getElementById('pontosGastosDashboard');
     if (pontosGastosElement) {
         pontosGastosElement.textContent = pontosGastosDashboard;
@@ -544,14 +643,17 @@ function atualizarDisplayPontos() {
         
         if (saldoDisponivel < 0) {
             saldoElement.style.color = '#e74c3c';
+            saldoElement.title = 'Saldo negativo! Adicione desvantagens ou reduza gastos.';
         } else if (saldoDisponivel < 50) {
             saldoElement.style.color = '#f39c12';
+            saldoElement.title = 'Saldo baixo. Cuidado com os gastos.';
         } else {
-            saldoElement.style.color = '#3498db';
+            saldoElement.style.color = '#27ae60';
+            saldoElement.title = 'Saldo saudável';
         }
     }
     
-    // DESVANTAGENS ATUAIS (CARD SUPERIOR) - MOSTRA O TOTAL DE DESVANTAGENS
+    // DESVANTAGENS ATUAIS (CARD SUPERIOR)
     const desvantagensElement = document.getElementById('desvantagensAtuais');
     if (desvantagensElement) {
         desvantagensElement.textContent = totalDesvantagens;
@@ -569,20 +671,20 @@ function atualizarDisplayPontos() {
     }
 }
 
-// CONTINUA NO PRÓXIMO COMENTÁRIO...
-// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS =====
+// ===== 9. ATUALIZAR DISPLAY RESUMO DE GASTOS (ATUALIZADO) =====
 function atualizarDisplayResumoGastos() {
     const { 
         gastosAtributos, 
         gastosVantagens, 
         gastosPericias, 
-        gastosMagias, 
+        gastosMagias,
+        riquezaVantagens,
         totalDesvantagens 
     } = dashboardEstado.pontos;
     
-    console.log('🔄 Atualizando resumo de gastos - TOTAL Desvantagens:', totalDesvantagens);
+    // Vantagens totais (inclui riqueza positiva)
+    const vantagensTotais = gastosVantagens + riquezaVantagens;
     
-    // Cards individuais
     const elementos = {
         gastosAtributos: document.getElementById('gastosAtributos'),
         gastosVantagens: document.getElementById('gastosVantagens'),
@@ -598,7 +700,18 @@ function atualizarDisplayResumoGastos() {
     }
     
     if (elementos.gastosVantagens) {
-        elementos.gastosVantagens.textContent = gastosVantagens;
+        elementos.gastosVantagens.textContent = vantagensTotais;
+        if (riquezaVantagens > 0) {
+            elementos.gastosVantagens.innerHTML = `
+                <span style="display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-coins" style="color: #27ae60;"></i>
+                    ${vantagensTotais}
+                    <small style="font-size: 0.7em; color: #95a5a6;">
+                        (+${riquezaVantagens} riqueza)
+                    </small>
+                </span>
+            `;
+        }
     }
     
     if (elementos.gastosPericias) {
@@ -609,7 +722,7 @@ function atualizarDisplayResumoGastos() {
         elementos.gastosMagias.textContent = gastosMagias;
     }
     
-    // CARD DE DESVANTAGENS & PECULIARIDADES - MOSTRA O TOTAL
+    // CARD DE DESVANTAGENS & PECULIARIDADES
     if (elementos.gastosDesvantagens) {
         elementos.gastosDesvantagens.textContent = totalDesvantagens;
         elementos.gastosDesvantagens.style.color = '#9b59b6';
@@ -619,25 +732,28 @@ function atualizarDisplayResumoGastos() {
                 <span style="display: flex; align-items: center; gap: 5px;">
                     <i class="fas fa-exclamation-circle"></i>
                     ${totalDesvantagens}
+                    <small style="font-size: 0.7em; color: #95a5a6;">
+                        (ganhos)
+                    </small>
                 </span>
             `;
         }
     }
     
     // CARD TOTAL GASTOS LÍQUIDOS
-    const gastosTotais = gastosAtributos + gastosVantagens + gastosPericias + gastosMagias;
-    const gastosLiquidos = gastosTotais - totalDesvantagens; // Desvantagens reduzem o total gasto
+    const gastosTotais = gastosAtributos + vantagensTotais + gastosPericias + gastosMagias;
+    const gastosLiquidos = gastosTotais - totalDesvantagens;
     
     if (elementos.gastosTotal) {
         elementos.gastosTotal.textContent = gastosLiquidos;
         
-        // Cores baseadas no valor
         if (gastosLiquidos < 0) {
             elementos.gastosTotal.style.color = '#9b59b6';
             elementos.gastosTotal.innerHTML = `
                 <span style="display: flex; align-items: center; gap: 5px;">
                     <i class="fas fa-arrow-down"></i>
                     ${gastosLiquidos}
+                    <small style="font-size: 0.7em;">(ganhos líquidos)</small>
                 </span>
             `;
         } else if (gastosLiquidos > dashboardEstado.pontos.total) {
@@ -646,6 +762,7 @@ function atualizarDisplayResumoGastos() {
                 <span style="display: flex; align-items: center; gap: 5px;">
                     <i class="fas fa-exclamation-triangle"></i>
                     ${gastosLiquidos}
+                    <small style="font-size: 0.7em;">(excede limite)</small>
                 </span>
             `;
         } else if (gastosLiquidos > dashboardEstado.pontos.total * 0.8) {
@@ -654,21 +771,23 @@ function atualizarDisplayResumoGastos() {
                 <span style="display: flex; align-items: center; gap: 5px;">
                     <i class="fas fa-exclamation"></i>
                     ${gastosLiquidos}
+                    <small style="font-size: 0.7em;">(alto)</small>
                 </span>
             `;
         } else {
-            elementos.gastosTotal.style.color = '#ffd700';
+            elementos.gastosTotal.style.color = '#27ae60';
             elementos.gastosTotal.innerHTML = `
                 <span style="display: flex; align-items: center; gap: 5px;">
                     <i class="fas fa-check-circle"></i>
                     ${gastosLiquidos}
+                    <small style="font-size: 0.7em;">(dentro do limite)</small>
                 </span>
             `;
         }
     }
 }
 
-// ===== 10. SISTEMA DE RELACIONAMENTOS =====
+// ===== 10. SISTEMA DE RELACIONAMENTOS (MANTIDO IGUAL) =====
 function configurarSistemaRelacionamentos() {
     carregarRelacionamentos();
     
@@ -763,7 +882,7 @@ function atualizarListaRelacionamentos(tipo) {
     listaElement.innerHTML = html;
 }
 
-// ===== 11. UTILITÁRIOS =====
+// ===== 11. UTILITÁRIOS (MANTIDO IGUAL) =====
 function configurarBotoesUtilitarios() {
     const btnExportar = document.getElementById('btnExportarDashboard');
     const btnImportar = document.getElementById('btnImportarDashboard');
@@ -780,7 +899,7 @@ function exportarDadosDashboard() {
             dashboard: {
                 estado: dashboardEstado,
                 timestamp: new Date().toISOString(),
-                versao: '2.2'
+                versao: '3.0'
             }
         };
         
@@ -818,8 +937,15 @@ function importarDadosDashboard() {
                 const dados = JSON.parse(e.target.result);
                 if (dados.dashboard && dados.dashboard.estado) {
                     dashboardEstado = dados.dashboard.estado;
+                    
+                    // Garantir que riquezaVantagens existe (para versões antigas)
+                    if (!dashboardEstado.pontos.riquezaVantagens) {
+                        dashboardEstado.pontos.riquezaVantagens = 0;
+                    }
+                    
                     atualizarDisplayPontos();
                     atualizarDisplayResumoGastos();
+                    atualizarDisplayCaracteristicas();
                     alert('✅ Dashboard importado com sucesso!');
                 }
             } catch (error) {
@@ -845,6 +971,7 @@ function resetarDashboardCompleto() {
                 desvantagensVantagens: 0,
                 aparenciaDesvantagens: 0,
                 riquezaDesvantagens: 0,
+                riquezaVantagens: 0,
                 totalDesvantagens: 0,
                 limiteDesvantagens: -50,
                 saldoDisponivel: 150
@@ -876,7 +1003,7 @@ function resetarDashboardCompleto() {
             status: {
                 ultimaAtualizacao: new Date().toISOString(),
                 integridade: 'OK',
-                versao: '2.2'
+                versao: '3.0'
             }
         };
         
@@ -885,13 +1012,14 @@ function resetarDashboardCompleto() {
         
         atualizarDisplayPontos();
         atualizarDisplayResumoGastos();
+        atualizarDisplayCaracteristicas();
         alert('✅ Dashboard resetado com sucesso!');
     }
 }
 
-// ===== 12. INICIALIZAÇÃO COMPLETA =====
+// ===== 12. INICIALIZAÇÃO COMPLETA (ATUALIZADA) =====
 function inicializarDashboard() {
-    console.log('🚀 Inicializando Dashboard v2.2 - SEM DUPLICAÇÃO');
+    console.log('🚀 Inicializando Dashboard v3.0 - COM RIQUEZA POSITIVA');
     
     // Configurar sistemas
     configurarSistemaFoto();
@@ -913,17 +1041,17 @@ function inicializarDashboard() {
         atualizarDisplayResumoGastos();
         atualizarContadorDescricao();
         
-        console.log('✅ Dashboard inicializado - SEM duplicação de peculiaridades');
-        console.log('🎯 Sistema corrigido:');
-        console.log('   • total-desvantagens já inclui peculiaridades');
-        console.log('   • NÃO pegamos peculiaridades separadamente');
-        console.log('   • Evita duplicação de contagem');
+        console.log('✅ Dashboard inicializado - COM sistema de riqueza positiva');
+        console.log('🎯 Sistema completo:');
+        console.log('   • Riqueza positiva (Confortável, Rico) = Vantagem (custa pontos)');
+        console.log('   • Riqueza negativa (Pobre, Batalhador) = Desvantagem (ganha pontos)');
+        console.log('   • Card de características atualiza com valor real');
         
-        debugDesvantagensDetalhado();
+        debugDashboardDetalhado();
     }, 500);
 }
 
-// ===== 13. INICIALIZAÇÃO AUTOMÁTICA =====
+// ===== 13. INICIALIZAÇÃO AUTOMÁTICA (MANTIDO) =====
 document.addEventListener('DOMContentLoaded', function() {
     const dashboardTab = document.getElementById('dashboard');
     if (dashboardTab && dashboardTab.classList.contains('active')) {
@@ -946,61 +1074,81 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// ===== 14. FUNÇÕES DE DEBUG DETALHADO =====
-function debugDesvantagensDetalhado() {
-    console.log('=== 🔍 DEBUG DETALHADO DESVANTAGENS ===');
-    console.log('1. Desvantagens Vantagens:', dashboardEstado.pontos.desvantagensVantagens, '(já inclui peculiaridades)');
-    console.log('2. Aparência Desvantagens:', dashboardEstado.pontos.aparenciaDesvantagens);
-    console.log('3. Riqueza Desvantagens:', dashboardEstado.pontos.riquezaDesvantagens);
-    console.log('📊 TOTAL:', dashboardEstado.pontos.totalDesvantagens);
+// ===== 14. FUNÇÕES DE DEBUG DETALHADO (ATUALIZADO) =====
+function debugDashboardDetalhado() {
+    console.log('=== 🔍 DEBUG DASHBOARD V3.0 ===');
+    console.log('1. Pontos Totais:', dashboardEstado.pontos.total);
+    console.log('2. Gastos Atributos:', dashboardEstado.pontos.gastosAtributos);
+    console.log('3. Gastos Vantagens:', dashboardEstado.pontos.gastosVantagens);
+    console.log('4. Riqueza Vantagens:', dashboardEstado.pontos.riquezaVantagens, '(NOVO)');
+    console.log('5. Gastos Perícias:', dashboardEstado.pontos.gastosPericias);
+    console.log('6. Gastos Magias:', dashboardEstado.pontos.gastosMagias);
+    console.log('7. Desvantagens Vantagens:', dashboardEstado.pontos.desvantagensVantagens);
+    console.log('8. Aparência Desvantagens:', dashboardEstado.pontos.aparenciaDesvantagens);
+    console.log('9. Riqueza Desvantagens:', dashboardEstado.pontos.riquezaDesvantagens);
+    console.log('10. TOTAL Desvantagens:', dashboardEstado.pontos.totalDesvantagens);
+    console.log('11. Saldo Disponível:', dashboardEstado.pontos.saldoDisponivel);
+    console.log('12. Características:', dashboardEstado.caracteristicas);
     console.log('====================================');
 }
 
-function testarDuplicacao() {
-    console.log('🧪 TESTE: Verificando duplicação de peculiaridades...');
+function testarSistemaRiqueza() {
+    console.log('🧪 TESTE: Sistema de Riqueza...');
     
-    // Simular cenário
-    const desvantagensVantagens = dashboardEstado.pontos.desvantagensVantagens;
-    const total = dashboardEstado.pontos.totalDesvantagens;
-    
-    console.log('Se total > desvantagensVantagens + aparência + riqueza, há duplicação');
-    console.log('Desvantagens Vantagens:', desvantagensVantagens);
-    console.log('Total calculado:', total);
-    
-    if (total > desvantagensVantagens + dashboardEstado.pontos.aparenciaDesvantagens + dashboardEstado.pontos.riquezaDesvantagens) {
-        console.warn('⚠️ POSSÍVEL DUPLICAÇÃO DETECTADA!');
-    } else {
-        console.log('✅ Sem duplicação detectada');
+    const selectRiqueza = document.getElementById('nivelRiqueza');
+    if (selectRiqueza) {
+        const valor = parseInt(selectRiqueza.value);
+        console.log('   Valor atual:', valor);
+        console.log('   Tipo:', valor > 0 ? 'VANTAGEM (custa pontos)' : 
+                            valor < 0 ? 'DESVANTAGEM (ganha pontos)' : 'NEUTRO');
+        console.log('   Renda calculada:', dashboardEstado.caracteristicas.saldo);
     }
 }
 
-// ===== 15. EXPORTAÇÃO DE FUNÇÕES GLOBAIS =====
+// ===== 15. EXPORTAÇÃO DE FUNÇÕES GLOBAIS (ATUALIZADO) =====
 window.inicializarDashboard = inicializarDashboard;
 window.dashboardEstado = dashboardEstado;
 window.removerRelacionamento = removerRelacionamento;
 window.exportarDadosDashboard = exportarDadosDashboard;
 window.importarDadosDashboard = importarDadosDashboard;
 window.resetarDashboardCompleto = resetarDashboardCompleto;
-window.debugDesvantagensDetalhado = debugDesvantagensDetalhado;
-window.testarDuplicacao = testarDuplicacao;
+window.debugDashboardDetalhado = debugDashboardDetalhado;
+window.testarSistemaRiqueza = testarSistemaRiqueza;
+
 window.forcarAtualizacao = function() {
-    console.log('🔄 Forçando atualização...');
+    console.log('🔄 Forçando atualização completa...');
+    puxarValoresAtributos();
     puxarDadosVantagensDesvantagens();
     puxarDadosAparencia();
     puxarDadosRiqueza();
+    puxarDadosPericias();
+    puxarDadosMagias();
+    puxarDadosCaracteristicas();
     calcularTotalDesvantagens();
     calcularSaldoDisponivel();
     atualizarDisplayPontos();
     atualizarDisplayResumoGastos();
-    debugDesvantagensDetalhado();
+    atualizarDisplayCaracteristicas();
+    debugDashboardDetalhado();
 };
 
-// ===== 16. INICIALIZAÇÃO FINAL =====
-console.log('📊 Dashboard JS v2.2 - Correção de duplicação carregada');
-console.log('✅ Sistema corrigido:');
-console.log('   • total-desvantagens já inclui peculiaridades');
-console.log('   • NÃO há contagem separada de peculiaridades');
-console.log('   • Evita duplicação: 19 + 1 peculiaridade = 20 (CORRETO)');
+// ===== 16. FUNÇÃO PARA TESTAR RIQUEZA =====
+window.testarRiqueza = function(nivel) {
+    const selectRiqueza = document.getElementById('nivelRiqueza');
+    if (selectRiqueza) {
+        selectRiqueza.value = nivel;
+        selectRiqueza.dispatchEvent(new Event('change'));
+        console.log('🧪 Teste de riqueza aplicado:', nivel);
+    }
+};
+
+// ===== 17. INICIALIZAÇÃO FINAL =====
+console.log('📊 Dashboard JS v3.0 - Sistema de riqueza completo carregado');
+console.log('✅ Sistema completo funcionando:');
+console.log('   • Riqueza positiva = Vantagem (Confortável: +10 pts, Rico: +20 pts)');
+console.log('   • Riqueza negativa = Desvantagem (Pobre: -15 pts, Falido: -25 pts)');
+console.log('   • Card de características mostra valor real dinâmico');
+console.log('   • Sistema integrado com dashboard');
 
 // Auto-inicialização se já carregado
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
