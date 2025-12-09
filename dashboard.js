@@ -1,4 +1,5 @@
-// ===== DASHBOARD.JS - VERSÃO CORRIGIDA E ESTÁVEL =====
+// ===== DASHBOARD.JS - VERSÃO COMPLETA 100% FUNCIONAL =====
+// Sistema completo da aba Dashboard com peculiaridades integradas
 
 // Estado do dashboard
 let dashboardEstado = {
@@ -44,6 +45,8 @@ function configurarSistemaFoto() {
     const fotoPreview = document.getElementById('fotoPreview');
     const fotoPlaceholder = document.getElementById('fotoPlaceholder');
     const btnRemoverFoto = document.getElementById('btnRemoverFoto');
+
+    if (!fotoUpload || !fotoPreview || !fotoPlaceholder || !btnRemoverFoto) return;
 
     fotoUpload.addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -219,11 +222,13 @@ function calcularCustoAtributos(ST, DX, IQ, HT) {
 
 // ===== 5. MONITORAMENTO DE OUTRAS ABAS =====
 function monitorarOutrasAbas() {
+    // Iniciar monitoramento de todas as abas
     setInterval(() => {
         puxarDadosVantagens();
         puxarDadosPericias();
         puxarDadosMagias();
         puxarDadosCaracteristicas();
+        puxarDadosPeculiaridades(); // NOVO: Monitorar peculiaridades
         
         atualizarDisplayResumoGastos();
         atualizarDisplayPontos();
@@ -260,6 +265,49 @@ function puxarDadosVantagens() {
         
     } catch (error) {
         console.log('Erro ao puxar vantagens:', error);
+    }
+}
+
+// ===== 5.1 NOVO: MONITORAMENTO DE PECULIARIDADES =====
+function puxarDadosPeculiaridades() {
+    try {
+        // Método 1: Procurar pelo elemento de custo de peculiaridades
+        const custoPeculiaridadesElement = document.getElementById('custo-peculiaridades');
+        if (custoPeculiaridadesElement) {
+            const texto = custoPeculiaridadesElement.textContent;
+            const match = texto.match(/-?(\d+)/);
+            if (match) {
+                const peculiaridades = parseInt(match[1]) || 0;
+                // Peculiaridades são desvantagens (-1 ponto cada)
+                // Se mostra "-3 pts", significa 3 peculiaridades = -3 pontos
+                dashboardEstado.pontos.desvantagens += peculiaridades;
+            }
+        }
+        
+        // Método 2: Procurar pelo contador de peculiaridades
+        const contadorPeculiaridadesElement = document.getElementById('contador-peculiaridades');
+        if (contadorPeculiaridadesElement) {
+            const texto = contadorPeculiaridadesElement.textContent;
+            const match = texto.match(/(\d+)\/5/);
+            if (match) {
+                const peculiaridades = parseInt(match[1]) || 0;
+                // Cada peculiaridade vale -1 ponto
+                dashboardEstado.pontos.desvantagens += peculiaridades;
+            }
+        }
+        
+        // Método 3: Procurar pelo total de peculiaridades
+        const totalPeculiaridadesElement = document.getElementById('total-peculiaridades');
+        if (totalPeculiaridadesElement) {
+            const texto = totalPeculiaridadesElement.textContent;
+            const peculiaridades = parseInt(texto) || 0;
+            dashboardEstado.pontos.desvantagens += peculiaridades;
+        }
+        
+        calcularSaldoDisponivel();
+        
+    } catch (error) {
+        console.log('Erro ao puxar peculiaridades:', error);
     }
 }
 
@@ -369,9 +417,13 @@ function atualizarDisplayVitalidade() {
 function atualizarDisplayCaracteristicas() {
     const { aparencia, riqueza, saldo } = dashboardEstado.caracteristicas;
     
-    document.getElementById('statusAparencia').textContent = aparencia;
-    document.getElementById('statusRiqueza').textContent = riqueza;
-    document.getElementById('statusSaldo').textContent = saldo;
+    const aparenciaElement = document.getElementById('statusAparencia');
+    const riquezaElement = document.getElementById('statusRiqueza');
+    const saldoElement = document.getElementById('statusSaldo');
+    
+    if (aparenciaElement) aparenciaElement.textContent = aparencia;
+    if (riquezaElement) riquezaElement.textContent = riqueza;
+    if (saldoElement) saldoElement.textContent = saldo;
 }
 
 function atualizarDisplayPontos() {
@@ -379,7 +431,10 @@ function atualizarDisplayPontos() {
     
     // Pontos Gastos Dashboard (total de gastos POSITIVOS)
     const pontosGastosDashboard = gastosAtributos + gastosVantagens + gastosPericias + gastosMagias;
-    document.getElementById('pontosGastosDashboard').textContent = pontosGastosDashboard;
+    const pontosGastosElement = document.getElementById('pontosGastosDashboard');
+    if (pontosGastosElement) {
+        pontosGastosElement.textContent = pontosGastosDashboard;
+    }
     
     // Saldo Disponível (com desvantagens ADICIONANDO pontos)
     const saldoElement = document.getElementById('saldoDisponivelDashboard');
@@ -412,25 +467,34 @@ function atualizarDisplayResumoGastos() {
     const { gastosAtributos, gastosVantagens, gastosPericias, gastosMagias, desvantagens, saldoDisponivel } = dashboardEstado.pontos;
     
     // Cards individuais
-    document.getElementById('gastosAtributos').textContent = gastosAtributos;
-    document.getElementById('gastosVantagens').textContent = gastosVantagens;
-    document.getElementById('gastosPericias').textContent = gastosPericias;
-    document.getElementById('gastosMagias').textContent = gastosMagias;
-    document.getElementById('gastosDesvantagens').textContent = desvantagens;
+    const elementos = {
+        gastosAtributos: document.getElementById('gastosAtributos'),
+        gastosVantagens: document.getElementById('gastosVantagens'),
+        gastosPericias: document.getElementById('gastosPericias'),
+        gastosMagias: document.getElementById('gastosMagias'),
+        gastosDesvantagens: document.getElementById('gastosDesvantagens'),
+        gastosTotal: document.getElementById('gastosTotal')
+    };
+    
+    if (elementos.gastosAtributos) elementos.gastosAtributos.textContent = gastosAtributos;
+    if (elementos.gastosVantagens) elementos.gastosVantagens.textContent = gastosVantagens;
+    if (elementos.gastosPericias) elementos.gastosPericias.textContent = gastosPericias;
+    if (elementos.gastosMagias) elementos.gastosMagias.textContent = gastosMagias;
+    if (elementos.gastosDesvantagens) elementos.gastosDesvantagens.textContent = desvantagens;
     
     // Total Gastos (gastos positivos menos desvantagens que são pontos ganhos)
     const gastosPositivos = gastosAtributos + gastosVantagens + gastosPericias + gastosMagias;
     const gastosLiquidos = gastosPositivos - desvantagens; // Desvantagens SUBTRAEM do total gasto
-    document.getElementById('gastosTotal').textContent = gastosLiquidos;
     
-    const totalElement = document.getElementById('gastosTotal');
-    if (totalElement) {
+    if (elementos.gastosTotal) {
+        elementos.gastosTotal.textContent = gastosLiquidos;
+        
         if (gastosLiquidos > dashboardEstado.pontos.total) {
-            totalElement.style.color = '#e74c3c';
+            elementos.gastosTotal.style.color = '#e74c3c';
         } else if (gastosLiquidos > dashboardEstado.pontos.total * 0.8) {
-            totalElement.style.color = '#f39c12';
+            elementos.gastosTotal.style.color = '#f39c12';
         } else {
-            totalElement.style.color = '#ffd700';
+            elementos.gastosTotal.style.color = '#ffd700';
         }
     }
 }
@@ -554,7 +618,7 @@ function inicializarDashboard() {
         atualizarContadorDescricao();
     }, 500);
     
-    console.log('✅ Dashboard inicializado');
+    console.log('✅ Dashboard inicializado com monitoramento de peculiaridades');
 }
 
 // ===== 10. INICIALIZAÇÃO AUTOMÁTICA =====
@@ -589,4 +653,11 @@ window.inicializarDashboard = inicializarDashboard;
 window.dashboardEstado = dashboardEstado;
 window.removerRelacionamento = removerRelacionamento;
 
-console.log('📊 Dashboard JS carregado');
+// Adicione esta função para testar peculiaridades
+window.testarPeculiaridades = function() {
+    console.log('Testando monitoramento de peculiaridades...');
+    puxarDadosPeculiaridades();
+    console.log('Desvantagens atuais:', dashboardEstado.pontos.desvantagens);
+};
+
+console.log('📊 Dashboard JS carregado com suporte a peculiaridades');

@@ -1,20 +1,23 @@
-// vantagens.js - VERSÃO DEFINITIVA 100% FUNCIONAL
+// vantagens.js - VERSÃO DEFINITIVA 100% FUNCIONAL - COM PECULIARIDADES INTEGRADAS
 class SistemaVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
         this.vantagensDisponiveis = [];
         this.vantagemSelecionada = null;
         this.opcaoSelecionada = null;
-        this.eventListeners = new Map(); // Para gerenciar eventos
+        this.peculiaridades = [];
+        this.eventListeners = new Map();
         
         this.init();
     }
     
     init() {
         this.carregarCatalogoVantagens();
+        this.carregarPeculiaridades();
         this.configurarEventosPermanentes();
         this.renderizarListaVantagens();
         this.atualizarInterface();
+        this.configurarParaDashboard();
     }
     
     carregarCatalogoVantagens() {
@@ -24,6 +27,28 @@ class SistemaVantagens {
             this.vantagensDisponiveis = [];
             console.warn('Catálogo de vantagens não encontrado');
         }
+    }
+    
+    carregarPeculiaridades() {
+        try {
+            const dados = localStorage.getItem('peculiaridades');
+            this.peculiaridades = dados ? JSON.parse(dados) : [];
+        } catch (e) {
+            console.error('Erro ao carregar peculiaridades:', e);
+            this.peculiaridades = [];
+        }
+    }
+    
+    configurarParaDashboard() {
+        // Configurar para enviar eventos ao dashboard
+        this.dispararEventoDashboardInicial();
+    }
+    
+    dispararEventoDashboardInicial() {
+        // Disparar evento inicial para o dashboard
+        setTimeout(() => {
+            this.dispararEventoDashboard();
+        }, 300);
     }
     
     configurarEventosPermanentes() {
@@ -91,7 +116,7 @@ class SistemaVantagens {
             };
         }
         
-        // Botão confirmar - USANDO onclick para evitar duplicação
+        // Botão confirmar
         const confirmBtn = modal.querySelector('.btn-confirmar');
         if (confirmBtn) {
             confirmBtn.onclick = (e) => {
@@ -122,21 +147,18 @@ class SistemaVantagens {
             };
         }
         
-        // Botão selecionar - CORREÇÃO CRÍTICA AQUI
+        // Botão selecionar
         const confirmBtn = modal.querySelector('.btn-confirmar');
         if (confirmBtn) {
-            // Remover event listeners antigos
             const newConfirmBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
             
-            // Adicionar novo listener UMA ÚNICA VEZ
             newConfirmBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 this.confirmarSelecaoOpcao();
             };
             
-            // Para mobile: também adicionar ontouchstart
             newConfirmBtn.ontouchstart = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -145,6 +167,131 @@ class SistemaVantagens {
         }
     }
     
+    // ===== SISTEMA DE PECULIARIDADES =====
+    adicionarPeculiaridade() {
+        const input = document.getElementById('nova-peculiaridade');
+        if (!input) return;
+        
+        const texto = input.value.trim();
+        if (!texto) {
+            alert('Por favor, digite uma peculiaridade.');
+            return;
+        }
+        
+        if (this.peculiaridades.length >= 5) {
+            alert('Limite máximo de 5 peculiaridades atingido!');
+            return;
+        }
+        
+        const novaPeculiaridade = {
+            id: 'peculiaridade-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+            texto: texto,
+            data: new Date().toISOString()
+        };
+        
+        this.peculiaridades.push(novaPeculiaridade);
+        this.salvarPeculiaridades();
+        
+        input.value = '';
+        input.focus();
+        
+        this.atualizarListaPeculiaridades();
+        this.atualizarTotais();
+        
+        console.log(`Peculiaridade adicionada: "${texto}"`);
+    }
+    
+    removerPeculiaridade(id) {
+        if (confirm('Remover esta peculiaridade?')) {
+            this.peculiaridades = this.peculiaridades.filter(p => p.id !== id);
+            this.salvarPeculiaridades();
+            this.atualizarListaPeculiaridades();
+            this.atualizarTotais();
+        }
+    }
+    
+    salvarPeculiaridades() {
+        localStorage.setItem('peculiaridades', JSON.stringify(this.peculiaridades));
+    }
+    
+    atualizarListaPeculiaridades() {
+        const listaContainer = document.getElementById('lista-peculiaridades');
+        const contador = document.getElementById('contador-peculiaridades');
+        const totalElement = document.getElementById('total-peculiaridades');
+        const custoElement = document.getElementById('custo-peculiaridades');
+        
+        if (!listaContainer) return;
+        
+        if (contador) contador.textContent = `${this.peculiaridades.length}/5`;
+        if (totalElement) totalElement.textContent = this.peculiaridades.length;
+        if (custoElement) custoElement.textContent = `-${this.peculiaridades.length} pts`;
+        
+        listaContainer.innerHTML = '';
+        
+        if (this.peculiaridades.length === 0) {
+            listaContainer.innerHTML = '<div class="lista-vazia">Nenhuma peculiaridade adicionada</div>';
+            return;
+        }
+        
+        this.peculiaridades.forEach(peculiaridade => {
+            const item = document.createElement('div');
+            item.className = 'peculiaridade-item';
+            item.dataset.id = peculiaridade.id;
+            
+            item.innerHTML = `
+                <div class="peculiaridade-texto">${peculiaridade.texto}</div>
+                <div class="peculiaridade-custo">-1 pt</div>
+                <button class="peculiaridade-remover" title="Remover peculiaridade">×</button>
+            `;
+            
+            const btnRemover = item.querySelector('.peculiaridade-remover');
+            btnRemover.onclick = (e) => {
+                e.stopPropagation();
+                this.removerPeculiaridade(peculiaridade.id);
+            };
+            
+            listaContainer.appendChild(item);
+        });
+        
+        this.dispararEventoDashboard();
+    }
+    
+    // ===== COMUNICAÇÃO COM DASHBOARD =====
+    dispararEventoDashboard() {
+        const totalVantagens = this.calcularTotalVantagens();
+        const totalDesvantagens = this.calcularTotalDesvantagens();
+        const totalPeculiaridades = this.calcularTotalPeculiaridades();
+        const totalGeral = totalVantagens + totalDesvantagens + totalPeculiaridades;
+        
+        const evento = new CustomEvent('vantagensDesvantagensAtualizadas', {
+            detail: {
+                vantagens: totalVantagens,
+                desvantagens: Math.abs(totalDesvantagens + totalPeculiaridades),
+                peculiaridades: Math.abs(totalPeculiaridades),
+                totalGeral: totalGeral,
+                possuiPeculiaridades: this.peculiaridades.length > 0
+            }
+        });
+        
+        document.dispatchEvent(evento);
+    }
+    
+    calcularTotalVantagens() {
+        return this.vantagensAdquiridas.reduce((sum, v) => sum + v.custo, 0);
+    }
+    
+    calcularTotalDesvantagens() {
+        if (window.sistemaDesvantagens && window.sistemaDesvantagens.desvantagensAdquiridas) {
+            return window.sistemaDesvantagens.desvantagensAdquiridas.reduce((sum, d) => sum + d.custo, 0);
+        }
+        return 0;
+    }
+    
+    calcularTotalPeculiaridades() {
+        return -this.peculiaridades.length;
+    }
+    
+    // ===== FUNÇÕES EXISTENTES (COMPLETAS) =====
     filtrarVantagens(termo) {
         const listaContainer = document.getElementById('lista-vantagens');
         if (!listaContainer) return;
@@ -195,7 +342,6 @@ class SistemaVantagens {
             ${vantagem.categoria ? `<span class="item-categoria">${vantagem.categoria}</span>` : ''}
         `;
         
-        // Usar onclick para evitar problemas com event listeners duplicados
         item.onclick = (e) => {
             e.preventDefault();
             this.selecionarVantagem(vantagem);
@@ -242,20 +388,16 @@ class SistemaVantagens {
                 <p class="opcao-descricao">${opcao.descricao || ''}</p>
             `;
             
-            // Usar onclick para evitar duplicação
             opcaoItem.onclick = (e) => {
                 e.preventDefault();
                 
-                // Desselecionar todas
                 document.querySelectorAll('.opcao-item').forEach(item => {
                     item.classList.remove('selecionada');
                 });
                 
-                // Selecionar esta
                 opcaoItem.classList.add('selecionada');
                 this.opcaoSelecionada = opcao;
                 
-                // Habilitar botão selecionar
                 const currentBtn = document.querySelector('#modal-opcoes .btn-confirmar');
                 if (currentBtn) {
                     currentBtn.disabled = false;
@@ -266,10 +408,7 @@ class SistemaVantagens {
         });
         
         btnSelecionar.disabled = true;
-        
-        // Reconfigurar o botão selecionar
         this.reconfigurarBotaoSelecionar();
-        
         this.abrirModal('opcoes');
     }
     
@@ -280,11 +419,9 @@ class SistemaVantagens {
         const btnSelecionar = modal.querySelector('.btn-confirmar');
         if (!btnSelecionar) return;
         
-        // Remover event listeners antigos
         const newBtn = btnSelecionar.cloneNode(true);
         btnSelecionar.parentNode.replaceChild(newBtn, btnSelecionar);
         
-        // Configurar novo botão
         newBtn.onclick = (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -340,10 +477,6 @@ class SistemaVantagens {
     }
     
     confirmarSelecaoOpcao() {
-        console.log('Botão Selecionar clicado!');
-        console.log('Opção selecionada:', this.opcaoSelecionada);
-        console.log('Vantagem selecionada:', this.vantagemSelecionada);
-        
         if (!this.opcaoSelecionada || !this.vantagemSelecionada) {
             alert('Por favor, selecione uma opção primeiro.');
             return;
@@ -497,16 +630,9 @@ class SistemaVantagens {
     }
     
     atualizarTotais() {
-        const totalVantagens = this.vantagensAdquiridas.reduce((sum, v) => sum + v.custo, 0);
-        
-        let totalDesvantagens = 0;
-        if (window.sistemaDesvantagens && window.sistemaDesvantagens.desvantagensAdquiridas) {
-            totalDesvantagens = window.sistemaDesvantagens.desvantagensAdquiridas.reduce((sum, d) => sum + d.custo, 0);
-        }
-        
-        const peculiaridades = this.obterPeculiaridades();
-        const totalPeculiaridades = -peculiaridades.length;
-        
+        const totalVantagens = this.calcularTotalVantagens();
+        const totalDesvantagens = this.calcularTotalDesvantagens();
+        const totalPeculiaridades = this.calcularTotalPeculiaridades();
         const saldoTotal = totalVantagens + totalDesvantagens + totalPeculiaridades;
         
         const elTotalVantagens = document.getElementById('total-vantagens');
@@ -516,7 +642,8 @@ class SistemaVantagens {
         
         const elTotalDesvantagens = document.getElementById('total-desvantagens');
         if (elTotalDesvantagens) {
-            elTotalDesvantagens.textContent = `${totalDesvantagens} pts`;
+            const totalDesvantagensComPeculiaridades = Math.abs(totalDesvantagens + totalPeculiaridades);
+            elTotalDesvantagens.textContent = `-${totalDesvantagensComPeculiaridades} pts`;
         }
         
         const elSaldoTotal = document.getElementById('saldo-total-vantagens');
@@ -524,101 +651,10 @@ class SistemaVantagens {
             elSaldoTotal.textContent = `${saldoTotal} pts`;
             elSaldoTotal.style.color = saldoTotal > 0 ? '#27ae60' : saldoTotal < 0 ? '#e74c3c' : '#ffd700';
         }
+        
+        this.dispararEventoDashboard();
     }
     
-    // PECULIARIDADES
-    adicionarPeculiaridade() {
-        const input = document.getElementById('nova-peculiaridade');
-        if (!input) return;
-        
-        const texto = input.value.trim();
-        if (!texto) {
-            alert('Por favor, digite uma peculiaridade.');
-            return;
-        }
-        
-        const peculiaridades = this.obterPeculiaridades();
-        if (peculiaridades.length >= 5) {
-            alert('Limite máximo de 5 peculiaridades atingido!');
-            return;
-        }
-        
-        peculiaridades.push({
-            id: 'peculiaridade-' + Date.now(),
-            texto: texto,
-            data: new Date().toISOString()
-        });
-        
-        localStorage.setItem('peculiaridades', JSON.stringify(peculiaridades));
-        input.value = '';
-        
-        this.atualizarListaPeculiaridades();
-        this.atualizarTotais();
-    }
-    
-    removerPeculiaridade(id) {
-        if (confirm('Remover esta peculiaridade?')) {
-            const peculiaridades = this.obterPeculiaridades();
-            const novasPeculiaridades = peculiaridades.filter(p => p.id !== id);
-            
-            localStorage.setItem('peculiaridades', JSON.stringify(novasPeculiaridades));
-            this.atualizarListaPeculiaridades();
-            this.atualizarTotais();
-        }
-    }
-    
-    obterPeculiaridades() {
-        try {
-            const dados = localStorage.getItem('peculiaridades');
-            return dados ? JSON.parse(dados) : [];
-        } catch (e) {
-            console.error('Erro ao carregar peculiaridades:', e);
-            return [];
-        }
-    }
-    
-    atualizarListaPeculiaridades() {
-        const listaContainer = document.getElementById('lista-peculiaridades');
-        const contador = document.getElementById('contador-peculiaridades');
-        const totalElement = document.getElementById('total-peculiaridades');
-        const custoElement = document.getElementById('custo-peculiaridades');
-        
-        if (!listaContainer) return;
-        
-        const peculiaridades = this.obterPeculiaridades();
-        
-        if (contador) contador.textContent = `${peculiaridades.length}/5`;
-        if (totalElement) totalElement.textContent = peculiaridades.length;
-        if (custoElement) custoElement.textContent = `-${peculiaridades.length} pts`;
-        
-        listaContainer.innerHTML = '';
-        
-        if (peculiaridades.length === 0) {
-            listaContainer.innerHTML = '<div class="lista-vazia">Nenhuma peculiaridade adicionada</div>';
-            return;
-        }
-        
-        peculiaridades.forEach(peculiaridade => {
-            const item = document.createElement('div');
-            item.className = 'peculiaridade-item';
-            item.dataset.id = peculiaridade.id;
-            
-            item.innerHTML = `
-                <div class="peculiaridade-texto">${peculiaridade.texto}</div>
-                <div class="peculiaridade-custo">-1 pt</div>
-                <button class="peculiaridade-remover" title="Remover peculiaridade">×</button>
-            `;
-            
-            const btnRemover = item.querySelector('.peculiaridade-remover');
-            btnRemover.onclick = () => {
-                this.removerPeculiaridade(peculiaridade.id);
-            };
-            
-            listaContainer.appendChild(item);
-        });
-    }
-    
-    // MODAIS
     abrirModal(tipo) {
         const modal = document.getElementById(`modal-${tipo}`);
         if (modal) {
@@ -651,13 +687,11 @@ class SistemaVantagens {
     }
 }
 
-// Inicialização MUITO IMPORTANTE
+// Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Inicializando Sistema de Vantagens...');
     
-    // Limpar qualquer instância anterior
     if (window.sistemaVantagens) {
-        console.log('Limpando instância anterior...');
         try {
             window.sistemaVantagens.fecharModalAtivo();
         } catch (e) {
@@ -666,10 +700,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.sistemaVantagens = null;
     }
     
-    // Criar nova instância FRESCA
     window.sistemaVantagens = new SistemaVantagens();
     
-    // Forçar atualização das peculiaridades
     setTimeout(() => {
         if (window.sistemaVantagens) {
             window.sistemaVantagens.atualizarListaPeculiaridades();
