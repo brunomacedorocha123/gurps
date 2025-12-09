@@ -1,6 +1,6 @@
-// ===== DASHBOARD.JS =====
-// Sistema completo da aba Dashboard - Versão 2.0
-// Puxa informações ativamente das outras abas
+// ===== DASHBOARD.JS - VERSÃO CORRIGIDA =====
+// Sistema completo da aba Dashboard - Versão 3.0
+// Corrige o monitoramento de atributos em tempo real
 
 // Estado do dashboard
 let dashboardEstado = {
@@ -53,26 +53,145 @@ const CUSTOS_ATRIBUTOS = {
     HT: 10
 };
 
-// ===== 1. SISTEMA DE MONITORAMENTO DE ATRIBUTOS =====
+// ===== 1. SISTEMA DE FOTO =====
+function configurarSistemaFoto() {
+    const fotoUpload = document.getElementById('fotoUpload');
+    const fotoPreview = document.getElementById('fotoPreview');
+    const fotoPlaceholder = document.getElementById('fotoPlaceholder');
+    const btnRemoverFoto = document.getElementById('btnRemoverFoto');
+
+    fotoUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                fotoPreview.src = e.target.result;
+                fotoPreview.style.display = 'block';
+                fotoPlaceholder.style.display = 'none';
+                btnRemoverFoto.style.display = 'inline-block';
+                
+                // Salvar no localStorage
+                localStorage.setItem('personagem_foto', e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    btnRemoverFoto.addEventListener('click', function() {
+        fotoPreview.src = '';
+        fotoPreview.style.display = 'none';
+        fotoPlaceholder.style.display = 'flex';
+        btnRemoverFoto.style.display = 'none';
+        fotoUpload.value = '';
+        localStorage.removeItem('personagem_foto');
+    });
+
+    // Carregar foto salva
+    const fotoSalva = localStorage.getItem('personagem_foto');
+    if (fotoSalva) {
+        fotoPreview.src = fotoSalva;
+        fotoPreview.style.display = 'block';
+        fotoPlaceholder.style.display = 'none';
+        btnRemoverFoto.style.display = 'inline-block';
+    }
+}
+
+// ===== 2. SISTEMA DE IDENTIFICAÇÃO =====
+function configurarCamposIdentificacao() {
+    const campos = ['racaPersonagem', 'classePersonagem', 'nivelPersonagem', 'descricaoPersonagem'];
+    
+    campos.forEach(campoId => {
+        const campo = document.getElementById(campoId);
+        if (campo) {
+            // Carregar valor salvo
+            const valorSalvo = localStorage.getItem(`personagem_${campoId}`);
+            if (valorSalvo) {
+                campo.value = valorSalvo;
+                if (campoId === 'descricaoPersonagem') {
+                    atualizarContadorDescricao();
+                }
+            }
+            
+            // Salvar ao digitar
+            campo.addEventListener('input', function() {
+                localStorage.setItem(`personagem_${campoId}`, campo.value);
+                
+                if (campoId === 'descricaoPersonagem') {
+                    atualizarContadorDescricao();
+                }
+            });
+        }
+    });
+}
+
+function atualizarContadorDescricao() {
+    const textarea = document.getElementById('descricaoPersonagem');
+    const contador = document.getElementById('contadorDescricao');
+    if (textarea && contador) {
+        contador.textContent = textarea.value.length;
+    }
+}
+
+// ===== 3. SISTEMA DE PONTOS =====
+function configurarControlePontos() {
+    const pontosTotaisInput = document.getElementById('pontosTotaisDashboard');
+    const limiteDesvantagensInput = document.getElementById('limiteDesvantagens');
+    
+    // Carregar valores salvos
+    const pontosSalvos = localStorage.getItem('dashboard_pontosTotais');
+    const limiteSalvo = localStorage.getItem('dashboard_limiteDesvantagens');
+    
+    if (pontosSalvos && pontosTotaisInput) {
+        pontosTotaisInput.value = pontosSalvos;
+        dashboardEstado.pontos.total = parseInt(pontosSalvos);
+    }
+    
+    if (limiteSalvo && limiteDesvantagensInput) {
+        limiteDesvantagensInput.value = limiteSalvo;
+        dashboardEstado.pontos.limiteDesvantagens = parseInt(limiteSalvo);
+    }
+    
+    // Salvar ao alterar
+    if (pontosTotaisInput) {
+        pontosTotaisInput.addEventListener('change', function() {
+            const valor = parseInt(this.value) || 150;
+            dashboardEstado.pontos.total = valor;
+            dashboardEstado.pontos.saldo = valor - dashboardEstado.pontos.gastos;
+            localStorage.setItem('dashboard_pontosTotais', valor);
+            atualizarDisplayPontos();
+        });
+    }
+    
+    if (limiteDesvantagensInput) {
+        limiteDesvantagensInput.addEventListener('change', function() {
+            const valor = parseInt(this.value) || -50;
+            dashboardEstado.pontos.limiteDesvantagens = valor;
+            localStorage.setItem('dashboard_limiteDesvantagens', valor);
+            atualizarDisplayPontos();
+        });
+    }
+}
+
+// ===== 4. SISTEMA DE MONITORAMENTO DE ATRIBUTOS (CORRIGIDO) =====
 function monitorarAtributos() {
-    console.log('Iniciando monitoramento de atributos...');
+    console.log('🔍 Iniciando monitoramento de atributos...');
     
-    // Lista de IDs dos inputs de atributos na aba Atributos
-    const idsAtributos = ['ST', 'DX', 'IQ', 'HT'];
-    const idsBonus = ['bonusPV', 'bonusPF', 'bonusVontade', 'bonusPercepcao', 'bonusDeslocamento'];
+    // Configurar um intervalo para verificar mudanças nos atributos
+    setInterval(() => {
+        puxarValoresAtributosAtivos();
+    }, 1000); // Verifica a cada segundo
     
-    // Configurar observador de mutação na aba atributos
+    // Também monitorar quando a aba atributos ficar ativa
     const atributosTab = document.getElementById('atributos');
-    
     if (atributosTab) {
-        // Observar quando a aba atributos é carregada/visível
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                     const tab = mutation.target;
                     if (tab.id === 'atributos' && tab.classList.contains('active')) {
-                        // Aba atributos ficou ativa, iniciar monitoramento
-                        setTimeout(iniciarMonitoramentoAtivo, 300);
+                        console.log('📊 Aba Atributos ativada - monitorando...');
+                        // Quando a aba atributos fica ativa, puxamos os valores imediatamente
+                        setTimeout(puxarValoresAtributosAtivos, 500);
                     }
                 }
             });
@@ -80,61 +199,46 @@ function monitorarAtributos() {
         
         observer.observe(atributosTab, { attributes: true });
         
-        // Se a aba já estiver ativa, iniciar monitoramento
+        // Se já estiver ativa, puxar agora
         if (atributosTab.classList.contains('active')) {
-            setTimeout(iniciarMonitoramentoAtivo, 300);
+            setTimeout(puxarValoresAtributosAtivos, 500);
         }
-    }
-    
-    // Função para iniciar monitoramento ativo
-    function iniciarMonitoramentoAtivo() {
-        console.log('Monitoramento ativo iniciado na aba Atributos');
-        
-        // Configurar intervalos para puxar valores
-        setInterval(puxarValoresAtributos, 1000);
-        
-        // Configurar event listeners para mudanças imediatas
-        configurarListenersAtributos();
     }
 }
 
-function puxarValoresAtributos() {
-    // Puxar valores dos inputs de atributos
+function puxarValoresAtributosAtivos() {
+    // Tenta puxar dos inputs diretamente
     const stInput = document.getElementById('ST');
     const dxInput = document.getElementById('DX');
     const iqInput = document.getElementById('IQ');
     const htInput = document.getElementById('HT');
     
-    // Puxar valores dos bônus
-    const bonusPV = document.getElementById('bonusPV');
-    const bonusPF = document.getElementById('bonusPF');
-    const bonusVontade = document.getElementById('bonusVontade');
-    const bonusPercepcao = document.getElementById('bonusPercepcao');
-    const bonusDeslocamento = document.getElementById('bonusDeslocamento');
-    
-    // Puxar valores totais
+    // Tenta puxar dos totais se os inputs não existirem
     const pvTotalElement = document.getElementById('PVTotal');
     const pfTotalElement = document.getElementById('PFTotal');
-    const vontadeTotalElement = document.getElementById('VontadeTotal');
-    const percepcaoTotalElement = document.getElementById('PercepcaoTotal');
-    const deslocamentoTotalElement = document.getElementById('DeslocamentoTotal');
+    
+    // Puxar pontos gastos
+    const pontosGastosElement = document.getElementById('pontosGastos');
     
     if (stInput && dxInput && iqInput && htInput) {
-        // Atualizar valores dos atributos
-        dashboardEstado.atributos.ST = parseInt(stInput.value) || 10;
-        dashboardEstado.atributos.DX = parseInt(dxInput.value) || 10;
-        dashboardEstado.atributos.IQ = parseInt(iqInput.value) || 10;
-        dashboardEstado.atributos.HT = parseInt(htInput.value) || 10;
+        // Puxar dos inputs diretos
+        const ST = parseInt(stInput.value) || 10;
+        const DX = parseInt(dxInput.value) || 10;
+        const IQ = parseInt(iqInput.value) || 10;
+        const HT = parseInt(htInput.value) || 10;
         
-        // Atualizar display no dashboard
-        atualizarDisplayAtributos();
+        // Atualizar estado
+        dashboardEstado.atributos.ST = ST;
+        dashboardEstado.atributos.DX = DX;
+        dashboardEstado.atributos.IQ = IQ;
+        dashboardEstado.atributos.HT = HT;
         
-        // Calcular custos dos atributos
+        // Calcular custo dos atributos
         calcularCustosAtributos();
     }
     
     if (pvTotalElement && pfTotalElement) {
-        // Puxar valores de PV e PF
+        // Puxar PV e PF
         const pvText = pvTotalElement.textContent;
         const pfText = pfTotalElement.textContent;
         
@@ -149,63 +253,24 @@ function puxarValoresAtributos() {
         atualizarDisplayVitalidade();
     }
     
-    if (bonusPV && bonusPF) {
-        // Podemos puxar os bônus também se necessário
-        const bonusPVValor = parseInt(bonusPV.value) || 0;
-        const bonusPFValor = parseInt(bonusPF.value) || 0;
-        
-        // Salvar se necessário para outros cálculos
-        dashboardEstado.bonus = dashboardEstado.bonus || {};
-        dashboardEstado.bonus.PV = bonusPVValor;
-        dashboardEstado.bonus.PF = bonusPFValor;
-    }
-    
-    // Puxar pontos gastos na aba atributos
-    puxarPontosGastos();
-}
-
-function configurarListenersAtributos() {
-    // Adicionar event listeners para detecção imediata
-    const ids = ['ST', 'DX', 'IQ', 'HT', 'bonusPV', 'bonusPF'];
-    
-    ids.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            // Remover listener antigo se existir
-            element.removeEventListener('input', handleAtributoChange);
-            element.removeEventListener('change', handleAtributoChange);
-            
-            // Adicionar novo listener
-            element.addEventListener('input', handleAtributoChange);
-            element.addEventListener('change', handleAtributoChange);
-        }
-    });
-}
-
-function handleAtributoChange() {
-    // Puxar valores imediatamente quando houver mudança
-    setTimeout(puxarValoresAtributos, 100);
-}
-
-function puxarPontosGastos() {
-    // Puxar pontos gastos da aba Atributos
-    const pontosGastosElement = document.getElementById('pontosGastos');
-    
     if (pontosGastosElement) {
+        // Puxar pontos gastos na aba atributos
         const texto = pontosGastosElement.textContent;
         const pontosGastos = parseInt(texto) || 0;
         
-        // Atualizar estado
-        dashboardEstado.pontos.gastos = pontosGastos;
-        dashboardEstado.pontos.saldo = dashboardEstado.pontos.total - pontosGastos;
-        
         // Atualizar gastos de atributos
         dashboardEstado.gastos.atributos = pontosGastos;
+        
+        // Recalcular total de gastos
+        recalcualarTotalGastos();
         
         // Atualizar displays
         atualizarDisplayPontos();
         atualizarDisplayGastos();
     }
+    
+    // Atualizar display de atributos
+    atualizarDisplayAtributos();
 }
 
 function calcularCustosAtributos() {
@@ -217,7 +282,11 @@ function calcularCustosAtributos() {
     const custoIQ = (IQ - 10) * CUSTOS_ATRIBUTOS.IQ;
     const custoHT = (HT - 10) * CUSTOS_ATRIBUTOS.HT;
     
-    // Atualizar gastos (pode ser usado no futuro)
+    // Total gasto em atributos
+    const totalAtributos = custoST + custoDX + custoIQ + custoHT;
+    dashboardEstado.gastos.atributos = totalAtributos;
+    
+    // Atualizar gastos individuais
     dashboardEstado.custosIndividuais = {
         ST: custoST,
         DX: custoDX,
@@ -226,256 +295,278 @@ function calcularCustosAtributos() {
     };
 }
 
-// ===== 2. SISTEMA DE MONITORAMENTO DE OUTRAS ABAS =====
+// ===== 5. SISTEMA DE MONITORAMENTO DE OUTRAS ABAS =====
 function monitorarOutrasAbas() {
-    console.log('Iniciando monitoramento de outras abas...');
-    
-    // Monitorar aba Vantagens
-    monitorarAbaVantagens();
-    
-    // Monitorar aba Perícias
-    monitorarAbaPericias();
-    
-    // Monitorar aba Magias
-    monitorarAbaMagias();
-    
-    // Monitorar aba Características
-    monitorarAbaCaracteristicas();
-}
-
-function monitorarAbaVantagens() {
-    const vantagensTab = document.getElementById('vantagens');
-    
-    if (vantagensTab) {
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    const tab = mutation.target;
-                    if (tab.id === 'vantagens' && tab.classList.contains('active')) {
-                        setTimeout(() => {
-                            // Quando a aba vantagens ficar ativa, puxar dados
-                            puxarDadosVantagens();
-                            // Configurar monitoramento contínuo
-                            setInterval(puxarDadosVantagens, 1500);
-                        }, 500);
-                    }
-                }
-            });
-        });
-        
-        observer.observe(vantagensTab, { attributes: true });
-    }
+    // Monitorar todas as abas periodicamente
+    setInterval(() => {
+        puxarDadosVantagens();
+        puxarDadosPericias();
+        puxarDadosMagias();
+        puxarDadosCaracteristicas();
+    }, 2000);
 }
 
 function puxarDadosVantagens() {
-    // Puxar total de vantagens
-    const totalVantagensElement = document.getElementById('total-vantagens');
-    const totalDesvantagensElement = document.getElementById('total-desvantagens');
-    const custoPeculiaridadesElement = document.getElementById('custo-peculiaridades');
-    
-    if (totalVantagensElement) {
-        const texto = totalVantagensElement.textContent;
-        // Extrair número (formato: "+10 pts" ou "0 pts")
-        const match = texto.match(/([+-]?\d+)/);
-        if (match) {
-            dashboardEstado.gastos.vantagens = parseInt(match[1]) || 0;
-        }
-    }
-    
-    if (totalDesvantagensElement) {
-        const texto = totalDesvantagensElement.textContent;
-        const match = texto.match(/([+-]?\d+)/);
-        if (match) {
-            const desvantagens = Math.abs(parseInt(match[1])) || 0;
-            dashboardEstado.pontos.desvantagensAtuais = desvantagens;
-            dashboardEstado.gastos.desvantagens = desvantagens;
-        }
-    }
-    
-    if (custoPeculiaridadesElement) {
-        const texto = custoPeculiaridadesElement.textContent;
-        const match = texto.match(/([+-]?\d+)/);
-        if (match) {
-            const peculiaridades = Math.abs(parseInt(match[1])) || 0;
-            // Adicionar ao total de desvantagens
-            dashboardEstado.pontos.desvantagensAtuais += peculiaridades;
-            dashboardEstado.gastos.desvantagens += peculiaridades;
-        }
-    }
-    
-    // Atualizar displays
-    atualizarDisplayPontos();
-    atualizarDisplayGastos();
-}
-
-function monitorarAbaPericias() {
-    const periciasTab = document.getElementById('pericias');
-    
-    if (periciasTab) {
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    const tab = mutation.target;
-                    if (tab.id === 'pericias' && tab.classList.contains('active')) {
-                        setTimeout(() => {
-                            // Quando a aba perícias ficar ativa, puxar dados
-                            puxarDadosPericias();
-                            // Configurar monitoramento contínuo
-                            setInterval(puxarDadosPericias, 1500);
-                        }, 500);
-                    }
-                }
-            });
-        });
+    try {
+        // Tentar vários seletores possíveis
+        const seletores = [
+            '#total-vantagens',
+            '.total-vantagens',
+            '[data-total="vantagens"]',
+            '.vantagens-total'
+        ];
         
-        observer.observe(periciasTab, { attributes: true });
+        let vantagensValor = 0;
+        let desvantagensValor = 0;
+        
+        // Procurar elemento de vantagens
+        for (const seletor of seletores) {
+            const elemento = document.querySelector(seletor);
+            if (elemento) {
+                const texto = elemento.textContent;
+                const match = texto.match(/([+-]?\d+)/);
+                if (match) {
+                    vantagensValor = parseInt(match[1]) || 0;
+                    break;
+                }
+            }
+        }
+        
+        // Procurar elemento de desvantagens
+        const desvantagensSelectors = [
+            '#total-desvantagens',
+            '.total-desvantagens',
+            '[data-total="desvantagens"]'
+        ];
+        
+        for (const seletor of desvantagensSelectors) {
+            const elemento = document.querySelector(seletor);
+            if (elemento) {
+                const texto = elemento.textContent;
+                const match = texto.match(/([+-]?\d+)/);
+                if (match) {
+                    const valor = parseInt(match[1]) || 0;
+                    // Desvantagens são negativas
+                    desvantagensValor = Math.abs(valor);
+                    break;
+                }
+            }
+        }
+        
+        // Atualizar estado
+        dashboardEstado.gastos.vantagens = vantagensValor;
+        dashboardEstado.pontos.desvantagensAtuais = desvantagensValor;
+        dashboardEstado.gastos.desvantagens = desvantagensValor;
+        
+        recalcualarTotalGastos();
+        atualizarDisplayPontos();
+        atualizarDisplayGastos();
+        
+    } catch (error) {
+        console.log('Erro ao puxar vantagens:', error);
     }
 }
 
 function puxarDadosPericias() {
-    // Puxar total de perícias
-    const pontosPericiasTotalElement = document.getElementById('pontos-pericias-total');
-    const ptsTotalElement = document.getElementById('pts-total');
-    
-    if (pontosPericiasTotalElement) {
-        const texto = pontosPericiasTotalElement.textContent;
-        // Extrair número (formato: "[10 pts]")
-        const match = texto.match(/\[(\d+)\s*pts\]/);
-        if (match) {
-            dashboardEstado.gastos.pericias = parseInt(match[1]) || 0;
-        }
-    }
-    
-    if (ptsTotalElement) {
-        const texto = ptsTotalElement.textContent;
-        // Extrair número (formato: "(10 pts)")
-        const match = texto.match(/\((\d+)\s*pts\)/);
-        if (match) {
-            dashboardEstado.gastos.pericias = parseInt(match[1]) || 0;
-        }
-    }
-    
-    atualizarDisplayGastos();
-}
-
-function monitorarAbaMagias() {
-    const magiaTab = document.getElementById('magia');
-    
-    if (magiaTab) {
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    const tab = mutation.target;
-                    if (tab.id === 'magia' && tab.classList.contains('active')) {
-                        setTimeout(() => {
-                            // Quando a aba magia ficar ativa, puxar dados
-                            puxarDadosMagias();
-                            // Configurar monitoramento contínuo
-                            setInterval(puxarDadosMagias, 1500);
-                        }, 500);
-                    }
-                }
-            });
-        });
+    try {
+        const seletores = [
+            '#pontos-pericias-total',
+            '#pts-total',
+            '.pericias-total',
+            '[data-total="pericias"]'
+        ];
         
-        observer.observe(magiaTab, { attributes: true });
+        let periciasValor = 0;
+        
+        for (const seletor of seletores) {
+            const elemento = document.querySelector(seletor);
+            if (elemento) {
+                const texto = elemento.textContent;
+                // Tentar diferentes formatos: "[10 pts]", "(10 pts)", "10 pts"
+                const match = texto.match(/(\d+)\s*pts/);
+                if (match) {
+                    periciasValor = parseInt(match[1]) || 0;
+                    break;
+                }
+            }
+        }
+        
+        dashboardEstado.gastos.pericias = periciasValor;
+        recalcualarTotalGastos();
+        atualizarDisplayGastos();
+        
+    } catch (error) {
+        console.log('Erro ao puxar perícias:', error);
     }
 }
 
 function puxarDadosMagias() {
-    // Puxar total de magias
-    const totalGastoMagiaElement = document.getElementById('total-gasto-magia');
-    const pontosMagiaTotalElement = document.getElementById('pontos-magia-total');
-    
-    if (totalGastoMagiaElement) {
-        const texto = totalGastoMagiaElement.textContent;
-        const match = texto.match(/(\d+)/);
-        if (match) {
-            dashboardEstado.gastos.magias = parseInt(match[1]) || 0;
-        }
-    }
-    
-    if (pontosMagiaTotalElement) {
-        const texto = pontosMagiaTotalElement.textContent;
-        const match = texto.match(/\[(\d+)\s*pts\]/);
-        if (match) {
-            dashboardEstado.gastos.magias = parseInt(match[1]) || 0;
-        }
-    }
-    
-    atualizarDisplayGastos();
-}
-
-function monitorarAbaCaracteristicas() {
-    const caracteristicasTab = document.getElementById('caracteristicas');
-    
-    if (caracteristicasTab) {
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    const tab = mutation.target;
-                    if (tab.id === 'caracteristicas' && tab.classList.contains('active')) {
-                        setTimeout(() => {
-                            // Quando a aba características ficar ativa, puxar dados
-                            puxarDadosCaracteristicas();
-                            // Configurar monitoramento contínuo
-                            setInterval(puxarDadosCaracteristicas, 1500);
-                        }, 500);
-                    }
-                }
-            });
-        });
+    try {
+        const seletores = [
+            '#total-gasto-magia',
+            '#pontos-magia-total',
+            '.magia-total',
+            '[data-total="magia"]'
+        ];
         
-        observer.observe(caracteristicasTab, { attributes: true });
+        let magiasValor = 0;
+        
+        for (const seletor of seletores) {
+            const elemento = document.querySelector(seletor);
+            if (elemento) {
+                const texto = elemento.textContent;
+                const match = texto.match(/(\d+)/);
+                if (match) {
+                    magiasValor = parseInt(match[1]) || 0;
+                    break;
+                }
+            }
+        }
+        
+        dashboardEstado.gastos.magias = magiasValor;
+        recalcualarTotalGastos();
+        atualizarDisplayGastos();
+        
+    } catch (error) {
+        console.log('Erro ao puxar magias:', error);
     }
 }
 
 function puxarDadosCaracteristicas() {
-    // Puxar aparência
-    const nivelAparenciaSelect = document.getElementById('nivelAparencia');
-    const displayAparenciaElement = document.getElementById('displayAparencia');
-    
-    if (nivelAparenciaSelect) {
-        const selectedOption = nivelAparenciaSelect.options[nivelAparenciaSelect.selectedIndex];
-        const texto = selectedOption.textContent;
-        // Extrair nome (formato: "Comum [0 pts]")
-        const nome = texto.split('[')[0].trim();
-        dashboardEstado.caracteristicas.aparencia = nome;
-    } else if (displayAparenciaElement) {
-        const strongElement = displayAparenciaElement.querySelector('strong');
-        if (strongElement) {
-            dashboardEstado.caracteristicas.aparencia = strongElement.textContent.trim();
+    try {
+        // Puxar aparência
+        const nivelAparenciaSelect = document.getElementById('nivelAparencia');
+        if (nivelAparenciaSelect) {
+            const texto = nivelAparenciaSelect.options[nivelAparenciaSelect.selectedIndex].text;
+            const nome = texto.split('[')[0].trim();
+            dashboardEstado.caracteristicas.aparencia = nome;
         }
-    }
-    
-    // Puxar riqueza
-    const nivelRiquezaSelect = document.getElementById('nivelRiqueza');
-    const displayRiquezaElement = document.getElementById('displayRiqueza');
-    
-    if (nivelRiquezaSelect) {
-        const selectedOption = nivelRiquezaSelect.options[nivelRiquezaSelect.selectedIndex];
-        const texto = selectedOption.textContent;
-        // Extrair nome (formato: "Médio [0 pts]")
-        const nome = texto.split('[')[0].trim();
-        dashboardEstado.caracteristicas.riqueza = nome;
-    } else if (displayRiquezaElement) {
-        const strongElement = displayRiquezaElement.querySelector('strong');
-        if (strongElement) {
-            dashboardEstado.caracteristicas.riqueza = strongElement.textContent.trim();
+        
+        // Puxar riqueza
+        const nivelRiquezaSelect = document.getElementById('nivelRiqueza');
+        if (nivelRiquezaSelect) {
+            const texto = nivelRiquezaSelect.options[nivelRiquezaSelect.selectedIndex].text;
+            const nome = texto.split('[')[0].trim();
+            dashboardEstado.caracteristicas.riqueza = nome;
         }
+        
+        atualizarDisplayCaracteristicas();
+        
+    } catch (error) {
+        console.log('Erro ao puxar características:', error);
     }
-    
-    // Puxar saldo (do equipamento se disponível)
-    const dinheiroEquipamentoElement = document.getElementById('dinheiroEquipamento');
-    if (dinheiroEquipamentoElement) {
-        dashboardEstado.caracteristicas.saldo = dinheiroEquipamentoElement.textContent;
-    }
-    
-    // Atualizar display
-    atualizarDisplayCaracteristicas();
 }
 
-// ===== 3. FUNÇÕES DE ATUALIZAÇÃO DE DISPLAY =====
+function recalcualarTotalGastos() {
+    // Recalcular total de pontos gastos
+    const { atributos, vantagens, pericias, magias, desvantagens } = dashboardEstado.gastos;
+    
+    // Desvantagens são negativas, então subtraímos
+    const total = atributos + vantagens + pericias + magias - desvantagens;
+    dashboardEstado.pontos.gastos = Math.max(total, 0);
+    dashboardEstado.pontos.saldo = dashboardEstado.pontos.total - dashboardEstado.pontos.gastos;
+    
+    // Atualizar total de gastos
+    dashboardEstado.gastos.total = total;
+}
+
+// ===== 6. SISTEMA DE RELACIONAMENTOS =====
+function configurarSistemaRelacionamentos() {
+    // Carregar relacionamentos salvos
+    carregarRelacionamentos();
+    
+    // Configurar botões de adicionar
+    document.querySelectorAll('.btn-adicionar').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tipo = this.getAttribute('data-tipo');
+            adicionarRelacionamento(tipo);
+        });
+    });
+}
+
+function carregarRelacionamentos() {
+    const tipos = ['inimigos', 'aliados', 'dependentes'];
+    
+    tipos.forEach(tipo => {
+        const salvo = localStorage.getItem(`dashboard_relacionamentos_${tipo}`);
+        if (salvo) {
+            try {
+                dashboardEstado.relacionamentos[tipo] = JSON.parse(salvo);
+                atualizarListaRelacionamentos(tipo);
+            } catch (e) {
+                console.error('Erro ao carregar relacionamentos:', e);
+            }
+        }
+    });
+}
+
+function adicionarRelacionamento(tipo) {
+    const nome = prompt(`Nome do ${tipo}:`);
+    if (!nome) return;
+    
+    const descricao = prompt(`Descrição/relacionamento:`);
+    const pontos = prompt(`Pontos (opcional, padrão 0):`) || "0";
+    
+    const relacionamento = {
+        id: Date.now(),
+        nome: nome,
+        descricao: descricao || '',
+        pontos: parseInt(pontos) || 0,
+        data: new Date().toLocaleDateString()
+    };
+    
+    dashboardEstado.relacionamentos[tipo].push(relacionamento);
+    salvarRelacionamentos(tipo);
+    atualizarListaRelacionamentos(tipo);
+}
+
+function removerRelacionamento(tipo, id) {
+    if (confirm('Tem certeza que deseja remover?')) {
+        dashboardEstado.relacionamentos[tipo] = 
+            dashboardEstado.relacionamentos[tipo].filter(r => r.id !== id);
+        salvarRelacionamentos(tipo);
+        atualizarListaRelacionamentos(tipo);
+    }
+}
+
+function salvarRelacionamentos(tipo) {
+    localStorage.setItem(
+        `dashboard_relacionamentos_${tipo}`,
+        JSON.stringify(dashboardEstado.relacionamentos[tipo])
+    );
+}
+
+function atualizarListaRelacionamentos(tipo) {
+    const listaElement = document.getElementById(`lista${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+    if (!listaElement) return;
+    
+    const relacionamentos = dashboardEstado.relacionamentos[tipo];
+    
+    if (relacionamentos.length === 0) {
+        listaElement.innerHTML = '<div class="relacionamento-vazio">Nenhum ' + tipo + ' adicionado</div>';
+        return;
+    }
+    
+    let html = '';
+    relacionamentos.forEach(rel => {
+        html += `
+            <div class="relacionamento-item" data-id="${rel.id}">
+                <div class="relacionamento-info">
+                    <strong>${rel.nome}</strong>
+                    ${rel.pontos !== 0 ? `<span class="relacionamento-pontos">${rel.pontos > 0 ? '+' : ''}${rel.pontos} pts</span>` : ''}
+                    ${rel.descricao ? `<div class="relacionamento-descricao">${rel.descricao}</div>` : ''}
+                </div>
+                <button class="btn-remover-relacionamento" onclick="removerRelacionamento('${tipo}', ${rel.id})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+    });
+    
+    listaElement.innerHTML = html;
+}
+
+// ===== 7. FUNÇÕES DE ATUALIZAÇÃO DE DISPLAY =====
 function atualizarDisplayAtributos() {
     const { ST, DX, IQ, HT } = dashboardEstado.atributos;
     
@@ -530,6 +621,10 @@ function atualizarDisplayCaracteristicas() {
     document.getElementById('statusAparencia').textContent = aparencia;
     document.getElementById('statusRiqueza').textContent = riqueza;
     document.getElementById('statusSaldo').textContent = saldo;
+    
+    highlightElement('statusAparencia');
+    highlightElement('statusRiqueza');
+    highlightElement('statusSaldo');
 }
 
 function atualizarDisplayPontos() {
@@ -567,7 +662,7 @@ function atualizarDisplayPontos() {
         desvantagensElement.textContent = dashboardEstado.pontos.desvantagensAtuais;
         
         // Verificar limite
-        if (dashboardEstado.pontos.desvantagensAtuais < dashboardEstado.pontos.limiteDesvantagens) {
+        if (Math.abs(dashboardEstado.pontos.desvantagensAtuais) > Math.abs(dashboardEstado.pontos.limiteDesvantagens)) {
             desvantagensElement.style.color = '#e74c3c';
             desvantagensElement.title = 'Acima do limite de desvantagens!';
         } else {
@@ -590,24 +685,20 @@ function atualizarDisplayGastos() {
         total: 'gastosTotal'
     };
     
-    // Calcular total
-    let total = 0;
+    // Atualizar cada card individualmente
+    const { atributos, vantagens, pericias, magias, desvantagens } = dashboardEstado.gastos;
     
-    Object.keys(ids).forEach(chave => {
-        if (chave !== 'total') {
-            const valor = dashboardEstado.gastos[chave] || 0;
-            total += Math.abs(valor); // Desvantagens são negativas, mas somamos como positivo
-            
-            const elemento = document.getElementById(ids[chave]);
-            if (elemento) {
-                elemento.textContent = valor;
-                highlightElement(ids[chave]);
-            }
-        }
-    });
+    document.getElementById('gastosAtributos').textContent = atributos;
+    document.getElementById('gastosVantagens').textContent = vantagens;
+    document.getElementById('gastosPericias').textContent = pericias;
+    document.getElementById('gastosMagias').textContent = magias;
+    document.getElementById('gastosDesvantagens').textContent = desvantagens;
+    
+    // Calcular total (desvantagens são negativas)
+    const total = atributos + vantagens + pericias + magias - desvantagens;
+    dashboardEstado.gastos.total = total;
     
     // Atualizar total
-    dashboardEstado.gastos.total = total;
     const totalElement = document.getElementById('gastosTotal');
     if (totalElement) {
         totalElement.textContent = total;
@@ -626,6 +717,11 @@ function atualizarDisplayGastos() {
         
         highlightElement('gastosTotal');
     }
+    
+    // Destacar elementos atualizados
+    Object.values(ids).forEach(id => {
+        highlightElement(id);
+    });
 }
 
 function highlightElement(id) {
@@ -638,12 +734,73 @@ function highlightElement(id) {
     }
 }
 
-// ===== 4. INICIALIZAÇÃO COMPLETA =====
+function atualizarTodosDisplays() {
+    atualizarDisplayAtributos();
+    atualizarDisplayVitalidade();
+    atualizarDisplayCaracteristicas();
+    atualizarDisplayPontos();
+    atualizarDisplayGastos();
+    
+    // Atualizar contador de descrição
+    atualizarContadorDescricao();
+    
+    // Atualizar relacionamentos
+    ['inimigos', 'aliados', 'dependentes'].forEach(tipo => {
+        atualizarListaRelacionamentos(tipo);
+    });
+}
+
+// ===== 8. CARREGAR E SALVAR ESTADO =====
+function carregarEstadoLocalStorage() {
+    try {
+        const salvo = localStorage.getItem('dashboard_estado');
+        if (salvo) {
+            const dados = JSON.parse(salvo);
+            
+            // Carregar apenas dados não sensíveis
+            if (dados.pontos) dashboardEstado.pontos = { ...dashboardEstado.pontos, ...dados.pontos };
+            if (dados.identificacao) dashboardEstado.identificacao = { ...dashboardEstado.identificacao, ...dados.identificacao };
+            if (dados.caracteristicas) dashboardEstado.caracteristicas = { ...dashboardEstado.caracteristicas, ...dados.caracteristicas };
+            
+            // Atualizar inputs
+            if (dashboardEstado.pontos.total) {
+                const pontosInput = document.getElementById('pontosTotaisDashboard');
+                if (pontosInput) pontosInput.value = dashboardEstado.pontos.total;
+            }
+            
+            if (dashboardEstado.pontos.limiteDesvantagens) {
+                const limiteInput = document.getElementById('limiteDesvantagens');
+                if (limiteInput) limiteInput.value = dashboardEstado.pontos.limiteDesvantagens;
+            }
+            
+            console.log('Estado do dashboard carregado');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar estado:', error);
+    }
+}
+
+function salvarEstadoLocalStorage() {
+    try {
+        // Não salvar tudo, apenas dados persistentes
+        const dadosParaSalvar = {
+            pontos: {
+                total: dashboardEstado.pontos.total,
+                limiteDesvantagens: dashboardEstado.pontos.limiteDesvantagens
+            },
+            identificacao: dashboardEstado.identificacao,
+            caracteristicas: dashboardEstado.caracteristicas
+        };
+        
+        localStorage.setItem('dashboard_estado', JSON.stringify(dadosParaSalvar));
+    } catch (error) {
+        console.error('Erro ao salvar estado:', error);
+    }
+}
+
+// ===== 9. INICIALIZAÇÃO COMPLETA =====
 function inicializarDashboard() {
     console.log('🚀 Inicializando Dashboard - Monitoramento Ativo');
-    
-    // Carregar estado salvo
-    carregarEstadoLocalStorage();
     
     // Configurar sistemas do dashboard
     configurarSistemaFoto();
@@ -651,42 +808,213 @@ function inicializarDashboard() {
     configurarControlePontos();
     configurarSistemaRelacionamentos();
     
-    // Iniciar monitoramento de outras abas
+    // Carregar estado salvo
+    carregarEstadoLocalStorage();
+    
+    // Iniciar monitoramento
     monitorarAtributos();
     monitorarOutrasAbas();
     
-    // Configurar monitoramento geral
-    configurarMonitoramentoGeral();
-    
     // Atualizar todos os displays inicialmente
-    atualizarTodosDisplays();
+    setTimeout(atualizarTodosDisplays, 500);
+    
+    // Configurar salvamento automático
+    setInterval(salvarEstadoLocalStorage, 10000); // Salvar a cada 10 segundos
+    
+    // Adicionar indicador de monitoramento ativo
+    adicionarIndicadorMonitoramento();
     
     console.log('✅ Dashboard inicializado com monitoramento ativo');
 }
 
-function configurarMonitoramentoGeral() {
-    // Monitorar mudanças em qualquer aba periodicamente
-    setInterval(() => {
-        // Forçar atualização periódica
-        puxarValoresAtributos();
-        puxarPontosGastos();
-        
-        // Recalcular saldo
-        dashboardEstado.pontos.saldo = dashboardEstado.pontos.total - dashboardEstado.pontos.gastos;
-        
-        // Atualizar displays
-        atualizarDisplayPontos();
-        atualizarDisplayGastos();
-    }, 2000);
+function adicionarIndicadorMonitoramento() {
+    const indicador = document.createElement('div');
+    indicador.className = 'dashboard-monitoring';
+    indicador.innerHTML = '<i class="fas fa-sync-alt"></i> Monitoramento Ativo';
+    indicador.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(46, 204, 113, 0.9);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    `;
+    
+    document.body.appendChild(indicador);
 }
 
-// ===== 5. FUNÇÕES RESTANTES (MANTIDAS DO CÓDIGO ANTERIOR) =====
-// (Aqui viriam as funções de foto, identificação, relacionamentos, etc.
-// que são as mesmas do código anterior, então não repito para economizar espaço)
+// ===== 10. INJEÇÃO DE CSS =====
+function injetarCSSDashboard() {
+    const css = `
+    /* Animações para atualizações em tempo real */
+    @keyframes highlightPulse {
+        0% { 
+            background-color: rgba(255, 140, 0, 0.3);
+            transform: scale(1);
+        }
+        50% { 
+            background-color: rgba(255, 140, 0, 0.6);
+            transform: scale(1.05);
+        }
+        100% { 
+            background-color: transparent;
+            transform: scale(1);
+        }
+    }
+    
+    .updated {
+        animation: highlightPulse 0.5s ease;
+        border-radius: 4px;
+        padding: 2px 4px;
+        display: inline-block;
+    }
+    
+    /* Estilos para relacionamentos */
+    .relacionamento-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 10px;
+        margin-bottom: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        border-left: 4px solid;
+    }
+    
+    .card-inimigo .relacionamento-item {
+        border-left-color: #e74c3c;
+    }
+    
+    .card-aliado .relacionamento-item {
+        border-left-color: #2ecc71;
+    }
+    
+    .card-dependente .relacionamento-item {
+        border-left-color: #3498db;
+    }
+    
+    .relacionamento-info {
+        flex: 1;
+    }
+    
+    .relacionamento-pontos {
+        display: inline-block;
+        margin-left: 10px;
+        padding: 2px 6px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 3px;
+        font-size: 0.85em;
+    }
+    
+    .relacionamento-descricao {
+        font-size: 0.9em;
+        color: rgba(255,255,255,0.8);
+        margin-top: 5px;
+    }
+    
+    .btn-remover-relacionamento {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.5);
+        cursor: pointer;
+        padding: 5px;
+        margin-left: 10px;
+    }
+    
+    .btn-remover-relacionamento:hover {
+        color: #e74c3c;
+    }
+    
+    /* Estilos para inputs de bônus */
+    .positivo {
+        color: #27ae60 !important;
+        font-weight: bold;
+    }
+    
+    .negativo {
+        color: #e74c3c !important;
+        font-weight: bold;
+    }
+    
+    /* Foto do personagem */
+    .foto-container {
+        position: relative;
+        width: 200px;
+        height: 250px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 3px solid #2c3e50;
+        cursor: pointer;
+        background: #1a252f;
+    }
+    
+    .foto-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: rgba(255,255,255,0.5);
+    }
+    
+    .foto-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .foto-upload-input {
+        display: none;
+    }
+    
+    .foto-acoes {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .btn-foto {
+        flex: 1;
+        padding: 8px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .btn-foto.btn-remover {
+        background: #e74c3c;
+    }
+    
+    .btn-foto:hover {
+        opacity: 0.9;
+    }
+    `;
+    
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+}
 
-// ===== 6. INICIALIZAÇÃO AUTOMÁTICA =====
-// Inicializar imediatamente se a aba já estiver ativa
+// ===== 11. INICIALIZAÇÃO AUTOMÁTICA =====
 document.addEventListener('DOMContentLoaded', function() {
+    // Injetar CSS
+    injetarCSSDashboard();
+    
+    // Inicializar quando a aba dashboard ficar ativa
     const dashboardTab = document.getElementById('dashboard');
     
     if (dashboardTab && dashboardTab.classList.contains('active')) {
@@ -705,81 +1033,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Observar todas as abas
     document.querySelectorAll('.tab-content').forEach(tab => {
         observer.observe(tab, { attributes: true });
     });
 });
 
-// ===== CSS PARA ANIMAÇÕES =====
-// Adicionar este CSS ao seu style-dashboard.css
-const dashboardCSS = `
-/* Animações para atualizações em tempo real */
-@keyframes highlightPulse {
-    0% { 
-        background-color: rgba(255, 140, 0, 0.3);
-        transform: scale(1);
-    }
-    50% { 
-        background-color: rgba(255, 140, 0, 0.6);
-        transform: scale(1.05);
-    }
-    100% { 
-        background-color: transparent;
-        transform: scale(1);
-    }
-}
-
-.updated {
-    animation: highlightPulse 0.5s ease;
-    border-radius: 4px;
-    padding: 2px 4px;
-}
-
-/* Indicador de monitoramento ativo */
-.dashboard-monitoring {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background: rgba(46, 204, 113, 0.9);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.dashboard-monitoring::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    background: white;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-`;
-
-// Injetar CSS se não estiver presente
-function injetarCSSDashboard() {
-    if (!document.getElementById('dashboard-css-dynamic')) {
-        const style = document.createElement('style');
-        style.id = 'dashboard-css-dynamic';
-        style.textContent = dashboardCSS;
-        document.head.appendChild(style);
-    }
-}
-
-// Injetar CSS quando inicializar
-injetarCSSDashboard();
-
-// ===== EXPORTAÇÃO =====
+// ===== 12. EXPORTAÇÃO DE FUNÇÕES =====
 window.inicializarDashboard = inicializarDashboard;
 window.dashboardEstado = dashboardEstado;
+window.removerRelacionamento = removerRelacionamento;
+
+// Exportar funções para outros sistemas
+window.obterEstadoDashboard = function() {
+    return dashboardEstado;
+};
+
+console.log('📊 Dashboard JS carregado com sucesso!');
