@@ -700,19 +700,9 @@ function atualizarDisplayResumoGastos() {
     }
     
     if (elementos.gastosVantagens) {
-        elementos.gastosVantagens.textContent = vantagensTotais;
-        if (riquezaVantagens > 0) {
-            elementos.gastosVantagens.innerHTML = `
-                <span style="display: flex; align-items: center; gap: 5px;">
-                    <i class="fas fa-coins" style="color: #27ae60;"></i>
-                    ${vantagensTotais}
-                    <small style="font-size: 0.7em; color: #95a5a6;">
-                        (+${riquezaVantagens} riqueza)
-                    </small>
-                </span>
-            `;
-        }
-    }
+    elementos.gastosVantagens.textContent = vantagensTotais;
+    // ⬆️⬆️⬆️ APENAS ESTA LINHA! ⬆️⬆️⬆️
+}
     
     if (elementos.gastosPericias) {
         elementos.gastosPericias.textContent = gastosPericias;
