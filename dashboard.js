@@ -747,7 +747,7 @@ if (elementos.gastosTotal) {
         elementos.gastosTotal.style.color = '#27ae60';
     }
 }
-// ===== 10. SISTEMA DE RELACIONAMENTOS (MANTIDO IGUAL) =====
+}
 function configurarSistemaRelacionamentos() {
     carregarRelacionamentos();
     
