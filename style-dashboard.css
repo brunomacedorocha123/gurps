@@ -15,12 +15,6 @@
     border-radius: 12px;
     padding: 25px;
     backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.dashboard-section:hover {
-    border-color: rgba(255, 140, 0, 0.4);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* TÍTULOS DAS SEÇÕES */
@@ -58,14 +52,7 @@
     overflow: hidden;
     background: rgba(40, 40, 50, 0.9);
     border: 2px solid rgba(255, 140, 0, 0.3);
-    transition: all 0.3s ease;
     cursor: pointer;
-}
-
-.foto-container:hover {
-    border-color: #ff8c00;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255, 140, 0, 0.2);
 }
 
 .foto-placeholder {
@@ -114,12 +101,6 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    transition: all 0.3s ease;
-}
-
-.btn-foto:hover {
-    background: rgba(255, 140, 0, 0.3);
-    transform: translateY(-2px);
 }
 
 .btn-foto.btn-remover {
@@ -158,7 +139,6 @@
     border-radius: 8px;
     color: white;
     font-size: 1rem;
-    transition: all 0.3s ease;
 }
 
 .dashboard-input:focus {
@@ -177,7 +157,6 @@
     font-size: 0.95rem;
     resize: vertical;
     min-height: 80px;
-    transition: all 0.3s ease;
 }
 
 .dashboard-textarea:focus {
@@ -206,7 +185,6 @@
     border-radius: 12px;
     padding: 20px;
     border: 1px solid;
-    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
 }
@@ -218,7 +196,6 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, transparent, transparent);
 }
 
 .ponto-card.card-principal::before { background: linear-gradient(90deg, #27ae60, #2ecc71); }
@@ -226,11 +203,6 @@
 .ponto-card.card-saldo::before { background: linear-gradient(90deg, #3498db, #2980b9); }
 .ponto-card.card-limite::before { background: linear-gradient(90deg, #f39c12, #e67e22); }
 .ponto-card.card-desvantagens::before { background: linear-gradient(90deg, #9b59b6, #8e44ad); }
-
-.ponto-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-}
 
 .ponto-header {
     display: flex;
@@ -270,7 +242,6 @@
     font-size: 1.8rem;
     font-weight: bold;
     text-align: center;
-    transition: all 0.3s ease;
 }
 
 .ponto-input:focus {
@@ -310,13 +281,6 @@
     border: 1px solid rgba(255, 215, 0, 0.3);
     border-radius: 12px;
     padding: 20px;
-    transition: all 0.3s ease;
-}
-
-.status-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(255, 215, 0, 0.6);
-    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.1);
 }
 
 .status-header {
@@ -410,14 +374,12 @@
     height: 100%;
     background: linear-gradient(90deg, #e74c3c, #27ae60);
     border-radius: 5px;
-    transition: width 0.5s ease;
 }
 
 .bar-pf {
     height: 100%;
     background: linear-gradient(90deg, #3498db, #2ecc71);
     border-radius: 5px;
-    transition: width 0.5s ease;
 }
 
 /* ===== SEÇÃO 4: RELACIONAMENTOS ===== */
@@ -433,7 +395,6 @@
     border-radius: 12px;
     padding: 20px;
     border: 1px solid;
-    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     height: 300px;
@@ -442,11 +403,6 @@
 .relacionamento-card.card-inimigo { border-color: rgba(231, 76, 60, 0.3); }
 .relacionamento-card.card-aliado { border-color: rgba(46, 204, 113, 0.3); }
 .relacionamento-card.card-dependente { border-color: rgba(155, 89, 182, 0.3); }
-
-.relacionamento-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
 
 .relacionamento-header {
     display: flex;
@@ -483,12 +439,6 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    transition: all 0.3s ease;
-}
-
-.btn-adicionar:hover {
-    background: rgba(255, 140, 0, 0.3);
-    transform: translateY(-2px);
 }
 
 .relacionamento-lista {
@@ -536,23 +486,11 @@
     border-radius: 12px;
     padding: 20px;
     text-align: center;
-    transition: all 0.3s ease;
-}
-
-.resumo-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(255, 140, 0, 0.6);
-    box-shadow: 0 5px 15px rgba(255, 140, 0, 0.2);
 }
 
 /* Estilo especial para o card de Desvantagens & Peculiaridades */
 .resumo-card:nth-child(5) {
     border-color: rgba(155, 89, 182, 0.3);
-}
-
-.resumo-card:nth-child(5):hover {
-    border-color: rgba(155, 89, 182, 0.6);
-    box-shadow: 0 5px 15px rgba(155, 89, 182, 0.2);
 }
 
 .resumo-card:nth-child(5) .resumo-header i {
@@ -613,6 +551,78 @@
 .resumo-label {
     color: #95a5a6;
     font-size: 0.85rem;
+}
+
+/* ===== ESTILOS ADICIONAIS PARA RELACIONAMENTOS ===== */
+.relacionamento-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    border-left: 4px solid;
+}
+
+.card-inimigo .relacionamento-item {
+    border-left-color: #e74c3c;
+}
+
+.card-aliado .relacionamento-item {
+    border-left-color: #2ecc71;
+}
+
+.card-dependente .relacionamento-item {
+    border-left-color: #3498db;
+}
+
+.relacionamento-info {
+    flex: 1;
+}
+
+.relacionamento-pontos {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 2px 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    font-size: 0.85em;
+}
+
+.relacionamento-descricao {
+    font-size: 0.9em;
+    color: rgba(255,255,255,0.8);
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.relacionamento-data {
+    font-size: 0.8em;
+    color: rgba(255,255,255,0.5);
+    display: block;
+}
+
+.btn-remover-relacionamento {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 10px;
+}
+
+/* ===== ANIMAÇÕES SUAVES E ESTÁVEIS ===== */
+@keyframes highlightPulse {
+    0% { background-color: rgba(255, 140, 0, 0.1); }
+    50% { background-color: rgba(255, 140, 0, 0.2); }
+    100% { background-color: transparent; }
+}
+
+.updated {
+    animation: highlightPulse 0.8s ease;
+    border-radius: 4px;
+    padding: 2px 4px;
 }
 
 /* ===== RESPONSIVIDADE ===== */
@@ -713,25 +723,3 @@
         height: 250px;
     }
 }
-
-/* ANIMAÇÕES */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.dashboard-section {
-    animation: fadeInUp 0.5s ease forwards;
-}
-
-.dashboard-section:nth-child(1) { animation-delay: 0.1s; }
-.dashboard-section:nth-child(2) { animation-delay: 0.2s; }
-.dashboard-section:nth-child(3) { animation-delay: 0.3s; }
-.dashboard-section:nth-child(4) { animation-delay: 0.4s; }
-.dashboard-section:nth-child(5) { animation-delay: 0.5s; }
