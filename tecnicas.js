@@ -1,5 +1,5 @@
-// ===== SISTEMA DE TÉCNICAS - VERSÃO FINAL CORRIGIDA =====
-console.log("🎯 SISTEMA DE TÉCNICAS - VERSÃO CORRIGIDA CARREGADA");
+// ===== SISTEMA DE TÉCNICAS - VERSÃO COM CÁLCULO CORRIGIDO =====
+console.log("🎯 SISTEMA DE TÉCNICAS - CÁLCULO CORRIGIDO CARREGADO");
 
 // ===== 1. ESTADO DO SISTEMA =====
 const estadoTecnicas = {
@@ -7,92 +7,88 @@ const estadoTecnicas = {
     pontosTotal: 0         // Pontos gastos
 };
 
-// ===== 2. FUNÇÕES PRINCIPAIS =====
+// ===== 2. FUNÇÕES DE CÁLCULO CORRIGIDAS =====
 
-// 2.1 Obter NH do Arco CORRETAMENTE - VERSÃO MELHORADA
+// 2.1 FUNÇÃO CORRETA: Calcular níveis baseado nos pontos (TÉCNICA DIFÍCIL)
+function calcularNiveisParaPontos(pontos) {
+    console.log(`🔢 Calculando níveis para ${pontos} pontos (Técnica Difícil)`);
+    
+    // REGRA PARA TÉCNICA DIFÍCIL:
+    // 2 pontos = 1 nível (+1)
+    // 3 pontos = 2 níveis (+2) 
+    // 4 pontos = 3 níveis (+3)
+    // 5 pontos = 4 níveis (+4)
+    
+    if (pontos >= 5) return 4;      // 5 pontos = 4 níveis
+    if (pontos >= 4) return 3;      // 4 pontos = 3 níveis  
+    if (pontos >= 3) return 2;      // 3 pontos = 2 níveis
+    if (pontos >= 2) return 1;      // 2 pontos = 1 nível
+    return 0;                       // menos de 2 pontos = 0 níveis
+}
+
+// 2.2 FUNÇÃO CORRETA: Calcular pontos baseado nos níveis (TÉCNICA DIFÍCIL)
+function calcularPontosParaNiveis(niveis) {
+    console.log(`💰 Calculando pontos para ${niveis} níveis (Técnica Difícil)`);
+    
+    // REGRA INVERSA:
+    // 1 nível = 2 pontos
+    // 2 níveis = 3 pontos
+    // 3 níveis = 4 pontos
+    // 4 níveis = 5 pontos
+    
+    switch(niveis) {
+        case 4: return 5;  // 4 níveis = 5 pontos
+        case 3: return 4;  // 3 níveis = 4 pontos
+        case 2: return 3;  // 2 níveis = 3 pontos
+        case 1: return 2;  // 1 nível = 2 pontos
+        default: return 0; // 0 níveis = 0 pontos
+    }
+}
+
+// 2.3 Obter NH do Arco (mantém igual)
 function obterNHArcoReal() {
     console.log("🔍 Buscando NH do Arco...");
     
-    // Estratégia 1: Buscar em pericias-aprendidas
     const aprendidasContainer = document.getElementById('pericias-aprendidas');
     if (aprendidasContainer) {
-        console.log("✅ Container 'pericias-aprendidas' encontrado");
-        
-        // Procurar por qualquer elemento que contenha "Arco" e "NH"
         const elementos = aprendidasContainer.querySelectorAll('*');
         
         for (let elemento of elementos) {
             const texto = (elemento.textContent || '').trim();
             if (texto.includes('Arco') && !texto.includes('Montada')) {
-                console.log("📋 Texto encontrado:", texto);
-                
-                // Extrair número após "NH"
                 const match = texto.match(/NH\s*[:\-]?\s*(\d+)/i);
                 if (match && match[1]) {
                     const nh = parseInt(match[1]);
                     console.log("✅ NH encontrado:", nh);
                     return nh;
                 }
-                
-                // Tentar pegar o último número no texto (como fallback)
-                const numeros = texto.match(/\d+/g);
-                if (numeros && numeros.length > 0) {
-                    // Pega o maior número (geralmente é o NH)
-                    const maiorNumero = Math.max(...numeros.map(n => parseInt(n)));
-                    if (maiorNumero > 0 && maiorNumero <= 25) {
-                        console.log("⚠️ NH inferido (fallback):", maiorNumero);
-                        return maiorNumero;
-                    }
-                }
             }
         }
     }
     
-    // Estratégia 2: Buscar em toda a página
-    console.log("⚠️ Buscando em toda a página...");
-    const elementosGlobais = document.querySelectorAll('*');
-    for (let elemento of elementosGlobais) {
-        const texto = (elemento.textContent || '').trim();
-        if (texto.includes('Arco') && texto.includes('NH') && !texto.includes('Montada')) {
-            console.log("🌍 Texto global:", texto.substring(0, 50));
-            const match = texto.match(/NH\s*[:\-]?\s*(\d+)/i);
-            if (match && match[1]) {
-                const nh = parseInt(match[1]);
-                console.log("✅ NH encontrado (global):", nh);
-                return nh;
-            }
-        }
-    }
-    
-    // Estratégia 3: Verificar console.log do seu sistema
-    console.log("⚠️ Usando valor padrão 10 (não encontrou Arco)");
-    return 10; // Default
+    console.log("⚠️ Usando valor padrão 10");
+    return 10;
 }
 
-// 2.2 Verificar se tem Cavalgar
+// 2.4 Verificar se tem Cavalgar (mantém igual)
 function verificarTemCavalgar() {
     const aprendidasContainer = document.getElementById('pericias-aprendidas');
-    if (!aprendidasContainer) {
-        console.log("⚠️ Container pericias-aprendidas não encontrado para Cavalgar");
-        return false;
-    }
+    if (!aprendidasContainer) return false;
     
     const elementos = aprendidasContainer.querySelectorAll('*');
     for (let elemento of elementos) {
         const texto = (elemento.textContent || '').toLowerCase();
         if (texto.includes('cavalgar') || texto.includes('cavalaria')) {
-            console.log("✅ Cavalgar encontrado");
             return true;
         }
     }
     
-    console.log("⚠️ Cavalgar NÃO encontrado");
     return false;
 }
 
-// 2.3 Calcular técnica CORRETAMENTE
+// 2.5 Calcular técnica COM CÁLCULO CORRETO
 function calcularTecnica() {
-    console.log("🧮 Calculando técnica...");
+    console.log("🧮 Calculando técnica (CÁLCULO CORRIGIDO)...");
     
     const nhArco = obterNHArcoReal();
     const base = nhArco - 4;
@@ -119,9 +115,9 @@ function calcularTecnica() {
         return resultado;
     }
     
-    // Cálculo GURPS: cada 2 pontos = +1 nível
+    // CÁLCULO CORRETO: Usar nova função
     const pontos = aprendida.custoTotal || 0;
-    const niveis = Math.floor(pontos / 2);
+    const niveis = calcularNiveisParaPontos(pontos);
     const atual = base + niveis;
     
     const resultado = {
@@ -136,17 +132,16 @@ function calcularTecnica() {
     };
     
     console.log("📈 Resultado (aprendida):", resultado);
+    console.log(`✅ Pontos: ${pontos} → Níveis: ${niveis} → NH: ${atual}`);
     return resultado;
 }
 
 // ===== 3. INTERFACE DA TÉCNICA =====
-
 function atualizarTecnicaNaTela() {
-    console.log("🔄 Atualizando técnica na tela...");
+    console.log("🔄 Atualizando técnica na tela (CÁLCULO CORRETO)...");
     
     const container = document.getElementById('lista-tecnicas');
     if (!container) {
-        console.log("❌ Container '#lista-tecnicas' não encontrado!");
         setTimeout(atualizarTecnicaNaTela, 1000);
         return;
     }
@@ -154,7 +149,7 @@ function atualizarTecnicaNaTela() {
     const calculo = calcularTecnica();
     const aprendida = estadoTecnicas.aprendidas.find(t => t.id === 'arquearia-montada');
     
-    console.log(`🎯 Dados para display: NH Arco=${calculo.nhArco}, Base=${calculo.base}, Atual=${calculo.atual}`);
+    console.log(`🎯 Dados para display: NH Arco=${calculo.nhArco}, Base=${calculo.base}, Atual=${calculo.atual}, Níveis=${calculo.niveis}`);
     
     // Criar ou atualizar card
     let card = document.getElementById('tecnica-arquearia-montada');
@@ -163,7 +158,6 @@ function atualizarTecnicaNaTela() {
         card.id = 'tecnica-arquearia-montada';
         card.style.cssText = 'margin-bottom: 15px;';
         container.insertBefore(card, container.firstChild);
-        console.log("✅ Card criado");
     }
     
     // Determinar se pode comprar
@@ -242,20 +236,14 @@ function atualizarTecnicaNaTela() {
     } else {
         card.onclick = null;
     }
-    
-    console.log("✅ Técnica atualizada na tela");
 }
 
 // ===== 4. TÉCNICAS APRENDIDAS =====
-
 function atualizarDisplayAprendidas() {
     console.log("🔄 Atualizando display de aprendidas...");
     
     const container = document.getElementById('tecnicas-aprendidas');
-    if (!container) {
-        console.log("❌ Container 'tecnicas-aprendidas' não encontrado");
-        return;
-    }
+    if (!container) return;
     
     container.innerHTML = '';
     
@@ -271,7 +259,6 @@ function atualizarDisplayAprendidas() {
                 <div>Nenhuma técnica aprendida</div>
             </div>
         `;
-        console.log("✅ Nenhuma técnica aprendida (display limpo)");
         return;
     }
     
@@ -336,18 +323,15 @@ function atualizarDisplayAprendidas() {
             </div>
             
             <div style="color: #95a5a6; font-size: 12px;">
-                +${calculo.niveis} nível(s) acima da base
+                +${calculo.niveis} nível(s) acima da base (${calculo.pontos} pontos)
             </div>
         `;
         
         container.appendChild(item);
     });
-    
-    console.log(`✅ ${estadoTecnicas.aprendidas.length} técnica(s) aprendida(s) exibida(s)`);
 }
 
 // ===== 5. EXCLUSÃO DE TÉCNICA =====
-
 function excluirTecnica(id) {
     const index = estadoTecnicas.aprendidas.findIndex(t => t.id === id);
     if (index === -1) return;
@@ -363,10 +347,9 @@ function excluirTecnica(id) {
     }
 }
 
-// ===== 6. MODAL DE COMPRA =====
-
+// ===== 6. MODAL DE COMPRA - VERSÃO CORRIGIDA =====
 function abrirModalTecnica() {
-    console.log("📱 Abrindo modal...");
+    console.log("📱 Abrindo modal (CÁLCULO CORRETO)...");
     
     const calculo = calcularTecnica();
     const nhArco = calculo.nhArco;
@@ -387,9 +370,9 @@ function abrirModalTecnica() {
     
     let pontosSelecionados = pontosAtuais;
     const maxNiveis = nhArco - base;
-    const maxPontos = maxNiveis * 2;
+    const maxPontos = calcularPontosParaNiveis(maxNiveis);
     
-    console.log(`📊 Modal: NH=${nhArco}, Base=${base}, PontosAtuais=${pontosAtuais}, MaxPontos=${maxPontos}`);
+    console.log(`📊 Modal: NH=${nhArco}, Base=${base}, PontosAtuais=${pontosAtuais}, MaxNíveis=${maxNiveis}, MaxPontos=${maxPontos}`);
     
     // Criar modal se não existir
     let modalOverlay = document.querySelector('.modal-tecnica-overlay');
@@ -428,7 +411,7 @@ function abrirModalTecnica() {
     }
     
     function atualizarModal() {
-        const niveisSelecionados = Math.floor(pontosSelecionados / 2);
+        const niveisSelecionados = calcularNiveisParaPontos(pontosSelecionados);
         const nhAtual = base + niveisSelecionados;
         const diferenca = pontosSelecionados - pontosAtuais;
         
@@ -472,13 +455,13 @@ function abrirModalTecnica() {
                     </div>
                 </div>
                 
-                <!-- CONTROLE -->
+                <!-- CONTROLE CORRETO (1 ponto por clique) -->
                 <div style="text-align: center; margin: 20px 0; padding: 20px; background: rgba(0, 0, 0, 0.2); border-radius: 8px;">
-                    <div style="color: #95a5a6; font-size: 14px;">Pontos de Perícia</div>
+                    <div style="color: #95a5a6; font-size: 14px;">Pontos de Técnica</div>
                     <div style="color: #ffd700; font-size: 42px; font-weight: bold; margin: 10px 0;">${pontosSelecionados}</div>
                     
                     <div style="display: flex; justify-content: center; gap: 15px; margin: 20px 0;">
-                        <button onclick="mudarPontosTecnica(-2)" ${pontosSelecionados <= 0 ? 'disabled' : ''}
+                        <button onclick="mudarPontosTecnica(-1)" ${pontosSelecionados <= 0 ? 'disabled' : ''}
                                 style="
                                     padding: 12px 24px;
                                     background: ${pontosSelecionados <= 0 ? '#7f8c8d' : '#e74c3c'};
@@ -490,9 +473,9 @@ function abrirModalTecnica() {
                                     font-weight: bold;
                                     min-width: 100px;
                                 ">
-                            -2 pts
+                            -1 pt
                         </button>
-                        <button onclick="mudarPontosTecnica(2)" ${pontosSelecionados >= maxPontos ? 'disabled' : ''}
+                        <button onclick="mudarPontosTecnica(1)" ${pontosSelecionados >= maxPontos ? 'disabled' : ''}
                                 style="
                                     padding: 12px 24px;
                                     background: ${pontosSelecionados >= maxPontos ? '#7f8c8d' : '#27ae60'};
@@ -504,7 +487,7 @@ function abrirModalTecnica() {
                                     font-weight: bold;
                                     min-width: 100px;
                                 ">
-                            +2 pts
+                            +1 pt
                         </button>
                     </div>
                     
@@ -514,7 +497,30 @@ function abrirModalTecnica() {
                             | NH Final: <strong style="color: #2ecc71;">${nhAtual}</strong>
                         </div>
                         <div style="font-size: 12px; color: #95a5a6; margin-top: 5px;">
-                            Cada 2 pontos = +1 nível (máximo: ${maxNiveis} níveis)
+                            Técnica Difícil: 2 pts = +1 nível, 3 pts = +2, 4 pts = +3, 5 pts = +4
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TABELA DE CUSTOS -->
+                <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <div style="color: #95a5a6; font-size: 12px; text-align: center; margin-bottom: 10px;">Tabela de Custo (Técnica Difícil)</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        <div style="text-align: center; padding: 5px; background: ${niveisSelecionados === 1 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px;">
+                            <div style="color: #95a5a6; font-size: 11px;">Nível +1</div>
+                            <div style="color: #3498db; font-weight: bold;">2 pts</div>
+                        </div>
+                        <div style="text-align: center; padding: 5px; background: ${niveisSelecionados === 2 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px;">
+                            <div style="color: #95a5a6; font-size: 11px;">Nível +2</div>
+                            <div style="color: #3498db; font-weight: bold;">3 pts</div>
+                        </div>
+                        <div style="text-align: center; padding: 5px; background: ${niveisSelecionados === 3 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px;">
+                            <div style="color: #95a5a6; font-size: 11px;">Nível +3</div>
+                            <div style="color: #3498db; font-weight: bold;">4 pts</div>
+                        </div>
+                        <div style="text-align: center; padding: 5px; background: ${niveisSelecionados === 4 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px;">
+                            <div style="color: #95a5a6; font-size: 11px;">Nível +4</div>
+                            <div style="color: #3498db; font-weight: bold;">5 pts</div>
                         </div>
                     </div>
                 </div>
@@ -581,7 +587,7 @@ function abrirModalTecnica() {
         if (novo >= 0 && novo <= maxPontos) {
             pontosSelecionados = novo;
             atualizarModal();
-            console.log(`📊 Pontos alterados: ${pontosSelecionados}`);
+            console.log(`📊 Pontos alterados: ${pontosSelecionados} → Níveis: ${calcularNiveisParaPontos(pontosSelecionados)}`);
         }
     };
     
@@ -591,12 +597,12 @@ function abrirModalTecnica() {
             return;
         }
         
-        const niveis = Math.floor(pontos / 2);
+        const niveis = calcularNiveisParaPontos(pontos);
         const nhFinal = base + niveis;
         
         const mensagem = pontos > pontosAtuais 
-            ? `Comprar ${pontos - pontosAtuais} pontos adicionais?\n\nNH: ${nhFinal}\nTotal: ${pontos} pontos`
-            : `Reduzir ${pontosAtuais - pontos} pontos?\n\nNH: ${nhFinal}\nTotal: ${pontos} pontos`;
+            ? `Comprar ${pontos - pontosAtuais} pontos adicionais?\n\nNíveis: +${niveis}\nNH: ${nhFinal}\nTotal: ${pontos} pontos`
+            : `Reduzir ${pontosAtuais - pontos} pontos?\n\nNíveis: +${niveis}\nNH: ${nhFinal}\nTotal: ${pontos} pontos`;
         
         if (confirm(mensagem)) {
             const index = estadoTecnicas.aprendidas.findIndex(t => t.id === 'arquearia-montada');
@@ -626,7 +632,7 @@ function abrirModalTecnica() {
             
             atualizarTodasTecnicas();
             
-            alert(`✅ Técnica ${pontos > pontosAtuais ? 'melhorada' : 'reduzida'}!\nNH: ${nhFinal}`);
+            alert(`✅ Técnica ${pontos > pontosAtuais ? 'melhorada' : 'reduzida'}!\nNíveis: +${niveis}\nNH: ${nhFinal}`);
             fecharModalTecnica();
         }
     };
@@ -634,21 +640,19 @@ function abrirModalTecnica() {
     // Mostrar modal
     atualizarModal();
     modalOverlay.style.display = 'flex';
-    console.log("📱 Modal aberto");
+    console.log("📱 Modal aberto (cálculo corrigido)");
 }
 
 // ===== 7. ATUALIZAR TUDO =====
-
 function atualizarTodasTecnicas() {
-    console.log("🔄 Atualizando todas as técnicas...");
+    console.log("🔄 Atualizando todas as técnicas (CÁLCULO CORRETO)...");
     atualizarTecnicaNaTela();
     atualizarDisplayAprendidas();
 }
 
 // ===== 8. INICIALIZAÇÃO =====
-
 function inicializarSistemaTecnicas() {
-    console.log("🚀 Inicializando sistema de técnicas...");
+    console.log("🚀 Inicializando sistema de técnicas (CÁLCULO CORRETO)...");
     
     // Carregar técnicas salvas
     try {
@@ -674,32 +678,29 @@ function inicializarSistemaTecnicas() {
 }
 
 // ===== 9. CARREGAMENTO =====
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("📄 DOM carregado, iniciando sistema...");
+    console.log("📄 DOM carregado, iniciando sistema de técnicas...");
     setTimeout(inicializarSistemaTecnicas, 1000);
 });
 
 // ===== 10. FUNÇÕES GLOBAIS =====
-
 window.abrirModalTecnica = abrirModalTecnica;
 window.excluirTecnica = excluirTecnica;
 window.atualizarTodasTecnicas = atualizarTodasTecnicas;
 
-// Função de teste pública
+// Função de teste com cálculo corrigido
 window.testarCalculo = () => {
-    console.log("=== TESTE DE CÁLCULO ===");
+    console.log("=== TESTE DE CÁLCULO CORRETO ===");
     const nh = obterNHArcoReal();
     const calculo = calcularTecnica();
-    console.log("📊 RESULTADOS:");
+    console.log("📊 RESULTADOS CORRETOS:");
     console.log("- NH Arco:", nh);
     console.log("- Base (Arco-4):", calculo.base);
     console.log("- Pontos atuais:", calculo.pontos);
+    console.log("- Níveis:", calculo.niveis, "(Cálculo: " + calcularNiveisParaPontos(calculo.pontos) + ")");
     console.log("- NH atual:", calculo.atual);
     console.log("- Máximo (Arco):", calculo.max);
-    console.log("- Tem Cavalgar:", calculo.temCavalgar);
-    console.log("- Pode comprar:", calculo.podeComprar);
     console.log("=== FIM TESTE ===");
 };
 
-console.log("✅ TECNICAS.JS - VERSÃO CORRIGIDA PRONTA!");
+console.log("✅ TECNICAS.JS - CÁLCULO CORRIGIDO PRONTO!");
