@@ -311,14 +311,290 @@
     <!-- Conteúdo das Abas -->
     <main class="char-content">
         
-      <!-- SEÇÃO 5: RESUMO DE GASTOS E PONTOS -->
+    <!-- ABA DASHBOARD -->
+<div id="dashboard" class="tab-content active">
+    <div class="dashboard-container">
+        
+        <!-- SEÇÃO 1: IDENTIFICAÇÃO DO PERSONAGEM -->
+        <div class="dashboard-section">
+            <h2 class="secao-titulo">
+                <i class="fas fa-user-circle"></i> Identificação do Personagem
+            </h2>
+            
+            <div class="identificacao-grid">
+                <!-- COLUNA DA FOTO -->
+                <div class="foto-coluna">
+                    <div class="foto-container" id="fotoContainer">
+                        <div class="foto-placeholder" id="fotoPlaceholder">
+                            <i class="fas fa-user-circle fa-6x"></i>
+                            <span>Clique para adicionar foto</span>
+                        </div>
+                        <img id="fotoPreview" class="foto-preview" style="display: none;" alt="Foto do Personagem">
+                        <input type="file" id="fotoUpload" accept="image/*" class="foto-upload-input">
+                    </div>
+                    <div class="foto-acoes">
+                        <button class="btn-foto" onclick="document.getElementById('fotoUpload').click()">
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                        <button class="btn-foto btn-remover" id="btnRemoverFoto" style="display: none;">
+                            <i class="fas fa-trash"></i> Remover
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- COLUNA DOS DADOS -->
+                <div class="dados-coluna">
+                    <div class="campo-dashboard">
+                        <label for="racaPersonagem">Raça/Espécie:</label>
+                        <input type="text" id="racaPersonagem" class="dashboard-input" 
+                               placeholder="Ex: Humano, Elfo, Anão..." maxlength="30">
+                    </div>
+                    
+                    <div class="campo-dashboard">
+                        <label for="classePersonagem">Classe/Profissão:</label>
+                        <input type="text" id="classePersonagem" class="dashboard-input" 
+                               placeholder="Ex: Guerreiro, Mago, Ladino..." maxlength="30">
+                    </div>
+                    
+                    <div class="campo-dashboard">
+                        <label for="nivelPersonagem">Nível/Hierarquia:</label>
+                        <input type="text" id="nivelPersonagem" class="dashboard-input" 
+                               placeholder="Ex: Noviço, Veterano, Capitão..." maxlength="30">
+                    </div>
+                    
+                    <div class="campo-dashboard full-width">
+                        <label for="descricaoPersonagem">Quem sou eu?:</label>
+                        <textarea id="descricaoPersonagem" class="dashboard-textarea" 
+                                  placeholder="Breve descrição do personagem, sua história, personalidade..."
+                                  rows="3" maxlength="500"></textarea>
+                        <div class="contador-caracteres">
+                            <span id="contadorDescricao">0</span>/500 caracteres
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SEÇÃO 2: CONTROLE DE PONTOS -->
+        <div class="dashboard-section">
+            <h2 class="secao-titulo">
+                <i class="fas fa-calculator"></i> Controle de Pontos
+            </h2>
+            
+            <div class="pontos-grid">
+                <!-- PONTOS TOTAIS -->
+                <div class="ponto-card card-principal">
+                    <div class="ponto-header">
+                        <i class="fas fa-star"></i>
+                        <h3>Pontos Totais</h3>
+                    </div>
+                    <div class="ponto-content">
+                        <input type="number" id="pontosTotaisDashboard" class="ponto-input" 
+                               value="150" min="0" step="10">
+                        <div class="ponto-desc">Definido pelo GM</div>
+                    </div>
+                </div>
+                
+                <!-- PONTOS GASTOS -->
+                <div class="ponto-card card-gastos">
+                    <div class="ponto-header">
+                        <i class="fas fa-coins"></i>
+                        <h3>Pontos Gastos</h3>
+                    </div>
+                    <div class="ponto-content">
+                        <div class="ponto-valor" id="pontosGastosDashboard">0</div>
+                        <div class="ponto-desc">Total utilizado</div>
+                    </div>
+                </div>
+                
+                <!-- SALDO DISPONÍVEL -->
+                <div class="ponto-card card-saldo">
+                    <div class="ponto-header">
+                        <i class="fas fa-wallet"></i>
+                        <h3>Saldo Disponível</h3>
+                    </div>
+                    <div class="ponto-content">
+                        <div class="ponto-valor" id="saldoDisponivelDashboard">150</div>
+                        <div class="ponto-desc">Pontos restantes</div>
+                    </div>
+                </div>
+                
+                <!-- LIMITE DESVANTAGENS -->
+                <div class="ponto-card card-limite">
+                    <div class="ponto-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Limite Desvantagens</h3>
+                    </div>
+                    <div class="ponto-content">
+                        <input type="number" id="limiteDesvantagens" class="ponto-input" 
+                               value="-50" min="-200" max="0" step="5">
+                        <div class="ponto-desc">Máximo permitido</div>
+                    </div>
+                </div>
+                
+                <!-- DESVANTAGENS ATUAIS -->
+                <div class="ponto-card card-desvantagens">
+                    <div class="ponto-header">
+                        <i class="fas fa-ban"></i>
+                        <h3>Desvantagens Atuais</h3>
+                    </div>
+                    <div class="ponto-content">
+                        <div class="ponto-valor" id="desvantagensAtuais">0</div>
+                        <div class="ponto-desc">Total em desvantagens</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SEÇÃO 3: STATUS RÁPIDO -->
+        <div class="dashboard-section">
+            <h2 class="secao-titulo">
+                <i class="fas fa-chart-line"></i> Status Rápido
+            </h2>
+            
+            <div class="status-grid">
+                <!-- ATRIBUTOS -->
+                <div class="status-card">
+                    <div class="status-header">
+                        <i class="fas fa-dumbbell"></i>
+                        <h3>Atributos</h3>
+                    </div>
+                    <div class="status-content">
+                        <div class="status-item">
+                            <span class="status-label">FOR (ST):</span>
+                            <span class="status-valor" id="statusST">10</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">DES (DX):</span>
+                            <span class="status-valor" id="statusDX">10</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">INT (IQ):</span>
+                            <span class="status-valor" id="statusIQ">10</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">VIG (HT):</span>
+                            <span class="status-valor" id="statusHT">10</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PONTOS DE VIDA/FADIGA -->
+                <div class="status-card">
+                    <div class="status-header">
+                        <i class="fas fa-heartbeat"></i>
+                        <h3>Vitalidade</h3>
+                    </div>
+                    <div class="status-content">
+                        <div class="vitalidade-item">
+                            <div class="vitalidade-info">
+                                <span class="vitalidade-label">Pontos de Vida</span>
+                                <span class="vitalidade-valor" id="statusPV">10/10</span>
+                            </div>
+                            <div class="vitalidade-bar">
+                                <div class="bar-pv" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="vitalidade-item">
+                            <div class="vitalidade-info">
+                                <span class="vitalidade-label">Pontos de Fadiga</span>
+                                <span class="vitalidade-valor" id="statusPF">10/10</span>
+                            </div>
+                            <div class="vitalidade-bar">
+                                <div class="bar-pf" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- APARÊNCIA E RIQUEZA -->
+                <div class="status-card">
+                    <div class="status-header">
+                        <i class="fas fa-user-tie"></i>
+                        <h3>Características</h3>
+                    </div>
+                    <div class="status-content">
+                        <div class="status-item">
+                            <span class="status-label">Aparência:</span>
+                            <span class="status-valor" id="statusAparencia">Comum</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Riqueza:</span>
+                            <span class="status-valor" id="statusRiqueza">Média</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Saldo:</span>
+                            <span class="status-valor dinheiro" id="statusSaldo">$2.000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SEÇÃO 4: RELACIONAMENTOS -->
+        <div class="dashboard-section">
+            <h2 class="secao-titulo">
+                <i class="fas fa-users"></i> Relacionamentos
+            </h2>
+            
+            <div class="relacionamentos-grid">
+                <!-- INIMIGOS -->
+                <div class="relacionamento-card card-inimigo">
+                    <div class="relacionamento-header">
+                        <i class="fas fa-skull-crossbones"></i>
+                        <h3>Inimigos</h3>
+                        <button class="btn-adicionar" data-tipo="inimigo">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div class="relacionamento-lista" id="listaInimigos">
+                        <div class="relacionamento-vazio">
+                            Nenhum inimigo adicionado
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ALIADOS -->
+                <div class="relacionamento-card card-aliado">
+                    <div class="relacionamento-header">
+                        <i class="fas fa-handshake"></i>
+                        <h3>Aliados</h3>
+                        <button class="btn-adicionar" data-tipo="aliado">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div class="relacionamento-lista" id="listaAliados">
+                        <div class="relacionamento-vazio">
+                            Nenhum aliado adicionado
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DEPENDENTES -->
+                <div class="relacionamento-card card-dependente">
+                    <div class="relacionamento-header">
+                        <i class="fas fa-child"></i>
+                        <h3>Dependentes</h3>
+                        <button class="btn-adicionar" data-tipo="dependente">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div class="relacionamento-lista" id="listaDependentes">
+                        <div class="relacionamento-vazio">
+                            Nenhum dependente adicionado
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SEÇÃO 5: RESUMO DE GASTOS -->
 <div class="dashboard-section">
     <h2 class="secao-titulo">
-        <i class="fas fa-file-invoice-dollar"></i> Resumo de Gastos e Pontos
+        <i class="fas fa-file-invoice-dollar"></i> Resumo de Gastos
     </h2>
     
     <div class="resumo-grid">
-        <!-- ATRIBUTOS -->
         <div class="resumo-card">
             <div class="resumo-header">
                 <i class="fas fa-dumbbell"></i>
@@ -330,7 +606,6 @@
             </div>
         </div>
         
-        <!-- VANTAGENS -->
         <div class="resumo-card">
             <div class="resumo-header">
                 <i class="fas fa-star"></i>
@@ -342,7 +617,6 @@
             </div>
         </div>
         
-        <!-- PERÍCIAS -->
         <div class="resumo-card">
             <div class="resumo-header">
                 <i class="fas fa-graduation-cap"></i>
@@ -354,7 +628,6 @@
             </div>
         </div>
         
-        <!-- MAGIAS -->
         <div class="resumo-card">
             <div class="resumo-header">
                 <i class="fas fa-hat-wizard"></i>
@@ -366,60 +639,35 @@
             </div>
         </div>
         
-        <!-- DESVANTAGENS (NOVO) -->
-        <div class="resumo-card desvantagens">
+        <!-- NOVO CARD: DESVANTAGENS E PECULIARIDADES -->
+        <div class="resumo-card">
             <div class="resumo-header">
-                <i class="fas fa-ban"></i>
-                <h4>Desvantagens</h4>
+                <i class="fas fa-exclamation-circle"></i>
+                <h4>Desvantagens & Peculiaridades</h4>
             </div>
             <div class="resumo-content">
                 <div class="resumo-valor" id="gastosDesvantagens">0</div>
-                <div class="resumo-label">pontos negativos</div>
+                <div class="resumo-label">pontos (negativos)</div>
             </div>
         </div>
         
-        <!-- PECULIARIDADES (NOVO) -->
-        <div class="resumo-card peculiaridades">
-            <div class="resumo-header">
-                <i class="fas fa-exclamation-circle"></i>
-                <h4>Peculiaridades</h4>
-            </div>
-            <div class="resumo-content">
-                <div class="resumo-valor" id="gastosPeculiaridades">0</div>
-                <div class="resumo-label">pontos</div>
-            </div>
-        </div>
-        
-        <!-- TOTAL LÍQUIDO (ATUALIZADO) -->
         <div class="resumo-card total">
             <div class="resumo-header">
                 <i class="fas fa-calculator"></i>
-                <h4>Total Líquido</h4>
+                <h4>Total Gastos</h4>
             </div>
             <div class="resumo-content">
-                <div class="resumo-valor" id="gastosTotalLiquido">0</div>
-                <div class="resumo-label">(gastos + negativos)</div>
+                <div class="resumo-valor" id="gastosTotal">0</div>
+                <div class="resumo-label">pontos líquidos</div>
             </div>
-        </div>
-    </div>
-    
-    <!-- LEGENDA EXPLICATIVA -->
-    <div class="resumo-legenda">
-        <div class="legenda-item">
-            <span class="legenda-cor" style="background: #ff8c00;"></span>
-            <span>Total gasto em características positivas</span>
-        </div>
-        <div class="legenda-item">
-            <span class="legenda-cor" style="background: #9b59b6;"></span>
-            <span>Desvantagens (pontos negativos)</span>
-        </div>
-        <div class="legenda-item">
-            <span class="legenda-cor" style="background: #ffd700;"></span>
-            <span>Saldo final (líquido)</span>
         </div>
     </div>
 </div>
-        <!-- ABA ATRIBUTOS -->
+        
+    </div><!-- FIM dashboard-container -->
+</div><!-- FIM ABA DASHBOARD -->   
+
+<!-- ABA ATRIBUTOS -->
         <div id="atributos" class="tab-content">
             <div class="atributos-container">
                 <!-- Seção de Pontos -->
