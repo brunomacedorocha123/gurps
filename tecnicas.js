@@ -1,5 +1,5 @@
-// ===== SISTEMA DE TÉCNICAS - VERSÃO COM CÁLCULO CORRIGIDO =====
-console.log("🎯 SISTEMA DE TÉCNICAS - CÁLCULO CORRIGIDO CARREGADO");
+// ===== SISTEMA DE TÉCNICAS - VERSÃO COMPLETA CORRIGIDA =====
+console.log("🎯 SISTEMA DE TÉCNICAS - VERSÃO CORRIGIDA CARREGADA");
 
 // ===== 1. ESTADO DO SISTEMA =====
 const estadoTecnicas = {
@@ -7,30 +7,120 @@ const estadoTecnicas = {
     pontosTotal: 0         // Pontos gastos
 };
 
-// ===== 2. FUNÇÕES DE CÁLCULO CORRIGIDAS =====
+// ===== 2. FUNÇÕES PRINCIPAIS =====
 
-// 2.1 FUNÇÃO CORRETA: Calcular níveis baseado nos pontos (TÉCNICA DIFÍCIL)
-function calcularNiveisParaPontos(pontos) {
-    console.log(`🔢 Calculando níveis para ${pontos} pontos (Técnica Difícil)`);
+// 2.1 Obter NH do Arco CORRETAMENTE - VERSÃO MELHORADA
+function obterNHArcoReal() {
+    console.log("🔍 Buscando NH do Arco...");
     
-    // REGRA PARA TÉCNICA DIFÍCIL:
+    // Estratégia 1: Buscar em pericias-aprendidas
+    const aprendidasContainer = document.getElementById('pericias-aprendidas');
+    if (aprendidasContainer) {
+        console.log("✅ Container 'pericias-aprendidas' encontrado");
+        
+        // Procurar por qualquer elemento que contenha "Arco" e "NH"
+        const elementos = aprendidasContainer.querySelectorAll('*');
+        
+        for (let elemento of elementos) {
+            const texto = (elemento.textContent || '').trim();
+            if (texto.includes('Arco') && !texto.includes('Montada')) {
+                console.log("📋 Texto encontrado:", texto);
+                
+                // Extrair número após "NH"
+                const match = texto.match(/NH\s*[:\-]?\s*(\d+)/i);
+                if (match && match[1]) {
+                    const nh = parseInt(match[1]);
+                    console.log("✅ NH encontrado:", nh);
+                    return nh;
+                }
+                
+                // Tentar pegar o último número no texto (como fallback)
+                const numeros = texto.match(/\d+/g);
+                if (numeros && numeros.length > 0) {
+                    // Pega o maior número (geralmente é o NH)
+                    const maiorNumero = Math.max(...numeros.map(n => parseInt(n)));
+                    if (maiorNumero > 0 && maiorNumero <= 25) {
+                        console.log("⚠️ NH inferido (fallback):", maiorNumero);
+                        return maiorNumero;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Estratégia 2: Buscar em toda a página
+    console.log("⚠️ Buscando em toda a página...");
+    const elementosGlobais = document.querySelectorAll('*');
+    for (let elemento of elementosGlobais) {
+        const texto = (elemento.textContent || '').trim();
+        if (texto.includes('Arco') && texto.includes('NH') && !texto.includes('Montada')) {
+            console.log("🌍 Texto global:", texto.substring(0, 50));
+            const match = texto.match(/NH\s*[:\-]?\s*(\d+)/i);
+            if (match && match[1]) {
+                const nh = parseInt(match[1]);
+                console.log("✅ NH encontrado (global):", nh);
+                return nh;
+            }
+        }
+    }
+    
+    // Estratégia 3: Verificar console.log do seu sistema
+    console.log("⚠️ Usando valor padrão 10 (não encontrou Arco)");
+    return 10; // Default
+}
+
+// 2.2 Verificar se tem Cavalgar
+function verificarTemCavalgar() {
+    const aprendidasContainer = document.getElementById('pericias-aprendidas');
+    if (!aprendidasContainer) {
+        console.log("⚠️ Container pericias-aprendidas não encontrado para Cavalgar");
+        return false;
+    }
+    
+    const elementos = aprendidasContainer.querySelectorAll('*');
+    for (let elemento of elementos) {
+        const texto = (elemento.textContent || '').toLowerCase();
+        if (texto.includes('cavalgar') || texto.includes('cavalaria')) {
+            console.log("✅ Cavalgar encontrado");
+            return true;
+        }
+    }
+    
+    console.log("⚠️ Cavalgar NÃO encontrado");
+    return false;
+}
+
+// 2.3 FUNÇÃO 100% CORRETA: Calcular níveis baseado nos pontos (TÉCNICA DIFÍCIL)
+function calcularNiveisParaPontos(pontos) {
+    console.log(`🔢 Calculando níveis para ${pontos} pontos (Técnica Difícil - CORRETO)`);
+    
+    // REGRA 100% CORRETA PARA TÉCNICA DIFÍCIL:
     // 2 pontos = 1 nível (+1)
     // 3 pontos = 2 níveis (+2) 
     // 4 pontos = 3 níveis (+3)
     // 5 pontos = 4 níveis (+4)
     
-    if (pontos >= 5) return 4;      // 5 pontos = 4 níveis
-    if (pontos >= 4) return 3;      // 4 pontos = 3 níveis  
-    if (pontos >= 3) return 2;      // 3 pontos = 2 níveis
-    if (pontos >= 2) return 1;      // 2 pontos = 1 nível
-    return 0;                       // menos de 2 pontos = 0 níveis
+    // VALORES PERMITIDOS: 0, 2, 3, 4, 5
+    if (pontos === 5) return 4;      // 5 pontos = 4 níveis
+    if (pontos === 4) return 3;      // 4 pontos = 3 níveis  
+    if (pontos === 3) return 2;      // 3 pontos = 2 níveis
+    if (pontos === 2) return 1;      // 2 pontos = 1 nível
+    if (pontos === 0) return 0;      // 0 pontos = 0 níveis
+    
+    // Se for outro valor (erro), ajusta para o mais próximo
+    console.log(`⚠️ Valor inválido de pontos: ${pontos}, ajustando...`);
+    if (pontos > 5) return 4;        // Máximo 4 níveis
+    if (pontos > 4) return 3;
+    if (pontos > 3) return 2;
+    if (pontos > 2) return 1;
+    return 0;
 }
 
-// 2.2 FUNÇÃO CORRETA: Calcular pontos baseado nos níveis (TÉCNICA DIFÍCIL)
+// 2.4 FUNÇÃO 100% CORRETA: Calcular pontos baseado nos níveis (TÉCNICA DIFÍCIL)
 function calcularPontosParaNiveis(niveis) {
-    console.log(`💰 Calculando pontos para ${niveis} níveis (Técnica Difícil)`);
+    console.log(`💰 Calculando pontos para ${niveis} níveis (Técnica Difícil - CORRETO)`);
     
-    // REGRA INVERSA:
+    // REGRA INVERSA 100% CORRETA:
     // 1 nível = 2 pontos
     // 2 níveis = 3 pontos
     // 3 níveis = 4 pontos
@@ -41,54 +131,16 @@ function calcularPontosParaNiveis(niveis) {
         case 3: return 4;  // 3 níveis = 4 pontos
         case 2: return 3;  // 2 níveis = 3 pontos
         case 1: return 2;  // 1 nível = 2 pontos
-        default: return 0; // 0 níveis = 0 pontos
+        case 0: return 0;  // 0 níveis = 0 pontos
+        default: 
+            console.log(`⚠️ Nível inválido: ${niveis}, usando máximo`);
+            return 5; // máximo
     }
 }
 
-// 2.3 Obter NH do Arco (mantém igual)
-function obterNHArcoReal() {
-    console.log("🔍 Buscando NH do Arco...");
-    
-    const aprendidasContainer = document.getElementById('pericias-aprendidas');
-    if (aprendidasContainer) {
-        const elementos = aprendidasContainer.querySelectorAll('*');
-        
-        for (let elemento of elementos) {
-            const texto = (elemento.textContent || '').trim();
-            if (texto.includes('Arco') && !texto.includes('Montada')) {
-                const match = texto.match(/NH\s*[:\-]?\s*(\d+)/i);
-                if (match && match[1]) {
-                    const nh = parseInt(match[1]);
-                    console.log("✅ NH encontrado:", nh);
-                    return nh;
-                }
-            }
-        }
-    }
-    
-    console.log("⚠️ Usando valor padrão 10");
-    return 10;
-}
-
-// 2.4 Verificar se tem Cavalgar (mantém igual)
-function verificarTemCavalgar() {
-    const aprendidasContainer = document.getElementById('pericias-aprendidas');
-    if (!aprendidasContainer) return false;
-    
-    const elementos = aprendidasContainer.querySelectorAll('*');
-    for (let elemento of elementos) {
-        const texto = (elemento.textContent || '').toLowerCase();
-        if (texto.includes('cavalgar') || texto.includes('cavalaria')) {
-            return true;
-        }
-    }
-    
-    return false;
-}
-
-// 2.5 Calcular técnica COM CÁLCULO CORRETO
+// 2.5 Calcular técnica COM CÁLCULO 100% CORRETO
 function calcularTecnica() {
-    console.log("🧮 Calculando técnica (CÁLCULO CORRIGIDO)...");
+    console.log("🧮 Calculando técnica (CÁLCULO 100% CORRETO)...");
     
     const nhArco = obterNHArcoReal();
     const base = nhArco - 4;
@@ -115,7 +167,7 @@ function calcularTecnica() {
         return resultado;
     }
     
-    // CÁLCULO CORRETO: Usar nova função
+    // CÁLCULO 100% CORRETO: Usar nova função
     const pontos = aprendida.custoTotal || 0;
     const niveis = calcularNiveisParaPontos(pontos);
     const atual = base + niveis;
@@ -132,16 +184,18 @@ function calcularTecnica() {
     };
     
     console.log("📈 Resultado (aprendida):", resultado);
-    console.log(`✅ Pontos: ${pontos} → Níveis: ${niveis} → NH: ${atual}`);
+    console.log(`✅ CORRETO: ${pontos} pontos → ${niveis} níveis → NH ${atual}`);
     return resultado;
 }
 
 // ===== 3. INTERFACE DA TÉCNICA =====
+
 function atualizarTecnicaNaTela() {
-    console.log("🔄 Atualizando técnica na tela (CÁLCULO CORRETO)...");
+    console.log("🔄 Atualizando técnica na tela...");
     
     const container = document.getElementById('lista-tecnicas');
     if (!container) {
+        console.log("❌ Container '#lista-tecnicas' não encontrado!");
         setTimeout(atualizarTecnicaNaTela, 1000);
         return;
     }
@@ -149,7 +203,7 @@ function atualizarTecnicaNaTela() {
     const calculo = calcularTecnica();
     const aprendida = estadoTecnicas.aprendidas.find(t => t.id === 'arquearia-montada');
     
-    console.log(`🎯 Dados para display: NH Arco=${calculo.nhArco}, Base=${calculo.base}, Atual=${calculo.atual}, Níveis=${calculo.niveis}`);
+    console.log(`🎯 Dados para display: NH Arco=${calculo.nhArco}, Base=${calculo.base}, Atual=${calculo.atual}, Níveis=${calculo.niveis}, Pontos=${calculo.pontos}`);
     
     // Criar ou atualizar card
     let card = document.getElementById('tecnica-arquearia-montada');
@@ -158,6 +212,7 @@ function atualizarTecnicaNaTela() {
         card.id = 'tecnica-arquearia-montada';
         card.style.cssText = 'margin-bottom: 15px;';
         container.insertBefore(card, container.firstChild);
+        console.log("✅ Card criado");
     }
     
     // Determinar se pode comprar
@@ -221,7 +276,7 @@ function atualizarTecnicaNaTela() {
                 ">
                     <div style="color: ${aprendida ? '#9b59b6' : (podeComprar ? '#27ae60' : '#e74c3c')}; font-size: 13px;">
                         <i class="fas fa-${aprendida ? 'check-circle' : (podeComprar ? 'shopping-cart' : 'exclamation-triangle')}"></i>
-                        ${aprendida ? `Aprendida (${calculo.pontos} pontos)` : 
+                        ${aprendida ? `Aprendida (${calculo.pontos} pontos = +${calculo.niveis} níveis)` : 
                           podeComprar ? 'Disponível para compra' : 
                           `PRÉ-REQUISITO: Precisa de Cavalgar (Arco: ${calculo.nhArco})`}
                     </div>
@@ -236,14 +291,20 @@ function atualizarTecnicaNaTela() {
     } else {
         card.onclick = null;
     }
+    
+    console.log("✅ Técnica atualizada na tela");
 }
 
 // ===== 4. TÉCNICAS APRENDIDAS =====
+
 function atualizarDisplayAprendidas() {
     console.log("🔄 Atualizando display de aprendidas...");
     
     const container = document.getElementById('tecnicas-aprendidas');
-    if (!container) return;
+    if (!container) {
+        console.log("❌ Container 'tecnicas-aprendidas' não encontrado");
+        return;
+    }
     
     container.innerHTML = '';
     
@@ -259,6 +320,7 @@ function atualizarDisplayAprendidas() {
                 <div>Nenhuma técnica aprendida</div>
             </div>
         `;
+        console.log("✅ Nenhuma técnica aprendida (display limpo)");
         return;
     }
     
@@ -329,9 +391,12 @@ function atualizarDisplayAprendidas() {
         
         container.appendChild(item);
     });
+    
+    console.log(`✅ ${estadoTecnicas.aprendidas.length} técnica(s) aprendida(s) exibida(s)`);
 }
 
 // ===== 5. EXCLUSÃO DE TÉCNICA =====
+
 function excluirTecnica(id) {
     const index = estadoTecnicas.aprendidas.findIndex(t => t.id === id);
     if (index === -1) return;
@@ -347,9 +412,10 @@ function excluirTecnica(id) {
     }
 }
 
-// ===== 6. MODAL DE COMPRA - VERSÃO CORRIGIDA =====
+// ===== 6. MODAL DE COMPRA - VERSÃO 100% CORRETA =====
+
 function abrirModalTecnica() {
-    console.log("📱 Abrindo modal (CÁLCULO CORRETO)...");
+    console.log("📱 Abrindo modal (CÁLCULO 100% CORRETO)...");
     
     const calculo = calcularTecnica();
     const nhArco = calculo.nhArco;
@@ -370,7 +436,20 @@ function abrirModalTecnica() {
     
     let pontosSelecionados = pontosAtuais;
     const maxNiveis = nhArco - base;
-    const maxPontos = calcularPontosParaNiveis(maxNiveis);
+    
+    // CALCULAR MÁXIMO CORRETAMENTE
+    let maxPontos;
+    if (maxNiveis >= 4) {
+        maxPontos = 5; // 4 níveis = 5 pontos
+    } else if (maxNiveis >= 3) {
+        maxPontos = 4; // 3 níveis = 4 pontos
+    } else if (maxNiveis >= 2) {
+        maxPontos = 3; // 2 níveis = 3 pontos
+    } else if (maxNiveis >= 1) {
+        maxPontos = 2; // 1 nível = 2 pontos
+    } else {
+        maxPontos = 0; // sem níveis
+    }
     
     console.log(`📊 Modal: NH=${nhArco}, Base=${base}, PontosAtuais=${pontosAtuais}, MaxNíveis=${maxNiveis}, MaxPontos=${maxPontos}`);
     
@@ -415,6 +494,9 @@ function abrirModalTecnica() {
         const nhAtual = base + niveisSelecionados;
         const diferenca = pontosSelecionados - pontosAtuais;
         
+        // Determinar quais opções estão disponíveis
+        const opcoesDisponiveis = [0, 2, 3, 4, 5].filter(p => p <= maxPontos);
+        
         modalContent.innerHTML = `
             <div class="modal-header" style="
                 background: rgba(155, 89, 182, 0.2);
@@ -455,40 +537,34 @@ function abrirModalTecnica() {
                     </div>
                 </div>
                 
-                <!-- CONTROLE CORRETO (1 ponto por clique) -->
+                <!-- CONTROLE 100% CORRETO -->
                 <div style="text-align: center; margin: 20px 0; padding: 20px; background: rgba(0, 0, 0, 0.2); border-radius: 8px;">
                     <div style="color: #95a5a6; font-size: 14px;">Pontos de Técnica</div>
                     <div style="color: #ffd700; font-size: 42px; font-weight: bold; margin: 10px 0;">${pontosSelecionados}</div>
                     
-                    <div style="display: flex; justify-content: center; gap: 15px; margin: 20px 0;">
-                        <button onclick="mudarPontosTecnica(-1)" ${pontosSelecionados <= 0 ? 'disabled' : ''}
-                                style="
-                                    padding: 12px 24px;
-                                    background: ${pontosSelecionados <= 0 ? '#7f8c8d' : '#e74c3c'};
-                                    color: white;
-                                    border: none;
-                                    border-radius: 6px;
-                                    cursor: ${pontosSelecionados <= 0 ? 'not-allowed' : 'pointer'};
-                                    font-size: 16px;
-                                    font-weight: bold;
-                                    min-width: 100px;
-                                ">
-                            -1 pt
-                        </button>
-                        <button onclick="mudarPontosTecnica(1)" ${pontosSelecionados >= maxPontos ? 'disabled' : ''}
-                                style="
-                                    padding: 12px 24px;
-                                    background: ${pontosSelecionados >= maxPontos ? '#7f8c8d' : '#27ae60'};
-                                    color: white;
-                                    border: none;
-                                    border-radius: 6px;
-                                    cursor: ${pontosSelecionados >= maxPontos ? 'not-allowed' : 'pointer'};
-                                    font-size: 16px;
-                                    font-weight: bold;
-                                    min-width: 100px;
-                                ">
-                            +1 pt
-                        </button>
+                    <!-- BOTÕES DE SELEÇÃO DE PONTOS -->
+                    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px 0;">
+                        ${opcoesDisponiveis.map(pontos => {
+                            const niveisParaEssesPontos = calcularNiveisParaPontos(pontos);
+                            const estaSelecionado = pontos === pontosSelecionados;
+                            return `
+                                <button onclick="selecionarPontosTecnica(${pontos})" 
+                                        style="
+                                            padding: 10px 15px;
+                                            background: ${estaSelecionado ? '#9b59b6' : (pontos === 0 ? '#7f8c8d' : '#3498db')};
+                                            color: white;
+                                            border: ${estaSelecionado ? '2px solid #ffd700' : 'none'};
+                                            border-radius: 6px;
+                                            cursor: pointer;
+                                            font-size: 14px;
+                                            font-weight: bold;
+                                            min-width: 70px;
+                                        ">
+                                    ${pontos} pts
+                                    ${niveisParaEssesPontos > 0 ? `<br><small>+${niveisParaEssesPontos}</small>` : ''}
+                                </button>
+                            `;
+                        }).join('')}
                     </div>
                     
                     <div style="color: #ccc; margin-top: 15px;">
@@ -497,30 +573,30 @@ function abrirModalTecnica() {
                             | NH Final: <strong style="color: #2ecc71;">${nhAtual}</strong>
                         </div>
                         <div style="font-size: 12px; color: #95a5a6; margin-top: 5px;">
-                            Técnica Difícil: 2 pts = +1 nível, 3 pts = +2, 4 pts = +3, 5 pts = +4
+                            Técnica Difícil: 2 pts = +1 nível | 3 pts = +2 | 4 pts = +3 | 5 pts = +4
                         </div>
                     </div>
                 </div>
                 
-                <!-- TABELA DE CUSTOS -->
+                <!-- TABELA DE CUSTOS 100% CORRETA -->
                 <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 20px 0;">
                     <div style="color: #95a5a6; font-size: 12px; text-align: center; margin-bottom: 10px;">Tabela de Custo (Técnica Difícil)</div>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                        <div style="text-align: center; padding: 5px; background: ${niveisSelecionados === 1 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px;">
-                            <div style="color: #95a5a6; font-size: 11px;">Nível +1</div>
-                            <div style="color: #3498db; font-weight: bold;">2 pts</div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                        <div style="text-align: center; padding: 8px; background: ${pontosSelecionados === 2 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px; border: ${pontosSelecionados === 2 ? '1px solid #ffd700' : 'none'};">
+                            <div style="color: #95a5a6; font-size: 11px;">2 pontos</div>
+                            <div style="color: #3498db; font-size: 16px; font-weight: bold;">+1 nível</div>
                         </div>
-                        <div style="text-align: center; padding: 5px; background: ${niveisSelecionados === 2 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px;">
-                            <div style="color: #95a5a6; font-size: 11px;">Nível +2</div>
-                            <div style="color: #3498db; font-weight: bold;">3 pts</div>
+                        <div style="text-align: center; padding: 8px; background: ${pontosSelecionados === 3 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px; border: ${pontosSelecionados === 3 ? '1px solid #ffd700' : 'none'};">
+                            <div style="color: #95a5a6; font-size: 11px;">3 pontos</div>
+                            <div style="color: #3498db; font-size: 16px; font-weight: bold;">+2 níveis</div>
                         </div>
-                        <div style="text-align: center; padding: 5px; background: ${niveisSelecionados === 3 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px;">
-                            <div style="color: #95a5a6; font-size: 11px;">Nível +3</div>
-                            <div style="color: #3498db; font-weight: bold;">4 pts</div>
+                        <div style="text-align: center; padding: 8px; background: ${pontosSelecionados === 4 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px; border: ${pontosSelecionados === 4 ? '1px solid #ffd700' : 'none'};">
+                            <div style="color: #95a5a6; font-size: 11px;">4 pontos</div>
+                            <div style="color: #3498db; font-size: 16px; font-weight: bold;">+3 níveis</div>
                         </div>
-                        <div style="text-align: center; padding: 5px; background: ${niveisSelecionados === 4 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px;">
-                            <div style="color: #95a5a6; font-size: 11px;">Nível +4</div>
-                            <div style="color: #3498db; font-weight: bold;">5 pts</div>
+                        <div style="text-align: center; padding: 8px; background: ${pontosSelecionados === 5 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(255,255,255,0.05)'}; border-radius: 4px; border: ${pontosSelecionados === 5 ? '1px solid #ffd700' : 'none'};">
+                            <div style="color: #95a5a6; font-size: 11px;">5 pontos</div>
+                            <div style="color: #3498db; font-size: 16px; font-weight: bold;">+4 níveis</div>
                         </div>
                     </div>
                 </div>
@@ -529,6 +605,9 @@ function abrirModalTecnica() {
                 <div style="background: rgba(155, 89, 182, 0.2); padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
                     <div style="color: #9b59b6; font-size: 12px;">Custo Total</div>
                     <div style="color: white; font-size: 32px; font-weight: bold;">${pontosSelecionados} pontos</div>
+                    <div style="color: #2ecc71; font-size: 14px; margin-top: 5px;">
+                        +${niveisSelecionados} nível(s) acima da base
+                    </div>
                     ${diferenca !== 0 ? `
                         <div style="color: ${diferenca > 0 ? '#27ae60' : '#e74c3c'}; font-size: 14px; margin-top: 5px;">
                             ${diferenca > 0 ? '+' : ''}${diferenca} pontos
@@ -582,13 +661,10 @@ function abrirModalTecnica() {
         console.log("📱 Modal fechado");
     };
     
-    window.mudarPontosTecnica = (mudanca) => {
-        const novo = pontosSelecionados + mudanca;
-        if (novo >= 0 && novo <= maxPontos) {
-            pontosSelecionados = novo;
-            atualizarModal();
-            console.log(`📊 Pontos alterados: ${pontosSelecionados} → Níveis: ${calcularNiveisParaPontos(pontosSelecionados)}`);
-        }
+    window.selecionarPontosTecnica = (pontos) => {
+        pontosSelecionados = pontos;
+        atualizarModal();
+        console.log(`📊 Pontos selecionados: ${pontos} → Níveis: ${calcularNiveisParaPontos(pontos)}`);
     };
     
     window.comprarTecnica = (pontos) => {
@@ -640,19 +716,21 @@ function abrirModalTecnica() {
     // Mostrar modal
     atualizarModal();
     modalOverlay.style.display = 'flex';
-    console.log("📱 Modal aberto (cálculo corrigido)");
+    console.log("📱 Modal aberto (cálculo 100% correto)");
 }
 
 // ===== 7. ATUALIZAR TUDO =====
+
 function atualizarTodasTecnicas() {
-    console.log("🔄 Atualizando todas as técnicas (CÁLCULO CORRETO)...");
+    console.log("🔄 Atualizando todas as técnicas...");
     atualizarTecnicaNaTela();
     atualizarDisplayAprendidas();
 }
 
 // ===== 8. INICIALIZAÇÃO =====
+
 function inicializarSistemaTecnicas() {
-    console.log("🚀 Inicializando sistema de técnicas (CÁLCULO CORRETO)...");
+    console.log("🚀 Inicializando sistema de técnicas...");
     
     // Carregar técnicas salvas
     try {
@@ -678,29 +756,43 @@ function inicializarSistemaTecnicas() {
 }
 
 // ===== 9. CARREGAMENTO =====
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("📄 DOM carregado, iniciando sistema de técnicas...");
+    console.log("📄 DOM carregado, iniciando sistema...");
     setTimeout(inicializarSistemaTecnicas, 1000);
 });
 
 // ===== 10. FUNÇÕES GLOBAIS =====
+
 window.abrirModalTecnica = abrirModalTecnica;
 window.excluirTecnica = excluirTecnica;
 window.atualizarTodasTecnicas = atualizarTodasTecnicas;
 
-// Função de teste com cálculo corrigido
+// Função de teste pública
 window.testarCalculo = () => {
-    console.log("=== TESTE DE CÁLCULO CORRETO ===");
+    console.log("=== TESTE DE CÁLCULO 100% CORRETO ===");
     const nh = obterNHArcoReal();
     const calculo = calcularTecnica();
     console.log("📊 RESULTADOS CORRETOS:");
     console.log("- NH Arco:", nh);
     console.log("- Base (Arco-4):", calculo.base);
     console.log("- Pontos atuais:", calculo.pontos);
-    console.log("- Níveis:", calculo.niveis, "(Cálculo: " + calcularNiveisParaPontos(calculo.pontos) + ")");
+    console.log("- Níveis:", calculo.niveis);
     console.log("- NH atual:", calculo.atual);
     console.log("- Máximo (Arco):", calculo.max);
+    
+    // Testar conversões
+    console.log("\n🧪 TESTE DE CONVERSÕES:");
+    console.log("2 pontos → Níveis:", calcularNiveisParaPontos(2));
+    console.log("3 pontos → Níveis:", calcularNiveisParaPontos(3));
+    console.log("4 pontos → Níveis:", calcularNiveisParaPontos(4));
+    console.log("5 pontos → Níveis:", calcularNiveisParaPontos(5));
+    
+    console.log("1 nível → Pontos:", calcularPontosParaNiveis(1));
+    console.log("2 níveis → Pontos:", calcularPontosParaNiveis(2));
+    console.log("3 níveis → Pontos:", calcularPontosParaNiveis(3));
+    console.log("4 níveis → Pontos:", calcularPontosParaNiveis(4));
     console.log("=== FIM TESTE ===");
 };
 
-console.log("✅ TECNICAS.JS - CÁLCULO CORRIGIDO PRONTO!");
+console.log("✅ TECNICAS.JS - VERSÃO 100% CORRETA PRONTA!");
