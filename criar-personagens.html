@@ -2453,9 +2453,10 @@
 
     </main> <!-- FIM DO MAIN -->
 
+    
     <!-- MOVER A FUNÇÃO toggleSubmenu PARA AQUI (estava quebrando a estrutura) -->
-    <script>
-    // Função toggleSubmenu - MOVIDA para cá (estava entre as abas, quebrando a estrutura)
+<script>
+    // Função toggleSubmenu - ÚNICA VERSÃO
     function toggleSubmenu(id) {
         const submenu = document.getElementById(id);
         const icon = submenu.previousElementSibling.querySelector('.fa-chevron-down');
@@ -2469,7 +2470,8 @@
         }
     }
 </script>
-<!-- SISTEMA DE ATRIBUTOS E CARACTERÍSTICAS -->
+
+<!-- ORDEM CORRETA DOS SCRIPTS -->
 <script src="dashboard.js"></script>    
 <script src="atributos.js"></script>
 <script src="caracteristicas-fisicas.js"></script>
@@ -2479,16 +2481,14 @@
 <script src="caracteristicas-idiomas.js"></script>
 
 <!-- SISTEMA DE VANTAGENS E DESVANTAGENS -->
-<script src="catalogo-vantagens.js"></script>
-<script src="catalogo-desvantagens.js"></script>
 <script src="vantagens.js"></script>
 <script src="desvantagens.js"></script>
+<script src="catalogo-vantagens.js"></script>
+<script src="catalogo-desvantagens.js"></script>
 
 <!-- SISTEMA DE PERÍCIAS -->
 <script src="pericias-catalogo.js"></script>
 <script src="sistema-pericias.js"></script>
-
-<!-- SISTEMA DE TÉCNICAS (DEPENDE DAS PERÍCIAS) -->
 <script src="tecnicas.js"></script>
 
 <!-- SISTEMA DE MAGIAS -->
@@ -2498,6 +2498,7 @@
 <!-- SISTEMA DE EQUIPAMENTOS -->
 <script src="catalogo-equipamentos.js"></script>
 <script src="equipamentos.js"></script>
+
 <script>
     // Configuração do Supabase
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
@@ -2522,15 +2523,19 @@
         inicializarNavegacaoAbas();
         configurarEventListeners();
         carregarPersonagemDaURL();
+        inicializarSistemaAbas();
     });
 
     // Navegação entre abas
     function inicializarNavegacaoAbas() {
-        document.querySelectorAll('.tab-btn').forEach(btn => {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(btn => {
             btn.addEventListener('click', function() {
                 // Remove active de todos
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tabButtons.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
                 
                 // Ativa a aba clicada
                 this.classList.add('active');
@@ -2547,34 +2552,67 @@
         });
     }
 
+    // Inicializar todos os sistemas de abas
+    function inicializarSistemaAbas() {
+        // Verifica qual aba está ativa inicialmente
+        const activeTab = document.querySelector('.tab-btn.active');
+        if (activeTab) {
+            const tabId = activeTab.getAttribute('data-tab');
+            inicializarSistemasAba(tabId);
+        }
+    }
+
     // Inicializar sistemas específicos de cada aba
     function inicializarSistemasAba(abaId) {
+        console.log('Inicializando aba:', abaId);
+        
         switch(abaId) {
+            case 'dashboard':
+                if (typeof inicializarDashboard === 'function') {
+                    setTimeout(() => inicializarDashboard(), 100);
+                }
+                break;
+                
             case 'atributos':
                 if (typeof inicializarAtributos === 'function') {
-                    setTimeout(() => {
-                        inicializarAtributos();
-                    }, 100);
+                    setTimeout(() => inicializarAtributos(), 100);
                 }
                 break;
                 
             case 'caracteristicas':
                 // Dispara evento para sistemas de características
-                const eventoCaracteristicas = new CustomEvent('caracteristicasCarregadas');
-                document.dispatchEvent(eventoCaracteristicas);
+                if (typeof inicializarCaracteristicas === 'function') {
+                    setTimeout(() => inicializarCaracteristicas(), 100);
+                }
                 break;
                 
             case 'vantagens':
-                // Sistema de vantagens será inicializado aqui
+                if (typeof inicializarVantagens === 'function') {
+                    setTimeout(() => inicializarVantagens(), 100);
+                }
                 break;
                 
             case 'pericias':
-                // Sistema de perícias será inicializado aqui
                 if (typeof inicializarSistemaPericias === 'function') {
-                    setTimeout(() => {
-                        inicializarSistemaPericias();
-                    }, 100);
+                    setTimeout(() => inicializarSistemaPericias(), 100);
                 }
+                break;
+                
+            case 'magia':
+                if (typeof inicializarMagias === 'function') {
+                    setTimeout(() => inicializarMagias(), 100);
+                }
+                break;
+                
+            case 'equipamento':
+                if (typeof inicializarEquipamentos === 'function') {
+                    setTimeout(() => inicializarEquipamentos(), 100);
+                }
+                break;
+                
+            case 'resumo':
+                // Carregar resumo dinamicamente
+                setTimeout(() => carregarResumo(), 100);
                 break;
         }
     }
@@ -2606,7 +2644,43 @@
         
         if (personagemId) {
             carregarPersonagemExistente(personagemId);
+        } else {
+            // Novo personagem - inicializa com valores padrão
+            personagemAtual = {
+                id: null,
+                nome: 'Novo Personagem',
+                pontos_totais: 150,
+                pontos_gastos: 0,
+                forca: 10,
+                destreza: 10,
+                inteligencia: 10,
+                saude: 10,
+            };
         }
+    }
+
+    // Carregar resumo
+    function carregarResumo() {
+        const resumoContent = document.getElementById('resumo');
+        if (!resumoContent) return;
+        
+        resumoContent.innerHTML = `
+            <div class="resumo-container">
+                <h2>Resumo do Personagem</h2>
+                <p>Carregando resumo...</p>
+            </div>
+        `;
+        
+        // Simular carregamento
+        setTimeout(() => {
+            resumoContent.innerHTML = `
+                <div class="resumo-container">
+                    <h2>Resumo de ${personagemAtual.nome}</h2>
+                    <p>Esta aba está em desenvolvimento.</p>
+                    <p>Mostrará um resumo completo do personagem com todas as informações.</p>
+                </div>
+            `;
+        }, 500);
     }
 
     // Salvar personagem
@@ -2616,24 +2690,26 @@
             
             if (!session) {
                 alert('Você precisa estar logado para salvar!');
+                window.location.href = 'login.html';
                 return;
             }
 
-            // Coleta dados de todos os sistemas antes de salvar
+            // Coleta dados básicos
             const dadosCompletos = {
                 ...personagemAtual,
                 user_id: session.user.id,
-                updated_at: new Date().toISOString()
+                updated_at: new Date().toISOString(),
+                nome: document.getElementById('charName')?.value || 'Personagem Sem Nome'
             };
 
-            // Atualiza os dados dos atributos se o sistema existir
-            if (typeof obterDadosAtributos === 'function') {
-                const dadosAtributos = obterDadosAtributos();
-                dadosCompletos.forca = dadosAtributos.ST;
-                dadosCompletos.destreza = dadosAtributos.DX;
-                dadosCompletos.inteligencia = dadosAtributos.IQ;
-                dadosCompletos.saude = dadosAtributos.HT;
-                dadosCompletos.pontos_gastos = dadosAtributos.PontosGastos;
+            // Tenta coletar dados de cada sistema
+            try {
+                if (typeof obterDadosAtributos === 'function') {
+                    const dadosAtributos = obterDadosAtributos();
+                    Object.assign(dadosCompletos, dadosAtributos);
+                }
+            } catch (e) {
+                console.warn('Erro ao obter dados de atributos:', e);
             }
 
             let resultado;
@@ -2740,3 +2816,5 @@
         }
     }
 </script>
+</body>
+</html>
