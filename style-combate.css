@@ -47,6 +47,7 @@
     padding: 20px;
     position: relative;
     overflow: hidden;
+    min-height: 380px;
 }
 
 .pv-completo-card::before {
@@ -100,6 +101,7 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
+    height: calc(100% - 60px);
 }
 
 /* ESCALA VISUAL DO PV */
@@ -148,16 +150,25 @@
     align-items: center;
 }
 
+@media (max-width: 768px) {
+    .pv-base-info {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
 .pv-base-group {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: nowrap;
 }
 
 .pv-label {
     color: #ccc;
     font-size: 0.9rem;
     min-width: 60px;
+    white-space: nowrap;
 }
 
 .pv-st-input {
@@ -170,6 +181,7 @@
     font-weight: bold;
     text-align: center;
     padding: 8px;
+    flex-shrink: 0;
 }
 
 .pv-atual-control {
@@ -177,6 +189,7 @@
     align-items: center;
     gap: 10px;
     flex: 1;
+    min-width: 200px;
 }
 
 .pv-atual-input {
@@ -206,6 +219,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .pv-btn:hover {
@@ -220,6 +234,7 @@
 /* BARRA DE PV */
 .pv-barra-container {
     width: 100%;
+    margin: 5px 0;
 }
 
 .pv-barra {
@@ -280,6 +295,13 @@
     gap: 8px;
     padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
+
+@media (max-width: 768px) {
+    .pv-faixas {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 .faixa-item {
@@ -310,7 +332,7 @@
 .faixa-item[data-cor="#9b59b6"]::before { background: #9b59b6; }
 .faixa-item[data-cor="#7f8c8d"]::before { background: #7f8c8d; }
 
-/* ===== CARD PF (REAJUSTADO) ===== */
+/* ===== CARD PF SIMPLIFICADO ===== */
 .pf-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(52, 152, 219, 0.4);
@@ -318,7 +340,6 @@
     padding: 20px;
     position: relative;
     overflow: hidden;
-    height: fit-content;
     min-height: 380px;
 }
 
@@ -365,47 +386,43 @@
     height: calc(100% - 60px);
 }
 
-/* ESCALA VISUAL DO PF */
-.pf-escala {
-    position: relative;
-    height: 35px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    margin: 5px 0;
-}
-
-.pf-marcador {
-    position: absolute;
-    top: 0;
-    transform: translateX(-50%);
+/* CONTROLES DO PF */
+.pf-controles {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 15px;
 }
 
 .pf-base-info {
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr 1fr;
     gap: 15px;
     align-items: center;
-    padding: 0 5px;
+}
+
+@media (max-width: 768px) {
+    .pf-base-info {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 }
 
 .pf-base-group {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .pf-label {
     color: #ccc;
     font-size: 0.9rem;
-    min-width: 45px;
+    min-width: 80px;
+    white-space: nowrap;
 }
 
-.pf-ht-input {
-    width: 55px;
+.pf-max-input {
+    width: 70px;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(52, 152, 219, 0.3);
     border-radius: 6px;
@@ -414,6 +431,7 @@
     font-weight: bold;
     text-align: center;
     padding: 6px;
+    flex-shrink: 0;
 }
 
 .pf-atual-control {
@@ -421,7 +439,7 @@
     align-items: center;
     gap: 8px;
     flex: 1;
-    min-width: 200px;
+    min-width: 180px;
 }
 
 .pf-atual-input {
@@ -434,7 +452,7 @@
     font-weight: bold;
     text-align: center;
     padding: 8px;
-    min-width: 60px;
+    min-width: 70px;
 }
 
 .pf-btn {
@@ -495,27 +513,88 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: bold;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* LEGENDA DAS FAIXAS DO PF */
-.pf-faixas {
+/* ESTADOS DE FADIGA */
+.pf-estados {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    padding-top: 10px;
+    gap: 8px;
+    padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin-top: auto;
 }
 
-.pf-faixas .faixa-item {
-    font-size: 0.75rem;
-    padding: 5px 3px;
+@media (max-width: 768px) {
+    .pf-estados {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-/* ===== CARD DANO GURPS (AGORA 50%) ===== */
+@media (max-width: 480px) {
+    .pf-estados {
+        grid-template-columns: 1fr;
+    }
+}
+
+.estado-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.estado-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.estado-indicador {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #3498db;
+    transition: all 0.2s ease;
+}
+
+.estado-item[data-nivel="0"] .estado-indicador {
+    background: #2ecc71;
+}
+
+.estado-item[data-nivel="1"] .estado-indicador {
+    background: #f1c40f;
+}
+
+.estado-item[data-nivel="2"] .estado-indicador {
+    background: #e67e22;
+}
+
+.estado-item[data-nivel="3"] .estado-indicador {
+    background: #e74c3c;
+}
+
+.estado-nome {
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.estado-desc {
+    color: #95a5a6;
+    font-size: 0.7rem;
+    line-height: 1.2;
+}
+
+/* ===== CARD DANO GURPS ===== */
 .dano-gurps-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(241, 196, 15, 0.4);
@@ -523,7 +602,7 @@
     padding: 20px;
     position: relative;
     overflow: hidden;
-    height: fit-content;
+    min-height: 350px;
 }
 
 .dano-gurps-card::before {
@@ -552,6 +631,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    height: calc(100% - 60px);
 }
 
 /* LINHA DE DANOS BASE */
@@ -559,6 +639,13 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
+}
+
+@media (max-width: 768px) {
+    .dano-base-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 }
 
 .dano-tipo-card {
@@ -689,7 +776,7 @@
     white-space: nowrap;
 }
 
-/* LINHA DE ARMAS (MELHORADA) */
+/* LINHA DE ARMAS */
 .armas-row {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
@@ -699,6 +786,7 @@
     background: rgba(241, 196, 15, 0.1);
     border-radius: 10px;
     border: 1px solid rgba(241, 196, 15, 0.2);
+    margin-top: auto;
 }
 
 @media (max-width: 768px) {
@@ -752,7 +840,7 @@
     font-weight: normal;
 }
 
-/* ===== CARD DEFESAS (AGORA 50% E MAIS ESPAÇOSO) ===== */
+/* ===== CARD DEFESAS ===== */
 .defesas-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(155, 89, 182, 0.4);
@@ -760,7 +848,7 @@
     padding: 20px;
     position: relative;
     overflow: hidden;
-    height: fit-content;
+    min-height: 350px;
 }
 
 .defesas-card::before {
@@ -789,6 +877,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    height: calc(100% - 60px);
 }
 
 .defesa-item {
@@ -848,6 +937,24 @@
     flex-wrap: wrap;
     justify-content: flex-end;
     flex: 1;
+}
+
+@media (max-width: 1100px) {
+    .defesa-valores {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 768px) {
+    .defesa-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .defesa-valores {
+        justify-content: space-around;
+    }
 }
 
 .defesa-base-group, .defesa-mod-group, .defesa-total-group {
@@ -1006,6 +1113,12 @@
     }
 }
 
+@media (max-width: 480px) {
+    .rd-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .rd-parte {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1066,6 +1179,7 @@
     border: 2px solid rgba(52, 152, 219, 0.4);
     border-radius: 12px;
     padding: 20px;
+    min-height: 400px;
 }
 
 .tabela-header {
@@ -1082,6 +1196,7 @@
 
 .tabela-content {
     overflow-x: auto;
+    height: calc(100% - 60px);
 }
 
 .redutores-table {
@@ -1119,6 +1234,7 @@
     border: 2px solid rgba(46, 204, 113, 0.4);
     border-radius: 12px;
     padding: 20px;
+    min-height: 400px;
 }
 
 .condicoes-header {
@@ -1137,6 +1253,7 @@
     max-height: 300px;
     overflow-y: auto;
     padding-right: 5px;
+    height: calc(100% - 60px);
 }
 
 .condicoes-grid {
@@ -1233,11 +1350,13 @@
 .condicoes-card { animation-delay: 0.7s; }
 
 /* SCROLLBAR PERSONALIZADA */
-.condicoes-content::-webkit-scrollbar {
+.condicoes-content::-webkit-scrollbar,
+.tabela-content::-webkit-scrollbar {
     width: 6px;
 }
 
-.condicoes-content::-webkit-scrollbar-track {
+.condicoes-content::-webkit-scrollbar-track,
+.tabela-content::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 3px;
 }
@@ -1247,8 +1366,17 @@
     border-radius: 3px;
 }
 
+.tabela-content::-webkit-scrollbar-thumb {
+    background: rgba(52, 152, 219, 0.5);
+    border-radius: 3px;
+}
+
 .condicoes-content::-webkit-scrollbar-thumb:hover {
     background: rgba(46, 204, 113, 0.7);
+}
+
+.tabela-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(52, 152, 219, 0.7);
 }
 
 /* ESTADO DE FOCO */
@@ -1281,12 +1409,9 @@ input:focus, select:focus, button:focus {
 
 /* RESPONSIVIDADE EXTRA */
 @media (max-width: 1100px) {
-    .combate-row:nth-child(1) {
-        grid-template-columns: 1fr;
-    }
-    
+    .combate-row:nth-child(1),
     .combate-row:nth-child(2) {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
     
     .dano-base-row {
@@ -1299,14 +1424,9 @@ input:focus, select:focus, button:focus {
     }
 }
 
-@media (max-width: 576px) {
-    .pv-base-info, .pf-base-info {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    .pv-faixas, .pf-faixas {
-        grid-template-columns: repeat(3, 1fr);
+@media (max-width: 768px) {
+    .pv-faixas, .pf-estados {
+        grid-template-columns: repeat(2, 1fr);
     }
     
     .armas-row {
@@ -1326,4 +1446,46 @@ input:focus, select:focus, button:focus {
     .condicoes-grid {
         grid-template-columns: 1fr;
     }
+}
+
+@media (max-width: 576px) {
+    .pv-base-info, .pf-base-info {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .pv-faixas, .pf-estados {
+        grid-template-columns: 1fr;
+    }
+    
+    .armas-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .rd-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .condicoes-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ALTURAS CONSISTENTES */
+.pv-completo-card, .pf-card, .dano-gurps-card, .defesas-card {
+    min-height: 380px;
+}
+
+.tabela-redutores-card, .condicoes-card {
+    min-height: 400px;
+}
+
+/* AJUSTES FINAIS DE ESPAÇAMENTO */
+.pv-content, .pf-content, .dano-content, .defesas-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.pv-faixas, .pf-estados, .armas-row {
+    margin-top: auto;
 }
