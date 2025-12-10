@@ -2749,42 +2749,42 @@ window.criarItemPersonalizado = criarItemPersonalizado;
                         <div class="faixa-cor verde"></div>
                         <div class="faixa-info">
                             <div class="faixa-label">Normal (ST até 0)</div>
-                            <div class="faixa-valor">0 a -ST (0 a -10)</div>
+                            <div class="faixa-valor" id="faixa-verde">0 a -ST (0 a -10)</div>
                         </div>
                     </div>
                     <div class="faixa-pv" data-faixa="amarelo">
                         <div class="faixa-cor amarelo"></div>
                         <div class="faixa-info">
                             <div class="faixa-label">Levemente Ferido (-1×ST)</div>
-                            <div class="faixa-valor">-ST a -2×ST (-11 a -20)</div>
+                            <div class="faixa-valor" id="faixa-amarelo">-ST a -2×ST (-11 a -20)</div>
                         </div>
                     </div>
                     <div class="faixa-pv" data-faixa="laranja">
                         <div class="faixa-cor laranja"></div>
                         <div class="faixa-info">
                             <div class="faixa-label">Gravemente Ferido (-2×ST)</div>
-                            <div class="faixa-valor">-2×ST a -3×ST (-21 a -30)</div>
+                            <div class="faixa-valor" id="faixa-laranja">-2×ST a -3×ST (-21 a -30)</div>
                         </div>
                     </div>
                     <div class="faixa-pv" data-faixa="vermelho">
                         <div class="faixa-cor vermelho"></div>
                         <div class="faixa-info">
                             <div class="faixa-label">Mortalmente Ferido (-3×ST)</div>
-                            <div class="faixa-valor">-3×ST a -4×ST (-31 a -40)</div>
+                            <div class="faixa-valor" id="faixa-vermelho">-3×ST a -4×ST (-31 a -40)</div>
                         </div>
                     </div>
                     <div class="faixa-pv" data-faixa="roxo">
                         <div class="faixa-cor roxo"></div>
                         <div class="faixa-info">
                             <div class="faixa-label">Inconsciente (-4×ST)</div>
-                            <div class="faixa-valor">-4×ST a -5×ST (-41 a -50)</div>
+                            <div class="faixa-valor" id="faixa-roxo">-4×ST a -5×ST (-41 a -50)</div>
                         </div>
                     </div>
                     <div class="faixa-pv" data-faixa="cinza">
                         <div class="faixa-cor cinza"></div>
                         <div class="faixa-info">
                             <div class="faixa-label">Morte Automática (-5×ST ou menos)</div>
-                            <div class="faixa-valor">≤ -5×ST (≤ -51)</div>
+                            <div class="faixa-valor" id="faixa-cinza">≤ -5×ST (≤ -51)</div>
                         </div>
                     </div>
                 </div>
@@ -2799,8 +2799,8 @@ window.criarItemPersonalizado = criarItemPersonalizado;
                         <div class="pv-input-container">
                             <input type="number" id="pvAtual" class="pv-input" value="10" min="-100" max="100">
                             <div class="pv-botoes">
-                                <button class="pv-btn" onclick="ajustarPV(1)">+</button>
-                                <button class="pv-btn" onclick="ajustarPV(-1)">-</button>
+                                <button class="pv-btn" id="btnAumentarPV">+</button>
+                                <button class="pv-btn" id="btnDiminuirPV">-</button>
                             </div>
                         </div>
                     </div>
@@ -3005,96 +3005,8 @@ window.criarItemPersonalizado = criarItemPersonalizado;
                         </div>
                     </div>
                     
-                    <div class="partes-grid">
-                        <!-- CRÂNIO -->
-                        <div class="parte-item" data-parte="cranio" data-grupo="cabeça">
-                            <div class="parte-header">
-                                <div class="parte-nome">Crânio</div>
-                                <div class="parte-rd" id="rdCranio">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: -7</div>
-                        </div>
-                        
-                        <!-- OLHOS -->
-                        <div class="parte-item" data-parte="olhos" data-grupo="cabeça">
-                            <div class="parte-header">
-                                <div class="parte-nome">Olhos</div>
-                                <div class="parte-rd" id="rdOlhos">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: -9</div>
-                        </div>
-                        
-                        <!-- ROSTO -->
-                        <div class="parte-item" data-parte="rosto" data-grupo="cabeça">
-                            <div class="parte-header">
-                                <div class="parte-nome">Rosto</div>
-                                <div class="parte-rd" id="rdRosto">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: -5</div>
-                        </div>
-                        
-                        <!-- PESCOÇO -->
-                        <div class="parte-item" data-parte="pescoco" data-grupo="cabeça">
-                            <div class="parte-header">
-                                <div class="parte-nome">Pescoço</div>
-                                <div class="parte-rd" id="rdPescoco">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: -5</div>
-                        </div>
-                        
-                        <!-- TRONCO -->
-                        <div class="parte-item" data-parte="tronco" data-grupo="torso">
-                            <div class="parte-header">
-                                <div class="parte-nome">Tronco</div>
-                                <div class="parte-rd" id="rdTronco">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: 0</div>
-                        </div>
-                        
-                        <!-- VIRILHA -->
-                        <div class="parte-item" data-parte="virilha" data-grupo="torso">
-                            <div class="parte-header">
-                                <div class="parte-nome">Virilha</div>
-                                <div class="parte-rd" id="rdVirilha">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: -3</div>
-                        </div>
-                        
-                        <!-- BRAÇOS -->
-                        <div class="parte-item" data-parte="bracos" data-grupo="membros">
-                            <div class="parte-header">
-                                <div class="parte-nome">Braços</div>
-                                <div class="parte-rd" id="rdBracos">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: -2</div>
-                        </div>
-                        
-                        <!-- MÃOS -->
-                        <div class="parte-item" data-parte="maos" data-grupo="membros">
-                            <div class="parte-header">
-                                <div class="parte-nome">Mãos</div>
-                                <div class="parte-rd" id="rdMaos">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: -4</div>
-                        </div>
-                        
-                        <!-- PERNAS -->
-                        <div class="parte-item" data-parte="pernas" data-grupo="membros">
-                            <div class="parte-header">
-                                <div class="parte-nome">Pernas</div>
-                                <div class="parte-rd" id="rdPernas">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: -2</div>
-                        </div>
-                        
-                        <!-- PÉS -->
-                        <div class="parte-item" data-parte="pes" data-grupo="membros">
-                            <div class="parte-header">
-                                <div class="parte-nome">Pés</div>
-                                <div class="parte-rd" id="rdPes">0</div>
-                            </div>
-                            <div class="parte-info">Redutor: -4</div>
-                        </div>
+                    <div class="partes-grid" id="partes-corpo-grid">
+                        <!-- As partes do corpo serão geradas dinamicamente -->
                     </div>
                 </div>
             </div>
@@ -3137,48 +3049,16 @@ window.criarItemPersonalizado = criarItemPersonalizado;
                         <div class="condicoes-header">
                             <h3><i class="fas fa-clipboard-list"></i> Condições em Combate</h3>
                         </div>
-                        <div class="condicoes-grid">
-                            <!-- CONDIÇÕES SERÃO ADICIONADAS DINAMICAMENTE -->
-                            <div class="condicao-item" data-condicao="atordoado">
-                                <div class="condicao-checkbox"></div>
-                                <div class="condicao-nome">Atordoado</div>
-                            </div>
-                            <div class="condicao-item" data-condicao="caido">
-                                <div class="condicao-checkbox"></div>
-                                <div class="condicao-nome">Caído</div>
-                            </div>
-                            <div class="condicao-item" data-condicao="desmaiado">
-                                <div class="condicao-checkbox"></div>
-                                <div class="condicao-nome">Desmaiado</div>
-                            </div>
-                            <div class="condicao-item" data-condicao="cego">
-                                <div class="condicao-checkbox"></div>
-                                <div class="condicao-nome">Cego</div>
-                            </div>
-                            <div class="condicao-item" data-condicao="agarrado">
-                                <div class="condicao-checkbox"></div>
-                                <div class="condicao-nome">Agarrado</div>
-                            </div>
-                            <div class="condicao-item" data-condicao="enjoado">
-                                <div class="condicao-checkbox"></div>
-                                <div class="condicao-nome">Enjoado</div>
-                            </div>
-                            <div class="condicao-item" data-condicao="ferido">
-                                <div class="condicao-checkbox"></div>
-                                <div class="condicao-nome">Ferido</div>
-                            </div>
-                            <div class="condicao-item" data-condicao="exausto">
-                                <div class="condicao-checkbox"></div>
-                                <div class="condicao-nome">Exausto</div>
-                            </div>
+                        <div class="condicoes-grid" id="condicoes-grid">
+                            <!-- Condições serão adicionadas dinamicamente -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-    </div><!-- FIM DO combate-container -->
-</div>    
+    </div>
+</div><!-- FIM DA ABA COMBATE -->    
         <!-- ABA RESUMO -->
         <div id="resumo" class="tab-content">
             <div class="loading">
