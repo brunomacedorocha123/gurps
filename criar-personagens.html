@@ -2449,14 +2449,12 @@
                
             </div>
         </div>
-<!-- ABA COMBATE - VERSÃO CORRIGIDA -->
+<!-- ABA COMBATE - VERSÃO CORRIGIDA FINAL -->
 <div id="combate" class="tab-content">
     <div class="combate-container">
         
-        <!-- PRIMEIRA LINHA: PV E PF -->
+        <!-- PRIMEIRA LINHA: PV E PF (MANTIDO) -->
         <div class="combate-row">
-            
-            <!-- CARD PV - CORRIGIDO -->
             <div class="pv-completo-card">
                 <div class="pv-header">
                     <h3><i class="fas fa-heartbeat"></i> PONTOS DE VIDA (PV)</h3>
@@ -2467,7 +2465,6 @@
                 </div>
                 
                 <div class="pv-content">
-                    <!-- ESCALA VISUAL SIMPLIFICADA -->
                     <div class="pv-escala">
                         <div class="pv-marcador" style="left: 0%">
                             <div class="marcador-valor" id="marcadorSt">ST</div>
@@ -2483,7 +2480,6 @@
                         </div>
                     </div>
                     
-                    <!-- CONTROLES -->
                     <div class="pv-controles">
                         <div class="pv-base-info">
                             <div class="pv-base-group">
@@ -2500,7 +2496,6 @@
                             </div>
                         </div>
                         
-                        <!-- BARRA DE PV -->
                         <div class="pv-barra-container">
                             <div class="pv-barra" id="pvBarra">
                                 <div class="pv-fill" id="pvFill"></div>
@@ -2509,7 +2504,6 @@
                         </div>
                     </div>
                     
-                    <!-- LEGENDA DAS FAIXAS - SIMPLIFICADA -->
                     <div class="pv-faixas">
                         <div class="faixa-item" data-cor="#27ae60">Cheio</div>
                         <div class="faixa-item" data-cor="#f1c40f">Machucado</div>
@@ -2521,14 +2515,12 @@
                 </div>
             </div>
             
-            <!-- CARD PF - CORRIGIDO -->
             <div class="pf-card">
                 <div class="pf-header">
                     <h3><i class="fas fa-wind"></i> PONTOS DE FADIGA (PF)</h3>
                 </div>
                 
                 <div class="pf-content">
-                    <!-- CONTROLES SIMPLES - CORRIGIDO -->
                     <div class="pf-base-info">
                         <div class="pf-base-group">
                             <div class="pf-label">PF Máx:</div>
@@ -2544,7 +2536,6 @@
                         </div>
                     </div>
                     
-                    <!-- BARRA DE PF -->
                     <div class="pf-barra-container">
                         <div class="pf-barra" id="pfBarra">
                             <div class="pf-fill" id="pfFill"></div>
@@ -2552,7 +2543,6 @@
                         </div>
                     </div>
                     
-                    <!-- ESTADOS DE FADIGA - CORRETO (3 ESTADOS) -->
                     <div class="pf-estados">
                         <div class="estado-item" data-estado="normal">
                             <div class="estado-indicador" style="background: #2ecc71;"></div>
@@ -2583,107 +2573,109 @@
         <!-- SEGUNDA LINHA: DANO E DEFESAS -->
         <div class="combate-row">
             
-            <!-- CARD DANO GURPS - COM 2 TIPOS -->
+            <!-- CARD DANO - VERSÃO SIMPLIFICADA E INTELIGENTE -->
             <div class="dano-gurps-card">
                 <div class="dano-header">
                     <h3><i class="fas fa-bolt"></i> DANO DO PERSONAGEM</h3>
                 </div>
                 
                 <div class="dano-content">
-                    <!-- LINHA SUPERIOR: DANOS BASE -->
+                    <!-- DANO BASE (SEM FÓRMULAS) -->
                     <div class="dano-base-row">
-                        <!-- DANO GdP -->
-                        <div class="dano-tipo-card" data-tipo="thr">
+                        <!-- DANO GDP -->
+                        <div class="dano-tipo-card" data-tipo="gdp">
                             <div class="dano-tipo-header">
                                 <div class="dano-tipo-icon">
                                     <i class="fas fa-fist-raised"></i>
                                 </div>
                                 <div class="dano-tipo-title">
-                                    <h4>Golpe de Punho</h4>
-                                    <div class="dano-formula">(ST-5)/2</div>
+                                    <h4>GDP</h4>
+                                    <div class="dano-subtitulo">Golpe de Punho</div>
                                 </div>
                             </div>
                             
                             <div class="dano-tipo-content">
-                                <div class="dano-base-group">
-                                    <div class="dano-label">Dano:</div>
-                                    <div class="dano-base-valor" id="danoThrBase">1d-2</div>
+                                <div class="dano-valor-display">
+                                    <span class="dano-label">Dano Base:</span>
+                                    <span class="dano-base-valor" id="danoGdp">1d-2</span>
                                 </div>
-                                <div class="dano-final-group">
-                                    <div class="dano-final-valor" id="danoThrFinal">1d-2</div>
+                                <div class="dano-info">
+                                    <small>Calculado automaticamente da tabela</small>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- DANO GeB -->
-                        <div class="dano-tipo-card" data-tipo="sw">
+                        <!-- DANO GEB -->
+                        <div class="dano-tipo-card" data-tipo="geb">
                             <div class="dano-tipo-header">
                                 <div class="dano-tipo-icon">
                                     <i class="fas fa-hand-rock"></i>
                                 </div>
                                 <div class="dano-tipo-title">
-                                    <h4>Golpe de Braço</h4>
-                                    <div class="dano-formula">(ST)/2</div>
+                                    <h4>GEB</h4>
+                                    <div class="dano-subtitulo">Golpe de Braço</div>
                                 </div>
                             </div>
                             
                             <div class="dano-tipo-content">
-                                <div class="dano-base-group">
-                                    <div class="dano-label">Dano:</div>
-                                    <div class="dano-base-valor" id="danoSwBase">1d</div>
+                                <div class="dano-valor-display">
+                                    <span class="dano-label">Dano Base:</span>
+                                    <span class="dano-base-valor" id="danoGeb">1d</span>
                                 </div>
-                                <div class="dano-final-group">
-                                    <div class="dano-final-valor" id="danoSwFinal">1d</div>
+                                <div class="dano-info">
+                                    <small>Calculado automaticamente da tabela</small>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- LINHA INFERIOR: DANO DE ARMAS COM 2 TIPOS -->
-                    <div class="armas-row">
-                        <div class="arma-select-group">
-                            <div class="dano-label">Arma Equipada:</div>
-                            <select id="armaSelect" class="arma-select">
-                                <option value="none">Sem Arma (Só Corporal)</option>
-                                <option value="adaga">Adaga</option>
-                                <option value="espada_longa">Espada Longa</option>
-                                <option value="maca">Maça</option>
-                                <option value="martelo_combate">Martelo de Combate</option>
-                                <option value="arco">Arco</option>
-                                <option value="adaga_lancar">Adaga (Lançar)</option>
-                            </select>
-                        </div>
-                        
-                        <!-- DISPLAY DE DANO COM ATÉ 2 TIPOS -->
-                        <div class="arma-dano-display">
-                            <div class="dano-label">Dano da Arma:</div>
-                            <div class="arma-dano-container" id="armaDanoContainer">
-                                <!-- Exemplo: Espada Longa mostra "2d corte / 1d+2 perfuração" -->
-                                <div class="dano-tipo-arma" id="danoTipo1">-</div>
-                                <div class="dano-separador" id="danoSeparador" style="display: none;">/</div>
-                                <div class="dano-tipo-arma" id="danoTipo2" style="display: none;"></div>
+                    <!-- SEÇÃO DE ARMAS DO PERSONAGEM -->
+                    <div class="armas-section">
+                        <div class="armas-header">
+                            <h4><i class="fas fa-swords"></i> Armas do Personagem</h4>
+                            <div class="arma-status" id="armaStatus">
+                                <span class="arma-count">0 armas</span>
                             </div>
                         </div>
                         
-                        <div class="arma-tipo-display">
-                            <div class="dano-label">Tipo(s):</div>
-                            <div class="arma-tipo-container" id="armaTipoContainer">
-                                <!-- Exemplo: "Corte | Perfuração" -->
-                                <div class="tipo-dano" id="tipoDano1">-</div>
+                        <!-- LISTA DE ARMAS DO PERSONAGEM -->
+                        <div class="armas-lista-container" id="armasListaContainer">
+                            <div class="sem-armas" id="semArmasMensagem">
+                                <i class="fas fa-inbox"></i>
+                                <p>Você ainda não tem armas</p>
+                                <small>Adquira armas na aba de Equipamentos</small>
+                            </div>
+                        </div>
+                        
+                        <!-- ARMA SELECIONADA PARA COMBATE -->
+                        <div class="arma-selecionada-container" id="armaSelecionadaContainer" style="display: none;">
+                            <div class="arma-selecionada-header">
+                                <h5><i class="fas fa-crosshairs"></i> Arma Equipada para Combate</h5>
+                                <button class="btn-mudar-arma" id="btnMudarArma">Mudar</button>
+                            </div>
+                            
+                            <div class="arma-selecionada-info" id="armaSelecionadaInfo">
+                                <!-- Aqui vai aparecer a arma selecionada -->
+                            </div>
+                            
+                            <!-- DISPLAY DE DANO DA ARMA (1 ou 2 tipos) -->
+                            <div class="arma-dano-display" id="armaDanoDisplay">
+                                <div class="dano-display-grid" id="danoDisplayGrid">
+                                    <!-- Será preenchido dinamicamente -->
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- CARD DEFESAS (MANTIDO) -->
+            <!-- CARD DEFESAS -->
             <div class="defesas-card">
                 <div class="defesas-header">
                     <h3><i class="fas fa-shield-alt"></i> DEFESAS</h3>
                 </div>
                 
                 <div class="defesas-content">
-                    <!-- ESQUIVA -->
                     <div class="defesa-item" data-tipo="esquiva">
                         <div class="defesa-info">
                             <div class="defesa-icon">
@@ -2715,7 +2707,6 @@
                         </div>
                     </div>
                     
-                    <!-- BLOQUEIO -->
                     <div class="defesa-item" data-tipo="bloqueio">
                         <div class="defesa-info">
                             <div class="defesa-icon">
@@ -2747,7 +2738,6 @@
                         </div>
                     </div>
                     
-                    <!-- APARAR -->
                     <div class="defesa-item" data-tipo="aparar">
                         <div class="defesa-info">
                             <div class="defesa-icon">
@@ -2779,7 +2769,6 @@
                         </div>
                     </div>
                     
-                    <!-- DESLOCAMENTO -->
                     <div class="defesa-item deslocamento-item" data-tipo="deslocamento">
                         <div class="defesa-info">
                             <div class="defesa-icon">
@@ -2814,7 +2803,7 @@
             </div>
         </div>
         
-        <!-- TERCEIRA LINHA: RD COMPLETO -->
+        <!-- TERCEIRA LINHA: RD (MANTIDO) -->
         <div class="combate-row">
             <div class="rd-completo-card">
                 <div class="rd-header">
@@ -2823,7 +2812,7 @@
                 
                 <div class="rd-content">
                     <div class="rd-grid">
-                        <!-- Cabeça -->
+                        <!-- Partes do corpo mantidas -->
                         <div class="rd-parte" data-parte="cabeca">
                             <div class="rd-parte-header">
                                 <h4><i class="fas fa-head-side-virus"></i> CABEÇA</h4>
@@ -2860,7 +2849,6 @@
                             </div>
                         </div>
                         
-                        <!-- Tronco -->
                         <div class="rd-parte" data-parte="tronco">
                             <div class="rd-parte-header">
                                 <h4><i class="fas fa-user"></i> TRONCO</h4>
@@ -2897,7 +2885,6 @@
                             </div>
                         </div>
                         
-                        <!-- Membros -->
                         <div class="rd-parte" data-parte="bracos">
                             <div class="rd-parte-header">
                                 <h4><i class="fas fa-hand-paper"></i> BRAÇOS</h4>
@@ -2938,10 +2925,8 @@
             </div>
         </div>
         
-        <!-- QUARTA LINHA: TABELA DE REDUTORES (CORRIGIDA) E CONDIÇÕES -->
+        <!-- QUARTA LINHA: TABELA REDUTORES E CONDIÇÕES -->
         <div class="combate-row">
-            
-            <!-- TABELA DE REDUTORES - SEM DUPLICAÇÃO -->
             <div class="tabela-redutores-card">
                 <div class="tabela-header">
                     <h3><i class="fas fa-crosshairs"></i> TABELA DE REDUTORES PARA ATAQUE</h3>
@@ -2972,7 +2957,6 @@
                 </div>
             </div>
             
-            <!-- CARD CONDIÇÕES (MANTIDO) -->
             <div class="condicoes-card">
                 <div class="condicoes-header">
                     <h3><i class="fas fa-clipboard-list"></i> CONDIÇÕES EM COMBATE</h3>
@@ -3018,7 +3002,6 @@
         </div>
     </div>
 </div>
-
         <!-- ABA RESUMO -->
         <div id="resumo" class="tab-content">
             <div class="loading">

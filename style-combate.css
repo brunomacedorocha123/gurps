@@ -1386,3 +1386,329 @@ input:focus, select:focus, button:focus {
     outline: 2px solid rgba(255, 140, 0, 0.5);
     outline-offset: 2px;
 }
+
+/* ===== NOVAS ESTILIZAÇÕES PARA O CARD DE DANO ===== */
+
+/* Dano Base (Sem fórmulas) */
+.dano-subtitulo {
+    color: #95a5a6;
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.dano-valor-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dano-valor-display .dano-label {
+    color: #ccc;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.dano-valor-display .dano-base-valor {
+    color: #f1c40f;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.dano-info {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.dano-info small {
+    color: #95a5a6;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* Seção de Armas */
+.armas-section {
+    background: rgba(241, 196, 15, 0.05);
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid rgba(241, 196, 15, 0.1);
+    margin-top: 20px;
+}
+
+.armas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.armas-header h4 {
+    color: #f1c40f;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.arma-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.arma-count {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Lista de Armas */
+.armas-lista-container {
+    min-height: 100px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-bottom: 20px;
+}
+
+.sem-armas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    text-align: center;
+    color: #95a5a6;
+}
+
+.sem-armas i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #95a5a6;
+    opacity: 0.5;
+}
+
+.sem-armas p {
+    color: #ccc;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.sem-armas small {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+/* Arma Selecionada */
+.arma-selecionada-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid rgba(241, 196, 15, 0.2);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.arma-selecionada-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.arma-selecionada-header h5 {
+    color: #f1c40f;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-mudar-arma {
+    background: rgba(241, 196, 15, 0.2);
+    border: 1px solid rgba(241, 196, 15, 0.4);
+    color: #f1c40f;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-mudar-arma:hover {
+    background: rgba(241, 196, 15, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Informações da Arma */
+.arma-selecionada-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .arma-selecionada-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+.arma-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.arma-info-label {
+    color: #95a5a6;
+    font-size: 0.85rem;
+}
+
+.arma-info-value {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Display de Dano da Arma */
+.arma-dano-display {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.dano-display-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.dano-tipo-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(241, 196, 15, 0.2);
+}
+
+.dano-tipo-label {
+    color: #f1c40f;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.dano-tipo-valor {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.dano-tipo-nome {
+    color: #95a5a6;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+/* Para armas com 2 tipos de dano */
+.dano-duplo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.dano-separador {
+    color: #f1c40f;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+/* ===== ESTILOS PARA LISTA DE ARMAS ===== */
+.lista-armas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.arma-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.arma-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(241, 196, 15, 0.3);
+    transform: translateY(-2px);
+}
+
+.arma-item.selecionada {
+    background: rgba(241, 196, 15, 0.1);
+    border-color: rgba(241, 196, 15, 0.5);
+}
+
+.arma-nome {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    flex: 1;
+}
+
+.arma-dano-preview {
+    color: #f1c40f;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 15px;
+}
+
+.btn-selecionar-arma {
+    background: rgba(241, 196, 15, 0.2);
+    border: 1px solid rgba(241, 196, 15, 0.4);
+    color: #f1c40f;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-selecionar-arma:hover {
+    background: rgba(241, 196, 15, 0.3);
+}
+
+.arma-item.selecionada .btn-selecionar-arma {
+    background: rgba(46, 204, 113, 0.2);
+    border-color: rgba(46, 204, 113, 0.4);
+    color: #2ecc71;
+}
