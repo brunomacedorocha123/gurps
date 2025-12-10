@@ -664,8 +664,8 @@
     </div>
 </div>
         
-    </div><!-- FIM dashboard-container -->
-</div><!-- FIM ABA DASHBOARD -->   
+    </div>
+</div>   
 
 <!-- ABA ATRIBUTOS -->
         <div id="atributos" class="tab-content">
@@ -1439,7 +1439,7 @@
     <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
     <div class="sistema-aquisicao-pericias">
       
-      <!-- COLUNA ESQUERDA - CATÁLOGO -->
+      <!-- COLUNA ESQUERDA - CATÁLOGO DE PERÍCIAS -->
       <div class="catalog-column-pericias">
         <div class="catalog-section-pericias">
           <h3><i class="fas fa-book-open"></i> Catálogo de Perícias</h3>
@@ -1473,12 +1473,14 @@
             </div>
           </div>
           
-          <!-- LISTA DE PERÍCIAS DO CATÁLOGO -->
-          <div class="catalog-list-pericias" id="lista-pericias">
-            <!-- As perícias serão carregadas dinamicamente pelo JavaScript -->
-            <div class="loading-spinner">
-              <i class="fas fa-spinner fa-spin"></i>
-              <div>Carregando catálogo de perícias...</div>
+          <!-- CONTAINER COM SCROLL PARA CATÁLOGO -->
+          <div class="scroll-container catalogo-scroll">
+            <div class="catalog-list-pericias" id="lista-pericias">
+              <!-- As perícias serão carregadas dinamicamente pelo JavaScript -->
+              <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <div>Carregando catálogo de perícias...</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1492,21 +1494,30 @@
           <h3><i class="fas fa-graduation-cap"></i> Perícias Aprendidas 
             <span class="points-badge" id="pontos-pericias-total">[0 pts]</span>
           </h3>
-          <div class="acquired-list-pericias" id="pericias-aprendidas">
-            <div class="nenhuma-pericia-aprendida">
-              <i class="fas fa-graduation-cap"></i>
-              <div>Nenhuma perícia aprendida</div>
-              <small>As perícias que você aprender aparecerão aqui</small>
+          
+          <!-- CONTAINER COM SCROLL PARA APRENDIDAS -->
+          <div class="scroll-container aprendidas-scroll">
+            <div class="acquired-list-pericias" id="pericias-aprendidas">
+              <div class="nenhuma-pericia-aprendida">
+                <i class="fas fa-graduation-cap"></i>
+                <div>Nenhuma perícia aprendida</div>
+                <small>As perícias que você aprender aparecerão aqui</small>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- DETALHES DA PERÍCIA SELECIONADA -->
         <div class="detalhes-pericia-section">
-          <div class="detalhes-pericia-content" id="detalhes-pericia-content">
-            <div class="nenhuma-pericia-selecionada">
-              <i class="fas fa-search"></i>
-              <div>Selecione uma perícia para ver os detalhes</div>
+          <h3><i class="fas fa-info-circle"></i> Detalhes da Perícia</h3>
+          
+          <!-- CONTAINER COM SCROLL PARA DETALHES -->
+          <div class="scroll-container detalhes-scroll">
+            <div class="detalhes-pericia-content" id="detalhes-pericia-content">
+              <div class="nenhuma-pericia-selecionada">
+                <i class="fas fa-search"></i>
+                <div>Selecione uma perícia para ver os detalhes</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1515,7 +1526,7 @@
     </div>
 
     <!-- ===== SEÇÃO DE TÉCNICAS - ABAIXO DAS PERÍCIAS ===== -->
-    <div class="tecnicas-section" style="margin-top: 40px; border-top: 2px solid rgba(255, 140, 0, 0.3); padding-top: 30px;">
+    <div class="tecnicas-section">
       
       <!-- STATUS DAS TÉCNICAS -->
       <div class="status-cards-container">
@@ -1566,7 +1577,7 @@
       </div>
 
       <!-- SISTEMA DE AQUISIÇÃO DE TÉCNICAS -->
-      <div class="sistema-aquisicao-pericias" style="margin-top: 25px;">
+      <div class="sistema-aquisicao-pericias">
         
         <!-- COLUNA ESQUERDA - CATÁLOGO DE TÉCNICAS -->
         <div class="catalog-column-pericias">
@@ -1596,12 +1607,14 @@
               </div>
             </div>
             
-            <!-- LISTA DE TÉCNICAS DISPONÍVEIS -->
-            <div class="catalog-list-pericias" id="lista-tecnicas">
-              <div class="nenhuma-pericia">
-                <i class="fas fa-info-circle"></i>
-                <div>Aprenda perícias primeiro</div>
-                <small>As técnicas aparecerão aqui quando você tiver as perícias necessárias</small>
+            <!-- CONTAINER COM SCROLL PARA TÉCNICAS DISPONÍVEIS -->
+            <div class="scroll-container tecnicas-catalogo-scroll">
+              <div class="catalog-list-pericias" id="lista-tecnicas">
+                <div class="nenhuma-pericia">
+                  <i class="fas fa-info-circle"></i>
+                  <div>Aprenda perícias primeiro</div>
+                  <small>As técnicas aparecerão aqui quando você tiver as perícias necessárias</small>
+                </div>
               </div>
             </div>
           </div>
@@ -1615,21 +1628,30 @@
             <h3><i class="fas fa-graduation-cap"></i> Técnicas Aprendidas 
               <span class="points-badge" id="pontos-tecnicas-total">[0 pts]</span>
             </h3>
-            <div class="acquired-list-pericias" id="tecnicas-aprendidas">
-              <div class="nenhuma-pericia-aprendida">
-                <i class="fas fa-tools"></i>
-                <div>Nenhuma técnica aprendida</div>
-                <small>As técnicas que você aprender aparecerão aqui</small>
+            
+            <!-- CONTAINER COM SCROLL PARA TÉCNICAS APRENDIDAS -->
+            <div class="scroll-container tecnicas-aprendidas-scroll">
+              <div class="acquired-list-pericias" id="tecnicas-aprendidas">
+                <div class="nenhuma-pericia-aprendida">
+                  <i class="fas fa-tools"></i>
+                  <div>Nenhuma técnica aprendida</div>
+                  <small>As técnicas que você aprender aparecerão aqui</small>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- DETALHES DA TÉCNICA SELECIONADA -->
           <div class="detalhes-pericia-section">
-            <div class="detalhes-pericia-content" id="detalhes-tecnica-content">
-              <div class="nenhuma-pericia-selecionada">
-                <i class="fas fa-search"></i>
-                <div>Selecione uma técnica para ver os detalhes</div>
+            <h3><i class="fas fa-info-circle"></i> Detalhes da Técnica</h3>
+            
+            <!-- CONTAINER COM SCROLL PARA DETALHES DA TÉCNICA -->
+            <div class="scroll-container tecnicas-detalhes-scroll">
+              <div class="detalhes-pericia-content" id="detalhes-tecnica-content">
+                <div class="nenhuma-pericia-selecionada">
+                  <i class="fas fa-search"></i>
+                  <div>Selecione uma técnica para ver os detalhes</div>
+                </div>
               </div>
             </div>
           </div>

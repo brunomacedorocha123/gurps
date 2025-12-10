@@ -1759,3 +1759,181 @@
     }
 }
 
+/* ===== SISTEMA DE SCROLL PURO CSS ===== */
+
+/* Container genérico para scroll */
+.scroll-container {
+    overflow-y: auto;
+    border: 1px solid rgba(255, 140, 0, 0.2);
+    border-radius: 8px;
+    background: rgba(40, 40, 50, 0.8);
+    margin-top: 10px;
+    position: relative;
+}
+
+/* Alturas específicas para cada seção */
+.catalogo-scroll {
+    height: 450px; /* Altura para catálogo de perícias */
+}
+
+.aprendidas-scroll {
+    height: 200px; /* Altura para perícias aprendidas */
+}
+
+.detalhes-scroll {
+    height: 220px; /* Altura para detalhes da perícia */
+}
+
+.tecnicas-catalogo-scroll {
+    height: 400px; /* Altura para catálogo de técnicas */
+}
+
+.tecnicas-aprendidas-scroll {
+    height: 180px; /* Altura para técnicas aprendidas */
+}
+
+.tecnicas-detalhes-scroll {
+    height: 200px; /* Altura para detalhes da técnica */
+}
+
+/* Remover propriedades de scroll antigas das listas */
+.catalog-list-pericias,
+.acquired-list-pericias,
+.detalhes-pericia-content {
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Ajustes para os itens dentro dos containers */
+.catalog-list-pericias .pericia-item,
+.acquired-list-pericias .pericia-aprendida-item {
+    flex-shrink: 0; /* Impede que os itens encolham */
+}
+
+/* SCROLLBAR PERSONALIZADA */
+.scroll-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.5);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.8);
+}
+
+/* Para Firefox */
+.scroll-container {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 140, 0, 0.5) rgba(255, 255, 255, 0.05);
+}
+
+/* ===== ESTILOS PARA A SEÇÃO DE TÉCNICAS ===== */
+.tecnicas-section {
+    margin-top: 40px;
+    border-top: 2px solid rgba(255, 140, 0, 0.3);
+    padding-top: 30px;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 1024px) {
+    .catalogo-scroll {
+        height: 400px;
+    }
+    
+    .tecnicas-catalogo-scroll {
+        height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    .catalogo-scroll {
+        height: 350px;
+    }
+    
+    .aprendidas-scroll {
+        height: 180px;
+    }
+    
+    .detalhes-scroll {
+        height: 200px;
+    }
+    
+    .tecnicas-catalogo-scroll {
+        height: 300px;
+    }
+    
+    .tecnicas-aprendidas-scroll {
+        height: 160px;
+    }
+    
+    .tecnicas-detalhes-scroll {
+        height: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .catalogo-scroll {
+        height: 300px;
+    }
+    
+    .aprendidas-scroll {
+        height: 160px;
+    }
+    
+    .tecnicas-catalogo-scroll {
+        height: 250px;
+    }
+    
+    .tecnicas-aprendidas-scroll {
+        height: 140px;
+    }
+}
+
+/* ===== VISUALIZAÇÃO DE "5 ITENS VISÍVEIS" (OPCIONAL) ===== */
+/* Se quiser limitar visualmente a 5 itens sem JS */
+.limitado-5-itens {
+    max-height: calc(5 * 80px + 20px); /* 5 itens de ~80px cada + padding */
+    overflow-y: hidden;
+}
+
+.limitado-5-itens::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(30, 30, 40, 0.95), transparent);
+    pointer-events: none;
+}
+
+/* ===== ESTILOS ADICIONAIS PARA MELHOR VISUALIZAÇÃO ===== */
+.catalog-section-pericias h3,
+.acquired-section-pericias h3,
+.detalhes-pericia-section h3 {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.catalog-section-pericias h3 i,
+.acquired-section-pericias h3 i,
+.detalhes-pericia-section h3 i {
+    margin-right: 10px;
+}
