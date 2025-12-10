@@ -2536,45 +2536,18 @@
                 </div>
             </div>
             
-            <!-- CARD PF (REAJUSTADO) -->
+            <!-- CARD PF CORRETO E SIMPLES -->
             <div class="pf-card">
                 <div class="pf-header">
                     <h3><i class="fas fa-wind"></i> PONTOS DE FADIGA (PF)</h3>
-                    <div class="pf-extra-control">
-                        <div class="extra-label">Extra:</div>
-                        <input type="number" id="pfExtra" class="extra-input" value="0" min="0">
-                    </div>
                 </div>
                 
                 <div class="pf-content">
-                    <!-- ESCALA VISUAL DO PF (NOVA) -->
-                    <div class="pf-escala">
-                        <div class="pf-marcador" style="left: 0%">
-                            <div class="marcador-valor">0</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pf-marcador" style="left: 25%">
-                            <div class="marcador-valor">-1×HT</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pf-marcador" style="left: 50%">
-                            <div class="marcador-valor">-2×HT</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pf-marcador" style="left: 75%">
-                            <div class="marcador-valor">-3×HT</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pf-marcador" style="left: 100%">
-                            <div class="marcador-valor">-4×HT</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                    </div>
-                    
+                    <!-- CONTROLES SIMPLES -->
                     <div class="pf-base-info">
                         <div class="pf-base-group">
-                            <div class="pf-label">HT:</div>
-                            <input type="number" id="pfHT" class="pf-ht-input" value="10" min="1">
+                            <div class="pf-label">PF Máximo:</div>
+                            <input type="number" id="pfMax" class="pf-max-input" value="10" min="1">
                         </div>
                         <div class="pf-base-group">
                             <div class="pf-label">PF Atual:</div>
@@ -2586,28 +2559,53 @@
                         </div>
                     </div>
                     
+                    <!-- BARRA DE PF -->
                     <div class="pf-barra-container">
                         <div class="pf-barra" id="pfBarra">
                             <div class="pf-fill" id="pfFill"></div>
-                            <div class="pf-texto" id="pfTexto">10</div>
+                            <div class="pf-texto" id="pfTexto">10/10</div>
                         </div>
                     </div>
                     
-                    <!-- LEGENDA DAS FAIXAS DO PF -->
-                    <div class="pf-faixas">
-                        <div class="faixa-item" data-cor="#3498db">Normal</div>
-                        <div class="faixa-item" data-cor="#f1c40f">Fadiga Moderada</div>
-                        <div class="faixa-item" data-cor="#e67e22">Exaustão</div>
-                        <div class="faixa-item" data-cor="#e74c3c">Colapso</div>
+                    <!-- ESTADOS DE FADIGA SIMPLES -->
+                    <div class="pf-estados">
+                        <div class="estado-item">
+                            <div class="estado-indicador" style="background: #2ecc71;"></div>
+                            <div class="estado-info">
+                                <div class="estado-nome">Normal</div>
+                                <div class="estado-desc">PF ≥ 1/3 máximo</div>
+                            </div>
+                        </div>
+                        <div class="estado-item">
+                            <div class="estado-indicador" style="background: #f1c40f;"></div>
+                            <div class="estado-info">
+                                <div class="estado-nome">Fadigado</div>
+                                <div class="estado-desc">PF &lt; 1/3 máximo</div>
+                            </div>
+                        </div>
+                        <div class="estado-item">
+                            <div class="estado-indicador" style="background: #e67e22;"></div>
+                            <div class="estado-info">
+                                <div class="estado-nome">Exausto</div>
+                                <div class="estado-desc">PF = 0</div>
+                            </div>
+                        </div>
+                        <div class="estado-item">
+                            <div class="estado-indicador" style="background: #e74c3c;"></div>
+                            <div class="estado-info">
+                                <div class="estado-nome">Inconsciente</div>
+                                <div class="estado-desc">PF negativo</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- SEGUNDA LINHA: DANO E DEFESAS (AGORA 50/50) -->
+        <!-- SEGUNDA LINHA: DANO E DEFESAS -->
         <div class="combate-row">
             
-            <!-- CARD DANO GURPS (AGORA 50%) -->
+            <!-- CARD DANO GURPS -->
             <div class="dano-gurps-card">
                 <div class="dano-header">
                     <h3><i class="fas fa-bolt"></i> DANO DO PERSONAGEM</h3>
@@ -2711,7 +2709,7 @@
                 </div>
             </div>
             
-            <!-- CARD DEFESAS (AGORA 50% E MAIS ESPAÇOSO) -->
+            <!-- CARD DEFESAS -->
             <div class="defesas-card">
                 <div class="defesas-header">
                     <h3><i class="fas fa-shield-alt"></i> DEFESAS</h3>

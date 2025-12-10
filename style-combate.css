@@ -332,7 +332,7 @@
 .faixa-item[data-cor="#9b59b6"]::before { background: #9b59b6; }
 .faixa-item[data-cor="#7f8c8d"]::before { background: #7f8c8d; }
 
-/* ===== CARD PF SIMPLIFICADO ===== */
+/* ===== CARD PF SIMPLES E CORRETO ===== */
 .pf-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(52, 152, 219, 0.4);
@@ -354,12 +354,7 @@
 }
 
 .pf-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
 }
 
 .pf-header h3 {
@@ -368,15 +363,6 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    flex: 1;
-    min-width: 200px;
-}
-
-.pf-extra-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
 }
 
 .pf-content {
@@ -386,24 +372,18 @@
     height: calc(100% - 60px);
 }
 
-/* CONTROLES DO PF */
-.pf-controles {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
+/* CONTROLES DO PF - SIMPLES */
 .pf-base-info {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
     align-items: center;
 }
 
 @media (max-width: 768px) {
     .pf-base-info {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 15px;
     }
 }
 
@@ -430,7 +410,7 @@
     font-size: 1rem;
     font-weight: bold;
     text-align: center;
-    padding: 6px;
+    padding: 8px;
     flex-shrink: 0;
 }
 
@@ -451,7 +431,7 @@
     font-size: 1.2rem;
     font-weight: bold;
     text-align: center;
-    padding: 8px;
+    padding: 10px;
     min-width: 70px;
 }
 
@@ -484,11 +464,11 @@
 /* BARRA DE PF */
 .pf-barra-container {
     width: 100%;
-    margin: 5px 0;
+    margin: 10px 0;
 }
 
 .pf-barra {
-    height: 40px;
+    height: 45px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     overflow: hidden;
@@ -513,16 +493,16 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: bold;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* ESTADOS DE FADIGA */
+/* ESTADOS DE FADIGA SIMPLES */
 .pf-estados {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
     padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin-top: auto;
@@ -530,27 +510,19 @@
 
 @media (max-width: 768px) {
     .pf-estados {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .pf-estados {
         grid-template-columns: 1fr;
     }
 }
 
 .estado-item {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 5px;
-    padding: 8px;
+    gap: 10px;
+    padding: 8px 12px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.2s ease;
-    text-align: center;
 }
 
 .estado-item:hover {
@@ -558,40 +530,28 @@
 }
 
 .estado-indicador {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: #3498db;
-    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
-.estado-item[data-nivel="0"] .estado-indicador {
-    background: #2ecc71;
-}
-
-.estado-item[data-nivel="1"] .estado-indicador {
-    background: #f1c40f;
-}
-
-.estado-item[data-nivel="2"] .estado-indicador {
-    background: #e67e22;
-}
-
-.estado-item[data-nivel="3"] .estado-indicador {
-    background: #e74c3c;
+.estado-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
 }
 
 .estado-nome {
     color: #fff;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 500;
-    white-space: nowrap;
 }
 
 .estado-desc {
     color: #95a5a6;
     font-size: 0.7rem;
-    line-height: 1.2;
 }
 
 /* ===== CARD DANO GURPS ===== */
@@ -1469,23 +1429,4 @@ input:focus, select:focus, button:focus {
     .condicoes-grid {
         grid-template-columns: 1fr;
     }
-}
-
-/* ALTURAS CONSISTENTES */
-.pv-completo-card, .pf-card, .dano-gurps-card, .defesas-card {
-    min-height: 380px;
-}
-
-.tabela-redutores-card, .condicoes-card {
-    min-height: 400px;
-}
-
-/* AJUSTES FINAIS DE ESPAÇAMENTO */
-.pv-content, .pf-content, .dano-content, .defesas-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.pv-faixas, .pf-estados, .armas-row {
-    margin-top: auto;
 }
