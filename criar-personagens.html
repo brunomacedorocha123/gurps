@@ -2449,52 +2449,36 @@
                
             </div>
         </div>
-<!-- ABA COMBATE - VERSÃO REVISTA -->
+<!-- ABA COMBATE - VERSÃO CORRIGIDA -->
 <div id="combate" class="tab-content">
     <div class="combate-container">
         
         <!-- PRIMEIRA LINHA: PV E PF -->
         <div class="combate-row">
             
-            <!-- CARD PV -->
+            <!-- CARD PV - CORRIGIDO -->
             <div class="pv-completo-card">
                 <div class="pv-header">
                     <h3><i class="fas fa-heartbeat"></i> PONTOS DE VIDA (PV)</h3>
                     <div class="pv-extra-control">
-                        <div class="extra-label">Extra:</div>
-                        <input type="number" id="pvExtra" class="extra-input" value="0" min="0">
+                        <div class="extra-label">Bônus:</div>
+                        <input type="number" id="pvBonus" class="extra-input" value="0" min="-10" max="10">
                     </div>
                 </div>
                 
                 <div class="pv-content">
-                    <!-- ESCALA VISUAL -->
+                    <!-- ESCALA VISUAL SIMPLIFICADA -->
                     <div class="pv-escala">
                         <div class="pv-marcador" style="left: 0%">
-                            <div class="marcador-valor">ST</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pv-marcador" style="left: 16.67%">
-                            <div class="marcador-valor">0</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pv-marcador" style="left: 33.33%">
-                            <div class="marcador-valor">-ST</div>
+                            <div class="marcador-valor" id="marcadorSt">ST</div>
                             <div class="marcador-line"></div>
                         </div>
                         <div class="pv-marcador" style="left: 50%">
-                            <div class="marcador-valor">-2×ST</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pv-marcador" style="left: 66.67%">
-                            <div class="marcador-valor">-3×ST</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pv-marcador" style="left: 83.33%">
-                            <div class="marcador-valor">-4×ST</div>
+                            <div class="marcador-valor">0</div>
                             <div class="marcador-line"></div>
                         </div>
                         <div class="pv-marcador" style="left: 100%">
-                            <div class="marcador-valor">-5×ST</div>
+                            <div class="marcador-valor" id="marcadorInconsciente">Inconsciente</div>
                             <div class="marcador-line"></div>
                         </div>
                     </div>
@@ -2503,57 +2487,58 @@
                     <div class="pv-controles">
                         <div class="pv-base-info">
                             <div class="pv-base-group">
-                                <div class="pv-label">ST:</div>
-                                <input type="number" id="pvST" class="pv-st-input" value="10" min="1">
+                                <div class="pv-label">PV Máx:</div>
+                                <input type="number" id="pvMax" class="pv-st-input" value="10" min="1">
                             </div>
                             <div class="pv-base-group">
                                 <div class="pv-label">PV Atual:</div>
                                 <div class="pv-atual-control">
                                     <button class="pv-btn minus" data-amount="1">-1</button>
-                                    <input type="number" id="pvAtual" class="pv-atual-input" value="10">
+                                    <input type="number" id="pvAtual" class="pv-atual-input" value="10" min="-50" max="50">
                                     <button class="pv-btn plus" data-amount="1">+1</button>
                                 </div>
                             </div>
                         </div>
                         
+                        <!-- BARRA DE PV -->
                         <div class="pv-barra-container">
                             <div class="pv-barra" id="pvBarra">
                                 <div class="pv-fill" id="pvFill"></div>
-                                <div class="pv-texto" id="pvTexto">10</div>
+                                <div class="pv-texto" id="pvTexto">10/10</div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- LEGENDA DAS FAIXAS -->
+                    <!-- LEGENDA DAS FAIXAS - SIMPLIFICADA -->
                     <div class="pv-faixas">
-                        <div class="faixa-item" data-cor="#27ae60">ST até 0</div>
-                        <div class="faixa-item" data-cor="#f1c40f">-1×ST</div>
-                        <div class="faixa-item" data-cor="#e67e22">-2×ST</div>
-                        <div class="faixa-item" data-cor="#e74c3c">-3×ST</div>
-                        <div class="faixa-item" data-cor="#9b59b6">-4×ST</div>
-                        <div class="faixa-item" data-cor="#7f8c8d">-5×ST</div>
+                        <div class="faixa-item" data-cor="#27ae60">Cheio</div>
+                        <div class="faixa-item" data-cor="#f1c40f">Machucado</div>
+                        <div class="faixa-item" data-cor="#e67e22">Ferido</div>
+                        <div class="faixa-item" data-cor="#e74c3c">Crítico</div>
+                        <div class="faixa-item" data-cor="#9b59b6">Morrendo</div>
+                        <div class="faixa-item" data-cor="#7f8c8d">Inconsciente</div>
                     </div>
                 </div>
             </div>
             
-            <!-- CARD PF CORRETO E SIMPLES -->
+            <!-- CARD PF - CORRIGIDO -->
             <div class="pf-card">
                 <div class="pf-header">
                     <h3><i class="fas fa-wind"></i> PONTOS DE FADIGA (PF)</h3>
                 </div>
                 
                 <div class="pf-content">
-                    <!-- CONTROLES SIMPLES -->
+                    <!-- CONTROLES SIMPLES - CORRIGIDO -->
                     <div class="pf-base-info">
                         <div class="pf-base-group">
-                            <div class="pf-label">PF Máximo:</div>
+                            <div class="pf-label">PF Máx:</div>
                             <input type="number" id="pfMax" class="pf-max-input" value="10" min="1">
                         </div>
                         <div class="pf-base-group">
                             <div class="pf-label">PF Atual:</div>
                             <div class="pf-atual-control">
                                 <button class="pf-btn minus" data-amount="1">-1</button>
-                                <input type="number" id="pfAtual" class="pf-atual-input" value="10">
+                                <input type="number" id="pfAtual" class="pf-atual-input" value="10" min="-10" max="20">
                                 <button class="pf-btn plus" data-amount="1">+1</button>
                             </div>
                         </div>
@@ -2567,34 +2552,27 @@
                         </div>
                     </div>
                     
-                    <!-- ESTADOS DE FADIGA SIMPLES -->
+                    <!-- ESTADOS DE FADIGA - CORRETO (3 ESTADOS) -->
                     <div class="pf-estados">
-                        <div class="estado-item">
+                        <div class="estado-item" data-estado="normal">
                             <div class="estado-indicador" style="background: #2ecc71;"></div>
                             <div class="estado-info">
                                 <div class="estado-nome">Normal</div>
                                 <div class="estado-desc">PF ≥ 1/3 máximo</div>
                             </div>
                         </div>
-                        <div class="estado-item">
+                        <div class="estado-item" data-estado="fadigado">
                             <div class="estado-indicador" style="background: #f1c40f;"></div>
                             <div class="estado-info">
-                                <div class="estado-nome">Fadigado</div>
+                                <div class="estado-nome">Fadigado/Exausto</div>
                                 <div class="estado-desc">PF &lt; 1/3 máximo</div>
                             </div>
                         </div>
-                        <div class="estado-item">
-                            <div class="estado-indicador" style="background: #e67e22;"></div>
-                            <div class="estado-info">
-                                <div class="estado-nome">Exausto</div>
-                                <div class="estado-desc">PF = 0</div>
-                            </div>
-                        </div>
-                        <div class="estado-item">
+                        <div class="estado-item" data-estado="inconsciente">
                             <div class="estado-indicador" style="background: #e74c3c;"></div>
                             <div class="estado-info">
                                 <div class="estado-nome">Inconsciente</div>
-                                <div class="estado-desc">PF negativo</div>
+                                <div class="estado-desc">PF = 0 ou menos</div>
                             </div>
                         </div>
                     </div>
@@ -2605,14 +2583,14 @@
         <!-- SEGUNDA LINHA: DANO E DEFESAS -->
         <div class="combate-row">
             
-            <!-- CARD DANO GURPS -->
+            <!-- CARD DANO GURPS - COM 2 TIPOS -->
             <div class="dano-gurps-card">
                 <div class="dano-header">
                     <h3><i class="fas fa-bolt"></i> DANO DO PERSONAGEM</h3>
                 </div>
                 
                 <div class="dano-content">
-                    <!-- LINHA SUPERIOR: DANOS BASE (GdP E GeB) -->
+                    <!-- LINHA SUPERIOR: DANOS BASE -->
                     <div class="dano-base-row">
                         <!-- DANO GdP -->
                         <div class="dano-tipo-card" data-tipo="thr">
@@ -2621,28 +2599,17 @@
                                     <i class="fas fa-fist-raised"></i>
                                 </div>
                                 <div class="dano-tipo-title">
-                                    <h4>Golpe de Punho (GdP)</h4>
+                                    <h4>Golpe de Punho</h4>
                                     <div class="dano-formula">(ST-5)/2</div>
                                 </div>
                             </div>
                             
                             <div class="dano-tipo-content">
                                 <div class="dano-base-group">
-                                    <div class="dano-label">Dano Base:</div>
+                                    <div class="dano-label">Dano:</div>
                                     <div class="dano-base-valor" id="danoThrBase">1d-2</div>
                                 </div>
-                                
-                                <div class="dano-mod-group">
-                                    <div class="dano-label">Modificador:</div>
-                                    <div class="mod-control">
-                                        <button class="mod-btn minus" data-target="thr">-</button>
-                                        <span class="mod-value" id="thrMod">0</span>
-                                        <button class="mod-btn plus" data-target="thr">+</button>
-                                    </div>
-                                </div>
-                                
                                 <div class="dano-final-group">
-                                    <div class="dano-label">Dano Final:</div>
                                     <div class="dano-final-valor" id="danoThrFinal">1d-2</div>
                                 </div>
                             </div>
@@ -2655,61 +2622,61 @@
                                     <i class="fas fa-hand-rock"></i>
                                 </div>
                                 <div class="dano-tipo-title">
-                                    <h4>Golpe de Braço (GeB)</h4>
+                                    <h4>Golpe de Braço</h4>
                                     <div class="dano-formula">(ST)/2</div>
                                 </div>
                             </div>
                             
                             <div class="dano-tipo-content">
                                 <div class="dano-base-group">
-                                    <div class="dano-label">Dano Base:</div>
+                                    <div class="dano-label">Dano:</div>
                                     <div class="dano-base-valor" id="danoSwBase">1d</div>
                                 </div>
-                                
-                                <div class="dano-mod-group">
-                                    <div class="dano-label">Modificador:</div>
-                                    <div class="mod-control">
-                                        <button class="mod-btn minus" data-target="sw">-</button>
-                                        <span class="mod-value" id="swMod">0</span>
-                                        <button class="mod-btn plus" data-target="sw">+</button>
-                                    </div>
-                                </div>
-                                
                                 <div class="dano-final-group">
-                                    <div class="dano-label">Dano Final:</div>
                                     <div class="dano-final-valor" id="danoSwFinal">1d</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- LINHA INFERIOR: DANO DE ARMAS -->
+                    <!-- LINHA INFERIOR: DANO DE ARMAS COM 2 TIPOS -->
                     <div class="armas-row">
                         <div class="arma-select-group">
                             <div class="dano-label">Arma Equipada:</div>
                             <select id="armaSelect" class="arma-select">
                                 <option value="none">Sem Arma (Só Corporal)</option>
-                                <option value="adaga">Adaga (1d-2 corte/1d-1 perfuração)</option>
-                                <option value="espada_longa">Espada Longa (2d corte/1d+2 perfuração)</option>
-                                <option value="maca">Maça (2d+2 esmagamento)</option>
-                                <option value="arco">Arco (1d+2 perfuração)</option>
+                                <option value="adaga">Adaga</option>
+                                <option value="espada_longa">Espada Longa</option>
+                                <option value="maca">Maça</option>
+                                <option value="martelo_combate">Martelo de Combate</option>
+                                <option value="arco">Arco</option>
+                                <option value="adaga_lancar">Adaga (Lançar)</option>
                             </select>
                         </div>
                         
+                        <!-- DISPLAY DE DANO COM ATÉ 2 TIPOS -->
                         <div class="arma-dano-display">
                             <div class="dano-label">Dano da Arma:</div>
-                            <div class="arma-dano-valor" id="armaDano">-</div>
+                            <div class="arma-dano-container" id="armaDanoContainer">
+                                <!-- Exemplo: Espada Longa mostra "2d corte / 1d+2 perfuração" -->
+                                <div class="dano-tipo-arma" id="danoTipo1">-</div>
+                                <div class="dano-separador" id="danoSeparador" style="display: none;">/</div>
+                                <div class="dano-tipo-arma" id="danoTipo2" style="display: none;"></div>
+                            </div>
                         </div>
                         
                         <div class="arma-tipo-display">
-                            <div class="dano-label">Tipo de Dano:</div>
-                            <div class="arma-tipo-valor" id="armaTipo">-</div>
+                            <div class="dano-label">Tipo(s):</div>
+                            <div class="arma-tipo-container" id="armaTipoContainer">
+                                <!-- Exemplo: "Corte | Perfuração" -->
+                                <div class="tipo-dano" id="tipoDano1">-</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- CARD DEFESAS -->
+            <!-- CARD DEFESAS (MANTIDO) -->
             <div class="defesas-card">
                 <div class="defesas-header">
                     <h3><i class="fas fa-shield-alt"></i> DEFESAS</h3>
@@ -2849,17 +2816,14 @@
         
         <!-- TERCEIRA LINHA: RD COMPLETO -->
         <div class="combate-row">
-            
-            <!-- CARD RD -->
             <div class="rd-completo-card">
                 <div class="rd-header">
                     <h3><i class="fas fa-user-shield"></i> RESISTÊNCIA A DANO (RD)</h3>
                 </div>
                 
                 <div class="rd-content">
-                    <!-- GRID DE RD POR PARTE DO CORPO -->
                     <div class="rd-grid">
-                        <!-- CABEÇA E ROSTO -->
+                        <!-- Cabeça -->
                         <div class="rd-parte" data-parte="cabeca">
                             <div class="rd-parte-header">
                                 <h4><i class="fas fa-head-side-virus"></i> CABEÇA</h4>
@@ -2896,7 +2860,7 @@
                             </div>
                         </div>
                         
-                        <!-- TRONCO E VIRILHA -->
+                        <!-- Tronco -->
                         <div class="rd-parte" data-parte="tronco">
                             <div class="rd-parte-header">
                                 <h4><i class="fas fa-user"></i> TRONCO</h4>
@@ -2933,7 +2897,7 @@
                             </div>
                         </div>
                         
-                        <!-- MEMBROS -->
+                        <!-- Membros -->
                         <div class="rd-parte" data-parte="bracos">
                             <div class="rd-parte-header">
                                 <h4><i class="fas fa-hand-paper"></i> BRAÇOS</h4>
@@ -2974,10 +2938,10 @@
             </div>
         </div>
         
-        <!-- QUARTA LINHA: TABELA DE REDUTORES E CONDIÇÕES -->
+        <!-- QUARTA LINHA: TABELA DE REDUTORES (CORRIGIDA) E CONDIÇÕES -->
         <div class="combate-row">
             
-            <!-- TABELA DE REDUTORES -->
+            <!-- TABELA DE REDUTORES - SEM DUPLICAÇÃO -->
             <div class="tabela-redutores-card">
                 <div class="tabela-header">
                     <h3><i class="fas fa-crosshairs"></i> TABELA DE REDUTORES PARA ATAQUE</h3>
@@ -2989,27 +2953,26 @@
                             <tr>
                                 <th>Parte do Corpo</th>
                                 <th>Redutor</th>
-                                <th>RD Aplicado</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-local="tronco"><td>Tronco</td><td>0</td><td>Tronco</td></tr>
-                            <tr data-local="orgaos"><td>Órgãos Vitais</td><td>-3</td><td>Órgãos</td></tr>
-                            <tr data-local="crânio"><td>Crânio</td><td>-7</td><td>Crânio</td></tr>
-                            <tr data-local="olhos"><td>Olho</td><td>-9</td><td>Olhos</td></tr>
-                            <tr data-local="rosto"><td>Rosto</td><td>-5</td><td>Rosto</td></tr>
-                            <tr data-local="pescoco"><td>Pescoço</td><td>-5</td><td>Pescoço</td></tr>
-                            <tr data-local="virilha"><td>Virilha</td><td>-3</td><td>Virilha</td></tr>
-                            <tr data-local="bracos"><td>Braços</td><td>-2</td><td>Braços</td></tr>
-                            <tr data-local="pernas"><td>Pernas</td><td>-2</td><td>Pernas</td></tr>
-                            <tr data-local="maos"><td>Mãos</td><td>-4</td><td>Mãos</td></tr>
-                            <tr data-local="pes"><td>Pés</td><td>-4</td><td>Pés</td></tr>
+                            <tr data-local="tronco"><td>Tronco</td><td>0</td></tr>
+                            <tr data-local="orgaos"><td>Órgãos Vitais</td><td>-3</td></tr>
+                            <tr data-local="crânio"><td>Crânio</td><td>-7</td></tr>
+                            <tr data-local="olhos"><td>Olho</td><td>-9</td></tr>
+                            <tr data-local="rosto"><td>Rosto</td><td>-5</td></tr>
+                            <tr data-local="pescoco"><td>Pescoço</td><td>-5</td></tr>
+                            <tr data-local="virilha"><td>Virilha</td><td>-3</td></tr>
+                            <tr data-local="bracos"><td>Braços</td><td>-2</td></tr>
+                            <tr data-local="pernas"><td>Pernas</td><td>-2</td></tr>
+                            <tr data-local="maos"><td>Mãos</td><td>-4</td></tr>
+                            <tr data-local="pes"><td>Pés</td><td>-4</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
             
-            <!-- CARD CONDIÇÕES -->
+            <!-- CARD CONDIÇÕES (MANTIDO) -->
             <div class="condicoes-card">
                 <div class="condicoes-header">
                     <h3><i class="fas fa-clipboard-list"></i> CONDIÇÕES EM COMBATE</h3>
@@ -3017,7 +2980,6 @@
                 
                 <div class="condicoes-content">
                     <div class="condicoes-grid" id="condicoesGrid">
-                        <!-- Condições serão adicionadas dinamicamente -->
                         <div class="condicao-item">
                             <div class="condicao-checkbox"></div>
                             <div class="condicao-nome">Inconsciente</div>
@@ -3054,7 +3016,6 @@
                 </div>
             </div>
         </div>
-        
     </div>
 </div>
 

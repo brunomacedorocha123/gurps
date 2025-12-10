@@ -1,45 +1,48 @@
-/* ===== COMBATE - VERSÃO REVISTA ===== */
+/* ===== STYLE-COMBATE.CSS - VERSÃO CORRIGIDA ===== */
+
+/* ===== LAYOUT BASE ===== */
 .combate-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
 .combate-row {
     display: grid;
-    gap: 15px;
+    gap: 20px;
 }
 
-/* PRIMEIRA LINHA: PV E PF (70/30) */
-.combate-row:nth-child(1) {
-    grid-template-columns: 2fr 1fr;
-}
+/* Desktop Layout */
+.combate-row:nth-child(1) { grid-template-columns: 2fr 1fr; }
+.combate-row:nth-child(2) { grid-template-columns: 1fr 1fr; }
+.combate-row:nth-child(3) { grid-template-columns: 1fr; }
+.combate-row:nth-child(4) { grid-template-columns: 2fr 1fr; }
 
-/* SEGUNDA LINHA: DANO E DEFESAS (50/50 COM GAP) */
-.combate-row:nth-child(2) {
-    grid-template-columns: calc(50% - 7.5px) calc(50% - 7.5px);
-}
-
-/* TERCEIRA LINHA: RD */
-.combate-row:nth-child(3) {
-    grid-template-columns: 1fr;
-}
-
-/* QUARTA LINHA: TABELA E CONDIÇÕES */
-.combate-row:nth-child(4) {
-    grid-template-columns: 2fr 1fr;
-}
-
-@media (max-width: 992px) {
-    .combate-row {
-        grid-template-columns: 1fr !important;
+/* Tablet */
+@media (max-width: 1024px) {
+    .combate-row:nth-child(1),
+    .combate-row:nth-child(2),
+    .combate-row:nth-child(4) {
+        grid-template-columns: 1fr;
     }
 }
 
-/* ===== CARD PV COMPLETO ===== */
+/* Mobile */
+@media (max-width: 768px) {
+    .combate-container {
+        padding: 10px;
+        gap: 15px;
+    }
+    
+    .combate-row {
+        gap: 15px;
+    }
+}
+
+/* ===== CARD PV CORRIGIDO ===== */
 .pv-completo-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(231, 76, 60, 0.4);
@@ -47,17 +50,7 @@
     padding: 20px;
     position: relative;
     overflow: hidden;
-    min-height: 380px;
-}
-
-.pv-completo-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #e74c3c, #c0392b);
+    min-height: 350px;
 }
 
 .pv-header {
@@ -65,6 +58,8 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .pv-header h3 {
@@ -84,10 +79,11 @@
 .extra-label {
     color: #ccc;
     font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .extra-input {
-    width: 60px;
+    width: 70px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(231, 76, 60, 0.3);
     border-radius: 6px;
@@ -97,20 +93,13 @@
     padding: 5px;
 }
 
-.pv-content {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    height: calc(100% - 60px);
-}
-
-/* ESCALA VISUAL DO PV */
+/* Escala Visual Simplificada */
 .pv-escala {
     position: relative;
-    height: 40px;
+    height: 50px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .pv-marcador {
@@ -128,6 +117,8 @@
     font-weight: bold;
     margin-bottom: 2px;
     white-space: nowrap;
+    text-align: center;
+    min-width: 80px;
 }
 
 .marcador-line {
@@ -136,17 +127,17 @@
     background: rgba(255, 255, 255, 0.5);
 }
 
-/* CONTROLES DO PV */
+/* Controles PV */
 .pv-controles {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
 .pv-base-info {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    gap: 20px;
+    gap: 15px;
     align-items: center;
 }
 
@@ -161,27 +152,26 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 .pv-label {
     color: #ccc;
     font-size: 0.9rem;
-    min-width: 60px;
+    min-width: 70px;
     white-space: nowrap;
 }
 
-.pv-st-input {
-    width: 60px;
+.pv-st-input, .pv-max-input {
+    width: 80px;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(231, 76, 60, 0.3);
-    border-radius: 6px;
+    border-radius: 8px;
     color: #e74c3c;
     font-size: 1.1rem;
     font-weight: bold;
     text-align: center;
-    padding: 8px;
-    flex-shrink: 0;
+    padding: 10px;
 }
 
 .pv-atual-control {
@@ -196,30 +186,30 @@
     flex: 1;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(231, 76, 60, 0.5);
-    border-radius: 8px;
+    border-radius: 10px;
     color: #fff;
     font-size: 1.3rem;
     font-weight: bold;
     text-align: center;
-    padding: 10px;
+    padding: 12px;
     min-width: 80px;
 }
 
 .pv-btn {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border: none;
     border-radius: 8px;
     background: linear-gradient(45deg, #e74c3c, #c0392b);
     color: white;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: all 0.2s ease;
 }
 
 .pv-btn:hover {
@@ -231,16 +221,16 @@
     background: linear-gradient(45deg, #27ae60, #2ecc71);
 }
 
-/* BARRA DE PV */
+/* Barra PV */
 .pv-barra-container {
     width: 100%;
-    margin: 5px 0;
+    margin: 15px 0;
 }
 
 .pv-barra {
-    height: 50px;
+    height: 55px;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     position: relative;
     border: 2px solid rgba(255, 255, 255, 0.1);
@@ -250,27 +240,7 @@
     height: 100%;
     background: linear-gradient(90deg, #27ae60, #2ecc71);
     border-radius: 10px;
-    transition: width 0.3s ease, background 0.3s ease;
-    position: relative;
-}
-
-.pv-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(255, 255, 255, 0.2) 50%, 
-        transparent 100%);
-    animation: brilhoBarra 2s infinite linear;
-}
-
-@keyframes brilhoBarra {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    transition: width 0.3s ease;
 }
 
 .pv-texto {
@@ -283,19 +253,19 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: bold;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* LEGENDA DAS FAIXAS */
+/* Faixas Simples */
 .pv-faixas {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 8px;
     padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: auto;
+    margin-top: 10px;
 }
 
 @media (max-width: 768px) {
@@ -304,9 +274,15 @@
     }
 }
 
+@media (max-width: 480px) {
+    .pv-faixas {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 .faixa-item {
     text-align: center;
-    padding: 6px;
+    padding: 8px 5px;
     border-radius: 6px;
     color: #fff;
     font-size: 0.8rem;
@@ -332,7 +308,7 @@
 .faixa-item[data-cor="#9b59b6"]::before { background: #9b59b6; }
 .faixa-item[data-cor="#7f8c8d"]::before { background: #7f8c8d; }
 
-/* ===== CARD PF SIMPLES E CORRETO ===== */
+/* ===== CARD PF CORRIGIDO ===== */
 .pf-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(52, 152, 219, 0.4);
@@ -340,17 +316,7 @@
     padding: 20px;
     position: relative;
     overflow: hidden;
-    min-height: 380px;
-}
-
-.pf-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #3498db, #2980b9);
+    min-height: 350px;
 }
 
 .pf-header {
@@ -372,18 +338,17 @@
     height: calc(100% - 60px);
 }
 
-/* CONTROLES DO PF - SIMPLES */
 .pf-base-info {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    gap: 20px;
+    gap: 15px;
     align-items: center;
 }
 
 @media (max-width: 768px) {
     .pf-base-info {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 12px;
     }
 }
 
@@ -391,86 +356,80 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 .pf-label {
     color: #ccc;
     font-size: 0.9rem;
-    min-width: 80px;
+    min-width: 70px;
     white-space: nowrap;
 }
 
 .pf-max-input {
-    width: 70px;
+    width: 80px;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(52, 152, 219, 0.3);
-    border-radius: 6px;
+    border-radius: 8px;
     color: #3498db;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: bold;
     text-align: center;
-    padding: 8px;
-    flex-shrink: 0;
+    padding: 10px;
 }
 
 .pf-atual-control {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     flex: 1;
-    min-width: 180px;
+    min-width: 200px;
 }
 
 .pf-atual-input {
     flex: 1;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(52, 152, 219, 0.5);
-    border-radius: 8px;
+    border-radius: 10px;
     color: #fff;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: bold;
     text-align: center;
-    padding: 10px;
-    min-width: 70px;
+    padding: 12px;
+    min-width: 80px;
 }
 
 .pf-btn {
-    width: 35px;
-    height: 35px;
+    width: 45px;
+    height: 45px;
     border: none;
     border-radius: 8px;
     background: linear-gradient(45deg, #e74c3c, #c0392b);
     color: white;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-}
-
-.pf-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+    transition: all 0.2s ease;
 }
 
 .pf-btn.plus {
     background: linear-gradient(45deg, #27ae60, #2ecc71);
 }
 
-/* BARRA DE PF */
+/* Barra PF */
 .pf-barra-container {
     width: 100%;
-    margin: 10px 0;
+    margin: 15px 0;
 }
 
 .pf-barra {
-    height: 45px;
+    height: 50px;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     position: relative;
     border: 2px solid rgba(255, 255, 255, 0.1);
@@ -493,24 +452,25 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: bold;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* ESTADOS DE FADIGA SIMPLES */
+/* Estados PF - 3 ESTADOS APENAS */
 .pf-estados {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: auto;
+    margin-top: 10px;
 }
 
 @media (max-width: 768px) {
     .pf-estados {
         grid-template-columns: 1fr;
+        gap: 8px;
     }
 }
 
@@ -518,9 +478,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 12px;
+    padding: 10px;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.2s ease;
 }
@@ -530,8 +490,8 @@
 }
 
 .estado-indicador {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -554,7 +514,7 @@
     font-size: 0.7rem;
 }
 
-/* ===== CARD DANO GURPS ===== */
+/* ===== CARD DANO COM 2 TIPOS ===== */
 .dano-gurps-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(241, 196, 15, 0.4);
@@ -563,16 +523,6 @@
     position: relative;
     overflow: hidden;
     min-height: 350px;
-}
-
-.dano-gurps-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #f1c40f, #f39c12);
 }
 
 .dano-header {
@@ -594,7 +544,6 @@
     height: calc(100% - 60px);
 }
 
-/* LINHA DE DANOS BASE */
 .dano-base-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -661,7 +610,7 @@
     gap: 10px;
 }
 
-.dano-base-group, .dano-mod-group, .dano-final-group {
+.dano-base-group, .dano-final-group {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -681,53 +630,6 @@
     white-space: nowrap;
 }
 
-.mod-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(241, 196, 15, 0.3);
-}
-
-.mod-btn {
-    width: 22px;
-    height: 22px;
-    border: none;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #f1c40f;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.mod-btn:hover {
-    background: rgba(241, 196, 15, 0.3);
-    transform: scale(1.05);
-}
-
-.mod-btn.minus {
-    color: #e74c3c;
-}
-
-.mod-btn.plus {
-    color: #2ecc71;
-}
-
-.mod-value {
-    min-width: 20px;
-    text-align: center;
-    color: #fff;
-    font-weight: bold;
-    font-size: 0.85rem;
-}
-
 .dano-final-valor {
     color: #fff;
     font-size: 1.1rem;
@@ -736,7 +638,7 @@
     white-space: nowrap;
 }
 
-/* LINHA DE ARMAS */
+/* Armas com múltiplos tipos de dano */
 .armas-row {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
@@ -752,7 +654,7 @@
 @media (max-width: 768px) {
     .armas-row {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 12px;
     }
 }
 
@@ -770,20 +672,39 @@
     font-size: 0.85rem;
     padding: 8px 10px;
     cursor: pointer;
-    transition: all 0.2s ease;
     width: 100%;
 }
 
-.arma-select:focus {
-    outline: none;
-    border-color: #f1c40f;
-    box-shadow: 0 0 8px rgba(241, 196, 15, 0.3);
+/* Display de dano com 2 tipos */
+.arma-dano-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
 }
 
-.arma-dano-valor, .arma-tipo-valor {
+.dano-tipo-arma {
     color: #fff;
     font-size: 1rem;
     font-weight: bold;
+    text-align: center;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(241, 196, 15, 0.3);
+    white-space: nowrap;
+}
+
+.dano-separador {
+    color: #f1c40f;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+.arma-tipo-container {
+    color: #95a5a6;
+    font-size: 0.9rem;
     text-align: center;
     padding: 8px;
     background: rgba(255, 255, 255, 0.1);
@@ -794,346 +715,7 @@
     text-overflow: ellipsis;
 }
 
-.arma-tipo-valor {
-    color: #95a5a6;
-    font-size: 0.9rem;
-    font-weight: normal;
-}
-
-/* ===== CARD DEFESAS ===== */
-.defesas-card {
-    background: rgba(30, 30, 40, 0.95);
-    border: 2px solid rgba(155, 89, 182, 0.4);
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    min-height: 350px;
-}
-
-.defesas-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #9b59b6, #8e44ad);
-}
-
-.defesas-header {
-    margin-bottom: 20px;
-}
-
-.defesas-header h3 {
-    color: #9b59b6;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.defesas-content {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    height: calc(100% - 60px);
-}
-
-.defesa-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.2s ease;
-    gap: 15px;
-}
-
-.defesa-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(155, 89, 182, 0.3);
-}
-
-.defesa-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 120px;
-}
-
-.defesa-icon {
-    color: #9b59b6;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-
-.defesa-detalhes {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.defesa-nome {
-    color: #fff;
-    font-weight: 600;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.defesa-formula {
-    color: #95a5a6;
-    font-size: 0.7rem;
-    font-style: italic;
-    white-space: nowrap;
-}
-
-.defesa-valores {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    flex: 1;
-}
-
-@media (max-width: 1100px) {
-    .defesa-valores {
-        justify-content: space-between;
-    }
-}
-
-@media (max-width: 768px) {
-    .defesa-item {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-    }
-    
-    .defesa-valores {
-        justify-content: space-around;
-    }
-}
-
-.defesa-base-group, .defesa-mod-group, .defesa-total-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    min-width: 60px;
-}
-
-.defesa-base-label, .defesa-mod-label, .defesa-total-label {
-    color: #95a5a6;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.defesa-base {
-    color: #9b59b6;
-    font-weight: bold;
-    font-size: 0.95rem;
-    text-align: center;
-    min-width: 40px;
-}
-
-.defesa-mod-control {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 3px 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(155, 89, 182, 0.3);
-}
-
-.defesa-mod-btn {
-    width: 20px;
-    height: 20px;
-    border: none;
-    border-radius: 4px;
-    background: rgba(155, 89, 182, 0.3);
-    color: #9b59b6;
-    font-size: 0.75rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.defesa-mod-btn:hover {
-    background: rgba(155, 89, 182, 0.5);
-    transform: scale(1.05);
-}
-
-.defesa-mod-btn.minus {
-    color: #e74c3c;
-}
-
-.defesa-mod-btn.plus {
-    color: #2ecc71;
-}
-
-.defesa-mod {
-    min-width: 20px;
-    text-align: center;
-    color: #fff;
-    font-weight: bold;
-    font-size: 0.85rem;
-}
-
-.defesa-total {
-    min-width: 45px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(155, 89, 182, 0.2);
-    border: 2px solid rgba(155, 89, 182, 0.5);
-    border-radius: 8px;
-    color: #fff;
-    font-weight: bold;
-    font-size: 1rem;
-}
-
-/* DESLOCAMENTO ESPECIAL */
-.deslocamento-item .defesa-icon {
-    color: #2ecc71;
-}
-
-.deslocamento-item .defesa-base {
-    color: #2ecc71;
-}
-
-.deslocamento-item .defesa-mod-control {
-    border-color: rgba(46, 204, 113, 0.3);
-}
-
-.deslocamento-item .defesa-total {
-    background: rgba(46, 204, 113, 0.2);
-    border-color: rgba(46, 204, 113, 0.5);
-}
-
-/* ===== CARD RD COMPLETO ===== */
-.rd-completo-card {
-    background: rgba(30, 30, 40, 0.95);
-    border: 2px solid rgba(255, 140, 0, 0.4);
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-}
-
-.rd-completo-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #ff8c00, #ffd700);
-}
-
-.rd-header {
-    margin-bottom: 20px;
-}
-
-.rd-header h3 {
-    color: #ffd700;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.rd-content {
-    padding: 10px;
-}
-
-.rd-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-}
-
-@media (max-width: 1200px) {
-    .rd-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .rd-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .rd-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.rd-parte {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 15px;
-    transition: all 0.2s ease;
-}
-
-.rd-parte:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 140, 0, 0.3);
-    transform: translateY(-2px);
-}
-
-.rd-parte-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.rd-parte-header h4 {
-    color: #fff;
-    font-size: 0.95rem;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.rd-parte-input {
-    display: flex;
-    justify-content: center;
-}
-
-.rd-input {
-    width: 80px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 140, 0, 0.3);
-    border-radius: 6px;
-    color: #ffd700;
-    font-size: 1.1rem;
-    font-weight: bold;
-    text-align: center;
-    padding: 8px;
-    transition: all 0.2s ease;
-}
-
-.rd-input:focus {
-    outline: none;
-    border-color: #ff8c00;
-    box-shadow: 0 0 8px rgba(255, 140, 0, 0.3);
-}
-
-/* ===== TABELA DE REDUTORES ===== */
+/* ===== TABELA DE REDUTORES SIMPLIFICADA ===== */
 .tabela-redutores-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(52, 152, 219, 0.4);
@@ -1142,21 +724,17 @@
     min-height: 400px;
 }
 
-.tabela-header {
-    margin-bottom: 15px;
-}
-
 .tabela-header h3 {
     color: #3498db;
     font-size: 1.2rem;
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 15px;
 }
 
 .tabela-content {
     overflow-x: auto;
-    height: calc(100% - 60px);
 }
 
 .redutores-table {
@@ -1184,10 +762,6 @@
     background: rgba(255, 255, 255, 0.05);
 }
 
-.redutores-table tr:last-child td {
-    border-bottom: none;
-}
-
 /* ===== CARD CONDIÇÕES ===== */
 .condicoes-card {
     background: rgba(30, 30, 40, 0.95);
@@ -1197,23 +771,19 @@
     min-height: 400px;
 }
 
-.condicoes-header {
-    margin-bottom: 15px;
-}
-
 .condicoes-header h3 {
     color: #2ecc71;
     font-size: 1.2rem;
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 15px;
 }
 
 .condicoes-content {
     max-height: 300px;
     overflow-y: auto;
     padding-right: 5px;
-    height: calc(100% - 60px);
 }
 
 .condicoes-grid {
@@ -1284,7 +854,7 @@
     font-weight: bold;
 }
 
-/* ANIMAÇÕES */
+/* ===== ANIMAÇÕES ===== */
 @keyframes aparecerSuave {
     from {
         opacity: 0;
@@ -1301,132 +871,24 @@
     animation: aparecerSuave 0.5s ease forwards;
 }
 
-.pv-completo-card { animation-delay: 0.1s; }
-.pf-card { animation-delay: 0.2s; }
-.dano-gurps-card { animation-delay: 0.3s; }
-.defesas-card { animation-delay: 0.4s; }
-.rd-completo-card { animation-delay: 0.5s; }
-.tabela-redutores-card { animation-delay: 0.6s; }
-.condicoes-card { animation-delay: 0.7s; }
-
-/* SCROLLBAR PERSONALIZADA */
-.condicoes-content::-webkit-scrollbar,
-.tabela-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-.condicoes-content::-webkit-scrollbar-track,
-.tabela-content::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.condicoes-content::-webkit-scrollbar-thumb {
-    background: rgba(46, 204, 113, 0.5);
-    border-radius: 3px;
-}
-
-.tabela-content::-webkit-scrollbar-thumb {
-    background: rgba(52, 152, 219, 0.5);
-    border-radius: 3px;
-}
-
-.condicoes-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(46, 204, 113, 0.7);
-}
-
-.tabela-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(52, 152, 219, 0.7);
-}
-
-/* ESTADO DE FOCO */
-input:focus, select:focus, button:focus {
-    outline: 2px solid rgba(255, 140, 0, 0.5);
-    outline-offset: 2px;
-}
-
-/* TOOLTIP */
-[data-tooltip] {
-    position: relative;
-    cursor: help;
-}
-
-[data-tooltip]:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    z-index: 1000;
-    border: 1px solid rgba(255, 140, 0, 0.3);
-}
-
-/* RESPONSIVIDADE EXTRA */
-@media (max-width: 1100px) {
-    .combate-row:nth-child(1),
-    .combate-row:nth-child(2) {
-        grid-template-columns: 1fr !important;
-    }
-    
-    .dano-base-row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    .defesa-valores {
-        justify-content: space-between;
-    }
-}
-
-@media (max-width: 768px) {
-    .pv-faixas, .pf-estados {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .armas-row {
-        grid-template-columns: 1fr;
-    }
-    
-    .defesa-item {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-    }
-    
-    .defesa-valores {
-        justify-content: space-around;
-    }
-    
-    .condicoes-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
+/* ===== RESPONSIVIDADE EXTRA ===== */
 @media (max-width: 576px) {
-    .pv-base-info, .pf-base-info {
-        grid-template-columns: 1fr;
-        gap: 12px;
+    .pv-atual-control, .pf-atual-control {
+        min-width: 150px;
     }
     
-    .pv-faixas, .pf-estados {
-        grid-template-columns: 1fr;
+    .pv-atual-input, .pf-atual-input {
+        font-size: 1.1rem;
+        padding: 10px;
+    }
+    
+    .pv-btn, .pf-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
     }
     
     .armas-row {
-        grid-template-columns: 1fr;
-    }
-    
-    .rd-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .condicoes-grid {
-        grid-template-columns: 1fr;
+        padding: 12px;
     }
 }
