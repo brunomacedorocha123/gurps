@@ -1937,3 +1937,183 @@
 .detalhes-pericia-section h3 i {
     margin-right: 10px;
 }
+
+/* ===== SISTEMA DE SCROLL PURO CSS ===== */
+
+/* Container genérico para scroll */
+.scroll-container {
+    overflow-y: auto;
+    border: 1px solid rgba(255, 140, 0, 0.2);
+    border-radius: 8px;
+    background: rgba(40, 40, 50, 0.8);
+    position: relative;
+}
+
+/* ALTURAS IGUAIS PARA CARDS LADO A LADO */
+/* PERÍCIAS: card esquerdo e direito com mesma altura */
+.catalogo-scroll {
+    height: 500px; /* Altura MAIOR para igualar com o direito */
+    margin-top: 10px;
+}
+
+.aprendidas-scroll {
+    height: 500px; /* MESMA altura que o esquerdo */
+    margin-top: 10px;
+}
+
+/* TÉCNICAS: card esquerdo e direito com mesma altura */
+.tecnicas-catalogo-scroll {
+    height: 450px; /* Altura MAIOR para igualar com o direito */
+    margin-top: 10px;
+}
+
+.tecnicas-aprendidas-scroll {
+    height: 450px; /* MESMA altura que o esquerdo */
+    margin-top: 10px;
+}
+
+/* ===== AJUSTES NO LAYOUT ===== */
+
+/* As seções agora ocupam altura total da coluna */
+.catalog-section-pericias,
+.acquired-section-pericias {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ajusta o conteúdo para ocupar espaço disponível */
+.catalog-section-pericias > h3,
+.acquired-section-pericias > h3 {
+    flex-shrink: 0; /* Não encolhe */
+}
+
+.catalog-section-pericias > .busca-pericias,
+.catalog-section-pericias > .filtros-container-pericias,
+.acquired-section-pericias > .points-badge {
+    flex-shrink: 0; /* Não encolhe */
+}
+
+/* O scroll-container ocupa o espaço restante */
+.catalog-section-pericias > .scroll-container,
+.acquired-section-pericias > .scroll-container {
+    flex: 1; /* Ocupa todo espaço disponível */
+    min-height: 0; /* Importante para o flex funcionar */
+}
+
+/* ===== REMOVER PROPRIEDADES ANTIGAS ===== */
+.catalog-list-pericias,
+.acquired-list-pericias {
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ===== SEÇÃO DE TÉCNICAS ===== */
+.tecnicas-section {
+    margin-top: 40px;
+    border-top: 2px solid rgba(255, 140, 0, 0.3);
+    padding-top: 30px;
+}
+
+/* ===== SCROLLBAR PERSONALIZADA ===== */
+.scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.5);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.8);
+}
+
+/* Para Firefox */
+.scroll-container {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 140, 0, 0.5) rgba(255, 255, 255, 0.05);
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 1024px) {
+    .catalogo-scroll,
+    .aprendidas-scroll {
+        height: 450px;
+    }
+    
+    .tecnicas-catalogo-scroll,
+    .tecnicas-aprendidas-scroll {
+        height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .catalogo-scroll,
+    .aprendidas-scroll {
+        height: 400px;
+    }
+    
+    .tecnicas-catalogo-scroll,
+    .tecnicas-aprendidas-scroll {
+        height: 350px;
+    }
+}
+
+@media (max-width: 480px) {
+    .catalogo-scroll,
+    .aprendidas-scroll {
+        height: 350px;
+    }
+    
+    .tecnicas-catalogo-scroll,
+    .tecnicas-aprendidas-scroll {
+        height: 300px;
+    }
+}
+
+/* ===== MELHORIAS VISUAIS ===== */
+.acquired-section-pericias {
+    border: 1px solid rgba(39, 174, 96, 0.25);
+    border-radius: 12px;
+    padding: 20px;
+    background: rgba(30, 30, 40, 0.95);
+    backdrop-filter: blur(10px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.acquired-section-pericias h3 {
+    color: #ffd700;
+    font-size: 1.4em;
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(39, 174, 96, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.points-badge {
+    background: rgba(39, 174, 96, 0.9);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
