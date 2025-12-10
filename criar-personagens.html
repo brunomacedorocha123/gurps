@@ -2453,330 +2453,321 @@
 <div id="combate" class="tab-content">
     <div class="combate-container">
         
-        <!-- SEÇÃO 1: PV E ESTADO -->
-        <div class="secao-pv-estado">
-            <div class="pv-card">
-                <div class="pv-header">
-                    <h3><i class="fas fa-heartbeat"></i> Pontos de Vida (PV)</h3>
-                    <div class="pv-total" id="pvTotalDisplay">PV Máx: ST × 6 = 60</div>
+        <!-- SEÇÃO SUPERIOR: PV, PF E DEFESAS -->
+        <div class="combate-top-section">
+            
+            <!-- COLUNA ESQUERDA: PV E PF -->
+            <div class="vitals-col">
+                
+                <!-- CARD PV COMPACTO -->
+                <div class="vital-card">
+                    <div class="vital-header">
+                        <h3><i class="fas fa-heartbeat"></i> PONTOS DE VIDA</h3>
+                        <div class="vital-max" id="pvMaxDisplay">Máx: 60</div>
+                    </div>
+                    
+                    <!-- BARRA DE PV COM FAIXAS -->
+                    <div class="vital-bar-container">
+                        <div class="pv-bar" id="pvBar">
+                            <div class="pv-fill" id="pvFill"></div>
+                            <div class="pv-faixas">
+                                <div class="pv-faixa" data-faixa="0"></div> <!-- ST -->
+                                <div class="pv-faixa" data-faixa="1"></div> <!-- -ST -->
+                                <div class="pv-faixa" data-faixa="2"></div> <!-- -2×ST -->
+                                <div class="pv-faixa" data-faixa="3"></div> <!-- -3×ST -->
+                                <div class="pv-faixa" data-faixa="4"></div> <!-- -4×ST -->
+                                <div class="pv-faixa" data-faixa="5"></div> <!-- -5×ST -->
+                            </div>
+                            <div class="pv-current" id="pvCurrent">60</div>
+                        </div>
+                        <div class="vital-controls">
+                            <button class="vital-btn minus" data-target="pv">-</button>
+                            <input type="number" id="pvInput" class="vital-input" value="60" min="-999" max="999">
+                            <button class="vital-btn plus" data-target="pv">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- LEGENDA DAS FAIXAS -->
+                    <div class="pv-faixas-legend">
+                        <div class="faixa-item" data-color="green">
+                            <span class="faixa-dot"></span>
+                            <span class="faixa-text">Normal</span>
+                        </div>
+                        <div class="faixa-item" data-color="yellow">
+                            <span class="faixa-dot"></span>
+                            <span class="faixa-text">×1 ST</span>
+                        </div>
+                        <div class="faixa-item" data-color="orange">
+                            <span class="faixa-dot"></span>
+                            <span class="faixa-text">×2 ST</span>
+                        </div>
+                        <div class="faixa-item" data-color="red">
+                            <span class="faixa-dot"></span>
+                            <span class="faixa-text">×3 ST</span>
+                        </div>
+                        <div class="faixa-item" data-color="purple">
+                            <span class="faixa-dot"></span>
+                            <span class="faixa-text">×4 ST</span>
+                        </div>
+                        <div class="faixa-item" data-color="gray">
+                            <span class="faixa-dot"></span>
+                            <span class="faixa-text">×5 ST</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- SISTEMA DE FAIXAS DE PV -->
-                <div class="pv-faixas-container">
-                    <div class="faixa-pv" data-faixa="verde">
-                        <div class="faixa-cor verde"></div>
-                        <div class="faixa-info">
-                            <div class="faixa-label">Normal (ST até 0)</div>
-                            <div class="faixa-valor" id="faixa-verde">0 a -ST (0 a -10)</div>
-                        </div>
+                <!-- CARD PF COMPACTO -->
+                <div class="vital-card">
+                    <div class="vital-header">
+                        <h3><i class="fas fa-wind"></i> PONTOS DE FADIGA</h3>
+                        <div class="vital-max" id="fpMaxDisplay">Máx: HT</div>
                     </div>
-                    <div class="faixa-pv" data-faixa="amarelo">
-                        <div class="faixa-cor amarelo"></div>
-                        <div class="faixa-info">
-                            <div class="faixa-label">Levemente Ferido (-1×ST)</div>
-                            <div class="faixa-valor" id="faixa-amarelo">-ST a -2×ST (-11 a -20)</div>
+                    
+                    <div class="vital-bar-container">
+                        <div class="fp-bar" id="fpBar">
+                            <div class="fp-fill" id="fpFill"></div>
+                            <div class="fp-current" id="fpCurrent">10</div>
                         </div>
-                    </div>
-                    <div class="faixa-pv" data-faixa="laranja">
-                        <div class="faixa-cor laranja"></div>
-                        <div class="faixa-info">
-                            <div class="faixa-label">Gravemente Ferido (-2×ST)</div>
-                            <div class="faixa-valor" id="faixa-laranja">-2×ST a -3×ST (-21 a -30)</div>
-                        </div>
-                    </div>
-                    <div class="faixa-pv" data-faixa="vermelho">
-                        <div class="faixa-cor vermelho"></div>
-                        <div class="faixa-info">
-                            <div class="faixa-label">Mortalmente Ferido (-3×ST)</div>
-                            <div class="faixa-valor" id="faixa-vermelho">-3×ST a -4×ST (-31 a -40)</div>
-                        </div>
-                    </div>
-                    <div class="faixa-pv" data-faixa="roxo">
-                        <div class="faixa-cor roxo"></div>
-                        <div class="faixa-info">
-                            <div class="faixa-label">Inconsciente (-4×ST)</div>
-                            <div class="faixa-valor" id="faixa-roxo">-4×ST a -5×ST (-41 a -50)</div>
-                        </div>
-                    </div>
-                    <div class="faixa-pv" data-faixa="cinza">
-                        <div class="faixa-cor cinza"></div>
-                        <div class="faixa-info">
-                            <div class="faixa-label">Morte Automática (-5×ST ou menos)</div>
-                            <div class="faixa-valor" id="faixa-cinza">≤ -5×ST (≤ -51)</div>
+                        <div class="vital-controls">
+                            <button class="vital-btn minus" data-target="fp">-</button>
+                            <input type="number" id="fpInput" class="vital-input" value="10" min="0" max="50">
+                            <button class="vital-btn plus" data-target="fp">+</button>
                         </div>
                     </div>
                 </div>
-                
-                <!-- CONTROLES DE PV -->
-                <div class="pv-controles">
-                    <div class="pv-atual-control">
-                        <div class="pv-label">
-                            <i class="fas fa-heart"></i>
-                            PV Atual:
+            </div>
+            
+            <!-- COLUNA DIREITA: DEFESAS -->
+            <div class="defenses-col">
+                <div class="defenses-card">
+                    <div class="defenses-header">
+                        <h3><i class="fas fa-shield-alt"></i> DEFESAS</h3>
+                    </div>
+                    
+                    <div class="defenses-grid">
+                        <!-- ESQUIVA -->
+                        <div class="defense-item">
+                            <div class="defense-icon">
+                                <i class="fas fa-running"></i>
+                            </div>
+                            <div class="defense-info">
+                                <div class="defense-name">Esquiva</div>
+                                <div class="defense-formula">DX + HT/4 + 3</div>
+                            </div>
+                            <div class="defense-value">
+                                <div class="defense-base" id="dodgeBase">10</div>
+                                <div class="defense-mod">
+                                    <button class="mod-btn minus" data-defense="dodge">-</button>
+                                    <span class="mod-value" id="dodgeMod">0</span>
+                                    <button class="mod-btn plus" data-defense="dodge">+</button>
+                                </div>
+                                <div class="defense-total" id="dodgeTotal">10</div>
+                            </div>
                         </div>
-                        <div class="pv-input-container">
-                            <input type="number" id="pvAtual" class="pv-input" value="10" min="-100" max="100">
-                            <div class="pv-botoes">
-                                <button class="pv-btn" id="btnAumentarPV">+</button>
-                                <button class="pv-btn" id="btnDiminuirPV">-</button>
+                        
+                        <!-- BLOQUEIO -->
+                        <div class="defense-item">
+                            <div class="defense-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="defense-info">
+                                <div class="defense-name">Bloqueio</div>
+                                <div class="defense-formula">Escudo/2 + 3</div>
+                            </div>
+                            <div class="defense-value">
+                                <div class="defense-base" id="blockBase">3</div>
+                                <div class="defense-mod">
+                                    <button class="mod-btn minus" data-defense="block">-</button>
+                                    <span class="mod-value" id="blockMod">0</span>
+                                    <button class="mod-btn plus" data-defense="block">+</button>
+                                </div>
+                                <div class="defense-total" id="blockTotal">3</div>
+                            </div>
+                        </div>
+                        
+                        <!-- APARAR -->
+                        <div class="defense-item">
+                            <div class="defense-icon">
+                                <i class="fas fa-sword"></i>
+                            </div>
+                            <div class="defense-info">
+                                <div class="defense-name">Aparar</div>
+                                <div class="defense-formula">Arma/2 + 3</div>
+                            </div>
+                            <div class="defense-value">
+                                <div class="defense-base" id="parryBase">3</div>
+                                <div class="defense-mod">
+                                    <button class="mod-btn minus" data-defense="parry">-</button>
+                                    <span class="mod-value" id="parryMod">0</span>
+                                    <button class="mod-btn plus" data-defense="parry">+</button>
+                                </div>
+                                <div class="defense-total" id="parryTotal">3</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SEÇÃO DO MEIO: DANO E DESLOCAMENTO -->
+        <div class="combate-mid-section">
+            
+            <!-- CARD DE DANO -->
+            <div class="damage-card">
+                <div class="damage-header">
+                    <h3><i class="fas fa-bolt"></i> DANO</h3>
+                    <div class="damage-type-selector">
+                        <button class="dmg-type-btn active" data-type="thr">GdP</button>
+                        <button class="dmg-type-btn" data-type="sw">GeB</button>
+                    </div>
+                </div>
+                
+                <div class="damage-content">
+                    <div class="dmg-base-section">
+                        <div class="dmg-original">
+                            <div class="dmg-label">Dano Base (ST):</div>
+                            <div class="dmg-value" id="dmgThrBase">1d-2</div>
+                            <div class="dmg-value" id="dmgSwBase">1d</div>
+                        </div>
+                        
+                        <div class="dmg-weapon">
+                            <div class="dmg-label">Arma:</div>
+                            <select id="weaponSelect" class="weapon-select">
+                                <option value="none">Sem Arma</option>
+                                <option value="sword">Espada Longa (2d)</option>
+                                <option value="mace">Maça (2d+2)</option>
+                                <option value="bow">Arco (1d+2)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="dmg-modifiers">
+                        <div class="dmg-mod-group">
+                            <div class="dmg-label">Modificador:</div>
+                            <div class="mod-control">
+                                <button class="mod-btn minus" data-target="dmg">-</button>
+                                <span class="mod-value" id="dmgMod">0</span>
+                                <button class="mod-btn plus" data-target="dmg">+</button>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="pv-maximo-display">
-                        <div class="pv-label">
-                            <i class="fas fa-heartbeat"></i>
-                            PV Máximo:
-                        </div>
-                        <div class="pv-input-container">
-                            <input type="number" id="pvMaximo" class="pv-input" value="10" readonly>
-                        </div>
+                    <div class="dmg-final">
+                        <div class="dmg-label">Dano Final:</div>
+                        <div class="dmg-total" id="dmgTotal">1d-2</div>
                     </div>
                 </div>
-                
-                <!-- BARRA DE PV -->
-                <div class="pv-barra-container">
-                    <div class="pv-barra">
-                        <div class="pv-preenchimento" id="pvBarraPreenchimento" style="width: 100%"></div>
-                        <div class="pv-texto-barra" id="pvTextoBarra">10 / 10 (100%)</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- GRID PRINCIPAL: DEFESAS, DANO, DESLOCAMENTO -->
-        <div class="combate-grid">
-            
-            <!-- COLUNA ESQUERDA: DEFESAS -->
-            <div class="defesa-coluna">
-                
-                <!-- CARD ESQUIVA -->
-                <div class="defesa-card">
-                    <div class="defesa-header">
-                        <h3><i class="fas fa-running"></i> Esquiva</h3>
-                        <div class="defesa-base" id="esquivaBase">Base: 10</div>
-                    </div>
-                    <div class="defesa-formula">
-                        DX + HT/4 + 3 = <span id="esquivaFormula">10</span>
-                    </div>
-                    <div class="defesa-controles">
-                        <div class="defesa-grupo">
-                            <div class="defesa-label">Valor Base:</div>
-                            <input type="number" id="esquivaBaseInput" class="defesa-input" value="10" readonly>
-                        </div>
-                        <div class="defesa-grupo">
-                            <div class="defesa-label">Bônus/Redutor:</div>
-                            <input type="number" id="esquivaBonus" class="defesa-bonus-input" value="0" min="-10" max="10">
-                        </div>
-                        <div class="defesa-grupo">
-                            <div class="defesa-label">Valor Final:</div>
-                            <div class="defesa-valor" id="esquivaFinal">10</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- CARD BLOQUEIO -->
-                <div class="defesa-card">
-                    <div class="defesa-header">
-                        <h3><i class="fas fa-shield-alt"></i> Bloqueio</h3>
-                        <div class="defesa-base" id="bloqueioBase">Base: 3</div>
-                    </div>
-                    <div class="defesa-formula">
-                        Escudo/2 + 3 = <span id="bloqueioFormula">3</span>
-                    </div>
-                    <div class="defesa-controles">
-                        <div class="defesa-grupo">
-                            <div class="defesa-label">Valor Base:</div>
-                            <input type="number" id="bloqueioBaseInput" class="defesa-input" value="3" readonly>
-                        </div>
-                        <div class="defesa-grupo">
-                            <div class="defesa-label">Bônus/Redutor:</div>
-                            <input type="number" id="bloqueioBonus" class="defesa-bonus-input" value="0" min="-10" max="10">
-                        </div>
-                        <div class="defesa-grupo">
-                            <div class="defesa-label">Valor Final:</div>
-                            <div class="defesa-valor" id="bloqueioFinal">3</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- CARD APARAR -->
-                <div class="defesa-card">
-                    <div class="defesa-header">
-                        <h3><i class="fas fa-sword"></i> Aparar</h3>
-                        <div class="defesa-base" id="apararBase">Base: 3</div>
-                    </div>
-                    <div class="defesa-formula">
-                        NH da Arma/2 + 3 = <span id="apararFormula">3</span>
-                    </div>
-                    <div class="defesa-controles">
-                        <div class="defesa-grupo">
-                            <div class="defesa-label">Valor Base:</div>
-                            <input type="number" id="apararBaseInput" class="defesa-input" value="3" readonly>
-                        </div>
-                        <div class="defesa-grupo">
-                            <div class="defesa-label">Bônus/Redutor:</div>
-                            <input type="number" id="apararBonus" class="defesa-bonus-input" value="0" min="-10" max="10">
-                        </div>
-                        <div class="defesa-grupo">
-                            <div class="defesa-label">Valor Final:</div>
-                            <div class="defesa-valor" id="apararFinal">3</div>
-                        </div>
-                    </div>
-                </div>
-                
             </div>
             
-            <!-- COLUNA DIREITA: DANO E DESLOCAMENTO -->
-            <div class="dano-deslocamento-coluna">
-                
-                <!-- CARD DANO BÁSICO -->
-                <div class="dano-card">
-                    <div class="dano-header">
-                        <h3><i class="fas fa-bolt"></i> Dano Básico</h3>
-                    </div>
-                    <div class="dano-conteudo">
-                        <div class="dano-original">
-                            <div class="dano-original-label">Dano Base (Arma):</div>
-                            <div class="dano-original-valor" id="danoBaseArma">1d</div>
-                        </div>
-                        <div class="dano-bonus-control">
-                            <div class="dano-bonus-label">Bônus/Redutor Situacional:</div>
-                            <input type="text" id="danoBonusInput" class="dano-bonus-input" value="0" placeholder="Ex: +2, -1">
-                        </div>
-                        <div class="dano-final">
-                            <div class="dano-final-label">Dano Final:</div>
-                            <div class="dano-final-valor" id="danoFinal">1d</div>
-                        </div>
-                    </div>
+            <!-- CARD DESLOCAMENTO -->
+            <div class="movement-card">
+                <div class="movement-header">
+                    <h3><i class="fas fa-walking"></i> DESLOCAMENTO</h3>
                 </div>
                 
-                <!-- CARD DESLOCAMENTO -->
-                <div class="deslocamento-card">
-                    <div class="deslocamento-header">
-                        <h3><i class="fas fa-walking"></i> Deslocamento</h3>
+                <div class="movement-content">
+                    <div class="movement-base">
+                        <div class="movement-label">Base (DX,HT):</div>
+                        <div class="movement-value" id="moveBase">5.00</div>
                     </div>
-                    <div class="deslocamento-conteudo">
-                        <div class="deslocamento-base">
-                            <div class="deslocamento-label">Base (Atributos):</div>
-                            <div class="deslocamento-valor" id="deslocamentoBase">5.00</div>
-                        </div>
-                        <div class="deslocamento-bonus-control">
-                            <div class="deslocamento-bonus-label">Bônus/Redutor:</div>
-                            <input type="number" id="deslocamentoBonus" class="deslocamento-bonus-input" value="0" step="0.25" min="-5" max="5">
-                        </div>
-                        <div class="deslocamento-final">
-                            <div class="deslocamento-label">Deslocamento Final:</div>
-                            <div class="deslocamento-valor" id="deslocamentoFinal">5.00</div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        
-        <!-- SEÇÃO RD (RESISTÊNCIA A DANO) -->
-        <div class="secao-rd">
-            <div class="rd-grid">
-                
-                <!-- TABELA DE REDUTORES -->
-                <div class="redutores-card">
-                    <h3><i class="fas fa-crosshairs"></i> Redutores por Local</h3>
-                    <table class="redutores-tabela">
-                        <thead>
-                            <tr>
-                                <th>Parte do Corpo</th>
-                                <th>Redutor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Tronco</td><td>0</td></tr>
-                            <tr><td>Órgãos Vitais</td><td>-3</td></tr>
-                            <tr><td>Crânio</td><td>-7</td></tr>
-                            <tr><td>Olho</td><td>-9</td></tr>
-                            <tr><td>Rosto</td><td>-5</td></tr>
-                            <tr><td>Pescoço</td><td>-5</td></tr>
-                            <tr><td>Virilha</td><td>-3</td></tr>
-                            <tr><td>Braços ou Pernas</td><td>-2</td></tr>
-                            <tr><td>Mãos ou Pés</td><td>-4</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- SISTEMA DE RD POR PARTES -->
-                <div class="rd-partes-card">
-                    <div class="rd-partes-header">
-                        <h3><i class="fas fa-user-shield"></i> RD por Parte do Corpo</h3>
-                        <div class="grupos-armadura">
-                            <button class="grupo-btn" data-grupo="traje-completo">
-                                <i class="fas fa-tshirt"></i> Traje Completo
-                            </button>
-                            <button class="grupo-btn" data-grupo="cabeça">
-                                <i class="fas fa-head-side-virus"></i> Cabeça
-                            </button>
-                            <button class="grupo-btn" data-grupo="torso">
-                                <i class="fas fa-user"></i> Torso
-                            </button>
-                            <button class="grupo-btn" data-grupo="membros">
-                                <i class="fas fa-running"></i> Membros
-                            </button>
+                    
+                    <div class="movement-modifiers">
+                        <div class="movement-mod-group">
+                            <div class="movement-label">Modificador:</div>
+                            <div class="mod-control">
+                                <button class="mod-btn minus" data-target="move">-</button>
+                                <span class="mod-value" id="moveMod">0</span>
+                                <button class="mod-btn plus" data-target="move">+</button>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="partes-grid" id="partes-corpo-grid">
-                        <!-- As partes do corpo serão geradas dinamicamente -->
+                    <div class="movement-final">
+                        <div class="movement-label">Deslocamento Final:</div>
+                        <div class="movement-total" id="moveTotal">5.00</div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- SEÇÃO OF (FADIGA) E CONDIÇÕES -->
-        <div class="combate-grid">
+        <!-- SEÇÃO INFERIOR: RD E CONDIÇÕES -->
+        <div class="combate-bottom-section">
             
-            <!-- COLUNA ESQUERDA: OF -->
-            <div class="of-coluna">
-                <div class="secao-of">
-                    <div class="of-card">
-                        <div class="of-header">
-                            <h3><i class="fas fa-wind"></i> Pontos de Fadiga (OF)</h3>
-                        </div>
-                        <div class="of-conteudo">
-                            <div class="of-control">
-                                <div class="of-label">
-                                    <i class="fas fa-battery-full"></i>
-                                    OF Atual:
-                                </div>
-                                <input type="number" id="ofAtual" class="of-input" value="10" min="0" max="50">
+            <!-- CARD RD -->
+            <div class="dr-card">
+                <div class="dr-header">
+                    <h3><i class="fas fa-user-shield"></i> RESISTÊNCIA A DANO (RD)</h3>
+                </div>
+                
+                <div class="dr-content">
+                    <div class="dr-locations">
+                        <div class="dr-location">
+                            <div class="dr-loc-name">Cabeça</div>
+                            <div class="dr-loc-value">
+                                <input type="number" class="dr-input" value="0" min="0" max="99" data-location="head">
                             </div>
-                            <div class="of-control">
-                                <div class="of-label">
-                                    <i class="fas fa-battery-empty"></i>
-                                    OF Máximo (HT):
-                                </div>
-                                <input type="number" id="ofMaximo" class="of-input" value="10" readonly>
+                        </div>
+                        <div class="dr-location">
+                            <div class="dr-loc-name">Torso</div>
+                            <div class="dr-loc-value">
+                                <input type="number" class="dr-input" value="0" min="0" max="99" data-location="torso">
+                            </div>
+                        </div>
+                        <div class="dr-location">
+                            <div class="dr-loc-name">Braços</div>
+                            <div class="dr-loc-value">
+                                <input type="number" class="dr-input" value="0" min="0" max="99" data-location="arms">
+                            </div>
+                        </div>
+                        <div class="dr-location">
+                            <div class="dr-loc-name">Pernas</div>
+                            <div class="dr-loc-value">
+                                <input type="number" class="dr-input" value="0" min="0" max="99" data-location="legs">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- COLUNA DIREITA: CONDIÇÕES -->
-            <div class="condicoes-coluna">
-                <div class="secao-condicoes">
-                    <div class="condicoes-card">
-                        <div class="condicoes-header">
-                            <h3><i class="fas fa-clipboard-list"></i> Condições em Combate</h3>
-                        </div>
-                        <div class="condicoes-grid" id="condicoes-grid">
-                            <!-- Condições serão adicionadas dinamicamente -->
-                        </div>
-                    </div>
+            <!-- CARD CONDIÇÕES -->
+            <div class="conditions-card">
+                <div class="conditions-header">
+                    <h3><i class="fas fa-clipboard-list"></i> CONDIÇÕES</h3>
+                </div>
+                
+                <div class="conditions-grid" id="conditionsGrid">
+                    <!-- Condições serão adicionadas dinamicamente -->
                 </div>
             </div>
+        </div>
+        
+        <!-- TABELA DE REDUTORES -->
+        <div class="hit-location-table">
+            <h3><i class="fas fa-crosshairs"></i> TABELA DE REDUTORES</h3>
+            <table class="hit-table">
+                <thead>
+                    <tr>
+                        <th>Local</th>
+                        <th>Penalidade</th>
+                        <th>Exemplo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Tronco</td><td>0</td><td>Corpo principal</td></tr>
+                    <tr><td>Órgãos</td><td>-3</td><td>Coração, pulmões</td></tr>
+                    <tr><td>Crânio</td><td>-7</td><td>Osso do crânio</td></tr>
+                    <tr><td>Olho</td><td>-9</td><td>Globo ocular</td></tr>
+                    <tr><td>Rosto</td><td>-5</td><td>Face, bochechas</td></tr>
+                    <tr><td>Pescoço</td><td>-5</td><td>Garganta, jugular</td></tr>
+                    <tr><td>Virilha</td><td>-3</td><td>Genitais</td></tr>
+                    <tr><td>Membros</td><td>-2</td><td>Braços, pernas</td></tr>
+                    <tr><td>Extremidades</td><td>-4</td><td>Mãos, pés</td></tr>
+                </tbody>
+            </table>
         </div>
         
     </div>
-</div><!-- FIM DA ABA COMBATE -->
+</div>
 
         <!-- ABA RESUMO -->
         <div id="resumo" class="tab-content">
@@ -2785,7 +2776,7 @@
             </div>
         </div>
 
-    </main> <!-- FIM DO MAIN -->
+    </main> 
 
     
     <!-- MOVER A FUNÇÃO toggleSubmenu PARA AQUI (estava quebrando a estrutura) -->
