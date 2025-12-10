@@ -13,14 +13,14 @@
     gap: 15px;
 }
 
-/* PRIMEIRA LINHA: PV E PF */
+/* PRIMEIRA LINHA: PV E PF (70/30) */
 .combate-row:nth-child(1) {
     grid-template-columns: 2fr 1fr;
 }
 
-/* SEGUNDA LINHA: DANO E DEFESAS */
+/* SEGUNDA LINHA: DANO E DEFESAS (50/50 COM GAP) */
 .combate-row:nth-child(2) {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: calc(50% - 7.5px) calc(50% - 7.5px);
 }
 
 /* TERCEIRA LINHA: RD */
@@ -310,7 +310,7 @@
 .faixa-item[data-cor="#9b59b6"]::before { background: #9b59b6; }
 .faixa-item[data-cor="#7f8c8d"]::before { background: #7f8c8d; }
 
-/* ===== CARD PF ===== */
+/* ===== CARD PF (REAJUSTADO) ===== */
 .pf-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(52, 152, 219, 0.4);
@@ -318,6 +318,8 @@
     padding: 20px;
     position: relative;
     overflow: hidden;
+    height: fit-content;
+    min-height: 380px;
 }
 
 .pf-card::before {
@@ -335,6 +337,8 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .pf-header h3 {
@@ -343,56 +347,81 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex: 1;
+    min-width: 200px;
 }
 
 .pf-extra-control {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .pf-content {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    height: calc(100% - 60px);
+}
+
+/* ESCALA VISUAL DO PF */
+.pf-escala {
+    position: relative;
+    height: 35px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin: 5px 0;
+}
+
+.pf-marcador {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .pf-base-info {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    gap: 20px;
+    gap: 15px;
     align-items: center;
+    padding: 0 5px;
 }
 
 .pf-base-group {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .pf-label {
     color: #ccc;
     font-size: 0.9rem;
-    min-width: 60px;
+    min-width: 45px;
 }
 
 .pf-ht-input {
-    width: 60px;
+    width: 55px;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(52, 152, 219, 0.3);
     border-radius: 6px;
     color: #3498db;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: bold;
     text-align: center;
-    padding: 8px;
+    padding: 6px;
 }
 
 .pf-atual-control {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex: 1;
+    min-width: 200px;
 }
 
 .pf-atual-input {
@@ -401,32 +430,33 @@
     border: 2px solid rgba(52, 152, 219, 0.5);
     border-radius: 8px;
     color: #fff;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: bold;
     text-align: center;
-    padding: 10px;
-    min-width: 80px;
+    padding: 8px;
+    min-width: 60px;
 }
 
 .pf-btn {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     border: none;
     border-radius: 8px;
     background: linear-gradient(45deg, #e74c3c, #c0392b);
     color: white;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .pf-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
 }
 
 .pf-btn.plus {
@@ -436,10 +466,11 @@
 /* BARRA DE PF */
 .pf-barra-container {
     width: 100%;
+    margin: 5px 0;
 }
 
 .pf-barra {
-    height: 50px;
+    height: 40px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     overflow: hidden;
@@ -464,12 +495,27 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: bold;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* ===== CARD DANO GURPS ===== */
+/* LEGENDA DAS FAIXAS DO PF */
+.pf-faixas {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
+
+.pf-faixas .faixa-item {
+    font-size: 0.75rem;
+    padding: 5px 3px;
+}
+
+/* ===== CARD DANO GURPS (AGORA 50%) ===== */
 .dano-gurps-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(241, 196, 15, 0.4);
@@ -477,6 +523,7 @@
     padding: 20px;
     position: relative;
     overflow: hidden;
+    height: fit-content;
 }
 
 .dano-gurps-card::before {
@@ -511,7 +558,7 @@
 .dano-base-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 15px;
 }
 
 .dano-tipo-card {
@@ -530,73 +577,87 @@
 .dano-tipo-header {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     margin-bottom: 15px;
 }
 
 .dano-tipo-icon {
     color: #f1c40f;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.dano-tipo-title {
+    flex: 1;
+    min-width: 0;
 }
 
 .dano-tipo-title h4 {
     color: #fff;
-    font-size: 1rem;
-    margin: 0 0 4px 0;
+    font-size: 0.95rem;
+    margin: 0 0 3px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .dano-formula {
     color: #95a5a6;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-style: italic;
+    white-space: nowrap;
 }
 
 .dano-tipo-content {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .dano-base-group, .dano-mod-group, .dano-final-group {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 10px;
 }
 
 .dano-label {
     color: #ccc;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
 }
 
 .dano-base-valor {
     color: #f1c40f;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: bold;
+    white-space: nowrap;
 }
 
 .mod-control {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: rgba(255, 255, 255, 0.1);
-    padding: 5px 10px;
+    padding: 4px 8px;
     border-radius: 6px;
     border: 1px solid rgba(241, 196, 15, 0.3);
 }
 
 .mod-btn {
-    width: 25px;
-    height: 25px;
+    width: 22px;
+    height: 22px;
     border: none;
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.1);
     color: #f1c40f;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .mod-btn:hover {
@@ -613,25 +674,26 @@
 }
 
 .mod-value {
-    min-width: 25px;
+    min-width: 20px;
     text-align: center;
     color: #fff;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .dano-final-valor {
     color: #fff;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
 }
 
-/* LINHA DE ARMAS */
+/* LINHA DE ARMAS (MELHORADA) */
 .armas-row {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 15px;
     align-items: center;
     padding: 15px;
     background: rgba(241, 196, 15, 0.1);
@@ -639,10 +701,17 @@
     border: 1px solid rgba(241, 196, 15, 0.2);
 }
 
-.arma-select-group {
+@media (max-width: 768px) {
+    .armas-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+.arma-select-group, .arma-dano-display, .arma-tipo-display {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .arma-select {
@@ -650,10 +719,11 @@
     border: 1px solid rgba(241, 196, 15, 0.3);
     border-radius: 6px;
     color: #f1c40f;
-    font-size: 0.9rem;
-    padding: 8px 12px;
+    font-size: 0.85rem;
+    padding: 8px 10px;
     cursor: pointer;
     transition: all 0.2s ease;
+    width: 100%;
 }
 
 .arma-select:focus {
@@ -662,34 +732,38 @@
     box-shadow: 0 0 8px rgba(241, 196, 15, 0.3);
 }
 
-.arma-dano-display {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.arma-dano-valor {
+.arma-dano-valor, .arma-tipo-valor {
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: bold;
     text-align: center;
-    padding: 10px;
+    padding: 8px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 6px;
     border: 1px solid rgba(241, 196, 15, 0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* ===== CARD DEFESAS ===== */
-.defesas-compacto-card {
+.arma-tipo-valor {
+    color: #95a5a6;
+    font-size: 0.9rem;
+    font-weight: normal;
+}
+
+/* ===== CARD DEFESAS (AGORA 50% E MAIS ESPAÇOSO) ===== */
+.defesas-card {
     background: rgba(30, 30, 40, 0.95);
     border: 2px solid rgba(155, 89, 182, 0.4);
     border-radius: 12px;
     padding: 20px;
     position: relative;
     overflow: hidden;
+    height: fit-content;
 }
 
-.defesas-compacto-card::before {
+.defesas-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -714,22 +788,22 @@
 .defesas-content {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
-.defesa-item, .deslocamento-item {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 20px;
+.defesa-item {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: 12px;
+    padding: 12px 15px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.2s ease;
+    gap: 15px;
 }
 
-.defesa-item:hover, .deslocamento-item:hover {
+.defesa-item:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(155, 89, 182, 0.3);
 }
@@ -737,69 +811,92 @@
 .defesa-info {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
+    min-width: 120px;
 }
 
 .defesa-icon {
     color: #9b59b6;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    flex-shrink: 0;
 }
 
 .defesa-detalhes {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 
 .defesa-nome {
     color: #fff;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .defesa-formula {
     color: #95a5a6;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-style: italic;
+    white-space: nowrap;
 }
 
 .defesa-valores {
     display: flex;
     align-items: center;
     gap: 15px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex: 1;
+}
+
+.defesa-base-group, .defesa-mod-group, .defesa-total-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 60px;
+}
+
+.defesa-base-label, .defesa-mod-label, .defesa-total-label {
+    color: #95a5a6;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .defesa-base {
-    min-width: 35px;
-    text-align: center;
     color: #9b59b6;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    text-align: center;
+    min-width: 40px;
 }
 
 .defesa-mod-control {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: rgba(255, 255, 255, 0.1);
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 6px;
     border: 1px solid rgba(155, 89, 182, 0.3);
 }
 
 .defesa-mod-btn {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border: none;
     border-radius: 4px;
     background: rgba(155, 89, 182, 0.3);
     color: #9b59b6;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .defesa-mod-btn:hover {
@@ -816,16 +913,16 @@
 }
 
 .defesa-mod {
-    min-width: 25px;
+    min-width: 20px;
     text-align: center;
     color: #fff;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .defesa-total {
     min-width: 45px;
-    height: 40px;
+    height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -834,81 +931,25 @@
     border-radius: 8px;
     color: #fff;
     font-weight: bold;
-    font-size: 1.1rem;
-}
-
-/* DESLOCAMENTO */
-.deslocamento-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.deslocamento-icon {
-    color: #2ecc71;
-    font-size: 1.2rem;
-}
-
-.deslocamento-detalhes {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.deslocamento-nome {
-    color: #fff;
-    font-weight: 600;
-    font-size: 0.95rem;
-}
-
-.deslocamento-formula {
-    color: #95a5a6;
-    font-size: 0.75rem;
-    font-style: italic;
-}
-
-.deslocamento-valores {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.deslocamento-base, .deslocamento-total {
-    min-width: 50px;
-    text-align: center;
-    color: #2ecc71;
-    font-weight: bold;
     font-size: 1rem;
 }
 
-.deslocamento-total {
-    min-width: 55px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* DESLOCAMENTO ESPECIAL */
+.deslocamento-item .defesa-icon {
+    color: #2ecc71;
+}
+
+.deslocamento-item .defesa-base {
+    color: #2ecc71;
+}
+
+.deslocamento-item .defesa-mod-control {
+    border-color: rgba(46, 204, 113, 0.3);
+}
+
+.deslocamento-item .defesa-total {
     background: rgba(46, 204, 113, 0.2);
-    border: 2px solid rgba(46, 204, 113, 0.5);
-    border-radius: 8px;
-    color: #fff;
-}
-
-.deslocamento-mod-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 10px;
-    border-radius: 6px;
-    border: 1px solid rgba(46, 204, 113, 0.3);
-}
-
-.deslocamento-mod {
-    min-width: 25px;
-    text-align: center;
-    color: #fff;
-    font-weight: bold;
-    font-size: 0.9rem;
+    border-color: rgba(46, 204, 113, 0.5);
 }
 
 /* ===== CARD RD COMPLETO ===== */
@@ -1178,7 +1219,7 @@
     }
 }
 
-.pv-completo-card, .pf-card, .dano-gurps-card, .defesas-compacto-card,
+.pv-completo-card, .pf-card, .dano-gurps-card, .defesas-card,
 .rd-completo-card, .tabela-redutores-card, .condicoes-card {
     animation: aparecerSuave 0.5s ease forwards;
 }
@@ -1186,7 +1227,7 @@
 .pv-completo-card { animation-delay: 0.1s; }
 .pf-card { animation-delay: 0.2s; }
 .dano-gurps-card { animation-delay: 0.3s; }
-.defesas-compacto-card { animation-delay: 0.4s; }
+.defesas-card { animation-delay: 0.4s; }
 .rd-completo-card { animation-delay: 0.5s; }
 .tabela-redutores-card { animation-delay: 0.6s; }
 .condicoes-card { animation-delay: 0.7s; }
@@ -1236,4 +1277,53 @@ input:focus, select:focus, button:focus {
     white-space: nowrap;
     z-index: 1000;
     border: 1px solid rgba(255, 140, 0, 0.3);
+}
+
+/* RESPONSIVIDADE EXTRA */
+@media (max-width: 1100px) {
+    .combate-row:nth-child(1) {
+        grid-template-columns: 1fr;
+    }
+    
+    .combate-row:nth-child(2) {
+        grid-template-columns: 1fr;
+    }
+    
+    .dano-base-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .defesa-valores {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 576px) {
+    .pv-base-info, .pf-base-info {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .pv-faixas, .pf-faixas {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .armas-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .defesa-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .defesa-valores {
+        justify-content: space-around;
+    }
+    
+    .condicoes-grid {
+        grid-template-columns: 1fr;
+    }
 }

@@ -2536,7 +2536,7 @@
                 </div>
             </div>
             
-            <!-- CARD PF -->
+            <!-- CARD PF (REAJUSTADO) -->
             <div class="pf-card">
                 <div class="pf-header">
                     <h3><i class="fas fa-wind"></i> PONTOS DE FADIGA (PF)</h3>
@@ -2547,6 +2547,30 @@
                 </div>
                 
                 <div class="pf-content">
+                    <!-- ESCALA VISUAL DO PF (NOVA) -->
+                    <div class="pf-escala">
+                        <div class="pf-marcador" style="left: 0%">
+                            <div class="marcador-valor">0</div>
+                            <div class="marcador-line"></div>
+                        </div>
+                        <div class="pf-marcador" style="left: 25%">
+                            <div class="marcador-valor">-1×HT</div>
+                            <div class="marcador-line"></div>
+                        </div>
+                        <div class="pf-marcador" style="left: 50%">
+                            <div class="marcador-valor">-2×HT</div>
+                            <div class="marcador-line"></div>
+                        </div>
+                        <div class="pf-marcador" style="left: 75%">
+                            <div class="marcador-valor">-3×HT</div>
+                            <div class="marcador-line"></div>
+                        </div>
+                        <div class="pf-marcador" style="left: 100%">
+                            <div class="marcador-valor">-4×HT</div>
+                            <div class="marcador-line"></div>
+                        </div>
+                    </div>
+                    
                     <div class="pf-base-info">
                         <div class="pf-base-group">
                             <div class="pf-label">HT:</div>
@@ -2568,14 +2592,22 @@
                             <div class="pf-texto" id="pfTexto">10</div>
                         </div>
                     </div>
+                    
+                    <!-- LEGENDA DAS FAIXAS DO PF -->
+                    <div class="pf-faixas">
+                        <div class="faixa-item" data-cor="#3498db">Normal</div>
+                        <div class="faixa-item" data-cor="#f1c40f">Fadiga Moderada</div>
+                        <div class="faixa-item" data-cor="#e67e22">Exaustão</div>
+                        <div class="faixa-item" data-cor="#e74c3c">Colapso</div>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- SEGUNDA LINHA: DANO DUPLO -->
+        <!-- SEGUNDA LINHA: DANO E DEFESAS (AGORA 50/50) -->
         <div class="combate-row">
             
-            <!-- CARD DANO GURPS -->
+            <!-- CARD DANO GURPS (AGORA 50%) -->
             <div class="dano-gurps-card">
                 <div class="dano-header">
                     <h3><i class="fas fa-bolt"></i> DANO DO PERSONAGEM</h3>
@@ -2591,7 +2623,7 @@
                                     <i class="fas fa-fist-raised"></i>
                                 </div>
                                 <div class="dano-tipo-title">
-                                    <h4>GdP</h4>
+                                    <h4>Golpe de Punho (GdP)</h4>
                                     <div class="dano-formula">(ST-5)/2</div>
                                 </div>
                             </div>
@@ -2625,7 +2657,7 @@
                                     <i class="fas fa-hand-rock"></i>
                                 </div>
                                 <div class="dano-tipo-title">
-                                    <h4>GeB</h4>
+                                    <h4>Golpe de Braço (GeB)</h4>
                                     <div class="dano-formula">(ST)/2</div>
                                 </div>
                             </div>
@@ -2670,12 +2702,17 @@
                             <div class="dano-label">Dano da Arma:</div>
                             <div class="arma-dano-valor" id="armaDano">-</div>
                         </div>
+                        
+                        <div class="arma-tipo-display">
+                            <div class="dano-label">Tipo de Dano:</div>
+                            <div class="arma-tipo-valor" id="armaTipo">-</div>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- CARD DEFESAS -->
-            <div class="defesas-compacto-card">
+            <!-- CARD DEFESAS (AGORA 50% E MAIS ESPAÇOSO) -->
+            <div class="defesas-card">
                 <div class="defesas-header">
                     <h3><i class="fas fa-shield-alt"></i> DEFESAS</h3>
                 </div>
@@ -2694,13 +2731,22 @@
                         </div>
                         
                         <div class="defesa-valores">
-                            <div class="defesa-base" id="esquivaBase">10</div>
-                            <div class="defesa-mod-control">
-                                <button class="defesa-mod-btn minus">-</button>
-                                <span class="defesa-mod" id="esquivaMod">0</span>
-                                <button class="defesa-mod-btn plus">+</button>
+                            <div class="defesa-base-group">
+                                <div class="defesa-base-label">Base:</div>
+                                <div class="defesa-base" id="esquivaBase">10</div>
                             </div>
-                            <div class="defesa-total" id="esquivaTotal">10</div>
+                            <div class="defesa-mod-group">
+                                <div class="defesa-mod-label">Mod:</div>
+                                <div class="defesa-mod-control">
+                                    <button class="defesa-mod-btn minus">-</button>
+                                    <span class="defesa-mod" id="esquivaMod">0</span>
+                                    <button class="defesa-mod-btn plus">+</button>
+                                </div>
+                            </div>
+                            <div class="defesa-total-group">
+                                <div class="defesa-total-label">Total:</div>
+                                <div class="defesa-total" id="esquivaTotal">10</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -2717,13 +2763,22 @@
                         </div>
                         
                         <div class="defesa-valores">
-                            <div class="defesa-base" id="bloqueioBase">3</div>
-                            <div class="defesa-mod-control">
-                                <button class="defesa-mod-btn minus">-</button>
-                                <span class="defesa-mod" id="bloqueioMod">0</span>
-                                <button class="defesa-mod-btn plus">+</button>
+                            <div class="defesa-base-group">
+                                <div class="defesa-base-label">Base:</div>
+                                <div class="defesa-base" id="bloqueioBase">3</div>
                             </div>
-                            <div class="defesa-total" id="bloqueioTotal">3</div>
+                            <div class="defesa-mod-group">
+                                <div class="defesa-mod-label">Mod:</div>
+                                <div class="defesa-mod-control">
+                                    <button class="defesa-mod-btn minus">-</button>
+                                    <span class="defesa-mod" id="bloqueioMod">0</span>
+                                    <button class="defesa-mod-btn plus">+</button>
+                                </div>
+                            </div>
+                            <div class="defesa-total-group">
+                                <div class="defesa-total-label">Total:</div>
+                                <div class="defesa-total" id="bloqueioTotal">3</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -2740,36 +2795,54 @@
                         </div>
                         
                         <div class="defesa-valores">
-                            <div class="defesa-base" id="apararBase">3</div>
-                            <div class="defesa-mod-control">
-                                <button class="defesa-mod-btn minus">-</button>
-                                <span class="defesa-mod" id="apararMod">0</span>
-                                <button class="defesa-mod-btn plus">+</button>
+                            <div class="defesa-base-group">
+                                <div class="defesa-base-label">Base:</div>
+                                <div class="defesa-base" id="apararBase">3</div>
                             </div>
-                            <div class="defesa-total" id="apararTotal">3</div>
+                            <div class="defesa-mod-group">
+                                <div class="defesa-mod-label">Mod:</div>
+                                <div class="defesa-mod-control">
+                                    <button class="defesa-mod-btn minus">-</button>
+                                    <span class="defesa-mod" id="apararMod">0</span>
+                                    <button class="defesa-mod-btn plus">+</button>
+                                </div>
+                            </div>
+                            <div class="defesa-total-group">
+                                <div class="defesa-total-label">Total:</div>
+                                <div class="defesa-total" id="apararTotal">3</div>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- DESLOCAMENTO -->
-                    <div class="deslocamento-item">
-                        <div class="deslocamento-info">
-                            <div class="deslocamento-icon">
+                    <div class="defesa-item deslocamento-item" data-tipo="deslocamento">
+                        <div class="defesa-info">
+                            <div class="defesa-icon">
                                 <i class="fas fa-walking"></i>
                             </div>
-                            <div class="deslocamento-detalhes">
-                                <div class="deslocamento-nome">Deslocamento</div>
-                                <div class="deslocamento-formula">(DX+HT)/4</div>
+                            <div class="defesa-detalhes">
+                                <div class="defesa-nome">Deslocamento</div>
+                                <div class="defesa-formula">(DX+HT)/4</div>
                             </div>
                         </div>
                         
-                        <div class="deslocamento-valores">
-                            <div class="deslocamento-base" id="deslocamentoBase">5.00</div>
-                            <div class="deslocamento-mod-control">
-                                <button class="defesa-mod-btn minus">-</button>
-                                <span class="deslocamento-mod" id="deslocamentoMod">0</span>
-                                <button class="defesa-mod-btn plus">+</button>
+                        <div class="defesa-valores">
+                            <div class="defesa-base-group">
+                                <div class="defesa-base-label">Base:</div>
+                                <div class="defesa-base" id="deslocamentoBase">5.00</div>
                             </div>
-                            <div class="deslocamento-total" id="deslocamentoTotal">5.00</div>
+                            <div class="defesa-mod-group">
+                                <div class="defesa-mod-label">Mod:</div>
+                                <div class="defesa-mod-control">
+                                    <button class="defesa-mod-btn minus">-</button>
+                                    <span class="defesa-mod" id="deslocamentoMod">0</span>
+                                    <button class="defesa-mod-btn plus">+</button>
+                                </div>
+                            </div>
+                            <div class="defesa-total-group">
+                                <div class="defesa-total-label">Total:</div>
+                                <div class="defesa-total" id="deslocamentoTotal">5.00</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2947,6 +3020,38 @@
                 <div class="condicoes-content">
                     <div class="condicoes-grid" id="condicoesGrid">
                         <!-- Condições serão adicionadas dinamicamente -->
+                        <div class="condicao-item">
+                            <div class="condicao-checkbox"></div>
+                            <div class="condicao-nome">Inconsciente</div>
+                        </div>
+                        <div class="condicao-item ativa">
+                            <div class="condicao-checkbox"></div>
+                            <div class="condicao-nome">Machucado</div>
+                        </div>
+                        <div class="condicao-item">
+                            <div class="condicao-checkbox"></div>
+                            <div class="condicao-nome">Fadigado</div>
+                        </div>
+                        <div class="condicao-item">
+                            <div class="condicao-checkbox"></div>
+                            <div class="condicao-nome">Enjoado</div>
+                        </div>
+                        <div class="condicao-item">
+                            <div class="condicao-checkbox"></div>
+                            <div class="condicao-nome">Atordoado</div>
+                        </div>
+                        <div class="condicao-item">
+                            <div class="condicao-checkbox"></div>
+                            <div class="condicao-nome">Cego</div>
+                        </div>
+                        <div class="condicao-item">
+                            <div class="condicao-checkbox"></div>
+                            <div class="condicao-nome">Surdo</div>
+                        </div>
+                        <div class="condicao-item">
+                            <div class="condicao-checkbox"></div>
+                            <div class="condicao-nome">Paralisado</div>
+                        </div>
                     </div>
                 </div>
             </div>
