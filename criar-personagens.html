@@ -1647,1092 +1647,237 @@
   </div>
 </div>
     
-<!-- ABA MAGIAS -->
-<div id="magia" class="tab-content">
-  <div class="container-principal">
-    
-    <!-- STATUS MÁGICO -->
-    <div class="status-cards-container">
-      <div class="card-magia-status">
-        <h3><i class="fas fa-hat-wizard"></i> Status Mágico</h3>
-        <div class="magia-status-grid">
-          <div class="magia-status-item">
-            <label><i class="fas fa-wand-magic"></i> Aptidão Mágica:</label>
-            <input type="number" id="aptidao-magica" value="0" min="0" max="10">
-          </div>
-          <div class="magia-status-item">
-            <label><i class="fas fa-brain"></i> IQ Mágico:</label>
-            <span id="iq-magico">10</span>
-          </div>
-          <div class="magia-status-item">
-            <label><i class="fas fa-tint"></i> Mana Base:</label>
-            <span id="mana-base">10</span>
-          </div>
-          <div class="magia-status-item">
-            <label><i class="fas fa-battery-half"></i> Mana Atual:</label>
-            <input type="number" id="mana-atual" value="10" min="0" max="50">
-          </div>
-          <div class="magia-status-item">
-            <label><i class="fas fa-plus-circle"></i> Bônus de Mana:</label>
-            <input type="number" id="bonus-mana" value="0" min="0" max="20">
-          </div>
-          <div class="magia-status-item total">
-            <label><i class="fas fa-coins"></i> Total Gasto:</label>
-            <span id="total-gasto-magia">0</span> pts
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
-    <div class="sistema-aquisicao-magia">
-      
-      <!-- COLUNA ESQUERDA - CATÁLOGO -->
-      <div class="catalog-column-magia">
-        <div class="catalog-section-magia">
-          <h3><i class="fas fa-book"></i> Catálogo de Magias</h3>
-          
-          <!-- BARRA DE BUSCA -->
-          <div class="busca-magias">
-            <input type="text" placeholder="🔍 Buscar magias..." class="search-input" id="busca-magias">
-          </div>
-          
-          <!-- FILTROS COM SUBMENUS (como nas perícias) -->
-          <div class="filtros-container-magia">
-            
-            <!-- FILTRO ESCOLAS -->
-            <div class="filtro-grupo">
-              <div class="filtro-header" onclick="toggleSubmenu('escolas-submenu')">
-                <i class="fas fa-graduation-cap"></i>
-                <span>Escolas de Magia</span>
-                <i class="fas fa-chevron-down"></i>
-              </div>
-              <div class="filtro-submenu" id="escolas-submenu">
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-todas" checked>
-                  <label for="escola-todas">Todas as Escolas</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-agua" class="escola-checkbox" checked>
-                  <label for="escola-agua">Água</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-ar" class="escola-checkbox" checked>
-                  <label for="escola-ar">Ar</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-compreensao" class="escola-checkbox" checked>
-                  <label for="escola-compreensao">Compreensão e Empatia</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-controle-mente" class="escola-checkbox" checked>
-                  <label for="escola-controle-mente">Controle da Mente</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-controle-corpo" class="escola-checkbox" checked>
-                  <label for="escola-controle-corpo">Controle do Corpo</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-cura" class="escola-checkbox" checked>
-                  <label for="escola-cura">Cura</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-deslocamento" class="escola-checkbox" checked>
-                  <label for="escola-deslocamento">Deslocamento</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-fogo" class="escola-checkbox" checked>
-                  <label for="escola-fogo">Fogo</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-luz-trevas" class="escola-checkbox" checked>
-                  <label for="escola-luz-trevas">Luz e Trevas</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-necromancia" class="escola-checkbox" checked>
-                  <label for="escola-necromancia">Necromancia</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-portal" class="escola-checkbox" checked>
-                  <label for="escola-portal">Portal</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-protecao" class="escola-checkbox" checked>
-                  <label for="escola-protecao">Proteção e Aviso</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-reconhecimento" class="escola-checkbox" checked>
-                  <label for="escola-reconhecimento">Reconhecimento</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-terra" class="escola-checkbox" checked>
-                  <label for="escola-terra">Terra</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="escola-metamagica" class="escola-checkbox" checked>
-                  <label for="escola-metamagica">Metamágica</label>
-                </div>
-              </div>
-            </div>
-
-            <!-- FILTRO CLASSES -->
-            <div class="filtro-grupo">
-              <div class="filtro-header" onclick="toggleSubmenu('classes-submenu')">
-                <i class="fas fa-layer-group"></i>
-                <span>Classes de Magia</span>
-                <i class="fas fa-chevron-down"></i>
-              </div>
-              <div class="filtro-submenu" id="classes-submenu">
-                <div class="filtro-option">
-                  <input type="checkbox" id="classe-todas" checked>
-                  <label for="classe-todas">Todas as Classes</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="classe-comuns" class="classe-checkbox" checked>
-                  <label for="classe-comuns">Comuns</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="classe-area" class="classe-checkbox" checked>
-                  <label for="classe-area">Área</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="classe-toque" class="classe-checkbox" checked>
-                  <label for="classe-toque">Toque</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="classe-projetil" class="classe-checkbox" checked>
-                  <label for="classe-projetil">Projétil</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="classe-bloqueio" class="classe-checkbox" checked>
-                  <label for="classe-bloqueio">Bloqueio</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="classe-informacao" class="classe-checkbox" checked>
-                  <label for="classe-informacao">Informação</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="classe-resistiveis" class="classe-checkbox" checked>
-                  <label for="classe-resistiveis">Resistíveis</label>
-                </div>
-                <div class="filtro-option">
-                  <input type="checkbox" id="classe-especiais" class="classe-checkbox" checked>
-                  <label for="classe-especiais">Especiais</label>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- LISTA DE MAGIAS DO CATÁLOGO -->
-          <div class="catalog-list-magias" id="lista-magias">
-            <!-- As magias serão carregadas dinamicamente pelo JavaScript -->
-            <div class="nenhuma-magia">
-              <i class="fas fa-spinner fa-spin"></i>
-              <div>Carregando catálogo de magias...</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- COLUNA DIREITA - MAGIAS APRENDIDAS -->
-      <div class="acquired-column-magia">
-        
-        <!-- MAGIAS APRENDIDAS -->
-        <div class="acquired-section-magia">
-          <h3><i class="fas fa-graduation-cap"></i> Magias Aprendidas 
-            <span class="points-badge" id="pontos-magia-total">[0 pts]</span>
-          </h3>
-          <div class="acquired-list-magias" id="magias-aprendidas">
-            <div class="nenhuma-magia-aprendida">
-              <i class="fas fa-hat-wizard"></i>
-              <div>Nenhuma magia aprendida</div>
-              <small>As magias que você aprender aparecerão aqui</small>
-            </div>
-          </div>
-        </div>
-
-        <!-- DETALHES DA MAGIA SELECIONADA -->
-        <div class="detalhes-magia-section">
-          <div class="detalhes-magia-content" id="detalhes-magia-content">
-            <div class="nenhuma-magia-selecionada">
-              <i class="fas fa-search"></i>
-              <div>Selecione uma magia para ver os detalhes</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- MODAL DE COMPRA/EDIÇÃO -->
-    <div class="modal-compra-overlay" style="display: none;">
-      <div class="modal-compra">
-        <!-- Conteúdo será preenchido pelo JavaScript -->
-      </div>
-    </div>
-
-  </div>
-  <!-- NÃO COLOQUE NADA AQUI - APENAS FECHA container-principal -->
-</div>
-<!-- FIM DA ABA MAGIA -->
-
-<script>
-// SCRIPT DA FUNÇÃO toggleSubmenu DEVE VIR AQUI, FORA DA DIV!
-function toggleSubmenu(id) {
-    const submenu = document.getElementById(id);
-    const icon = submenu.previousElementSibling.querySelector('.fa-chevron-down');
-    
-    submenu.classList.toggle('active');
-    
-    if (submenu.classList.contains('active')) {
-        icon.className = 'fas fa-chevron-up';
-    } else {
-        icon.className = 'fas fa-chevron-down';
-    }
-}
-</script>
-
-
-
-<!-- ABA EQUIPAMENTO -->
-<div id="equipamento" class="tab-content">
-    <div class="equipamento-container">
-        
-        <!-- BANNER SUPERIOR COM STATUS -->
-        <div class="equipamento-banner">
-            <div class="banner-grid">
-                <!-- DINHEIRO -->
-                <div class="status-card">
-                    <div class="status-header">
-                        <i class="fas fa-coins"></i>
-                        <h4>Dinheiro</h4>
-                    </div>
-                    <div class="status-value" id="dinheiroEquipamento">$2.000</div>
-                    <div class="status-actions">
-                        <button class="btn-status" onclick="window.receberDinheiroRapido && receberDinheiroRapido()">
-                            <i class="fas fa-plus"></i> Receber
-                        </button>
-                        <button class="btn-status" onclick="window.gastarDinheiroRapido && gastarDinheiroRapido()">
-                            <i class="fas fa-minus"></i> Gastar
-                        </button>
-                    </div>
-                </div>
+        <!-- ABA MAGIAS -->
+        <div id="magia" class="tab-content">
+            <div class="container-principal">
                 
-                <!-- CARGA -->
-                <div class="status-card">
-                    <div class="status-header">
-                        <i class="fas fa-weight-hanging"></i>
-                        <h4>Carga</h4>
-                    </div>
-                    <div class="status-value">
-                        <span id="pesoAtual">0</span>/<span id="pesoMaximo">60</span> kg
-                    </div>
-                    <div class="status-info">
-                        <span id="nivelCarga" class="carga-leve">LEVE</span>
-                        <small id="penalidadesCarga">MOV +0 / DODGE +0</small>
-                    </div>
-                </div>
-                
-                <!-- MÃOS -->
-                <div class="status-card">
-                    <div class="status-header">
-                        <i class="fas fa-hands"></i>
-                        <h4>Mãos Livres</h4>
-                    </div>
-                    <div class="status-value" id="displayMaos">
-                        <span class="mao-livre">👐</span><span class="mao-livre">👐</span>
-                    </div>
-                    <div class="status-info">
-                        <small>2 mãos disponíveis</small>
-                    </div>
-                </div>
-                
-                <!-- MOCHILA -->
-                <div class="status-card">
-                    <div class="status-header">
-                        <i class="fas fa-backpack"></i>
-                        <h4>Mochila</h4>
-                    </div>
-                    <div class="status-value">
-                        <span id="contadorMochila">0</span> itens
-                    </div>
-                    <div class="status-actions">
-                        <button class="btn-status" id="btn-liberar-mochila">
-                            <i class="fas fa-suitcase"></i> Liberar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- SUB-ABAS DE EQUIPAMENTO -->
-        <div class="equipamento-subtabs">
-            <div class="subtabs-container">
-                <button class="subtab-btn active" data-subtab="catalogo">
-                    <i class="fas fa-store"></i>
-                    <span>Catálogo</span>
-                </button>
-                <button class="subtab-btn" data-subtab="inventario">
-                    <i class="fas fa-box-open"></i>
-                    <span>Inventário</span>
-                </button>
-                <button class="subtab-btn" data-subtab="deposito">
-                    <i class="fas fa-home"></i>
-                    <span>Depósito</span>
-                </button>
-                <button class="subtab-btn" data-subtab="criar">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Criar Item</span>
-                </button>
-                <button class="subtab-btn" data-subtab="financeiro">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Financeiro</span>
-                </button>
-            </div>
-        </div>
-        
-        <!-- CONTEÚDO DAS SUB-ABAS -->
-        <div class="equipamento-subcontent">
-            
-            <!-- SUB-ABA: CATÁLOGO -->
-            <div id="subtab-catalogo" class="subtab-content active">
-                <div class="catalogo-container">
-                    
-                    <!-- FILTROS DO CATÁLOGO -->
-                    <div class="catalogo-filtros">
-                        <div class="filtro-header">
-                            <i class="fas fa-filter"></i>
-                            <h4>Filtros</h4>
+                <!-- STATUS MÁGICO -->
+                <div class="status-cards-container">
+                    <div class="card-magia-status">
+                        <h3><i class="fas fa-hat-wizard"></i> Status Mágico</h3>
+                        <div class="magia-status-grid">
+                            <div class="magia-status-item">
+                                <label><i class="fas fa-wand-magic"></i> Aptidão Mágica:</label>
+                                <input type="number" id="aptidao-magica" value="0" min="0" max="10">
+                            </div>
+                            <div class="magia-status-item">
+                                <label><i class="fas fa-brain"></i> IQ Mágico:</label>
+                                <span id="iq-magico">10</span>
+                            </div>
+                            <div class="magia-status-item">
+                                <label><i class="fas fa-tint"></i> Mana Base:</label>
+                                <span id="mana-base">10</span>
+                            </div>
+                            <div class="magia-status-item">
+                                <label><i class="fas fa-battery-half"></i> Mana Atual:</label>
+                                <input type="number" id="mana-atual" value="10" min="0" max="50">
+                            </div>
+                            <div class="magia-status-item">
+                                <label><i class="fas fa-plus-circle"></i> Bônus de Mana:</label>
+                                <input type="number" id="bonus-mana" value="0" min="0" max="20">
+                            </div>
+                            <div class="magia-status-item total">
+                                <label><i class="fas fa-coins"></i> Total Gasto:</label>
+                                <span id="total-gasto-magia">0</span> pts
+                            </div>
                         </div>
-                        
-                        <div class="filtros-grid">
-                            <!-- ERA -->
-                            <div class="filtro-group">
-                                <label>Era:</label>
-                                <select id="filtro-era" class="filtro-select">
-                                    <option value="todas">Todas as Eras</option>
-                                    <option value="medieval">Medieval/Fantasia</option>
-                                    <option value="moderna">Moderna/Cyberpunk</option>
-                                </select>
+                    </div>
+                </div>
+
+                <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
+                <div class="sistema-aquisicao-magia">
+                    
+                    <!-- COLUNA ESQUERDA - CATÁLOGO -->
+                    <div class="catalog-column-magia">
+                        <div class="catalog-section-magia">
+                            <h3><i class="fas fa-book"></i> Catálogo de Magias</h3>
+                            
+                            <!-- BARRA DE BUSCA -->
+                            <div class="busca-magias">
+                                <input type="text" placeholder="🔍 Buscar magias..." class="search-input" id="busca-magias">
                             </div>
                             
-                            <!-- TIPO DE EQUIPAMENTO -->
-                            <div class="filtro-group">
-                                <label>Tipo:</label>
-                                <select id="filtro-tipo" class="filtro-select">
-                                    <option value="todas">Todos os Tipos</option>
-                                    <option value="arma-cc">Armas Corpo-a-Corpo</option>
-                                    <option value="arma-dist">Armas à Distância</option>
-                                    <option value="armadura">Armaduras</option>
-                                    <option value="escudo">Escudos</option>
-                                    <option value="geral">Equipamentos Gerais</option>
-                                </select>
-                            </div>
-                            
-                            <!-- BUSCA -->
-                            <div class="filtro-group busca-group">
-                                <label>Buscar:</label>
-                                <div class="busca-input">
-                                    <i class="fas fa-search"></i>
-                                    <input type="text" id="busca-catalogo" placeholder="Nome do equipamento...">
+                            <!-- FILTROS COM SUBMENUS (como nas perícias) -->
+                            <div class="filtros-container-magia">
+                                
+                                <!-- FILTRO ESCOLAS -->
+                                <div class="filtro-grupo">
+                                    <div class="filtro-header" onclick="toggleSubmenu('escolas-submenu')">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <span>Escolas de Magia</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="filtro-submenu" id="escolas-submenu">
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-todas" checked>
+                                            <label for="escola-todas">Todas as Escolas</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-agua" class="escola-checkbox" checked>
+                                            <label for="escola-agua">Água</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-ar" class="escola-checkbox" checked>
+                                            <label for="escola-ar">Ar</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-compreensao" class="escola-checkbox" checked>
+                                            <label for="escola-compreensao">Compreensão e Empatia</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-controle-mente" class="escola-checkbox" checked>
+                                            <label for="escola-controle-mente">Controle da Mente</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-controle-corpo" class="escola-checkbox" checked>
+                                            <label for="escola-controle-corpo">Controle do Corpo</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-cura" class="escola-checkbox" checked>
+                                            <label for="escola-cura">Cura</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-deslocamento" class="escola-checkbox" checked>
+                                            <label for="escola-deslocamento">Deslocamento</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-fogo" class="escola-checkbox" checked>
+                                            <label for="escola-fogo">Fogo</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-luz-trevas" class="escola-checkbox" checked>
+                                            <label for="escola-luz-trevas">Luz e Trevas</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-necromancia" class="escola-checkbox" checked>
+                                            <label for="escola-necromancia">Necromancia</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-portal" class="escola-checkbox" checked>
+                                            <label for="escola-portal">Portal</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-protecao" class="escola-checkbox" checked>
+                                            <label for="escola-protecao">Proteção e Aviso</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-reconhecimento" class="escola-checkbox" checked>
+                                            <label for="escola-reconhecimento">Reconhecimento</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-terra" class="escola-checkbox" checked>
+                                            <label for="escola-terra">Terra</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="escola-metamagica" class="escola-checkbox" checked>
+                                            <label for="escola-metamagica">Metamágica</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- FILTRO CLASSES -->
+                                <div class="filtro-grupo">
+                                    <div class="filtro-header" onclick="toggleSubmenu('classes-submenu')">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span>Classes de Magia</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="filtro-submenu" id="classes-submenu">
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="classe-todas" checked>
+                                            <label for="classe-todas">Todas as Classes</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="classe-comuns" class="classe-checkbox" checked>
+                                            <label for="classe-comuns">Comuns</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="classe-area" class="classe-checkbox" checked>
+                                            <label for="classe-area">Área</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="classe-toque" class="classe-checkbox" checked>
+                                            <label for="classe-toque">Toque</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="classe-projetil" class="classe-checkbox" checked>
+                                            <label for="classe-projetil">Projétil</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="classe-bloqueio" class="classe-checkbox" checked>
+                                            <label for="classe-bloqueio">Bloqueio</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="classe-informacao" class="classe-checkbox" checked>
+                                            <label for="classe-informacao">Informação</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="classe-resistiveis" class="classe-checkbox" checked>
+                                            <label for="classe-resistiveis">Resistíveis</label>
+                                        </div>
+                                        <div class="filtro-option">
+                                            <input type="checkbox" id="classe-especiais" class="classe-checkbox" checked>
+                                            <label for="classe-especiais">Especiais</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- LISTA DE CATEGORIAS -->
-                    <div class="categorias-container">
-                        
-                        <!-- ARMAS CORPO-A-CORPO -->
-                        <div class="categoria-section" data-category="armas-cc">
-                            <div class="categoria-header">
-                                <i class="fas fa-gavel"></i>
-                                <h3>Armas Corpo-a-Corpo</h3>
-                                <span class="categoria-count" id="count-armas-cc">6</span>
-                            </div>
-                            <div class="table-container">
-                                <!-- Tabela será preenchida pelo JavaScript -->
-                                <div class="loading-categoria">
+                            
+                            <!-- LISTA DE MAGIAS DO CATÁLOGO -->
+                            <div class="catalog-list-magias" id="lista-magias">
+                                <!-- As magias serão carregadas dinamicamente pelo JavaScript -->
+                                <div class="nenhuma-magia">
                                     <i class="fas fa-spinner fa-spin"></i>
-                                    <span>Carregando armas...</span>
+                                    <div>Carregando catálogo de magias...</div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- COLUNA DIREITA - MAGIAS APRENDIDAS -->
+                    <div class="acquired-column-magia">
                         
-                        <!-- ARMAS À DISTÂNCIA -->
-                        <div class="categoria-section" data-category="armas-dist">
-                            <div class="categoria-header">
-                                <i class="fas fa-bullseye"></i>
-                                <h3>Armas à Distância</h3>
-                                <span class="categoria-count" id="count-armas-dist">4</span>
-                            </div>
-                            <div class="table-container">
-                                <!-- Tabela será preenchida pelo JavaScript -->
+                        <!-- MAGIAS APRENDIDAS -->
+                        <div class="acquired-section-magia">
+                            <h3><i class="fas fa-graduation-cap"></i> Magias Aprendidas 
+                                <span class="points-badge" id="pontos-magia-total">[0 pts]</span>
+                            </h3>
+                            <div class="acquired-list-magias" id="magias-aprendidas">
+                                <div class="nenhuma-magia-aprendida">
+                                    <i class="fas fa-hat-wizard"></i>
+                                    <div>Nenhuma magia aprendida</div>
+                                    <small>As magias que você aprender aparecerão aqui</small>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- ARMADURAS -->
-                        <div class="categoria-section" data-category="armaduras">
-                            <div class="categoria-header">
-                                <i class="fas fa-shield-alt"></i>
-                                <h3>Armaduras</h3>
-                                <span class="categoria-count" id="count-armaduras">4</span>
-                            </div>
-                            <div class="table-container">
-                                <!-- Tabela será preenchida pelo JavaScript -->
+
+                        <!-- DETALHES DA MAGIA SELECIONADA -->
+                        <div class="detalhes-magia-section">
+                            <div class="detalhes-magia-content" id="detalhes-magia-content">
+                                <div class="nenhuma-magia-selecionada">
+                                    <i class="fas fa-search"></i>
+                                    <div>Selecione uma magia para ver os detalhes</div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- ESCUDOS -->
-                        <div class="categoria-section" data-category="escudos">
-                            <div class="categoria-header">
-                                <i class="fas fa-shield-virus"></i>
-                                <h3>Escudos</h3>
-                                <span class="categoria-count" id="count-escudos">4</span>
-                            </div>
-                            <div class="table-container">
-                                <!-- Tabela será preenchida pelo JavaScript -->
-                            </div>
-                        </div>
-                        
-                        <!-- EQUIPAMENTOS GERAIS -->
-                        <div class="categoria-section" data-category="geral">
-                            <div class="categoria-header">
-                                <i class="fas fa-campground"></i>
-                                <h3>Equipamentos Gerais</h3>
-                                <span class="categoria-count" id="count-geral">7</span>
-                            </div>
-                            <div class="table-container">
-                                <!-- Tabela será preenchida pelo JavaScript -->
-                            </div>
-                        </div>
+
                     </div>
                 </div>
+
+                <!-- MODAL DE COMPRA/EDIÇÃO -->
+                <div class="modal-compra-overlay" style="display: none;">
+                    <div class="modal-compra">
+                        <!-- Conteúdo será preenchido pelo JavaScript -->
+                    </div>
+                </div>
+
             </div>
-            
-            <!-- SUB-ABA: INVENTÁRIO -->
-            <div id="subtab-inventario" class="subtab-content">
-                <div class="inventario-container">
-                    
-                    <!-- FILTROS DO INVENTÁRIO -->
-                    <div class="inventario-filtros">
-                        <div class="filtros-rapidos">
-                            <button class="filtro-btn active" data-filtro="todos">
-                                <i class="fas fa-list"></i> Todos
-                            </button>
-                            <button class="filtro-btn" data-filtro="equipados">
-                                <i class="fas fa-tshirt"></i> Equipados
-                            </button>
-                            <button class="filtro-btn" data-filtro="corpo">
-                                <i class="fas fa-user"></i> No Corpo
-                            </button>
-                            <button class="filtro-btn" data-filtro="mochila">
-                                <i class="fas fa-backpack"></i> Mochila
-                            </button>
-                        </div>
-                        
-                        <div class="inventario-info">
-                            <span><strong id="totalItensInventario">0</strong> itens no total</span>
-                            <span><strong id="pesoInventario">0</strong> kg de peso</span>
-                        </div>
-                    </div>
-                    
-                    <!-- LISTA DE EQUIPAMENTOS ADQUIRIDOS -->
-                    <div class="lista-inventario" id="lista-equipamentos-adquiridos">
-                        <div class="inventario-vazio">
-                            <i class="fas fa-inbox fa-3x"></i>
-                            <h4>Inventário Vazio</h4>
-                            <p>Adquira equipamentos no catálogo para começar</p>
-                            <button class="btn-ir-catalogo" onclick="window.alternarSubTab && alternarSubTab('catalogo')">
-                                <i class="fas fa-store"></i> Ir para Catálogo
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- SUB-ABA: DEPÓSITO -->
-            <div id="subtab-deposito" class="subtab-content">
-                <div class="deposito-container">
-                    
-                    <!-- CABEÇALHO DO DEPÓSITO -->
-                    <div class="deposito-header">
-                        <div class="deposito-info">
-                            <h3><i class="fas fa-home"></i> Depósito</h3>
-                            <p>Itens guardados não contam peso e não podem ser usados</p>
-                        </div>
-                        
-                        <div class="deposito-acoes">
-                            <button class="btn-deposito-acao" id="btn-guardar-tudo-deposito">
-                                <i class="fas fa-upload"></i> Guardar Tudo
-                            </button>
-                            <button class="btn-deposito-acao" id="btn-retirar-tudo-deposito">
-                                <i class="fas fa-download"></i> Retirar Tudo
-                            </button>
-                            <button class="btn-deposito-acao perigo" id="btn-limpar-deposito">
-                                <i class="fas fa-trash"></i> Limpar Depósito
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- RESUMO DO DEPÓSITO -->
-                    <div class="deposito-resumo">
-                        <div class="resumo-card">
-                            <i class="fas fa-boxes"></i>
-                            <div>
-                                <h4>Itens Guardados</h4>
-                                <span id="contador-deposito">0 itens</span>
-                            </div>
-                        </div>
-                        
-                        <div class="resumo-card">
-                            <i class="fas fa-weight-hanging"></i>
-                            <div>
-                                <h4>Peso Liberado</h4>
-                                <span id="peso-liberado">0 kg</span>
-                            </div>
-                        </div>
-                        
-                        <div class="resumo-card">
-                            <i class="fas fa-coins"></i>
-                            <div>
-                                <h4>Valor Total</h4>
-                                <span id="valor-deposito">$0</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- LISTA DO DEPÓSITO -->
-                    <div class="lista-deposito" id="lista-deposito">
-                        <div class="deposito-vazio">
-                            <i class="fas fa-home fa-3x"></i>
-                            <h4>Depósito Vazio</h4>
-                            <p>Guarde itens do seu inventário aqui</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- SUB-ABA: CRIAR ITEM -->
-            <div id="subtab-criar" class="subtab-content">
-                <div class="criar-container">
-                    <div class="criar-header">
-                        <h3><i class="fas fa-plus-circle"></i> Criar Item Personalizado</h3>
-                        <p>Crie equipamentos, armas, armaduras e itens mágicos personalizados</p>
-                    </div>
-                    
-                    <div class="criar-grid">
-                        <!-- FORMULÁRIO DE CRIAÇÃO -->
-                        <div class="criar-form">
-                            <div class="form-section">
-                                <h4><i class="fas fa-info-circle"></i> Informações Básicas</h4>
-                                
-                                <div class="form-group">
-                                    <label>Nome do Item:</label>
-                                    <input type="text" id="item-nome" placeholder="Ex: Espada Élfica" maxlength="50">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Tipo de Item:</label>
-                                    <select id="item-tipo">
-                                        <option value="geral">Equipamento Geral</option>
-                                        <option value="arma-cc">Arma Corpo-a-Corpo</option>
-                                        <option value="arma-dist">Arma à Distância</option>
-                                        <option value="armadura">Armadura</option>
-                                        <option value="escudo">Escudo</option>
-                                        <option value="consumivel">Consumível</option>
-                                        <option value="artefato">Artefato Mágico</option>
-                                        <option value="missao">Item de Missão</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group-duo">
-                                    <div class="form-group">
-                                        <label>Peso (kg):</label>
-                                        <input type="number" id="item-peso" value="1.0" step="0.1" min="0">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Custo ($):</label>
-                                        <input type="number" id="item-custo" value="0" min="0">
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Era:</label>
-                                    <select id="item-era">
-                                        <option value="medieval">Medieval/Fantasia</option>
-                                        <option value="moderna">Moderna/Cyberpunk</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Descrição:</label>
-                                    <textarea id="item-descricao" rows="3" placeholder="Descreva o item..."></textarea>
-                                </div>
-                                
-                                <div class="form-group checkbox-group">
-                                    <input type="checkbox" id="item-magico">
-                                    <label>Item Mágico?</label>
-                                </div>
-                                
-                                <!-- CAMPOS MÁGICOS (OCULTOS INICIALMENTE) -->
-                                <div id="campos-magicos" style="display: none;">
-                                    <div class="form-group">
-                                        <label>Efeito Mágico:</label>
-                                        <textarea id="item-efeito-magico" rows="2" placeholder="Descreva o efeito mágico..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- CAMPOS ESPECÍFICOS POR TIPO -->
-                            <div id="campos-especificos">
-                                <!-- Serão preenchidos dinamicamente -->
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button class="btn-cancelar" onclick="window.limparFormCriacao && limparFormCriacao()">
-                                    <i class="fas fa-times"></i> Limpar
-                                </button>
-                                <button class="btn-confirmar" onclick="window.criarItemPersonalizado && criarItemPersonalizado()">
-                                    <i class="fas fa-check"></i> Criar Item
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- PREVIEW DO ITEM -->
-                        <div class="criar-preview">
-                            <div class="preview-header">
-                                <h4><i class="fas fa-eye"></i> Preview do Item</h4>
-                            </div>
-                            <div class="preview-content" id="preview-conteudo">
-                                <div class="preview-vazio">
-                                    <i class="fas fa-cube fa-3x"></i>
-                                    <p>As informações do item aparecerão aqui</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- SUB-ABA: FINANCEIRO (SUPER SIMPLIFICADO) -->
-            <div id="subtab-financeiro" class="subtab-content">
-                <div class="financeiro-ultra-simples">
-                    
-                    <!-- CABEÇALHO MÍNIMO -->
-                    <div class="financeiro-titulo">
-                        <h3><i class="fas fa-coins"></i> Dinheiro</h3>
-                        <p>Controle rápido de ouro/moedas</p>
-                    </div>
-                    
-                    <!-- SALDO GRANDE E VISÍVEL -->
-                    <div class="saldo-principal">
-                        <div class="saldo-atual">
-                            <span>Saldo Disponível:</span>
-                            <h2 id="dinheiro-disponivel">$0</h2>
-                        </div>
-                        
-                        <!-- BOTÕES GRANDES E CLAROS -->
-                        <div class="botoes-rapidos">
-                            <button class="btn-receber-grande" onclick="window.receberDinheiroRapido && receberDinheiroRapido()">
-                                <i class="fas fa-plus-circle"></i> RECEBER
-                            </button>
-                            <button class="btn-gastar-grande" onclick="window.gastarDinheiroRapido && gastarDinheiroRapido()">
-                                <i class="fas fa-minus-circle"></i> GASTAR
-                            </button>
-                            <button class="btn-ajustar" onclick="window.ajustarDinheiroManual && ajustarDinheiroManual()">
-                                <i class="fas fa-edit"></i> AJUSTAR
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- VALORES RÁPIDOS -->
-                    <div class="valores-rapidos">
-                        <h4>Valores Rápidos:</h4>
-                        <div class="botoes-valores">
-                            <button onclick="window.adicionarDinheiro && adicionarDinheiro(10)">+$10</button>
-                            <button onclick="window.adicionarDinheiro && adicionarDinheiro(50)">+$50</button>
-                            <button onclick="window.adicionarDinheiro && adicionarDinheiro(100)">+$100</button>
-                            <button onclick="window.removerDinheiro && removerDinheiro(10)">-$10</button>
-                            <button onclick="window.removerDinheiro && removerDinheiro(50)">-$50</button>
-                            <button onclick="window.removerDinheiro && removerDinheiro(100)">-$100</button>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-        </div><!-- FIM DO equipamento-subcontent -->
-        
-        <!-- MODAIS GLOBAIS (FORA DAS SUB-ABAS) -->
-        
-        <!-- MODAL SIMPLIFICADO PARA DINHEIRO -->
-        <div id="modal-dinheiro-simples" class="modal-overlay" style="display: none;">
-            <div class="modal-simples">
-                <div class="modal-header">
-                    <h3 id="modal-titulo">Receber Dinheiro</h3>
-                    <button onclick="window.fecharModalSimples && fecharModalSimples()">&times;</button>
-                </div>
-                
-                <div class="modal-body">
-                    <div class="saldo-atual-modal">
-                        Saldo Atual: <strong id="saldo-modal-atual">$0</strong>
-                    </div>
-                    
-                    <div class="campo-valor">
-                        <label>Valor:</label>
-                        <div class="input-com-simbolo">
-                            <span>$</span>
-                            <input type="number" id="valor-operacao" placeholder="0" min="1" step="1" autofocus>
-                        </div>
-                    </div>
-                    
-                    <div class="campo-descricao">
-                        <label>Motivo:</label>
-                        <input type="text" id="descricao-operacao" 
-                               placeholder="Ex: Missão, Recompensa, Compras...">
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button class="btn-cancelar" onclick="window.fecharModalSimples && fecharModalSimples()">
-                        Cancelar
-                    </button>
-                    <button class="btn-confirmar" onclick="window.confirmarOperacao && confirmarOperacao()">
-                        Confirmar
-                    </button>
-                </div>
-            </div>
+            <!-- NÃO COLOQUE NADA AQUI - APENAS FECHA container-principal -->
         </div>
-        
-        <!-- MODAL DE QUANTIDADE PARA COMPRAS -->
-        <div id="submenu-quantidade" class="modal-overlay" style="display: none;">
-            <div class="modal-simples">
-                <div class="modal-header">
-                    <h3 id="quantidade-titulo">Quantidade para Comprar</h3>
-                    <button onclick="window.fecharSubmenuQuantidade && fecharSubmenuQuantidade()">&times;</button>
-                </div>
-                
-                <div class="modal-body">
-                    <div class="item-info-modal">
-                        <h4 id="quantidade-nome-item">Item</h4>
-                        <div class="detalhes-item-modal">
-                            <span id="quantidade-custo-unitario">Custo: $0</span>
-                            <span id="quantidade-peso-unitario">Peso: 0 kg</span>
-                        </div>
-                    </div>
-                    
-                    <div class="controles-quantidade-modal">
-                        <button class="btn-quantidade-modal" onclick="window.diminuirQuantidade && diminuirQuantidade()">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        
-                        <input type="number" id="input-quantidade" 
-                               value="1" min="1" max="99">
-                        
-                        <button class="btn-quantidade-modal" onclick="window.aumentarQuantidade && aumentarQuantidade()">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="totais-modal">
-                        <div class="total-linha-modal">
-                            <span>Custo Total:</span>
-                            <strong id="quantidade-custo-total">$0</strong>
-                        </div>
-                        <div class="total-linha-modal">
-                            <span>Peso Total:</span>
-                            <strong id="quantidade-peso-total">0 kg</strong>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button class="btn-cancelar" onclick="window.fecharSubmenuQuantidade && fecharSubmenuQuantidade()">
-                        <i class="fas fa-times"></i> Cancelar
-                    </button>
-                    <button class="btn-confirmar" onclick="window.confirmarCompraQuantidade && confirmarCompraQuantidade()">
-                        <i class="fas fa-check"></i> Comprar
-                    </button>
-                </div>
-            </div>
-        </div>
-       
-    </div><!-- FIM DO equipamento-container -->
-</div><!-- FIM DA ABA EQUIPAMENTO -->
-<script>
-// Script de navegação básica para a aba equipamento
-// Este script só cuida da navegação entre sub-abas
-// Todo o sistema de funcionalidades é gerenciado pelo equipamentos.js
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Configurar navegação entre sub-abas (APENAS UI)
-    configurarNavegacaoSubAbas();
-    
-    // Configurar botão de mochila (event listener básico)
-    const btnLiberarMochila = document.getElementById('btn-liberar-mochila');
-    if (btnLiberarMochila) {
-        btnLiberarMochila.addEventListener('click', function() {
-            if (window.sistemaEquipamentos && window.sistemaEquipamentos.alternarMochila) {
-                window.sistemaEquipamentos.alternarMochila();
-            }
-        });
-    }
-    
-    // Configurar filtros do inventário (event listener básico)
-    configurarFiltrosInventarioBasico();
-    
-    // Configurar botões de depósito (event listener básico)
-    configurarBotoesDepositoBasico();
-    
-    // Configurar criação de itens (event listener básico)
-    configurarCriacaoItensBasico();
-    
-    // Configurar navegação do catálogo (event listener básico)
-    configurarNavegacaoCatalogoBasico();
-});
-
-// Função para configurar navegação entre sub-abas (APENAS UI)
-function configurarNavegacaoSubAbas() {
-    document.querySelectorAll('.subtab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Remover active de todos
-            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
-            
-            // Adicionar active ao clicado
-            this.classList.add('active');
-            const subtabId = this.getAttribute('data-subtab');
-            const subtabContent = document.getElementById(`subtab-${subtabId}`);
-            
-            if (subtabContent) {
-                subtabContent.classList.add('active');
-            }
-        });
-    });
-}
-
-// Configurar filtros do inventário (APENAS UI)
-function configurarFiltrosInventarioBasico() {
-    document.querySelectorAll('.filtro-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-            
-            this.classList.add('active');
-            const filtro = this.getAttribute('data-filtro');
-            
-            // Chamar função do sistema se disponível
-            if (window.sistemaEquipamentos && window.sistemaEquipamentos.filtrarListaEquipamentos) {
-                window.sistemaEquipamentos.filtrarListaEquipamentos(filtro);
-            }
-        });
-    });
-}
-
-// Configurar botões de depósito (APENAS event listeners)
-function configurarBotoesDepositoBasico() {
-    const btnGuardarTudo = document.getElementById('btn-guardar-tudo-deposito');
-    const btnRetirarTudo = document.getElementById('btn-retirar-tudo-deposito');
-    const btnLimpar = document.getElementById('btn-limpar-deposito');
-    
-    if (btnGuardarTudo) {
-        btnGuardarTudo.addEventListener('click', function() {
-            if (window.sistemaEquipamentos && window.sistemaEquipamentos.moverTudoParaDeposito) {
-                window.sistemaEquipamentos.moverTudoParaDeposito();
-            }
-        });
-    }
-    
-    if (btnRetirarTudo) {
-        btnRetirarTudo.addEventListener('click', function() {
-            if (window.sistemaEquipamentos && window.sistemaEquipamentos.retirarTudoDoDeposito) {
-                window.sistemaEquipamentos.retirarTudoDoDeposito();
-            }
-        });
-    }
-    
-    if (btnLimpar) {
-        btnLimpar.addEventListener('click', function() {
-            if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparDeposito) {
-                window.sistemaEquipamentos.limparDeposito();
-            }
-        });
-    }
-}
-
-// Configurar criação de itens (APENAS event listeners)
-function configurarCriacaoItensBasico() {
-    const itemTipoSelect = document.getElementById('item-tipo');
-    const itemMagicoCheckbox = document.getElementById('item-magico');
-    
-    if (itemTipoSelect) {
-        itemTipoSelect.addEventListener('change', function() {
-            if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposPorTipo) {
-                window.sistemaEquipamentos.atualizarCamposPorTipo();
-            }
-        });
-    }
-    
-    if (itemMagicoCheckbox) {
-        itemMagicoCheckbox.addEventListener('change', function() {
-            if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarCamposMagicos) {
-                window.sistemaEquipamentos.atualizarCamposMagicos();
-            }
-        });
-    }
-    
-    // Adicionar listeners para atualizar preview em tempo real
-    const inputsPreview = ['item-nome', 'item-peso', 'item-custo', 'item-descricao'];
-    inputsPreview.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('input', function() {
-                if (window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarPreviewItem) {
-                    window.sistemaEquipamentos.atualizarPreviewItem();
-                }
-            });
-        }
-    });
-}
-
-// Configurar navegação do catálogo (APENAS event listeners)
-function configurarNavegacaoCatalogoBasico() {
-    const filtroEra = document.getElementById('filtro-era');
-    const filtroTipo = document.getElementById('filtro-tipo');
-    const buscaCatalogo = document.getElementById('busca-catalogo');
-    
-    if (filtroEra) {
-        filtroEra.addEventListener('change', function() {
-            if (window.catalogoEquipamentos && window.catalogoEquipamentos.filtrarCatalogo) {
-                window.catalogoEquipamentos.filtrarCatalogo();
-            }
-        });
-    }
-    
-    if (filtroTipo) {
-        filtroTipo.addEventListener('change', function() {
-            if (window.catalogoEquipamentos && window.catalogoEquipamentos.filtrarCatalogo) {
-                window.catalogoEquipamentos.filtrarCatalogo();
-            }
-        });
-    }
-    
-    if (buscaCatalogo) {
-        buscaCatalogo.addEventListener('input', function() {
-            if (window.catalogoEquipamentos && window.catalogoEquipamentos.filtrarCatalogo) {
-                window.catalogoEquipamentos.filtrarCatalogo();
-            }
-        });
-    }
-}
-
-// Função wrapper para alternar sub-aba (mantida para compatibilidade)
-function alternarSubTab(subtab) {
-    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
-    
-    const btn = document.querySelector(`[data-subtab="${subtab}"]`);
-    const content = document.getElementById(`subtab-${subtab}`);
-    
-    if (btn) btn.classList.add('active');
-    if (content) content.classList.add('active');
-    
-    if (subtab === 'financeiro' && window.sistemaEquipamentos && window.sistemaEquipamentos.atualizarInterfaceFinanceiro) {
-        setTimeout(() => {
-            window.sistemaEquipamentos.atualizarInterfaceFinanceiro();
-        }, 100);
-    }
-}
-
-// Configurar botões de valores rápidos (financeiro)
-document.addEventListener('click', function(e) {
-    // Botões de valores rápidos
-    if (e.target.closest('.botoes-valores')) {
-        const botao = e.target.closest('button');
-        if (botao && window.sistemaEquipamentos) {
-            const texto = botao.textContent;
-            const valor = parseInt(texto.replace(/[^0-9]/g, ''));
-            
-            if (texto.startsWith('+') && window.sistemaEquipamentos.adicionarDinheiro) {
-                window.sistemaEquipamentos.adicionarDinheiro(valor);
-            } else if (texto.startsWith('-') && window.sistemaEquipamentos.removerDinheiro) {
-                window.sistemaEquipamentos.removerDinheiro(valor);
-            }
-        }
-    }
-});
-
-// Funções wrapper que serão chamadas pelo sistema principal
-// Estas funções apenas redirecionam para o sistemaEquipamentos
-
-// Funções do modal de quantidade
-function aumentarQuantidade() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.aumentarQuantidade) {
-        window.sistemaEquipamentos.aumentarQuantidade();
-    }
-}
-
-function diminuirQuantidade() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.diminuirQuantidade) {
-        window.sistemaEquipamentos.diminuirQuantidade();
-    }
-}
-
-function fecharSubmenuQuantidade() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.fecharSubmenuQuantidade) {
-        window.sistemaEquipamentos.fecharSubmenuQuantidade();
-    }
-}
-
-function confirmarCompraQuantidade() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.confirmarCompraQuantidade) {
-        window.sistemaEquipamentos.confirmarCompraQuantidade();
-    }
-}
-
-// Funções do modal financeiro
-function fecharModalSimples() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.fecharModalSimples) {
-        window.sistemaEquipamentos.fecharModalSimples();
-    }
-}
-
-function confirmarOperacao() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.confirmarOperacao) {
-        window.sistemaEquipamentos.confirmarOperacao();
-    }
-}
-
-// Funções de criação de itens
-function limparFormCriacao() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.limparFormCriacao) {
-        window.sistemaEquipamentos.limparFormCriacao();
-    }
-}
-
-function criarItemPersonalizado() {
-    if (window.sistemaEquipamentos && window.sistemaEquipamentos.criarItemPersonalizado) {
-        window.sistemaEquipamentos.criarItemPersonalizado();
-    }
-}
-
-// Registrar funções globalmente (para compatibilidade)
-window.alternarSubTab = alternarSubTab;
-window.aumentarQuantidade = aumentarQuantidade;
-window.diminuirQuantidade = diminuirQuantidade;
-window.fecharSubmenuQuantidade = fecharSubmenuQuantidade;
-window.confirmarCompraQuantidade = confirmarCompraQuantidade;
-window.fecharModalSimples = fecharModalSimples;
-window.confirmarOperacao = confirmarOperacao;
-window.limparFormCriacao = limparFormCriacao;
-window.criarItemPersonalizado = criarItemPersonalizado;
+        <!-- FIM DA ABA MAGIA -->
 
 
-</script>
 
-    
         <!-- ABA RESUMO -->
         <div id="resumo" class="tab-content">
             <div class="loading">
@@ -2742,9 +1887,52 @@ window.criarItemPersonalizado = criarItemPersonalizado;
 
     </main> <!-- FIM DO MAIN -->
 
-   <script>
+    <!-- MOVER A FUNÇÃO toggleSubmenu PARA AQUI (estava quebrando a estrutura) -->
+    <script>
+    // Função toggleSubmenu - MOVIDA para cá (estava entre as abas, quebrando a estrutura)
+    function toggleSubmenu(id) {
+        const submenu = document.getElementById(id);
+        const icon = submenu.previousElementSibling.querySelector('.fa-chevron-down');
+        
+        submenu.classList.toggle('active');
+        
+        if (submenu.classList.contains('active')) {
+            icon.className = 'fas fa-chevron-up';
+        } else {
+            icon.className = 'fas fa-chevron-down';
+        }
+    }
+</script>
+<!-- SISTEMA DE ATRIBUTOS E CARACTERÍSTICAS -->
+<script src="dashboard.js"></script>    
+<script src="atributos.js"></script>
+<script src="caracteristicas-fisicas.js"></script>
+<script src="caracteristicas-altura-peso.js"></script>
+<script src="caracteristicas-aparencia.js"></script>
+<script src="caracteristicas-riqueza.js"></script>
+<script src="caracteristicas-idiomas.js"></script>
 
-      
+<!-- SISTEMA DE VANTAGENS E DESVANTAGENS -->
+<script src="catalogo-vantagens.js"></script>
+<script src="catalogo-desvantagens.js"></script>
+<script src="vantagens.js"></script>
+<script src="desvantagens.js"></script>
+
+<!-- SISTEMA DE PERÍCIAS -->
+<script src="pericias-catalogo.js"></script>
+<script src="sistema-pericias.js"></script>
+
+<!-- SISTEMA DE TÉCNICAS (DEPENDE DAS PERÍCIAS) -->
+<script src="tecnicas.js"></script>
+
+<!-- SISTEMA DE MAGIAS -->
+<script src="catalogo-magias.js"></script>
+<script src="magias.js"></script>
+
+<!-- SISTEMA DE EQUIPAMENTOS -->
+<script src="catalogo-equipamentos.js"></script>
+<script src="equipamentos.js"></script>
+<script>
     // Configuração do Supabase
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
@@ -2985,38 +2173,4 @@ window.criarItemPersonalizado = criarItemPersonalizado;
             window.location.href = 'personagens.html';
         }
     }
-    </script>
-
-    <!-- SISTEMA DE ATRIBUTOS E CARACTERÍSTICAS -->
-<script src="dashboard.js"></script>    
-<script src="atributos.js"></script>
-<script src="caracteristicas-fisicas.js"></script>
-<script src="caracteristicas-altura-peso.js"></script>
-<script src="caracteristicas-aparencia.js"></script>
-<script src="caracteristicas-riqueza.js"></script>
-<script src="caracteristicas-idiomas.js"></script>
-
-<!-- SISTEMA DE VANTAGENS E DESVANTAGENS -->
-<script src="catalogo-vantagens.js"></script>
-<script src="catalogo-desvantagens.js"></script>
-<script src="vantagens.js"></script>
-<script src="desvantagens.js"></script>
-
-<!-- SISTEMA DE PERÍCIAS -->
-<script src="pericias-catalogo.js"></script>
-<script src="sistema-pericias.js"></script>
-
-<!-- SISTEMA DE TÉCNICAS (DEPENDE DAS PERÍCIAS) -->
-
-<script src="tecnicas.js"></script>
-
-<!-- SISTEMA DE MAGIAS -->
-<script src="catalogo-magias.js"></script>
-<script src="magias.js"></script>
-
-<!-- SISTEMA DE EQUIPAMENTOS -->
-<script src="catalogo-equipamentos.js"></script>
-<script src="equipamentos.js"></script>
-
-</body>
-</html>
+</script>
