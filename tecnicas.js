@@ -1,5 +1,5 @@
-// ===== SISTEMA DE TÉCNICAS - VERSÃO COMPLETA CORRIGIDA =====
-console.log("🎯 SISTEMA DE TÉCNICAS - VERSÃO CORRIGIDA CARREGADA");
+// ===== SISTEMA DE TÉCNICAS - VERSÃO COMPLETA INCREMENTAL =====
+console.log("🎯 SISTEMA DE TÉCNICAS - VERSÃO INCREMENTAL CARREGADA");
 
 // ===== 1. ESTADO DO SISTEMA =====
 const estadoTecnicas = {
@@ -90,11 +90,11 @@ function verificarTemCavalgar() {
     return false;
 }
 
-// 2.3 FUNÇÃO 100% CORRETA: Calcular níveis baseado nos pontos (TÉCNICA DIFÍCIL)
+// 2.3 FUNÇÃO CORRETA: Calcular níveis baseado nos pontos (TÉCNICA DIFÍCIL)
 function calcularNiveisParaPontos(pontos) {
     console.log(`🔢 Calculando níveis para ${pontos} pontos (Técnica Difícil - CORRETO)`);
     
-    // REGRA 100% CORRETA PARA TÉCNICA DIFÍCIL:
+    // REGRA CORRETA PARA TÉCNICA DIFÍCIL:
     // 2 pontos = 1 nível (+1)
     // 3 pontos = 2 níveis (+2) 
     // 4 pontos = 3 níveis (+3)
@@ -116,11 +116,11 @@ function calcularNiveisParaPontos(pontos) {
     return 0;
 }
 
-// 2.4 FUNÇÃO 100% CORRETA: Calcular pontos baseado nos níveis (TÉCNICA DIFÍCIL)
+// 2.4 FUNÇÃO CORRETA: Calcular pontos baseado nos níveis (TÉCNICA DIFÍCIL)
 function calcularPontosParaNiveis(niveis) {
     console.log(`💰 Calculando pontos para ${niveis} níveis (Técnica Difícil - CORRETO)`);
     
-    // REGRA INVERSA 100% CORRETA:
+    // REGRA INVERSA CORRETA:
     // 1 nível = 2 pontos
     // 2 níveis = 3 pontos
     // 3 níveis = 4 pontos
@@ -138,9 +138,9 @@ function calcularPontosParaNiveis(niveis) {
     }
 }
 
-// 2.5 Calcular técnica COM CÁLCULO 100% CORRETO
+// 2.5 Calcular técnica COM CÁLCULO CORRETO
 function calcularTecnica() {
-    console.log("🧮 Calculando técnica (CÁLCULO 100% CORRETO)...");
+    console.log("🧮 Calculando técnica (CÁLCULO CORRETO)...");
     
     const nhArco = obterNHArcoReal();
     const base = nhArco - 4;
@@ -167,7 +167,7 @@ function calcularTecnica() {
         return resultado;
     }
     
-    // CÁLCULO 100% CORRETO: Usar nova função
+    // CÁLCULO CORRETO: Usar nova função
     const pontos = aprendida.custoTotal || 0;
     const niveis = calcularNiveisParaPontos(pontos);
     const atual = base + niveis;
@@ -412,10 +412,10 @@ function excluirTecnica(id) {
     }
 }
 
-// ===== 6. MODAL DE COMPRA - VERSÃO 100% CORRETA =====
+// ===== 6. MODAL DE COMPRA - VERSÃO INCREMENTAL ORIGINAL =====
 
 function abrirModalTecnica() {
-    console.log("📱 Abrindo modal (CÁLCULO 100% CORRETO)...");
+    console.log("📱 Abrindo modal (SISTEMA INCREMENTAL ORIGINAL)...");
     
     const calculo = calcularTecnica();
     const nhArco = calculo.nhArco;
@@ -437,18 +437,18 @@ function abrirModalTecnica() {
     let pontosSelecionados = pontosAtuais;
     const maxNiveis = nhArco - base;
     
-    // CALCULAR MÁXIMO CORRETAMENTE
+    // Calcular máximo permitido
     let maxPontos;
     if (maxNiveis >= 4) {
-        maxPontos = 5; // 4 níveis = 5 pontos
+        maxPontos = 5; // Pode comprar até 5 pontos (4 níveis)
     } else if (maxNiveis >= 3) {
-        maxPontos = 4; // 3 níveis = 4 pontos
+        maxPontos = 4; // Pode comprar até 4 pontos (3 níveis)
     } else if (maxNiveis >= 2) {
-        maxPontos = 3; // 2 níveis = 3 pontos
+        maxPontos = 3; // Pode comprar até 3 pontos (2 níveis)
     } else if (maxNiveis >= 1) {
-        maxPontos = 2; // 1 nível = 2 pontos
+        maxPontos = 2; // Pode comprar até 2 pontos (1 nível)
     } else {
-        maxPontos = 0; // sem níveis
+        maxPontos = 0; // sem níveis disponíveis
     }
     
     console.log(`📊 Modal: NH=${nhArco}, Base=${base}, PontosAtuais=${pontosAtuais}, MaxNíveis=${maxNiveis}, MaxPontos=${maxPontos}`);
@@ -494,8 +494,23 @@ function abrirModalTecnica() {
         const nhAtual = base + niveisSelecionados;
         const diferenca = pontosSelecionados - pontosAtuais;
         
-        // Determinar quais opções estão disponíveis
-        const opcoesDisponiveis = [0, 2, 3, 4, 5].filter(p => p <= maxPontos);
+        // Determinar próximo nível disponível
+        let proximoNivelDisponivel = null;
+        let proximosPontosDisponivel = null;
+        
+        if (maxNiveis >= 4 && pontosSelecionados < 5) {
+            proximoNivelDisponivel = 4;
+            proximosPontosDisponivel = 5;
+        } else if (maxNiveis >= 3 && pontosSelecionados < 4) {
+            proximoNivelDisponivel = 3;
+            proximosPontosDisponivel = 4;
+        } else if (maxNiveis >= 2 && pontosSelecionados < 3) {
+            proximoNivelDisponivel = 2;
+            proximosPontosDisponivel = 3;
+        } else if (maxNiveis >= 1 && pontosSelecionados < 2) {
+            proximoNivelDisponivel = 1;
+            proximosPontosDisponivel = 2;
+        }
         
         modalContent.innerHTML = `
             <div class="modal-header" style="
@@ -537,34 +552,40 @@ function abrirModalTecnica() {
                     </div>
                 </div>
                 
-                <!-- CONTROLE 100% CORRETO -->
+                <!-- CONTROLE INCREMENTAL (ORIGINAL) -->
                 <div style="text-align: center; margin: 20px 0; padding: 20px; background: rgba(0, 0, 0, 0.2); border-radius: 8px;">
                     <div style="color: #95a5a6; font-size: 14px;">Pontos de Técnica</div>
                     <div style="color: #ffd700; font-size: 42px; font-weight: bold; margin: 10px 0;">${pontosSelecionados}</div>
                     
-                    <!-- BOTÕES DE SELEÇÃO DE PONTOS -->
-                    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px 0;">
-                        ${opcoesDisponiveis.map(pontos => {
-                            const niveisParaEssesPontos = calcularNiveisParaPontos(pontos);
-                            const estaSelecionado = pontos === pontosSelecionados;
-                            return `
-                                <button onclick="selecionarPontosTecnica(${pontos})" 
-                                        style="
-                                            padding: 10px 15px;
-                                            background: ${estaSelecionado ? '#9b59b6' : (pontos === 0 ? '#7f8c8d' : '#3498db')};
-                                            color: white;
-                                            border: ${estaSelecionado ? '2px solid #ffd700' : 'none'};
-                                            border-radius: 6px;
-                                            cursor: pointer;
-                                            font-size: 14px;
-                                            font-weight: bold;
-                                            min-width: 70px;
-                                        ">
-                                    ${pontos} pts
-                                    ${niveisParaEssesPontos > 0 ? `<br><small>+${niveisParaEssesPontos}</small>` : ''}
-                                </button>
-                            `;
-                        }).join('')}
+                    <div style="display: flex; justify-content: center; gap: 15px; margin: 20px 0;">
+                        <button onclick="mudarPontosTecnica(-1)" ${pontosSelecionados <= 0 ? 'disabled' : ''}
+                                style="
+                                    padding: 12px 24px;
+                                    background: ${pontosSelecionados <= 0 ? '#7f8c8d' : '#e74c3c'};
+                                    color: white;
+                                    border: none;
+                                    border-radius: 6px;
+                                    cursor: ${pontosSelecionados <= 0 ? 'not-allowed' : 'pointer'};
+                                    font-size: 16px;
+                                    font-weight: bold;
+                                    min-width: 100px;
+                                ">
+                            -1 pt
+                        </button>
+                        <button onclick="mudarPontosTecnica(1)" ${pontosSelecionados >= maxPontos ? 'disabled' : ''}
+                                style="
+                                    padding: 12px 24px;
+                                    background: ${pontosSelecionados >= maxPontos ? '#7f8c8d' : '#27ae60'};
+                                    color: white;
+                                    border: none;
+                                    border-radius: 6px;
+                                    cursor: ${pontosSelecionados >= maxPontos ? 'not-allowed' : 'pointer'};
+                                    font-size: 16px;
+                                    font-weight: bold;
+                                    min-width: 100px;
+                                ">
+                            +1 pt
+                        </button>
                     </div>
                     
                     <div style="color: #ccc; margin-top: 15px;">
@@ -573,12 +594,25 @@ function abrirModalTecnica() {
                             | NH Final: <strong style="color: #2ecc71;">${nhAtual}</strong>
                         </div>
                         <div style="font-size: 12px; color: #95a5a6; margin-top: 5px;">
-                            Técnica Difícil: 2 pts = +1 nível | 3 pts = +2 | 4 pts = +3 | 5 pts = +4
+                            Técnica Difícil: 2 pts = +1 nível, 3 pts = +2, 4 pts = +3, 5 pts = +4
                         </div>
                     </div>
                 </div>
                 
-                <!-- TABELA DE CUSTOS 100% CORRETA -->
+                <!-- PRÓXIMO NÍVEL DISPONÍVEL -->
+                ${proximoNivelDisponivel ? `
+                <div style="background: rgba(46, 204, 113, 0.1); padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 3px solid #2ecc71;">
+                    <div style="color: #95a5a6; font-size: 12px;">Próximo Nível Disponível</div>
+                    <div style="color: #2ecc71; font-size: 16px; font-weight: bold; margin: 5px 0;">
+                        +${proximoNivelDisponivel} níveis (${proximosPontosDisponivel} pontos)
+                    </div>
+                    <div style="color: #ccc; font-size: 13px;">
+                        Adicionar ${proximosPontosDisponivel - pontosSelecionados} ponto(s) para evoluir
+                    </div>
+                </div>
+                ` : ''}
+                
+                <!-- TABELA DE CUSTOS -->
                 <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 20px 0;">
                     <div style="color: #95a5a6; font-size: 12px; text-align: center; margin-bottom: 10px;">Tabela de Custo (Técnica Difícil)</div>
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
@@ -610,7 +644,7 @@ function abrirModalTecnica() {
                     </div>
                     ${diferenca !== 0 ? `
                         <div style="color: ${diferenca > 0 ? '#27ae60' : '#e74c3c'}; font-size: 14px; margin-top: 5px;">
-                            ${diferenca > 0 ? '+' : ''}${diferenca} pontos
+                            ${diferenca > 0 ? '+' : ''}${diferenca} ponto(s) ${diferenca > 0 ? 'adicionais' : 'a menos'}
                         </div>
                     ` : ''}
                 </div>
@@ -661,10 +695,41 @@ function abrirModalTecnica() {
         console.log("📱 Modal fechado");
     };
     
-    window.selecionarPontosTecnica = (pontos) => {
-        pontosSelecionados = pontos;
-        atualizarModal();
-        console.log(`📊 Pontos selecionados: ${pontos} → Níveis: ${calcularNiveisParaPontos(pontos)}`);
+    window.mudarPontosTecnica = (mudanca) => {
+        const novo = pontosSelecionados + mudanca;
+        
+        // Só permitir valores válidos: 0, 2, 3, 4, 5
+        const valoresValidos = [0, 2, 3, 4, 5];
+        
+        // Encontrar o valor válido mais próximo
+        let valorValido = novo;
+        if (!valoresValidos.includes(novo)) {
+            // Se não for válido, ajustar
+            if (mudanca > 0) {
+                // Aumentando: ir para o próximo valor válido
+                for (let i = 0; i < valoresValidos.length; i++) {
+                    if (valoresValidos[i] > pontosSelecionados && valoresValidos[i] <= maxPontos) {
+                        valorValido = valoresValidos[i];
+                        break;
+                    }
+                }
+            } else {
+                // Diminuindo: ir para o valor válido anterior
+                for (let i = valoresValidos.length - 1; i >= 0; i--) {
+                    if (valoresValidos[i] < pontosSelecionados && valoresValidos[i] >= 0) {
+                        valorValido = valoresValidos[i];
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Verificar se está dentro dos limites
+        if (valorValido >= 0 && valorValido <= maxPontos) {
+            pontosSelecionados = valorValido;
+            atualizarModal();
+            console.log(`📊 Pontos alterados: ${pontosSelecionados} → Níveis: ${calcularNiveisParaPontos(pontosSelecionados)}`);
+        }
     };
     
     window.comprarTecnica = (pontos) => {
@@ -677,8 +742,8 @@ function abrirModalTecnica() {
         const nhFinal = base + niveis;
         
         const mensagem = pontos > pontosAtuais 
-            ? `Comprar ${pontos - pontosAtuais} pontos adicionais?\n\nNíveis: +${niveis}\nNH: ${nhFinal}\nTotal: ${pontos} pontos`
-            : `Reduzir ${pontosAtuais - pontos} pontos?\n\nNíveis: +${niveis}\nNH: ${nhFinal}\nTotal: ${pontos} pontos`;
+            ? `Comprar ${pontos - pontosAtuais} pontos adicionais?\n\nNíveis: +${niveis} (era +${calcularNiveisParaPontos(pontosAtuais)})\nNH: ${nhFinal} (era ${base + calcularNiveisParaPontos(pontosAtuais)})\nTotal: ${pontos} pontos`
+            : `Reduzir ${pontosAtuais - pontos} pontos?\n\nNíveis: +${niveis} (era +${calcularNiveisParaPontos(pontosAtuais)})\nNH: ${nhFinal} (era ${base + calcularNiveisParaPontos(pontosAtuais)})\nTotal: ${pontos} pontos`;
         
         if (confirm(mensagem)) {
             const index = estadoTecnicas.aprendidas.findIndex(t => t.id === 'arquearia-montada');
@@ -716,7 +781,7 @@ function abrirModalTecnica() {
     // Mostrar modal
     atualizarModal();
     modalOverlay.style.display = 'flex';
-    console.log("📱 Modal aberto (cálculo 100% correto)");
+    console.log("📱 Modal aberto (sistema incremental original)");
 }
 
 // ===== 7. ATUALIZAR TUDO =====
@@ -770,29 +835,19 @@ window.atualizarTodasTecnicas = atualizarTodasTecnicas;
 
 // Função de teste pública
 window.testarCalculo = () => {
-    console.log("=== TESTE DE CÁLCULO 100% CORRETO ===");
+    console.log("=== TESTE DE CÁLCULO ===");
     const nh = obterNHArcoReal();
     const calculo = calcularTecnica();
-    console.log("📊 RESULTADOS CORRETOS:");
+    console.log("📊 RESULTADOS:");
     console.log("- NH Arco:", nh);
     console.log("- Base (Arco-4):", calculo.base);
     console.log("- Pontos atuais:", calculo.pontos);
     console.log("- Níveis:", calculo.niveis);
     console.log("- NH atual:", calculo.atual);
     console.log("- Máximo (Arco):", calculo.max);
-    
-    // Testar conversões
-    console.log("\n🧪 TESTE DE CONVERSÕES:");
-    console.log("2 pontos → Níveis:", calcularNiveisParaPontos(2));
-    console.log("3 pontos → Níveis:", calcularNiveisParaPontos(3));
-    console.log("4 pontos → Níveis:", calcularNiveisParaPontos(4));
-    console.log("5 pontos → Níveis:", calcularNiveisParaPontos(5));
-    
-    console.log("1 nível → Pontos:", calcularPontosParaNiveis(1));
-    console.log("2 níveis → Pontos:", calcularPontosParaNiveis(2));
-    console.log("3 níveis → Pontos:", calcularPontosParaNiveis(3));
-    console.log("4 níveis → Pontos:", calcularPontosParaNiveis(4));
+    console.log("- Tem Cavalgar:", calculo.temCavalgar);
+    console.log("- Pode comprar:", calculo.podeComprar);
     console.log("=== FIM TESTE ===");
 };
 
-console.log("✅ TECNICAS.JS - VERSÃO 100% CORRETA PRONTA!");
+console.log("✅ TECNICAS.JS - VERSÃO INCREMENTAL ORIGINAL PRONTA!");
