@@ -2571,237 +2571,242 @@
         </div>
         
         <!-- SEGUNDA LINHA: DANO E DEFESAS -->
-        <div class="combate-row">
-            
-            <!-- CARD DANO - VERSÃO SIMPLIFICADA E INTELIGENTE -->
-            <div class="dano-gurps-card">
-                <div class="dano-header">
-                    <h3><i class="fas fa-bolt"></i> DANO DO PERSONAGEM</h3>
-                </div>
-                
-                <div class="dano-content">
-                    <!-- DANO BASE (SEM FÓRMULAS) -->
-                    <div class="dano-base-row">
-                        <!-- DANO GDP -->
-                        <div class="dano-tipo-card" data-tipo="gdp">
-                            <div class="dano-tipo-header">
-                                <div class="dano-tipo-icon">
-                                    <i class="fas fa-fist-raised"></i>
-                                </div>
-                                <div class="dano-tipo-title">
-                                    <h4>GDP</h4>
-                                    <div class="dano-subtitulo">Golpe de Punho</div>
-                                </div>
-                            </div>
-                            
-                            <div class="dano-tipo-content">
-                                <div class="dano-valor-display">
-                                    <span class="dano-label">Dano Base:</span>
-                                    <span class="dano-base-valor" id="danoGdp">1d-2</span>
-                                </div>
-                                <div class="dano-info">
-                                    <small>Calculado automaticamente da tabela</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- DANO GEB -->
-                        <div class="dano-tipo-card" data-tipo="geb">
-                            <div class="dano-tipo-header">
-                                <div class="dano-tipo-icon">
-                                    <i class="fas fa-hand-rock"></i>
-                                </div>
-                                <div class="dano-tipo-title">
-                                    <h4>GEB</h4>
-                                    <div class="dano-subtitulo">Golpe de Braço</div>
-                                </div>
-                            </div>
-                            
-                            <div class="dano-tipo-content">
-                                <div class="dano-valor-display">
-                                    <span class="dano-label">Dano Base:</span>
-                                    <span class="dano-base-valor" id="danoGeb">1d</span>
-                                </div>
-                                <div class="dano-info">
-                                    <small>Calculado automaticamente da tabela</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- SEÇÃO DE ARMAS DO PERSONAGEM -->
-                    <div class="armas-section">
-                        <div class="armas-header">
-                            <h4><i class="fas fa-swords"></i> Armas do Personagem</h4>
-                            <div class="arma-status" id="armaStatus">
-                                <span class="arma-count">0 armas</span>
-                            </div>
-                        </div>
-                        
-                        <!-- LISTA DE ARMAS DO PERSONAGEM -->
-                        <div class="armas-lista-container" id="armasListaContainer">
-                            <div class="sem-armas" id="semArmasMensagem">
-                                <i class="fas fa-inbox"></i>
-                                <p>Você ainda não tem armas</p>
-                                <small>Adquira armas na aba de Equipamentos</small>
-                            </div>
-                        </div>
-                        
-                        <!-- ARMA SELECIONADA PARA COMBATE -->
-                        <div class="arma-selecionada-container" id="armaSelecionadaContainer" style="display: none;">
-                            <div class="arma-selecionada-header">
-                                <h5><i class="fas fa-crosshairs"></i> Arma Equipada para Combate</h5>
-                                <button class="btn-mudar-arma" id="btnMudarArma">Mudar</button>
-                            </div>
-                            
-                            <div class="arma-selecionada-info" id="armaSelecionadaInfo">
-                                <!-- Aqui vai aparecer a arma selecionada -->
-                            </div>
-                            
-                            <!-- DISPLAY DE DANO DA ARMA (1 ou 2 tipos) -->
-                            <div class="arma-dano-display" id="armaDanoDisplay">
-                                <div class="dano-display-grid" id="danoDisplayGrid">
-                                    <!-- Será preenchido dinamicamente -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- CARD DEFESAS -->
-            <div class="defesas-card">
-                <div class="defesas-header">
-                    <h3><i class="fas fa-shield-alt"></i> DEFESAS</h3>
-                </div>
-                
-                <div class="defesas-content">
-                    <div class="defesa-item" data-tipo="esquiva">
-                        <div class="defesa-info">
-                            <div class="defesa-icon">
-                                <i class="fas fa-running"></i>
-                            </div>
-                            <div class="defesa-detalhes">
-                                <div class="defesa-nome">Esquiva</div>
-                                <div class="defesa-formula">DX + HT/4 + 3</div>
-                            </div>
-                        </div>
-                        
-                        <div class="defesa-valores">
-                            <div class="defesa-base-group">
-                                <div class="defesa-base-label">Base:</div>
-                                <div class="defesa-base" id="esquivaBase">10</div>
-                            </div>
-                            <div class="defesa-mod-group">
-                                <div class="defesa-mod-label">Mod:</div>
-                                <div class="defesa-mod-control">
-                                    <button class="defesa-mod-btn minus">-</button>
-                                    <span class="defesa-mod" id="esquivaMod">0</span>
-                                    <button class="defesa-mod-btn plus">+</button>
-                                </div>
-                            </div>
-                            <div class="defesa-total-group">
-                                <div class="defesa-total-label">Total:</div>
-                                <div class="defesa-total" id="esquivaTotal">10</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="defesa-item" data-tipo="bloqueio">
-                        <div class="defesa-info">
-                            <div class="defesa-icon">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <div class="defesa-detalhes">
-                                <div class="defesa-nome">Bloqueio</div>
-                                <div class="defesa-formula">Escudo/2 + 3</div>
-                            </div>
-                        </div>
-                        
-                        <div class="defesa-valores">
-                            <div class="defesa-base-group">
-                                <div class="defesa-base-label">Base:</div>
-                                <div class="defesa-base" id="bloqueioBase">3</div>
-                            </div>
-                            <div class="defesa-mod-group">
-                                <div class="defesa-mod-label">Mod:</div>
-                                <div class="defesa-mod-control">
-                                    <button class="defesa-mod-btn minus">-</button>
-                                    <span class="defesa-mod" id="bloqueioMod">0</span>
-                                    <button class="defesa-mod-btn plus">+</button>
-                                </div>
-                            </div>
-                            <div class="defesa-total-group">
-                                <div class="defesa-total-label">Total:</div>
-                                <div class="defesa-total" id="bloqueioTotal">3</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="defesa-item" data-tipo="aparar">
-                        <div class="defesa-info">
-                            <div class="defesa-icon">
-                                <i class="fas fa-sword"></i>
-                            </div>
-                            <div class="defesa-detalhes">
-                                <div class="defesa-nome">Aparar</div>
-                                <div class="defesa-formula">Arma/2 + 3</div>
-                            </div>
-                        </div>
-                        
-                        <div class="defesa-valores">
-                            <div class="defesa-base-group">
-                                <div class="defesa-base-label">Base:</div>
-                                <div class="defesa-base" id="apararBase">3</div>
-                            </div>
-                            <div class="defesa-mod-group">
-                                <div class="defesa-mod-label">Mod:</div>
-                                <div class="defesa-mod-control">
-                                    <button class="defesa-mod-btn minus">-</button>
-                                    <span class="defesa-mod" id="apararMod">0</span>
-                                    <button class="defesa-mod-btn plus">+</button>
-                                </div>
-                            </div>
-                            <div class="defesa-total-group">
-                                <div class="defesa-total-label">Total:</div>
-                                <div class="defesa-total" id="apararTotal">3</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="defesa-item deslocamento-item" data-tipo="deslocamento">
-                        <div class="defesa-info">
-                            <div class="defesa-icon">
-                                <i class="fas fa-walking"></i>
-                            </div>
-                            <div class="defesa-detalhes">
-                                <div class="defesa-nome">Deslocamento</div>
-                                <div class="defesa-formula">(DX+HT)/4</div>
-                            </div>
-                        </div>
-                        
-                        <div class="defesa-valores">
-                            <div class="defesa-base-group">
-                                <div class="defesa-base-label">Base:</div>
-                                <div class="defesa-base" id="deslocamentoBase">5.00</div>
-                            </div>
-                            <div class="defesa-mod-group">
-                                <div class="defesa-mod-label">Mod:</div>
-                                <div class="defesa-mod-control">
-                                    <button class="defesa-mod-btn minus">-</button>
-                                    <span class="defesa-mod" id="deslocamentoMod">0</span>
-                                    <button class="defesa-mod-btn plus">+</button>
-                                </div>
-                            </div>
-                            <div class="defesa-total-group">
-                                <div class="defesa-total-label">Total:</div>
-                                <div class="defesa-total" id="deslocamentoTotal">5.00</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- SEGUNDA LINHA: DANO E DEFESAS -->
+<div class="combate-row">
+    
+    <!-- CARD DANO - VERSÃO SIMPLIFICADA -->
+    <div class="dano-gurps-card">
+        <div class="dano-header">
+            <h3><i class="fas fa-bolt"></i> DANO DO PERSONAGEM</h3>
         </div>
+        
+        <div class="dano-content">
+            <!-- DANO BASE (SEM FÓRMULAS) -->
+            <div class="dano-base-row">
+                <!-- DANO GDP -->
+                <div class="dano-tipo-card" data-tipo="gdp">
+                    <div class="dano-tipo-header">
+                        <div class="dano-tipo-icon">
+                            <i class="fas fa-fist-raised"></i>
+                        </div>
+                        <div class="dano-tipo-title">
+                            <h4>GDP</h4>
+                            <div class="dano-subtitulo">Golpe de Punho</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dano-tipo-content">
+                        <div class="dano-valor-display">
+                            <span class="dano-label">Dano:</span>
+                            <span class="dano-base-valor" id="danoGdp">1d-2</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DANO GEB -->
+                <div class="dano-tipo-card" data-tipo="geb">
+                    <div class="dano-tipo-header">
+                        <div class="dano-tipo-icon">
+                            <i class="fas fa-hand-rock"></i>
+                        </div>
+                        <div class="dano-tipo-title">
+                            <h4>GEB</h4>
+                            <div class="dano-subtitulo">Golpe de Braço</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dano-tipo-content">
+                        <div class="dano-valor-display">
+                            <span class="dano-label">Dano:</span>
+                            <span class="dano-base-valor" id="danoGeb">1d</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SEÇÃO DE ARMA EQUIPADA - SIMPLES -->
+            <div class="arma-equipada-section">
+                <div class="arma-principal">
+                    <div class="arma-header">
+                        <h4><i class="fas fa-crosshairs"></i> Arma Equipada</h4>
+                    </div>
+                    
+                    <!-- QUANDO NÃO TEM ARMA -->
+                    <div class="sem-arma" id="semArmaContainer">
+                        <i class="fas fa-fist-raised"></i>
+                        <div class="sem-arma-texto">
+                            <span class="sem-arma-titulo">Sem Arma (Só Corporal)</span>
+                            <small>Adquira armas na aba de Equipamentos</small>
+                        </div>
+                    </div>
+                    
+                    <!-- QUANDO TEM ARMA (APARECE AUTOMATICAMENTE) -->
+                    <div class="arma-info" id="armaInfoContainer" style="display: none;">
+                        <div class="arma-nome-container">
+                            <span class="arma-label">Arma:</span>
+                            <span class="arma-nome" id="armaNome">-</span>
+                        </div>
+                        
+                        <!-- DISPLAY DE DANO DA ARMA -->
+                        <div class="arma-dano-info">
+                            <div class="dano-tipo-linha" id="danoTipo1Container">
+                                <span class="dano-label">Dano:</span>
+                                <span class="dano-valor" id="danoValor1">-</span>
+                                <span class="dano-tipo" id="danoTipo1">-</span>
+                            </div>
+                            
+                            <!-- SEGUNDO TIPO DE DANO (APENAS SE A ARMA TIVER) -->
+                            <div class="dano-tipo-linha" id="danoTipo2Container" style="display: none;">
+                                <span class="dano-separador">/</span>
+                                <span class="dano-valor" id="danoValor2">-</span>
+                                <span class="dano-tipo" id="danoTipo2">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div> <!-- Fecha .dano-content -->
+    </div> <!-- Fecha .dano-gurps-card -->
+    
+    <!-- CARD DEFESAS -->
+    <div class="defesas-card">
+        <div class="defesas-header">
+            <h3><i class="fas fa-shield-alt"></i> DEFESAS</h3>
+        </div>
+        
+        <div class="defesas-content">
+            <!-- ESQUIVA -->
+            <div class="defesa-item" data-tipo="esquiva">
+                <div class="defesa-info">
+                    <div class="defesa-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <div class="defesa-detalhes">
+                        <div class="defesa-nome">Esquiva</div>
+                        <div class="defesa-formula">DX + HT/4 + 3</div>
+                    </div>
+                </div>
+                
+                <div class="defesa-valores">
+                    <div class="defesa-base-group">
+                        <div class="defesa-base-label">Base:</div>
+                        <div class="defesa-base" id="esquivaBase">10</div>
+                    </div>
+                    <div class="defesa-mod-group">
+                        <div class="defesa-mod-label">Mod:</div>
+                        <div class="defesa-mod-control">
+                            <button class="defesa-mod-btn minus">-</button>
+                            <span class="defesa-mod" id="esquivaMod">0</span>
+                            <button class="defesa-mod-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="defesa-total-group">
+                        <div class="defesa-total-label">Total:</div>
+                        <div class="defesa-total" id="esquivaTotal">10</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- BLOQUEIO -->
+            <div class="defesa-item" data-tipo="bloqueio">
+                <div class="defesa-info">
+                    <div class="defesa-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="defesa-detalhes">
+                        <div class="defesa-nome">Bloqueio</div>
+                        <div class="defesa-formula">Escudo/2 + 3</div>
+                    </div>
+                </div>
+                
+                <div class="defesa-valores">
+                    <div class="defesa-base-group">
+                        <div class="defesa-base-label">Base:</div>
+                        <div class="defesa-base" id="bloqueioBase">3</div>
+                    </div>
+                    <div class="defesa-mod-group">
+                        <div class="defesa-mod-label">Mod:</div>
+                        <div class="defesa-mod-control">
+                            <button class="defesa-mod-btn minus">-</button>
+                            <span class="defesa-mod" id="bloqueioMod">0</span>
+                            <button class="defesa-mod-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="defesa-total-group">
+                        <div class="defesa-total-label">Total:</div>
+                        <div class="defesa-total" id="bloqueioTotal">3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- APARAR -->
+            <div class="defesa-item" data-tipo="aparar">
+                <div class="defesa-info">
+                    <div class="defesa-icon">
+                        <i class="fas fa-sword"></i>
+                    </div>
+                    <div class="defesa-detalhes">
+                        <div class="defesa-nome">Aparar</div>
+                        <div class="defesa-formula">Arma/2 + 3</div>
+                    </div>
+                </div>
+                
+                <div class="defesa-valores">
+                    <div class="defesa-base-group">
+                        <div class="defesa-base-label">Base:</div>
+                        <div class="defesa-base" id="apararBase">3</div>
+                    </div>
+                    <div class="defesa-mod-group">
+                        <div class="defesa-mod-label">Mod:</div>
+                        <div class="defesa-mod-control">
+                            <button class="defesa-mod-btn minus">-</button>
+                            <span class="defesa-mod" id="apararMod">0</span>
+                            <button class="defesa-mod-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="defesa-total-group">
+                        <div class="defesa-total-label">Total:</div>
+                        <div class="defesa-total" id="apararTotal">3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- DESLOCAMENTO -->
+            <div class="defesa-item deslocamento-item" data-tipo="deslocamento">
+                <div class="defesa-info">
+                    <div class="defesa-icon">
+                        <i class="fas fa-walking"></i>
+                    </div>
+                    <div class="defesa-detalhes">
+                        <div class="defesa-nome">Deslocamento</div>
+                        <div class="defesa-formula">(DX+HT)/4</div>
+                    </div>
+                </div>
+                
+                <div class="defesa-valores">
+                    <div class="defesa-base-group">
+                        <div class="defesa-base-label">Base:</div>
+                        <div class="defesa-base" id="deslocamentoBase">5.00</div>
+                    </div>
+                    <div class="defesa-mod-group">
+                        <div class="defesa-mod-label">Mod:</div>
+                        <div class="defesa-mod-control">
+                            <button class="defesa-mod-btn minus">-</button>
+                            <span class="defesa-mod" id="deslocamentoMod">0</span>
+                            <button class="defesa-mod-btn plus">+</button>
+                        </div>
+                    </div>
+                    <div class="defesa-total-group">
+                        <div class="defesa-total-label">Total:</div>
+                        <div class="defesa-total" id="deslocamentoTotal">5.00</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div> <!-- Fecha .defesas-content -->
+    </div> <!-- Fecha .defesas-card -->
+</div> <!-- Fecha .combate-row -->
         
         <!-- TERCEIRA LINHA: RD (MANTIDO) -->
         <div class="combate-row">

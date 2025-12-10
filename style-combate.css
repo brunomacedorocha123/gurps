@@ -1712,3 +1712,162 @@ input:focus, select:focus, button:focus {
     border-color: rgba(46, 204, 113, 0.4);
     color: #2ecc71;
 }
+
+/* ===== SEÇÃO DE ARMA EQUIPADA - SIMPLES ===== */
+.arma-equipada-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.arma-principal {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid rgba(241, 196, 15, 0.1);
+}
+
+.arma-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.arma-header h4 {
+    color: #f1c40f;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Quando não tem arma */
+.sem-arma {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+
+.sem-arma i {
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.sem-arma-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sem-arma-titulo {
+    color: #ccc;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.sem-arma small {
+    color: #95a5a6;
+    font-size: 0.85rem;
+}
+
+/* Quando tem arma */
+.arma-info {
+    padding: 15px;
+}
+
+.arma-nome-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.arma-label {
+    color: #95a5a6;
+    font-size: 0.9rem;
+    min-width: 50px;
+}
+
+.arma-nome {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    flex: 1;
+}
+
+/* Display de dano da arma */
+.arma-dano-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid rgba(241, 196, 15, 0.2);
+}
+
+.dano-tipo-linha {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 150px;
+}
+
+.dano-label {
+    color: #ccc;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 50px;
+}
+
+.dano-valor {
+    color: #f1c40f;
+    font-size: 1.1rem;
+    font-weight: bold;
+    min-width: 60px;
+}
+
+.dano-tipo {
+    color: #95a5a6;
+    font-size: 0.9rem;
+    font-style: italic;
+    flex: 1;
+}
+
+.dano-separador {
+    color: #f1c40f;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+/* Para quando tiver 2 tipos de dano */
+.dano-tipo-linha:not(:first-child) .dano-label {
+    display: none;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .dano-tipo-linha {
+        min-width: 100%;
+    }
+    
+    .arma-dano-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .dano-separador {
+        display: none;
+    }
+}
