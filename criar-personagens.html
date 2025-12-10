@@ -1510,121 +1510,124 @@
     </div>
 
     <!-- ===== SEÇÃO DE TÉCNICAS - ABAIXO DAS PERÍCIAS ===== -->
-<div class="tecnicas-section">
-  
-  <!-- STATUS DAS TÉCNICAS -->
-  <div class="status-cards-container">
-    <div class="card-status-resumo">
-      <h3><i class="fas fa-tools"></i> Técnicas Especiais</h3>
+    <div class="tecnicas-section">
       
-      <div class="status-linhas-container">
-        <!-- TÉCNICAS MÉDIAS -->
-        <div class="status-linha">
-          <div class="status-categoria">
-            <i class="fas fa-star-half-alt"></i>
-            <span>Médias</span>
-          </div>
-          <div class="status-valores">
-            <span class="status-qtd" id="qtd-tecnicas-medio">0</span>
-            <span class="status-pontos" id="pts-tecnicas-medio">(0 pts)</span>
-          </div>
-        </div>
-        
-        <!-- TÉCNICAS DIFÍCEIS -->
-        <div class="status-linha">
-          <div class="status-categoria">
-            <i class="fas fa-star"></i>
-            <span>Difíceis</span>
-          </div>
-          <div class="status-valores">
-            <span class="status-qtd" id="qtd-tecnicas-dificil">0</span>
-            <span class="status-pontos" id="pts-tecnicas-dificil">(0 pts)</span>
-          </div>
-        </div>
-        
-        <!-- SEPARADOR -->
-        <div class="status-separador"></div>
-        
-        <!-- TOTAL TÉCNICAS -->
-        <div class="status-linha total">
-          <div class="status-categoria">
-            <i class="fas fa-tools"></i>
-            <span>TOTAL TÉCNICAS</span>
-          </div>
-          <div class="status-valores">
-            <span class="status-qtd" id="qtd-tecnicas-total">0</span>
-            <span class="status-pontos" id="pts-tecnicas-total">(0 pts)</span>
+      <!-- STATUS DAS TÉCNICAS -->
+      <div class="status-cards-container">
+        <div class="card-status-resumo">
+          <h3><i class="fas fa-tools"></i> Técnicas Especiais</h3>
+          
+          <div class="status-linhas-container">
+            <!-- TÉCNICAS MÉDIAS -->
+            <div class="status-linha">
+              <div class="status-categoria">
+                <i class="fas fa-star-half-alt"></i>
+                <span>Médias</span>
+              </div>
+              <div class="status-valores">
+                <span class="status-qtd" id="qtd-tecnicas-medio">0</span>
+                <span class="status-pontos" id="pts-tecnicas-medio">(0 pts)</span>
+              </div>
+            </div>
+            
+            <!-- TÉCNICAS DIFÍCEIS -->
+            <div class="status-linha">
+              <div class="status-categoria">
+                <i class="fas fa-star"></i>
+                <span>Difíceis</span>
+              </div>
+              <div class="status-valores">
+                <span class="status-qtd" id="qtd-tecnicas-dificil">0</span>
+                <span class="status-pontos" id="pts-tecnicas-dificil">(0 pts)</span>
+              </div>
+            </div>
+            
+            <!-- SEPARADOR -->
+            <div class="status-separador"></div>
+            
+            <!-- TOTAL TÉCNICAS -->
+            <div class="status-linha total">
+              <div class="status-categoria">
+                <i class="fas fa-tools"></i>
+                <span>TOTAL TÉCNICAS</span>
+              </div>
+              <div class="status-valores">
+                <span class="status-qtd" id="qtd-tecnicas-total">0</span>
+                <span class="status-pontos" id="pts-tecnicas-total">(0 pts)</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- SISTEMA DE AQUISIÇÃO DE TÉCNICAS -->
-  <div class="sistema-aquisicao-pericias">
-    
-    <!-- COLUNA ESQUERDA - CATÁLOGO DE TÉCNICAS -->
-    <div class="catalog-column-pericias">
-      <div class="catalog-section-pericias">
-        <h3><i class="fas fa-book-open"></i> Técnicas Disponíveis</h3>
+      <!-- SISTEMA DE AQUISIÇÃO DE TÉCNICAS -->
+      <div class="sistema-aquisicao-pericias">
         
-        <!-- BARRA DE BUSCA COM ID ÚNICO -->
-        <div class="busca-pericias">
-          <input type="text" placeholder="🔍 Buscar técnicas..." class="search-input" id="busca-tecnicas-input">
-        </div>
-        
-        <!-- FILTROS POR DIFICULDADE COM IDs ÚNICOS -->
-        <div class="filtros-container-pericias">
-          <div class="filtro-buttons">
-            <button class="filtro-btn-tecnica active" data-filtro="todas-tecnicas">
-              <i class="fas fa-layer-group"></i> Todas
-            </button>
-            <button class="filtro-btn-tecnica" data-filtro="medio-tecnicas">
-              <i class="fas fa-star-half-alt"></i> Médias
-            </button>
-            <button class="filtro-btn-tecnica" data-filtro="dificil-tecnicas">
-              <i class="fas fa-star"></i> Difíceis
-            </button>
-            <button class="filtro-btn-tecnica" data-filtro="pericia-tecnicas">
-              <i class="fas fa-filter"></i> Por Perícia
-            </button>
+        <!-- COLUNA ESQUERDA - CATÁLOGO DE TÉCNICAS -->
+        <div class="catalog-column-pericias">
+          <div class="catalog-section-pericias">
+            <h3><i class="fas fa-book-open"></i> Técnicas Disponíveis</h3>
+            
+            <!-- BARRA DE BUSCA COM ID ÚNICO -->
+            <div class="busca-pericias">
+              <input type="text" placeholder="🔍 Buscar técnicas..." class="search-input" id="busca-tecnicas-input">
+            </div>
+            
+            <!-- FILTROS POR DIFICULDADE COM IDs ÚNICOS -->
+            <div class="filtros-container-pericias">
+              <div class="filtro-buttons">
+                <button class="filtro-btn-tecnica active" data-filtro="todas-tecnicas">
+                  <i class="fas fa-layer-group"></i> Todas
+                </button>
+                <button class="filtro-btn-tecnica" data-filtro="medio-tecnicas">
+                  <i class="fas fa-star-half-alt"></i> Médias
+                </button>
+                <button class="filtro-btn-tecnica" data-filtro="dificil-tecnicas">
+                  <i class="fas fa-star"></i> Difíceis
+                </button>
+                <button class="filtro-btn-tecnica" data-filtro="pericia-tecnicas">
+                  <i class="fas fa-filter"></i> Por Perícia
+                </button>
+              </div>
+            </div>
+            
+            <!-- CONTAINER COM SCROLL PARA TÉCNICAS DISPONÍVEIS -->
+            <div class="scroll-container tecnicas-catalogo-scroll">
+              <div class="catalog-list-pericias" id="lista-tecnicas">
+                <div class="nenhuma-pericia">
+                  <i class="fas fa-info-circle"></i>
+                  <div>Aprenda perícias primeiro</div>
+                  <small>As técnicas aparecerão aqui quando você tiver as perícias necessárias</small>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
-        <!-- CONTAINER COM SCROLL PARA TÉCNICAS DISPONÍVEIS -->
-        <div class="scroll-container tecnicas-catalogo-scroll">
-          <div class="catalog-list-pericias" id="lista-tecnicas">
-            <div class="nenhuma-pericia">
-              <i class="fas fa-info-circle"></i>
-              <div>Aprenda perícias primeiro</div>
-              <small>As técnicas aparecerão aqui quando você tiver as perícias necessárias</small>
+        <!-- COLUNA DIREITA - TÉCNICAS APRENDIDAS -->
+        <div class="acquired-column-pericias">
+          <div class="acquired-section-pericias">
+            <h3><i class="fas fa-graduation-cap"></i> Técnicas Aprendidas 
+              <span class="points-badge" id="pontos-tecnicas-total">[0 pts]</span>
+            </h3>
+            
+            <!-- CONTAINER COM SCROLL PARA TÉCNICAS APRENDIDAS -->
+            <div class="scroll-container tecnicas-aprendidas-scroll">
+              <div class="acquired-list-pericias" id="tecnicas-aprendidas">
+                <div class="nenhuma-pericia-aprendida">
+                  <i class="fas fa-tools"></i>
+                  <div>Nenhuma técnica aprendida</div>
+                  <small>As técnicas que você aprender aparecerão aqui</small>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
     
-    <!-- COLUNA DIREITA - TÉCNICAS APRENDIDAS -->
-    <div class="acquired-column-pericias">
-      <div class="acquired-section-pericias">
-        <h3><i class="fas fa-graduation-cap"></i> Técnicas Aprendidas 
-          <span class="points-badge" id="pontos-tecnicas-total">[0 pts]</span>
-        </h3>
-        
-        <!-- CONTAINER COM SCROLL PARA TÉCNICAS APRENDIDAS -->
-        <div class="scroll-container tecnicas-aprendidas-scroll">
-          <div class="acquired-list-pericias" id="tecnicas-aprendidas">
-            <div class="nenhuma-pericia-aprendida">
-              <i class="fas fa-tools"></i>
-              <div>Nenhuma técnica aprendida</div>
-              <small>As técnicas que você aprender aparecerão aqui</small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+  </div> <!-- Fecha .container-principal -->
+</div> <!-- Fecha #pericias -->
 
 <!-- MODAL DE COMPRA/EDIÇÃO DE PERÍCIA -->
 <div class="modal-pericia-overlay" style="display: none;">
@@ -1646,8 +1649,6 @@
     <!-- Conteúdo será preenchido pelo JavaScript -->
   </div>
 </div>
-    
-        
         <!-- ABA MAGIAS -->
         <div id="magia" class="tab-content">
             <div class="container-principal">
