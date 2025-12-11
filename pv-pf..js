@@ -1,5 +1,5 @@
 // pv-pf.js - Sistema de Pontos de Vida e Fadiga
-// Focado APENAS no card de PV e PF
+// Versão corrigida e testada
 
 class SistemaPVPF {
     constructor() {
@@ -11,7 +11,7 @@ class SistemaPVPF {
             atual: 10,
             bonus: 0,
             porcentagem: 100,
-            stThreshold: 5 // Limite de ST (metade do PV)
+            stThreshold: 5
         };
         
         // Estado do PF
@@ -24,16 +24,44 @@ class SistemaPVPF {
         // Cache dos elementos
         this.elements = {};
         
-        // Inicializar
-        this.cacheElements();
+        // Aguardar DOM estar pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            setTimeout(() => this.init(), 100);
+        }
+    }
+    
+    init() {
+        console.log('Inicializando sistema PV/PF...');
+        
+        if (!this.cacheElements()) {
+            console.error('Elementos do PV/PF não encontrados! Verifique se a aba Combate está visível.');
+            return;
+        }
+        
         this.bindEvents();
         this.carregarSalvo();
         this.atualizarTudo();
+        this.iniciarObservadorAba();
         
         console.log('Sistema PV/PF pronto!');
     }
     
     cacheElements() {
+        // Verificar se os elementos existem
+        const elementosExistentes = [
+            'pvMax', 'pvAtual', 'pvBonus', 'pvFill', 'pvTexto',
+            'pfMax', 'pfAtual', 'pfFill', 'pfTexto', 'marcadorSt'
+        ];
+        
+        for (const id of elementosExistentes) {
+            if (!document.getElementById(id)) {
+                console.warn(`Elemento ${id} não encontrado!`);
+                return false;
+            }
+        }
+        
         // Elementos do PV
         this.elements.pv = {
             maxInput: document.getElementById('pvMax'),
@@ -59,73 +87,87 @@ class SistemaPVPF {
         
         // Estados de PF
         this.elements.estados = document.querySelectorAll('.estado-item');
+        
+        return true;
     }
     
     bindEvents() {
         // === EVENTOS DO PV ===
         
-        // Quando muda o máximo de PV
-        this.elements.pv.maxInput.addEventListener('change', (e) => {
-            const novoMax = parseInt(e.target.value) || 1;
-            this.alterarPvMax(novoMax);
-        });
-        
-        // Quando muda o atual de PV
-        this.elements.pv.atualInput.addEventListener('change', (e) => {
-            const novoAtual = parseInt(e.target.value) || 0;
-            this.alterarPvAtual(novoAtual);
-        });
-        
-        // Quando muda o bônus de PV
-        this.elements.pv.bonusInput.addEventListener('change', (e) => {
-            this.pv.bonus = parseInt(e.target.value) || 0;
-            this.atualizarPV();
-        });
-        
-        // Botões +- do PV
-        this.elements.pv.botoes.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const valor = parseInt(e.target.dataset.amount) || 1;
-                if (e.target.classList.contains('plus')) {
-                    this.alterarPv(valor);
-                } else {
-                    this.alterarPv(-valor);
-                }
+        // Input máximo PV
+        if (this.elements.pv.maxInput) {
+            this.elements.pv.maxInput.addEventListener('change', (e) => {
+                const novoMax = parseInt(e.target.value) || 1;
+                this.alterarPvMax(novoMax);
             });
-        });
+        }
+        
+        // Input atual PV
+        if (this.elements.pv.atualInput) {
+            this.elements.pv.atualInput.addEventListener('change', (e) => {
+                const novoAtual = parseInt(e.target.value) || 0;
+                this.alterarPvAtual(novoAtual);
+            });
+        }
+        
+        // Input bônus PV
+        if (this.elements.pv.bonusInput) {
+            this.elements.pv.bonusInput.addEventListener('change', (e) => {
+                this.pv.bonus = parseInt(e.target.value) || 0;
+                this.atualizarPV();
+            });
+        }
+        
+        // Botões +- PV
+        if (this.elements.pv.botoes) {
+            this.elements.pv.botoes.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const valor = parseInt(e.target.dataset.amount) || 1;
+                    if (e.target.classList.contains('plus')) {
+                        this.alterarPv(valor);
+                    } else {
+                        this.alterarPv(-valor);
+                    }
+                });
+            });
+        }
         
         // === EVENTOS DO PF ===
         
-        // Quando muda o máximo de PF
-        this.elements.pf.maxInput.addEventListener('change', (e) => {
-            const novoMax = parseInt(e.target.value) || 1;
-            this.alterarPfMax(novoMax);
-        });
-        
-        // Quando muda o atual de PF
-        this.elements.pf.atualInput.addEventListener('change', (e) => {
-            const novoAtual = parseInt(e.target.value) || 0;
-            this.alterarPfAtual(novoAtual);
-        });
-        
-        // Botões +- do PF
-        this.elements.pf.botoes.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const valor = parseInt(e.target.dataset.amount) || 1;
-                if (e.target.classList.contains('plus')) {
-                    this.alterarPf(valor);
-                } else {
-                    this.alterarPf(-valor);
-                }
-            });
-        });
-        
-        // Escutar mudanças dos atributos (se o sistema existir)
-        if (window.obterDadosAtributos) {
-            document.addEventListener('atributosAlterados', () => {
-                this.sincronizarComAtributos();
+        // Input máximo PF
+        if (this.elements.pf.maxInput) {
+            this.elements.pf.maxInput.addEventListener('change', (e) => {
+                const novoMax = parseInt(e.target.value) || 1;
+                this.alterarPfMax(novoMax);
             });
         }
+        
+        // Input atual PF
+        if (this.elements.pf.atualInput) {
+            this.elements.pf.atualInput.addEventListener('change', (e) => {
+                const novoAtual = parseInt(e.target.value) || 0;
+                this.alterarPfAtual(novoAtual);
+            });
+        }
+        
+        // Botões +- PF
+        if (this.elements.pf.botoes) {
+            this.elements.pf.botoes.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const valor = parseInt(e.target.dataset.amount) || 1;
+                    if (e.target.classList.contains('plus')) {
+                        this.alterarPf(valor);
+                    } else {
+                        this.alterarPf(-valor);
+                    }
+                });
+            });
+        }
+        
+        // Escutar mudanças dos atributos
+        document.addEventListener('atributosAlterados', () => {
+            this.sincronizarComAtributos();
+        });
     }
     
     // ==================== MÉTODOS DO PV ====================
@@ -136,7 +178,9 @@ class SistemaPVPF {
         
         // Atualizar estado
         this.pv.max = novoMax;
-        this.elements.pv.maxInput.value = novoMax;
+        if (this.elements.pv.maxInput) {
+            this.elements.pv.maxInput.value = novoMax;
+        }
         
         // Recalcular ST (metade do PV)
         this.pv.stThreshold = Math.floor(this.pv.max / 2);
@@ -144,7 +188,9 @@ class SistemaPVPF {
         // Ajustar PV atual se ficou maior que o máximo
         if (this.pv.atual > novoMax) {
             this.pv.atual = novoMax;
-            this.elements.pv.atualInput.value = novoMax;
+            if (this.elements.pv.atualInput) {
+                this.elements.pv.atualInput.value = novoMax;
+            }
         }
         
         this.atualizarPV();
@@ -160,7 +206,9 @@ class SistemaPVPF {
         
         // Atualizar estado
         this.pv.atual = novoAtual;
-        this.elements.pv.atualInput.value = novoAtual;
+        if (this.elements.pv.atualInput) {
+            this.elements.pv.atualInput.value = novoAtual;
+        }
         
         this.atualizarPV();
     }
@@ -176,8 +224,13 @@ class SistemaPVPF {
         if (this.pv.porcentagem > 200) this.pv.porcentagem = 200;
         
         // Atualizar barra visual
-        this.elements.pv.fill.style.width = `${this.pv.porcentagem}%`;
-        this.elements.pv.texto.textContent = `${this.pv.atual}/${this.pv.max}`;
+        if (this.elements.pv.fill) {
+            this.elements.pv.fill.style.width = `${this.pv.porcentagem}%`;
+        }
+        
+        if (this.elements.pv.texto) {
+            this.elements.pv.texto.textContent = `${this.pv.atual}/${this.pv.max}`;
+        }
         
         // Atualizar marcador de ST
         this.atualizarMarcadorSt();
@@ -207,6 +260,8 @@ class SistemaPVPF {
     }
     
     atualizarFaixasPV() {
+        if (!this.elements.faixas || this.elements.faixas.length === 0) return;
+        
         // Definir faixas de PV
         const faixas = [
             { min: 100, cor: '#27ae60', nome: 'Cheio' },
@@ -234,17 +289,21 @@ class SistemaPVPF {
         // Atualizar visual das faixas
         this.elements.faixas.forEach((item, index) => {
             const faixa = faixas[index];
-            item.style.backgroundColor = faixa.cor;
-            
-            if (faixaAtual && faixa.nome === faixaAtual.nome) {
-                item.classList.add('ativa');
-            } else {
-                item.classList.remove('ativa');
+            if (faixa) {
+                item.style.backgroundColor = faixa.cor;
+                
+                if (faixaAtual && faixa.nome === faixaAtual.nome) {
+                    item.classList.add('ativa');
+                } else {
+                    item.classList.remove('ativa');
+                }
             }
         });
     }
     
     atualizarCorBarraPV() {
+        if (!this.elements.pv.fill) return;
+        
         // Cores baseadas na porcentagem
         let cor = '#27ae60'; // Verde (saudável)
         
@@ -263,12 +322,16 @@ class SistemaPVPF {
         if (novoMax < 1) novoMax = 1;
         
         this.pf.max = novoMax;
-        this.elements.pf.maxInput.value = novoMax;
+        if (this.elements.pf.maxInput) {
+            this.elements.pf.maxInput.value = novoMax;
+        }
         
         // Ajustar PF atual se necessário
         if (this.pf.atual > novoMax) {
             this.pf.atual = novoMax;
-            this.elements.pf.atualInput.value = novoMax;
+            if (this.elements.pf.atualInput) {
+                this.elements.pf.atualInput.value = novoMax;
+            }
         }
         
         this.atualizarPF();
@@ -282,7 +345,9 @@ class SistemaPVPF {
         if (novoAtual > this.pf.max * 2) novoAtual = this.pf.max * 2;
         
         this.pf.atual = novoAtual;
-        this.elements.pf.atualInput.value = novoAtual;
+        if (this.elements.pf.atualInput) {
+            this.elements.pf.atualInput.value = novoAtual;
+        }
         
         this.atualizarPF();
     }
@@ -298,8 +363,13 @@ class SistemaPVPF {
         if (this.pf.porcentagem > 200) this.pf.porcentagem = 200;
         
         // Atualizar barra
-        this.elements.pf.fill.style.width = `${this.pf.porcentagem}%`;
-        this.elements.pf.texto.textContent = `${this.pf.atual}/${this.pf.max}`;
+        if (this.elements.pf.fill) {
+            this.elements.pf.fill.style.width = `${this.pf.porcentagem}%`;
+        }
+        
+        if (this.elements.pf.texto) {
+            this.elements.pf.texto.textContent = `${this.pf.atual}/${this.pf.max}`;
+        }
         
         // Atualizar estados
         this.atualizarEstadosPF();
@@ -312,6 +382,8 @@ class SistemaPVPF {
     }
     
     atualizarEstadosPF() {
+        if (!this.elements.estados || this.elements.estados.length === 0) return;
+        
         const tercoMax = this.pf.max / 3;
         let estado = 'normal'; // PF ≥ 1/3 máximo
         
@@ -334,6 +406,8 @@ class SistemaPVPF {
     }
     
     atualizarCorBarraPF() {
+        if (!this.elements.pf.fill) return;
+        
         let cor = '#2ecc71'; // Verde (normal)
         
         if (this.pf.atual < this.pf.max / 3) {
@@ -347,26 +421,40 @@ class SistemaPVPF {
         this.elements.pf.fill.style.backgroundColor = cor;
     }
     
-    // ==================== INTEGRAÇÃO ====================
+    // ==================== MÉTODOS GERAIS ====================
+    
+    atualizarTudo() {
+        this.atualizarPV();
+        this.atualizarPF();
+    }
+    
+    // ==================== INTEGRAÇÃO COM ATRIBUTOS ====================
     
     sincronizarComAtributos() {
-        // Se existir o sistema de atributos, pega PV e PF dele
+        console.log('Sincronizando PV/PF com atributos...');
+        
         try {
-            if (window.obterDadosAtributos) {
-                const dados = window.obterDadosAtributos();
-                
-                // Atualizar PV máximo
-                if (dados.PV && dados.PV !== this.pv.max) {
-                    this.alterarPvMax(dados.PV);
+            // Tentar pegar valores da aba de atributos
+            const pvTotalElem = document.getElementById('PVTotal');
+            const pfTotalElem = document.getElementById('PFTotal');
+            
+            if (pvTotalElem) {
+                const pvDoAtributo = parseInt(pvTotalElem.textContent);
+                if (!isNaN(pvDoAtributo) && pvDoAtributo > 0) {
+                    console.log(`PV do atributos.js: ${pvDoAtributo}`);
+                    this.alterarPvMax(pvDoAtributo);
                 }
-                
-                // Atualizar PF máximo
-                if (dados.PF && dados.PF !== this.pf.max) {
-                    this.alterarPfMax(dados.PF);
+            }
+            
+            if (pfTotalElem) {
+                const pfDoAtributo = parseInt(pfTotalElem.textContent);
+                if (!isNaN(pfDoAtributo) && pfDoAtributo > 0) {
+                    console.log(`PF do atributos.js: ${pfDoAtributo}`);
+                    this.alterarPfMax(pfDoAtributo);
                 }
             }
         } catch (error) {
-            console.log('Sistema de atributos não disponível:', error);
+            console.log('Erro ao sincronizar com atributos:', error);
         }
     }
     
@@ -394,28 +482,51 @@ class SistemaPVPF {
                 // Carregar PV
                 if (dados.pv) {
                     this.pv = dados.pv;
-                    this.elements.pv.maxInput.value = this.pv.max;
-                    this.elements.pv.atualInput.value = this.pv.atual;
-                    this.elements.pv.bonusInput.value = this.pv.bonus;
+                    if (this.elements.pv.maxInput) this.elements.pv.maxInput.value = this.pv.max;
+                    if (this.elements.pv.atualInput) this.elements.pv.atualInput.value = this.pv.atual;
+                    if (this.elements.pv.bonusInput) this.elements.pv.bonusInput.value = this.pv.bonus;
                 }
                 
                 // Carregar PF
                 if (dados.pf) {
                     this.pf = dados.pf;
-                    this.elements.pf.maxInput.value = this.pf.max;
-                    this.elements.pf.atualInput.value = this.pf.atual;
+                    if (this.elements.pf.maxInput) this.elements.pf.maxInput.value = this.pf.max;
+                    if (this.elements.pf.atualInput) this.elements.pf.atualInput.value = this.pf.atual;
                 }
                 
-                console.log('Dados PV/PF carregados do armazenamento local');
+                console.log('Dados PV/PF carregados do localStorage');
             }
         } catch (error) {
             console.log('Não foi possível carregar dados salvos:', error);
         }
     }
     
-    // ==================== PÚBLICO ====================
+    // ==================== OBSERVADOR DA ABA ====================
     
-    // Para outros sistemas acessarem os dados
+    iniciarObservadorAba() {
+        const combateTab = document.getElementById('combate');
+        if (!combateTab) return;
+        
+        // Observa mudanças na aba
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    // Quando a aba de combate ficar visível
+                    if (combateTab.classList.contains('active')) {
+                        console.log('Aba Combate ativada - reinicializando PV/PF');
+                        setTimeout(() => {
+                            this.init();
+                        }, 50);
+                    }
+                }
+            });
+        });
+        
+        observer.observe(combateTab, { attributes: true });
+    }
+    
+    // ==================== MÉTODOS PÚBLICOS ====================
+    
     getDados() {
         return {
             pv: { ...this.pv },
@@ -423,14 +534,15 @@ class SistemaPVPF {
         };
     }
     
-    // Para outros sistemas alterarem os dados
     setDados(dados) {
         if (dados.pv) {
             if (dados.pv.max !== undefined) this.alterarPvMax(dados.pv.max);
             if (dados.pv.atual !== undefined) this.alterarPvAtual(dados.pv.atual);
             if (dados.pv.bonus !== undefined) {
                 this.pv.bonus = dados.pv.bonus;
-                this.elements.pv.bonusInput.value = this.pv.bonus;
+                if (this.elements.pv.bonusInput) {
+                    this.elements.pv.bonusInput.value = this.pv.bonus;
+                }
             }
         }
         
@@ -441,11 +553,10 @@ class SistemaPVPF {
     }
 }
 
-// ==================== INICIALIZAÇÃO ====================
+// ==================== INICIALIZAÇÃO GLOBAL ====================
 
 let sistemaPVPF = null;
 
-// Função para iniciar quando a aba de combate for ativada
 function iniciarSistemaPVPF() {
     if (!sistemaPVPF) {
         sistemaPVPF = new SistemaPVPF();
@@ -453,40 +564,20 @@ function iniciarSistemaPVPF() {
     return sistemaPVPF;
 }
 
-// Inicialização automática
+// Inicializar quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
-    // Verifica se estamos na aba de combate
-    const combateTab = document.getElementById('combate');
+    console.log('DOM carregado - verificando aba Combate...');
     
-    // Se a aba já estiver ativa, inicia
+    // Verificar se já estamos na aba de Combate
+    const combateTab = document.getElementById('combate');
     if (combateTab && combateTab.classList.contains('active')) {
         setTimeout(() => {
             iniciarSistemaPVPF();
-        }, 100);
-    }
-    
-    // Observa mudanças nas abas
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const tab = mutation.target;
-                // Quando a aba de combate ficar ativa
-                if (tab.id === 'combate' && tab.classList.contains('active')) {
-                    setTimeout(() => {
-                        iniciarSistemaPVPF();
-                    }, 100);
-                }
-            }
-        });
-    });
-    
-    // Começa a observar a aba de combate
-    if (combateTab) {
-        observer.observe(combateTab, { attributes: true });
+        }, 200);
     }
 });
 
-// Exportar para uso global
+// Exportar funções para uso global
 window.iniciarSistemaPVPF = iniciarSistemaPVPF;
 window.obterDadosPVPF = () => sistemaPVPF ? sistemaPVPF.getDados() : null;
 window.atualizarPVPF = (dados) => sistemaPVPF ? sistemaPVPF.setDados(dados) : null;
