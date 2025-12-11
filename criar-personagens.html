@@ -2449,165 +2449,247 @@
                
             </div>
         </div>
-<!-- ABA COMBATE - REDESIGN COMPLETO -->
-<div id="combate" class="tab-content active">
-    <div class="combate-container redesigned">
+<!-- ABA COMBATE - VERSÃO FINAL OTIMIZADA -->
+<div id="combate" class="tab-content">
+    <div class="combate-container">
         
         <!-- PRIMEIRA LINHA: PV E PF -->
         <div class="combate-row">
-            <!-- CARD PV - DESIGN MINIMALISTA -->
-            <div class="pv-card-redesign">
-                <div class="card-header-combate">
-                    <h3><i class="fas fa-heartbeat"></i> PONTOS DE VIDA</h3>
-                    <div class="pv-modifier">
-                        <span class="mod-label">Mod.</span>
-                        <div class="mod-control">
-                            <button class="mod-btn mod-minus">-</button>
-                            <input type="number" id="pvMod" class="mod-input" value="0" min="-20" max="20">
-                            <button class="mod-btn mod-plus">+</button>
+            <!-- CARD PV - DESIGN LIMPO E FUNCIONAL -->
+            <div class="pv-card">
+                <div class="card-header">
+                    <div class="header-left">
+                        <i class="fas fa-heartbeat"></i>
+                        <h3>PONTOS DE VIDA</h3>
+                    </div>
+                    <div class="header-right">
+                        <div class="modificador">
+                            <span class="mod-label">Modificador</span>
+                            <div class="mod-control">
+                                <button class="mod-btn minus" data-change="-1">-</button>
+                                <input type="number" id="pvModificador" class="mod-input" value="0" min="-10" max="10">
+                                <button class="mod-btn plus" data-change="1">+</button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="pv-main-display">
-                    <!-- BARRA DE PV COM ESTADOS VISUAIS -->
-                    <div class="pv-bar-container">
-                        <div class="pv-bar-labels">
-                            <span class="pv-label">ST: <span id="pvST">10</span></span>
-                            <span class="pv-label">Máx: <span id="pvMaxDisplay">10</span></span>
-                        </div>
-                        
-                        <div class="pv-bar-wrapper">
-                            <div class="pv-bar" id="pvBar">
-                                <div class="pv-fill" id="pvFill"></div>
-                                <div class="pv-value" id="pvValue">10/10</div>
-                                
-                                <!-- INDICADORES DE ESTADO -->
-                                <div class="state-indicator" style="left: 80%">
-                                    <div class="state-dot" data-state="machucado"></div>
-                                    <span class="state-label">-20%</span>
-                                </div>
-                                <div class="state-indicator" style="left: 60%">
-                                    <div class="state-dot" data-state="ferido"></div>
-                                    <span class="state-label">-40%</span>
-                                </div>
-                                <div class="state-indicator" style="left: 40%">
-                                    <div class="state-dot" data-state="critico"></div>
-                                    <span class="state-label">-60%</span>
-                                </div>
-                                <div class="state-indicator" style="left: 20%">
-                                    <div class="state-dot" data-state="morrendo"></div>
-                                    <span class="state-label">-80%</span>
-                                </div>
+                <div class="pv-content">
+                    <!-- DISPLAY PRINCIPAL -->
+                    <div class="pv-display">
+                        <div class="pv-stats">
+                            <div class="stat">
+                                <span class="stat-label">PV Base</span>
+                                <span class="stat-value" id="pvBase">10</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">PV Máx</span>
+                                <span class="stat-value" id="pvMaxValue">10</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">PV Atual</span>
+                                <span class="stat-value" id="pvAtualValue">10</span>
                             </div>
                         </div>
                         
-                        <div class="pv-state-display">
-                            <span class="current-state" id="pvStateText">Perfeita Saúde</span>
-                        </div>
-                    </div>
-                    
-                    <!-- CONTROLES PRINCIPAIS PV -->
-                    <div class="pv-control-panel">
-                        <div class="pv-input-section">
-                            <div class="pv-input-group">
-                                <label for="pvMax">PV Máx</label>
-                                <div class="input-with-buttons">
-                                    <button class="pv-btn pv-dec" data-change="-1">-</button>
-                                    <input type="number" id="pvMax" class="pv-input" value="10" min="1">
-                                    <button class="pv-btn pv-inc" data-change="1">+</button>
+                        <!-- BARRA DE PV COM INDICADORES DE ESTADO -->
+                        <div class="pv-bar-container">
+                            <div class="pv-bar-labels">
+                                <span class="pv-label">0%</span>
+                                <span class="pv-label">Inconsciente</span>
+                                <span class="pv-label">100%</span>
+                            </div>
+                            
+                            <div class="pv-bar-wrapper">
+                                <!-- BARRA PRINCIPAL -->
+                                <div class="pv-bar" id="pvBar">
+                                    <div class="pv-fill" id="pvFill"></div>
+                                    <div class="pv-text" id="pvText">10/10</div>
+                                </div>
+                                
+                                <!-- MARCADORES DE ESTADO -->
+                                <div class="state-marker" style="left: 80%" data-state="machucado">
+                                    <div class="marker-line"></div>
+                                    <div class="marker-label">-20%</div>
+                                </div>
+                                <div class="state-marker" style="left: 60%" data-state="ferido">
+                                    <div class="marker-line"></div>
+                                    <div class="marker-label">-40%</div>
+                                </div>
+                                <div class="state-marker" style="left: 40%" data-state="critico">
+                                    <div class="marker-line"></div>
+                                    <div class="marker-label">-60%</div>
+                                </div>
+                                <div class="state-marker" style="left: 20%" data-state="morrendo">
+                                    <div class="marker-line"></div>
+                                    <div class="marker-label">-80%</div>
                                 </div>
                             </div>
                             
-                            <div class="pv-input-group">
-                                <label for="pvCurrent">PV Atual</label>
-                                <div class="input-with-buttons">
-                                    <button class="pv-btn pv-dec" data-change="-1">-</button>
-                                    <input type="number" id="pvCurrent" class="pv-input" value="10" min="-50" max="50">
-                                    <button class="pv-btn pv-inc" data-change="1">+</button>
+                            <!-- LEGENDA DOS ESTADOS -->
+                            <div class="state-legend">
+                                <div class="state-item" data-state="saudavel">
+                                    <div class="state-color"></div>
+                                    <span class="state-name">Saudável</span>
+                                </div>
+                                <div class="state-item" data-state="machucado">
+                                    <div class="state-color"></div>
+                                    <span class="state-name">Machucado</span>
+                                </div>
+                                <div class="state-item" data-state="ferido">
+                                    <div class="state-color"></div>
+                                    <span class="state-name">Ferido</span>
+                                </div>
+                                <div class="state-item" data-state="critico">
+                                    <div class="state-color"></div>
+                                    <span class="state-name">Crítico</span>
+                                </div>
+                                <div class="state-item" data-state="morrendo">
+                                    <div class="state-color"></div>
+                                    <span class="state-name">Morrendo</span>
+                                </div>
+                                <div class="state-item" data-state="inconsciente">
+                                    <div class="state-color"></div>
+                                    <span class="state-name">Inconsciente</span>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- CONTROLES -->
+                    <div class="pv-controls">
+                        <div class="control-section">
+                            <h4>Controle de Dano</h4>
+                            <div class="quick-buttons">
+                                <button class="btn-dano" data-amount="-5">-5</button>
+                                <button class="btn-dano" data-amount="-2">-2</button>
+                                <button class="btn-dano" data-amount="-1">-1</button>
+                                <button class="btn-cura" data-amount="1">+1</button>
+                                <button class="btn-cura" data-amount="2">+2</button>
+                                <button class="btn-cura" data-amount="5">+5</button>
+                            </div>
+                        </div>
                         
-                        <div class="pv-quick-controls">
-                            <button class="quick-btn damage-btn" data-amount="-5">-5 PV</button>
-                            <button class="quick-btn damage-btn" data-amount="-1">-1 PV</button>
-                            <button class="quick-btn heal-btn" data-amount="1">+1 PV</button>
-                            <button class="quick-btn heal-btn" data-amount="5">+5 PV</button>
+                        <div class="control-section">
+                            <h4>Configuração</h4>
+                            <div class="config-controls">
+                                <div class="config-item">
+                                    <label for="pvMaxInput">PV Máximo</label>
+                                    <input type="number" id="pvMaxInput" value="10" min="1">
+                                </div>
+                                <div class="config-item">
+                                    <label for="pvAtualInput">PV Atual</label>
+                                    <input type="number" id="pvAtualInput" value="10" min="-50" max="50">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- CARD PF - DESIGN COERENTE -->
-            <div class="pf-card-redesign">
-                <div class="card-header-combate">
-                    <h3><i class="fas fa-wind"></i> PONTOS DE FADIGA</h3>
-                    <div class="pf-modifier">
-                        <span class="mod-label">Mod.</span>
-                        <div class="mod-control">
-                            <button class="mod-btn mod-minus">-</button>
-                            <input type="number" id="pfMod" class="mod-input" value="0" min="-10" max="10">
-                            <button class="mod-btn mod-plus">+</button>
+            <!-- CARD PF - DESIGN SIMPLIFICADO -->
+            <div class="pf-card">
+                <div class="card-header">
+                    <div class="header-left">
+                        <i class="fas fa-wind"></i>
+                        <h3>PONTOS DE FADIGA</h3>
+                    </div>
+                    <div class="header-right">
+                        <div class="modificador">
+                            <span class="mod-label">Modificador</span>
+                            <div class="mod-control">
+                                <button class="mod-btn minus" data-change="-1">-</button>
+                                <input type="number" id="pfModificador" class="mod-input" value="0" min="-10" max="10">
+                                <button class="mod-btn plus" data-change="1">+</button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="pf-main-display">
-                    <!-- BARRA DE PF -->
-                    <div class="pf-bar-container">
-                        <div class="pf-bar-labels">
-                            <span class="pf-label">HT: <span id="pfHT">10</span></span>
-                            <span class="pf-label">Máx: <span id="pfMaxDisplay">10</span></span>
-                        </div>
-                        
-                        <div class="pf-bar-wrapper">
-                            <div class="pf-bar" id="pfBar">
-                                <div class="pf-fill" id="pfFill"></div>
-                                <div class="pf-value" id="pfValue">10/10</div>
-                                
-                                <!-- INDICADOR DE FATIGA -->
-                                <div class="fatigue-indicator" style="left: 33%">
-                                    <div class="fatigue-line"></div>
-                                    <span class="fatigue-label">Fadiga</span>
-                                </div>
+                <div class="pf-content">
+                    <!-- DISPLAY PRINCIPAL PF -->
+                    <div class="pf-display">
+                        <div class="pf-stats">
+                            <div class="stat">
+                                <span class="stat-label">PF Base</span>
+                                <span class="stat-value" id="pfBase">10</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">PF Máx</span>
+                                <span class="stat-value" id="pfMaxValue">10</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">PF Atual</span>
+                                <span class="stat-value" id="pfAtualValue">10</span>
                             </div>
                         </div>
                         
-                        <div class="pf-state-display">
-                            <div class="state-tag" data-state="normal">Normal</div>
-                            <div class="state-tag" data-state="fadigado">Fadigado</div>
-                            <div class="state-tag" data-state="inconsciente">Inconsciente</div>
+                        <!-- BARRA DE PF -->
+                        <div class="pf-bar-container">
+                            <div class="pf-bar-wrapper">
+                                <div class="pf-bar" id="pfBar">
+                                    <div class="pf-fill" id="pfFill"></div>
+                                    <div class="pf-text" id="pfText">10/10</div>
+                                    
+                                    <!-- INDICADOR DE FATIGA -->
+                                    <div class="fatigue-marker" style="left: 33%">
+                                        <div class="fatigue-line"></div>
+                                        <span class="fatigue-label">Fadiga</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ESTADOS PF -->
+                            <div class="pf-states">
+                                <div class="pf-state active" data-state="normal">
+                                    <div class="state-indicator"></div>
+                                    <div class="state-info">
+                                        <div class="state-name">Normal</div>
+                                        <div class="state-desc">PF ≥ 1/3 máximo</div>
+                                    </div>
+                                </div>
+                                <div class="pf-state" data-state="fadigado">
+                                    <div class="state-indicator"></div>
+                                    <div class="state-info">
+                                        <div class="state-name">Fadigado</div>
+                                        <div class="state-desc">PF < 1/3 máximo</div>
+                                    </div>
+                                </div>
+                                <div class="pf-state" data-state="inconsciente">
+                                    <div class="state-indicator"></div>
+                                    <div class="state-info">
+                                        <div class="state-name">Inconsciente</div>
+                                        <div class="state-desc">PF ≤ 0</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- CONTROLES PF -->
-                    <div class="pf-control-panel">
-                        <div class="pf-input-section">
-                            <div class="pf-input-group">
-                                <label for="pfMax">PF Máx</label>
-                                <div class="input-with-buttons">
-                                    <button class="pf-btn pf-dec" data-change="-1">-</button>
-                                    <input type="number" id="pfMax" class="pf-input" value="10" min="1">
-                                    <button class="pf-btn pf-inc" data-change="1">+</button>
-                                </div>
-                            </div>
-                            
-                            <div class="pf-input-group">
-                                <label for="pfCurrent">PF Atual</label>
-                                <div class="input-with-buttons">
-                                    <button class="pf-btn pf-dec" data-change="-1">-</button>
-                                    <input type="number" id="pfCurrent" class="pf-input" value="10" min="-10" max="20">
-                                    <button class="pf-btn pf-inc" data-change="1">+</button>
-                                </div>
+                    <div class="pf-controls">
+                        <div class="control-section">
+                            <h4>Controle de Fadiga</h4>
+                            <div class="quick-buttons">
+                                <button class="btn-fadiga" data-amount="-3">-3</button>
+                                <button class="btn-fadiga" data-amount="-1">-1</button>
+                                <button class="btn-descanso" data-amount="1">+1</button>
+                                <button class="btn-descanso" data-amount="3">+3</button>
                             </div>
                         </div>
                         
-                        <div class="pf-quick-controls">
-                            <button class="quick-btn fatigue-btn" data-amount="-3">-3 PF</button>
-                            <button class="quick-btn fatigue-btn" data-amount="-1">-1 PF</button>
-                            <button class="quick-btn rest-btn" data-amount="1">+1 PF</button>
-                            <button class="quick-btn rest-btn" data-amount="3">+3 PF</button>
+                        <div class="control-section">
+                            <h4>Configuração</h4>
+                            <div class="config-controls">
+                                <div class="config-item">
+                                    <label for="pfMaxInput">PF Máximo</label>
+                                    <input type="number" id="pfMaxInput" value="10" min="1">
+                                </div>
+                                <div class="config-item">
+                                    <label for="pfAtualInput">PF Atual</label>
+                                    <input type="number" id="pfAtualInput" value="10" min="-10" max="20">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2616,73 +2698,69 @@
         
         <!-- SEGUNDA LINHA: DANO E DEFESAS -->
         <div class="combate-row">
-            <!-- CARD DANO - SIMPLIFICADO -->
-            <div class="dano-card-redesign">
-                <div class="card-header-combate">
-                    <h3><i class="fas fa-bolt"></i> DANO</h3>
-                    <div class="dano-type-badge" id="danoTypeBadge">Corporal</div>
+            <!-- CARD DANO -->
+            <div class="dano-card">
+                <div class="card-header">
+                    <i class="fas fa-bolt"></i>
+                    <h3>DANO</h3>
                 </div>
                 
                 <div class="dano-content">
-                    <!-- DANO BASE (SEM ARMAS) -->
-                    <div class="dano-base-section">
-                        <div class="dano-type-box" data-type="gdp">
-                            <div class="dano-type-header">
+                    <div class="dano-base">
+                        <div class="dano-tipo">
+                            <div class="tipo-header">
                                 <i class="fas fa-fist-raised"></i>
                                 <h4>GDP</h4>
                             </div>
-                            <div class="dano-value-display" id="danoGdp">1d-2</div>
-                            <div class="dano-label">Golpe de Punho</div>
+                            <div class="tipo-valor" id="danoGdp">1d-2</div>
+                            <div class="tipo-desc">Golpe de Punho</div>
                         </div>
                         
-                        <div class="dano-type-box" data-type="geb">
-                            <div class="dano-type-header">
+                        <div class="dano-tipo">
+                            <div class="tipo-header">
                                 <i class="fas fa-hand-rock"></i>
                                 <h4>GEB</h4>
                             </div>
-                            <div class="dano-value-display" id="danoGeb">1d</div>
-                            <div class="dano-label">Golpe de Braço</div>
+                            <div class="tipo-valor" id="danoGeb">1d</div>
+                            <div class="tipo-desc">Golpe de Braço</div>
                         </div>
                     </div>
                     
-                    <!-- ARMA ATUAL -->
-                    <div class="arma-atual-section">
+                    <!-- ARMA EQUIPADA -->
+                    <div class="arma-section">
                         <div class="arma-header">
-                            <h4><i class="fas fa-crosshairs"></i> ARMA EQUIPADA</h4>
+                            <h4><i class="fas fa-crosshairs"></i> Arma Equipada</h4>
                         </div>
                         
                         <div class="arma-display" id="armaDisplay">
-                            <!-- ESTADO INICIAL - SEM ARMA -->
-                            <div class="sem-arma-display" id="semArmaDisplay">
+                            <!-- SEM ARMA -->
+                            <div class="sem-arma" id="semArma">
                                 <div class="sem-arma-icon">
                                     <i class="fas fa-fist-raised"></i>
                                 </div>
                                 <div class="sem-arma-text">
-                                    <h5>Sem Arma Equipada</h5>
-                                    <p>Use dano corporal acima</p>
+                                    <div class="sem-arma-title">Usando dano corporal</div>
+                                    <small>Adicione armas na aba de equipamentos</small>
                                 </div>
                             </div>
                             
-                            <!-- COM ARMA (APARECE DINAMICAMENTE) -->
-                            <div class="arma-info-display" id="armaInfoDisplay" style="display: none;">
-                                <div class="arma-nome-display">
+                            <!-- COM ARMA -->
+                            <div class="arma-info" id="armaInfo" style="display: none;">
+                                <div class="arma-nome">
                                     <span class="arma-label">Arma:</span>
-                                    <span class="arma-nome" id="armaNome">Espada Longa</span>
+                                    <span class="arma-value" id="armaNome">-</span>
                                 </div>
                                 
-                                <div class="arma-dano-display">
-                                    <!-- PRIMEIRO TIPO DE DANO (SEMPRE) -->
+                                <div class="arma-dano">
                                     <div class="dano-linha" id="danoLinha1">
-                                        <span class="dano-label-arma">Dano:</span>
-                                        <span class="dano-valor" id="danoValor1">2d</span>
-                                        <span class="dano-tipo" id="danoTipo1">cort</span>
+                                        <span class="dano-label">Dano:</span>
+                                        <span class="dano-valor" id="danoValor1">-</span>
+                                        <span class="dano-tipo" id="danoTipo1">-</span>
                                     </div>
-                                    
-                                    <!-- SEGUNDO TIPO (APENAS SE EXISTIR) -->
                                     <div class="dano-linha" id="danoLinha2" style="display: none;">
                                         <span class="dano-separador">/</span>
-                                        <span class="dano-valor" id="danoValor2">1d</span>
-                                        <span class="dano-tipo" id="danoTipo2">imp</span>
+                                        <span class="dano-valor" id="danoValor2">-</span>
+                                        <span class="dano-tipo" id="danoTipo2">-</span>
                                     </div>
                                 </div>
                             </div>
@@ -2691,78 +2769,91 @@
                 </div>
             </div>
             
-            <!-- CARD DEFESAS - COMPACTO -->
-            <div class="defesas-card-compact">
-                <div class="card-header-combate">
-                    <h3><i class="fas fa-shield-alt"></i> DEFESAS</h3>
+            <!-- CARD DEFESAS -->
+            <div class="defesas-card">
+                <div class="card-header">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>DEFESAS</h3>
                 </div>
                 
-                <div class="defesas-grid">
-                    <!-- ESQUIVA -->
-                    <div class="defesa-item-compact" data-tipo="esquiva">
-                        <div class="defesa-header">
-                            <i class="fas fa-running"></i>
-                            <span class="defesa-nome">Esquiva</span>
+                <div class="defesas-content">
+                    <div class="defesa-item">
+                        <div class="defesa-info">
+                            <div class="defesa-icon">
+                                <i class="fas fa-running"></i>
+                            </div>
+                            <div class="defesa-detalhes">
+                                <div class="defesa-nome">Esquiva</div>
+                                <div class="defesa-formula">DX + HT/4 + 3</div>
+                            </div>
                         </div>
-                        <div class="defesa-valores-compact">
-                            <div class="defesa-base">Base: <span id="esquivaBase">10</span></div>
+                        <div class="defesa-valor">
                             <div class="defesa-mod">
-                                <button class="defesa-mod-btn minus">-</button>
+                                <button class="mod-btn minus">-</button>
                                 <span class="mod-value" id="esquivaMod">0</span>
-                                <button class="defesa-mod-btn plus">+</button>
+                                <button class="mod-btn plus">+</button>
                             </div>
-                            <div class="defesa-total-compact" id="esquivaTotal">10</div>
+                            <div class="defesa-total" id="esquivaTotal">10</div>
                         </div>
                     </div>
                     
-                    <!-- BLOQUEIO -->
-                    <div class="defesa-item-compact" data-tipo="bloqueio">
-                        <div class="defesa-header">
-                            <i class="fas fa-shield-alt"></i>
-                            <span class="defesa-nome">Bloqueio</span>
+                    <div class="defesa-item">
+                        <div class="defesa-info">
+                            <div class="defesa-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="defesa-detalhes">
+                                <div class="defesa-nome">Bloqueio</div>
+                                <div class="defesa-formula">Escudo/2 + 3</div>
+                            </div>
                         </div>
-                        <div class="defesa-valores-compact">
-                            <div class="defesa-base">Base: <span id="bloqueioBase">3</span></div>
+                        <div class="defesa-valor">
                             <div class="defesa-mod">
-                                <button class="defesa-mod-btn minus">-</button>
+                                <button class="mod-btn minus">-</button>
                                 <span class="mod-value" id="bloqueioMod">0</span>
-                                <button class="defesa-mod-btn plus">+</button>
+                                <button class="mod-btn plus">+</button>
                             </div>
-                            <div class="defesa-total-compact" id="bloqueioTotal">3</div>
+                            <div class="defesa-total" id="bloqueioTotal">3</div>
                         </div>
                     </div>
                     
-                    <!-- APARAR -->
-                    <div class="defesa-item-compact" data-tipo="aparar">
-                        <div class="defesa-header">
-                            <i class="fas fa-sword"></i>
-                            <span class="defesa-nome">Aparar</span>
+                    <div class="defesa-item">
+                        <div class="defesa-info">
+                            <div class="defesa-icon">
+                                <i class="fas fa-sword"></i>
+                            </div>
+                            <div class="defesa-detalhes">
+                                <div class="defesa-nome">Aparar</div>
+                                <div class="defesa-formula">Arma/2 + 3</div>
+                            </div>
                         </div>
-                        <div class="defesa-valores-compact">
-                            <div class="defesa-base">Base: <span id="apararBase">3</span></div>
+                        <div class="defesa-valor">
                             <div class="defesa-mod">
-                                <button class="defesa-mod-btn minus">-</button>
+                                <button class="mod-btn minus">-</button>
                                 <span class="mod-value" id="apararMod">0</span>
-                                <button class="defesa-mod-btn plus">+</button>
+                                <button class="mod-btn plus">+</button>
                             </div>
-                            <div class="defesa-total-compact" id="apararTotal">3</div>
+                            <div class="defesa-total" id="apararTotal">3</div>
                         </div>
                     </div>
                     
-                    <!-- DESLOCAMENTO -->
-                    <div class="defesa-item-compact" data-tipo="deslocamento">
-                        <div class="defesa-header">
-                            <i class="fas fa-walking"></i>
-                            <span class="defesa-nome">Deslocamento</span>
-                        </div>
-                        <div class="defesa-valores-compact">
-                            <div class="defesa-base">Base: <span id="deslocamentoBase">5.00</span></div>
-                            <div class="defesa-mod">
-                                <button class="defesa-mod-btn minus">-</button>
-                                <span class="mod-value" id="deslocamentoMod">0</span>
-                                <button class="defesa-mod-btn plus">+</button>
+                    <div class="defesa-item">
+                        <div class="defesa-info">
+                            <div class="defesa-icon">
+                                <i class="fas fa-walking"></i>
                             </div>
-                            <div class="defesa-total-compact" id="deslocamentoTotal">5.00</div>
+                            <div class="defesa-detalhes">
+                                <div class="defesa-nome">Deslocamento</div>
+                                <div class="defesa-formula">(DX + HT)/4</div>
+                            </div>
+                        </div>
+                        <div class="defesa-valor">
+                            <div class="defesa-mod">
+                                <button class="mod-btn minus">-</button>
+                                <span class="mod-value" id="deslocamentoMod">0</span>
+                                <button class="mod-btn plus">+</button>
+                            </div>
+                            <div class="defesa-total" id="deslocamentoTotal">5.00</div>
                         </div>
                     </div>
                 </div>
@@ -2771,106 +2862,136 @@
         
         <!-- TERCEIRA LINHA: RD COMPACTO -->
         <div class="combate-row">
-            <div class="rd-card-compact">
-                <div class="card-header-combate">
-                    <h3><i class="fas fa-user-shield"></i> RESISTÊNCIA A DANO (RD)</h3>
+            <div class="rd-card">
+                <div class="card-header">
+                    <i class="fas fa-user-shield"></i>
+                    <h3>RESISTÊNCIA A DANO (RD)</h3>
                 </div>
                 
-                <div class="rd-grid-compact">
-                    <!-- TRONCO E CABEÇA -->
-                    <div class="rd-category">
-                        <h4 class="rd-category-title">CENTRAL</h4>
-                        <div class="rd-parts-group">
-                            <div class="rd-part-item" data-parte="tronco">
-                                <div class="rd-part-label">
-                                    <i class="fas fa-user"></i>
-                                    <span>Tronco</span>
-                                </div>
-                                <input type="number" class="rd-input-compact" value="0" min="0">
+                <div class="rd-content">
+                    <div class="rd-grid">
+                        <!-- PARTES DO CORPO -->
+                        <div class="rd-parte" data-parte="cabeca">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-head-side-virus"></i>
+                                <span>Cabeça</span>
                             </div>
-                            <div class="rd-part-item" data-parte="orgaos">
-                                <div class="rd-part-label">
-                                    <i class="fas fa-heart"></i>
-                                    <span>Órgãos</span>
-                                </div>
-                                <input type="number" class="rd-input-compact" value="0" min="0">
+                            <input type="number" class="rd-input" value="0" min="0">
+                        </div>
+                        
+                        <div class="rd-parte" data-parte="tronco">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-user"></i>
+                                <span>Tronco</span>
                             </div>
-                            <div class="rd-part-item" data-parte="cabeca">
-                                <div class="rd-part-label">
-                                    <i class="fas fa-head-side-virus"></i>
-                                    <span>Cabeça</span>
-                                </div>
-                                <input type="number" class="rd-input-compact" value="0" min="0">
+                            <input type="number" class="rd-input" value="0" min="0">
+                        </div>
+                        
+                        <div class="rd-parte" data-parte="orgaos">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-heart"></i>
+                                <span>Órgãos</span>
                             </div>
+                            <input type="number" class="rd-input" value="0" min="0">
+                        </div>
+                        
+                        <div class="rd-parte" data-parte="crânio">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-skull"></i>
+                                <span>Crânio</span>
+                            </div>
+                            <input type="number" class="rd-input" value="0" min="0">
+                        </div>
+                        
+                        <div class="rd-parte" data-parte="pescoco">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-user-slash"></i>
+                                <span>Pescoço</span>
+                            </div>
+                            <input type="number" class="rd-input" value="0" min="0">
+                        </div>
+                        
+                        <div class="rd-parte" data-parte="virilha">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-user-injured"></i>
+                                <span>Virilha</span>
+                            </div>
+                            <input type="number" class="rd-input" value="0" min="0">
+                        </div>
+                        
+                        <div class="rd-parte" data-parte="bracos">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-hand-paper"></i>
+                                <span>Braços</span>
+                            </div>
+                            <input type="number" class="rd-input" value="0" min="0">
+                        </div>
+                        
+                        <div class="rd-parte" data-parte="pernas">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-running"></i>
+                                <span>Pernas</span>
+                            </div>
+                            <input type="number" class="rd-input" value="0" min="0">
+                        </div>
+                        
+                        <div class="rd-parte" data-parte="maos">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-hand"></i>
+                                <span>Mãos</span>
+                            </div>
+                            <input type="number" class="rd-input" value="0" min="0">
+                        </div>
+                        
+                        <div class="rd-parte" data-parte="pes">
+                            <div class="rd-parte-header">
+                                <i class="fas fa-shoe-prints"></i>
+                                <span>Pés</span>
+                            </div>
+                            <input type="number" class="rd-input" value="0" min="0">
                         </div>
                     </div>
                     
-                    <!-- ROSTO E PESCOÇO -->
-                    <div class="rd-category">
-                        <h4 class="rd-category-title">CRÍTICO</h4>
-                        <div class="rd-parts-group">
-                            <div class="rd-part-item" data-parte="crânio">
-                                <div class="rd-part-label">
-                                    <i class="fas fa-skull"></i>
-                                    <span>Crânio</span>
-                                </div>
-                                <input type="number" class="rd-input-compact" value="0" min="0">
+                    <!-- TABELA DE REDUTORES -->
+                    <div class="redutores-section">
+                        <h4><i class="fas fa-crosshairs"></i> Redutores para Ataque</h4>
+                        <div class="redutores-grid">
+                            <div class="redutor-item" data-local="tronco">
+                                <span class="redutor-nome">Tronco</span>
+                                <span class="redutor-valor">0</span>
                             </div>
-                            <div class="rd-part-item" data-parte="pescoco">
-                                <div class="rd-part-label">
-                                    <i class="fas fa-user-slash"></i>
-                                    <span>Pescoço</span>
-                                </div>
-                                <input type="number" class="rd-input-compact" value="0" min="0">
+                            <div class="redutor-item" data-local="orgaos">
+                                <span class="redutor-nome">Órgãos</span>
+                                <span class="redutor-valor">-3</span>
                             </div>
-                            <div class="rd-part-item" data-parte="virilha">
-                                <div class="rd-part-label">
-                                    <i class="fas fa-user-injured"></i>
-                                    <span>Virilha</span>
-                                </div>
-                                <input type="number" class="rd-input-compact" value="0" min="0">
+                            <div class="redutor-item" data-local="crânio">
+                                <span class="redutor-nome">Crânio</span>
+                                <span class="redutor-valor">-7</span>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- MEMBROS -->
-                    <div class="rd-category">
-                        <h4 class="rd-category-title">MEMBROS</h4>
-                        <div class="rd-parts-group">
-                            <div class="rd-part-item" data-parte="bracos">
-                                <div class="rd-part-label">
-                                    <i class="fas fa-hand-paper"></i>
-                                    <span>Braços</span>
-                                </div>
-                                <input type="number" class="rd-input-compact" value="0" min="0">
+                            <div class="redutor-item" data-local="pescoco">
+                                <span class="redutor-nome">Pescoço</span>
+                                <span class="redutor-valor">-5</span>
                             </div>
-                            <div class="rd-part-item" data-parte="pernas">
-                                <div class="rd-part-label">
-                                    <i class="fas fa-running"></i>
-                                    <span>Pernas</span>
-                                </div>
-                                <input type="number" class="rd-input-compact" value="0" min="0">
+                            <div class="redutor-item" data-local="virilha">
+                                <span class="redutor-nome">Virilha</span>
+                                <span class="redutor-valor">-3</span>
                             </div>
-                            <div class="rd-part-item" data-parte="maos">
-                                <div class="rd-part-label">
-                                    <i class="fas fa-hand"></i>
-                                    <span>Mãos</span>
-                                </div>
-                                <input type="number" class="rd-input-compact" value="0" min="0">
+                            <div class="redutor-item" data-local="bracos">
+                                <span class="redutor-nome">Braços</span>
+                                <span class="redutor-valor">-2</span>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- REDUTORES -->
-                    <div class="redutores-table-compact">
-                        <h4 class="rd-category-title">REDUTORES PARA ATAQUE</h4>
-                        <div class="redutores-list">
-                            <div class="redutor-item" data-local="tronco"><span>Tronco</span><span class="redutor-valor">0</span></div>
-                            <div class="redutor-item" data-local="orgaos"><span>Órgãos</span><span class="redutor-valor">-3</span></div>
-                            <div class="redutor-item" data-local="crânio"><span>Crânio</span><span class="redutor-valor">-7</span></div>
-                            <div class="redutor-item" data-local="olhos"><span>Olhos</span><span class="redutor-valor">-9</span></div>
-                            <div class="redutor-item" data-local="pescoco"><span>Pescoço</span><span class="redutor-valor">-5</span></div>
-                            <div class="redutor-item" data-local="virilha"><span>Virilha</span><span class="redutor-valor">-3</span></div>
+                            <div class="redutor-item" data-local="pernas">
+                                <span class="redutor-nome">Pernas</span>
+                                <span class="redutor-valor">-2</span>
+                            </div>
+                            <div class="redutor-item" data-local="maos">
+                                <span class="redutor-nome">Mãos</span>
+                                <span class="redutor-valor">-4</span>
+                            </div>
+                            <div class="redutor-item" data-local="pes">
+                                <span class="redutor-nome">Pés</span>
+                                <span class="redutor-valor">-4</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2879,46 +3000,53 @@
         
         <!-- QUARTA LINHA: CONDIÇÕES -->
         <div class="combate-row">
-            <div class="condicoes-card-compact">
-                <div class="card-header-combate">
-                    <h3><i class="fas fa-clipboard-list"></i> CONDIÇÕES</h3>
-                    <div class="condicoes-counter">
+            <div class="condicoes-card">
+                <div class="card-header">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>CONDIÇÕES</h3>
+                    <div class="condicoes-count">
                         <span id="condicoesAtivas">0</span> ativas
                     </div>
                 </div>
                 
-                <div class="condicoes-grid-compact">
-                    <div class="condicao-chip" data-condicao="machucado">
-                        <div class="condicao-check"></div>
-                        <span class="condicao-nome">Machucado</span>
-                    </div>
-                    <div class="condicao-chip" data-condicao="fadigado">
-                        <div class="condicao-check"></div>
-                        <span class="condicao-nome">Fadigado</span>
-                    </div>
-                    <div class="condicao-chip" data-condicao="atordoado">
-                        <div class="condicao-check"></div>
-                        <span class="condicao-nome">Atordoado</span>
-                    </div>
-                    <div class="condicao-chip" data-condicao="enjoado">
-                        <div class="condicao-check"></div>
-                        <span class="condicao-nome">Enjoado</span>
-                    </div>
-                    <div class="condicao-chip" data-condicao="cego">
-                        <div class="condicao-check"></div>
-                        <span class="condicao-nome">Cego</span>
-                    </div>
-                    <div class="condicao-chip" data-condicao="surdo">
-                        <div class="condicao-check"></div>
-                        <span class="condicao-nome">Surdo</span>
-                    </div>
-                    <div class="condicao-chip" data-condicao="paralisado">
-                        <div class="condicao-check"></div>
-                        <span class="condicao-nome">Paralisado</span>
-                    </div>
-                    <div class="condicao-chip" data-condicao="inconsciente">
-                        <div class="condicao-check"></div>
-                        <span class="condicao-nome">Inconsciente</span>
+                <div class="condicoes-content">
+                    <div class="condicoes-grid">
+                        <div class="condicao-item" data-condicao="inconsciente">
+                            <div class="condicao-checkbox"></div>
+                            <span class="condicao-nome">Inconsciente</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="machucado">
+                            <div class="condicao-checkbox"></div>
+                            <span class="condicao-nome">Machucado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="ferido">
+                            <div class="condicao-checkbox"></div>
+                            <span class="condicao-nome">Ferido</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="fadigado">
+                            <div class="condicao-checkbox"></div>
+                            <span class="condicao-nome">Fadigado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="atordoado">
+                            <div class="condicao-checkbox"></div>
+                            <span class="condicao-nome">Atordoado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="enjoado">
+                            <div class="condicao-checkbox"></div>
+                            <span class="condicao-nome">Enjoado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="cego">
+                            <div class="condicao-checkbox"></div>
+                            <span class="condicao-nome">Cego</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="surdo">
+                            <div class="condicao-checkbox"></div>
+                            <span class="condicao-nome">Surdo</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="paralisado">
+                            <div class="condicao-checkbox"></div>
+                            <span class="condicao-nome">Paralisado</span>
+                        </div>
                     </div>
                 </div>
             </div>
