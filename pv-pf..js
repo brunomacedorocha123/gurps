@@ -1,385 +1,369 @@
-// pv-pf-integrado.js
-class SistemaPVPFIntegrado {
+// ====================================================
+// SISTEMA PV-PF - COMPLETO E FUNCIONAL
+// Controle dos cards de Pontos de Vida e Pontos de Fadiga
+// ====================================================
+
+// Classe principal do sistema PV-PF
+class SistemaPVPF {
     constructor() {
-        this.pvBase = 10;
-        this.pvBonus = 0;
-        this.pvMax = 10;
-        this.pvAtual = 10;
+        // ESTADO DO PERSONAGEM
+        this.estado = {
+            // Valores atuais (mudam no combate)
+            pvAtual: 10,
+            pfAtual: 10,
+            
+            // Valores máximos (base + bônus)
+            pvMax: 10,
+            pfMax: 10,
+            
+            // Valores base (ST e HT)
+            pvBase: 10,
+            pfBase: 10,
+            
+            // Modificadores (botões +/- dos cards)
+            pvModificador: 0,
+            pfModificador: 0,
+            
+            // Condições ativas
+            condicoesAtivas: new Set()
+        };
         
-        this.pfBase = 10;
-        this.pfBonus = 0;
-        this.pfMax = 10;
-        this.pfAtual = 10;
-        
-        this.condicoesAtivas = new Set();
-        this.rdValores = {};
-        
-        this.init();
-    }
-    
-    init() {
-        this.configurarEventos();
-        this.observarAtributos();
+        // Inicialização
         this.carregarEstado();
-        this.atualizarDisplayCompleto();
+        this.configurarEventos();
+        this.integrarComAtributos();
+        this.atualizarTudo();
         
-        console.log('Sistema PV-PF Integrado inicializado!');
+        console.log('✅ Sistema PV-PF carregado e pronto!');
     }
     
-    observarAtributos() {
-        // Método 1: Observa os inputs ST e HT diretamente
-        const STInput = document.getElementById('ST');
-        const HTInput = document.getElementById('HT');
-        
-        if (STInput) {
-            STInput.addEventListener('change', () => this.atualizarBaseDeAtributos());
-            STInput.addEventListener('input', () => {
-                clearTimeout(this.stTimeout);
-                this.stTimeout = setTimeout(() => this.atualizarBaseDeAtributos(), 300);
-            });
-        }
-        
-        if (HTInput) {
-            HTInput.addEventListener('change', () => this.atualizarBaseDeAtributos());
-            HTInput.addEventListener('input', () => {
-                clearTimeout(this.htTimeout);
-                this.htTimeout = setTimeout(() => this.atualizarBaseDeAtributos(), 300);
-            });
-        }
-        
-        // Método 2: Observa bônus de PV e PF da aba atributos
-        this.observarBonusAtributos();
-        
-        // Método 3: Tenta pegar dados do evento do atributos.js (se existir)
-        document.addEventListener('atributosAlterados', (e) => {
-            if (e.detail) {
-                this.processarDadosAtributos(e.detail);
-            }
-        });
-        
-        // Inicializa com os valores atuais
-        this.atualizarBaseDeAtributos();
-    }
-    
-    observarBonusAtributos() {
-        // Observa os inputs de bônus na aba atributos
-        const bonusPV = document.getElementById('bonusPV');
-        const bonusPF = document.getElementById('bonusPF');
-        
-        if (bonusPV) {
-            bonusPV.addEventListener('change', () => this.atualizarBonus());
-            bonusPV.addEventListener('input', () => {
-                clearTimeout(this.bonusTimeout);
-                this.bonusTimeout = setTimeout(() => this.atualizarBonus(), 300);
-            });
-        }
-        
-        if (bonusPF) {
-            bonusPF.addEventListener('change', () => this.atualizarBonus());
-            bonusPF.addEventListener('input', () => {
-                clearTimeout(this.bonusTimeout);
-                this.bonusTimeout = setTimeout(() => this.atualizarBonus(), 300);
-            });
-        }
-    }
-    
-    atualizarBaseDeAtributos() {
-        // Pega valores diretamente dos inputs
-        const ST = this.obterValorAtributo('ST');
-        const HT = this.obterValorAtributo('HT');
-        
-        this.pvBase = ST || 10;
-        this.pfBase = HT || 10;
-        
-        this.calcularMaximos();
-        this.atualizarDisplayCompleto();
-    }
-    
-    atualizarBonus() {
-        // Pega bônus dos inputs na aba atributos
-        const bonusPV = this.obterValorAtributo('bonusPV');
-        const bonusPF = this.obterValorAtributo('bonusPF');
-        
-        this.pvBonus = bonusPV || 0;
-        this.pfBonus = bonusPF || 0;
-        
-        // Atualiza os inputs de modificador na aba combate
-        const pvModInput = document.getElementById('pvModificador');
-        const pfModInput = document.getElementById('pfModificador');
-        
-        if (pvModInput) pvModInput.value = this.pvBonus;
-        if (pfModInput) pfModInput.value = this.pfBonus;
-        
-        this.calcularMaximos();
-        this.atualizarDisplayCompleto();
-    }
-    
-    obterValorAtributo(id) {
-        const elemento = document.getElementById(id);
-        if (!elemento) return null;
-        
-        // Tenta pegar o valor
-        const valor = elemento.value || elemento.textContent;
-        const numero = parseInt(valor);
-        
-        return isNaN(numero) ? null : numero;
-    }
-    
-    processarDadosAtributos(dados) {
-        // Processa dados do evento (se o atributos.js disparar)
-        if (dados.ST !== undefined) this.pvBase = dados.ST;
-        if (dados.HT !== undefined) this.pfBase = dados.HT;
-        if (dados.Bonus?.PV !== undefined) this.pvBonus = dados.Bonus.PV;
-        if (dados.Bonus?.PF !== undefined) this.pfBonus = dados.Bonus.PF;
-        
-        this.calcularMaximos();
-        this.atualizarDisplayCompleto();
-    }
-    
-    calcularMaximos() {
-        this.pvMax = Math.max(1, this.pvBase + this.pvBonus);
-        this.pfMax = Math.max(1, this.pfBase + this.pfBonus);
-        
-        // Ajusta valores atuais se necessário
-        this.pvAtual = Math.min(this.pvAtual, this.pvMax);
-        this.pvAtual = Math.max(-50, this.pvAtual);
-        
-        this.pfAtual = Math.min(this.pfAtual, this.pfMax);
-        this.pfAtual = Math.max(-10, this.pfAtual);
-    }
+    // ====================================================
+    // CONFIGURAÇÃO DE EVENTOS
+    // ====================================================
     
     configurarEventos() {
-        // Eventos dos botões de dano/cura
+        // 1. Botões de dano/cura PV (-5, -2, -1, +1, +2, +5)
         document.addEventListener('click', (e) => {
-            // Botões de dano PV (-5, -2, -1)
-            if (e.target.classList.contains('btn-dano')) {
-                const texto = e.target.textContent;
+            const target = e.target;
+            
+            // Botões de dano PV
+            if (target.classList.contains('btn-dano')) {
+                const texto = target.textContent;
                 const valor = parseInt(texto.replace(/[^\d]/g, '')) || 1;
                 this.alterarPV(-valor);
-                return;
             }
             
-            // Botões de cura PV (+1, +2, +5)
-            if (e.target.classList.contains('btn-cura')) {
-                const texto = e.target.textContent;
+            // Botões de cura PV
+            if (target.classList.contains('btn-cura')) {
+                const texto = target.textContent;
                 const valor = parseInt(texto.replace(/[^\d]/g, '')) || 1;
                 this.alterarPV(valor);
-                return;
             }
             
             // Botões de fadiga PF (-3, -1)
-            if (e.target.classList.contains('btn-fadiga')) {
-                const texto = e.target.textContent;
+            if (target.classList.contains('btn-fadiga')) {
+                const texto = target.textContent;
                 const valor = parseInt(texto.replace(/[^\d]/g, '')) || 1;
                 this.alterarPF(-valor);
-                return;
             }
             
             // Botões de descanso PF (+1, +3)
-            if (e.target.classList.contains('btn-descanso')) {
-                const texto = e.target.textContent;
+            if (target.classList.contains('btn-descanso')) {
+                const texto = target.textContent;
                 const valor = parseInt(texto.replace(/[^\d]/g, '')) || 1;
                 this.alterarPF(valor);
-                return;
             }
             
             // Botão reset PV
-            if (e.target.classList.contains('btn-reset') && 
-                e.target.closest('.card-pv')) {
+            if (target.classList.contains('btn-reset') && target.closest('.card-pv')) {
                 this.resetarPV();
-                return;
             }
             
             // Botão reset PF
-            if (e.target.classList.contains('btn-reset') && 
-                e.target.closest('.card-pf')) {
+            if (target.classList.contains('btn-reset') && target.closest('.card-pf')) {
                 this.resetarPF();
-                return;
-            }
-            
-            // Botões modificadores (- e +)
-            if (e.target.classList.contains('btn-mod')) {
-                const modificador = e.target.closest('.controle-modificador');
-                if (!modificador) return;
-                
-                const input = modificador.querySelector('.mod-input');
-                const isMinus = e.target.classList.contains('minus');
-                const isPV = modificador.closest('.card-pv');
-                
-                if (input) {
-                    let valor = parseInt(input.value) || 0;
-                    valor += isMinus ? -1 : 1;
-                    valor = Math.max(-10, Math.min(10, valor));
-                    input.value = valor;
-                    
-                    if (isPV) {
-                        this.pvBonus = valor;
-                    } else {
-                        this.pfBonus = valor;
-                    }
-                    
-                    this.calcularMaximos();
-                    this.atualizarDisplayCompleto();
-                    this.salvarEstado();
-                }
             }
         });
         
-        // Eventos dos inputs (modificadores e valores atuais)
-        document.addEventListener('change', (e) => {
-            // Inputs de modificador
-            if (e.target.classList.contains('mod-input')) {
-                const valor = parseInt(e.target.value) || 0;
-                const isPV = e.target.closest('.card-pv');
-                
-                if (isPV) {
-                    this.pvBonus = valor;
-                } else {
-                    this.pfBonus = valor;
-                }
-                
-                this.calcularMaximos();
-                this.atualizarDisplayCompleto();
-                this.salvarEstado();
-                return;
-            }
-            
-            // Inputs de PV/PF atuais
-            if (e.target.id === 'pvAtualDisplay') {
-                this.pvAtual = parseInt(e.target.value) || 0;
-                this.atualizarDisplayCompleto();
-                this.salvarEstado();
-                return;
-            }
-            
-            if (e.target.id === 'pfAtualDisplay') {
-                this.pfAtual = parseInt(e.target.value) || 0;
-                this.atualizarDisplayCompleto();
-                this.salvarEstado();
-                return;
-            }
-        });
+        // 2. Inputs de valores atuais (quando o usuário digita)
+        const pvAtualInput = document.getElementById('pvAtualDisplay');
+        const pfAtualInput = document.getElementById('pfAtualDisplay');
         
-        // Eventos das condições
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.condicao-item')) {
-                const item = e.target.closest('.condicao-item');
-                const condicao = item.dataset.condicao;
-                
-                item.classList.toggle('ativa');
-                
-                if (item.classList.contains('ativa')) {
-                    this.condicoesAtivas.add(condicao);
-                } else {
-                    this.condicoesAtivas.delete(condicao);
-                }
-                
-                this.atualizarContadorCondicoes();
-                this.salvarEstado();
-            }
-        });
+        if (pvAtualInput) {
+            pvAtualInput.addEventListener('change', () => {
+                const valor = parseInt(pvAtualInput.value) || 0;
+                this.setPVAtual(valor);
+            });
+        }
         
-        // Eventos dos inputs RD
-        document.addEventListener('input', (e) => {
-            if (e.target.classList.contains('rd-input')) {
-                this.calcularRDTotal();
-            }
+        if (pfAtualInput) {
+            pfAtualInput.addEventListener('change', () => {
+                const valor = parseInt(pfAtualInput.value) || 0;
+                this.setPFAtual(valor);
+            });
+        }
+        
+        // 3. Condições de combate
+        document.querySelectorAll('.condicao-item').forEach(item => {
+            item.addEventListener('click', () => {
+                this.alternarCondicao(item.dataset.condicao);
+            });
         });
     }
+    
+    // ====================================================
+    // INTEGRAÇÃO COM ATRIBUTOS (ST e HT)
+    // ====================================================
+    
+    integrarComAtributos() {
+        // Método 1: Ouvir o evento que já existe
+        document.addEventListener('atributosAlterados', (e) => {
+            if (e.detail) {
+                this.atualizarBaseDeAtributos(e.detail);
+            }
+        });
+        
+        // Método 2: Tentar pegar valores iniciais
+        this.buscarValoresAtributosIniciais();
+    }
+    
+    buscarValoresAtributosIniciais() {
+        // Tenta pegar ST e HT diretamente
+        try {
+            const stInput = document.getElementById('ST');
+            const htInput = document.getElementById('HT');
+            
+            if (stInput && htInput) {
+                const ST = parseInt(stInput.value) || 10;
+                const HT = parseInt(htInput.value) || 10;
+                
+                this.estado.pvBase = ST;
+                this.estado.pfBase = HT;
+                
+                // Atualiza máximos considerando modificadores
+                this.calcularMaximos();
+                this.atualizarTudo();
+            }
+        } catch (e) {
+            console.log('Aguardando dados dos atributos...');
+        }
+    }
+    
+    atualizarBaseDeAtributos(dados) {
+        // Atualiza bases com ST e HT
+        if (dados.ST !== undefined) {
+            this.estado.pvBase = dados.ST;
+        }
+        if (dados.HT !== undefined) {
+            this.estado.pfBase = dados.HT;
+        }
+        
+        // Recalcula máximos
+        this.calcularMaximos();
+        this.atualizarTudo();
+    }
+    
+    // ====================================================
+    // CÁLCULOS DE PV E PF (CORE DO SISTEMA)
+    // ====================================================
+    
+    calcularMaximos() {
+        // FÓRMULA: Máximo = Base + Modificador
+        this.estado.pvMax = Math.max(1, this.estado.pvBase + this.estado.pvModificador);
+        this.estado.pfMax = Math.max(1, this.estado.pfBase + this.estado.pfModificador);
+        
+        // Ajusta valores atuais se necessário
+        this.estado.pvAtual = Math.min(this.estado.pvAtual, this.estado.pvMax);
+        this.estado.pvAtual = Math.max(-5 * this.estado.pvMax, this.estado.pvAtual); // Limite de -5x PV máximo
+        
+        this.estado.pfAtual = Math.min(this.estado.pfAtual, this.estado.pfMax);
+        this.estado.pfAtual = Math.max(-this.estado.pfMax, this.estado.pfAtual); // Limite de -1x PF máximo
+    }
+    
+    // ====================================================
+    // FUNÇÕES PRINCIPAIS - CONTROLE DE PV
+    // ====================================================
     
     alterarPV(valor) {
-        this.pvAtual += valor;
-        this.pvAtual = Math.max(-50, Math.min(this.pvAtual, this.pvMax));
-        this.atualizarDisplayCompleto();
+        // Aplica o valor
+        this.estado.pvAtual += valor;
+        
+        // Limites
+        this.estado.pvAtual = Math.min(this.estado.pvAtual, this.estado.pvMax);
+        this.estado.pvAtual = Math.max(-5 * this.estado.pvMax, this.estado.pvAtual);
+        
+        // Atualiza display e salva
+        this.atualizarTudo();
         this.salvarEstado();
         
         // Efeito visual
-        this.aplicarEfeito('pv', valor > 0 ? 'cura' : 'dano');
+        this.aplicarEfeitoVisual('pv', valor > 0 ? 'cura' : 'dano');
     }
     
-    alterarPF(valor) {
-        this.pfAtual += valor;
-        this.pfAtual = Math.max(-10, Math.min(this.pfAtual, this.pfMax));
-        this.atualizarDisplayCompleto();
+    setPVAtual(valor) {
+        this.estado.pvAtual = valor;
+        this.estado.pvAtual = Math.min(this.estado.pvAtual, this.estado.pvMax);
+        this.estado.pvAtual = Math.max(-5 * this.estado.pvMax, this.estado.pvAtual);
+        
+        this.atualizarTudo();
         this.salvarEstado();
-        
-        // Efeito visual
-        this.aplicarEfeito('pf', valor > 0 ? 'cura' : 'dano');
-    }
-    
-    aplicarEfeito(tipo, efeito) {
-        const barra = document.getElementById(tipo === 'pv' ? 'pvFill' : 'pfFill');
-        if (!barra) return;
-        
-        barra.classList.add(efeito === 'cura' ? 'cura-recebida' : 'dano-recebido');
-        
-        setTimeout(() => {
-            barra.classList.remove('cura-recebida', 'dano-recebido');
-        }, 1000);
     }
     
     resetarPV() {
-        this.pvAtual = this.pvMax;
-        this.atualizarDisplayCompleto();
+        this.estado.pvAtual = this.estado.pvMax;
+        this.atualizarTudo();
+        this.salvarEstado();
+        
+        // Efeito visual de cura
+        this.aplicarEfeitoVisual('pv', 'cura');
+    }
+    
+    // ====================================================
+    // FUNÇÕES PRINCIPAIS - CONTROLE DE PF
+    // ====================================================
+    
+    alterarPF(valor) {
+        // Aplica o valor
+        this.estado.pfAtual += valor;
+        
+        // Limites
+        this.estado.pfAtual = Math.min(this.estado.pfAtual, this.estado.pfMax);
+        this.estado.pfAtual = Math.max(-this.estado.pfMax, this.estado.pfAtual);
+        
+        // Atualiza display e salva
+        this.atualizarTudo();
+        this.salvarEstado();
+        
+        // Efeito visual
+        this.aplicarEfeitoVisual('pf', valor > 0 ? 'cura' : 'dano');
+    }
+    
+    setPFAtual(valor) {
+        this.estado.pfAtual = valor;
+        this.estado.pfAtual = Math.min(this.estado.pfAtual, this.estado.pvMax);
+        this.estado.pfAtual = Math.max(-this.estado.pfMax, this.estado.pfAtual);
+        
+        this.atualizarTudo();
         this.salvarEstado();
     }
     
     resetarPF() {
-        this.pfAtual = this.pfMax;
-        this.atualizarDisplayCompleto();
+        this.estado.pfAtual = this.estado.pfMax;
+        this.atualizarTudo();
         this.salvarEstado();
+        
+        // Efeito visual de cura
+        this.aplicarEfeitoVisual('pf', 'cura');
     }
     
-    atualizarDisplayCompleto() {
-        this.atualizarDisplayPV();
-        this.atualizarDisplayPF();
-        this.atualizarEstadosPF();
+    // ====================================================
+    // FUNÇÕES DOS MODIFICADORES (Botões + e -)
+    // ====================================================
+    
+    modificarPV(tipo, valor) {
+        if (tipo === 'mod') {
+            this.estado.pvModificador += valor;
+            
+            // Limita entre -10 e +10
+            this.estado.pvModificador = Math.max(-10, Math.min(10, this.estado.pvModificador));
+            
+            // Atualiza o input visual
+            const input = document.getElementById('pvModificador');
+            if (input) input.value = this.estado.pvModificador;
+            
+            // Recalcula máximos
+            this.calcularMaximos();
+            this.atualizarTudo();
+            this.salvarEstado();
+        }
+    }
+    
+    modificarPF(tipo, valor) {
+        if (tipo === 'mod') {
+            this.estado.pfModificador += valor;
+            
+            // Limita entre -10 e +10
+            this.estado.pfModificador = Math.max(-10, Math.min(10, this.estado.pfModificador));
+            
+            // Atualiza o input visual
+            const input = document.getElementById('pfModificador');
+            if (input) input.value = this.estado.pfModificador;
+            
+            // Recalcula máximos
+            this.calcularMaximos();
+            this.atualizarTudo();
+            this.salvarEstado();
+        }
+    }
+    
+    // ====================================================
+    // ATUALIZAÇÃO VISUAL - CORE DA INTERFACE
+    // ====================================================
+    
+    atualizarTudo() {
+        this.atualizarCardPV();
+        this.atualizarCardPF();
         this.atualizarContadorCondicoes();
     }
     
-    atualizarDisplayPV() {
-        // Atualiza elementos específicos
-        const elementos = {
-            base: document.getElementById('pvBaseDisplay'),
-            max: document.getElementById('pvMaxDisplay'),
-            atual: document.getElementById('pvAtualDisplay'),
-            estado: document.getElementById('pvEstadoDisplay'),
-            texto: document.getElementById('pvTexto'),
-            fill: document.getElementById('pvFill')
-        };
+    atualizarCardPV() {
+        // 1. Atualiza valores numéricos
+        const pvBaseDisplay = document.getElementById('pvBaseDisplay');
+        const pvMaxDisplay = document.getElementById('pvMaxDisplay');
+        const pvAtualInput = document.getElementById('pvAtualDisplay');
+        const pvTexto = document.getElementById('pvTexto');
         
-        // Atualiza valores
-        if (elementos.base) elementos.base.textContent = this.pvBase;
-        if (elementos.max) elementos.max.textContent = this.pvMax;
-        if (elementos.atual) elementos.atual.value = this.pvAtual;
-        if (elementos.texto) elementos.texto.textContent = `${this.pvAtual}/${this.pvMax}`;
+        if (pvBaseDisplay) pvBaseDisplay.textContent = this.estado.pvBase;
+        if (pvMaxDisplay) pvMaxDisplay.textContent = this.estado.pvMax;
+        if (pvAtualInput) pvAtualInput.value = this.estado.pvAtual;
+        if (pvTexto) pvTexto.textContent = `${this.estado.pvAtual}/${this.estado.pvMax}`;
         
-        // Calcula porcentagem e estado
-        const porcentagem = this.pvMax > 0 ? (this.pvAtual / this.pvMax) * 100 : 0;
-        const { cor, estado } = this.calcularEstadoPV(porcentagem);
+        // 2. Calcula porcentagem para a barra
+        const porcentagem = this.estado.pvMax > 0 ? 
+            (this.estado.pvAtual / this.estado.pvMax) * 100 : 0;
         
-        // Aplica cor e estado
-        if (elementos.fill) {
-            elementos.fill.style.background = cor;
-            elementos.fill.style.width = `${Math.max(0, Math.min(100, porcentagem))}%`;
+        // 3. Determina estado e cor baseado na porcentagem
+        const estadoInfo = this.calcularEstadoPV(porcentagem);
+        
+        // 4. Atualiza barra de PV
+        const pvFill = document.getElementById('pvFill');
+        const pvEstadoDisplay = document.getElementById('pvEstadoDisplay');
+        
+        if (pvFill) {
+            pvFill.style.width = `${Math.max(0, Math.min(100, porcentagem))}%`;
+            pvFill.style.background = estadoInfo.cor;
             
             // Efeito de pulsação para estados críticos
-            if (porcentagem <= 40 && this.pvAtual > 0) {
-                elementos.fill.style.animation = 'pulse 1.5s infinite alternate';
+            if (porcentagem <= 40 && this.estado.pvAtual > 0) {
+                pvFill.style.animation = 'pulse 1.5s infinite alternate';
             } else {
-                elementos.fill.style.animation = 'none';
+                pvFill.style.animation = 'none';
             }
         }
         
-        if (elementos.estado) {
-            elementos.estado.textContent = estado;
-            elementos.estado.style.color = cor;
-            elementos.estado.style.backgroundColor = `${cor}20`;
+        if (pvEstadoDisplay) {
+            pvEstadoDisplay.textContent = estadoInfo.estado;
+            pvEstadoDisplay.style.color = estadoInfo.cor;
+            pvEstadoDisplay.style.backgroundColor = `${estadoInfo.cor}20`;
+        }
+        
+        // 5. Atualiza modificador visual
+        const pvModInput = document.getElementById('pvModificador');
+        if (pvModInput && pvModInput.value != this.estado.pvModificador) {
+            pvModInput.value = this.estado.pvModificador;
         }
     }
     
     calcularEstadoPV(porcentagem) {
-        if (this.pvAtual <= 0) {
+        // FÓRMULA COMPLETA DE ESTADOS DE PV (como você quer):
+        // 100-81%: Saudável (Verde)
+        // 80-61%: Machucado (Amarelo)  
+        // 60-41%: Ferido (Laranja)
+        // 40-21%: Crítico (Vermelho)
+        // 20-1%: Morrendo (Roxo)
+        // 0% ou negativo: Morto (Cinza)
+        
+        if (this.estado.pvAtual <= 0) {
             return { cor: '#7f8c8d', estado: 'Morto' };
         } else if (porcentagem <= 20) {
             return { cor: '#8e44ad', estado: 'Morrendo' };
@@ -394,42 +378,57 @@ class SistemaPVPFIntegrado {
         }
     }
     
-    atualizarDisplayPF() {
-        // Atualiza elementos específicos
-        const elementos = {
-            base: document.getElementById('pfBaseDisplay'),
-            max: document.getElementById('pfMaxDisplay'),
-            atual: document.getElementById('pfAtualDisplay'),
-            estado: document.getElementById('pfEstadoDisplay'),
-            texto: document.getElementById('pfTexto'),
-            fill: document.getElementById('pfFill')
-        };
+    atualizarCardPF() {
+        // 1. Atualiza valores numéricos
+        const pfBaseDisplay = document.getElementById('pfBaseDisplay');
+        const pfMaxDisplay = document.getElementById('pfMaxDisplay');
+        const pfAtualInput = document.getElementById('pfAtualDisplay');
+        const pfTexto = document.getElementById('pfTexto');
         
-        // Atualiza valores
-        if (elementos.base) elementos.base.textContent = this.pfBase;
-        if (elementos.max) elementos.max.textContent = this.pfMax;
-        if (elementos.atual) elementos.atual.value = this.pfAtual;
-        if (elementos.texto) elementos.texto.textContent = `${this.pfAtual}/${this.pfMax}`;
+        if (pfBaseDisplay) pfBaseDisplay.textContent = this.estado.pfBase;
+        if (pfMaxDisplay) pfMaxDisplay.textContent = this.estado.pfMax;
+        if (pfAtualInput) pfAtualInput.value = this.estado.pfAtual;
+        if (pfTexto) pfTexto.textContent = `${this.estado.pfAtual}/${this.estado.pfMax}`;
         
-        // Calcula porcentagem e estado
-        const porcentagem = this.pfMax > 0 ? (this.pfAtual / this.pfMax) * 100 : 0;
-        const { cor, estado } = this.calcularEstadoPF(porcentagem);
+        // 2. Calcula porcentagem para a barra
+        const porcentagem = this.estado.pfMax > 0 ? 
+            (this.estado.pfAtual / this.estado.pfMax) * 100 : 0;
         
-        // Aplica cor e estado
-        if (elementos.fill) {
-            elementos.fill.style.background = cor;
-            elementos.fill.style.width = `${Math.max(0, Math.min(100, porcentagem))}%`;
+        // 3. Determina estado e cor
+        const estadoInfo = this.calcularEstadoPF(porcentagem);
+        
+        // 4. Atualiza barra de PF
+        const pfFill = document.getElementById('pfFill');
+        const pfEstadoDisplay = document.getElementById('pfEstadoDisplay');
+        
+        if (pfFill) {
+            pfFill.style.width = `${Math.max(0, Math.min(100, porcentagem))}%`;
+            pfFill.style.background = estadoInfo.cor;
         }
         
-        if (elementos.estado) {
-            elementos.estado.textContent = estado;
-            elementos.estado.style.color = cor;
-            elementos.estado.style.backgroundColor = `${cor}20`;
+        if (pfEstadoDisplay) {
+            pfEstadoDisplay.textContent = estadoInfo.estado;
+            pfEstadoDisplay.style.color = estadoInfo.cor;
+            pfEstadoDisplay.style.backgroundColor = `${estadoInfo.cor}20`;
+        }
+        
+        // 5. Atualiza estados PF (Normal, Fadigado, Exausto)
+        this.atualizarEstadosPF(porcentagem);
+        
+        // 6. Atualiza modificador visual
+        const pfModInput = document.getElementById('pfModificador');
+        if (pfModInput && pfModInput.value != this.estado.pfModificador) {
+            pfModInput.value = this.estado.pfModificador;
         }
     }
     
     calcularEstadoPF(porcentagem) {
-        if (this.pfAtual <= 0) {
+        // FÓRMULA DE ESTADOS DE PF:
+        // > 33%: Normal (Azul)
+        // 33-1%: Fadigado (Laranja)
+        // ≤ 0%: Exausto (Vermelho)
+        
+        if (this.estado.pfAtual <= 0) {
             return { cor: '#e74c3c', estado: 'Exausto' };
         } else if (porcentagem <= 33) {
             return { cor: '#f39c12', estado: 'Fadigado' };
@@ -438,274 +437,226 @@ class SistemaPVPFIntegrado {
         }
     }
     
-    atualizarEstadosPF() {
-        const porcentagem = this.pfMax > 0 ? (this.pfAtual / this.pfMax) * 100 : 0;
+    atualizarEstadosPF(porcentagem) {
         const estados = document.querySelectorAll('.pf-estado');
         
         estados.forEach(estado => {
             estado.classList.remove('ativo');
             
             const tipo = estado.dataset.estado;
-            if (tipo === 'normal' && porcentagem > 33 && this.pfAtual > 0) {
+            
+            // Lógica para ativar o estado correto
+            if (tipo === 'normal' && porcentagem > 33 && this.estado.pfAtual > 0) {
                 estado.classList.add('ativo');
             } else if (tipo === 'fadigado' && porcentagem <= 33 && porcentagem > 0) {
                 estado.classList.add('ativo');
-            } else if (tipo === 'exausto' && this.pfAtual <= 0) {
+            } else if (tipo === 'exausto' && this.estado.pfAtual <= 0) {
                 estado.classList.add('ativo');
             }
         });
     }
     
-    calcularRDTotal() {
-        let total = 0;
-        const inputs = document.querySelectorAll('.rd-input');
-        
-        inputs.forEach(input => {
-            const valor = parseInt(input.value) || 0;
-            const parte = input.closest('.rd-parte')?.dataset.parte;
-            
-            if (parte) {
-                this.rdValores[parte] = valor;
-            }
-            
-            total += valor;
-        });
-        
-        const rdTotalEl = document.getElementById('rdTotal');
-        if (rdTotalEl) {
-            rdTotalEl.textContent = total;
+    // ====================================================
+    // CONDIÇÕES DE COMBATE
+    // ====================================================
+    
+    alternarCondicao(nomeCondicao) {
+        if (this.estado.condicoesAtivas.has(nomeCondicao)) {
+            this.estado.condicoesAtivas.delete(nomeCondicao);
+        } else {
+            this.estado.condicoesAtivas.add(nomeCondicao);
         }
         
+        this.atualizarContadorCondicoes();
         this.salvarEstado();
     }
     
     atualizarContadorCondicoes() {
         const contador = document.getElementById('condicoesAtivas');
         if (contador) {
-            contador.textContent = this.condicoesAtivas.size;
+            contador.textContent = this.estado.condicoesAtivas.size;
+        }
+        
+        // Atualiza visual das condições
+        document.querySelectorAll('.condicao-item').forEach(item => {
+            const condicao = item.dataset.condicao;
+            if (this.estado.condicoesAtivas.has(condicao)) {
+                item.classList.add('ativa');
+            } else {
+                item.classList.remove('ativa');
+            }
+        });
+    }
+    
+    // ====================================================
+    // EFEITOS VISUAIS
+    // ====================================================
+    
+    aplicarEfeitoVisual(tipo, efeito) {
+        const barra = document.getElementById(tipo === 'pv' ? 'pvFill' : 'pfFill');
+        if (!barra) return;
+        
+        barra.classList.add(efeito === 'cura' ? 'cura-recebida' : 'dano-recebido');
+        
+        setTimeout(() => {
+            barra.classList.remove('cura-recebida', 'dano-recebido');
+        }, 1000);
+    }
+    
+    // ====================================================
+    // SALVAR E CARREGAR ESTADO
+    // ====================================================
+    
+    salvarEstado() {
+        try {
+            const estadoParaSalvar = {
+                pvAtual: this.estado.pvAtual,
+                pfAtual: this.estado.pfAtual,
+                pvModificador: this.estado.pvModificador,
+                pfModificador: this.estado.pfModificador,
+                condicoesAtivas: Array.from(this.estado.condicoesAtivas)
+            };
+            
+            localStorage.setItem('sistemaPVPF', JSON.stringify(estadoParaSalvar));
+        } catch (e) {
+            console.warn('Não foi possível salvar o estado:', e);
         }
     }
     
-    salvarEstado() {
-        const estado = {
-            pvAtual: this.pvAtual,
-            pvMax: this.pvMax,
-            pvBonus: this.pvBonus,
-            pfAtual: this.pfAtual,
-            pfMax: this.pfMax,
-            pfBonus: this.pfBonus,
-            condicoes: Array.from(this.condicoesAtivas),
-            rdValores: this.rdValores
-        };
-        
-        localStorage.setItem('combateEstado', JSON.stringify(estado));
-    }
-    
     carregarEstado() {
-        const estado = localStorage.getItem('combateEstado');
-        if (estado) {
-            try {
-                const dados = JSON.parse(estado);
+        try {
+            const salvo = localStorage.getItem('sistemaPVPF');
+            if (salvo) {
+                const dados = JSON.parse(salvo);
                 
-                // Carrega valores principais
-                this.pvAtual = dados.pvAtual || this.pvAtual;
-                this.pvMax = dados.pvMax || this.pvMax;
-                this.pvBonus = dados.pvBonus || 0;
-                
-                this.pfAtual = dados.pfAtual || this.pfAtual;
-                this.pfMax = dados.pfMax || this.pfMax;
-                this.pfBonus = dados.pfBonus || 0;
-                
-                // Atualiza inputs de modificador
-                const pvModInput = document.getElementById('pvModificador');
-                const pfModInput = document.getElementById('pfModificador');
-                
-                if (pvModInput) pvModInput.value = this.pvBonus;
-                if (pfModInput) pfModInput.value = this.pfBonus;
-                
-                // Carrega condições
-                if (dados.condicoes) {
-                    this.condicoesAtivas = new Set(dados.condicoes);
-                    document.querySelectorAll('.condicao-item').forEach(item => {
-                        if (this.condicoesAtivas.has(item.dataset.condicao)) {
-                            item.classList.add('ativa');
-                        }
-                    });
+                // Carrega valores salvos
+                if (dados.pvAtual !== undefined) this.estado.pvAtual = dados.pvAtual;
+                if (dados.pfAtual !== undefined) this.estado.pfAtual = dados.pfAtual;
+                if (dados.pvModificador !== undefined) this.estado.pvModificador = dados.pvModificador;
+                if (dados.pfModificador !== undefined) this.estado.pfModificador = dados.pfModificador;
+                if (dados.condicoesAtivas) {
+                    this.estado.condicoesAtivas = new Set(dados.condicoesAtivas);
                 }
                 
-                // Carrega RD
-                if (dados.rdValores) {
-                    this.rdValores = dados.rdValores;
-                    Object.entries(this.rdValores).forEach(([parte, valor]) => {
-                        const input = document.querySelector(`.rd-parte[data-parte="${parte}"] .rd-input`);
-                        if (input) {
-                            input.value = valor;
-                        }
-                    });
-                }
-                
-            } catch (e) {
-                console.error('Erro ao carregar estado do combate:', e);
+                console.log('Estado do PV-PF carregado com sucesso!');
             }
+        } catch (e) {
+            console.warn('Não foi possível carregar o estado:', e);
         }
     }
 }
 
-// ===== INICIALIZAÇÃO AUTOMÁTICA =====
+// ====================================================
+// INICIALIZAÇÃO GLOBAL
+// ====================================================
 
 let sistemaPVPF;
 
 function inicializarSistemaPVPF() {
-    // Espera o DOM estar pronto
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            iniciar();
-        });
-    } else {
-        iniciar();
-    }
-    
-    function iniciar() {
-        // Verifica se a aba de combate está presente
-        const combateTab = document.getElementById('combate');
-        if (!combateTab) return;
-        
-        // Inicializa o sistema
-        sistemaPVPF = new SistemaPVPFIntegrado();
-        window.sistemaPVPF = sistemaPVPF;
-        
-        // Calcula RD total inicial
-        sistemaPVPF.calcularRDTotal();
-        
-        console.log('Sistema PV-PF Integrado carregado!');
-    }
-}
-
-// Observa quando a aba de combate se torna ativa
-function observarAbaCombate() {
+    // Espera a aba de combate estar pronta
     const combateTab = document.getElementById('combate');
-    if (!combateTab) return;
-    
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && 
-                mutation.attributeName === 'class' &&
-                mutation.target.classList.contains('active')) {
-                
-                // Pequeno delay para garantir que o conteúdo esteja carregado
-                setTimeout(() => {
-                    if (!window.sistemaPVPF) {
-                        inicializarSistemaPVPF();
-                    }
-                }, 50);
-            }
-        });
-    });
-    
-    observer.observe(combateTab, { attributes: true });
-    
-    // Se já estiver ativo, inicializa imediatamente
-    if (combateTab.classList.contains('active')) {
-        setTimeout(() => {
-            inicializarSistemaPVPF();
-        }, 100);
+    if (!combateTab) {
+        // Tenta novamente em 500ms
+        setTimeout(inicializarSistemaPVPF, 500);
+        return;
     }
+    
+    // Inicializa o sistema
+    sistemaPVPF = new SistemaPVPF();
+    window.sistemaPVPF = sistemaPVPF;
+    
+    console.log('✅ Sistema PV-PF inicializado na aba de combate!');
 }
 
-// Inicia a observação quando a página carrega
+// Inicializa quando o DOM estiver pronto
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', observarAbaCombate);
+    document.addEventListener('DOMContentLoaded', inicializarSistemaPVPF);
 } else {
-    observarAbaCombate();
+    inicializarSistemaPVPF();
 }
 
-// ===== FUNÇÕES GLOBAIS PARA O HTML =====
+// ====================================================
+// FUNÇÕES GLOBAIS PARA O HTML (onclick)
+// ====================================================
 
-// Estas funções podem ser chamadas diretamente do HTML
+// Funções chamadas diretamente do HTML
 window.alterarPV = function(valor) {
-    window.sistemaPVPF?.alterarPV(valor);
+    if (window.sistemaPVPF) {
+        window.sistemaPVPF.alterarPV(valor);
+    }
 };
 
 window.alterarPF = function(valor) {
-    window.sistemaPVPF?.alterarPF(valor);
+    if (window.sistemaPVPF) {
+        window.sistemaPVPF.alterarPF(valor);
+    }
 };
 
 window.modificarPV = function(tipo, valor) {
-    if (tipo === 'mod' && window.sistemaPVPF) {
-        const input = document.getElementById('pvModificador');
-        if (input) {
-            let current = parseInt(input.value) || 0;
-            current += valor;
-            current = Math.max(-10, Math.min(10, current));
-            input.value = current;
-            
-            window.sistemaPVPF.pvBonus = current;
-            window.sistemaPVPF.calcularMaximos();
-            window.sistemaPVPF.atualizarDisplayCompleto();
-            window.sistemaPVPF.salvarEstado();
-        }
+    if (window.sistemaPVPF) {
+        window.sistemaPVPF.modificarPV(tipo, valor);
     }
 };
 
 window.modificarPF = function(tipo, valor) {
-    if (tipo === 'mod' && window.sistemaPVPF) {
-        const input = document.getElementById('pfModificador');
-        if (input) {
-            let current = parseInt(input.value) || 0;
-            current += valor;
-            current = Math.max(-10, Math.min(10, current));
-            input.value = current;
-            
-            window.sistemaPVPF.pfBonus = current;
-            window.sistemaPVPF.calcularMaximos();
-            window.sistemaPVPF.atualizarDisplayCompleto();
-            window.sistemaPVPF.salvarEstado();
-        }
+    if (window.sistemaPVPF) {
+        window.sistemaPVPF.modificarPF(tipo, valor);
     }
 };
 
 window.resetarPV = function() {
-    window.sistemaPVPF?.resetarPV();
+    if (window.sistemaPVPF) {
+        window.sistemaPVPF.resetarPV();
+    }
 };
 
 window.resetarPF = function() {
-    window.sistemaPVPF?.resetarPF();
-};
-
-window.calcularRDTotal = function() {
-    window.sistemaPVPF?.calcularRDTotal();
-};
-
-window.alternarCondicao = function(elemento) {
-    elemento.classList.toggle('ativa');
-    const condicao = elemento.dataset.condicao;
-    
     if (window.sistemaPVPF) {
-        if (elemento.classList.contains('ativa')) {
-            window.sistemaPVPF.condicoesAtivas.add(condicao);
-        } else {
-            window.sistemaPVPF.condicoesAtivas.delete(condicao);
-        }
-        
-        window.sistemaPVPF.atualizarContadorCondicoes();
-        window.sistemaPVPF.salvarEstado();
+        window.sistemaPVPF.resetarPF();
     }
 };
 
 window.atualizarPVManual = function() {
     const input = document.getElementById('pvAtualDisplay');
     if (input && window.sistemaPVPF) {
-        window.sistemaPVPF.pvAtual = parseInt(input.value) || 0;
-        window.sistemaPVPF.atualizarDisplayCompleto();
-        window.sistemaPVPF.salvarEstado();
+        const valor = parseInt(input.value) || 0;
+        window.sistemaPVPF.setPVAtual(valor);
     }
 };
 
 window.atualizarPFManual = function() {
     const input = document.getElementById('pfAtualDisplay');
     if (input && window.sistemaPVPF) {
-        window.sistemaPVPF.pfAtual = parseInt(input.value) || 0;
-        window.sistemaPVPF.atualizarDisplayCompleto();
-        window.sistemaPVPF.salvarEstado();
+        const valor = parseInt(input.value) || 0;
+        window.sistemaPVPF.setPFAtual(valor);
     }
 };
+
+window.alternarCondicao = function(elemento) {
+    if (window.sistemaPVPF) {
+        const condicao = elemento.dataset.condicao;
+        window.sistemaPVPF.alternarCondicao(condicao);
+    }
+};
+
+// Função para calcular RD total (mantida para compatibilidade)
+window.calcularRDTotal = function() {
+    let total = 0;
+    document.querySelectorAll('.rd-input').forEach(input => {
+        total += parseInt(input.value) || 0;
+    });
+    
+    const rdTotalEl = document.getElementById('rdTotal');
+    if (rdTotalEl) {
+        rdTotalEl.textContent = total;
+    }
+};
+
+// Inicializa o cálculo de RD ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        if (typeof calcularRDTotal === 'function') {
+            calcularRDTotal();
+        }
+    }, 1000);
+});
