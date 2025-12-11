@@ -2454,124 +2454,61 @@
     <div class="combate-container">
         
         <!-- PRIMEIRA LINHA: PV E PF (MANTIDO) -->
-        <div class="combate-row">
-            <div class="pv-completo-card">
-                <div class="pv-header">
-                    <h3><i class="fas fa-heartbeat"></i> PONTOS DE VIDA (PV)</h3>
-                    <div class="pv-extra-control">
-                        <div class="extra-label">Bônus:</div>
-                        <input type="number" id="pvBonus" class="extra-input" value="0" min="-10" max="10">
-                    </div>
-                </div>
-                
-                <div class="pv-content">
-                    <div class="pv-escala">
-                        <div class="pv-marcador" style="left: 0%">
-                            <div class="marcador-valor" id="marcadorSt">ST</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pv-marcador" style="left: 50%">
-                            <div class="marcador-valor">0</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                        <div class="pv-marcador" style="left: 100%">
-                            <div class="marcador-valor" id="marcadorInconsciente">Inconsciente</div>
-                            <div class="marcador-line"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="pv-controles">
-                        <div class="pv-base-info">
-                            <div class="pv-base-group">
-                                <div class="pv-label">PV Máx:</div>
-                                <input type="number" id="pvMax" class="pv-st-input" value="10" min="1">
-                            </div>
-                            <div class="pv-base-group">
-                                <div class="pv-label">PV Atual:</div>
-                                <div class="pv-atual-control">
-                                    <button class="pv-btn minus" data-amount="1">-1</button>
-                                    <input type="number" id="pvAtual" class="pv-atual-input" value="10" min="-50" max="50">
-                                    <button class="pv-btn plus" data-amount="1">+1</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="pv-barra-container">
-                            <div class="pv-barra" id="pvBarra">
-                                <div class="pv-fill" id="pvFill"></div>
-                                <div class="pv-texto" id="pvTexto">10/10</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="pv-faixas">
-                        <div class="faixa-item" data-cor="#27ae60">Cheio</div>
-                        <div class="faixa-item" data-cor="#f1c40f">Machucado</div>
-                        <div class="faixa-item" data-cor="#e67e22">Ferido</div>
-                        <div class="faixa-item" data-cor="#e74c3c">Crítico</div>
-                        <div class="faixa-item" data-cor="#9b59b6">Morrendo</div>
-                        <div class="faixa-item" data-cor="#7f8c8d">Inconsciente</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="pf-card">
-                <div class="pf-header">
-                    <h3><i class="fas fa-wind"></i> PONTOS DE FADIGA (PF)</h3>
-                </div>
-                
-                <div class="pf-content">
-                    <div class="pf-base-info">
-                        <div class="pf-base-group">
-                            <div class="pf-label">PF Máx:</div>
-                            <input type="number" id="pfMax" class="pf-max-input" value="10" min="1">
-                        </div>
-                        <div class="pf-base-group">
-                            <div class="pf-label">PF Atual:</div>
-                            <div class="pf-atual-control">
-                                <button class="pf-btn minus" data-amount="1">-1</button>
-                                <input type="number" id="pfAtual" class="pf-atual-input" value="10" min="-10" max="20">
-                                <button class="pf-btn plus" data-amount="1">+1</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="pf-barra-container">
-                        <div class="pf-barra" id="pfBarra">
-                            <div class="pf-fill" id="pfFill"></div>
-                            <div class="pf-texto" id="pfTexto">10/10</div>
-                        </div>
-                    </div>
-                    
-                    <div class="pf-estados">
-                        <div class="estado-item" data-estado="normal">
-                            <div class="estado-indicador" style="background: #2ecc71;"></div>
-                            <div class="estado-info">
-                                <div class="estado-nome">Normal</div>
-                                <div class="estado-desc">PF ≥ 1/3 máximo</div>
-                            </div>
-                        </div>
-                        <div class="estado-item" data-estado="fadigado">
-                            <div class="estado-indicador" style="background: #f1c40f;"></div>
-                            <div class="estado-info">
-                                <div class="estado-nome">Fadigado/Exausto</div>
-                                <div class="estado-desc">PF &lt; 1/3 máximo</div>
-                            </div>
-                        </div>
-                        <div class="estado-item" data-estado="inconsciente">
-                            <div class="estado-indicador" style="background: #e74c3c;"></div>
-                            <div class="estado-info">
-                                <div class="estado-nome">Inconsciente</div>
-                                <div class="estado-desc">PF = 0 ou menos</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Na primeira linha da aba combate -->
+<div class="combate-row">
+    
+    <!-- CARD PV - CONECTADO AO ST -->
+    <div class="pv-completo-card" data-atributo="ST" data-bonus="0">
+        <div class="pv-header">
+            <h3><i class="fas fa-heartbeat"></i> PONTOS DE VIDA (PV)</h3>
+            <div class="pv-extra-control">
+                <div class="extra-label">Bônus:</div>
+                <input type="number" class="pv-bonus-input" value="0" min="-10" max="10">
             </div>
         </div>
         
-        <!-- SEGUNDA LINHA: DANO E DEFESAS -->
-        <!-- SEGUNDA LINHA: DANO E DEFESAS -->
+        <div class="pv-content">
+            <!-- Barra de PV -->
+            <div class="pv-barra-container">
+                <div class="pv-barra">
+                    <div class="pv-fill" style="width: 100%"></div>
+                    <div class="pv-texto">10/10</div>
+                </div>
+            </div>
+            
+            <!-- Controles SIMPLES -->
+            <div class="pv-controles-rapidos">
+                <button class="btn-pv" data-acao="diminuir">-1 PV</button>
+                <span class="pv-valor-atual">10</span>
+                <button class="btn-pv" data-acao="aumentar">+1 PV</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CARD PF - CONECTADO AO HT -->
+    <div class="pf-card" data-atributo="HT">
+        <div class="pf-header">
+            <h3><i class="fas fa-wind"></i> PONTOS DE FADIGA (PF)</h3>
+        </div>
+        
+        <div class="pf-content">
+            <!-- Barra de PF -->
+            <div class="pf-barra-container">
+                <div class="pf-barra">
+                    <div class="pf-fill" style="width: 100%"></div>
+                    <div class="pf-texto">10/10</div>
+                </div>
+            </div>
+            
+            <!-- Controles SIMPLES -->
+            <div class="pf-controles-rapidos">
+                <button class="btn-pf" data-acao="diminuir">-1 PF</button>
+                <span class="pf-valor-atual">10</span>
+                <button class="btn-pf" data-acao="aumentar">+1 PF</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="combate-row">
     
     <!-- CARD DANO - VERSÃO SIMPLIFICADA -->
@@ -3035,33 +2972,40 @@
 </script>
 
 <!-- ORDEM CORRETA DOS SCRIPTS -->
-<script src="dashboard.js"></script>    
+<!-- ATRIBUTOS (base de tudo) -->
 <script src="atributos.js"></script>
+
+<!-- COMBATE (usa atributos) -->
+<script src="pv-pf.js"></script>
+
+<!-- DASHBOARD (controle principal) -->
+<script src="dashboard.js"></script>
+
+<!-- CARACTERÍSTICAS -->
 <script src="caracteristicas-fisicas.js"></script>
 <script src="caracteristicas-altura-peso.js"></script>
 <script src="caracteristicas-aparencia.js"></script>
 <script src="caracteristicas-riqueza.js"></script>
 <script src="caracteristicas-idiomas.js"></script>
 
-<!-- SISTEMA DE VANTAGENS E DESVANTAGENS -->
+<!-- VANTAGENS/DESVANTAGENS -->
 <script src="vantagens.js"></script>
 <script src="desvantagens.js"></script>
 <script src="catalogo-vantagens.js"></script>
 <script src="catalogo-desvantagens.js"></script>
 
-<!-- SISTEMA DE PERÍCIAS -->
+<!-- PERÍCIAS -->
 <script src="pericias-catalogo.js"></script>
 <script src="sistema-pericias.js"></script>
 <script src="tecnicas.js"></script>
 
-<!-- SISTEMA DE MAGIAS -->
+<!-- MAGIAS -->
 <script src="catalogo-magias.js"></script>
 <script src="magias.js"></script>
 
-<!-- SISTEMA DE EQUIPAMENTOS -->
+<!-- EQUIPAMENTOS -->
 <script src="catalogo-equipamentos.js"></script>
 <script src="equipamentos.js"></script>
-
 <script>
     // Configuração do Supabase
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
