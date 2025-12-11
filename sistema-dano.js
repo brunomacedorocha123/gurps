@@ -1,4 +1,4 @@
-// sistema-dano.js - SISTEMA COMPLETO DE CÁLCULO DE DANO (VERSÃO CORRIGIDA)
+// sistema-dano.js - SISTEMA COMPLETO DE CÁLCULO DE DANO (VERSÃO FINAL)
 (function() {
     'use strict';
 
@@ -10,7 +10,7 @@
         fadigaAtiva: false
     };
 
-    // TABELA DE DANO POR ST (mesma do seu sistema de atributos)
+    // TABELA DE DANO POR ST
     const tabelaDanoST = {
         1: { gdp: "1d-6", geb: "1d-5" },
         2: { gdp: "1d-6", geb: "1d-5" },
@@ -44,7 +44,43 @@
         30: { gdp: "3d", geb: "5d+2" }
     };
 
-    // ========== MONITORAMENTO DO ST EM TEMPO REAL ==========
+    // ========== FUNÇÕES AUXILIARES ==========
+
+    function calcularSomaDeDados(base, modificador) {
+        if (!modificador || modificador.trim() === '') return base.trim();
+        
+        base = base.trim();
+        modificador = modificador.trim();
+        
+        const sinal = modificador.charAt(0);
+        const numero = parseInt(modificador.substring(1)) || 0;
+        
+        const match = base.match(/(\d+d)([+-]\d+)?/);
+        
+        if (match) {
+            const dados = match[1];
+            const baseMod = match[2] ? parseInt(match[2]) : 0;
+            
+            let novoMod = baseMod;
+            if (sinal === '+') {
+                novoMod += numero;
+            } else if (sinal === '-') {
+                novoMod -= numero;
+            }
+            
+            if (novoMod === 0) {
+                return dados;
+            } else if (novoMod > 0) {
+                return dados + '+' + novoMod;
+            } else {
+                return dados + novoMod;
+            }
+        }
+        
+        return base + " " + modificador;
+    }
+
+    // ========== MONITORAMENTO DO ST ==========
 
     function monitorarST() {
         const stInput = document.getElementById('ST');
@@ -174,39 +210,28 @@
         }
     }
 
-    // ========== CÁLCULO DO DANO (FUNÇÃO PRINCIPAL CORRIGIDA) ==========
+    // ========== CÁLCULO DO DANO ==========
 
     function calcularTodosOsDanosDaArma(arma) {
         if (!arma) return [];
         
-        const stEfetivo = estado.fadigaAtiva ? Math.ceil(estado.stAtual / 2) : estado.stAtual;
         const tiposDano = [];
+        const danoGDPbase = estado.danoBase.gdp;
+        const danoGEBbase = estado.danoBase.geb;
         
-        // VERIFICAÇÃO COMPLETA DOS TIPOS DE DANO
-        
-        // 1. Primeiro, DANO PRINCIPAL (dano + tipoDano) - GeB+1 corte
-        if (arma.dano && arma.tipoDano) {
-            let formulaFinal = '';
-            let baseTipo = '';
+        // 1. GDP ESPECÍFICO (GdP+1 contusão)
+        if (arma.danoGDP && arma.danoGDP !== "-") {
+            const modificadorGDP = arma.danoGDP.replace('GdP', '').trim();
+            let formulaGDP = danoGDPbase;
             
-            if (arma.dano.startsWith('GeB')) {
-                const modificador = arma.dano.replace('GeB', '').trim();
-                formulaFinal = estado.danoBase.geb + (modificador ? ` ${modificador}` : '');
-                baseTipo = 'GEB';
-            } else if (arma.dano.startsWith('GdP')) {
-                const modificador = arma.dano.replace('GdP', '').trim();
-                formulaFinal = estado.danoBase.gdp + (modificador ? ` ${modificador}` : '');
-                baseTipo = 'GDP';
-            } else {
-                formulaFinal = arma.dano;
-                baseTipo = arma.dano.startsWith('GdP') ? 'GDP' : 'GEB';
+            if (modificadorGDP) {
+                formulaGDP = calcularSomaDeDados(danoGDPbase, modificadorGDP);
             }
             
-            // Adiciona o dano principal
             tiposDano.push({
-                formula: formulaFinal,
-                tipo: arma.tipoDano,
-                base: baseTipo,
+                formula: formulaGDP,
+                tipo: arma.tipoDanoGDP || 'contusão',
+                base: 'GDP',
                 nome: arma.nome,
                 stRequerido: arma.st,
                 maos: arma.maos || 1,
@@ -214,65 +239,49 @@
             });
         }
         
-        // 2. Depois, DANO GDP ESPECÍFICO (danoGDP + tipoDanoGDP) - GdP+1 contusão
-        if (arma.danoGDP && arma.danoGDP !== "-") {
-            const modificadorGDP = arma.danoGDP.replace('GdP', '').trim();
-            const formulaGDP = estado.danoBase.gdp + (modificadorGDP ? ` ${modificadorGDP}` : '');
-            
-            // Só adiciona se ainda não tiver um dano GDP
-            const jaTemGDP = tiposDano.some(d => d.base === 'GDP');
-            if (!jaTemGDP) {
-                tiposDano.push({
-                    formula: formulaGDP,
-                    tipo: arma.tipoDanoGDP || 'contusão',
-                    base: 'GDP',
-                    nome: `${arma.nome} (GdP)`,
-                    stRequerido: arma.st,
-                    maos: arma.maos || 1,
-                    alcance: arma.alcance || '1'
-                });
-            }
-        }
-        
-        // 3. Depois, DANO GEB ESPECÍFICO (danoGEB + tipoDanoGEB)
+        // 2. GEB ESPECÍFICO (GeB+1 corte)
         if (arma.danoGEB && arma.danoGEB !== "-") {
             const modificadorGEB = arma.danoGEB.replace('GeB', '').trim();
-            const formulaGEB = estado.danoBase.geb + (modificadorGEB ? ` ${modificadorGEB}` : '');
+            let formulaGEB = danoGEBbase;
             
-            // Só adiciona se ainda não tiver um dano GEB
-            const jaTemGEB = tiposDano.some(d => d.base === 'GEB');
-            if (!jaTemGEB) {
-                tiposDano.push({
-                    formula: formulaGEB,
-                    tipo: arma.tipoDanoGEB || 'corte',
-                    base: 'GEB',
-                    nome: `${arma.nome} (GeB)`,
-                    stRequerido: arma.st,
-                    maos: arma.maos || 1,
-                    alcance: arma.alcance || '1'
-                });
+            if (modificadorGEB) {
+                formulaGEB = calcularSomaDeDados(danoGEBbase, modificadorGEB);
             }
+            
+            tiposDano.push({
+                formula: formulaGEB,
+                tipo: arma.tipoDanoGEB || 'corte',
+                base: 'GEB',
+                nome: arma.nome,
+                stRequerido: arma.st,
+                maos: arma.maos || 1,
+                alcance: arma.alcance || '1'
+            });
         }
         
-        // 4. Se NÃO TEM NENHUM DANO, usa dano padrão
+        // 3. DANO PRINCIPAL (para armas que não tem GDP/GEB separados)
         if (tiposDano.length === 0 && arma.dano) {
             let formulaFinal = '';
+            let baseTipo = '';
             let tipoDano = arma.tipoDano || 'contusão';
             
             if (arma.dano.startsWith('GeB')) {
                 const modificador = arma.dano.replace('GeB', '').trim();
-                formulaFinal = estado.danoBase.geb + (modificador ? ` ${modificador}` : '');
+                formulaFinal = calcularSomaDeDados(danoGEBbase, modificador);
+                baseTipo = 'GEB';
             } else if (arma.dano.startsWith('GdP')) {
                 const modificador = arma.dano.replace('GdP', '').trim();
-                formulaFinal = estado.danoBase.gdp + (modificador ? ` ${modificador}` : '');
+                formulaFinal = calcularSomaDeDados(danoGDPbase, modificador);
+                baseTipo = 'GDP';
             } else {
                 formulaFinal = arma.dano;
+                baseTipo = 'GEB';
             }
             
             tiposDano.push({
                 formula: formulaFinal,
                 tipo: tipoDano,
-                base: arma.dano.startsWith('GdP') ? 'GDP' : 'GEB',
+                base: baseTipo,
                 nome: arma.nome,
                 stRequerido: arma.st,
                 maos: arma.maos || 1,
@@ -342,7 +351,7 @@
             if (armaNome) {
                 armaNome.textContent = estado.armaEquipada.nome;
                 if (danosCalculados.length > 1) {
-                    armaNome.innerHTML = `${estado.armaEquipada.nome} <span style="color:#e74c3c; font-size:0.8em;">(${danosCalculados.length} tipos)</span>`;
+                    armaNome.innerHTML = `${estado.armaEquipada.nome} <span style="color:#FFD700; font-size:0.8em; margin-left:5px;">(${danosCalculados.length} tipos)</span>`;
                 }
             }
             
@@ -354,37 +363,40 @@
                     const containerDano = document.createElement('div');
                     containerDano.className = 'tipo-dano-item';
                     containerDano.style.cssText = `
-                        margin-bottom: ${index < danosCalculados.length - 1 ? '10px' : '0'};
-                        padding: 10px;
-                        border-radius: 8px;
-                        background: ${index % 2 === 0 ? 'rgba(52, 152, 219, 0.15)' : 'rgba(155, 89, 182, 0.15)'};
-                        border: 1px solid ${index % 2 === 0 ? 'rgba(52, 152, 219, 0.3)' : 'rgba(155, 89, 182, 0.3)'};
+                        margin-bottom: ${index < danosCalculados.length - 1 ? '12px' : '0'};
+                        padding: 12px;
+                        border-radius: 10px;
+                        background: ${index % 2 === 0 ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.4)'};
+                        border: 1px solid rgba(255, 215, 0, 0.3);
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                     `;
                     
                     const linhaFormula = document.createElement('div');
                     linhaFormula.style.cssText = `
-                        font-size: 1.4em;
+                        font-size: 1.6em;
                         font-weight: bold;
-                        color: #2c3e50;
-                        margin-bottom: 5px;
+                        color: #FFD700;
+                        text-shadow: 1px 1px 2px #000, 0 0 10px rgba(255, 215, 0, 0.5);
+                        margin-bottom: 8px;
                         font-family: 'Courier New', monospace;
                         text-align: center;
+                        letter-spacing: 1px;
                     `;
                     linhaFormula.textContent = dano.formula;
                     
                     const linhaTipo = document.createElement('div');
                     linhaTipo.style.cssText = `
-                        font-size: 0.9em;
-                        color: #7f8c8d;
+                        font-size: 1em;
+                        color: #FFFFFF;
                         text-align: center;
-                        line-height: 1.4;
+                        line-height: 1.5;
                     `;
                     
-                    let tipoTexto = `<strong style="color:#e74c3c;">${dano.tipo}</strong>`;
-                    tipoTexto += ` <span style="color:#27ae60;">(${dano.base})</span>`;
+                    let tipoTexto = `<span style="color:#FF6B6B; font-weight:bold;">${dano.tipo}</span>`;
+                    tipoTexto += ` <span style="color:#4ECDC4;">(${dano.base})</span>`;
                     
                     if (dano.alcance && dano.alcance !== '1') {
-                        tipoTexto += `<br><span style="color:#3498db;">Alcance: ${dano.alcance}</span>`;
+                        tipoTexto += `<br><span style="color:#45B7D1;">Alcance: ${dano.alcance}</span>`;
                     }
                     
                     if (dano.maos) {
@@ -396,7 +408,7 @@
                         } else {
                             textoMaos = `${dano.maos} mãos`;
                         }
-                        tipoTexto += `<br><span style="color:#f39c12;">${textoMaos}</span>`;
+                        tipoTexto += `<br><span style="color:#FFD166;">${textoMaos}</span>`;
                     }
                     
                     linhaTipo.innerHTML = tipoTexto;
@@ -413,16 +425,17 @@
             if (stMinimo && stEfetivo < stMinimo) {
                 const avisoST = document.createElement('div');
                 avisoST.style.cssText = `
-                    color: #e74c3c;
-                    font-size: 0.85em;
-                    margin-top: 10px;
-                    padding: 8px;
-                    background: rgba(231, 76, 60, 0.1);
-                    border-radius: 6px;
-                    border-left: 4px solid #e74c3c;
+                    color: #FF6B6B;
+                    font-size: 0.9em;
+                    margin-top: 12px;
+                    padding: 10px;
+                    background: rgba(255, 107, 107, 0.15);
+                    border-radius: 8px;
+                    border-left: 4px solid #FF6B6B;
                     text-align: center;
+                    font-weight: bold;
                 `;
-                avisoST.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ST atual (${stEfetivo}) abaixo do mínimo (${stMinimo})`;
+                avisoST.innerHTML = `<i class="fas fa-exclamation-triangle" style="margin-right:8px;"></i> ST atual (${stEfetivo}) < ST mínimo (${stMinimo})`;
                 
                 if (armaTipo) {
                     armaTipo.appendChild(avisoST);
@@ -449,10 +462,12 @@
         if (estado.fadigaAtiva) {
             const stReduzido = Math.ceil(estado.stAtual / 2);
             stDisplay.textContent = `${stReduzido} (reduzido pela fadiga)`;
-            stDisplay.style.color = '#e67e22';
+            stDisplay.style.color = '#FFA500';
+            stDisplay.style.fontWeight = 'bold';
         } else {
             stDisplay.textContent = estado.stAtual;
             stDisplay.style.color = '';
+            stDisplay.style.fontWeight = '';
         }
     }
 
