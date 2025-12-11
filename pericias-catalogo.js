@@ -298,7 +298,47 @@ const catalogoPericias = {
                 }
             ]
         },
-        
+
+     // CORREÇÃO: "Escudos" deve ser um grupo SEPARADO, não dentro de "Outras Armas"
+        "Escudos": {
+            tipo: "modal-escolha",
+            nome: "Escudo",
+            descricao: "Habilidade de usar um escudo tanto para defesa quanto para atacar. A defesa ativa (Bloqueio) é igual a (NH/2) + 3, arredondado para baixo.",
+            atributo: "DX",
+            categoria: "Combate",
+            pericias: [
+                {
+                    id: "escudo-broquel",
+                    nome: "Escudo (Broquel)",
+                    atributo: "DX",
+                    dificuldade: "Fácil",
+                    custoBase: 1,
+                    descricao: "Escudo pequeno empunhado com uma das mãos. Ocupa completamente a mão, mas pode ser preparado em um turno ou largado como ação livre.",
+                    prereq: "DX-4",
+                    default: "DX-4 ou Escudo-2 ou Escudo de Energia-2"
+                },
+                {
+                    id: "escudo-padrao",
+                    nome: "Escudo",
+                    atributo: "DX",
+                    dificuldade: "Fácil",
+                    custoBase: 1,
+                    descricao: "Escudo preso por faixa, permitindo segurar (mas não empunhar) algo com a mão do escudo. Especialização mais comum.",
+                    prereq: "DX-4",
+                    default: "DX-4 ou Escudo (Broquel)-2 ou Escudo de Energia-2"
+                },
+                {
+                    id: "escudo-energia",
+                    nome: "Escudo de Energia",
+                    atributo: "DX",
+                    dificuldade: "Fácil",
+                    custoBase: 1,
+                    descricao: "Escudo com superfície bloqueadora formada de energia, em vez de matéria.",
+                    prereq: "DX-4",
+                    default: "DX-4 ou Escudo-2 ou Escudo (Broquel)-2"
+                }
+            ]
+        },
         // Perícias de Combate Simples (sem especialização)
         "Simples": [
             {
