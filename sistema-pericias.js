@@ -1,4 +1,4 @@
-// ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA E CORRIGIDA =====
+// ===== SISTEMA DE PERÍCIAS - VERSÃO COMPLETA =====
 
 // Estado do sistema
 let estadoPericias = {
@@ -368,7 +368,10 @@ function renderizarCatalogo() {
   const container = document.getElementById('lista-pericias');
   const periciasFiltradas = filtrarPericias();
   
-  if (!container) return;
+  if (!container) {
+    console.error('Container lista-pericias não encontrado!');
+    return;
+  }
   
   if (periciasFiltradas.length === 0) {
     container.innerHTML = `
@@ -594,7 +597,6 @@ function abrirModalPericiaExistente(periciaExistente) {
   atualizarCustoNoModal(periciaExistente);
 }
 
-// CONTINUA NO PRÓXIMO COMENTÁRIO...
 // ===== FUNÇÃO REESCRITA: atualizarCustoNoModal() =====
 function atualizarCustoNoModal(periciaEditando) {
   if (!estadoPericias.modalPericiaAtiva) return;
@@ -1200,6 +1202,8 @@ function buscarPericiaEspecifica(grupo, idEspecializacao) {
 
 // ===== FUNÇÕES DE INICIALIZAÇÃO =====
 function inicializarSistemaPericias() {
+  console.log('Inicializando sistema de perícias...');
+  
   carregarPericias();
   configurarEventListeners();
   configurarOuvinteAtributos();
@@ -1210,17 +1214,27 @@ function inicializarSistemaPericias() {
   renderizarPericiasAprendidas();
 }
 
+// ===== FUNÇÃO REESCRITA: configurarEventListeners() =====
 function configurarEventListeners() {
+  // Configura listeners para os botões de filtro de perícias
   const filtroButtons = document.querySelectorAll('.filtro-btn');
+  console.log('Encontrados', filtroButtons.length, 'botões de filtro de perícias');
+  
   filtroButtons.forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const filtro = this.dataset.filtro;
+      console.log('Clicado no filtro de perícias:', filtro);
+      
       estadoPericias.filtroAtivo = filtro;
       renderizarFiltros();
       renderizarCatalogo();
     });
   });
   
+  // Configura busca de perícias
   const buscaInput = document.getElementById('busca-pericias');
   if (buscaInput) {
     buscaInput.addEventListener('input', function() {
@@ -1229,24 +1243,49 @@ function configurarEventListeners() {
     });
   }
   
-  document.querySelectorAll('.modal-pericia-overlay, .modal-especializacao-overlay').forEach(overlay => {
-    overlay.addEventListener('click', function(e) {
+  // Configura clicks nos overlays dos modais
+  const modalPericiaOverlay = document.querySelector('.modal-pericia-overlay');
+  const modalEspecializacaoOverlay = document.querySelector('.modal-especializacao-overlay');
+  
+  if (modalPericiaOverlay) {
+    modalPericiaOverlay.addEventListener('click', function(e) {
       if (e.target === this) {
-        if (this.classList.contains('modal-pericia-overlay')) {
-          fecharModalPericia();
-        } else {
-          fecharModalEspecializacao();
-        }
+        fecharModalPericia();
       }
     });
-  });
+  }
   
+  if (modalEspecializacaoOverlay) {
+    modalEspecializacaoOverlay.addEventListener('click', function(e) {
+      if (e.target === this) {
+        fecharModalEspecializacao();
+      }
+    });
+  }
+  
+  // Configura tecla Escape para fechar modais
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-      fecharModalPericia();
-      fecharModalEspecializacao();
+      if (estadoPericias.modalPericiaAtiva) {
+        fecharModalPericia();
+      }
+      if (estadoPericias.modalEspecializacaoAtiva) {
+        fecharModalEspecializacao();
+      }
     }
   });
+  
+  // Configura botão de remover perícia (event delegation)
+  const adquiridasContainer = document.getElementById('pericias-aprendidas');
+  if (adquiridasContainer) {
+    adquiridasContainer.addEventListener('click', function(e) {
+      if (e.target.closest('.btn-remover-pericia')) {
+        const btn = e.target.closest('.btn-remover-pericia');
+        const idPericia = btn.dataset.id;
+        removerPericia(idPericia);
+      }
+    });
+  }
 }
 
 // ===== FUNÇÕES PÚBLICAS PARA INTEGRAÇÃO =====
@@ -1325,25 +1364,97 @@ function migrarPericiasAntigas() {
   alert(`Migração concluída! ${contador} perícias foram atualizadas.`);
 }
 
+// ===== FUNÇÕES PARA DIAGNÓSTICO =====
+function verificarIntegracao() {
+  console.log('=== VERIFICAÇÃO DO SISTEMA DE PERÍCIAS ===');
+  console.log('1. Funções do catálogo disponíveis:');
+  console.log('- obterTodasPericiasSimples:', typeof window.obterTodasPericiasSimples);
+  console.log('- obterEspecializacoes:', typeof window.obterEspecializacoes);
+  console.log('- catalogoPericias:', window.catalogoPericias ? 'OK' : 'NÃO ENCONTRADO');
+  
+  console.log('2. Estado do sistema:');
+  console.log('- Filtro ativo:', estadoPericias.filtroAtivo);
+  console.log('- Busca ativa:', estadoPericias.buscaAtiva);
+  console.log('- Perícias aprendidas:', estadoPericias.periciasAprendidas.length);
+  
+  console.log('3. Elementos HTML encontrados:');
+  console.log('- #lista-pericias:', document.getElementById('lista-pericias') ? 'OK' : 'NÃO ENCONTRADO');
+  console.log('- #pericias-aprendidas:', document.getElementById('pericias-aprendidas') ? 'OK' : 'NÃO ENCONTRADO');
+  console.log('- #busca-pericias:', document.getElementById('busca-pericias') ? 'OK' : 'NÃO ENCONTRADO');
+  console.log('- Botões de filtro:', document.querySelectorAll('.filtro-btn').length);
+  
+  // Testa a função filtrarPericias
+  const todasPericias = window.obterTodasPericiasSimples ? window.obterTodasPericiasSimples() : [];
+  console.log('4. Teste de filtragem:');
+  console.log('- Total de perícias no catálogo:', todasPericias.length);
+  
+  // Testa cada filtro
+  const filtrosTeste = ['todas', 'dx', 'iq', 'ht', 'perc', 'combate'];
+  filtrosTeste.forEach(filtro => {
+    estadoPericias.filtroAtivo = filtro;
+    const filtradas = filtrarPericias();
+    console.log(`  - Filtro "${filtro}": ${filtradas.length} perícias`);
+  });
+  
+  // Restaura filtro padrão
+  estadoPericias.filtroAtivo = 'todas';
+  
+  console.log('=== FIM DA VERIFICAÇÃO ===');
+}
+
 // ===== INICIALIZAÇÃO AUTOMÁTICA =====
-document.addEventListener('DOMContentLoaded', function() {
-  const periciasTab = document.getElementById('pericias');
-  if (periciasTab && periciasTab.classList.contains('active')) {
+function verificarEInicializarSistema() {
+  console.log('Verificando sistema de perícias...');
+  
+  // Verifica se o catálogo está disponível
+  if (!window.catalogoPericias) {
+    console.error('Catálogo de perícias não encontrado!');
+    console.log('Aguardando catálogo...');
+    
+    // Tenta novamente após 1 segundo
     setTimeout(() => {
-      inicializarSistemaPericias();
-    }, 100);
+      if (window.catalogoPericias) {
+        console.log('Catálogo carregado, inicializando sistema...');
+        inicializarSistemaPericias();
+      } else {
+        console.error('Catálogo ainda não disponível após espera.');
+      }
+    }, 1000);
+    return;
   }
   
+  // Verifica se a aba de perícias está visível
+  const periciasTab = document.getElementById('pericias');
+  if (!periciasTab) {
+    console.error('Aba de perícias não encontrada!');
+    return;
+  }
+  
+  // Inicializa imediatamente se a aba estiver ativa
+  if (periciasTab.classList.contains('active')) {
+    console.log('Aba de perícias ativa, inicializando...');
+    inicializarSistemaPericias();
+    return;
+  }
+  
+  // Configura observer para quando a aba for ativada
   const observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
       if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
         const tab = mutation.target;
         if (tab.id === 'pericias' && tab.classList.contains('active')) {
+          console.log('Aba de perícias ativada, inicializando sistema...');
+          
+          // Remove o observer após ativar
+          observer.disconnect();
+          
+          // Inicializa o sistema
           setTimeout(() => {
             if (!window.sistemaPericiasInicializado) {
               inicializarSistemaPericias();
               window.sistemaPericiasInicializado = true;
             } else {
+              console.log('Sistema já inicializado, apenas renderizando...');
               renderizarStatusPericias();
               renderizarFiltros();
               renderizarCatalogo();
@@ -1355,10 +1466,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    observer.observe(tab, { attributes: true });
-  });
-});
+  // Observa a aba de perícias
+  observer.observe(periciasTab, { attributes: true });
+  console.log('Observer configurado para a aba de perícias.');
+}
 
 // ===== EXPORTAÇÃO DE FUNÇÕES PARA USO GLOBAL =====
 window.alterarNivelPericiaDropdown = alterarNivelPericiaDropdown;
@@ -1378,3 +1489,39 @@ window.migrarPericiasAntigas = migrarPericiasAntigas;
 window.buscarPericiaEspecifica = buscarPericiaEspecifica;
 window.filtrarPericias = filtrarPericias;
 window.renderizarCatalogo = renderizarCatalogo;
+window.renderizarStatusPericias = renderizarStatusPericias;
+window.renderizarPericiasAprendidas = renderizarPericiasAprendidas;
+window.renderizarFiltros = renderizarFiltros;
+window.verificarIntegracao = verificarIntegracao;
+
+// Inicialização quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM carregado, verificando sistema de perícias...');
+  
+  // Pequeno delay para garantir que outros scripts estejam carregados
+  setTimeout(() => {
+    verificarEInicializarSistema();
+  }, 500);
+});
+
+// Exporta o estado para depuração
+window.estadoPericias = estadoPericias;
+
+// ===== FUNÇÕES DE TESTE RÁPIDO =====
+function testarFiltro(filtro) {
+  console.log(`Testando filtro: ${filtro}`);
+  estadoPericias.filtroAtivo = filtro;
+  renderizarFiltros();
+  const resultados = filtrarPericias();
+  console.log(`Resultados encontrados: ${resultados.length}`);
+  renderizarCatalogo();
+  
+  // Mostra algumas perícias encontradas
+  if (resultados.length > 0) {
+    console.log('Primeiras 3 perícias:');
+    resultados.slice(0, 3).forEach(p => {
+      console.log(`  - ${p.nome} (${p.atributo}/${p.categoria})`);
+    });
+  }
+}
+
