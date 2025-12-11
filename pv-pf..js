@@ -1,199 +1,173 @@
-// pv-pf.js - SISTEMA COMPLETO DE PV E PF
+// pv-pf.js - SISTEMA DEFINITIVO DE PV E PF
 
-// Estado do personagem
-let estadoPersonagem = {
-    pv: {
-        base: 10,      // ST base do atributo
-        bonus: 0,      // Bônus de itens/magia
-        maximo: 10,    // base + bonus
-        atual: 10      // Valor atual
-    },
-    pf: {
-        base: 10,      // HT base do atributo
-        bonus: 0,      // Bônus de itens/magia
-        maximo: 10,    // base + bonus
-        atual: 10      // Valor atual
-    }
+// Estado do personagem - PEGANDO OS VALORES REAIS
+let estado = {
+    pv: { atual: 12, maximo: 12 }, // Pegando do atributo (ST: 12, PV: 12)
+    pf: { atual: 13, maximo: 13 }  // Pegando do atributo (HT: 13, PF: 13)
 };
 
-// ==================== FUNÇÕES PRINCIPAIS ====================
+// ========== FUNÇÕES BÁSICAS QUE FUNCIONAM ==========
 
-// Função principal para alterar PV
-function alterarPV(quantidade) {
-    console.log(`Alterando PV: ${quantidade} (Atual: ${estadoPersonagem.pv.atual})`);
+// Função para mudar PV
+function mudarPV(valor) {
+    console.log(`Mudando PV: ${valor} (De: ${estado.pv.atual})`);
     
-    // Adiciona a quantidade
-    estadoPersonagem.pv.atual += quantidade;
+    estado.pv.atual += valor;
     
     // Limites
-    if (estadoPersonagem.pv.atual > estadoPersonagem.pv.maximo) {
-        estadoPersonagem.pv.atual = estadoPersonagem.pv.maximo;
+    if (estado.pv.atual > estado.pv.maximo) {
+        estado.pv.atual = estado.pv.maximo;
     }
-    if (estadoPersonagem.pv.atual < -estadoPersonagem.pv.maximo) {
-        estadoPersonagem.pv.atual = -estadoPersonagem.pv.maximo;
+    if (estado.pv.atual < 0) {
+        estado.pv.atual = 0;
     }
     
-    // Atualiza a tela
-    atualizarDisplayPV();
+    atualizarTelaPV();
     salvarEstado();
 }
 
-// Função principal para alterar PF
-function alterarPF(quantidade) {
-    console.log(`Alterando PF: ${quantidade} (Atual: ${estadoPersonagem.pf.atual})`);
+// Função para mudar PF
+function mudarPF(valor) {
+    console.log(`Mudando PF: ${valor} (De: ${estado.pf.atual})`);
     
-    // Adiciona a quantidade
-    estadoPersonagem.pf.atual += quantidade;
+    estado.pf.atual += valor;
     
     // Limites
-    if (estadoPersonagem.pf.atual > estadoPersonagem.pf.maximo) {
-        estadoPersonagem.pf.atual = estadoPersonagem.pf.maximo;
+    if (estado.pf.atual > estado.pf.maximo) {
+        estado.pf.atual = estado.pf.maximo;
     }
-    if (estadoPersonagem.pf.atual < -estadoPersonagem.pf.maximo) {
-        estadoPersonagem.pf.atual = -estadoPersonagem.pf.maximo;
+    if (estado.pf.atual < 0) {
+        estado.pf.atual = 0;
     }
     
-    // Atualiza a tela
-    atualizarDisplayPF();
+    atualizarTelaPF();
     salvarEstado();
 }
 
-// ==================== ATUALIZAR DISPLAY ====================
+// ========== ATUALIZAR TELA ==========
 
-function atualizarDisplayPV() {
-    // Encontrar elementos
-    const pvBase = document.getElementById('pvBase');
-    const pvMaxValue = document.getElementById('pvMaxValue');
-    const pvAtualValue = document.getElementById('pvAtualValue');
-    const pvText = document.getElementById('pvText');
-    const pvFill = document.getElementById('pvFill');
+function atualizarTelaPV() {
+    console.log("Atualizando tela PV...");
     
-    const pvBonusInput = document.getElementById('pvBonus');
-    const pvMaxInput = document.getElementById('pvMaxInput');
-    const pvAtualInput = document.getElementById('pvAtualInput');
+    // 1. Atualizar textos
+    const pvBaseEl = document.getElementById('pvBase');
+    const pvMaxEl = document.getElementById('pvMaxValue');
+    const pvAtualEl = document.getElementById('pvAtualValue');
+    const pvTextEl = document.getElementById('pvText');
     
-    // Atualizar textos
-    if (pvBase) pvBase.textContent = estadoPersonagem.pv.base;
-    if (pvMaxValue) pvMaxValue.textContent = estadoPersonagem.pv.maximo;
-    if (pvAtualValue) pvAtualValue.textContent = estadoPersonagem.pv.atual;
-    if (pvText) pvText.textContent = `${estadoPersonagem.pv.atual}/${estadoPersonagem.pv.maximo}`;
+    if (pvBaseEl) pvBaseEl.textContent = estado.pv.maximo; // ST base
+    if (pvMaxEl) pvMaxEl.textContent = estado.pv.maximo;
+    if (pvAtualEl) pvAtualEl.textContent = estado.pv.atual;
+    if (pvTextEl) pvTextEl.textContent = `${estado.pv.atual}/${estado.pv.maximo}`;
     
-    // Atualizar barra
-    if (pvFill) {
-        const porcentagem = (estadoPersonagem.pv.atual / estadoPersonagem.pv.maximo) * 100;
-        const largura = Math.max(0, porcentagem);
-        pvFill.style.width = `${largura}%`;
+    // 2. Atualizar barra
+    const pvFillEl = document.getElementById('pvFill');
+    if (pvFillEl) {
+        const porcentagem = (estado.pv.atual / estado.pv.maximo) * 100;
+        pvFillEl.style.width = `${porcentagem}%`;
         
-        // Mudar cor baseada na porcentagem
-        if (porcentagem > 80) {
-            pvFill.style.background = '#27ae60';
-        } else if (porcentagem > 60) {
-            pvFill.style.background = '#f1c40f';
-        } else if (porcentagem > 40) {
-            pvFill.style.background = '#e67e22';
-        } else if (porcentagem > 20) {
-            pvFill.style.background = '#d35400';
-        } else if (porcentagem > 0) {
-            pvFill.style.background = '#c0392b';
-        } else {
-            pvFill.style.background = '#7f8c8d';
-        }
+        // Cor da barra
+        if (porcentagem > 80) pvFillEl.style.background = '#27ae60';
+        else if (porcentagem > 60) pvFillEl.style.background = '#f1c40f';
+        else if (porcentagem > 40) pvFillEl.style.background = '#e67e22';
+        else if (porcentagem > 20) pvFillEl.style.background = '#d35400';
+        else if (porcentagem > 0) pvFillEl.style.background = '#c0392b';
+        else pvFillEl.style.background = '#7f8c8d';
     }
     
-    // Atualizar inputs
-    if (pvBonusInput) pvBonusInput.value = estadoPersonagem.pv.bonus;
-    if (pvMaxInput) pvMaxInput.value = estadoPersonagem.pv.maximo;
-    if (pvAtualInput) pvAtualInput.value = estadoPersonagem.pv.atual;
+    // 3. Atualizar inputs
+    const pvModificadorEl = document.getElementById('pvModificador');
+    const pvMaxInputEl = document.getElementById('pvMaxInput');
+    const pvAtualInputEl = document.getElementById('pvAtualInput');
+    
+    if (pvModificadorEl) pvModificadorEl.value = estado.pv.maximo - 10; // Calcula bônus
+    if (pvMaxInputEl) pvMaxInputEl.value = estado.pv.maximo;
+    if (pvAtualInputEl) pvAtualInputEl.value = estado.pv.atual;
+    
+    console.log(`PV atualizado: ${estado.pv.atual}/${estado.pv.maximo}`);
 }
 
-function atualizarDisplayPF() {
-    // Encontrar elementos
-    const pfBase = document.getElementById('pfBase');
-    const pfMaxValue = document.getElementById('pfMaxValue');
-    const pfAtualValue = document.getElementById('pfAtualValue');
-    const pfText = document.getElementById('pfText');
-    const pfFill = document.getElementById('pfFill');
+function atualizarTelaPF() {
+    console.log("Atualizando tela PF...");
     
-    const pfBonusInput = document.getElementById('pfBonus');
-    const pfMaxInput = document.getElementById('pfMaxInput');
-    const pfAtualInput = document.getElementById('pfAtualInput');
+    // 1. Atualizar textos
+    const pfBaseEl = document.getElementById('pfBase');
+    const pfMaxEl = document.getElementById('pfMaxValue');
+    const pfAtualEl = document.getElementById('pfAtualValue');
+    const pfTextEl = document.getElementById('pfText');
     
-    // Atualizar textos
-    if (pfBase) pfBase.textContent = estadoPersonagem.pf.base;
-    if (pfMaxValue) pfMaxValue.textContent = estadoPersonagem.pf.maximo;
-    if (pfAtualValue) pfAtualValue.textContent = estadoPersonagem.pf.atual;
-    if (pfText) pfText.textContent = `${estadoPersonagem.pf.atual}/${estadoPersonagem.pf.maximo}`;
+    if (pfBaseEl) pfBaseEl.textContent = estado.pf.maximo; // HT base
+    if (pfMaxEl) pfMaxEl.textContent = estado.pf.maximo;
+    if (pfAtualEl) pfAtualEl.textContent = estado.pf.atual;
+    if (pfTextEl) pfTextEl.textContent = `${estado.pf.atual}/${estado.pf.maximo}`;
     
-    // Atualizar barra
-    if (pfFill) {
-        const porcentagem = (estadoPersonagem.pf.atual / estadoPersonagem.pf.maximo) * 100;
-        const largura = Math.max(0, porcentagem);
-        pfFill.style.width = `${largura}%`;
+    // 2. Atualizar barra
+    const pfFillEl = document.getElementById('pfFill');
+    if (pfFillEl) {
+        const porcentagem = (estado.pf.atual / estado.pf.maximo) * 100;
+        pfFillEl.style.width = `${porcentagem}%`;
         
-        // Mudar cor baseada na porcentagem
-        if (porcentagem > 33) {
-            pfFill.style.background = '#2ecc71';
-        } else if (porcentagem > 0) {
-            pfFill.style.background = '#f39c12';
-        } else {
-            pfFill.style.background = '#e74c3c';
-        }
+        // Cor da barra
+        if (porcentagem > 33) pfFillEl.style.background = '#2ecc71';
+        else if (porcentagem > 0) pfFillEl.style.background = '#f39c12';
+        else pfFillEl.style.background = '#e74c3c';
     }
     
-    // Atualizar inputs
-    if (pfBonusInput) pfBonusInput.value = estadoPersonagem.pf.bonus;
-    if (pfMaxInput) pfMaxInput.value = estadoPersonagem.pf.maximo;
-    if (pfAtualInput) pfAtualInput.value = estadoPersonagem.pf.atual;
+    // 3. Atualizar inputs
+    const pfModificadorEl = document.getElementById('pfModificador');
+    const pfMaxInputEl = document.getElementById('pfMaxInput');
+    const pfAtualInputEl = document.getElementById('pfAtualInput');
+    
+    if (pfModificadorEl) pfModificadorEl.value = estado.pf.maximo - 10; // Calcula bônus
+    if (pfMaxInputEl) pfMaxInputEl.value = estado.pf.maximo;
+    if (pfAtualInputEl) pfAtualInputEl.value = estado.pf.atual;
+    
+    console.log(`PF atualizado: ${estado.pf.atual}/${estado.pf.maximo}`);
 }
 
-// ==================== CONFIGURAR BOTÕES ====================
+// ========== CONFIGURAR BOTÕES ==========
 
-function configurarBotoes() {
-    console.log('Configurando botões...');
+function configurarTodosBotoes() {
+    console.log("🔧 Configurando todos os botões...");
     
-    // Botões de dano PV
-    const botoesDano = document.querySelectorAll('.btn-dano');
-    botoesDano.forEach(botao => {
+    // BOTÕES DE DANO PV (-5, -2, -1)
+    document.querySelectorAll('.btn-dano').forEach(botao => {
         botao.addEventListener('click', function() {
-            const valor = parseInt(this.getAttribute('data-amount')) || 0;
-            console.log(`Botão dano clicado: -${valor} PV`);
-            alterarPV(-valor);
+            const valor = parseInt(this.getAttribute('data-amount')) || 1;
+            console.log(`Botão DANO PV clicado: -${valor}`);
+            mudarPV(-valor);
         });
     });
     
-    // Botões de cura PV
-    const botoesCura = document.querySelectorAll('.btn-cura');
-    botoesCura.forEach(botao => {
+    // BOTÕES DE CURA PV (+1, +2, +5)
+    document.querySelectorAll('.btn-cura').forEach(botao => {
         botao.addEventListener('click', function() {
-            const valor = parseInt(this.getAttribute('data-amount')) || 0;
-            console.log(`Botão cura clicado: +${valor} PV`);
-            alterarPV(valor);
+            const valor = parseInt(this.getAttribute('data-amount')) || 1;
+            console.log(`Botão CURA PV clicado: +${valor}`);
+            mudarPV(valor);
         });
     });
     
-    // Botões de fadiga PF
-    const botoesFadiga = document.querySelectorAll('.btn-fadiga');
-    botoesFadiga.forEach(botao => {
+    // BOTÕES DE FADIGA PF (-3, -1)
+    document.querySelectorAll('.btn-fadiga').forEach(botao => {
         botao.addEventListener('click', function() {
-            const valor = parseInt(this.getAttribute('data-amount')) || 0;
-            console.log(`Botão fadiga clicado: -${valor} PF`);
-            alterarPF(-valor);
+            const valor = parseInt(this.getAttribute('data-amount')) || 1;
+            console.log(`Botão FADIGA PF clicado: -${valor}`);
+            mudarPF(-valor);
         });
     });
     
-    // Botões de descanso PF
-    const botoesDescanso = document.querySelectorAll('.btn-descanso');
-    botoesDescanso.forEach(botao => {
+    // BOTÕES DE DESCANSO PF (+1, +3)
+    document.querySelectorAll('.btn-descanso').forEach(botao => {
         botao.addEventListener('click', function() {
-            const valor = parseInt(this.getAttribute('data-amount')) || 0;
-            console.log(`Botão descanso clicado: +${valor} PF`);
-            alterarPF(valor);
+            const valor = parseInt(this.getAttribute('data-amount')) || 1;
+            console.log(`Botão DESCANSO PF clicado: +${valor}`);
+            mudarPF(valor);
         });
     });
     
-    // Botões de modificador (+/-)
-    const botoesMod = document.querySelectorAll('.mod-btn');
-    botoesMod.forEach(botao => {
+    // BOTÕES DE MODIFICADOR (+/-)
+    document.querySelectorAll('.mod-btn').forEach(botao => {
         botao.addEventListener('click', function() {
             const input = this.closest('.mod-control').querySelector('.mod-input');
             if (!input) return;
@@ -206,52 +180,70 @@ function configurarBotoes() {
                 valor--;
             }
             
-            // Limites diferentes para PV e PF
-            if (input.id === 'pvBonus' || input.id === 'pvModificador') {
+            // Limites
+            if (input.id === 'pvModificador') {
                 valor = Math.max(-20, Math.min(20, valor));
-            } else if (input.id === 'pfBonus' || input.id === 'pfModificador') {
+                input.value = valor;
+                
+                // Atualizar PV máximo com o bônus
+                estado.pv.maximo = 10 + valor;
+                if (estado.pv.atual > estado.pv.maximo) {
+                    estado.pv.atual = estado.pv.maximo;
+                }
+                atualizarTelaPV();
+                
+            } else if (input.id === 'pfModificador') {
                 valor = Math.max(-10, Math.min(10, valor));
+                input.value = valor;
+                
+                // Atualizar PF máximo com o bônus
+                estado.pf.maximo = 10 + valor;
+                if (estado.pf.atual > estado.pf.maximo) {
+                    estado.pf.atual = estado.pf.maximo;
+                }
+                atualizarTelaPF();
             }
             
-            input.value = valor;
-            
-            // Atualizar estado
-            if (input.id === 'pvBonus' || input.id === 'pvModificador') {
-                estadoPersonagem.pv.bonus = valor;
-                calcularMaximos();
-            } else if (input.id === 'pfBonus' || input.id === 'pfModificador') {
-                estadoPersonagem.pf.bonus = valor;
-                calcularMaximos();
-            }
+            salvarEstado();
         });
     });
     
-    // Inputs de bônus
-    const pvBonusInput = document.getElementById('pvBonus') || document.getElementById('pvModificador');
-    if (pvBonusInput) {
-        pvBonusInput.addEventListener('change', function() {
+    // INPUTS
+    const pvModificadorInput = document.getElementById('pvModificador');
+    if (pvModificadorInput) {
+        pvModificadorInput.addEventListener('change', function() {
             const valor = parseInt(this.value) || 0;
-            estadoPersonagem.pv.bonus = valor;
-            calcularMaximos();
+            estado.pv.maximo = 10 + valor;
+            if (estado.pv.atual > estado.pv.maximo) {
+                estado.pv.atual = estado.pv.maximo;
+            }
+            atualizarTelaPV();
+            salvarEstado();
         });
     }
     
-    const pfBonusInput = document.getElementById('pfBonus') || document.getElementById('pfModificador');
-    if (pfBonusInput) {
-        pfBonusInput.addEventListener('change', function() {
+    const pfModificadorInput = document.getElementById('pfModificador');
+    if (pfModificadorInput) {
+        pfModificadorInput.addEventListener('change', function() {
             const valor = parseInt(this.value) || 0;
-            estadoPersonagem.pf.bonus = valor;
-            calcularMaximos();
+            estado.pf.maximo = 10 + valor;
+            if (estado.pf.atual > estado.pf.maximo) {
+                estado.pf.atual = estado.pf.maximo;
+            }
+            atualizarTelaPF();
+            salvarEstado();
         });
     }
     
-    // Inputs de máximo
     const pvMaxInput = document.getElementById('pvMaxInput');
     if (pvMaxInput) {
         pvMaxInput.addEventListener('change', function() {
-            const valor = parseInt(this.value) || 10;
-            estadoPersonagem.pv.maximo = Math.max(1, valor);
-            atualizarDisplayPV();
+            const valor = parseInt(this.value) || 12;
+            estado.pv.maximo = Math.max(1, valor);
+            if (estado.pv.atual > estado.pv.maximo) {
+                estado.pv.atual = estado.pv.maximo;
+            }
+            atualizarTelaPV();
             salvarEstado();
         });
     }
@@ -259,20 +251,22 @@ function configurarBotoes() {
     const pfMaxInput = document.getElementById('pfMaxInput');
     if (pfMaxInput) {
         pfMaxInput.addEventListener('change', function() {
-            const valor = parseInt(this.value) || 10;
-            estadoPersonagem.pf.maximo = Math.max(1, valor);
-            atualizarDisplayPF();
+            const valor = parseInt(this.value) || 13;
+            estado.pf.maximo = Math.max(1, valor);
+            if (estado.pf.atual > estado.pf.maximo) {
+                estado.pf.atual = estado.pf.maximo;
+            }
+            atualizarTelaPF();
             salvarEstado();
         });
     }
     
-    // Inputs de atual
     const pvAtualInput = document.getElementById('pvAtualInput');
     if (pvAtualInput) {
         pvAtualInput.addEventListener('change', function() {
-            const valor = parseInt(this.value) || 10;
-            estadoPersonagem.pv.atual = Math.max(-estadoPersonagem.pv.maximo, Math.min(valor, estadoPersonagem.pv.maximo));
-            atualizarDisplayPV();
+            const valor = parseInt(this.value) || 12;
+            estado.pv.atual = Math.max(0, Math.min(valor, estado.pv.maximo));
+            atualizarTelaPV();
             salvarEstado();
         });
     }
@@ -280,196 +274,172 @@ function configurarBotoes() {
     const pfAtualInput = document.getElementById('pfAtualInput');
     if (pfAtualInput) {
         pfAtualInput.addEventListener('change', function() {
-            const valor = parseInt(this.value) || 10;
-            estadoPersonagem.pf.atual = Math.max(-estadoPersonagem.pf.maximo, Math.min(valor, estadoPersonagem.pf.maximo));
-            atualizarDisplayPF();
+            const valor = parseInt(this.value) || 13;
+            estado.pf.atual = Math.max(0, Math.min(valor, estado.pf.maximo));
+            atualizarTelaPF();
             salvarEstado();
         });
     }
     
-    console.log('Botões configurados!');
+    console.log("✅ Todos os botões configurados!");
 }
 
-// ==================== CALCULAR VALORES ====================
+// ========== PEGAR ATRIBUTOS DO PERSONAGEM ==========
 
-function calcularMaximos() {
-    // PV Máximo = ST base + bônus
-    estadoPersonagem.pv.maximo = Math.max(1, estadoPersonagem.pv.base + estadoPersonagem.pv.bonus);
+function pegarAtributosAtuais() {
+    console.log("🔄 Pegando atributos do personagem...");
     
-    // PF Máximo = HT base + bônus
-    estadoPersonagem.pf.maximo = Math.max(1, estadoPersonagem.pf.base + estadoPersonagem.pf.bonus);
-    
-    // Ajustar valores atuais se necessário
-    if (estadoPersonagem.pv.atual > estadoPersonagem.pv.maximo) {
-        estadoPersonagem.pv.atual = estadoPersonagem.pv.maximo;
+    if (typeof window.obterDadosAtributos === 'function') {
+        try {
+            const dados = window.obterDadosAtributos();
+            console.log("Dados encontrados:", dados);
+            
+            // USAR OS VALORES REAIS DO PERSONAGEM
+            if (dados.ST && dados.PV) {
+                estado.pv.maximo = dados.PV; // Usar PV total (já com bônus)
+                estado.pv.atual = dados.PV;
+                console.log(`PV do personagem: ${dados.PV} (ST: ${dados.ST})`);
+            }
+            
+            if (dados.HT && dados.PF) {
+                estado.pf.maximo = dados.PF; // Usar PF total (já com bônus)
+                estado.pf.atual = dados.PF;
+                console.log(`PF do personagem: ${dados.PF} (HT: ${dados.HT})`);
+            }
+            
+            // Atualizar tela com os valores reais
+            atualizarTelaPV();
+            atualizarTelaPF();
+            
+        } catch (e) {
+            console.warn("Erro ao pegar atributos:", e);
+        }
+    } else {
+        console.warn("Função obterDadosAtributos não encontrada!");
     }
-    if (estadoPersonagem.pf.atual > estadoPersonagem.pf.maximo) {
-        estadoPersonagem.pf.atual = estadoPersonagem.pf.maximo;
-    }
-    
-    atualizarDisplayPV();
-    atualizarDisplayPF();
-    salvarEstado();
 }
 
-// ==================== INTEGRAÇÃO COM ATRIBUTOS ====================
-
-function receberAtributos(atributos) {
-    console.log('Recebendo atributos:', atributos);
-    
-    if (atributos.ST) {
-        estadoPersonagem.pv.base = atributos.ST;
-        console.log(`ST atualizado para PV: ${atributos.ST}`);
-    }
-    
-    if (atributos.HT) {
-        estadoPersonagem.pf.base = atributos.HT;
-        console.log(`HT atualizado para PF: ${atributos.HT}`);
-    }
-    
-    // Se o sistema de atributos já calculou PV e PF totais
-    if (atributos.PV) {
-        estadoPersonagem.pv.maximo = atributos.PV;
-        estadoPersonagem.pv.bonus = estadoPersonagem.pv.maximo - estadoPersonagem.pv.base;
-        console.log(`PV total recebido: ${atributos.PV}`);
-    }
-    
-    if (atributos.PF) {
-        estadoPersonagem.pf.maximo = atributos.PF;
-        estadoPersonagem.pf.bonus = estadoPersonagem.pf.maximo - estadoPersonagem.pf.base;
-        console.log(`PF total recebido: ${atributos.PF}`);
-    }
-    
-    // Recalcular tudo
-    calcularMaximos();
-}
-
-// ==================== SALVAR E CARREGAR ====================
+// ========== SALVAR E CARREGAR ==========
 
 function salvarEstado() {
     try {
-        localStorage.setItem('gurps_pv_pf', JSON.stringify(estadoPersonagem));
+        localStorage.setItem('gurps_pv_pf_estado', JSON.stringify(estado));
     } catch (e) {
-        console.warn('Não foi possível salvar o estado:', e);
+        console.warn("Não foi possível salvar:", e);
     }
 }
 
 function carregarEstado() {
     try {
-        const salvo = localStorage.getItem('gurps_pv_pf');
+        const salvo = localStorage.getItem('gurps_pv_pf_estado');
         if (salvo) {
             const dados = JSON.parse(salvo);
-            
-            // Mesclar com estado atual
-            if (dados.pv) {
-                estadoPersonagem.pv = { ...estadoPersonagem.pv, ...dados.pv };
-            }
-            
-            if (dados.pf) {
-                estadoPersonagem.pf = { ...estadoPersonagem.pf, ...dados.pf };
-            }
-            
-            console.log('Estado PV/PF carregado:', estadoPersonagem);
+            estado = { ...estado, ...dados };
+            console.log("Estado carregado:", estado);
         }
     } catch (e) {
-        console.warn('Erro ao carregar estado:', e);
+        console.warn("Erro ao carregar:", e);
     }
 }
 
-// ==================== INICIALIZAÇÃO ====================
+// ========== INICIAR SISTEMA ==========
 
-function iniciarSistemaPVPF() {
-    console.log('🚀 Iniciando sistema PV/PF...');
+function iniciarSistema() {
+    console.log("🚀 INICIANDO SISTEMA PV/PF");
     
     // 1. Carregar estado salvo
     carregarEstado();
     
-    // 2. Configurar botões
-    configurarBotoes();
+    // 2. Pegar atributos atuais do personagem
+    pegarAtributosAtuais();
     
-    // 3. Atualizar display inicial
-    atualizarDisplayPV();
-    atualizarDisplayPF();
+    // 3. Configurar todos os botões
+    configurarTodosBotoes();
     
-    // 4. Tentar obter atributos do sistema principal
-    if (window.obterDadosAtributos) {
-        try {
-            const atributos = window.obterDadosAtributos();
-            if (atributos) {
-                receberAtributos(atributos);
-            }
-        } catch (e) {
-            console.warn('Não foi possível obter atributos:', e);
-        }
-    }
+    // 4. Atualizar tela inicial
+    atualizarTelaPV();
+    atualizarTelaPF();
     
-    // 5. Escutar eventos de atributos alterados
+    // 5. Escutar quando atributos mudarem
     document.addEventListener('atributosAlterados', function(e) {
-        if (e.detail) {
-            receberAtributos(e.detail);
+        console.log("📡 Evento de atributos alterados recebido!", e.detail);
+        
+        if (e.detail.PV !== undefined) {
+            estado.pv.maximo = e.detail.PV;
+            if (estado.pv.atual > estado.pv.maximo) {
+                estado.pv.atual = estado.pv.maximo;
+            }
+            atualizarTelaPV();
         }
+        
+        if (e.detail.PF !== undefined) {
+            estado.pf.maximo = e.detail.PF;
+            if (estado.pf.atual > estado.pf.maximo) {
+                estado.pf.atual = estado.pf.maximo;
+            }
+            atualizarTelaPF();
+        }
+        
+        salvarEstado();
     });
     
-    console.log('✅ Sistema PV/PF pronto!');
-    
-    // Debug: mostrar quantos botões foram encontrados
-    const totalBotoes = document.querySelectorAll('.btn-dano, .btn-cura, .btn-fadiga, .btn-descanso').length;
-    console.log(`📊 Total de botões encontrados: ${totalBotoes}`);
+    console.log("✅ SISTEMA PV/PF PRONTO!");
+    console.log(`PV Inicial: ${estado.pv.atual}/${estado.pv.maximo}`);
+    console.log(`PF Inicial: ${estado.pf.atual}/${estado.pf.maximo}`);
 }
 
-// ==================== INICIALIZAÇÃO AUTOMÁTICA ====================
+// ========== INICIALIZAÇÃO AUTOMÁTICA ==========
 
-// Aguardar o DOM estar pronto
+// Esperar a aba de combate carregar
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar se estamos na aba de combate
     const combateTab = document.getElementById('combate');
     
+    // Se a aba de combate já estiver ativa, iniciar
     if (combateTab && combateTab.classList.contains('active')) {
-        // Esperar um pouco para garantir que o HTML está carregado
-        setTimeout(iniciarSistemaPVPF, 300);
+        setTimeout(iniciarSistema, 500);
     }
     
-    // Observar mudanças de aba
+    // Observar quando a aba de combate for ativada
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.attributeName === 'class') {
-                const tab = mutation.target;
-                if (tab.id === 'combate' && tab.classList.contains('active')) {
-                    // Esperar um pouco para garantir que o HTML está carregado
-                    setTimeout(iniciarSistemaPVPF, 300);
+                if (combateTab.classList.contains('active')) {
+                    setTimeout(iniciarSistema, 500);
                 }
             }
         });
     });
     
-    // Começar a observar a aba de combate
-    if (combateTab) {
-        observer.observe(combateTab, { attributes: true });
-    }
+    observer.observe(combateTab, { attributes: true });
 });
 
-// ==================== FUNÇÕES PARA TESTE ====================
+// ========== FUNÇÕES PARA TESTE NO CONSOLE ==========
 
-// Para testar no console do navegador
+// Testar no console (F12)
 window.testePV = function(valor) {
-    alterarPV(valor);
-    console.log(`PV: ${estadoPersonagem.pv.atual}/${estadoPersonagem.pv.maximo}`);
+    mudarPV(valor);
+    console.log(`PV: ${estado.pv.atual}/${estado.pv.maximo}`);
 };
 
 window.testePF = function(valor) {
-    alterarPF(valor);
-    console.log(`PF: ${estadoPersonagem.pf.atual}/${estadoPersonagem.pf.maximo}`);
+    mudarPF(valor);
+    console.log(`PF: ${estado.pf.atual}/${estado.pf.maximo}`);
 };
 
-// ==================== EXPORTAÇÃO ====================
+window.mostrarEstado = function() {
+    console.log("ESTADO ATUAL:", estado);
+    console.log(`PV: ${estado.pv.atual}/${estado.pv.maximo}`);
+    console.log(`PF: ${estado.pf.atual}/${estado.pf.maximo}`);
+};
 
-// Exportar funções para outros scripts
+// ========== EXPORTAR FUNÇÕES ==========
+
 window.PVPF = {
-    alterarPV: alterarPV,
-    alterarPF: alterarPF,
-    getPVAtual: () => estadoPersonagem.pv.atual,
-    getPFAtual: () => estadoPersonagem.pf.atual,
-    getPVMax: () => estadoPersonagem.pv.maximo,
-    getPFMax: () => estadoPersonagem.pf.maximo,
-    receberAtributos: receberAtributos
+    mudarPV: mudarPV,
+    mudarPF: mudarPF,
+    getPV: () => estado.pv.atual,
+    getPF: () => estado.pf.atual,
+    getPVMax: () => estado.pv.maximo,
+    getPFMax: () => estado.pf.maximo,
+    pegarAtributosAtuais: pegarAtributosAtuais
 };
