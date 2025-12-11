@@ -2449,13 +2449,13 @@
                
             </div>
         </div>
-<!-- ABA COMBATE - VERSÃO OTIMIZADA COMPLETA -->
+<!-- ABA COMBATE - COMPLETA E INTEGRADA -->
 <div id="combate" class="tab-content">
     <div class="combate-container">
         
         <!-- PRIMEIRA LINHA: PV E PF -->
         <div class="combate-row linha-pv-pf">
-            <!-- CARD PV - DESIGN INTELIGENTE -->
+            <!-- CARD PV - DESIGN OTIMIZADO -->
             <div class="card-pv">
                 <div class="card-header">
                     <div class="header-left">
@@ -2466,32 +2466,32 @@
                         <div class="controle-modificador">
                             <span class="mod-label">Mod:</span>
                             <button class="btn-mod minus" onclick="modificarPV('mod', -1)">-</button>
-                            <input type="number" id="pvModificador" value="0" min="-10" max="10" 
-                                   class="mod-input" onchange="atualizarPV()">
+                            <input type="text" id="pvModificador" value="0" 
+                                   class="mod-input" readonly>
                             <button class="btn-mod plus" onclick="modificarPV('mod', 1)">+</button>
                         </div>
                     </div>
                 </div>
                 
                 <div class="card-content">
-                    <!-- INFO BÁSICA -->
+                    <!-- INFO BÁSICA - LAYOT PROPORCIONAL -->
                     <div class="info-basica">
                         <div class="info-box">
                             <span class="info-label">Base</span>
-                            <span class="info-valor" id="pvBase">10</span>
+                            <span class="info-valor" id="pvBaseDisplay">10</span>
                         </div>
                         <div class="info-box">
-                            <span class="info-label">Máximo</span>
-                            <span class="info-valor" id="pvMax">10</span>
+                            <span class="info-label">Máx</span>
+                            <span class="info-valor" id="pvMaxDisplay">10</span>
                         </div>
                         <div class="info-box">
                             <span class="info-label">Atual</span>
-                            <input type="number" id="pvAtualInput" value="10" min="-50" max="50" 
+                            <input type="text" id="pvAtualDisplay" value="10" 
                                    class="info-input" onchange="atualizarPVManual()">
                         </div>
                         <div class="info-box estado">
                             <span class="info-label">Estado</span>
-                            <span class="info-estado" id="pvEstado">Saudável</span>
+                            <span class="info-estado" id="pvEstadoDisplay">Saudável</span>
                         </div>
                     </div>
                     
@@ -2531,7 +2531,7 @@
                 </div>
             </div>
             
-            <!-- CARD PF - DESIGN COMPACTO -->
+            <!-- CARD PF - DESIGN CORRIGIDO E PROPORCIONAL -->
             <div class="card-pf">
                 <div class="card-header">
                     <div class="header-left">
@@ -2542,32 +2542,32 @@
                         <div class="controle-modificador">
                             <span class="mod-label">Mod:</span>
                             <button class="btn-mod minus" onclick="modificarPF('mod', -1)">-</button>
-                            <input type="number" id="pfModificador" value="0" min="-10" max="10" 
-                                   class="mod-input" onchange="atualizarPF()">
+                            <input type="text" id="pfModificador" value="0" 
+                                   class="mod-input" readonly>
                             <button class="btn-mod plus" onclick="modificarPF('mod', 1)">+</button>
                         </div>
                     </div>
                 </div>
                 
                 <div class="card-content">
-                    <!-- INFO BÁSICA PF -->
+                    <!-- INFO BÁSICA - MESMO LAYOUT DO PV -->
                     <div class="info-basica">
                         <div class="info-box">
                             <span class="info-label">Base</span>
-                            <span class="info-valor" id="pfBase">10</span>
+                            <span class="info-valor" id="pfBaseDisplay">10</span>
                         </div>
                         <div class="info-box">
-                            <span class="info-label">Máximo</span>
-                            <span class="info-valor" id="pfMax">10</span>
+                            <span class="info-label">Máx</span>
+                            <span class="info-valor" id="pfMaxDisplay">10</span>
                         </div>
                         <div class="info-box">
                             <span class="info-label">Atual</span>
-                            <input type="number" id="pfAtualInput" value="10" min="-10" max="20" 
+                            <input type="text" id="pfAtualDisplay" value="10" 
                                    class="info-input" onchange="atualizarPFManual()">
                         </div>
                         <div class="info-box estado">
                             <span class="info-label">Estado</span>
-                            <span class="info-estado" id="pfEstado">Normal</span>
+                            <span class="info-estado" id="pfEstadoDisplay">Normal</span>
                         </div>
                     </div>
                     
@@ -2577,6 +2577,22 @@
                             <div class="barra-pf" id="barraPF">
                                 <div class="barra-fill" id="pfFill"></div>
                                 <div class="barra-texto" id="pfTexto">10/10</div>
+                                <!-- MARCADOR DE FADIGA (1/3) -->
+                                <div class="marcador-fadiga" style="left: 33.33%"></div>
+                            </div>
+                        </div>
+                        <div class="pf-estados">
+                            <div class="pf-estado" data-estado="normal">
+                                <div class="estado-indicador"></div>
+                                <span>Normal</span>
+                            </div>
+                            <div class="pf-estado" data-estado="fadigado">
+                                <div class="estado-indicador"></div>
+                                <span>Fadigado</span>
+                            </div>
+                            <div class="pf-estado" data-estado="exausto">
+                                <div class="estado-indicador"></div>
+                                <span>Exausto</span>
                             </div>
                         </div>
                     </div>
@@ -2670,7 +2686,6 @@
                                 </div>
                             </div>
                             <div class="defesa-valor">
-                                <span class="defesa-mod">+0</span>
                                 <span class="defesa-total" id="esquivaTotal">10</span>
                             </div>
                         </div>
@@ -2684,7 +2699,6 @@
                                 </div>
                             </div>
                             <div class="defesa-valor">
-                                <span class="defesa-mod">+0</span>
                                 <span class="defesa-total" id="bloqueioTotal">3</span>
                             </div>
                         </div>
@@ -2698,7 +2712,6 @@
                                 </div>
                             </div>
                             <div class="defesa-valor">
-                                <span class="defesa-mod">+0</span>
                                 <span class="defesa-total" id="apararTotal">3</span>
                             </div>
                         </div>
@@ -2712,7 +2725,6 @@
                                 </div>
                             </div>
                             <div class="defesa-valor">
-                                <span class="defesa-mod">+0</span>
                                 <span class="defesa-total" id="deslocamentoTotal">5.00</span>
                             </div>
                         </div>
@@ -2726,9 +2738,9 @@
             <div class="card-rd">
                 <div class="card-header">
                     <i class="fas fa-user-shield"></i>
-                    <h3>RESISTÊNCIA A DANO</h3>
+                    <h3>RESISTÊNCIA A DANO (RD)</h3>
                     <div class="rd-total">
-                        Total RD: <span id="rdTotal">0</span>
+                        Total: <span id="rdTotal">0</span>
                     </div>
                 </div>
                 
@@ -2737,77 +2749,77 @@
                         <div class="rd-parte" data-parte="cabeca">
                             <i class="fas fa-head-side-virus"></i>
                             <span>Cabeça</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                         
                         <div class="rd-parte" data-parte="tronco">
                             <i class="fas fa-user"></i>
                             <span>Tronco</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                         
                         <div class="rd-parte" data-parte="orgaos">
                             <i class="fas fa-heart"></i>
                             <span>Órgãos</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                         
                         <div class="rd-parte" data-parte="crânio">
                             <i class="fas fa-skull"></i>
                             <span>Crânio</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                         
                         <div class="rd-parte" data-parte="pescoco">
                             <i class="fas fa-user-slash"></i>
                             <span>Pescoço</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                         
                         <div class="rd-parte" data-parte="virilha">
                             <i class="fas fa-user-injured"></i>
                             <span>Virilha</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                         
                         <div class="rd-parte" data-parte="bracos">
                             <i class="fas fa-hand-paper"></i>
                             <span>Braços</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                         
                         <div class="rd-parte" data-parte="pernas">
                             <i class="fas fa-running"></i>
                             <span>Pernas</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                         
                         <div class="rd-parte" data-parte="maos">
                             <i class="fas fa-hand"></i>
                             <span>Mãos</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                         
                         <div class="rd-parte" data-parte="pes">
                             <i class="fas fa-shoe-prints"></i>
                             <span>Pés</span>
-                            <input type="number" value="0" min="0" max="20" 
+                            <input type="number" value="0" min="0" max="99" 
                                    class="rd-input" onchange="calcularRDTotal()">
                         </div>
                     </div>
                     
                     <!-- TABELA DE REDUTORES -->
                     <div class="redutores-container">
-                        <h4><i class="fas fa-crosshairs"></i> Redutores para Ataque</h4>
+                        <h4><i class="fas fa-crosshairs"></i> Penalidades para Ataque</h4>
                         <div class="redutores-grid">
                             <div class="redutor-item" data-local="tronco">
                                 <span>Tronco</span>
@@ -2856,7 +2868,7 @@
             <div class="card-condicoes">
                 <div class="card-header">
                     <i class="fas fa-clipboard-list"></i>
-                    <h3>CONDIÇÕES</h3>
+                    <h3>CONDIÇÕES DE COMBATE</h3>
                     <div class="condicoes-count">
                         <span id="condicoesAtivas">0</span> ativas
                     </div>
@@ -2864,51 +2876,51 @@
                 
                 <div class="card-content">
                     <div class="condicoes-grid">
-                        <div class="condicao-item" data-condicao="inconsciente">
+                        <div class="condicao-item" data-condicao="inconsciente" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Inconsciente</span>
                         </div>
-                        <div class="condicao-item" data-condicao="machucado">
+                        <div class="condicao-item" data-condicao="machucado" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Machucado</span>
                         </div>
-                        <div class="condicao-item" data-condicao="ferido">
+                        <div class="condicao-item" data-condicao="ferido" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Ferido</span>
                         </div>
-                        <div class="condicao-item" data-condicao="fadigado">
+                        <div class="condicao-item" data-condicao="fadigado" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Fadigado</span>
                         </div>
-                        <div class="condicao-item" data-condicao="atordoado">
+                        <div class="condicao-item" data-condicao="atordoado" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Atordoado</span>
                         </div>
-                        <div class="condicao-item" data-condicao="enjoado">
+                        <div class="condicao-item" data-condicao="enjoado" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Enjoado</span>
                         </div>
-                        <div class="condicao-item" data-condicao="cego">
+                        <div class="condicao-item" data-condicao="cego" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Cego</span>
                         </div>
-                        <div class="condicao-item" data-condicao="surdo">
+                        <div class="condicao-item" data-condicao="surdo" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Surdo</span>
                         </div>
-                        <div class="condicao-item" data-condicao="paralisado">
+                        <div class="condicao-item" data-condicao="paralisado" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Paralisado</span>
                         </div>
-                        <div class="condicao-item" data-condicao="envenenado">
+                        <div class="condicao-item" data-condicao="envenenado" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Envenenado</span>
                         </div>
-                        <div class="condicao-item" data-condicao="sangrando">
+                        <div class="condicao-item" data-condicao="sangrando" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Sangrando</span>
                         </div>
-                        <div class="condicao-item" data-condicao="queimando">
+                        <div class="condicao-item" data-condicao="queimando" onclick="alternarCondicao(this)">
                             <div class="condicao-checkbox"></div>
                             <span>Queimando</span>
                         </div>
@@ -2919,7 +2931,8 @@
         
     </div>
 </div>
-        <!-- ABA RESUMO -->
+
+<!-- ABA RESUMO -->
         <div id="resumo" class="tab-content">
             <div class="loading">
                 <div class="spinner"></div>
@@ -2929,7 +2942,7 @@
     </main> 
 
     
-    <!-- MOVER A FUNÇÃO toggleSubmenu PARA AQUI (estava quebrando a estrutura) -->
+   
 <script>
     // Função toggleSubmenu - ÚNICA VERSÃO
     function toggleSubmenu(id) {
