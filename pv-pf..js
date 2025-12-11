@@ -1,332 +1,305 @@
-// pv-pf.js - VERSÃO CORRETA COM REGRAS GURPS
+// pv-pf.js - CÓDIGO COMPLETO E FUNCIONAL
 
-// Estado GLOBAL
-window.estadoPVPF = {
-    pv: { 
-        atual: 0,      // Pode ser negativo
-        maximo: 0,     // PV máximo positivo (ST + bônus)
-        stBase: 0      // ST base
-    },
-    pf: {
-        atual: 0,
-        maximo: 0,
-        htBase: 0
+// ============ VARIÁVEIS GLOBAIS ============
+window.personagemPV = 10;
+window.personagemPF = 10;
+window.personagemST = 10;
+window.personagemHT = 10;
+
+// ============ FUNÇÃO PRINCIPAL: ALTERAR PV ============
+window.alterarPV = function(valor) {
+    // 1. Alterar o valor
+    window.personagemPV += valor;
+    
+    // 2. Atualizar na tela - TODOS os elementos
+    const elementosPV = [
+        'pvAtualValue', 'pvAtualInput', 'pvText'
+    ];
+    
+    elementosPV.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            if (elemento.tagName === 'INPUT') {
+                elemento.value = window.personagemPV;
+            } else {
+                elemento.textContent = window.personagemPV;
+            }
+        }
+    });
+    
+    // 3. Atualizar barra de PV
+    const barraPV = document.getElementById('pvFill');
+    if (barraPV) {
+        // Calcular porcentagem (0% a 100%)
+        let porcentagem = (window.personagemPV / 20) * 100;
+        if (porcentagem > 100) porcentagem = 100;
+        if (porcentagem < 0) porcentagem = 0;
+        
+        barraPV.style.width = porcentagem + '%';
+        
+        // Mudar cor baseada no valor
+        if (window.personagemPV > 15) barraPV.style.background = '#27ae60';
+        else if (window.personagemPV > 10) barraPV.style.background = '#2ecc71';
+        else if (window.personagemPV > 5) barraPV.style.background = '#f1c40f';
+        else if (window.personagemPV > 0) barraPV.style.background = '#e67e22';
+        else if (window.personagemPV > -5) barraPV.style.background = '#e74c3c';
+        else if (window.personagemPV > -10) barraPV.style.background = '#9b59b6';
+        else barraPV.style.background = '#2c3e50';
     }
+    
+    console.log('PV alterado para:', window.personagemPV);
 };
 
-// ==================== REGRAS GURPS ====================
-// PV pode ser NEGATIVO:
-// 0 a -ST: Ferido (amarelo)
-// -ST a -2×ST: Muito Ferido (laranja)
-// -2×ST a -3×ST: Crítico (vermelho)
-// -3×ST a -4×ST: Morrendo (roxo)
-// -4×ST a -5×ST: Morto (preto)
-// ======================================================
+// ============ FUNÇÃO PRINCIPAL: ALTERAR PF ============
+window.alterarPF = function(valor) {
+    // 1. Alterar o valor
+    window.personagemPF += valor;
+    
+    // 2. Atualizar na tela - TODOS os elementos
+    const elementosPF = [
+        'pfAtualValue', 'pfAtualInput', 'pfText'
+    ];
+    
+    elementosPF.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            if (elemento.tagName === 'INPUT') {
+                elemento.value = window.personagemPF;
+            } else {
+                elemento.textContent = window.personagemPF;
+            }
+        }
+    });
+    
+    // 3. Atualizar barra de PF
+    const barraPF = document.getElementById('pfFill');
+    if (barraPF) {
+        // Calcular porcentagem (0% a 100%)
+        let porcentagem = (window.personagemPF / 20) * 100;
+        if (porcentagem > 100) porcentagem = 100;
+        if (porcentagem < 0) porcentagem = 0;
+        
+        barraPF.style.width = porcentagem + '%';
+        
+        // Mudar cor baseada no valor
+        if (window.personagemPF > 7) barraPF.style.background = '#2ecc71';
+        else if (window.personagemPF > 3) barraPF.style.background = '#f1c40f';
+        else barraPF.style.background = '#e74c3c';
+    }
+    
+    console.log('PF alterado para:', window.personagemPF);
+};
 
-// 1. PEGAR ATRIBUTOS REAIS
-function pegarAtributosReais() {
-    if (window.obterDadosAtributos) {
+// ============ CONFIGURAR TODOS OS BOTÕES ============
+function configurarTodosBotoes() {
+    console.log('Configurando botões...');
+    
+    // BOTÕES DE DANO PV
+    const botoesDano = document.querySelectorAll('.btn-dano');
+    botoesDano.forEach(botao => {
+        botao.addEventListener('click', function() {
+            const valor = parseInt(this.getAttribute('data-amount')) || 1;
+            console.log('Botão dano clicado:', valor);
+            window.alterarPV(-valor);
+        });
+    });
+    
+    // BOTÕES DE CURA PV
+    const botoesCura = document.querySelectorAll('.btn-cura');
+    botoesCura.forEach(botao => {
+        botao.addEventListener('click', function() {
+            const valor = parseInt(this.getAttribute('data-amount')) || 1;
+            console.log('Botão cura clicado:', valor);
+            window.alterarPV(valor);
+        });
+    });
+    
+    // BOTÕES DE FADIGA PF
+    const botoesFadiga = document.querySelectorAll('.btn-fadiga');
+    botoesFadiga.forEach(botao => {
+        botao.addEventListener('click', function() {
+            const valor = parseInt(this.getAttribute('data-amount')) || 1;
+            console.log('Botão fadiga clicado:', valor);
+            window.alterarPF(-valor);
+        });
+    });
+    
+    // BOTÕES DE DESCANSO PF
+    const botoesDescanso = document.querySelectorAll('.btn-descanso');
+    botoesDescanso.forEach(botao => {
+        botao.addEventListener('click', function() {
+            const valor = parseInt(this.getAttribute('data-amount')) || 1;
+            console.log('Botão descanso clicado:', valor);
+            window.alterarPF(valor);
+        });
+    });
+    
+    // BOTÕES DE MODIFICADOR (+/-)
+    const botoesMod = document.querySelectorAll('.mod-btn');
+    botoesMod.forEach(botao => {
+        botao.addEventListener('click', function() {
+            const input = this.closest('.mod-control').querySelector('.mod-input');
+            if (!input) return;
+            
+            let valor = parseInt(input.value) || 0;
+            
+            if (this.classList.contains('plus')) {
+                valor += 1;
+            } else {
+                valor -= 1;
+            }
+            
+            input.value = valor;
+            
+            // Atualizar máximo se for modificador de PV
+            if (input.id === 'pvModificador') {
+                window.personagemPV = 10 + valor;
+                window.alterarPV(0); // Forçar atualização
+            }
+            
+            // Atualizar máximo se for modificador de PF
+            if (input.id === 'pfModificador') {
+                window.personagemPF = 10 + valor;
+                window.alterarPF(0); // Forçar atualização
+            }
+        });
+    });
+    
+    console.log('Botões configurados:', 
+        botoesDano.length + botoesCura.length + 
+        botoesFadiga.length + botoesDescanso.length + ' botões');
+}
+
+// ============ PEGAR ATRIBUTOS DO PERSONAGEM ============
+function pegarAtributos() {
+    if (typeof window.obterDadosAtributos === 'function') {
         try {
             const dados = window.obterDadosAtributos();
             
-            // PV = ST + bônus (sempre POSITIVO)
-            window.estadoPVPF.pv.maximo = dados.PV || 10;
-            window.estadoPVPF.pv.stBase = dados.ST || 10;
-            window.estadoPVPF.pv.atual = dados.PV || 10;
-            
-            // PF = HT + bônus
-            window.estadoPVPF.pf.maximo = dados.PF || 10;
-            window.estadoPVPF.pf.htBase = dados.HT || 10;
-            window.estadoPVPF.pf.atual = dados.PF || 10;
-            
-        } catch (e) {
-            console.error("Erro:", e);
-        }
-    }
-}
-
-// 2. FUNÇÃO para mudar PV (COM REGRAS GURPS)
-window.alterarPV = function(valor) {
-    // Adiciona o valor (pode ser positivo ou negativo)
-    window.estadoPVPF.pv.atual += valor;
-    
-    // Morte: se PV ≤ -5×ST
-    if (window.estadoPVPF.pv.atual <= -(window.estadoPVPF.pv.stBase * 5)) {
-        window.estadoPVPF.pv.atual = -(window.estadoPVPF.pv.stBase * 5);
-        console.log("💀 PERSONAGEM MORTO!");
-    }
-    
-    // Atualizar TELA
-    atualizarDisplayPV();
-};
-
-// 3. FUNÇÃO para mudar PF
-window.alterarPF = function(valor) {
-    window.estadoPVPF.pf.atual += valor;
-    
-    // Limites básicos
-    if (window.estadoPVPF.pf.atual < 0) {
-        window.estadoPVPF.pf.atual = 0;
-    }
-    if (window.estadoPVPF.pf.atual > window.estadoPVPF.pf.maximo * 2) {
-        window.estadoPVPF.pf.atual = window.estadoPVPF.pf.maximo * 2;
-    }
-    
-    atualizarDisplayPF();
-};
-
-// 4. DETERMINAR ESTADO DO PV (CORES)
-function determinarEstadoPV() {
-    const pv = window.estadoPVPF.pv.atual;
-    const st = window.estadoPVPF.pv.stBase;
-    
-    // Positivo: Verde
-    if (pv > 0) return { cor: '#27ae60', nome: 'Saudável' };
-    
-    // 0 a -ST: Amarelo (Ferido)
-    if (pv >= -st) return { cor: '#f1c40f', nome: 'Ferido' };
-    
-    // -ST a -2×ST: Laranja (Muito Ferido)
-    if (pv >= -(st * 2)) return { cor: '#e67e22', nome: 'Muito Ferido' };
-    
-    // -2×ST a -3×ST: Vermelho (Crítico)
-    if (pv >= -(st * 3)) return { cor: '#e74c3c', nome: 'Crítico' };
-    
-    // -3×ST a -4×ST: Roxo (Morrendo)
-    if (pv >= -(st * 4)) return { cor: '#9b59b6', nome: 'Morrendo' };
-    
-    // -4×ST a -5×ST: Preto (Morto)
-    return { cor: '#2c3e50', nome: 'Morto' };
-}
-
-// 5. ATUALIZAR DISPLAY PV
-function atualizarDisplayPV() {
-    const estado = determinarEstadoPV();
-    const pv = window.estadoPVPF.pv.atual;
-    const max = window.estadoPVPF.pv.maximo;
-    const st = window.estadoPVPF.pv.stBase;
-    
-    // Calcular porcentagem para barra (sempre mostramos de 100% a -500%)
-    const porcentagemPositiva = (pv / max) * 100;
-    const porcentagemNegativa = (pv / -(st * 5)) * 100;
-    
-    // Elementos para atualizar
-    const elementos = [
-        { id: 'pvAtualValue', value: pv },
-        { id: 'pvMaxValue', value: max },
-        { id: 'pvBase', value: st },
-        { id: 'pvText', value: pv + '/' + max },
-        { id: 'pvAtualInput', value: pv },
-        { id: 'pvMaxInput', value: max },
-        { id: 'pvModificador', value: max - st }
-    ];
-    
-    // Atualizar todos elementos
-    elementos.forEach(item => {
-        const el = document.getElementById(item.id);
-        if (el) {
-            if (el.tagName === 'INPUT') {
-                el.value = item.value;
-            } else {
-                el.textContent = item.value;
-            }
-        }
-    });
-    
-    // Atualizar barra com COR CORRETA
-    const barra = document.getElementById('pvFill');
-    if (barra) {
-        // Para valores positivos: 0% a 100%
-        // Para valores negativos: 0% a -500% (ajustado para caber na barra)
-        let largura;
-        if (pv >= 0) {
-            largura = (pv / max) * 100;
-        } else {
-            // Mostrar negativo como redução da barra
-            largura = Math.max(0, 100 + ((pv / (st * 5)) * 100));
-        }
-        
-        barra.style.width = largura + '%';
-        barra.style.background = estado.cor;
-        
-        // Adicionar texto de estado se existir
-        const estadoEl = document.getElementById('pvEstadoTexto');
-        if (estadoEl) estadoEl.textContent = estado.nome;
-    }
-    
-    // Atualizar faixas de cores
-    atualizarFaixasPV();
-}
-
-// 6. ATUALIZAR FAIXAS DE CORES (marcadores na barra)
-function atualizarFaixasPV() {
-    const st = window.estadoPVPF.pv.stBase;
-    
-    // Marcadores: 0, -ST, -2×ST, -3×ST, -4×ST, -5×ST
-    const marcadores = [
-        { valor: 0, label: '0' },
-        { valor: -st, label: '-ST' },
-        { valor: -(st * 2), label: '-2×ST' },
-        { valor: -(st * 3), label: '-3×ST' },
-        { valor: -(st * 4), label: '-4×ST' },
-        { valor: -(st * 5), label: 'Morte' }
-    ];
-    
-    // Atualizar ou criar marcadores
-    marcadores.forEach((marcador, index) => {
-        let marcadorEl = document.getElementById(`pvMarcador${index}`);
-        
-        if (!marcadorEl && document.getElementById('pvBar')) {
-            marcadorEl = document.createElement('div');
-            marcadorEl.id = `pvMarcador${index}`;
-            marcadorEl.className = 'pv-marcador';
-            marcadorEl.innerHTML = `
-                <div class="marcador-valor">${marcador.label}</div>
-                <div class="marcador-line"></div>
-            `;
-            document.getElementById('pvBar').appendChild(marcadorEl);
-        }
-        
-        if (marcadorEl) {
-            // Posicionar o marcador (0% a -500% ajustado)
-            let posicao;
-            if (marcador.valor >= 0) {
-                posicao = (marcador.valor / window.estadoPVPF.pv.maximo) * 100;
-            } else {
-                posicao = 100 + ((marcador.valor / (st * 5)) * 100);
+            if (dados.ST) {
+                window.personagemST = dados.ST;
+                window.personagemPV = dados.PV || dados.ST;
+                
+                // Atualizar displays de ST
+                const stElementos = ['pvBase', 'pvMaxValue', 'pvMaxInput'];
+                stElementos.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.tagName === 'INPUT') {
+                            el.value = dados.ST;
+                        } else {
+                            el.textContent = dados.ST;
+                        }
+                    }
+                });
             }
             
-            marcadorEl.style.left = posicao + '%';
-        }
-    });
-}
-
-// 7. ATUALIZAR DISPLAY PF
-function atualizarDisplayPF() {
-    const pf = window.estadoPVPF.pf.atual;
-    const max = window.estadoPVPF.pf.maximo;
-    
-    // Elementos para atualizar
-    const elementos = [
-        { id: 'pfAtualValue', value: pf },
-        { id: 'pfMaxValue', value: max },
-        { id: 'pfBase', value: window.estadoPVPF.pf.htBase },
-        { id: 'pfText', value: pf + '/' + max },
-        { id: 'pfAtualInput', value: pf },
-        { id: 'pfMaxInput', value: max },
-        { id: 'pfModificador', value: max - window.estadoPVPF.pf.htBase }
-    ];
-    
-    // Atualizar todos elementos
-    elementos.forEach(item => {
-        const el = document.getElementById(item.id);
-        if (el) {
-            if (el.tagName === 'INPUT') {
-                el.value = item.value;
-            } else {
-                el.textContent = item.value;
+            if (dados.HT) {
+                window.personagemHT = dados.HT;
+                window.personagemPF = dados.PF || dados.HT;
+                
+                // Atualizar displays de HT
+                const htElementos = ['pfBase', 'pfMaxValue', 'pfMaxInput'];
+                htElementos.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.tagName === 'INPUT') {
+                            el.value = dados.HT;
+                        } else {
+                            el.textContent = dados.HT;
+                        }
+                    }
+                });
             }
-        }
-    });
-    
-    // Atualizar barra PF
-    const barra = document.getElementById('pfFill');
-    if (barra) {
-        let porcentagem = (pf / max) * 100;
-        if (porcentagem < 0) porcentagem = 0;
-        if (porcentagem > 200) porcentagem = 200;
-        
-        barra.style.width = porcentagem + '%';
-        
-        // Cor baseada no estado
-        if (pf >= max * 0.33) {
-            barra.style.background = '#2ecc71'; // Normal
-        } else if (pf > 0) {
-            barra.style.background = '#f39c12'; // Fadigado
-        } else {
-            barra.style.background = '#e74c3c'; // Inconsciente
+            
+            // Forçar atualização
+            window.alterarPV(0);
+            window.alterarPF(0);
+            
+        } catch (error) {
+            console.error('Erro ao pegar atributos:', error);
         }
     }
 }
 
-// 8. CONFIGURAR BOTÕES
-function configurarBotoes() {
-    // Botões de dano PV (-5, -2, -1)
-    document.querySelectorAll('.btn-dano').forEach(botao => {
-        botao.onclick = () => window.alterarPV(-parseInt(botao.getAttribute('data-amount') || 1));
-    });
+// ============ INICIAR SISTEMA ============
+function iniciarSistemaPVPF() {
+    console.log('=== INICIANDO SISTEMA PV/PF ===');
     
-    // Botões de cura PV (+1, +2, +5)
-    document.querySelectorAll('.btn-cura').forEach(botao => {
-        botao.onclick = () => window.alterarPV(parseInt(botao.getAttribute('data-amount') || 1));
-    });
-    
-    // Botões de fadiga PF (-3, -1)
-    document.querySelectorAll('.btn-fadiga').forEach(botao => {
-        botao.onclick = () => window.alterarPF(-parseInt(botao.getAttribute('data-amount') || 1));
-    });
-    
-    // Botões de descanso PF (+1, +3)
-    document.querySelectorAll('.btn-descanso').forEach(botao => {
-        botao.onclick = () => window.alterarPF(parseInt(botao.getAttribute('data-amount') || 1));
-    });
-}
-
-// 9. INICIAR SISTEMA
-function iniciarSistema() {
-    // 1. Pegar atributos REAIS
-    pegarAtributosReais();
+    // 1. Pegar atributos
+    pegarAtributos();
     
     // 2. Configurar botões
-    configurarBotoes();
+    configurarTodosBotoes();
     
-    // 3. Atualizar display
-    atualizarDisplayPV();
-    atualizarDisplayPF();
+    // 3. Atualizar valores iniciais
+    window.alterarPV(0);
+    window.alterarPF(0);
     
-    // 4. Escutar mudanças de atributos
-    document.addEventListener('atributosAlterados', function(e) {
-        if (e.detail) {
-            if (e.detail.PV) {
-                window.estadoPVPF.pv.maximo = e.detail.PV;
-                window.estadoPVPF.pv.atual = e.detail.PV;
-            }
-            if (e.detail.ST) {
-                window.estadoPVPF.pv.stBase = e.detail.ST;
-            }
-            if (e.detail.PF) {
-                window.estadoPVPF.pf.maximo = e.detail.PF;
-                window.estadoPVPF.pf.atual = e.detail.PF;
-            }
-            if (e.detail.HT) {
-                window.estadoPVPF.pf.htBase = e.detail.HT;
+    // 4. Escutar eventos de atributos alterados
+    document.addEventListener('atributosAlterados', function(evento) {
+        if (evento.detail) {
+            if (evento.detail.ST) {
+                window.personagemST = evento.detail.ST;
+                window.personagemPV = evento.detail.PV || evento.detail.ST;
+                window.alterarPV(0);
             }
             
-            atualizarDisplayPV();
-            atualizarDisplayPF();
+            if (evento.detail.HT) {
+                window.personagemHT = evento.detail.HT;
+                window.personagemPF = evento.detail.PF || evento.detail.HT;
+                window.alterarPF(0);
+            }
         }
     });
     
-    console.log("✅ SISTEMA PV/PF INICIADO - REGRAS GURPS");
+    console.log('✅ SISTEMA PV/PF INICIADO COM SUCESSO');
 }
 
-// 10. INICIAR quando aba carregar
+// ============ INICIAR QUANDO PÁGINA CARREGAR ============
 document.addEventListener('DOMContentLoaded', function() {
-    const combateTab = document.getElementById('combate');
-    
-    function iniciar() {
-        if (document.querySelector('#combate .pv-card')) {
-            iniciarSistema();
-        } else {
-            setTimeout(iniciar, 100);
+    // Esperar 1 segundo para garantir que tudo carregou
+    setTimeout(function() {
+        const combateTab = document.getElementById('combate');
+        
+        if (combateTab && combateTab.classList.contains('active')) {
+            iniciarSistemaPVPF();
         }
-    }
-    
-    if (combateTab && combateTab.classList.contains('active')) {
-        iniciar();
-    }
+        
+        // Observar quando a aba combate for ativada
+        const observer = new MutationObserver(function(mutacoes) {
+            mutacoes.forEach(function(mutacao) {
+                if (mutacao.attributeName === 'class') {
+                    if (combateTab.classList.contains('active')) {
+                        iniciarSistemaPVPF();
+                    }
+                }
+            });
+        });
+        
+        if (combateTab) {
+            observer.observe(combateTab, { attributes: true });
+        }
+    }, 1000);
 });
 
-// 11. TESTE
-window.testePV = (v) => { window.alterarPV(v); console.log("PV:", window.estadoPVPF.pv.atual); };
-window.testePF = (v) => { window.alterarPF(v); console.log("PF:", window.estadoPVPF.pf.atual); };
+// ============ FUNÇÕES PARA TESTE NO CONSOLE ============
+// Para testar: abra console (F12) e digite:
+// testarPV(-5) ou testarPF(-3)
+window.testarPV = function(valor) {
+    console.log('Testando PV:', valor);
+    window.alterarPV(valor);
+};
+
+window.testarPF = function(valor) {
+    console.log('Testando PF:', valor);
+    window.alterarPF(valor);
+};
+
+window.mostrarEstado = function() {
+    console.log('ESTADO ATUAL:');
+    console.log('PV:', window.personagemPV);
+    console.log('PF:', window.personagemPF);
+    console.log('ST:', window.personagemST);
+    console.log('HT:', window.personagemHT);
+};
