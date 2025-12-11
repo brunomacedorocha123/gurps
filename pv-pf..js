@@ -1,56 +1,196 @@
 // pv-pf.js - Sistema COMPLETO de PV e PF baseado em ST e HT
+// Funciona com seu atributos.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Carregando sistema PV/PF...');
+    console.log('📦 Carregando sistema PV/PF...');
     
-    // Esperar atributos.js carregar
-    setTimeout(inicializarSistemaPVPF, 300);
+    // Inicializar depois de um breve delay
+    setTimeout(inicializarSistemaPVPF, 100);
 });
 
 function inicializarSistemaPVPF() {
-    console.log('Inicializando sistema PV/PF...');
+    console.log('🚀 INICIANDO SISTEMA PV/PF');
     
-    // === 1. ELEMENTOS - VERIFICAR SE EXISTEM ===
+    // ============================================
+    // 1. BUSCAR TODOS OS ELEMENTOS
+    // ============================================
+    
     const elementos = {
+        // --- PV ---
         pvMax: document.getElementById('pvMax'),
         pvAtual: document.getElementById('pvAtual'),
         pvBonus: document.getElementById('pvBonus'),
         pvFill: document.getElementById('pvFill'),
         pvTexto: document.getElementById('pvTexto'),
         marcadorSt: document.getElementById('marcadorSt'),
+        
+        // --- PF ---
         pfMax: document.getElementById('pfMax'),
         pfAtual: document.getElementById('pfAtual'),
         pfFill: document.getElementById('pfFill'),
-        pfTexto: document.getElementById('pfTexto')
+        pfTexto: document.getElementById('pfTexto'),
+        
+        // --- Elementos de atributos (do seu atributos.js) ---
+        inputST: document.getElementById('ST'),
+        inputHT: document.getElementById('HT'),
+        elementoPVTotal: document.getElementById('PVTotal'),  // Onde mostra PV total em atributos
+        elementoPFTotal: document.getElementById('PFTotal'),  // Onde mostra PF total em atributos
+        
+        // --- Botões ---
+        pvBotoes: document.querySelectorAll('.pv-btn'),
+        pfBotoes: document.querySelectorAll('.pf-btn'),
+        
+        // --- Visuais ---
+        faixas: document.querySelectorAll('.faixa-item'),
+        estados: document.querySelectorAll('.estado-item')
     };
     
     // Verificar elementos críticos
-    const elementosCriticos = ['pvMax', 'pvAtual', 'pvFill', 'pvTexto', 'pfMax', 'pfAtual', 'pfFill', 'pfTexto'];
-    for (const id of elementosCriticos) {
+    const criticos = ['pvMax', 'pvAtual', 'pvFill', 'pvTexto', 'pfMax', 'pfAtual', 'pfFill', 'pfTexto'];
+    for (const id of criticos) {
         if (!elementos[id]) {
-            console.error(`❌ Elemento não encontrado: ${id}`);
-            return; // Para aqui se elemento crítico não existir
+            console.error(`❌ ERRO: Elemento ${id} não encontrado!`);
+            return;
         }
     }
     
-    console.log('✅ Todos elementos encontrados!');
+    console.log('✅ Todos elementos encontrados');
     
-    // Elementos opcionais
-    elementos.pvBotoes = document.querySelectorAll('.pv-btn');
-    elementos.pfBotoes = document.querySelectorAll('.pf-btn');
-    elementos.faixas = document.querySelectorAll('.faixa-item');
-    elementos.estados = document.querySelectorAll('.estado-item');
+    // ============================================
+    // 2. ESTADO DO SISTEMA
+    // ============================================
     
-    // === 2. ESTADO DO PERSONAGEM ===
     const estado = {
-        pv: { max: 10, atual: 10, bonus: 0 },
-        pf: { max: 10, atual: 10 }
+        pv: {
+            max: 10,      // Vem do ST + bônus
+            atual: 10,    // Valor atual
+            bonus: 0      // Bônus manual
+        },
+        pf: {
+            max: 10,      // Vem do HT + bônus
+            atual: 10     // Valor atual
+        }
     };
     
-    // === 3. FUNÇÕES AUXILIARES ===
+    // ============================================
+    // 3. FUNÇÕES DE SINCRONIZAÇÃO COM ATRIBUTOS
+    // ============================================
+    
+    function pegarPVDoAtributos() {
+        console.log('🔍 Buscando PV dos atributos...');
+        
+        // MÉTODO 1: Se a função obterDadosAtributos existe
+        if (typeof window.obterDadosAtributos === 'function') {
+            try {
+                const dados = window.obterDadosAtributos();
+                if (dados && dados.PV) {
+                    console.log('📊 PV do atributos.js:', dados.PV);
+                    return dados.PV;
+                }
+            } catch (e) {
+                console.warn('Erro ao usar obterDadosAtributos:', e);
+            }
+        }
+        
+        // MÉTODO 2: Pegar do elemento PVTotal
+        if (elementos.elementoPVTotal && elementos.elementoPVTotal.textContent) {
+            const pv = parseInt(elementos.elementoPVTotal.textContent);
+            if (!isNaN(pv) && pv > 0) {
+                console.log('📊 PV do elemento PVTotal:', pv);
+                return pv;
+            }
+        }
+        
+        // MÉTODO 3: Calcular baseado no ST + bônus manual
+        if (elementos.inputST) {
+            const st = parseInt(elementos.inputST.value) || 10;
+            const bonus = elementos.pvBonus ? parseInt(elementos.pvBonus.value) || 0 : 0;
+            const pvCalculado = st + bonus;
+            console.log('📊 PV calculado (ST + bônus):', pvCalculado);
+            return pvCalculado;
+        }
+        
+        // MÉTODO 4: Usar valor padrão
+        console.log('⚠️ Usando valor padrão para PV');
+        return 10;
+    }
+    
+    function pegarPFDoAtributos() {
+        console.log('🔍 Buscando PF dos atributos...');
+        
+        // MÉTODO 1: Se a função obterDadosAtributos existe
+        if (typeof window.obterDadosAtributos === 'function') {
+            try {
+                const dados = window.obterDadosAtributos();
+                if (dados && dados.PF) {
+                    console.log('📊 PF do atributos.js:', dados.PF);
+                    return dados.PF;
+                }
+            } catch (e) {
+                console.warn('Erro ao usar obterDadosAtributos:', e);
+            }
+        }
+        
+        // MÉTODO 2: Pegar do elemento PFTotal
+        if (elementos.elementoPFTotal && elementos.elementoPFTotal.textContent) {
+            const pf = parseInt(elementos.elementoPFTotal.textContent);
+            if (!isNaN(pf) && pf > 0) {
+                console.log('📊 PF do elemento PFTotal:', pf);
+                return pf;
+            }
+        }
+        
+        // MÉTODO 3: Calcular baseado no HT
+        if (elementos.inputHT) {
+            const ht = parseInt(elementos.inputHT.value) || 10;
+            console.log('📊 PF calculado (HT):', ht);
+            return ht;
+        }
+        
+        // MÉTODO 4: Usar valor padrão
+        console.log('⚠️ Usando valor padrão para PF');
+        return 10;
+    }
+    
+    function sincronizarComAtributos() {
+        console.log('🔄 Sincronizando com atributos...');
+        
+        // Pegar PV máximo dos atributos
+        const pvMaxAtributos = pegarPVDoAtributos();
+        if (pvMaxAtributos && pvMaxAtributos !== estado.pv.max) {
+            console.log(`📈 PV máximo mudou: ${estado.pv.max} → ${pvMaxAtributos}`);
+            estado.pv.max = pvMaxAtributos;
+            
+            // Ajustar PV atual se necessário
+            if (estado.pv.atual > pvMaxAtributos) {
+                estado.pv.atual = pvMaxAtributos;
+                console.log(`📉 Ajustando PV atual para: ${estado.pv.atual}`);
+            }
+        }
+        
+        // Pegar PF máximo dos atributos
+        const pfMaxAtributos = pegarPFDoAtributos();
+        if (pfMaxAtributos && pfMaxAtributos !== estado.pf.max) {
+            console.log(`📈 PF máximo mudou: ${estado.pf.max} → ${pfMaxAtributos}`);
+            estado.pf.max = pfMaxAtributos;
+            
+            // Ajustar PF atual se necessário
+            if (estado.pf.atual > pfMaxAtributos) {
+                estado.pf.atual = pfMaxAtributos;
+                console.log(`📉 Ajustando PF atual para: ${estado.pf.atual}`);
+            }
+        }
+        
+        // Atualizar visual
+        atualizarTudo();
+    }
+    
+    // ============================================
+    // 4. FUNÇÕES DE ATUALIZAÇÃO VISUAL
+    // ============================================
     
     function atualizarPV() {
-        console.log('Atualizando PV:', estado.pv);
+        console.log('🎨 Atualizando PV visual...');
         
         // Atualizar inputs
         elementos.pvMax.value = estado.pv.max;
@@ -73,12 +213,10 @@ function inicializarSistemaPVPF() {
         
         // Atualizar faixas
         atualizarFaixasPV(porcentagem);
-        
-        salvarEstado();
     }
     
     function atualizarPF() {
-        console.log('Atualizando PF:', estado.pf);
+        console.log('🎨 Atualizando PF visual...');
         
         // Atualizar inputs
         elementos.pfMax.value = estado.pf.max;
@@ -97,8 +235,6 @@ function inicializarSistemaPVPF() {
         
         // Atualizar estados
         atualizarEstadosPF(porcentagem);
-        
-        salvarEstado();
     }
     
     function atualizarMarcadorST() {
@@ -108,10 +244,10 @@ function inicializarSistemaPVPF() {
         elementos.marcadorSt.textContent = `ST (${stThreshold})`;
         
         // Mover marcador visual
-        const marcador = document.querySelector('.pv-marcador[style*="left: 0%"]');
-        if (marcador) {
+        const marcadores = document.querySelectorAll('.pv-marcador');
+        if (marcadores[0]) {
             const posicaoSt = (stThreshold / estado.pv.max) * 100;
-            marcador.style.left = `${Math.min(posicaoSt, 100)}%`;
+            marcadores[0].style.left = `${Math.min(posicaoSt, 100)}%`;
         }
     }
     
@@ -169,9 +305,20 @@ function inicializarSistemaPVPF() {
         });
     }
     
-    // === 4. FUNÇÕES DE ALTERAÇÃO ===
+    function atualizarTudo() {
+        console.log('🔄 Atualizando tudo...');
+        atualizarPV();
+        atualizarPF();
+        salvarEstado();
+    }
+    
+    // ============================================
+    // 5. FUNÇÕES DE ALTERAÇÃO DE VALORES
+    // ============================================
     
     function alterarPV(quantidade) {
+        console.log(`➕ Alterando PV: ${quantidade}`);
+        
         estado.pv.atual += quantidade;
         
         // Limites
@@ -179,9 +326,12 @@ function inicializarSistemaPVPF() {
         if (estado.pv.atual > estado.pv.max * 2) estado.pv.atual = estado.pv.max * 2;
         
         atualizarPV();
+        salvarEstado();
     }
     
     function alterarPF(quantidade) {
+        console.log(`➕ Alterando PF: ${quantidade}`);
+        
         estado.pf.atual += quantidade;
         
         // Limites
@@ -189,215 +339,193 @@ function inicializarSistemaPVPF() {
         if (estado.pf.atual > estado.pf.max * 2) estado.pf.atual = estado.pf.max * 2;
         
         atualizarPF();
+        salvarEstado();
     }
     
-    // === 5. SINCRONIZAÇÃO COM ATRIBUTOS ===
+    // ============================================
+    // 6. EVENT LISTENERS
+    // ============================================
     
-    function sincronizarComAtributos() {
-        console.log('Sincronizando com atributos...');
+    function configurarEventListeners() {
+        console.log('🔗 Configurando event listeners...');
         
-        // Método 1: Usar função do atributos.js
-        if (window.obterDadosAtributos) {
-            const dados = window.obterDadosAtributos();
-            
-            if (dados.PV && dados.PV !== estado.pv.max) {
-                console.log('PV do atributos.js:', dados.PV);
-                estado.pv.max = dados.PV;
-                if (estado.pv.atual > dados.PV) estado.pv.atual = dados.PV;
-            }
-            
-            if (dados.PF && dados.PF !== estado.pf.max) {
-                console.log('PF do atributos.js:', dados.PF);
-                estado.pf.max = dados.PF;
-                if (estado.pf.atual > dados.PF) estado.pf.atual = dados.PF;
-            }
-        } 
-        // Método 2: Pegar direto dos elementos
-        else {
-            const pvTotalElem = document.getElementById('PVTotal');
-            const pfTotalElem = document.getElementById('PFTotal');
-            
-            if (pvTotalElem && pvTotalElem.textContent) {
-                const pv = parseInt(pvTotalElem.textContent);
-                if (!isNaN(pv) && pv > 0) {
-                    estado.pv.max = pv;
-                    if (estado.pv.atual > pv) estado.pv.atual = pv;
-                }
-            }
-            
-            if (pfTotalElem && pfTotalElem.textContent) {
-                const pf = parseInt(pfTotalElem.textContent);
-                if (!isNaN(pf) && pf > 0) {
-                    estado.pf.max = pf;
-                    if (estado.pf.atual > pf) estado.pf.atual = pf;
-                }
-            }
+        // --- Botões PV ---
+        if (elementos.pvBotoes && elementos.pvBotoes.length > 0) {
+            elementos.pvBotoes.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const quantidade = parseInt(this.dataset.amount) || 1;
+                    if (this.classList.contains('plus')) {
+                        alterarPV(quantidade);
+                    } else {
+                        alterarPV(-quantidade);
+                    }
+                });
+            });
         }
         
-        // Atualizar visual
-        atualizarTudo();
-    }
-    
-    // === 6. FUNÇÃO ATUALIZAR TUDO (QUE ESTAVA FALTANDO) ===
-    
-    function atualizarTudo() {
-        console.log('Atualizando tudo...');
-        atualizarPV();
-        atualizarPF();
-    }
-    
-    // === 7. EVENT LISTENERS ===
-    
-    // Botões PV
-    if (elementos.pvBotoes && elementos.pvBotoes.length > 0) {
-        elementos.pvBotoes.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const quantidade = parseInt(this.dataset.amount) || 1;
-                if (this.classList.contains('plus')) {
-                    alterarPV(quantidade);
-                } else {
-                    alterarPV(-quantidade);
-                }
+        // --- Botões PF ---
+        if (elementos.pfBotoes && elementos.pfBotoes.length > 0) {
+            elementos.pfBotoes.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const quantidade = parseInt(this.dataset.amount) || 1;
+                    if (this.classList.contains('plus')) {
+                        alterarPF(quantidade);
+                    } else {
+                        alterarPF(-quantidade);
+                    }
+                });
             });
+        }
+        
+        // --- Inputs PV ---
+        elementos.pvMax.addEventListener('change', function() {
+            const novoMax = parseInt(this.value) || 1;
+            estado.pv.max = novoMax;
+            if (estado.pv.atual > novoMax) estado.pv.atual = novoMax;
+            atualizarPV();
+        });
+        
+        elementos.pvAtual.addEventListener('change', function() {
+            estado.pv.atual = parseInt(this.value) || 0;
+            atualizarPV();
+        });
+        
+        elementos.pvBonus.addEventListener('change', function() {
+            estado.pv.bonus = parseInt(this.value) || 0;
+            sincronizarComAtributos(); // Recalcula com o bônus
+        });
+        
+        // --- Inputs PF ---
+        elementos.pfMax.addEventListener('change', function() {
+            const novoMax = parseInt(this.value) || 1;
+            estado.pf.max = novoMax;
+            if (estado.pf.atual > novoMax) estado.pf.atual = novoMax;
+            atualizarPF();
+        });
+        
+        elementos.pfAtual.addEventListener('change', function() {
+            estado.pf.atual = parseInt(this.value) || 0;
+            atualizarPF();
+        });
+        
+        // --- Monitorar mudanças nos atributos ST e HT ---
+        if (elementos.inputST) {
+            elementos.inputST.addEventListener('change', sincronizarComAtributos);
+            elementos.inputST.addEventListener('input', function() {
+                setTimeout(sincronizarComAtributos, 300);
+            });
+        }
+        
+        if (elementos.inputHT) {
+            elementos.inputHT.addEventListener('change', sincronizarComAtributos);
+            elementos.inputHT.addEventListener('input', function() {
+                setTimeout(sincronizarComAtributos, 300);
+            });
+        }
+        
+        // --- Escutar evento do atributos.js ---
+        document.addEventListener('atributosAlterados', function() {
+            console.log('📢 Evento atributosAlterados recebido!');
+            setTimeout(sincronizarComAtributos, 100);
         });
     }
     
-    // Botões PF
-    if (elementos.pfBotoes && elementos.pfBotoes.length > 0) {
-        elementos.pfBotoes.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const quantidade = parseInt(this.dataset.amount) || 1;
-                if (this.classList.contains('plus')) {
-                    alterarPF(quantidade);
-                } else {
-                    alterarPF(-quantidade);
-                }
-            });
-        });
-    }
-    
-    // Inputs PV
-    elementos.pvMax.addEventListener('change', function() {
-        const novoMax = parseInt(this.value) || 1;
-        estado.pv.max = novoMax;
-        if (estado.pv.atual > novoMax) estado.pv.atual = novoMax;
-        atualizarPV();
-    });
-    
-    elementos.pvAtual.addEventListener('change', function() {
-        estado.pv.atual = parseInt(this.value) || 0;
-        atualizarPV();
-    });
-    
-    elementos.pvBonus.addEventListener('change', function() {
-        estado.pv.bonus = parseInt(this.value) || 0;
-        sincronizarComAtributos();
-    });
-    
-    // Inputs PF
-    elementos.pfMax.addEventListener('change', function() {
-        const novoMax = parseInt(this.value) || 1;
-        estado.pf.max = novoMax;
-        if (estado.pf.atual > novoMax) estado.pf.atual = novoMax;
-        atualizarPF();
-    });
-    
-    elementos.pfAtual.addEventListener('change', function() {
-        estado.pf.atual = parseInt(this.value) || 0;
-        atualizarPF();
-    });
-    
-    // === 8. PERSISTÊNCIA ===
+    // ============================================
+    // 7. PERSISTÊNCIA (LOCAL STORAGE)
+    // ============================================
     
     function salvarEstado() {
         try {
-            localStorage.setItem('gurps-pv-pf', JSON.stringify(estado));
+            localStorage.setItem('gurps-pv-pf-estado', JSON.stringify(estado));
+            console.log('💾 Estado salvo:', estado);
         } catch (e) {
-            console.error('Erro ao salvar:', e);
+            console.warn('Não foi possível salvar estado:', e);
         }
     }
     
     function carregarEstado() {
         try {
-            const salvo = localStorage.getItem('gurps-pv-pf');
+            const salvo = localStorage.getItem('gurps-pv-pf-estado');
             if (salvo) {
                 const dados = JSON.parse(salvo);
                 
                 if (dados.pv) {
-                    estado.pv = { ...estado.pv, ...dados.pv };
-                }
-                if (dados.pf) {
-                    estado.pf = { ...estado.pf, ...dados.pf };
+                    estado.pv.max = dados.pv.max || estado.pv.max;
+                    estado.pv.atual = dados.pv.atual || estado.pv.atual;
+                    estado.pv.bonus = dados.pv.bonus || estado.pv.bonus;
                 }
                 
-                console.log('Estado carregado:', estado);
+                if (dados.pf) {
+                    estado.pf.max = dados.pf.max || estado.pf.max;
+                    estado.pf.atual = dados.pf.atual || estado.pf.atual;
+                }
+                
+                console.log('📂 Estado carregado:', estado);
                 return true;
             }
         } catch (e) {
-            console.error('Erro ao carregar:', e);
+            console.warn('Não foi possível carregar estado:', e);
         }
         return false;
     }
     
-    // === 9. INTEGRAÇÃO COM ATRIBUTOS ===
+    // ============================================
+    // 8. INICIALIZAÇÃO FINAL
+    // ============================================
     
-    // Escutar evento do atributos.js
-    document.addEventListener('atributosAlterados', sincronizarComAtributos);
-    
-    // Observar mudanças nos elementos de atributos
-    const pvTotalElem = document.getElementById('PVTotal');
-    const pfTotalElem = document.getElementById('PFTotal');
-    
-    if (pvTotalElem) {
-        const observer = new MutationObserver(() => {
-            setTimeout(sincronizarComAtributos, 100);
-        });
-        observer.observe(pvTotalElem, { childList: true, subtree: true, characterData: true });
-    }
-    
-    if (pfTotalElem) {
-        const observer = new MutationObserver(() => {
-            setTimeout(sincronizarComAtributos, 100);
-        });
-        observer.observe(pfTotalElem, { childList: true, subtree: true, characterData: true });
-    }
-    
-    // === 10. INICIALIZAÇÃO FINAL ===
-    
-    function inicializar() {
-        // Carregar estado salvo
-        const estadoCarregado = carregarEstado();
+    function iniciar() {
+        console.log('⚡ Iniciando sistema...');
         
-        // Sincronizar com atributos
+        // 1. Carregar estado salvo
+        carregarEstado();
+        
+        // 2. Configurar eventos
+        configurarEventListeners();
+        
+        // 3. Sincronizar com atributos
         sincronizarComAtributos();
         
-        // Se não sincronizou, usar valores padrão
-        if (estado.pv.max === 10 && !estadoCarregado) {
-            console.log('Usando valores padrão');
-        }
-        
-        // Atualizar tudo
+        // 4. Atualizar tudo
         atualizarTudo();
         
-        console.log('✅ Sistema PV/PF inicializado com sucesso!');
+        console.log('✅ SISTEMA PV/PF INICIALIZADO COM SUCESSO!');
         console.log('Estado final:', estado);
+        
+        // 5. Verificar se está na aba de Combate
+        verificarAbaAtiva();
     }
     
-    // Inicializar
-    inicializar();
+    // Verificar periodicamente se a aba está ativa
+    function verificarAbaAtiva() {
+        const combateTab = document.getElementById('combate');
+        if (combateTab && combateTab.classList.contains('active')) {
+            console.log('🎯 Aba Combate está ativa');
+        }
+    }
     
-    // === 11. EXPORTAR PARA DEBUG ===
+    // ============================================
+    // 9. EXPORTAÇÃO PARA USO GLOBAL
+    // ============================================
     
-    window.pvpf = {
+    // Adicionar funções ao objeto global para debug
+    window.pvpfSistema = {
         estado: estado,
         atualizarTudo: atualizarTudo,
         sincronizarComAtributos: sincronizarComAtributos,
         alterarPV: alterarPV,
-        alterarPF: alterarPF
+        alterarPF: alterarPF,
+        pegarPVDoAtributos: pegarPVDoAtributos,
+        pegarPFDoAtributos: pegarPFDoAtributos
     };
     
-    console.log('📊 Sistema PV/PF pronto para uso!');
+    // ============================================
+    // 10. INICIAR O SISTEMA
+    // ============================================
+    
+    iniciar();
 }
 
-// Função para forçar recarregamento (para debug)
+// Função para forçar recarregamento (útil para debug)
 window.recarregarPVPF = inicializarSistemaPVPF;
+
+console.log('📦 pv-pf.js carregado e pronto!');
