@@ -2550,7 +2550,7 @@
                                 </div>
                                 <div class="state-item" data-state="inconsciente">
                                     <div class="state-color"></div>
-                                    <span class="state-name">Inconsciente</span>
+                                    <span class="state-name">Morto</span>
                                 </div>
                             </div>
                         </div>
@@ -3092,6 +3092,10 @@
 <script src="dashboard.js"></script>
 
 <!-- CARACTERÍSTICAS -->
+<!-- ATRIBUTOS PRINCIPAIS -->
+<script src="atributos.js"></script>
+
+<!-- CARACTERÍSTICAS -->
 <script src="caracteristicas-fisicas.js"></script>
 <script src="caracteristicas-altura-peso.js"></script>
 <script src="caracteristicas-aparencia.js"></script>
@@ -3116,6 +3120,13 @@
 <!-- EQUIPAMENTOS -->
 <script src="catalogo-equipamentos.js"></script>
 <script src="equipamentos.js"></script>
+
+<!-- COMBATE (DEPENDE DE ATRIBUTOS E EQUIPAMENTOS) -->
+<script src="pv-pf.js"></script>
+<script src="combate-integracao.js"></script>
+
+<!-- SISTEMA PRINCIPAL (DEVE SER O ÚLTIMO) -->
+<script src="sistema.js"></script>
 <script>
     // Configuração do Supabase
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
