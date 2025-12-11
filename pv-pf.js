@@ -1,4 +1,4 @@
-// pv-pf.js — VERSÃO CORRIGIDA QUE FUNCIONA COM SEU HTML
+// pv-pf.js — VERSÃO CORRIGIDA INTEGRADA COM SEU HTML
 (function() {
     'use strict';
 
@@ -7,12 +7,12 @@
         st: 10,
         ht: 10,
         pv: { atual: 10, maximo: 10, modificador: 0 },
-        pf: { atual: 10, maximo: 10, modificador: 0 }
+        pf: { atual: 10, maximo: 10, modificador: 0 },
+        fadigaAtiva: false
     };
 
     // ========== FUNÇÕES QUE SEU HTML ESPERA ==========
-
-    // PV
+    // (MANTIDAS EXATAMENTE IGUAIS)
     window.danoPV5 = () => alterarPV(-5);
     window.danoPV2 = () => alterarPV(-2);
     window.danoPV1 = () => alterarPV(-1);
@@ -24,7 +24,6 @@
     window.resetPV = () => resetarPV();
     window.atualizarPVInput = () => atualizarPVManual();
 
-    // PF
     window.fadigaPF3 = () => alterarPF(-3);
     window.fadigaPF1 = () => alterarPF(-1);
     window.descansoPF1 = () => alterarPF(1);
@@ -34,7 +33,7 @@
     window.resetPF = () => resetarPF();
     window.atualizarPFInput = () => atualizarPFManual();
 
-    // ========== FUNÇÕES INTERNAS ==========
+    // ========== FUNÇÕES INTERNAS CORRIGIDAS ==========
 
     function alterarPV(delta) {
         estado.pv.atual += delta;
@@ -48,8 +47,30 @@
         estado.pf.atual += delta;
         const limite = -1 * estado.ht;
         estado.pf.atual = Math.max(limite, Math.min(estado.pf.maximo, estado.pf.atual));
+        
+        // NOVO: Se PF chegar a 0 ou negativo, começa a perder PV
+        if (estado.pf.atual <= 0) {
+            aplicarDanoPorExaustao();
+        }
+        
         atualizarTudo();
         aplicarEfeito('pfFill', delta > 0 ? 'cura-recebida' : 'dano-recebido');
+    }
+
+    function aplicarDanoPorExaustao() {
+        if (estado.pf.atual < 0) {
+            // Cada ponto NEGATIVO de PF = 1 ponto de dano em PV
+            const dano = Math.abs(estado.pf.atual);
+            estado.pv.atual -= dano;
+            
+            // Garante que não passe do limite de morte
+            const limiteMorte = -5 * estado.st;
+            if (estado.pv.atual < limiteMorte) {
+                estado.pv.atual = limiteMorte;
+            }
+            
+            console.log(`⚠️ Exaustão! PF negativo causou ${dano} de dano em PV`);
+        }
     }
 
     function modificarPV(_, valor) {
@@ -73,6 +94,7 @@
 
     function resetarPF() {
         estado.pf.atual = estado.pf.maximo;
+        estado.fadigaAtiva = false;
         atualizarTudo();
     }
 
@@ -85,7 +107,102 @@
     function atualizarPFManual() {
         const v = parseInt(document.getElementById('pfAtualDisplay')?.value) || estado.pf.maximo;
         estado.pf.atual = Math.max(-1 * estado.ht, Math.min(estado.pf.maximo, v));
+        
+        // Verifica se manualmente colocou PF ≤ 0
+        if (estado.pf.atual <= 0) {
+            aplicarDanoPorExaustao();
+        }
+        
         atualizarTudo();
+    }
+
+    // ========== LÓGICA DE FADIGA (1/3) ==========
+
+    function calcularLimiteFadiga() {
+        // 1/3 dos PF máximos, arredondado PARA CIMA
+        return Math.ceil(estado.pf.maximo / 3);
+    }
+
+    function verificarFadiga() {
+        const limite = calcularLimiteFadiga();
+        const estavaFadigado = estado.fadigaAtiva;
+        const agoraFadigado = estado.pf.atual <= limite;
+        
+        // Se ACABA de entrar em fadiga
+        if (agoraFadigado && !estavaFadigado) {
+            estado.fadigaAtiva = true;
+            console.log(`⚠️ PERSONAGEM FADIGADO! PF (${estado.pf.atual}) ≤ ${limite} (1/3 do máximo)`);
+            aplicarEfeitosFadiga(true);
+        }
+        
+        // Se ACABA de sair da fadiga
+        if (!agoraFadigado && estavaFadigado) {
+            estado.fadigaAtiva = false;
+            console.log(`✅ Fadiga removida. PF (${estado.pf.atual}) > ${limite}`);
+            aplicarEfeitosFadiga(false);
+        }
+        
+        return agoraFadigado;
+    }
+
+    function aplicarEfeitosFadiga(ativar) {
+        if (ativar) {
+            // Quando entra em fadiga:
+            // 1. Perde deslocamento
+            // 2. Perde esquiva
+            // 3. ST reduzido pela metade (arredondado para cima)
+            // 4. MAS NÃO perde dano (como você especificou)
+            
+            console.log("Efeitos aplicados: Deslocamento=0, Esquiva=0, ST reduzido pela metade");
+            
+            // Atualiza o marcador visual no HTML (que você já tem)
+            const marcador = document.querySelector('.marcador-fadiga');
+            if (marcador) {
+                marcador.style.backgroundColor = '#e74c3c'; // Vermelho forte
+            }
+            
+        } else {
+            // Quando sai da fadiga, restaura tudo
+            console.log("Efeitos removidos: Deslocamento/Esquiva/ST restaurados");
+            
+            const marcador = document.querySelector('.marcador-fadiga');
+            if (marcador) {
+                marcador.style.backgroundColor = 'rgba(0,0,0,0.3)'; // Volta ao normal
+            }
+        }
+        
+        // Atualiza os displays de defesa (se existirem)
+        atualizarDefesas();
+    }
+
+    function atualizarDefesas() {
+        // Aqui você integra com o sistema de defesas que já tem
+        // Mas só vou mostrar os valores se os elementos existirem
+        
+        if (estado.fadigaAtiva) {
+            // ST reduzido pela metade (arredondado para cima)
+            const stReduzido = Math.ceil(estado.st / 2);
+            
+            // Atualiza displays (se existirem)
+            const stDisplay = document.getElementById('stEfetivoDisplay');
+            if (stDisplay) stDisplay.textContent = `${stReduzido} (reduzido)`;
+            
+            const deslocamentoDisplay = document.getElementById('deslocamentoDisplay');
+            if (deslocamentoDisplay) deslocamentoDisplay.textContent = 'Perdido';
+            
+            const esquivaDisplay = document.getElementById('esquivaDisplay');
+            if (esquivaDisplay) esquivaDisplay.textContent = 'Perdida';
+        } else {
+            // Volta ao normal
+            const stDisplay = document.getElementById('stEfetivoDisplay');
+            if (stDisplay) stDisplay.textContent = estado.st;
+            
+            const deslocamentoDisplay = document.getElementById('deslocamentoDisplay');
+            if (deslocamentoDisplay) deslocamentoDisplay.textContent = 'Normal';
+            
+            const esquivaDisplay = document.getElementById('esquivaDisplay');
+            if (esquivaDisplay) esquivaDisplay.textContent = 'Normal';
+        }
     }
 
     // ========== ATUALIZAÇÃO DA INTERFACE ==========
@@ -107,7 +224,13 @@
         estado.pv.maximo = estado.st + estado.pv.modificador;
         estado.pf.maximo = estado.ht + estado.pf.modificador;
 
-        // 3. PV
+        // 3. Verifica fadiga (1/3 dos PF)
+        verificarFadiga();
+
+        // 4. Atualiza marcador de 1/3 na barra
+        atualizarMarcadorFadiga();
+
+        // 5. PV
         setTexto('pvBaseDisplay', estado.st);
         setTexto('pvMaxDisplay', estado.pv.maximo);
         setInput('pvAtualDisplay', estado.pv.atual);
@@ -116,7 +239,7 @@
         atualizarBarraPV();
         atualizarEstadoPV();
 
-        // 4. PF
+        // 6. PF
         setTexto('pfBaseDisplay', estado.ht);
         setTexto('pfMaxDisplay', estado.pf.maximo);
         setInput('pfAtualDisplay', estado.pf.atual);
@@ -124,8 +247,94 @@
         setTexto('pfTexto', `${estado.pf.atual}/${estado.pf.maximo}`);
         atualizarBarraPF();
         atualizarEstadoPF();
+        
+        // 7. Atualiza a condição "Fadigado" na lista de condições
+        atualizarCondicaoFadigado();
     }
 
+    function atualizarMarcadorFadiga() {
+        const marcador = document.querySelector('.marcador-fadiga');
+        if (!marcador) return;
+        
+        // Calcula a posição CORRETA do marcador (1/3 dos PF máximos)
+        const porcentagemLimite = (calcularLimiteFadiga() / estado.pf.maximo) * 100;
+        marcador.style.left = `${Math.min(100, Math.max(0, porcentagemLimite))}%`;
+        
+        // Muda a cor se estiver em fadiga
+        if (estado.fadigaAtiva) {
+            marcador.style.backgroundColor = '#e74c3c';
+            marcador.style.boxShadow = '0 0 5px #e74c3c';
+        } else {
+            marcador.style.backgroundColor = 'rgba(0,0,0,0.3)';
+            marcador.style.boxShadow = 'none';
+        }
+    }
+
+    function atualizarBarraPF() {
+        const barra = document.getElementById('pfFill');
+        if (!barra) return;
+        
+        const porcentagem = Math.max(0, Math.min(100, (estado.pf.atual / estado.pf.maximo) * 100));
+        barra.style.width = `${porcentagem}%`;
+        
+        // Cores baseadas no estado
+        let cor = '#3498db'; // Azul normal
+        
+        if (estado.fadigaAtiva) {
+            cor = '#e67e22'; // Laranja - Fadigado (PF ≤ 1/3)
+        }
+        
+        if (estado.pf.atual <= 0) {
+            cor = '#e74c3c'; // Vermelho - Exausto
+        }
+        
+        barra.style.background = cor;
+    }
+
+    function atualizarEstadoPF() {
+        const elemento = document.getElementById('pfEstadoDisplay');
+        if (!elemento) return;
+        
+        let estadoTexto = 'Normal';
+        let cor = '#3498db';
+        
+        if (estado.fadigaAtiva) {
+            estadoTexto = 'Fadigado';
+            cor = '#e67e22';
+        }
+        
+        if (estado.pf.atual <= 0) {
+            estadoTexto = 'Exausto';
+            cor = '#e74c3c';
+        }
+        
+        if (estado.pf.atual < 0) {
+            estadoTexto = 'Perdendo PV!';
+            cor = '#8e44ad';
+        }
+        
+        elemento.textContent = estadoTexto;
+        elemento.style.color = cor;
+    }
+
+    function atualizarCondicaoFadigado() {
+        // Atualiza o checkbox de "Fadigado" na lista de condições
+        const condicaoItem = document.querySelector('[data-condicao="fadigado"]');
+        if (condicaoItem) {
+            const checkbox = condicaoItem.querySelector('.condicao-checkbox');
+            if (checkbox) {
+                if (estado.fadigaAtiva) {
+                    checkbox.classList.add('checked');
+                    condicaoItem.classList.add('ativa');
+                } else {
+                    checkbox.classList.remove('checked');
+                    condicaoItem.classList.remove('ativa');
+                }
+            }
+        }
+    }
+
+    // Resto das funções permanece igual...
     function atualizarBarraPV() {
         const barra = document.getElementById('pvFill');
         if (!barra) return;
@@ -137,8 +346,7 @@
         
         barra.style.width = `${porcentagem}%`;
         
-        // Cor GURPS
-        let cor = '#27ae60'; // Verde
+        let cor = '#27ae60';
         if (estado.pv.atual <= 0) cor = '#f1c40f';
         if (estado.pv.atual <= -estado.st) cor = '#e67e22';
         if (estado.pv.atual <= -2 * estado.st) cor = '#e74c3c';
@@ -185,51 +393,6 @@
         elemento.style.color = cor;
     }
 
-    function atualizarBarraPF() {
-        const barra = document.getElementById('pfFill');
-        if (!barra) return;
-        
-        const porcentagem = Math.max(0, Math.min(100, (estado.pf.atual / estado.pf.maximo) * 100));
-        barra.style.width = `${porcentagem}%`;
-        
-        // Cor
-        let cor = '#3498db';
-        if (estado.pf.atual < estado.pf.maximo * 0.66) cor = '#f39c12';
-        if (estado.pf.atual < estado.pf.maximo * 0.33) cor = '#e67e22';
-        if (estado.pf.atual <= 0) cor = '#e74c3c';
-        if (estado.pf.atual < 0) cor = '#8e44ad';
-        
-        barra.style.background = cor;
-    }
-
-    function atualizarEstadoPF() {
-        const elemento = document.getElementById('pfEstadoDisplay');
-        if (!elemento) return;
-        
-        let estadoTexto = 'Normal';
-        let cor = '#3498db';
-        
-        if (estado.pf.atual < estado.pf.maximo * 0.66) {
-            estadoTexto = 'Cansado';
-            cor = '#f39c12';
-        }
-        if (estado.pf.atual < estado.pf.maximo * 0.33) {
-            estadoTexto = 'Fadigado';
-            cor = '#e67e22';
-        }
-        if (estado.pf.atual <= 0) {
-            estadoTexto = 'Exausto';
-            cor = '#e74c3c';
-        }
-        if (estado.pf.atual < 0) {
-            estadoTexto = 'Colapso';
-            cor = '#8e44ad';
-        }
-        
-        elemento.textContent = estadoTexto;
-        elemento.style.color = cor;
-    }
-
     function setTexto(id, valor) {
         const el = document.getElementById(id);
         if (el) el.textContent = valor;
@@ -252,12 +415,10 @@
     // ========== INICIALIZAÇÃO ==========
 
     function inicializar() {
-        console.log('🚀 Inicializando sistema PV-PF...');
+        console.log('🚀 Inicializando sistema PV-PF com fadiga corrigida...');
         
-        // Atualiza tudo
         atualizarTudo();
         
-        // Configura eventos dos inputs
         const pvInput = document.getElementById('pvAtualDisplay');
         const pfInput = document.getElementById('pfAtualDisplay');
         
@@ -271,10 +432,9 @@
             pfInput.onblur = atualizarPFManual;
         }
         
-        console.log('✅ Sistema PV-PF pronto!');
+        console.log('✅ Sistema PV-PF com fadiga corrigida pronto!');
     }
 
-    // Inicia quando a aba Combate é ativada
     document.addEventListener('DOMContentLoaded', function() {
         const combateTab = document.getElementById('combate');
         if (!combateTab) return;
@@ -292,7 +452,6 @@
         
         observer.observe(combateTab, { attributes: true });
         
-        // Se já estiver ativa
         if (combateTab.classList.contains('active')) {
             setTimeout(inicializar, 500);
         }
