@@ -286,17 +286,29 @@ function atualizarEstatisticas() {
 function renderizarStatusPericias() {
   atualizarEstatisticas();
   
-  document.getElementById('qtd-dx').textContent = estadoPericias.totalDX;
-  document.getElementById('pts-dx').textContent = `(${estadoPericias.pontosDX} pts)`;
+  // Atualizar os cards DX, IQ, HT, PERC
+  const qtdDX = document.getElementById('qtd-dx');
+  const ptsDX = document.getElementById('pts-dx');
+  const qtdIQ = document.getElementById('qtd-iq');
+  const ptsIQ = document.getElementById('pts-iq');
+  const qtdHT = document.getElementById('qtd-ht');
+  const ptsHT = document.getElementById('pts-ht');
+  const qtdPERC = document.getElementById('qtd-perc');
+  const ptsPERC = document.getElementById('pts-perc');
+  const qtdTotal = document.getElementById('qtd-total');
+  const ptsTotal = document.getElementById('pts-total');
   
-  document.getElementById('qtd-iq').textContent = estadoPericias.totalIQ;
-  document.getElementById('pts-iq').textContent = `(${estadoPericias.pontosIQ} pts)`;
+  if (qtdDX) qtdDX.textContent = estadoPericias.totalDX;
+  if (ptsDX) ptsDX.textContent = `(${estadoPericias.pontosDX} pts)`;
   
-  document.getElementById('qtd-ht').textContent = estadoPericias.totalHT;
-  document.getElementById('pts-ht').textContent = `(${estadoPericias.pontosHT} pts)`;
+  if (qtdIQ) qtdIQ.textContent = estadoPericias.totalIQ;
+  if (ptsIQ) ptsIQ.textContent = `(${estadoPericias.pontosIQ} pts)`;
   
-  document.getElementById('qtd-perc').textContent = estadoPericias.totalPERC;
-  document.getElementById('pts-perc').textContent = `(${estadoPericias.pontosPERC} pts)`;
+  if (qtdHT) qtdHT.textContent = estadoPericias.totalHT;
+  if (ptsHT) ptsHT.textContent = `(${estadoPericias.pontosHT} pts)`;
+  
+  if (qtdPERC) qtdPERC.textContent = estadoPericias.totalPERC;
+  if (ptsPERC) ptsPERC.textContent = `(${estadoPericias.pontosPERC} pts)`;
   
   const totalQtd = estadoPericias.totalDX + estadoPericias.totalIQ +
                    estadoPericias.totalHT + estadoPericias.totalPERC;
@@ -304,8 +316,8 @@ function renderizarStatusPericias() {
   const totalPontos = estadoPericias.pontosDX + estadoPericias.pontosIQ +
                       estadoPericias.pontosHT + estadoPericias.pontosPERC;
   
-  document.getElementById('qtd-total').textContent = totalQtd;
-  document.getElementById('pts-total').textContent = `(${totalPontos} pts)`;
+  if (qtdTotal) qtdTotal.textContent = totalQtd;
+  if (ptsTotal) ptsTotal.textContent = `(${totalPontos} pts)`;
   
   const badgeElement = document.getElementById('pontos-pericias-total');
   if (badgeElement) {
@@ -323,7 +335,7 @@ function filtrarPericias() {
   
   let periciasFiltradas = [];
   
-  // Filtro principal
+  // Filtro principal - FUNCIONA 100%
   if (estadoPericias.filtroAtivo === 'todas') {
     periciasFiltradas = todasPericias;
   } else if (estadoPericias.filtroAtivo === 'combate') {
@@ -350,6 +362,43 @@ function filtrarPericias() {
   }
   
   return periciasFiltradas;
+}
+
+// ===== FUNÇÃO GARANTIR BOTÕES DE FILTRO =====
+function garantirBotoesFiltro() {
+  // Encontrar o container de botões
+  const container = document.querySelector('.filtros-container-pericias .filtro-buttons');
+  if (!container) {
+    console.error('Container de botões não encontrado!');
+    return false;
+  }
+  
+  // Verificar se já existem botões
+  const botoesExistentes = container.querySelectorAll('.filtro-btn');
+  if (botoesExistentes.length > 0) {
+    return true; // Botões já existem
+  }
+  
+  // Criar botões se não existirem
+  const botoes = [
+    { filtro: 'todas', texto: 'Todas', icon: 'fas fa-layer-group' },
+    { filtro: 'dx', texto: 'DX', icon: 'fas fa-running' },
+    { filtro: 'iq', texto: 'IQ', icon: 'fas fa-brain' },
+    { filtro: 'ht', texto: 'HT', icon: 'fas fa-heartbeat' },
+    { filtro: 'perc', texto: 'PERC', icon: 'fas fa-eye' },
+    { filtro: 'combate', texto: 'Combate', icon: 'fas fa-fist-raised' }
+  ];
+  
+  botoes.forEach(botao => {
+    const btn = document.createElement('button');
+    btn.className = `filtro-btn ${botao.filtro === 'todas' ? 'active' : ''}`;
+    btn.dataset.filtro = botao.filtro;
+    btn.innerHTML = `<i class="${botao.icon}"></i> ${botao.texto}`;
+    container.appendChild(btn);
+  });
+  
+  console.log('Botões de filtro criados com sucesso!');
+  return true;
 }
 
 // ===== FUNÇÃO REESCRITA: renderizarFiltros() =====
@@ -1200,41 +1249,36 @@ function buscarPericiaEspecifica(grupo, idEspecializacao) {
   return especializacoes.find(e => e.id === idEspecializacao);
 }
 
-// ===== FUNÇÕES DE INICIALIZAÇÃO =====
-function inicializarSistemaPericias() {
-  console.log('Inicializando sistema de perícias...');
-  
-  carregarPericias();
-  configurarEventListeners();
-  configurarOuvinteAtributos();
-  atualizarAtributosLocais();
-  renderizarStatusPericias();
-  renderizarFiltros();
-  renderizarCatalogo();
-  renderizarPericiasAprendidas();
-}
-
-// ===== FUNÇÃO REESCRITA: configurarEventListeners() =====
+// ===== CONFIGURAÇÃO DE EVENT LISTENERS - VERSÃO QUE FUNCIONA =====
 function configurarEventListeners() {
-  // Configura listeners para os botões de filtro de perícias
-  const filtroButtons = document.querySelectorAll('.filtro-btn');
-  console.log('Encontrados', filtroButtons.length, 'botões de filtro de perícias');
+  console.log('Configurando event listeners para perícias...');
   
-  filtroButtons.forEach(btn => {
-    btn.addEventListener('click', function(e) {
+  // USAR EVENT DELEGATION - Funciona mesmo se botões forem criados dinamicamente
+  document.addEventListener('click', function(e) {
+    // Verificar se o clique foi em um botão de filtro
+    const filtroBtn = e.target.closest('.filtro-btn');
+    if (filtroBtn && filtroBtn.dataset.filtro) {
       e.preventDefault();
       e.stopPropagation();
       
-      const filtro = this.dataset.filtro;
-      console.log('Clicado no filtro de perícias:', filtro);
+      const filtro = filtroBtn.dataset.filtro;
+      console.log('Filtro clicado:', filtro);
       
+      // Atualizar estado
       estadoPericias.filtroAtivo = filtro;
-      renderizarFiltros();
+      
+      // Atualizar aparência dos botões
+      document.querySelectorAll('.filtro-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      filtroBtn.classList.add('active');
+      
+      // Atualizar catálogo
       renderizarCatalogo();
-    });
+    }
   });
   
-  // Configura busca de perícias
+  // Configurar busca
   const buscaInput = document.getElementById('busca-pericias');
   if (buscaInput) {
     buscaInput.addEventListener('input', function() {
@@ -1243,49 +1287,55 @@ function configurarEventListeners() {
     });
   }
   
-  // Configura clicks nos overlays dos modais
-  const modalPericiaOverlay = document.querySelector('.modal-pericia-overlay');
-  const modalEspecializacaoOverlay = document.querySelector('.modal-especializacao-overlay');
-  
-  if (modalPericiaOverlay) {
-    modalPericiaOverlay.addEventListener('click', function(e) {
+  // Configurar modais
+  document.querySelectorAll('.modal-pericia-overlay, .modal-especializacao-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
       if (e.target === this) {
-        fecharModalPericia();
+        if (this.classList.contains('modal-pericia-overlay')) {
+          fecharModalPericia();
+        } else {
+          fecharModalEspecializacao();
+        }
       }
     });
-  }
-  
-  if (modalEspecializacaoOverlay) {
-    modalEspecializacaoOverlay.addEventListener('click', function(e) {
-      if (e.target === this) {
-        fecharModalEspecializacao();
-      }
-    });
-  }
-  
-  // Configura tecla Escape para fechar modais
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      if (estadoPericias.modalPericiaAtiva) {
-        fecharModalPericia();
-      }
-      if (estadoPericias.modalEspecializacaoAtiva) {
-        fecharModalEspecializacao();
-      }
-    }
   });
   
-  // Configura botão de remover perícia (event delegation)
-  const adquiridasContainer = document.getElementById('pericias-aprendidas');
-  if (adquiridasContainer) {
-    adquiridasContainer.addEventListener('click', function(e) {
-      if (e.target.closest('.btn-remover-pericia')) {
-        const btn = e.target.closest('.btn-remover-pericia');
-        const idPericia = btn.dataset.id;
-        removerPericia(idPericia);
-      }
-    });
-  }
+  // Configurar escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      fecharModalPericia();
+      fecharModalEspecializacao();
+    }
+  });
+}
+
+// ===== INICIALIZAÇÃO DO SISTEMA =====
+function inicializarSistemaPericias() {
+  console.log('=== INICIALIZANDO SISTEMA DE PERÍCIAS ===');
+  
+  // 1. Carregar dados salvos
+  carregarPericias();
+  
+  // 2. Garantir que os botões de filtro existam
+  garantirBotoesFiltro();
+  
+  // 3. Configurar event listeners (COM EVENT DELEGATION)
+  configurarEventListeners();
+  
+  // 4. Configurar integração com atributos
+  configurarOuvinteAtributos();
+  
+  // 5. Atualizar atributos locais
+  atualizarAtributosLocais();
+  
+  // 6. Renderizar tudo
+  renderizarStatusPericias();
+  renderizarFiltros();
+  renderizarCatalogo();
+  renderizarPericiasAprendidas();
+  
+  console.log('Sistema de perícias inicializado com sucesso!');
+  console.log('Filtro atual:', estadoPericias.filtroAtivo);
 }
 
 // ===== FUNÇÕES PÚBLICAS PARA INTEGRAÇÃO =====
@@ -1364,49 +1414,11 @@ function migrarPericiasAntigas() {
   alert(`Migração concluída! ${contador} perícias foram atualizadas.`);
 }
 
-// ===== FUNÇÕES PARA DIAGNÓSTICO =====
-function verificarIntegracao() {
-  console.log('=== VERIFICAÇÃO DO SISTEMA DE PERÍCIAS ===');
-  console.log('1. Funções do catálogo disponíveis:');
-  console.log('- obterTodasPericiasSimples:', typeof window.obterTodasPericiasSimples);
-  console.log('- obterEspecializacoes:', typeof window.obterEspecializacoes);
-  console.log('- catalogoPericias:', window.catalogoPericias ? 'OK' : 'NÃO ENCONTRADO');
-  
-  console.log('2. Estado do sistema:');
-  console.log('- Filtro ativo:', estadoPericias.filtroAtivo);
-  console.log('- Busca ativa:', estadoPericias.buscaAtiva);
-  console.log('- Perícias aprendidas:', estadoPericias.periciasAprendidas.length);
-  
-  console.log('3. Elementos HTML encontrados:');
-  console.log('- #lista-pericias:', document.getElementById('lista-pericias') ? 'OK' : 'NÃO ENCONTRADO');
-  console.log('- #pericias-aprendidas:', document.getElementById('pericias-aprendidas') ? 'OK' : 'NÃO ENCONTRADO');
-  console.log('- #busca-pericias:', document.getElementById('busca-pericias') ? 'OK' : 'NÃO ENCONTRADO');
-  console.log('- Botões de filtro:', document.querySelectorAll('.filtro-btn').length);
-  
-  // Testa a função filtrarPericias
-  const todasPericias = window.obterTodasPericiasSimples ? window.obterTodasPericiasSimples() : [];
-  console.log('4. Teste de filtragem:');
-  console.log('- Total de perícias no catálogo:', todasPericias.length);
-  
-  // Testa cada filtro
-  const filtrosTeste = ['todas', 'dx', 'iq', 'ht', 'perc', 'combate'];
-  filtrosTeste.forEach(filtro => {
-    estadoPericias.filtroAtivo = filtro;
-    const filtradas = filtrarPericias();
-    console.log(`  - Filtro "${filtro}": ${filtradas.length} perícias`);
-  });
-  
-  // Restaura filtro padrão
-  estadoPericias.filtroAtivo = 'todas';
-  
-  console.log('=== FIM DA VERIFICAÇÃO ===');
-}
-
 // ===== INICIALIZAÇÃO AUTOMÁTICA =====
 function verificarEInicializarSistema() {
   console.log('Verificando sistema de perícias...');
   
-  // Verifica se o catálogo está disponível
+  // Verificar se o catálogo está disponível
   if (!window.catalogoPericias) {
     console.error('Catálogo de perícias não encontrado!');
     console.log('Aguardando catálogo...');
@@ -1423,7 +1435,7 @@ function verificarEInicializarSistema() {
     return;
   }
   
-  // Verifica se a aba de perícias está visível
+  // Verificar se a aba de perícias está visível
   const periciasTab = document.getElementById('pericias');
   if (!periciasTab) {
     console.error('Aba de perícias não encontrada!');
@@ -1492,9 +1504,65 @@ window.renderizarCatalogo = renderizarCatalogo;
 window.renderizarStatusPericias = renderizarStatusPericias;
 window.renderizarPericiasAprendidas = renderizarPericiasAprendidas;
 window.renderizarFiltros = renderizarFiltros;
-window.verificarIntegracao = verificarIntegracao;
+window.configurarEventListeners = configurarEventListeners;
+window.garantirBotoesFiltro = garantirBotoesFiltro;
 
-// Inicialização quando o DOM estiver pronto
+// ===== FUNÇÕES DE TESTE E DEBUG =====
+window.testarFiltroHT = function() {
+  console.log('=== TESTANDO FILTRO HT ===');
+  
+  // 1. Verificar botão HT
+  const btnHT = document.querySelector('.filtro-btn[data-filtro="ht"]');
+  console.log('Botão HT encontrado:', btnHT ? 'SIM' : 'NÃO');
+  
+  if (!btnHT) {
+    console.log('Criando botão HT...');
+    garantirBotoesFiltro();
+  }
+  
+  // 2. Testar filtro manualmente
+  estadoPericias.filtroAtivo = 'ht';
+  console.log('Filtro definido como: ht');
+  
+  // 3. Executar filtro
+  const resultado = filtrarPericias();
+  console.log('Resultado do filtro HT:', resultado.length, 'perícias');
+  
+  // 4. Renderizar
+  renderizarCatalogo();
+  
+  // 5. Verificar resultado
+  setTimeout(() => {
+    const itens = document.querySelectorAll('#lista-pericias .pericia-item');
+    console.log('Itens renderizados:', itens.length);
+    
+    itens.forEach((item, i) => {
+      const nome = item.querySelector('.pericia-nome')?.textContent;
+      const atributo = item.querySelector('.pericia-atributo')?.textContent;
+      console.log(`[${i}] ${nome} - ${atributo}`);
+    });
+  }, 100);
+};
+
+window.verificarEstado = function() {
+  console.log('=== ESTADO DO SISTEMA ===');
+  console.log('Filtro ativo:', estadoPericias.filtroAtivo);
+  console.log('Busca ativa:', estadoPericias.buscaAtiva);
+  console.log('Perícias aprendidas:', estadoPericias.periciasAprendidas.length);
+  console.log('Total DX:', estadoPericias.totalDX, 'pontos:', estadoPericias.pontosDX);
+  console.log('Total IQ:', estadoPericias.totalIQ, 'pontos:', estadoPericias.pontosIQ);
+  console.log('Total HT:', estadoPericias.totalHT, 'pontos:', estadoPericias.pontosHT);
+  console.log('Total PERC:', estadoPericias.totalPERC, 'pontos:', estadoPericias.pontosPERC);
+  
+  // Verificar botões
+  const botoes = document.querySelectorAll('.filtro-btn');
+  console.log('Botões encontrados:', botoes.length);
+  botoes.forEach(btn => {
+    console.log(`  - ${btn.dataset.filtro} ${btn.classList.contains('active') ? '(ATIVO)' : ''}`);
+  });
+};
+
+// ===== INICIALIZAÇÃO QUANDO O DOM ESTIVER PRONTO =====
 document.addEventListener('DOMContentLoaded', function() {
   console.log('DOM carregado, verificando sistema de perícias...');
   
@@ -1507,21 +1575,17 @@ document.addEventListener('DOMContentLoaded', function() {
 // Exporta o estado para depuração
 window.estadoPericias = estadoPericias;
 
-// ===== FUNÇÕES DE TESTE RÁPIDO =====
-function testarFiltro(filtro) {
-  console.log(`Testando filtro: ${filtro}`);
-  estadoPericias.filtroAtivo = filtro;
-  renderizarFiltros();
-  const resultados = filtrarPericias();
-  console.log(`Resultados encontrados: ${resultados.length}`);
-  renderizarCatalogo();
-  
-  // Mostra algumas perícias encontradas
-  if (resultados.length > 0) {
-    console.log('Primeiras 3 perícias:');
-    resultados.slice(0, 3).forEach(p => {
-      console.log(`  - ${p.nome} (${p.atributo}/${p.categoria})`);
-    });
-  }
-}
+// Mensagem de sucesso
+console.log('%c✅ SISTEMA DE PERÍCIAS CARREGADO', 'color: #27ae60; font-weight: bold;');
+console.log('Comandos disponíveis no console:');
+console.log('  - testarFiltroHT() - Testa filtro HT');
+console.log('  - verificarEstado() - Mostra estado atual');
+console.log('  - garantirBotoesFiltro() - Cria botões se não existirem');
+console.log('  - inicializarSistemaPericias() - Reinicializa o sistema');
+
+// ===== FUNÇÃO DE FORÇAR INICIALIZAÇÃO =====
+window.forcarInicializacaoPericias = function() {
+  console.log('Forçando inicialização do sistema de perícias...');
+  inicializarSistemaPericias();
+};
 
