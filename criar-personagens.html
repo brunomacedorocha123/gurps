@@ -2465,16 +2465,16 @@
                     <div class="header-right">
                         <div class="controle-modificador">
                             <span class="mod-label">Mod:</span>
-                            <button class="btn-mod minus" onclick="modificarPV('mod', -1)">-</button>
+                            <button class="btn-mod minus" onclick="modPVMenos()">-</button>
                             <input type="text" id="pvModificador" value="0" 
                                    class="mod-input" readonly>
-                            <button class="btn-mod plus" onclick="modificarPV('mod', 1)">+</button>
+                            <button class="btn-mod plus" onclick="modPVMais()">+</button>
                         </div>
                     </div>
                 </div>
                 
                 <div class="card-content">
-                    <!-- INFO BÁSICA - LAYOT PROPORCIONAL -->
+                    <!-- INFO BÁSICA - LAYOUT PROPORCIONAL -->
                     <div class="info-basica">
                         <div class="info-box">
                             <span class="info-label">Base</span>
@@ -2487,7 +2487,7 @@
                         <div class="info-box">
                             <span class="info-label">Atual</span>
                             <input type="text" id="pvAtualDisplay" value="10" 
-                                   class="info-input" onchange="atualizarPVManual()">
+                                   class="info-input" onchange="atualizarPVInput()">
                         </div>
                         <div class="info-box estado">
                             <span class="info-label">Estado</span>
@@ -2517,13 +2517,13 @@
                     <div class="controles-rapidos">
                         <h4>Controle Rápido</h4>
                         <div class="botoes-controle">
-                            <button class="btn-dano" onclick="alterarPV(-5)">-5</button>
-                            <button class="btn-dano" onclick="alterarPV(-2)">-2</button>
-                            <button class="btn-dano" onclick="alterarPV(-1)">-1</button>
-                            <button class="btn-cura" onclick="alterarPV(1)">+1</button>
-                            <button class="btn-cura" onclick="alterarPV(2)">+2</button>
-                            <button class="btn-cura" onclick="alterarPV(5)">+5</button>
-                            <button class="btn-reset" onclick="resetarPV()">
+                            <button class="btn-dano" onclick="danoPV5()">-5</button>
+                            <button class="btn-dano" onclick="danoPV2()">-2</button>
+                            <button class="btn-dano" onclick="danoPV1()">-1</button>
+                            <button class="btn-cura" onclick="curaPV1()">+1</button>
+                            <button class="btn-cura" onclick="curaPV2()">+2</button>
+                            <button class="btn-cura" onclick="curaPV5()">+5</button>
+                            <button class="btn-reset" onclick="resetPV()">
                                 <i class="fas fa-redo"></i>
                             </button>
                         </div>
@@ -2541,10 +2541,10 @@
                     <div class="header-right">
                         <div class="controle-modificador">
                             <span class="mod-label">Mod:</span>
-                            <button class="btn-mod minus" onclick="modificarPF('mod', -1)">-</button>
+                            <button class="btn-mod minus" onclick="modPFMenos()">-</button>
                             <input type="text" id="pfModificador" value="0" 
                                    class="mod-input" readonly>
-                            <button class="btn-mod plus" onclick="modificarPF('mod', 1)">+</button>
+                            <button class="btn-mod plus" onclick="modPFMais()">+</button>
                         </div>
                     </div>
                 </div>
@@ -2563,7 +2563,7 @@
                         <div class="info-box">
                             <span class="info-label">Atual</span>
                             <input type="text" id="pfAtualDisplay" value="10" 
-                                   class="info-input" onchange="atualizarPFManual()">
+                                   class="info-input" onchange="atualizarPFInput()">
                         </div>
                         <div class="info-box estado">
                             <span class="info-label">Estado</span>
@@ -2601,11 +2601,11 @@
                     <div class="controles-rapidos">
                         <h4>Controle Rápido</h4>
                         <div class="botoes-controle">
-                            <button class="btn-fadiga" onclick="alterarPF(-3)">-3</button>
-                            <button class="btn-fadiga" onclick="alterarPF(-1)">-1</button>
-                            <button class="btn-descanso" onclick="alterarPF(1)">+1</button>
-                            <button class="btn-descanso" onclick="alterarPF(3)">+3</button>
-                            <button class="btn-reset" onclick="resetarPF()">
+                            <button class="btn-fadiga" onclick="fadigaPF3()">-3</button>
+                            <button class="btn-fadiga" onclick="fadigaPF1()">-1</button>
+                            <button class="btn-descanso" onclick="descansoPF1()">+1</button>
+                            <button class="btn-descanso" onclick="descansoPF3()">+3</button>
+                            <button class="btn-reset" onclick="resetPF()">
                                 <i class="fas fa-redo"></i>
                             </button>
                         </div>
