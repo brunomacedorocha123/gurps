@@ -1,4 +1,4 @@
-// sistema-dano.js - SISTEMA COMPLETO DE CÁLCULO DE DANO
+// sistema-dano.js - SISTEMA COMPLETO DE CÁLCULO DE DANO (VERSÃO CORRIGIDA)
 (function() {
     'use strict';
 
@@ -57,7 +57,6 @@
                 const novoST = parseInt(stInput.value) || 10;
                 if (novoST !== estado.stAtual) {
                     estado.stAtual = novoST;
-                    console.log(`🔄 ST alterado para: ${novoST}`);
                     atualizarDanoBasePorST();
                     calcularEAtualizarInterface();
                 }
@@ -89,7 +88,6 @@
         if (dadosST) {
             estado.danoBase.gdp = dadosST.gdp;
             estado.danoBase.geb = dadosST.geb;
-            console.log(`🎯 Dano base atualizado: GDP=${dadosST.gdp}, GEB=${dadosST.geb}`);
         } else {
             estado.danoBase.gdp = '1d-2';
             estado.danoBase.geb = '1d';
@@ -106,7 +104,6 @@
                                   estadoPF.textContent === 'Exausto';
                 if (novaFadiga !== estado.fadigaAtiva) {
                     estado.fadigaAtiva = novaFadiga;
-                    console.log(`🔄 Fadiga alterada: ${novaFadiga ? 'ATIVA' : 'INATIVA'}`);
                     calcularEAtualizarInterface();
                 }
             }
@@ -132,7 +129,6 @@
 
     function monitorarEquipamentos() {
         document.addEventListener('equipamentosAtualizados', () => {
-            console.log('🔄 Equipamentos atualizados, recalculando dano...');
             buscarArmaEquipada();
             calcularEAtualizarInterface();
         });
@@ -162,7 +158,6 @@
                 for (const item of equipamentos.maos) {
                     if (item.tipo === 'arma-cc' || item.tipo === 'arma-dist') {
                         estado.armaEquipada = item;
-                        console.log(`⚔️ Arma equipada: ${item.nome}`);
                         return;
                     }
                 }
@@ -172,17 +167,14 @@
                 for (const item of equipamentos.corpo) {
                     if (item.tipo === 'arma-cc' || item.tipo === 'arma-dist') {
                         estado.armaEquipada = item;
-                        console.log(`⚔️ Arma no corpo: ${item.nome}`);
                         return;
                     }
                 }
             }
         }
-        
-        console.log('🎯 Usando dano corporal (nenhuma arma equipada)');
     }
 
-    // ========== CÁLCULO DO DANO (FUNÇÕES PRINCIPAIS) ==========
+    // ========== CÁLCULO DO DANO (FUNÇÃO PRINCIPAL CORRIGIDA) ==========
 
     function calcularTodosOsDanosDaArma(arma) {
         if (!arma) return [];
@@ -190,36 +182,80 @@
         const stEfetivo = estado.fadigaAtiva ? Math.ceil(estado.stAtual / 2) : estado.stAtual;
         const tiposDano = [];
         
-        // 1. Se arma tem GDP (Golpe de Punho)
+        // VERIFICAÇÃO COMPLETA DOS TIPOS DE DANO
+        
+        // 1. Primeiro, DANO PRINCIPAL (dano + tipoDano) - GeB+1 corte
+        if (arma.dano && arma.tipoDano) {
+            let formulaFinal = '';
+            let baseTipo = '';
+            
+            if (arma.dano.startsWith('GeB')) {
+                const modificador = arma.dano.replace('GeB', '').trim();
+                formulaFinal = estado.danoBase.geb + (modificador ? ` ${modificador}` : '');
+                baseTipo = 'GEB';
+            } else if (arma.dano.startsWith('GdP')) {
+                const modificador = arma.dano.replace('GdP', '').trim();
+                formulaFinal = estado.danoBase.gdp + (modificador ? ` ${modificador}` : '');
+                baseTipo = 'GDP';
+            } else {
+                formulaFinal = arma.dano;
+                baseTipo = arma.dano.startsWith('GdP') ? 'GDP' : 'GEB';
+            }
+            
+            // Adiciona o dano principal
+            tiposDano.push({
+                formula: formulaFinal,
+                tipo: arma.tipoDano,
+                base: baseTipo,
+                nome: arma.nome,
+                stRequerido: arma.st,
+                maos: arma.maos || 1,
+                alcance: arma.alcance || '1'
+            });
+        }
+        
+        // 2. Depois, DANO GDP ESPECÍFICO (danoGDP + tipoDanoGDP) - GdP+1 contusão
         if (arma.danoGDP && arma.danoGDP !== "-") {
             const modificadorGDP = arma.danoGDP.replace('GdP', '').trim();
             const formulaGDP = estado.danoBase.gdp + (modificadorGDP ? ` ${modificadorGDP}` : '');
             
-            tiposDano.push({
-                formula: formulaGDP,
-                tipo: arma.tipoDanoGDP || 'contusão',
-                base: 'GDP',
-                nome: `${arma.nome} (GdP)`,
-                stRequerido: arma.st
-            });
+            // Só adiciona se ainda não tiver um dano GDP
+            const jaTemGDP = tiposDano.some(d => d.base === 'GDP');
+            if (!jaTemGDP) {
+                tiposDano.push({
+                    formula: formulaGDP,
+                    tipo: arma.tipoDanoGDP || 'contusão',
+                    base: 'GDP',
+                    nome: `${arma.nome} (GdP)`,
+                    stRequerido: arma.st,
+                    maos: arma.maos || 1,
+                    alcance: arma.alcance || '1'
+                });
+            }
         }
         
-        // 2. Se arma tem GEB (Golpe de Braço)
+        // 3. Depois, DANO GEB ESPECÍFICO (danoGEB + tipoDanoGEB)
         if (arma.danoGEB && arma.danoGEB !== "-") {
             const modificadorGEB = arma.danoGEB.replace('GeB', '').trim();
             const formulaGEB = estado.danoBase.geb + (modificadorGEB ? ` ${modificadorGEB}` : '');
             
-            tiposDano.push({
-                formula: formulaGEB,
-                tipo: arma.tipoDanoGEB || 'corte',
-                base: 'GEB',
-                nome: `${arma.nome} (GeB)`,
-                stRequerido: arma.st
-            });
+            // Só adiciona se ainda não tiver um dano GEB
+            const jaTemGEB = tiposDano.some(d => d.base === 'GEB');
+            if (!jaTemGEB) {
+                tiposDano.push({
+                    formula: formulaGEB,
+                    tipo: arma.tipoDanoGEB || 'corte',
+                    base: 'GEB',
+                    nome: `${arma.nome} (GeB)`,
+                    stRequerido: arma.st,
+                    maos: arma.maos || 1,
+                    alcance: arma.alcance || '1'
+                });
+            }
         }
         
-        // 3. Se arma tem dano padrão (sem GDP/GEB separados)
-        if (!tiposDano.length && arma.dano) {
+        // 4. Se NÃO TEM NENHUM DANO, usa dano padrão
+        if (tiposDano.length === 0 && arma.dano) {
             let formulaFinal = '';
             let tipoDano = arma.tipoDano || 'contusão';
             
@@ -238,7 +274,9 @@
                 tipo: tipoDano,
                 base: arma.dano.startsWith('GdP') ? 'GDP' : 'GEB',
                 nome: arma.nome,
-                stRequerido: arma.st
+                stRequerido: arma.st,
+                maos: arma.maos || 1,
+                alcance: arma.alcance || '1'
             });
         }
         
@@ -256,22 +294,16 @@
                 tipo: 'contusão',
                 alcance: 'C',
                 maos: 1,
-                stMinimo: null,
                 stAtual: stEfetivo,
-                stSuficiente: true,
-                nome: 'Golpe de Punho',
-                fadiga: estado.fadigaAtiva
+                nome: 'Golpe de Punho'
             },
             geb: {
                 formula: estado.danoBase.geb,
                 tipo: 'contusão',
                 alcance: '1',
                 maos: 1,
-                stMinimo: null,
                 stAtual: stEfetivo,
-                stSuficiente: true,
-                nome: 'Golpe de Braço',
-                fadiga: estado.fadigaAtiva
+                nome: 'Golpe de Braço'
             }
         };
     }
@@ -288,15 +320,8 @@
         const gdpDisplay = document.getElementById('danoGdp');
         const gebDisplay = document.getElementById('danoGeb');
         
-        if (gdpDisplay) {
-            gdpDisplay.textContent = estado.danoBase.gdp;
-            gdpDisplay.title = `Golpe de Punho (ST ${estado.stAtual})`;
-        }
-        
-        if (gebDisplay) {
-            gebDisplay.textContent = estado.danoBase.geb;
-            gebDisplay.title = `Golpe de Braço (ST ${estado.stAtual})`;
-        }
+        if (gdpDisplay) gdpDisplay.textContent = estado.danoBase.gdp;
+        if (gebDisplay) gebDisplay.textContent = estado.danoBase.geb;
     }
 
     function atualizarDanoArmaEquipada() {
@@ -316,9 +341,8 @@
             
             if (armaNome) {
                 armaNome.textContent = estado.armaEquipada.nome;
-                
                 if (danosCalculados.length > 1) {
-                    armaNome.innerHTML = `${estado.armaEquipada.nome} <span style="color:#e74c3c; font-size:0.8em;">(2 tipos)</span>`;
+                    armaNome.innerHTML = `${estado.armaEquipada.nome} <span style="color:#e74c3c; font-size:0.8em;">(${danosCalculados.length} tipos)</span>`;
                 }
             }
             
@@ -330,7 +354,7 @@
                     const containerDano = document.createElement('div');
                     containerDano.className = 'tipo-dano-item';
                     containerDano.style.cssText = `
-                        margin-bottom: ${index < danosCalculados.length - 1 ? '12px' : '0'};
+                        margin-bottom: ${index < danosCalculados.length - 1 ? '10px' : '0'};
                         padding: 10px;
                         border-radius: 8px;
                         background: ${index % 2 === 0 ? 'rgba(52, 152, 219, 0.15)' : 'rgba(155, 89, 182, 0.15)'};
@@ -339,11 +363,12 @@
                     
                     const linhaFormula = document.createElement('div');
                     linhaFormula.style.cssText = `
-                        font-size: 1.3em;
+                        font-size: 1.4em;
                         font-weight: bold;
                         color: #2c3e50;
-                        margin-bottom: 4px;
-                        font-family: monospace;
+                        margin-bottom: 5px;
+                        font-family: 'Courier New', monospace;
+                        text-align: center;
                     `;
                     linhaFormula.textContent = dano.formula;
                     
@@ -351,18 +376,27 @@
                     linhaTipo.style.cssText = `
                         font-size: 0.9em;
                         color: #7f8c8d;
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 8px;
+                        text-align: center;
+                        line-height: 1.4;
                     `;
                     
-                    let tipoTexto = `<span style="color:#e74c3c; font-weight:bold;">${dano.tipo}</span>`;
-                    if (dano.base) tipoTexto += ` <span style="color:#27ae60;">(${dano.base})</span>`;
-                    if (estado.armaEquipada.alcance && estado.armaEquipada.alcance !== '1') {
-                        tipoTexto += ` <span style="color:#3498db;">Alcance: ${estado.armaEquipada.alcance}</span>`;
+                    let tipoTexto = `<strong style="color:#e74c3c;">${dano.tipo}</strong>`;
+                    tipoTexto += ` <span style="color:#27ae60;">(${dano.base})</span>`;
+                    
+                    if (dano.alcance && dano.alcance !== '1') {
+                        tipoTexto += `<br><span style="color:#3498db;">Alcance: ${dano.alcance}</span>`;
                     }
-                    if (estado.armaEquipada.maos) {
-                        tipoTexto += ` <span style="color:#f39c12;">Mãos: ${estado.armaEquipada.maos}</span>`;
+                    
+                    if (dano.maos) {
+                        let textoMaos = '';
+                        if (dano.maos === 1.5) {
+                            textoMaos = '1 ou 2 mãos';
+                        } else if (dano.maos === 1) {
+                            textoMaos = '1 mão';
+                        } else {
+                            textoMaos = `${dano.maos} mãos`;
+                        }
+                        tipoTexto += `<br><span style="color:#f39c12;">${textoMaos}</span>`;
                     }
                     
                     linhaTipo.innerHTML = tipoTexto;
@@ -381,22 +415,14 @@
                 avisoST.style.cssText = `
                     color: #e74c3c;
                     font-size: 0.85em;
-                    margin-top: 12px;
-                    padding: 8px 12px;
+                    margin-top: 10px;
+                    padding: 8px;
                     background: rgba(231, 76, 60, 0.1);
                     border-radius: 6px;
                     border-left: 4px solid #e74c3c;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
+                    text-align: center;
                 `;
-                avisoST.innerHTML = `
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div>
-                        <strong>ST Insuficiente!</strong><br>
-                        ST atual: ${stEfetivo} | ST mínimo da arma: ${stMinimo}
-                    </div>
-                `;
+                avisoST.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ST atual (${stEfetivo}) abaixo do mínimo (${stMinimo})`;
                 
                 if (armaTipo) {
                     armaTipo.appendChild(avisoST);
@@ -411,14 +437,8 @@
             const gdpDisplay = document.getElementById('danoGdp');
             const gebDisplay = document.getElementById('danoGeb');
             
-            if (gdpDisplay) {
-                gdpDisplay.textContent = danoCorporal.gdp.formula;
-                gdpDisplay.title = `Golpe de Punho (contusão) | ST: ${danoCorporal.gdp.stAtual}`;
-            }
-            if (gebDisplay) {
-                gebDisplay.textContent = danoCorporal.geb.formula;
-                gebDisplay.title = `Golpe de Braço (contusão) | ST: ${danoCorporal.geb.stAtual}`;
-            }
+            if (gdpDisplay) gdpDisplay.textContent = danoCorporal.gdp.formula;
+            if (gebDisplay) gebDisplay.textContent = danoCorporal.geb.formula;
         }
     }
 
@@ -430,26 +450,21 @@
             const stReduzido = Math.ceil(estado.stAtual / 2);
             stDisplay.textContent = `${stReduzido} (reduzido pela fadiga)`;
             stDisplay.style.color = '#e67e22';
-            stDisplay.style.fontWeight = 'bold';
         } else {
             stDisplay.textContent = estado.stAtual;
             stDisplay.style.color = '';
-            stDisplay.style.fontWeight = '';
         }
     }
 
     // ========== INICIALIZAÇÃO ==========
 
     function inicializar() {
-        console.log('⚔️ Inicializando sistema de dano...');
-        
         monitorarST();
         monitorarFadiga();
         monitorarEquipamentos();
         
         setTimeout(() => {
             calcularEAtualizarInterface();
-            console.log('✅ Sistema de dano inicializado!');
         }, 500);
     }
 
@@ -462,7 +477,6 @@
                 if (mutation.attributeName === 'class' && 
                     combateTab.classList.contains('active')) {
                     
-                    console.log('🎯 Aba Combate ativada, inicializando sistema de dano...');
                     setTimeout(inicializar, 300);
                 }
             });
@@ -480,15 +494,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         observarAbaCombate();
     });
-
-    window.obterDanoPersonagem = function() {
-        return {
-            st: estado.stAtual,
-            danoBase: estado.danoBase,
-            armaEquipada: estado.armaEquipada,
-            fadigaAtiva: estado.fadigaAtiva
-        };
-    };
 
     console.log('🔧 sistema-dano.js carregado com sucesso!');
 
