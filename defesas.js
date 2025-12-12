@@ -1,658 +1,160 @@
-// defesas.js - SISTEMA MAIS BRABO DO MUNDO GURPS!
-class SistemaDefesasUltraBrabo {
+// defesas.js - SISTEMA 100% COMPLETO E CORRETO
+class SistemaDefesasCompleto {
     constructor() {
-        console.log('🔥🔥🔥 SISTEMA DE DEFESAS ULTRA BRABO INICIADO! 🔥🔥🔥');
+        console.log('🎮 SISTEMA DE DEFESAS COMPLETO INICIADO!');
         
-        this.ULTRA_BRABO = true;
-        this.superCache = {
-            dx: 10, ht: 10,
-            nhEscudo: null, nhArma: null,
-            bonus: { reflexos: 0, escudo: 0, capa: 0, outros: 0 },
-            defesas: { esquiva: 0, bloqueio: 0, aparar: 0, deslocamento: 0 },
-            ultimaAtualizacao: Date.now()
+        this.config = {
+            bonus: {
+                // BÔNUS QUE APLICAM EM TODAS AS DEFESAS
+                TODAS_DEFESAS: ['Outros'],
+                
+                // BÔNUS ESPECÍFICOS
+                ESPECIFICOS: {
+                    'Reflexos': ['esquiva', 'deslocamento'],
+                    'Escudo': ['bloqueio'],
+                    'Capa': ['esquiva', 'bloqueio', 'aparar', 'deslocamento']
+                }
+            },
+            
+            formulas: {
+                esquiva: (dx, ht) => Math.floor((dx + ht) / 4) + 3,
+                deslocamento: (dx, ht) => (dx + ht) / 4,
+                bloqueio: (nh) => Math.floor(nh / 2) + 3,
+                aparar: (nh) => Math.floor(nh / 2) + 3
+            },
+            
+            redutoresCarga: {
+                'nenhuma': 0,
+                'leve': -1,
+                'média': -2,
+                'pesada': -3,
+                'muito pesada': -4
+            }
         };
         
-        this.monitoresAtivos = [];
+        this.estado = {
+            atributos: { dx: 10, ht: 10 },
+            bonusValores: { Reflexos: 0, Escudo: 0, Capa: 0, Outros: 0 },
+            nh: { escudo: null, arma: null },
+            defesas: { esquiva: 0, bloqueio: 0, aparar: 0, deslocamento: 0 },
+            nivelCarga: 'nenhuma'
+        };
+        
         this.iniciado = false;
     }
     
-    // ===== INICIALIZAÇÃO ULTRA BRABA =====
+    // ===== INICIALIZAÇÃO COMPLETA =====
     iniciar() {
         if (this.iniciado) return;
-        console.log('🚀🚀🚀 INICIANDO SISTEMA ULTRA BRABO! 🚀🚀🚀');
+        console.log('🔄 INICIANDO SISTEMA COMPLETO...');
         
-        // 1. FORÇAR PRIMEIRA ATUALIZAÇÃO
-        this.atualizarTudoComForcaBruta();
+        // 1. Configurar tudo
+        this.configurarElementos();
+        this.configurarEventos();
+        this.configurarObservadores();
         
-        // 2. CONFIGURAR MONITORES BRABOS
-        this.configurarMonitoresUltraBrabos();
+        // 2. Carregar valores iniciais
+        this.carregarValoresIniciais();
         
-        // 3. INTERCEPTAR TUDO QUE MEXE
-        this.interceptarTudoQueExiste();
+        // 3. Calcular pela primeira vez
+        this.calcularTudo();
         
-        // 4. INICIAR AUTO-DEFESA (atualiza sozinho)
-        this.iniciarAutoDefesa();
+        // 4. Iniciar monitoramento
+        this.iniciarMonitoramento();
         
         this.iniciado = true;
-        console.log('✅✅✅ SISTEMA ULTRA BRABO PRONTO PARA DESTRUIR! ✅✅✅');
+        console.log('✅ SISTEMA COMPLETO PRONTO!');
     }
     
-    // ===== FORÇA BRUTA DE ATUALIZAÇÃO =====
-    atualizarTudoComForcaBruta() {
-        console.log('💪 ATUALIZANDO TUDO COM FORÇA BRUTA!');
-        
-        // Passo 1: PEGAR DADOS NA UNHA
-        this.pegarDXHTNaMarra();
-        this.pegarBonusNoGrito();
-        this.buscarPericiasComRaiva();
-        
-        // Passo 2: CALCULAR TUDO
-        this.calcularESQUIVABraba();
-        this.calcularDESLOCAMENTOBrabo();
-        this.calcularBLOQUEIOBrabo();
-        this.calcularAPARARBrabo();
-        
-        // Passo 3: ATUALIZAR TELA COM PODER
-        this.atualizarTelaComExplosao();
-        
-        // Passo 4: ATUALIZAR BÔNUS TOTAL
-        this.atualizarBonusTotalComFuria();
-        
-        this.superCache.ultimaAtualizacao = Date.now();
-        console.log('💥 ATUALIZAÇÃO BRUTAL CONCLUÍDA!');
-    }
-    
-    pegarDXHTNaMarra() {
-        // Método 1: Input direto
-        const dxInput = document.getElementById('DX');
-        const htInput = document.getElementById('HT');
-        
-        if (dxInput) {
-            this.superCache.dx = parseInt(dxInput.value) || 10;
-            console.log(`🎯 DX BRUTO: ${this.superCache.dx}`);
-        }
-        
-        if (htInput) {
-            this.superCache.ht = parseInt(htInput.value) || 10;
-            console.log(`🎯 HT BRUTO: ${this.superCache.ht}`);
-        }
-        
-        // Método 2: Procurar em qualquer lugar (nunca falha)
-        if (!dxInput || !htInput) {
-            this.procurarAtributosNoDesespero();
-        }
-    }
-    
-    procurarAtributosNoDesespero() {
-        console.log('🔍 PROCURANDO ATRIBUTOS NO DESESPERO...');
-        
-        // Varre TUDO que tem número
-        const elementos = document.querySelectorAll('input, span, div, td');
-        
-        for (let el of elementos) {
-            const texto = el.textContent || el.value || '';
+    configurarElementos() {
+        // Garantir que todos os inputs de bônus existem
+        ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonus => {
+            const id = `bonus${bonus}`;
+            let input = document.getElementById(id);
             
-            // DX em qualquer formato
-            if (texto.includes('DX') || texto.includes('dx') || texto.includes('Destreza')) {
-                const numeros = texto.match(/\d+/);
-                if (numeros && !this.superCache.dx) {
-                    this.superCache.dx = parseInt(numeros[0]);
-                    console.log(`✅ DX ENCONTRADO NO DESESPERO: ${this.superCache.dx}`);
-                }
-            }
-            
-            // HT em qualquer formato
-            if (texto.includes('HT') || texto.includes('ht') || texto.includes('Vigor')) {
-                const numeros = texto.match(/\d+/);
-                if (numeros && !this.superCache.ht) {
-                    this.superCache.ht = parseInt(numeros[0]);
-                    console.log(`✅ HT ENCONTRADO NO DESESPERO: ${this.superCache.ht}`);
-                }
-            }
-            
-            if (this.superCache.dx && this.superCache.ht) break;
-        }
-        
-        // Garantia final (nunca retorna undefined)
-        this.superCache.dx = this.superCache.dx || 10;
-        this.superCache.ht = this.superCache.ht || 10;
-    }
-    
-    pegarBonusNoGrito() {
-        console.log('💰 PEGANDO BÔNUS NO GRITO!');
-        
-        // BÔNUS REFLEXOS
-        const bonusReflexos = document.getElementById('bonusReflexos');
-        if (bonusReflexos) {
-            this.superCache.bonus.reflexos = parseInt(bonusReflexos.value) || 0;
-            console.log(`💰 Reflexos: ${this.superCache.bonus.reflexos}`);
-        }
-        
-        // BÔNUS ESCUDO
-        const bonusEscudo = document.getElementById('bonusEscudo');
-        if (bonusEscudo) {
-            this.superCache.bonus.escudo = parseInt(bonusEscudo.value) || 0;
-            console.log(`💰 Escudo: ${this.superCache.bonus.escudo}`);
-        }
-        
-        // BÔNUS CAPA
-        const bonusCapa = document.getElementById('bonusCapa');
-        if (bonusCapa) {
-            this.superCache.bonus.capa = parseInt(bonusCapa.value) || 0;
-            console.log(`💰 Capa: ${this.superCache.bonus.capa}`);
-        }
-        
-        // BÔNUS OUTROS
-        const bonusOutros = document.getElementById('bonusOutros');
-        if (bonusOutros) {
-            this.superCache.bonus.outros = parseInt(bonusOutros.value) || 0;
-            console.log(`💰 Outros: ${this.superCache.bonus.outros}`);
-        }
-    }
-    
-    buscarPericiasComRaiva() {
-        console.log('😡 BUSCANDO PERÍCIAS COM RAIVA!');
-        
-        // Limpar cache pra forçar busca
-        this.superCache.nhEscudo = null;
-        this.superCache.nhArma = null;
-        
-        // Buscar Escudo com ódio
-        this.superCache.nhEscudo = this.buscarEscudoComFuria();
-        
-        // Buscar Arma com violência
-        this.superCache.nhArma = this.buscarArmaComViolencia();
-    }
-    
-    buscarEscudoComFuria() {
-        console.log('🛡️ BUSCANDO ESCUDO COM FÚRIA!');
-        const dx = this.superCache.dx;
-        
-        // Método 1: Lista de perícias aprendidas
-        const container = document.getElementById('pericias-aprendidas');
-        if (container) {
-            const itens = container.querySelectorAll('.pericia-aprendida-item, .pericia-item');
-            
-            for (let item of itens) {
-                const nome = item.textContent || '';
-                if (nome.toLowerCase().includes('escudo')) {
-                    // Extrair nível com REGEX BRUTO
-                    const nivelMatch = nome.match(/[+-]?\d+/);
-                    const nivel = nivelMatch ? parseInt(nivelMatch[0]) : 0;
-                    const nh = dx + nivel;
-                    console.log(`🛡️ ESCUDO ENCONTRADO! Nível ${nivel}, NH ${nh}`);
-                    return nh;
-                }
-            }
-        }
-        
-        // Método 2: Catálogo
-        const catalogo = document.getElementById('lista-pericias');
-        if (catalogo) {
-            const itens = catalogo.querySelectorAll('.pericia-item');
-            
-            for (let item of itens) {
-                const nome = item.textContent || '';
-                if (nome.toLowerCase().includes('escudo')) {
-                    console.log(`🛡️ ESCUDO NO CATÁLOGO! NH mínimo: ${dx}`);
-                    return dx; // NH mínimo (só DX)
-                }
-            }
-        }
-        
-        // Método 3: localStorage (último recurso)
-        try {
-            const salvo = localStorage.getItem('periciasAprendidas');
-            if (salvo) {
-                const pericias = JSON.parse(salvo);
-                const escudo = pericias.find(p => 
-                    p.nome && p.nome.toLowerCase().includes('escudo')
-                );
-                
-                if (escudo) {
-                    const nh = dx + (escudo.nivel || 0);
-                    console.log(`🛡️ ESCUDO NO LOCALSTORAGE! NH ${nh}`);
-                    return nh;
-                }
-            }
-        } catch (e) {
-            // Ignora
-        }
-        
-        console.log(`🛡️ SEM ESCUDO, USANDO NH MÍNIMO: ${dx}`);
-        return dx; // DX puro
-    }
-    
-    buscarArmaComViolencia() {
-        console.log('⚔️ BUSCANDO ARMA COM VIOLÊNCIA!');
-        
-        // Primeiro, descobrir se tem arma equipada
-        const armaEquipada = this.descobrirArmaComForca();
-        if (!armaEquipada) {
-            console.log('⚔️ NENHUMA ARMA EQUIPADA!');
-            return 0;
-        }
-        
-        console.log(`⚔️ ARMA EQUIPADA: ${armaEquipada.nome}`);
-        const dx = this.superCache.dx;
-        
-        // Buscar perícia correspondente
-        const nh = this.buscarPericiaDaArma(armaEquipada.nome, dx);
-        
-        if (nh > 0) {
-            console.log(`⚔️ PERÍCIA DA ARMA ENCONTRADA! NH ${nh}`);
-            return nh;
-        }
-        
-        console.log(`⚔️ SEM PERÍCIA, USANDO NH MÍNIMO: ${dx}`);
-        return dx; // DX puro
-    }
-    
-    descobrirArmaComForca() {
-        // Método 1: Card de arma na aba combate
-        const comArma = document.getElementById('comArma');
-        if (comArma && comArma.style.display !== 'none') {
-            const nomeElement = comArma.querySelector('.arma-nome, .arma-nome *');
-            if (nomeElement) {
-                return { nome: nomeElement.textContent.trim(), origem: 'card-combate' };
-            }
-        }
-        
-        // Método 2: Itens equipados
-        const equipados = document.querySelectorAll('[class*="equipado"], [class*="equipada"]');
-        for (let item of equipados) {
-            const texto = item.textContent || '';
-            
-            // Lista de armas (completa)
-            const armas = ['espada', 'adaga', 'machado', 'maça', 'arco', 'lanca', 'lança',
-                          'martelo', 'faca', 'sabre', 'rapieira', 'terçado', 'bastão',
-                          'tonfa', 'pistola', 'rifle', 'shotgun', 'besta', 'funda',
-                          'katana', 'mangual', 'chicote', 'kusari', 'jitte', 'sai'];
-            
-            for (let arma of armas) {
-                if (texto.toLowerCase().includes(arma)) {
-                    return { nome: texto.split('\n')[0].trim(), origem: 'item-equipado' };
-                }
-            }
-        }
-        
-        // Método 3: Sistema de equipamentos (se disponível)
-        if (window.sistemaEquipamentos && window.sistemaEquipamentos.armasCombate) {
-            const armas = window.sistemaEquipamentos.armasCombate.maos;
-            if (armas && armas.length > 0) {
-                return { nome: armas[0].nome, origem: 'sistema-equipamentos' };
-            }
-        }
-        
-        return null;
-    }
-    
-    buscarPericiaDaArma(nomeArma, dx) {
-        const nomeLower = nomeArma.toLowerCase();
-        
-        // Mapeamento BRUTO de armas para perícias
-        const mapeamento = {
-            'adaga': ['adaga', 'faca', 'adaga de esgrima'],
-            'espada': ['espada', 'espadas', 'sabre', 'rapieira', 'terçado'],
-            'machado': ['machado', 'maça/machado', 'armas de impacto'],
-            'maça': ['maça', 'maça/machado', 'martelo'],
-            'arco': ['arco', 'besta', 'funda'],
-            'lanca': ['lança', 'bastão', 'armas de haste'],
-            'martelo': ['martelo', 'maça/machado'],
-            'faca': ['faca', 'adaga'],
-            'sabre': ['sabre', 'espada'],
-            'bastão': ['bastão', 'lança'],
-            'tonfa': ['tonfa'],
-            'pistola': ['armas de fogo', 'pistola'],
-            'rifle': ['armas de fogo', 'rifle'],
-            'shotgun': ['armas de fogo', 'espingarda']
-        };
-        
-        // Procurar perícia correspondente
-        let tipoPericia = null;
-        
-        for (const [arma, pericias] of Object.entries(mapeamento)) {
-            if (nomeLower.includes(arma)) {
-                tipoPericia = pericias[0];
-                break;
-            }
-        }
-        
-        if (!tipoPericia) {
-            // Fallback: primeira palavra da arma
-            const primeiraPalavra = nomeLower.split(' ')[0];
-            tipoPericia = primeiraPalavra;
-        }
-        
-        console.log(`🔍 Buscando perícia: "${tipoPericia}" para arma "${nomeArma}"`);
-        
-        // Buscar a perícia
-        return this.buscarPericiaPorNome(tipoPericia, dx);
-    }
-    
-    buscarPericiaPorNome(nomePericia, dx) {
-        // Buscar em TODOS os lugares possíveis
-        
-        // 1. Perícias aprendidas
-        const container = document.getElementById('pericias-aprendidas');
-        if (container) {
-            const itens = container.querySelectorAll('.pericia-aprendida-item, .pericia-item');
-            
-            for (let item of itens) {
-                const texto = item.textContent || '';
-                if (texto.toLowerCase().includes(nomePericia.toLowerCase())) {
-                    const nivelMatch = texto.match(/[+-]?\d+/);
-                    const nivel = nivelMatch ? parseInt(nivelMatch[0]) : 0;
-                    return dx + nivel;
-                }
-            }
-        }
-        
-        // 2. localStorage
-        try {
-            const salvo = localStorage.getItem('periciasAprendidas');
-            if (salvo) {
-                const pericias = JSON.parse(salvo);
-                const pericia = pericias.find(p => 
-                    p.nome && p.nome.toLowerCase().includes(nomePericia.toLowerCase())
-                );
-                
-                if (pericia) {
-                    return dx + (pericia.nivel || 0);
-                }
-            }
-        } catch (e) {
-            // Ignora
-        }
-        
-        return 0; // Não encontrou
-    }
-    
-    // ===== CÁLCULOS BRABOS =====
-    calcularESQUIVABraba() {
-        console.log('🏃 CALCULANDO ESQUIVA BRABA!');
-        
-        const { dx, ht } = this.superCache;
-        const { reflexos, outros } = this.superCache.bonus;
-        
-        // Base: floor((DX + HT)/4) + 3
-        const base = Math.floor((dx + ht) / 4) + 3;
-        
-        // Modificador
-        const modInput = document.getElementById('esquivaMod');
-        const modificador = modInput ? parseInt(modInput.value) || 0 : 0;
-        
-        // Redutor de carga
-        const nivelCarga = document.getElementById('nivelCarga')?.textContent.toLowerCase() || 'nenhuma';
-        const redutor = this.getRedutorCarga(nivelCarga);
-        
-        // Total COM BÔNUS
-        const total = base + modificador + reflexos + outros + redutor;
-        
-        this.superCache.defesas.esquiva = Math.max(total, 1);
-        console.log(`🏃 ESQUIVA: ${this.superCache.defesas.esquiva} (base:${base} +reflexos:${reflexos} +outros:${outros})`);
-    }
-    
-    calcularDESLOCAMENTOBrabo() {
-        console.log('👣 CALCULANDO DESLOCAMENTO BRABO!');
-        
-        const { dx, ht } = this.superCache;
-        const { outros } = this.superCache.bonus;
-        
-        // Base: (DX + HT)/4
-        const base = (dx + ht) / 4;
-        
-        // Modificador
-        const modInput = document.getElementById('deslocamentoMod');
-        const modificador = modInput ? parseInt(modInput.value) || 0 : 0;
-        
-        // Redutor de carga
-        const nivelCarga = document.getElementById('nivelCarga')?.textContent.toLowerCase() || 'nenhuma';
-        const redutor = this.getRedutorCarga(nivelCarga);
-        
-        // Total COM BÔNUS
-        const total = base + modificador + outros + redutor;
-        
-        this.superCache.defesas.deslocamento = Math.max(total, 0);
-        console.log(`👣 DESLOCAMENTO: ${total.toFixed(2)} (base:${base.toFixed(2)} +outros:${outros})`);
-    }
-    
-    calcularBLOQUEIOBrabo() {
-        console.log('🛡️ CALCULANDO BLOQUEIO BRABO!');
-        
-        const nhEscudo = this.superCache.nhEscudo || this.superCache.dx;
-        const { escudo, outros } = this.superCache.bonus;
-        
-        // Base: floor(NH/2) + 3
-        const base = Math.floor(nhEscudo / 2) + 3;
-        
-        // Modificador
-        const modInput = document.getElementById('bloqueioMod');
-        const modificador = modInput ? parseInt(modInput.value) || 0 : 0;
-        
-        // Total COM BÔNUS DO ESCUDO E OUTROS
-        const total = base + modificador + escudo + outros;
-        
-        this.superCache.defesas.bloqueio = Math.max(total, 1);
-        console.log(`🛡️ BLOQUEIO: ${total} (NH:${nhEscudo} base:${base} +escudo:${escudo} +outros:${outros})`);
-    }
-    
-    calcularAPARARBrabo() {
-        console.log('⚔️ CALCULANDO APARAR BRABO!');
-        
-        const nhArma = this.superCache.nhArma;
-        const { outros } = this.superCache.bonus;
-        
-        if (!nhArma || nhArma <= 0) {
-            this.superCache.defesas.aparar = 0;
-            console.log('⚔️ APARAR: Nenhuma arma equipada');
-            return;
-        }
-        
-        // Base: floor(NH/2) + 3
-        const base = Math.floor(nhArma / 2) + 3;
-        
-        // Modificador
-        const modInput = document.getElementById('apararMod');
-        const modificador = modInput ? parseInt(modInput.value) || 0 : 0;
-        
-        // Total COM BÔNUS OUTROS
-        const total = base + modificador + outros;
-        
-        this.superCache.defesas.aparar = Math.max(total, 1);
-        console.log(`⚔️ APARAR: ${total} (NH:${nhArma} base:${base} +outros:${outros})`);
-    }
-    
-    getRedutorCarga(nivelCarga) {
-        const redutores = {
-            'nenhuma': 0,
-            'leve': -1,
-            'média': -2,
-            'pesada': -3,
-            'muito pesada': -4,
-            'sobrecarregado': -4
-        };
-        return redutores[nivelCarga] || 0;
-    }
-    
-    // ===== ATUALIZAÇÃO DA TELA =====
-    atualizarTelaComExplosao() {
-        console.log('💥 ATUALIZANDO TELA COM EXPLOSÃO!');
-        
-        // ESQUIVA
-        const esquivaTotal = document.getElementById('esquivaTotal');
-        if (esquivaTotal) {
-            esquivaTotal.textContent = this.superCache.defesas.esquiva;
-        }
-        
-        // DESLOCAMENTO
-        const deslocamentoTotal = document.getElementById('deslocamentoTotal');
-        if (deslocamentoTotal) {
-            deslocamentoTotal.textContent = this.superCache.defesas.deslocamento.toFixed(2);
-        }
-        
-        // BLOQUEIO
-        const bloqueioTotal = document.getElementById('bloqueioTotal');
-        if (bloqueioTotal) {
-            bloqueioTotal.textContent = this.superCache.defesas.bloqueio;
-        }
-        
-        // APARAR
-        const apararTotal = document.getElementById('apararTotal');
-        if (apararTotal) {
-            apararTotal.textContent = this.superCache.defesas.aparar || 0;
-        }
-        
-        // MODIFICADORES (mantém o que usuário digitou)
-        this.atualizarModificadores();
-    }
-    
-    atualizarModificadores() {
-        // Só atualiza se mudou no cache
-        const defesas = ['esquiva', 'bloqueio', 'aparar', 'deslocamento'];
-        
-        defesas.forEach(defesa => {
-            const input = document.getElementById(`${defesa}Mod`);
-            if (input) {
-                // Não sobrescreve o que o usuário digitou
-                // Só atualiza se for NaN
-                if (isNaN(parseInt(input.value))) {
-                    input.value = '0';
-                }
+            if (!input) {
+                // Se não existe, cria (só por segurança)
+                console.log(`⚠️ Input ${id} não encontrado, criando...`);
+                input = document.createElement('input');
+                input.id = id;
+                input.type = 'number';
+                input.value = '0';
+                input.className = 'bonus-input';
+                document.body.appendChild(input);
             }
         });
     }
     
-    atualizarBonusTotalComFuria() {
-        console.log('💰💰💰 ATUALIZANDO BÔNUS TOTAL COM FÚRIA!');
-        
-        const { reflexos, escudo, capa, outros } = this.superCache.bonus;
-        const total = reflexos + escudo + capa + outros;
-        
-        const totalElement = document.getElementById('totalBonus');
-        if (totalElement) {
-            totalElement.textContent = total >= 0 ? `+${total}` : `${total}`;
-            console.log(`💰 BÔNUS TOTAL: ${total >= 0 ? '+' : ''}${total}`);
-        }
-    }
-    
-    // ===== MONITORES ULTRA BRABOS =====
-    configurarMonitoresUltraBrabos() {
-        console.log('👁️‍🗨️👁️‍🗨️👁️‍🗨️ CONFIGURANDO MONITORES ULTRA BRABOS! 👁️‍🗨️👁️‍🗨️👁️‍🗨️');
-        
-        // Monitorar INPUTS DE BÔNUS (IMPORTANTE!)
-        this.monitorarBonusComLoucura();
-        
-        // Monitorar ATRIBUTOS
-        this.monitorarAtributosComVigor();
-        
-        // Monitorar CARGA
-        this.monitorarCargaComForca();
-        
-        // Monitorar EQUIPAMENTOS
-        this.monitorarEquipamentosComRaiva();
-        
-        // Monitorar PERÍCIAS
-        this.monitorarPericiasComOdio();
-        
-        // Monitorar QUALQUER MUDANÇA NO DOM
-        this.monitorarTudoQueSeMexe();
-    }
-    
-    monitorarBonusComLoucura() {
-        console.log('💰 MONITORANDO BÔNUS COM LOUCURA!');
-        
-        const bonusIds = ['Reflexos', 'Escudo', 'Capa', 'Outros'];
-        
-        bonusIds.forEach(bonus => {
+    configurarEventos() {
+        // Eventos para cada bônus
+        ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonus => {
             const input = document.getElementById(`bonus${bonus}`);
             if (input) {
-                // Evento de input (em tempo real)
+                // Quando muda o valor
                 input.addEventListener('input', () => {
-                    console.log(`💰 Bônus ${bonus} alterado: ${input.value}`);
-                    this.superCache.bonus[bonus.toLowerCase()] = parseInt(input.value) || 0;
-                    this.atualizarTudoComForcaBruta();
+                    this.estado.bonusValores[bonus] = parseInt(input.value) || 0;
+                    this.calcularTudo();
                 });
                 
-                // Evento de change (quando termina de digitar)
                 input.addEventListener('change', () => {
-                    console.log(`💰 Bônus ${bonus} confirmado: ${input.value}`);
-                    this.superCache.bonus[bonus.toLowerCase()] = parseInt(input.value) || 0;
-                    this.atualizarTudoComForcaBruta();
+                    this.estado.bonusValores[bonus] = parseInt(input.value) || 0;
+                    this.calcularTudo();
                 });
-                
-                // Valor inicial
-                this.superCache.bonus[bonus.toLowerCase()] = parseInt(input.value) || 0;
             }
         });
-    }
-    
-    monitorarAtributosComVigor() {
+        
+        // Eventos para modificadores de defesa
+        ['esquiva', 'bloqueio', 'aparar', 'deslocamento'].forEach(defesa => {
+            const input = document.getElementById(`${defesa}Mod`);
+            if (input) {
+                input.addEventListener('change', () => {
+                    this.calcularTudo();
+                });
+            }
+        });
+        
+        // Eventos para atributos
         ['DX', 'HT'].forEach(atributo => {
             const input = document.getElementById(atributo);
             if (input) {
                 input.addEventListener('input', () => {
-                    setTimeout(() => {
-                        this.superCache[atributo.toLowerCase()] = parseInt(input.value) || 10;
-                        this.atualizarTudoComForcaBruta();
-                    }, 300);
+                    this.estado.atributos[atributo.toLowerCase()] = parseInt(input.value) || 10;
+                    this.calcularTudo();
                 });
-                
-                // Observador de mutations (catch all)
-                const observer = new MutationObserver(() => {
-                    this.superCache[atributo.toLowerCase()] = parseInt(input.value) || 10;
-                    this.atualizarTudoComForcaBruta();
-                });
-                
-                observer.observe(input, { attributes: true, attributeFilter: ['value'] });
             }
         });
     }
     
-    monitorarCargaComForca() {
+    configurarObservadores() {
+        // Observar nível de carga
         const cargaElement = document.getElementById('nivelCarga');
         if (cargaElement) {
             const observer = new MutationObserver(() => {
-                console.log('🏋️ Carga alterada!');
-                this.atualizarTudoComForcaBruta();
+                this.estado.nivelCarga = cargaElement.textContent.toLowerCase().trim();
+                this.calcularTudo();
             });
             
             observer.observe(cargaElement, { 
                 childList: true, 
-                characterData: true,
-                subtree: true 
+                characterData: true 
             });
         }
-    }
-    
-    monitorarEquipamentosComRaiva() {
-        // Observa o card da arma
-        const armaInfo = document.getElementById('armaInfo');
-        if (armaInfo) {
-            const observer = new MutationObserver(() => {
-                console.log('⚔️ Arma alterada!');
-                setTimeout(() => this.atualizarTudoComForcaBruta(), 500);
-            });
-            
-            observer.observe(armaInfo, { 
-                childList: true, 
-                attributes: true,
-                subtree: true 
-            });
-        }
-    }
-    
-    monitorarPericiasComOdio() {
-        // Observa container de perícias
-        const container = document.getElementById('pericias-aprendidas') || 
-                         document.getElementById('lista-pericias');
         
+        // Observar mudanças em perícias
+        this.configurarObservadorPericias();
+        
+        // Observar mudanças em equipamentos
+        this.configurarObservadorEquipamentos();
+    }
+    
+    configurarObservadorPericias() {
+        const container = document.getElementById('pericias-aprendidas');
         if (container) {
             const observer = new MutationObserver(() => {
-                console.log('📚 Perícias alteradas!');
-                this.superCache.nhEscudo = null;
-                this.superCache.nhArma = null;
-                setTimeout(() => this.atualizarTudoComForcaBruta(), 700);
+                console.log('📚 Perícias atualizadas!');
+                this.estado.nh.escudo = null;
+                this.estado.nh.arma = null;
+                setTimeout(() => this.calcularTudo(), 300);
             });
             
             observer.observe(container, { 
@@ -662,152 +164,458 @@ class SistemaDefesasUltraBrabo {
         }
     }
     
-    monitorarTudoQueSeMexe() {
-        // Observador global (só pra garantir)
-        const observer = new MutationObserver((mutations) => {
-            let relevante = false;
+    configurarObservadorEquipamentos() {
+        const armaInfo = document.getElementById('armaInfo');
+        if (armaInfo) {
+            const observer = new MutationObserver(() => {
+                console.log('⚔️ Equipamento alterado!');
+                this.estado.nh.arma = null;
+                setTimeout(() => this.calcularTudo(), 300);
+            });
             
-            for (const mutation of mutations) {
-                const target = mutation.target;
-                const id = target.id || '';
-                const text = target.textContent || '';
-                
-                // Se mexeu em algo relacionado a defesas
-                if (id.includes('defesa') || id.includes('bonus') || id.includes('arma') ||
-                    text.includes('Escudo') || text.includes('NH') || text.includes('nível') ||
-                    text.includes('equipado') || text.includes('carga')) {
-                    relevante = true;
+            observer.observe(armaInfo, { 
+                childList: true, 
+                attributes: true 
+            });
+        }
+    }
+    
+    carregarValoresIniciais() {
+        // Carregar atributos
+        const dxInput = document.getElementById('DX');
+        const htInput = document.getElementById('HT');
+        
+        if (dxInput) this.estado.atributos.dx = parseInt(dxInput.value) || 10;
+        if (htInput) this.estado.atributos.ht = parseInt(htInput.value) || 10;
+        
+        // Carregar bônus
+        ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonus => {
+            const input = document.getElementById(`bonus${bonus}`);
+            if (input) {
+                this.estado.bonusValores[bonus] = parseInt(input.value) || 0;
+            }
+        });
+        
+        // Carregar nível de carga
+        const cargaElement = document.getElementById('nivelCarga');
+        if (cargaElement) {
+            this.estado.nivelCarga = cargaElement.textContent.toLowerCase().trim();
+        }
+    }
+    
+    iniciarMonitoramento() {
+        // Atualização periódica (só pra garantir)
+        setInterval(() => {
+            this.verificarMudancas();
+        }, 2000);
+    }
+    
+    verificarMudancas() {
+        // Verifica se algo mudou desde a última atualização
+        let mudou = false;
+        
+        // Verificar atributos
+        const dxInput = document.getElementById('DX');
+        const htInput = document.getElementById('HT');
+        
+        if (dxInput) {
+            const novoDX = parseInt(dxInput.value) || 10;
+            if (novoDX !== this.estado.atributos.dx) {
+                this.estado.atributos.dx = novoDX;
+                mudou = true;
+            }
+        }
+        
+        if (htInput) {
+            const novoHT = parseInt(htInput.value) || 10;
+            if (novoHT !== this.estado.atributos.ht) {
+                this.estado.atributos.ht = novoHT;
+                mudou = true;
+            }
+        }
+        
+        // Verificar bônus
+        ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonus => {
+            const input = document.getElementById(`bonus${bonus}`);
+            if (input) {
+                const novoValor = parseInt(input.value) || 0;
+                if (novoValor !== this.estado.bonusValores[bonus]) {
+                    this.estado.bonusValores[bonus] = novoValor;
+                    mudou = true;
+                }
+            }
+        });
+        
+        if (mudou) {
+            this.calcularTudo();
+        }
+    }
+    
+    // ===== CÁLCULOS COMPLETOS =====
+    calcularTudo() {
+        console.log('🧮 CALCULANDO TUDO...');
+        
+        // 1. Buscar NH atualizado
+        this.buscarNHAtual();
+        
+        // 2. Calcular cada defesa
+        this.calcularEsquiva();
+        this.calcularDeslocamento();
+        this.calcularBloqueio();
+        this.calcularAparar();
+        
+        // 3. Atualizar interface
+        this.atualizarInterface();
+        
+        // 4. Atualizar total de bônus
+        this.atualizarTotalBonus();
+        
+        console.log('✅ CÁLCULO COMPLETO!');
+    }
+    
+    buscarNHAtual() {
+        // Buscar NH do Escudo
+        if (this.estado.nh.escudo === null) {
+            this.estado.nh.escudo = this.calcularNHEscudo();
+        }
+        
+        // Buscar NH da Arma
+        if (this.estado.nh.arma === null) {
+            this.estado.nh.arma = this.calcularNHArma();
+        }
+    }
+    
+    calcularNHEscudo() {
+        const dx = this.estado.atributos.dx;
+        
+        // Procurar perícia de Escudo
+        let nivelEscudo = 0;
+        
+        // Procurar na lista de perícias
+        const itens = document.querySelectorAll('.pericia-aprendida-item');
+        for (let item of itens) {
+            const nome = item.querySelector('.pericia-aprendida-nome');
+            if (nome && nome.textContent.toLowerCase().includes('escudo')) {
+                const nivel = item.querySelector('.pericia-aprendida-nivel');
+                if (nivel) {
+                    const texto = nivel.textContent.replace('+', '');
+                    nivelEscudo = parseInt(texto) || 0;
                     break;
                 }
             }
-            
-            if (relevante) {
-                console.log('👀 Algo relevante se mexeu!');
-                setTimeout(() => this.atualizarTudoComForcaBruta(), 1000);
+        }
+        
+        return dx + nivelEscudo;
+    }
+    
+    calcularNHArma() {
+        // Verificar se tem arma equipada
+        const comArma = document.getElementById('comArma');
+        if (!comArma || comArma.style.display === 'none') {
+            return 0; // Nenhuma arma equipada
+        }
+        
+        const dx = this.estado.atributos.dx;
+        
+        // Buscar nome da arma
+        const armaNome = comArma.querySelector('.arma-nome');
+        if (!armaNome) return dx; // Retorna DX mínimo
+        
+        const nomeArma = armaNome.textContent.toLowerCase();
+        
+        // Buscar perícia correspondente
+        let nivelArma = 0;
+        
+        // Procurar na lista de perícias
+        const itens = document.querySelectorAll('.pericia-aprendida-item');
+        for (let item of itens) {
+            const nomePericia = item.querySelector('.pericia-aprendida-nome');
+            if (nomePericia) {
+                const nome = nomePericia.textContent.toLowerCase();
+                
+                // Verificar correspondência
+                if (this.periciaCorrespondeArma(nome, nomeArma)) {
+                    const nivel = item.querySelector('.pericia-aprendida-nivel');
+                    if (nivel) {
+                        const texto = nivel.textContent.replace('+', '');
+                        nivelArma = parseInt(texto) || 0;
+                        break;
+                    }
+                }
             }
-        });
+        }
         
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            characterData: true
-        });
+        return dx + nivelArma;
     }
     
-    // ===== INTERCEPTAÇÃO =====
-    interceptarTudoQueExiste() {
-        console.log('🎯 INTERCEPTANDO TUDO QUE EXISTE!');
+    periciaCorrespondeArma(nomePericia, nomeArma) {
+        // Mapeamento simples
+        const mapeamento = {
+            'adaga': ['adaga', 'faca'],
+            'espada': ['espada', 'sabre', 'rapieira', 'terçado'],
+            'arco': ['arco', 'besta', 'funda'],
+            'machado': ['machado', 'maça/machado'],
+            'maça': ['maça', 'maça/machado', 'martelo'],
+            'lanca': ['lança', 'bastão'],
+            'pistola': ['armas de fogo'],
+            'rifle': ['armas de fogo'],
+            'shotgun': ['armas de fogo']
+        };
         
-        // Intercepta cliques nos botões de modificador
-        document.querySelectorAll('.minus, .plus, .mod-btn').forEach(btn => {
-            const originalClick = btn.onclick;
-            
-            btn.onclick = (e) => {
-                if (originalClick) originalClick(e);
-                setTimeout(() => this.atualizarTudoComForcaBruta(), 100);
-            };
-        });
-        
-        // Intercepta inputs de modificador
-        document.querySelectorAll('input[type="number"]').forEach(input => {
-            if (input.id && input.id.includes('Mod')) {
-                input.addEventListener('change', () => {
-                    setTimeout(() => this.atualizarTudoComForcaBruta(), 100);
-                });
+        for (const [pericia, armas] of Object.entries(mapeamento)) {
+            if (nomePericia.includes(pericia)) {
+                for (const arma of armas) {
+                    if (nomeArma.includes(arma)) {
+                        return true;
+                    }
+                }
             }
-        });
+        }
+        
+        return false;
     }
     
-    // ===== AUTO-DEFESA (atualiza sozinho) =====
-    iniciarAutoDefesa() {
-        console.log('🤖 INICIANDO AUTO-DEFESA!');
+    // ===== CÁLCULO DE CADA DEFESA =====
+    calcularEsquiva() {
+        const { dx, ht } = this.estado.atributos;
         
-        // Atualiza a cada 5 segundos (só pra garantir)
-        setInterval(() => {
-            this.atualizarTudoComForcaBruta();
-        }, 5000);
+        // Base da fórmula
+        const base = this.config.formulas.esquiva(dx, ht);
+        
+        // Modificador
+        const modInput = document.getElementById('esquivaMod');
+        const modificador = modInput ? parseInt(modInput.value) || 0 : 0;
+        
+        // Bônus que se aplicam à esquiva
+        let bonusTotal = 0;
+        
+        // "Outros" aplica em tudo
+        bonusTotal += this.estado.bonusValores.Outros || 0;
+        
+        // "Reflexos" aplica na esquiva
+        bonusTotal += this.estado.bonusValores.Reflexos || 0;
+        
+        // "Capa" aplica na esquiva
+        bonusTotal += this.estado.bonusValores.Capa || 0;
+        
+        // Redutor de carga
+        const redutor = this.config.redutoresCarga[this.estado.nivelCarga] || 0;
+        
+        // Total
+        const total = base + modificador + bonusTotal + redutor;
+        
+        this.estado.defesas.esquiva = Math.max(total, 1);
     }
     
-    // ===== FUNÇÕES PÚBLICAS ULTRA BRABAS =====
-    mostrarStatusBrabo() {
-        console.log('=== 🦾 STATUS DO SISTEMA ULTRA BRABO 🦾 ===');
-        console.log('💪 Atributos:', { DX: this.superCache.dx, HT: this.superCache.ht });
-        console.log('💰 Bônus:', this.superCache.bonus);
-        console.log('🎯 NHs:', { Escudo: this.superCache.nhEscudo, Arma: this.superCache.nhArma });
-        console.log('🛡️ Defesas:', this.superCache.defesas);
-        console.log('⏰ Última atualização:', new Date(this.superCache.ultimaAtualizacao).toLocaleTimeString());
-        console.log('===========================================');
+    calcularDeslocamento() {
+        const { dx, ht } = this.estado.atributos;
+        
+        // Base da fórmula
+        const base = this.config.formulas.deslocamento(dx, ht);
+        
+        // Modificador
+        const modInput = document.getElementById('deslocamentoMod');
+        const modificador = modInput ? parseInt(modInput.value) || 0 : 0;
+        
+        // Bônus que se aplicam ao deslocamento
+        let bonusTotal = 0;
+        
+        // "Outros" aplica em tudo
+        bonusTotal += this.estado.bonusValores.Outros || 0;
+        
+        // "Reflexos" aplica no deslocamento
+        bonusTotal += this.estado.bonusValores.Reflexos || 0;
+        
+        // "Capa" aplica no deslocamento
+        bonusTotal += this.estado.bonusValores.Capa || 0;
+        
+        // Redutor de carga
+        const redutor = this.config.redutoresCarga[this.estado.nivelCarga] || 0;
+        
+        // Total
+        const total = base + modificador + bonusTotal + redutor;
+        
+        this.estado.defesas.deslocamento = Math.max(total, 0);
     }
     
-    testarTudoBrabo() {
-        console.log('🧪🧪🧪 TESTANDO TUDO BRABO! 🧪🧪🧪');
-        this.mostrarStatusBrabo();
+    calcularBloqueio() {
+        const nhEscudo = this.estado.nh.escudo || this.estado.atributos.dx;
         
-        // Testa cada bônus
-        console.log('💰 Testando cálculo de bônus...');
-        const totalBonus = this.superCache.bonus.reflexos + 
-                          this.superCache.bonus.escudo + 
-                          this.superCache.bonus.capa + 
-                          this.superCache.bonus.outros;
-        console.log(`💰 Bônus total calculado: ${totalBonus}`);
+        // Base da fórmula
+        const base = this.config.formulas.bloqueio(nhEscudo);
         
-        // Testa se está sendo aplicado
-        console.log('🎯 Verificando aplicação de bônus...');
-        console.log(`🏃 Esquiva tem +${this.superCache.bonus.reflexos + this.superCache.bonus.outros} de bônus`);
-        console.log(`🛡️ Bloqueio tem +${this.superCache.bonus.escudo + this.superCache.bonus.outros} de bônus`);
-        console.log(`⚔️ Aparar tem +${this.superCache.bonus.outros} de bônus`);
-        console.log(`👣 Deslocamento tem +${this.superCache.bonus.outros} de bônus`);
+        // Modificador
+        const modInput = document.getElementById('bloqueioMod');
+        const modificador = modInput ? parseInt(modInput.value) || 0 : 0;
         
-        console.log('✅✅✅ TESTE BRABO CONCLUÍDO! ✅✅✅');
+        // Bônus que se aplicam ao bloqueio
+        let bonusTotal = 0;
+        
+        // "Outros" aplica em tudo
+        bonusTotal += this.estado.bonusValores.Outros || 0;
+        
+        // "Escudo" aplica no bloqueio
+        bonusTotal += this.estado.bonusValores.Escudo || 0;
+        
+        // "Capa" aplica no bloqueio
+        bonusTotal += this.estado.bonusValores.Capa || 0;
+        
+        // Total
+        const total = base + modificador + bonusTotal;
+        
+        this.estado.defesas.bloqueio = Math.max(total, 1);
+    }
+    
+    calcularAparar() {
+        const nhArma = this.estado.nh.arma;
+        
+        if (!nhArma || nhArma <= 0) {
+            this.estado.defesas.aparar = 0;
+            return;
+        }
+        
+        // Base da fórmula
+        const base = this.config.formulas.aparar(nhArma);
+        
+        // Modificador
+        const modInput = document.getElementById('apararMod');
+        const modificador = modInput ? parseInt(modInput.value) || 0 : 0;
+        
+        // Bônus que se aplicam ao aparar
+        let bonusTotal = 0;
+        
+        // "Outros" aplica em tudo
+        bonusTotal += this.estado.bonusValores.Outros || 0;
+        
+        // "Capa" aplica no aparar
+        bonusTotal += this.estado.bonusValores.Capa || 0;
+        
+        // Total
+        const total = base + modificador + bonusTotal;
+        
+        this.estado.defesas.aparar = Math.max(total, 1);
+    }
+    
+    // ===== ATUALIZAÇÃO DA INTERFACE =====
+    atualizarInterface() {
+        // Atualizar cada valor total
+        this.atualizarElemento('esquivaTotal', this.estado.defesas.esquiva);
+        this.atualizarElemento('deslocamentoTotal', this.estado.defesas.deslocamento.toFixed(2));
+        this.atualizarElemento('bloqueioTotal', this.estado.defesas.bloqueio);
+        this.atualizarElemento('apararTotal', this.estado.defesas.aparar || 0);
+    }
+    
+    atualizarElemento(id, valor) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = valor;
+        }
+    }
+    
+    atualizarTotalBonus() {
+        // Calcular total de todos os bônus
+        const total = this.estado.bonusValores.Reflexos + 
+                     this.estado.bonusValores.Escudo + 
+                     this.estado.bonusValores.Capa + 
+                     this.estado.bonusValores.Outros;
+        
+        const totalElement = document.getElementById('totalBonus');
+        if (totalElement) {
+            totalElement.textContent = total >= 0 ? `+${total}` : `${total}`;
+        }
+    }
+    
+    // ===== FUNÇÕES PÚBLICAS =====
+    mostrarStatus() {
+        console.log('=== 📊 STATUS DO SISTEMA 📊 ===');
+        console.log('🎯 Atributos:', this.estado.atributos);
+        console.log('💰 Bônus:', this.estado.bonusValores);
+        console.log('📊 NH:', this.estado.nh);
+        console.log('🛡️ Defesas:', this.estado.defesas);
+        console.log('🏋️ Carga:', this.estado.nivelCarga);
+        console.log('===============================');
+    }
+    
+    testarBônus() {
+        console.log('🧪 TESTANDO APLICAÇÃO DE BÔNUS...');
+        
+        console.log('💰 Bônus Reflexos:', this.estado.bonusValores.Reflexos);
+        console.log('   → Aplica em: Esquiva, Deslocamento');
+        
+        console.log('💰 Bônus Escudo:', this.estado.bonusValores.Escudo);
+        console.log('   → Aplica em: Bloqueio');
+        
+        console.log('💰 Bônus Capa:', this.estado.bonusValores.Capa);
+        console.log('   → Aplica em: Esquiva, Bloqueio, Aparar, Deslocamento');
+        
+        console.log('💰 Bônus Outros:', this.estado.bonusValores.Outros);
+        console.log('   → Aplica em: TODAS as defesas');
+        
+        console.log('🎯 Verificando cálculos...');
+        console.log(`🏃 Esquiva: +${this.estado.bonusValores.Reflexos + this.estado.bonusValores.Capa + this.estado.bonusValores.Outros} de bônus`);
+        console.log(`🛡️ Bloqueio: +${this.estado.bonusValores.Escudo + this.estado.bonusValores.Capa + this.estado.bonusValores.Outros} de bônus`);
+        console.log(`⚔️ Aparar: +${this.estado.bonusValores.Capa + this.estado.bonusValores.Outros} de bônus`);
+        console.log(`👣 Deslocamento: +${this.estado.bonusValores.Reflexos + this.estado.bonusValores.Capa + this.estado.bonusValores.Outros} de bônus`);
+        
+        console.log('✅ TESTE COMPLETO!');
+    }
+    
+    forcarAtualizacao() {
+        console.log('🔄 FORÇANDO ATUALIZAÇÃO COMPLETA...');
+        this.estado.nh.escudo = null;
+        this.estado.nh.arma = null;
+        this.calcularTudo();
     }
 }
 
-// ===== INICIALIZAÇÃO DO APOCALIPSE =====
-let sistemaUltraBrabo;
+// ===== INICIALIZAÇÃO AUTOMÁTICA =====
+let sistemaCompleto;
 
-function iniciarSistemaDoApocalypse() {
-    if (sistemaUltraBrabo) {
+function iniciarSistemaCompleto() {
+    if (sistemaCompleto) {
         console.log('⚠️ Sistema já está ativo!');
-        sistemaUltraBrabo.mostrarStatusBrabo();
-        return sistemaUltraBrabo;
+        return sistemaCompleto;
     }
     
-    console.log('🌋🌋🌋 INICIANDO SISTEMA DO APOCALIPSE! 🌋🌋🌋');
-    sistemaUltraBrabo = new SistemaDefesasUltraBrabo();
-    window.sistemaDefesasUltraBrabo = sistemaUltraBrabo;
+    console.log('🚀 INICIANDO SISTEMA COMPLETO...');
+    sistemaCompleto = new SistemaDefesasCompleto();
+    window.sistemaDefesasCompleto = sistemaCompleto;
     
-    // ESPERAR PÁGINA CARREGAR COMPLETAMENTE
+    // Esperar página carregar
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => sistemaUltraBrabo.iniciar(), 800);
+            setTimeout(() => sistemaCompleto.iniciar(), 500);
         });
     } else {
-        setTimeout(() => sistemaUltraBrabo.iniciar(), 800);
+        setTimeout(() => sistemaCompleto.iniciar(), 500);
     }
     
-    return sistemaUltraBrabo;
+    return sistemaCompleto;
 }
 
-// INICIA AUTOMATICAMENTE QUANDO COMBATE É ABERTO
+// Iniciar quando aba de combate abrir
 document.addEventListener('DOMContentLoaded', function() {
     const combateTab = document.getElementById('combate');
     
-    function iniciarQuandoCombateAtivo() {
+    function verificarEIniciar() {
         if (combateTab && combateTab.classList.contains('active')) {
-            console.log('🎯 ABA DE COMBATE DETECTADA! INICIANDO...');
-            iniciarSistemaDoApocalypse();
+            if (!window.sistemaDefesasCompleto) {
+                setTimeout(() => {
+                    iniciarSistemaCompleto();
+                }, 300);
+            }
         }
     }
     
     // Verificar inicialmente
-    iniciarQuandoCombateAtivo();
+    verificarEIniciar();
     
     // Observar mudanças
     if (combateTab) {
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    iniciarQuandoCombateAtivo();
+                    verificarEIniciar();
                 }
             });
         });
@@ -816,38 +624,41 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ===== FUNÇÕES GLOBAIS MEGA BRABAS =====
-window.testarSistemaApocalypse = function() {
-    if (!window.sistemaDefesasUltraBrabo) {
-        console.log('❌ Sistema não iniciado. INICIANDO COM PODER...');
-        iniciarSistemaDoApocalypse();
-        return;
-    }
-    window.sistemaDefesasUltraBrabo.testarTudoBrabo();
-};
-
-window.mostrarStatusApocalypse = function() {
-    if (window.sistemaDefesasUltraBrabo) {
-        window.sistemaDefesasUltraBrabo.mostrarStatusBrabo();
+// ===== FUNÇÕES GLOBAIS =====
+window.mostrarStatusDefesas = function() {
+    if (window.sistemaDefesasCompleto) {
+        window.sistemaDefesasCompleto.mostrarStatus();
     } else {
-        console.log('❌ Sistema não está ativo!');
+        console.log('❌ Sistema não iniciado. Use iniciarSistemaCompleto()');
     }
 };
 
-window.forcarAtualizacaoApocalypse = function() {
-    if (window.sistemaDefesasUltraBrabo) {
-        console.log('💥💥💥 FORÇANDO ATUALIZAÇÃO APOCALÍPTICA! 💥💥💥');
-        window.sistemaDefesasUltraBrabo.atualizarTudoComForcaBruta();
+window.testarBonusDefesas = function() {
+    if (window.sistemaDefesasCompleto) {
+        window.sistemaDefesasCompleto.testarBônus();
     } else {
-        console.log('⚠️ Iniciando sistema primeiro...');
-        iniciarSistemaDoApocalypse();
+        console.log('❌ Sistema não iniciado.');
     }
 };
 
-// ATALHO RÁPIDO
-window.D = function() { window.forcarAtualizacaoApocalypse(); };
+window.atualizarDefesas = function() {
+    if (window.sistemaDefesasCompleto) {
+        window.sistemaDefesasCompleto.forcarAtualizacao();
+    } else {
+        console.log('❌ Sistema não iniciado.');
+    }
+};
 
-console.log('🔥🔥🔥 SISTEMA DE DEFESAS ULTRA BRABO CARREGADO! 🔥🔥🔥');
-console.log('💡 Use testarSistemaApocalypse() para testar tudo!');
-console.log('💡 Use mostrarStatusApocalypse() para ver status!');
-console.log('💡 Use forcarAtualizacaoApocalypse() ou D() para forçar atualização!');
+// Atalho rápido
+window.DC = function() { // Defesas Completas
+    if (!window.sistemaDefesasCompleto) {
+        iniciarSistemaCompleto();
+    } else {
+        window.sistemaDefesasCompleto.forcarAtualizacao();
+    }
+};
+
+console.log('✅ SISTEMA DE DEFESAS COMPLETO CARREGADO!');
+console.log('💡 Use mostrarStatusDefesas() para ver status');
+console.log('💡 Use testarBonusDefesas() para testar bônus');
+console.log('💡 Use atualizarDefesas() ou DC() para forçar atualização');
