@@ -1695,3 +1695,208 @@ input:-webkit-autofill:focus {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* ===== DEFESAS - CSS CORRETO ===== */
+.defesa-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.defesa-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(155, 89, 182, 0.1);
+}
+
+.defesa-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.defesa-info i {
+    color: var(--defesa-cor);
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+}
+
+.defesa-nome {
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.defesa-info small {
+    color: #95a5a6;
+    font-size: 0.75rem;
+    display: block;
+}
+
+.defesa-controle {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espaço entre modificador e valor */
+}
+
+.defesa-modificador {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mod-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #95a5a6;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.mod-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.mod-btn.plus:hover {
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.2);
+}
+
+.mod-btn.minus:hover {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.2);
+}
+
+.defesa-modificador .mod-input {
+    width: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(155, 89, 182, 0.3);
+    border-radius: 4px;
+    color: white;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 4px;
+    font-weight: 500;
+    -moz-appearance: textfield;
+}
+
+.defesa-modificador .mod-input::-webkit-outer-spin-button,
+.defesa-modificador .mod-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.defesa-valor {
+    width: 50px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(155, 89, 182, 0.2);
+    border: 2px solid var(--defesa-cor);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+/* BÔNUS (mantenha seu CSS original) */
+.defesa-bonus {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid rgba(155, 89, 182, 0.2);
+}
+
+.bonus-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.bonus-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bonus-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.bonus-header i {
+    color: var(--defesa-cor);
+    font-size: 0.8rem;
+}
+
+.bonus-header span {
+    color: #ccc;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.bonus-input {
+    width: 70px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(155, 89, 182, 0.3);
+    border-radius: 4px;
+    color: white;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 4px;
+    font-weight: 500;
+}
+
+.bonus-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: rgba(155, 89, 182, 0.15);
+    border-radius: 6px;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+.bonus-total span:first-child {
+    color: #ccc;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.bonus-total span:last-child {
+    color: var(--defesa-cor);
+    font-size: 0.9rem;
+    font-weight: bold;
+    background: rgba(155, 89, 182, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+}
