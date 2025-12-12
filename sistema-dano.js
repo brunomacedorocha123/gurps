@@ -1,4 +1,4 @@
-// sistema-dano.js - SISTEMA COMPLETO DE CÁLCULO DE DANO (VERSÃO FINAL)
+// sistema-dano.js - VERSÃO FINAL DEFINITIVA
 (function() {
     'use strict';
 
@@ -232,10 +232,7 @@
                 formula: formulaGDP,
                 tipo: arma.tipoDanoGDP || 'contusão',
                 base: 'GDP',
-                nome: arma.nome,
-                stRequerido: arma.st,
-                maos: arma.maos || 1,
-                alcance: arma.alcance || '1'
+                nome: arma.nome
             });
         }
         
@@ -252,10 +249,7 @@
                 formula: formulaGEB,
                 tipo: arma.tipoDanoGEB || 'corte',
                 base: 'GEB',
-                nome: arma.nome,
-                stRequerido: arma.st,
-                maos: arma.maos || 1,
-                alcance: arma.alcance || '1'
+                nome: arma.nome
             });
         }
         
@@ -282,10 +276,7 @@
                 formula: formulaFinal,
                 tipo: tipoDano,
                 base: baseTipo,
-                nome: arma.nome,
-                stRequerido: arma.st,
-                maos: arma.maos || 1,
-                alcance: arma.alcance || '1'
+                nome: arma.nome
             });
         }
         
@@ -293,27 +284,9 @@
     }
 
     function calcularDanoCorporal() {
-        const stEfetivo = estado.fadigaAtiva ? 
-            Math.ceil(estado.stAtual / 2) : 
-            estado.stAtual;
-        
         return {
-            gdp: {
-                formula: estado.danoBase.gdp,
-                tipo: 'contusão',
-                alcance: 'C',
-                maos: 1,
-                stAtual: stEfetivo,
-                nome: 'Golpe de Punho'
-            },
-            geb: {
-                formula: estado.danoBase.geb,
-                tipo: 'contusão',
-                alcance: '1',
-                maos: 1,
-                stAtual: stEfetivo,
-                nome: 'Golpe de Braço'
-            }
+            gdp: { formula: estado.danoBase.gdp, tipo: 'contusão', nome: 'Golpe de Punho' },
+            geb: { formula: estado.danoBase.geb, tipo: 'contusão', nome: 'Golpe de Braço' }
         };
     }
 
@@ -322,7 +295,6 @@
     function calcularEAtualizarInterface() {
         atualizarDanoBaseDisplay();
         atualizarDanoArmaEquipada();
-        atualizarStatusFadiga();
     }
 
     function atualizarDanoBaseDisplay() {
@@ -350,124 +322,109 @@
             
             if (armaNome) {
                 armaNome.textContent = estado.armaEquipada.nome;
-                if (danosCalculados.length > 1) {
-                    armaNome.innerHTML = `${estado.armaEquipada.nome} <span style="color:#FFD700; font-size:0.8em; margin-left:5px;">(${danosCalculados.length} tipos)</span>`;
-                }
+                armaNome.style.cssText = `
+                    font-size: 1.3em;
+                    font-weight: bold;
+                    color: #FFD700;
+                    margin-bottom: 10px;
+                    text-align: center;
+                    border-bottom: 2px solid #FFD700;
+                    padding-bottom: 5px;
+                `;
             }
             
             if (armaDano) armaDano.innerHTML = '';
             if (armaTipo) armaTipo.innerHTML = '';
             
             if (armaDano && armaTipo) {
-                danosCalculados.forEach((dano, index) => {
-                    const containerDano = document.createElement('div');
-                    containerDano.className = 'tipo-dano-item';
-                    containerDano.style.cssText = `
-                        margin-bottom: ${index < danosCalculados.length - 1 ? '12px' : '0'};
-                        padding: 12px;
-                        border-radius: 10px;
-                        background: ${index % 2 === 0 ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.4)'};
-                        border: 1px solid rgba(255, 215, 0, 0.3);
-                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                // EXPANDE O ESPAÇO
+                const containerPai = comArma.closest('.arma-info') || comArma.parentElement;
+                if (containerPai) {
+                    containerPai.style.minHeight = '140px';
+                    containerPai.style.padding = '15px 20px';
+                }
+                
+                // CONTAINER PRINCIPAL
+                const containerPrincipal = document.createElement('div');
+                containerPrincipal.style.cssText = `
+                    width: 100%;
+                    padding: 10px;
+                `;
+                
+                // ADICIONA CADA TIPO DE DANO
+                danosCalculados.forEach(dano => {
+                    const linha = document.createElement('div');
+                    linha.style.cssText = `
+                        font-size: 1.1em;
+                        margin: 8px 0;
+                        padding: 8px 12px;
+                        background: rgba(0,0,0,0.3);
+                        border-radius: 8px;
+                        border-left: 5px solid ${dano.base === 'GEB' ? '#FF6B6B' : '#4ECDC4'};
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
                     `;
                     
-                    const linhaFormula = document.createElement('div');
-                    linhaFormula.style.cssText = `
-                        font-size: 1.6em;
+                    const ladoEsquerdo = document.createElement('div');
+                    ladoEsquerdo.style.cssText = `
+                        font-family: 'Courier New', monospace;
                         font-weight: bold;
                         color: #FFD700;
-                        text-shadow: 1px 1px 2px #000, 0 0 10px rgba(255, 215, 0, 0.5);
-                        margin-bottom: 8px;
-                        font-family: 'Courier New', monospace;
-                        text-align: center;
-                        letter-spacing: 1px;
                     `;
-                    linhaFormula.textContent = dano.formula;
+                    ladoEsquerdo.textContent = `Dano ${dano.base}:`;
                     
-                    const linhaTipo = document.createElement('div');
-                    linhaTipo.style.cssText = `
-                        font-size: 1em;
+                    const ladoDireito = document.createElement('div');
+                    ladoDireito.style.cssText = `
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                    `;
+                    
+                    const valorDano = document.createElement('span');
+                    valorDano.style.cssText = `
+                        font-size: 1.2em;
+                        font-weight: bold;
                         color: #FFFFFF;
-                        text-align: center;
-                        line-height: 1.5;
+                        font-family: 'Courier New', monospace;
                     `;
+                    valorDano.textContent = dano.formula;
                     
-                    let tipoTexto = `<span style="color:#FF6B6B; font-weight:bold;">${dano.tipo}</span>`;
-                    tipoTexto += ` <span style="color:#4ECDC4;">(${dano.base})</span>`;
+                    const tipoDanoSpan = document.createElement('span');
+                    tipoDanoSpan.style.cssText = `
+                        color: ${dano.base === 'GEB' ? '#FF6B6B' : '#4ECDC4'};
+                        font-style: italic;
+                    `;
+                    tipoDanoSpan.textContent = dano.tipo;
                     
-                    if (dano.alcance && dano.alcance !== '1') {
-                        tipoTexto += `<br><span style="color:#45B7D1;">Alcance: ${dano.alcance}</span>`;
-                    }
+                    ladoDireito.appendChild(valorDano);
+                    ladoDireito.appendChild(tipoDanoSpan);
                     
-                    if (dano.maos) {
-                        let textoMaos = '';
-                        if (dano.maos === 1.5) {
-                            textoMaos = '1 ou 2 mãos';
-                        } else if (dano.maos === 1) {
-                            textoMaos = '1 mão';
-                        } else {
-                            textoMaos = `${dano.maos} mãos`;
-                        }
-                        tipoTexto += `<br><span style="color:#FFD166;">${textoMaos}</span>`;
-                    }
-                    
-                    linhaTipo.innerHTML = tipoTexto;
-                    
-                    containerDano.appendChild(linhaFormula);
-                    containerDano.appendChild(linhaTipo);
-                    armaDano.appendChild(containerDano);
+                    linha.appendChild(ladoEsquerdo);
+                    linha.appendChild(ladoDireito);
+                    containerPrincipal.appendChild(linha);
                 });
-            }
-            
-            const stMinimo = estado.armaEquipada.st;
-            const stEfetivo = estado.fadigaAtiva ? Math.ceil(estado.stAtual / 2) : estado.stAtual;
-            
-            if (stMinimo && stEfetivo < stMinimo) {
-                const avisoST = document.createElement('div');
-                avisoST.style.cssText = `
-                    color: #FF6B6B;
-                    font-size: 0.9em;
-                    margin-top: 12px;
-                    padding: 10px;
-                    background: rgba(255, 107, 107, 0.15);
-                    border-radius: 8px;
-                    border-left: 4px solid #FF6B6B;
-                    text-align: center;
-                    font-weight: bold;
-                `;
-                avisoST.innerHTML = `<i class="fas fa-exclamation-triangle" style="margin-right:8px;"></i> ST atual (${stEfetivo}) < ST mínimo (${stMinimo})`;
                 
-                if (armaTipo) {
-                    armaTipo.appendChild(avisoST);
+                // ADICIONA ALCANCE SE TIVER
+                if (estado.armaEquipada.alcance && estado.armaEquipada.alcance !== '1') {
+                    const linhaAlcance = document.createElement('div');
+                    linhaAlcance.style.cssText = `
+                        font-size: 0.9em;
+                        color: #45B7D1;
+                        margin-top: 10px;
+                        text-align: center;
+                        font-style: italic;
+                    `;
+                    linhaAlcance.textContent = `Alcance: ${estado.armaEquipada.alcance}`;
+                    containerPrincipal.appendChild(linhaAlcance);
                 }
+                
+                armaDano.appendChild(containerPrincipal);
             }
             
         } else {
             semArma.style.display = 'flex';
             comArma.style.display = 'none';
-            
-            const danoCorporal = calcularDanoCorporal();
-            const gdpDisplay = document.getElementById('danoGdp');
-            const gebDisplay = document.getElementById('danoGeb');
-            
-            if (gdpDisplay) gdpDisplay.textContent = danoCorporal.gdp.formula;
-            if (gebDisplay) gebDisplay.textContent = danoCorporal.geb.formula;
-        }
-    }
-
-    function atualizarStatusFadiga() {
-        const stDisplay = document.getElementById('stEfetivoDisplay');
-        if (!stDisplay) return;
-        
-        if (estado.fadigaAtiva) {
-            const stReduzido = Math.ceil(estado.stAtual / 2);
-            stDisplay.textContent = `${stReduzido} (reduzido pela fadiga)`;
-            stDisplay.style.color = '#FFA500';
-            stDisplay.style.fontWeight = 'bold';
-        } else {
-            stDisplay.textContent = estado.stAtual;
-            stDisplay.style.color = '';
-            stDisplay.style.fontWeight = '';
         }
     }
 
@@ -509,7 +466,5 @@
     document.addEventListener('DOMContentLoaded', function() {
         observarAbaCombate();
     });
-
-    console.log('🔧 sistema-dano.js carregado com sucesso!');
 
 })();
