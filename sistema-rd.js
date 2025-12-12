@@ -1,24 +1,20 @@
-// sistema-rd.js - Sistema Automático de Resistência a Dano
-// Corrigido para verificar itens NO CORPO
+// sistema-rd.js - Versão corrigida para detectar armaduras no corpo
 
 class SistemaRD {
     constructor() {
         console.log('🛡️ Inicializando Sistema RD...');
         
-        // Partes do corpo
         this.partesCorpo = [
             'cabeca', 'tronco', 'rosto', 'crânio', 'pescoco',
             'virilha', 'bracos', 'pernas', 'maos', 'pes'
         ];
         
-        // Mapeamento correto baseado no catálogo
         this.mapeamentoArmaduras = {
             'Tronco/Virilha': ['tronco', 'virilha'],
+            'Tronco/Virilha': ['tronco', 'virilha'], // Sem acento
             'Cabeça': ['cabeca', 'crânio', 'rosto'],
             'Braços': ['bracos'],
             'Pernas': ['pernas'],
-            'Mãos': ['maos'],
-            'Pés': ['pes'],
             'Corpo Inteiro': ['tronco', 'virilha', 'bracos', 'pernas', 'cabeca', 'crânio', 'rosto']
         };
         
@@ -27,7 +23,6 @@ class SistemaRD {
             this.rdCalculado[parte] = 0;
         });
         
-        this.inicializado = false;
         this.inicializarQuandoPronto();
     }
     
@@ -42,16 +37,13 @@ class SistemaRD {
     
     aguardarSistemaEquipamentos() {
         return new Promise((resolve) => {
-            let tentativas = 0;
             const verificar = () => {
-                tentativas++;
-                if (window.sistemaEquipamentos) {
-                    console.log('✅ Sistema de equipamentos OK');
+                if (window.sistemaEquipamentos && 
+                    window.sistemaEquipamentos.equipamentosAdquiridos) {
+                    console.log('✅ Sistema de equipamentos detectado');
                     resolve();
-                } else if (tentativas < 30) {
-                    setTimeout(verificar, 100);
                 } else {
-                    resolve();
+                    setTimeout(verificar, 100);
                 }
             };
             verificar();
@@ -59,183 +51,160 @@ class SistemaRD {
     }
     
     inicializar() {
-        try {
-            console.log('🚀 Iniciando RD...');
-            
-            this.configurarObservador();
-            this.configurarEventosCampos();
-            this.calcularRDAutomatico();
-            this.atualizarInterface();
-            
-            this.inicializado = true;
-            console.log('✅ Sistema RD pronto!');
-            
-        } catch (error) {
-            console.error('❌ Erro RD:', error);
-        }
-    }
-    
-    configurarObservador() {
-        // Observar mudanças no sistema de equipamentos
+        console.log('🚀 Iniciando RD...');
+        
+        // 1. Configurar observador
         document.addEventListener('equipamentosAtualizados', () => {
             setTimeout(() => {
                 this.calcularRDAutomatico();
                 this.atualizarInterface();
             }, 100);
         });
+        
+        // 2. Calcular RD inicial
+        setTimeout(() => {
+            this.calcularRDAutomatico();
+            this.atualizarInterface();
+        }, 500);
+        
+        console.log('✅ Sistema RD pronto!');
     }
     
-    configurarEventosCampos() {
-        this.partesCorpo.forEach(parte => {
-            const input = document.querySelector(`.rd-parte[data-parte="${parte}"] input`);
-            if (input) {
-                // Substituir o input para remover event listeners antigos
-                const novoInput = input.cloneNode(true);
-                input.parentNode.replaceChild(novoInput, input);
-                
-                novoInput.addEventListener('change', (e) => {
-                    const valor = parseInt(e.target.value) || 0;
-                    this.rdCalculado[parte] = valor;
-                    this.atualizarTotal();
-                });
-            }
-        });
-    }
-    
-    // MÉTODO CORRIGIDO: Verificar itens NO CORPO
+    // MÉTODO PRINCIPAL - Versão simplificada e mais robusta
     calcularRDAutomatico() {
         console.log('🧮 Calculando RD automático...');
         
-        // Resetar cache
+        // Reset
         this.partesCorpo.forEach(parte => {
             this.rdCalculado[parte] = 0;
         });
         
         if (!window.sistemaEquipamentos) {
-            console.warn('⚠️ Sistema de equipamentos não disponível');
+            console.warn('⚠️ Sistema de equipamentos não encontrado');
             return;
         }
         
-        // CORREÇÃO AQUI: Verificar itens NO CORPO, não equipados
-        const itensNoCorpo = this.obterItensNoCorpo();
-        console.log(`🔍 ${itensNoCorpo.length} item(s) no corpo detectado(s)`);
+        // DEBUG: Mostrar todos os itens adquiridos
+        console.log('🔍 Todos os itens adquiridos:', window.sistemaEquipamentos.equipamentosAdquiridos);
         
-        // Processar cada item no corpo
+        // Procurar itens NO CORPO
+        const itensNoCorpo = window.sistemaEquipamentos.equipamentosAdquiridos.filter(item => {
+            const estaNoCorpo = item.status === 'no-corpo';
+            const temRD = item.rd !== undefined && item.rd !== null;
+            const temLocal = item.local !== undefined;
+            
+            console.log(`📦 Item: ${item.nome}, Status: ${item.status}, RD: ${item.rd}, Local: ${item.local}`);
+            
+            return estaNoCorpo && (temRD || temLocal);
+        });
+        
+        console.log(`🎯 ${itensNoCorpo.length} item(s) no corpo com RD detectado(s):`, itensNoCorpo);
+        
+        // Processar cada item
         itensNoCorpo.forEach(item => {
-            this.processarItem(item);
+            this.processarItemArmadura(item);
         });
         
         this.atualizarTotal();
     }
     
-    // CORREÇÃO: Método para obter itens NO CORPO
-    obterItensNoCorpo() {
-        if (!window.sistemaEquipamentos || !window.sistemaEquipamentos.equipamentosAdquiridos) {
-            return [];
-        }
+    processarItemArmadura(item) {
+        console.log(`🛡️ Processando: ${item.nome}`, item);
         
-        // Filtrar itens com status 'no-corpo'
-        return window.sistemaEquipamentos.equipamentosAdquiridos.filter(item => 
-            item.status === 'no-corpo' && 
-            (item.tipo === 'armadura' || item.local || item.rd)
-        );
-    }
-    
-    processarItem(item) {
-        if (!item) return;
-        
-        console.log(`🛡️ Processando item no corpo: ${item.nome}`, item);
-        
-        // Obter RD do item
+        // Extrair valor de RD
         let rdValor = 0;
         
         if (typeof item.rd === 'number') {
             rdValor = item.rd;
         } else if (typeof item.rd === 'string') {
-            const partes = item.rd.split('/');
-            rdValor = parseInt(partes[0]) || 0;
+            // Tentar extrair número da string
+            const match = item.rd.match(/(\d+)/);
+            rdValor = match ? parseInt(match[1]) : 0;
         }
         
         if (rdValor === 0) {
-            console.log(`⚠️ ${item.nome} sem RD definido`);
+            console.log(`⚠️ ${item.nome} sem valor de RD válido:`, item.rd);
             return;
         }
         
-        // Determinar partes protegidas
-        const partesProtegidas = this.determinarPartesProtegidas(item);
+        // Determinar partes protegidas - VERSÃO MAIS FLEXÍVEL
+        const partes = this.determinarPartesProtegidasFlex(item);
         
-        console.log(`📊 ${item.nome} protege: ${partesProtegidas.join(', ')} com RD ${rdValor}`);
+        console.log(`📊 ${item.nome} (RD ${rdValor}) protege:`, partes);
         
-        // Aplicar RD às partes
-        partesProtegidas.forEach(parte => {
-            this.rdCalculado[parte] += rdValor;
+        // Aplicar RD
+        partes.forEach(parte => {
+            if (this.rdCalculado[parte] !== undefined) {
+                this.rdCalculado[parte] += rdValor;
+            }
         });
     }
     
-    determinarPartesProtegidas(item) {
+    determinarPartesProtegidasFlex(item) {
         const partes = [];
+        const local = item.local || '';
+        const nome = item.nome || '';
         
-        // 1. Usar o local do item se existir
-        if (item.local) {
-            const local = item.local.trim();
-            
-            // Verificar mapeamento direto
-            if (this.mapeamentoArmaduras[local]) {
-                partes.push(...this.mapeamentoArmaduras[local]);
-            } 
-            // Inferir se for "Tronco/Virilha"
-            else if (local.includes('Tronco') && local.includes('Virilha')) {
+        console.log(`🔍 Determinando partes para: ${nome} (Local: "${local}")`);
+        
+        // Converter para minúsculas sem acentos para comparação
+        const localLower = this.removerAcentos(local.toLowerCase());
+        const nomeLower = this.removerAcentos(nome.toLowerCase());
+        
+        // 1. Verificar por local específico
+        if (local) {
+            // "Tronco/Virilha" ou "Tronco/Virilha"
+            if (localLower.includes('tronco') && localLower.includes('virilha')) {
                 partes.push('tronco', 'virilha');
             }
-            // Inferir se for "Cabeça"
-            else if (local.includes('Cabeça')) {
+            // "Cabeça"
+            else if (localLower.includes('cabeça') || localLower.includes('cabeca')) {
                 partes.push('cabeca', 'crânio', 'rosto');
             }
-            // Inferir outros
-            else if (local.includes('Braços')) {
+            // "Braços"
+            else if (localLower.includes('braço') || localLower.includes('braco')) {
                 partes.push('bracos');
             }
-            else if (local.includes('Pernas')) {
+            // "Pernas"
+            else if (localLower.includes('perna')) {
                 partes.push('pernas');
             }
-            else if (local.includes('Mãos')) {
+            // "Mãos"
+            else if (localLower.includes('mão') || localLower.includes('mao')) {
                 partes.push('maos');
             }
-            else if (local.includes('Pés')) {
+            // "Pés"
+            else if (localLower.includes('pé') || localLower.includes('pe')) {
                 partes.push('pes');
             }
         }
         
-        // 2. Se não encontrou, tentar pelo nome
+        // 2. Se não encontrou por local, tentar por nome
         if (partes.length === 0) {
-            const nomeLower = item.nome.toLowerCase();
-            
-            if (nomeLower.includes('elmo') || nomeLower.includes('capacete') || nomeLower.includes('cabeça')) {
+            if (nomeLower.includes('elmo') || nomeLower.includes('capacete') || nomeLower.includes('helm')) {
                 partes.push('cabeca', 'crânio', 'rosto');
             }
-            else if (nomeLower.includes('couro') || nomeLower.includes('cota') || nomeLower.includes('peitoral')) {
-                if (nomeLower.includes('virilha') || nomeLower.includes('inteira')) {
+            else if (nomeLower.includes('couro') || nomeLower.includes('cota') || nomeLower.includes('peitoral') || nomeLower.includes('armadura')) {
+                if (nomeLower.includes('virilha') || nomeLower.includes('inteira') || nomeLower.includes('completa')) {
                     partes.push('tronco', 'virilha');
                 } else {
                     partes.push('tronco');
                 }
             }
-            else if (nomeLower.includes('braçadeira') || nomeLower.includes('braço')) {
+            else if (nomeLower.includes('braçadeira') || nomeLower.includes('brace')) {
                 partes.push('bracos');
             }
-            else if (nomeLower.includes('perneira') || nomeLower.includes('perna')) {
+            else if (nomeLower.includes('perneira') || nomeLower.includes('greva')) {
                 partes.push('pernas');
-            }
-            else if (nomeLower.includes('manopla') || nomeLower.includes('luva')) {
-                partes.push('maos');
-            }
-            else if (nomeLower.includes('bota') || nomeLower.includes('sapato')) {
-                partes.push('pes');
             }
         }
         
-        // Remover duplicatas
+        // 3. Remover duplicatas
         return [...new Set(partes)];
+    }
+    
+    removerAcentos(texto) {
+        return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
     
     atualizarTotal() {
@@ -245,10 +214,10 @@ class SistemaRD {
             total += this.rdCalculado[parte] || 0;
         });
         
-        // Atualizar display
         const rdTotalElement = document.getElementById('rdTotal');
         if (rdTotalElement) {
             rdTotalElement.textContent = total;
+            console.log(`💰 RD Total atualizado: ${total}`);
         }
         
         return total;
@@ -262,64 +231,56 @@ class SistemaRD {
             const container = document.querySelector(`.rd-parte[data-parte="${parte}"]`);
             
             if (input && container) {
-                // Atualizar valor
                 input.value = rdValor;
                 
-                // Destacar se tem RD
+                // Destacar visualmente
+                container.classList.toggle('tem-rd', rdValor > 0);
+                
                 if (rdValor > 0) {
-                    container.classList.add('tem-rd');
-                    container.title = `RD ${rdValor}`;
-                } else {
-                    container.classList.remove('tem-rd');
-                    container.title = 'Sem proteção';
+                    console.log(`🎨 ${parte}: RD ${rdValor}`);
                 }
             }
         });
         
-        // Notificar outros sistemas
-        this.notificarMudanca();
-    }
-    
-    notificarMudanca() {
-        const event = new CustomEvent('rdAtualizado', {
-            detail: {
-                rdCalculado: this.rdCalculado,
-                rdTotal: this.atualizarTotal()
-            }
-        });
-        document.dispatchEvent(event);
+        console.log('✅ Interface RD atualizada');
     }
 }
 
-// Inicialização
-let sistemaRD;
-
+// Inicialização imediata
 document.addEventListener('DOMContentLoaded', function() {
-    if (window.sistemaRD) return;
+    console.log('📦 Carregando Sistema RD...');
     
-    const inicializarQuandoNecessario = () => {
-        const abaCombate = document.getElementById('combate');
-        if (abaCombate && !sistemaRD) {
-            console.log('🎯 Inicializando RD...');
-            sistemaRD = new SistemaRD();
-            window.sistemaRD = sistemaRD;
-        }
-    };
-    
-    inicializarQuandoNecessario();
+    // Inicializar imediatamente se a aba combate existir
+    const abaCombate = document.getElementById('combate');
+    if (abaCombate && !window.sistemaRD) {
+        console.log('🎯 Inicializando RD agora...');
+        window.sistemaRD = new SistemaRD();
+        
+        // Forçar cálculo após 1 segundo (tempo para sistemas carregarem)
+        setTimeout(() => {
+            if (window.sistemaRD.calcularRDAutomatico) {
+                window.sistemaRD.calcularRDAutomatico();
+                window.sistemaRD.atualizarInterface();
+            }
+        }, 1000);
+    }
 });
 
-// Adicione este CSS no seu arquivo CSS existente:
-/*
-.rd-parte.tem-rd {
-    background: rgba(46, 204, 113, 0.15) !important;
-    border-color: #2ecc71 !important;
-}
+// Função de debug para testar manualmente
+window.testarRD = function() {
+    console.log('🧪 Testando RD...');
+    if (window.sistemaRD) {
+        console.log('📊 RD Atual:', window.sistemaRD.rdCalculado);
+        console.log('💰 RD Total:', window.sistemaRD.atualizarTotal());
+        
+        // Mostrar itens no corpo
+        if (window.sistemaEquipamentos) {
+            const itensNoCorpo = window.sistemaEquipamentos.equipamentosAdquiridos.filter(item => 
+                item.status === 'no-corpo'
+            );
+            console.log('👕 Itens no corpo:', itensNoCorpo);
+        }
+    }
+};
 
-.rd-parte.tem-rd input {
-    color: #2ecc71 !important;
-    font-weight: bold !important;
-}
-*/
-
-console.log('🔧 sistema-rd.js (corrigido) carregado!');
+console.log('🔧 sistema-rd.js (debug) carregado!');
