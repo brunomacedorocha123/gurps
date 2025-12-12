@@ -1,4 +1,4 @@
-// defesas.js - VERSÃO QUE FUÇA EM TODOS OS LUGARES POSSÍVEIS
+// defesas.js - SISTEMA COMPLETO DE DEFESAS ATIVAS
 class SistemaDefesas {
     constructor() {
         this.defesas = {
@@ -20,21 +20,34 @@ class SistemaDefesas {
             'pesada': -3,
             'muito pesada': -4
         };
+        
+        // Cache para melhor performance
+        this.cache = {
+            nhEscudo: null,
+            nhArma: null,
+            ultimaAtualizacao: 0
+        };
+        
+        // Observador para perícias
+        this.observadorPericias = null;
     }
 
-    // ===== MÉTODO PRINCIPAL =====
+    // ===== INICIALIZAÇÃO =====
     inicializar() {
         console.log('🛡️ Iniciando Sistema de Defesas...');
         
         this.configurarEventListeners();
         this.configurarControlesManuais();
+        this.configurarObservadorPericias();
         this.atualizarDadosIniciais();
         this.calcularTodasDefesas();
         
         console.log('✅ Sistema de Defesas pronto!');
     }
 
+    // ===== CONFIGURAÇÃO DE EVENTOS =====
     configurarEventListeners() {
+        // Atributos alterados
         document.addEventListener('atributosAlterados', (e) => {
             if (e.detail) {
                 this.DX = e.detail.DX || 10;
@@ -43,25 +56,13 @@ class SistemaDefesas {
             }
         });
 
+        // Equipamentos alterados
         document.addEventListener('equipamentosAtualizados', () => {
+            this.cache.nhArma = null; // Limpar cache da arma
             this.calcularTodasDefesas();
         });
 
-        // Monitorar quando abrir aba de perícias
-        const observer = new MutationObserver(() => {
-            const periciasTab = document.getElementById('pericias');
-            if (periciasTab && periciasTab.classList.contains('active')) {
-                setTimeout(() => {
-                    this.calcularTodasDefesas();
-                }, 1000);
-            }
-        });
-        
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            observer.observe(tab, { attributes: true });
-        });
-
-        // Monitorar nível de carga
+        // Nível de carga
         this.configurarObservadorCarga();
     }
 
@@ -86,7 +87,54 @@ class SistemaDefesas {
         }
     }
 
+    configurarObservadorPericias() {
+        // Observar mudanças no localStorage (quando perícias são atualizadas)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'periciasAprendidas') {
+                console.log('📚 Perícias atualizadas no localStorage');
+                this.cache.nhEscudo = null;
+                this.cache.nhArma = null;
+                setTimeout(() => this.calcularTodasDefesas(), 100);
+            }
+        });
+
+        // Observar mudanças na aba de perícias
+        this.observadorPericias = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                    // Verificar se é algo relacionado a perícias
+                    const texto = mutation.target.textContent || '';
+                    if (texto.includes('Escudo') || texto.includes('NH') || texto.includes('nível')) {
+                        console.log('📚 Mudança detectada em perícias');
+                        this.cache.nhEscudo = null;
+                        this.cache.nhArma = null;
+                        setTimeout(() => this.calcularTodasDefesas(), 300);
+                    }
+                }
+            });
+        });
+
+        // Começar a observar quando a aba de perícias estiver ativa
+        const observarAbaPericias = () => {
+            const containerPericias = document.getElementById('pericias-aprendidas');
+            if (containerPericias) {
+                this.observadorPericias.observe(containerPericias, {
+                    childList: true,
+                    characterData: true,
+                    subtree: true
+                });
+                console.log('👀 Observador de perícias ativado');
+            } else {
+                setTimeout(observarAbaPericias, 1000);
+            }
+        };
+
+        observarAbaPericias();
+    }
+
+    // ===== CONTROLES MANUAIS =====
     configurarControlesManuais() {
+        // Botões +/- para cada defesa
         const defesasIds = ['esquiva', 'bloqueio', 'aparar', 'deslocamento'];
         
         defesasIds.forEach(defesaId => {
@@ -108,6 +156,7 @@ class SistemaDefesas {
             });
         });
 
+        // Bônus gerais
         const bonusIds = ['Reflexos', 'Escudo', 'Capa', 'Outros'];
         bonusIds.forEach(bonusId => {
             const input = document.getElementById(`bonus${bonusId}`);
@@ -120,7 +169,9 @@ class SistemaDefesas {
         });
     }
 
+    // ===== ATUALIZAÇÃO DE DADOS =====
     atualizarDadosIniciais() {
+        // Atributos
         const dxInput = document.getElementById('DX');
         const htInput = document.getElementById('HT');
         if (dxInput && htInput) {
@@ -128,11 +179,13 @@ class SistemaDefesas {
             this.HT = parseInt(htInput.value) || 10;
         }
         
+        // Nível de carga
         const cargaElement = document.getElementById('nivelCarga');
         if (cargaElement) {
             this.nivelCarga = cargaElement.textContent.toLowerCase().trim();
         }
         
+        // Bônus gerais
         this.atualizarBonusGerais();
     }
 
@@ -163,136 +216,123 @@ class SistemaDefesas {
         }
     }
 
-    // ===== BUSCAR NH MANUALMENTE =====
-    buscarNHEscudoManual() {
-        console.log('🔍 Buscando NH do Escudo MANUALMENTE...');
+    // ===== BUSCAR NH DAS PERÍCIAS =====
+    buscarNHEscudo() {
+        // Usar cache se disponível
+        if (this.cache.nhEscudo !== null) {
+            return this.cache.nhEscudo;
+        }
         
-        // Método 1: Verificar localStorage
+        console.log('🔍 Buscando NH do Escudo...');
+        let nhEncontrado = null;
+        
+        // Método 1: Buscar no localStorage
         try {
             const salvo = localStorage.getItem('periciasAprendidas');
             if (salvo) {
                 const pericias = JSON.parse(salvo);
-                console.log(`📁 Encontrado ${pericias.length} perícias no localStorage`);
-                
                 const escudoPericia = pericias.find(p => 
                     p.nome && p.nome.toLowerCase().includes('escudo')
                 );
                 
                 if (escudoPericia) {
-                    const nh = escudoPericia.nh || (escudoPericia.nivel + 10);
-                    console.log(`✅ NH do Escudo no localStorage: ${nh} (${escudoPericia.nome})`);
-                    return nh;
+                    nhEncontrado = escudoPericia.nh || (escudoPericia.nivel + 10);
+                    console.log(`✅ NH do Escudo: ${nhEncontrado} (nível ${escudoPericia.nivel})`);
+                    
+                    // Salvar no cache
+                    this.cache.nhEscudo = nhEncontrado;
+                    this.cache.ultimaAtualizacao = Date.now();
+                    return nhEncontrado;
                 }
             }
         } catch (e) {
-            console.log('❌ Erro ao ler localStorage:', e);
+            console.log('❌ Erro ao buscar NH do Escudo:', e);
         }
         
-        // Método 2: Verificar sistema global
-        if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
+        // Método 2: Buscar no sistema de perícias
+        if (window.estadoPericias?.periciasAprendidas) {
             const pericias = window.estadoPericias.periciasAprendidas;
-            console.log(`🌐 Encontrado ${pericias.length} perícias no sistema`);
-            
-            // Procurar por "Escudo" de qualquer forma
-            const escudoPericia = pericias.find(p => {
-                if (!p || !p.nome) return false;
-                
-                // Verificar nome
-                if (p.nome.toLowerCase().includes('escudo')) return true;
-                
-                // Verificar grupo
-                if (p.grupo && p.grupo.toLowerCase().includes('escudo')) return true;
-                
-                // Verificar especialização
-                if (p.especializacao && p.especializacao.toLowerCase().includes('escudo')) return true;
-                
-                return false;
-            });
+            const escudoPericia = pericias.find(p => 
+                p.nome && p.nome.toLowerCase().includes('escudo')
+            );
             
             if (escudoPericia) {
-                const nh = escudoPericia.nh || (escudoPericia.nivel + 10);
-                console.log(`✅ NH do Escudo no sistema: ${nh} (${escudoPericia.nome})`);
-                return nh;
+                nhEncontrado = escudoPericia.nh || (escudoPericia.nivel + 10);
+                console.log(`✅ NH do Escudo (sistema): ${nhEncontrado}`);
+                
+                this.cache.nhEscudo = nhEncontrado;
+                this.cache.ultimaAtualizacao = Date.now();
+                return nhEncontrado;
             }
         }
         
-        // Método 3: Buscar no HTML da página atual
-        console.log('🔍 Procurando "Escudo" no HTML da página...');
-        const elementos = document.querySelectorAll('*');
-        
-        for (const elemento of elementos) {
-            const texto = elemento.textContent || '';
-            if (texto.toLowerCase().includes('escudo')) {
-                console.log('📍 Elemento encontrado com "Escudo":', elemento);
-                
-                // Tentar extrair NH do texto
-                const match = texto.match(/NH\s*(\d+)/i);
-                if (match) {
-                    const nh = parseInt(match[1]);
-                    console.log(`✅ NH extraído do texto: ${nh}`);
-                    return nh;
-                }
-                
-                // Se não encontrar, verificar se tem número (pode ser o nível)
-                const nivelMatch = texto.match(/[+-]\s*\d+/);
-                if (nivelMatch) {
-                    const nivel = parseInt(nivelMatch[0].replace(/\s/g, ''));
-                    const nh = nivel + 10; // Assumindo atributo 10
-                    console.log(`✅ NH calculado do nível ${nivel}: ${nh}`);
-                    return nh;
-                }
-            }
-        }
-        
-        console.log('❌ NH do Escudo não encontrado em lugar nenhum');
+        console.log('❌ NH do Escudo não encontrado');
         return null;
     }
 
-    buscarNHArmaManual() {
-        console.log('🔍 Buscando NH da Arma MANUALMENTE...');
+    buscarNHArma() {
+        // Usar cache se disponível
+        if (this.cache.nhArma !== null) {
+            return this.cache.nhArma;
+        }
         
         // Verificar se há arma equipada
         const sistemaEquip = window.sistemaEquipamentos;
         if (!sistemaEquip || !sistemaEquip.armasCombate?.maos?.length) {
-            console.log('ℹ️ Nenhuma arma equipada');
             return null;
         }
         
         const armaEquipada = sistemaEquip.armasCombate.maos[0];
-        console.log(`🔍 Arma equipada: ${armaEquipada.nome}`);
+        console.log(`🔍 Buscando NH para arma: ${armaEquipada.nome}`);
         
-        // Método 1: Verificar localStorage
+        // Buscar no localStorage
         try {
             const salvo = localStorage.getItem('periciasAprendidas');
             if (salvo) {
                 const pericias = JSON.parse(salvo);
+                const nomeArma = armaEquipada.nome.toLowerCase();
                 
                 // Procurar perícia correspondente
                 const periciaArma = pericias.find(p => {
                     if (!p.nome) return false;
                     
                     const nomePericia = p.nome.toLowerCase();
-                    const nomeArma = armaEquipada.nome.toLowerCase();
                     
-                    // Verificar correspondência
-                    if (nomePericia.includes(nomeArma.split(' ')[0].toLowerCase())) return true;
-                    
-                    // Verificar mapeamento comum
+                    // Mapeamento de armas
                     if (nomeArma.includes('adaga') && nomePericia.includes('adaga')) return true;
                     if (nomeArma.includes('arco') && nomePericia.includes('arco')) return true;
+                    if (nomeArma.includes('maça') && nomePericia.includes('maça')) return true;
+                    if (nomeArma.includes('machado') && nomePericia.includes('machado')) return true;
                     if (nomeArma.includes('espada') && nomePericia.includes('espada')) return true;
+                    
+                    // Correspondência por primeira palavra
+                    const palavrasArma = nomeArma.split(/[^a-záéíóúãõâêîôûàèìòùç]+/);
+                    const palavrasPericia = nomePericia.split(/[^a-záéíóúãõâêîôûàèìòùç]+/);
+                    
+                    for (const palavraArma of palavrasArma) {
+                        if (palavraArma.length > 3) {
+                            for (const palavraPericia of palavrasPericia) {
+                                if (palavraPericia.includes(palavraArma) || palavraArma.includes(palavraPericia)) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
                     
                     return false;
                 });
                 
                 if (periciaArma) {
-                    const nh = periciaArma.nh || (periciaArma.nivel + 10);
-                    console.log(`✅ NH da Arma no localStorage: ${nh} (${periciaArma.nome})`);
-                    return nh;
+                    const nhArma = periciaArma.nh || (periciaArma.nivel + 10);
+                    console.log(`✅ NH da Arma: ${nhArma} (${periciaArma.nome})`);
+                    
+                    this.cache.nhArma = nhArma;
+                    this.cache.ultimaAtualizacao = Date.now();
+                    return nhArma;
                 }
             }
         } catch (e) {
-            console.log('❌ Erro ao ler localStorage:', e);
+            console.log('❌ Erro ao buscar NH da Arma:', e);
         }
         
         console.log('❌ NH da Arma não encontrado');
@@ -312,6 +352,7 @@ class SistemaDefesas {
     }
 
     calcularEsquiva() {
+        // Fórmula: floor((DX + HT)/4) + 3
         const baseCalculada = (this.DX + this.HT) / 4;
         const base = Math.floor(baseCalculada) + 3;
         const redutorCarga = this.redutoresCarga[this.nivelCarga] || 0;
@@ -329,6 +370,7 @@ class SistemaDefesas {
     }
 
     calcularDeslocamento() {
+        // Fórmula: (DX + HT)/4
         const base = (this.DX + this.HT) / 4;
         const redutorCarga = this.redutoresCarga[this.nivelCarga] || 0;
         
@@ -346,7 +388,7 @@ class SistemaDefesas {
 
     calcularBloqueio() {
         // Buscar NH do Escudo
-        const nhEscudo = this.buscarNHEscudoManual();
+        const nhEscudo = this.buscarNHEscudo();
         
         let base = 3; // Mínimo sem escudo
         
@@ -354,7 +396,7 @@ class SistemaDefesas {
             base = Math.floor(nhEscudo / 2) + 3;
             console.log(`🛡️ Bloqueio: floor(${nhEscudo}/2) + 3 = ${base}`);
         } else {
-            console.log(`ℹ️ Bloqueio: Sem NH do Escudo - usando ${base}`);
+            console.log(`ℹ️ Bloqueio: Sem perícia de Escudo - usando ${base}`);
         }
         
         this.defesas.bloqueio.base = base;
@@ -368,7 +410,7 @@ class SistemaDefesas {
 
     calcularAparar() {
         // Buscar NH da Arma
-        const nhArma = this.buscarNHArmaManual();
+        const nhArma = this.buscarNHArma();
         
         let base = 3; // Mínimo sem arma
         
@@ -376,7 +418,7 @@ class SistemaDefesas {
             base = Math.floor(nhArma / 2) + 3;
             console.log(`⚔️ Aparar: floor(${nhArma}/2) + 3 = ${base}`);
         } else {
-            console.log(`ℹ️ Aparar: Sem NH da Arma - usando ${base}`);
+            console.log(`ℹ️ Aparar: ${nhArma === null ? 'Nenhuma arma equipada' : 'Sem perícia para arma'} - usando ${base}`);
         }
         
         this.defesas.aparar.base = base;
@@ -388,8 +430,9 @@ class SistemaDefesas {
         );
     }
 
-    // ===== INTERFACE =====
+    // ===== ATUALIZAR INTERFACE =====
     atualizarInterface() {
+        // Atualizar valores totais
         const atualizar = (id, valor) => {
             const element = document.getElementById(id);
             if (element) element.textContent = valor;
@@ -400,6 +443,7 @@ class SistemaDefesas {
         atualizar('bloqueioTotal', this.defesas.bloqueio.total);
         atualizar('apararTotal', this.defesas.aparar.total);
         
+        // Atualizar modificadores
         const atualizarMod = (id, valor) => {
             const element = document.getElementById(id);
             if (element) element.value = valor;
@@ -413,17 +457,31 @@ class SistemaDefesas {
 
     // ===== MÉTODOS PÚBLICOS =====
     forcarRecalculo() {
-        console.log('🔄 Forçando recálculo...');
+        console.log('🔄 Forçando recálculo completo...');
+        this.cache.nhEscudo = null;
+        this.cache.nhArma = null;
         this.atualizarDadosIniciais();
         this.calcularTodasDefesas();
     }
 
+    atualizarEmTempoReal() {
+        console.log('⏱️ Atualizando em tempo real...');
+        this.forcarRecalculo();
+    }
+
     obterDadosDefesas() {
-        return this.defesas;
+        return {
+            esquiva: this.defesas.esquiva.total,
+            deslocamento: this.defesas.deslocamento.total,
+            bloqueio: this.defesas.bloqueio.total,
+            aparar: this.defesas.aparar.total,
+            nivelCarga: this.nivelCarga,
+            detalhes: this.defesas
+        };
     }
 }
 
-// ===== INICIALIZAÇÃO =====
+// ===== INICIALIZAÇÃO GLOBAL =====
 let sistemaDefesas;
 
 function inicializarSistemaDefesas() {
@@ -438,7 +496,7 @@ function inicializarSistemaDefesas() {
     return sistemaDefesas;
 }
 
-// Inicializar
+// Inicializar quando combate for aberto
 document.addEventListener('DOMContentLoaded', function() {
     const combateTab = document.getElementById('combate');
     if (combateTab && combateTab.classList.contains('active')) {
@@ -465,26 +523,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Funções globais
-window.obterDadosDefesas = () => window.sistemaDefesas?.obterDadosDefesas();
-window.forcarRecalculoDefesas = () => window.sistemaDefesas?.forcarRecalculo();
-
-// Testar busca manual
-window.testarBuscaEscudo = () => {
-    console.log('=== TESTE MANUAL BUSCA ESCUDO ===');
-    const nh = window.sistemaDefesas?.buscarNHEscudoManual();
-    console.log('NH encontrado:', nh);
-    return nh;
+// ===== FUNÇÕES GLOBAIS =====
+window.obterDadosDefesas = function() {
+    return window.sistemaDefesas?.obterDadosDefesas() || null;
 };
 
-window.testarBuscaArma = () => {
-    console.log('=== TESTE MANUAL BUSCA ARMA ===');
-    const nh = window.sistemaDefesas?.buscarNHArmaManual();
-    console.log('NH encontrado:', nh);
-    return nh;
+window.forcarRecalculoDefesas = function() {
+    window.sistemaDefesas?.forcarRecalculo();
 };
 
-// Exportações
+window.atualizarDefesasTempoReal = function() {
+    window.sistemaDefesas?.atualizarEmTempoReal();
+};
+
+// Função para testar NH
+window.testarNH = function() {
+    console.log('=== TESTE NH ===');
+    const sistema = window.sistemaDefesas;
+    if (!sistema) {
+        console.log('❌ Sistema não inicializado');
+        return;
+    }
+    
+    console.log('1. NH do Escudo:', sistema.buscarNHEscudo());
+    console.log('2. NH da Arma:', sistema.buscarNHArma());
+    
+    // Verificar localStorage
+    try {
+        const salvo = localStorage.getItem('periciasAprendidas');
+        if (salvo) {
+            const pericias = JSON.parse(salvo);
+            console.log(`📁 ${pericias.length} perícias no localStorage:`);
+            pericias.forEach(p => {
+                console.log(`   - ${p.nome}: NH ${p.nh}, Nível ${p.nivel}`);
+            });
+        }
+    } catch (e) {
+        console.log('❌ Erro:', e);
+    }
+};
+
+// ===== EXPORTAÇÕES =====
 window.SistemaDefesas = SistemaDefesas;
 window.inicializarSistemaDefesas = inicializarSistemaDefesas;
 
