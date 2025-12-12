@@ -1387,17 +1387,22 @@ input:-webkit-autofill:focus {
     border-color: #8e44ad !important;
     animation: pulse 2s infinite !important;
 }
-/* ===== DEFESAS - MODIFICADORES AO LADO ===== */
+/* ===== DEFESAS - MODIFICADORES AO LADO DO VALOR ===== */
 .defesa-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 10px 12px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     border: 1px solid rgba(155, 89, 182, 0.1);
     transition: all 0.2s ease;
     min-height: 55px;
+}
+
+.defesa-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(155, 89, 182, 0.3);
 }
 
 .defesa-info {
@@ -1412,6 +1417,8 @@ input:-webkit-autofill:focus {
     color: var(--defesa-cor);
     font-size: 1.2rem;
     flex-shrink: 0;
+    width: 24px;
+    text-align: center;
 }
 
 .defesa-nome {
@@ -1435,28 +1442,37 @@ input:-webkit-autofill:focus {
 .defesa-direita {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 0; /* ZERO - sem espaço entre modificador e valor */
     flex-shrink: 0;
+}
+
+/* CONTAINER DO MODIFICADOR E VALOR JUNTOS */
+.defesa-modificador-container {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(155, 89, 182, 0.2);
+    overflow: hidden;
 }
 
 .defesa-modificador {
     display: flex;
     align-items: center;
     gap: 4px;
+    padding: 4px 6px;
     background: rgba(255, 255, 255, 0.05);
-    padding: 4px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(155, 89, 182, 0.2);
 }
 
 .mod-btn {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border: none;
-    border-radius: 4px;
+    border-radius: 3px;
     background: rgba(255, 255, 255, 0.1);
     color: #95a5a6;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1482,14 +1498,13 @@ input:-webkit-autofill:focus {
 }
 
 .defesa-modificador .mod-input {
-    width: 45px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(155, 89, 182, 0.3);
-    border-radius: 4px;
+    width: 35px;
+    background: transparent;
+    border: none;
     color: white;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     text-align: center;
-    padding: 4px;
+    padding: 2px;
     font-weight: 500;
     /* Remove setas do input number */
     -moz-appearance: textfield;
@@ -1503,23 +1518,22 @@ input:-webkit-autofill:focus {
 
 .defesa-modificador .mod-input:focus {
     outline: none;
-    border-color: var(--defesa-cor);
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
 }
 
 .defesa-valor {
-    width: 55px;
-    height: 35px;
+    width: 45px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(155, 89, 182, 0.2);
-    border: 2px solid var(--defesa-cor);
-    border-radius: 8px;
     color: white;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: bold;
     flex-shrink: 0;
+    padding: 0 8px;
 }
 
 /* BÔNUS COMPACTOS */
@@ -1528,7 +1542,7 @@ input:-webkit-autofill:focus {
     border-radius: 8px;
     padding: 10px;
     border: 1px solid rgba(155, 89, 182, 0.2);
-    margin-top: 5px;
+    margin-top: 8px;
 }
 
 .bonus-grid {
@@ -1629,19 +1643,24 @@ input:-webkit-autofill:focus {
 
 /* Responsividade */
 @media (max-width: 768px) {
-    .defesa-direita {
-        gap: 10px;
+    .defesa-item {
+        padding: 8px 10px;
     }
     
     .defesa-modificador .mod-input {
-        width: 40px;
-        font-size: 0.8rem;
+        width: 32px;
+        font-size: 0.75rem;
+    }
+    
+    .mod-btn {
+        width: 20px;
+        height: 20px;
     }
     
     .defesa-valor {
-        width: 50px;
-        height: 32px;
-        font-size: 0.9rem;
+        width: 42px;
+        height: 28px;
+        font-size: 0.85rem;
     }
     
     .bonus-grid {
@@ -1659,13 +1678,17 @@ input:-webkit-autofill:focus {
 @media (max-width: 480px) {
     .defesa-item {
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
         align-items: stretch;
     }
     
     .defesa-direita {
-        justify-content: space-between;
+        justify-content: center;
         width: 100%;
+    }
+    
+    .defesa-modificador-container {
+        margin: 0 auto;
     }
     
     .bonus-grid {

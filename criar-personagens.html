@@ -2670,148 +2670,101 @@
             
             <!-- CARD DEFESAS -->
            <!-- CARD DEFESAS - VERSÃO COMPACTA E OTIMIZADA -->
-<!-- CARD DEFESAS - VERSÃO CORRIGIDA COM MODIFICADORES AO LADO -->
-<div class="card-defesas">
-    <div class="card-header">
-        <i class="fas fa-shield-alt"></i>
-        <h3>DEFESAS ATIVAS</h3>
+<!-- Para CADA item de defesa, use esta estrutura: -->
+<div class="defesa-item" data-defesa="esquiva">
+    <div class="defesa-info">
+        <i class="fas fa-running"></i>
+        <div>
+            <div class="defesa-nome">Esquiva</div>
+            <small>DX + HT/4 + 3</small>
+        </div>
     </div>
     
-    <div class="card-content">
-        <div class="defesa-lista">
-            <!-- ESQUIVA -->
-            <div class="defesa-item" data-defesa="esquiva">
-                <div class="defesa-info">
-                    <i class="fas fa-running"></i>
-                    <div>
-                        <div class="defesa-nome">Esquiva</div>
-                        <small>DX + HT/4 + 3</small>
-                    </div>
-                </div>
-                <div class="defesa-direita">
-                    <div class="defesa-modificador">
-                        <button class="mod-btn minus" onclick="modDefesaMenos('esquiva')">-</button>
-                        <input type="number" id="esquivaMod" value="0" class="mod-input" 
-                               min="-99" max="99" onchange="atualizarDefesa('esquiva')">
-                        <button class="mod-btn plus" onclick="modDefesaMais('esquiva')">+</button>
-                    </div>
-                    <div class="defesa-valor">
-                        <span class="defesa-total" id="esquivaTotal">0</span>
-                    </div>
-                </div>
+    <div class="defesa-direita">
+        <div class="defesa-modificador-container">
+            <div class="defesa-modificador">
+                <button class="mod-btn minus" onclick="modDefesaMenos('esquiva')">-</button>
+                <input type="number" id="esquivaMod" value="0" class="mod-input" 
+                       min="-99" max="99" onchange="atualizarDefesa('esquiva')">
+                <button class="mod-btn plus" onclick="modDefesaMais('esquiva')">+</button>
             </div>
-            
-            <!-- BLOQUEIO -->
-            <div class="defesa-item" data-defesa="bloqueio">
-                <div class="defesa-info">
-                    <i class="fas fa-shield-alt"></i>
-                    <div>
-                        <div class="defesa-nome">Bloqueio</div>
-                        <small>Escudo/2 + 3</small>
-                    </div>
-                </div>
-                <div class="defesa-direita">
-                    <div class="defesa-modificador">
-                        <button class="mod-btn minus" onclick="modDefesaMenos('bloqueio')">-</button>
-                        <input type="number" id="bloqueioMod" value="0" class="mod-input"
-                               min="-99" max="99" onchange="atualizarDefesa('bloqueio')">
-                        <button class="mod-btn plus" onclick="modDefesaMais('bloqueio')">+</button>
-                    </div>
-                    <div class="defesa-valor">
-                        <span class="defesa-total" id="bloqueioTotal">0</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- APARAR -->
-            <div class="defesa-item" data-defesa="aparar">
-                <div class="defesa-info">
-                    <i class="fas fa-sword"></i>
-                    <div>
-                        <div class="defesa-nome">Aparar</div>
-                        <small>Arma/2 + 3</small>
-                    </div>
-                </div>
-                <div class="defesa-direita">
-                    <div class="defesa-modificador">
-                        <button class="mod-btn minus" onclick="modDefesaMenos('aparar')">-</button>
-                        <input type="number" id="apararMod" value="0" class="mod-input"
-                               min="-99" max="99" onchange="atualizarDefesa('aparar')">
-                        <button class="mod-btn plus" onclick="modDefesaMais('aparar')">+</button>
-                    </div>
-                    <div class="defesa-valor">
-                        <span class="defesa-total" id="apararTotal">0</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- DESLOCAMENTO -->
-            <div class="defesa-item" data-defesa="deslocamento">
-                <div class="defesa-info">
-                    <i class="fas fa-walking"></i>
-                    <div>
-                        <div class="defesa-nome">Deslocamento</div>
-                        <small>(DX + HT)/4</small>
-                    </div>
-                </div>
-                <div class="defesa-direita">
-                    <div class="defesa-modificador">
-                        <button class="mod-btn minus" onclick="modDefesaMenos('deslocamento')">-</button>
-                        <input type="number" id="deslocamentoMod" value="0" class="mod-input"
-                               min="-99" max="99" onchange="atualizarDefesa('deslocamento')">
-                        <button class="mod-btn plus" onclick="modDefesaMais('deslocamento')">+</button>
-                    </div>
-                    <div class="defesa-valor">
-                        <span class="defesa-total" id="deslocamentoTotal">0.00</span>
-                    </div>
-                </div>
+            <div class="defesa-valor">
+                <span class="defesa-total" id="esquivaTotal">10</span>
             </div>
         </div>
-        
-        <!-- BÔNUS COMPACTOS - GRID 2x2 -->
-        <div class="defesa-bonus">
-            <div class="bonus-grid">
-                <div class="bonus-item">
-                    <div class="bonus-header">
-                        <i class="fas fa-bolt"></i>
-                        <span>Reflexos</span>
-                    </div>
-                    <input type="number" id="bonusReflexos" value="0" 
-                           class="bonus-input" onchange="atualizarTodosBonus()">
-                </div>
-                
-                <div class="bonus-item">
-                    <div class="bonus-header">
-                        <i class="fas fa-shield"></i>
-                        <span>Escudo</span>
-                    </div>
-                    <input type="number" id="bonusEscudo" value="0" 
-                           class="bonus-input" onchange="atualizarTodosBonus()">
-                </div>
-                
-                <div class="bonus-item">
-                    <div class="bonus-header">
-                        <i class="fas fa-vest"></i>
-                        <span>Capa</span>
-                    </div>
-                    <input type="number" id="bonusCapa" value="0" 
-                           class="bonus-input" onchange="atualizarTodosBonus()">
-                </div>
-                
-                <div class="bonus-item">
-                    <div class="bonus-header">
-                        <i class="fas fa-star"></i>
-                        <span>Outros</span>
-                    </div>
-                    <input type="number" id="bonusOutros" value="0" 
-                           class="bonus-input" onchange="atualizarTodosBonus()">
-                </div>
+    </div>
+</div>
+
+<!-- Para bloqueio (mesma estrutura): -->
+<div class="defesa-item" data-defesa="bloqueio">
+    <div class="defesa-info">
+        <i class="fas fa-shield-alt"></i>
+        <div>
+            <div class="defesa-nome">Bloqueio</div>
+            <small>Escudo/2 + 3</small>
+        </div>
+    </div>
+    
+    <div class="defesa-direita">
+        <div class="defesa-modificador-container">
+            <div class="defesa-modificador">
+                <button class="mod-btn minus" onclick="modDefesaMenos('bloqueio')">-</button>
+                <input type="number" id="bloqueioMod" value="0" class="mod-input" 
+                       min="-99" max="99" onchange="atualizarDefesa('bloqueio')">
+                <button class="mod-btn plus" onclick="modDefesaMais('bloqueio')">+</button>
             </div>
-            
-            <!-- TOTAL DE BÔNUS -->
-            <div class="bonus-total">
-                <span>Total de Bônus:</span>
-                <span id="totalBonus">+0</span>
+            <div class="defesa-valor">
+                <span class="defesa-total" id="bloqueioTotal">3</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Para aparar (mesma estrutura): -->
+<div class="defesa-item" data-defesa="aparar">
+    <div class="defesa-info">
+        <i class="fas fa-sword"></i>
+        <div>
+            <div class="defesa-nome">Aparar</div>
+            <small>Arma/2 + 3</small>
+        </div>
+    </div>
+    
+    <div class="defesa-direita">
+        <div class="defesa-modificador-container">
+            <div class="defesa-modificador">
+                <button class="mod-btn minus" onclick="modDefesaMenos('aparar')">-</button>
+                <input type="number" id="apararMod" value="0" class="mod-input" 
+                       min="-99" max="99" onchange="atualizarDefesa('aparar')">
+                <button class="mod-btn plus" onclick="modDefesaMais('aparar')">+</button>
+            </div>
+            <div class="defesa-valor">
+                <span class="defesa-total" id="apararTotal">3</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Para deslocamento (mesma estrutura): -->
+<div class="defesa-item" data-defesa="deslocamento">
+    <div class="defesa-info">
+        <i class="fas fa-walking"></i>
+        <div>
+            <div class="defesa-nome">Deslocamento</div>
+            <small>(DX + HT)/4</small>
+        </div>
+    </div>
+    
+    <div class="defesa-direita">
+        <div class="defesa-modificador-container">
+            <div class="defesa-modificador">
+                <button class="mod-btn minus" onclick="modDefesaMenos('deslocamento')">-</button>
+                <input type="number" id="deslocamentoMod" value="0" class="mod-input" 
+                       min="-99" max="99" onchange="atualizarDefesa('deslocamento')">
+                <button class="mod-btn plus" onclick="modDefesaMais('deslocamento')">+</button>
+            </div>
+            <div class="defesa-valor">
+                <span class="defesa-total" id="deslocamentoTotal">5.00</span>
             </div>
         </div>
     </div>
