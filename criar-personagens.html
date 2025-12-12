@@ -2883,121 +2883,127 @@
                         </div>
                     </div>
                     
-                    <!-- TABELA DE REDUTORES -->
-                    <div class="redutores-container">
-                        <h4><i class="fas fa-crosshairs"></i> Penalidades para Ataque</h4>
-                        <div class="redutores-grid">
-                            <div class="redutor-item" data-local="tronco">
-                                <span>Tronco</span>
-                                <span class="redutor-valor">0</span>
-                            </div>
-                            <div class="redutor-item" data-local="orgaos">
-                                <span>Órgãos</span>
-                                <span class="redutor-valor">-3</span>
-                            </div>
-                            <div class="redutor-item" data-local="crânio">
-                                <span>Crânio</span>
-                                <span class="redutor-valor">-7</span>
-                            </div>
-                            <div class="redutor-item" data-local="pescoco">
-                                <span>Pescoço</span>
-                                <span class="redutor-valor">-5</span>
-                            </div>
-                            <div class="redutor-item" data-local="virilha">
-                                <span>Virilha</span>
-                                <span class="redutor-valor">-3</span>
-                            </div>
-                            <div class="redutor-item" data-local="bracos">
-                                <span>Braços</span>
-                                <span class="redutor-valor">-2</span>
-                            </div>
-                            <div class="redutor-item" data-local="pernas">
-                                <span>Pernas</span>
-                                <span class="redutor-valor">-2</span>
-                            </div>
-                            <div class="redutor-item" data-local="maos">
-                                <span>Mãos</span>
-                                <span class="redutor-valor">-4</span>
-                            </div>
-                            <div class="redutor-item" data-local="pes">
-                                <span>Pés</span>
-                                <span class="redutor-valor">-4</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                   <!-- TABELA DE REDUTORES -->
+<div class="redutores-container">
+    <h4><i class="fas fa-crosshairs"></i> Penalidades para Ataque</h4>
+    <div class="redutores-grid">
+        <div class="redutor-item" data-local="tronco">
+            <span>Tronco</span>
+            <span class="redutor-valor">0</span>
+        </div>
+        <div class="redutor-item" data-local="orgaos">
+            <span>Órgãos</span>
+            <span class="redutor-valor">-3</span>
+        </div>
+        <div class="redutor-item" data-local="crânio">
+            <span>Crânio</span>
+            <span class="redutor-valor">-7</span>
+        </div>
+        <div class="redutor-item" data-local="pescoco">
+            <span>Pescoço</span>
+            <span class="redutor-valor">-5</span>
+        </div>
+        <div class="redutor-item" data-local="virilha">
+            <span>Virilha</span>
+            <span class="redutor-valor">-3</span>
+        </div>
+        <!-- OLHO ADICIONADO AQUI -->
+        <div class="redutor-item" data-local="olho">
+            <span>Olho</span>
+            <span class="redutor-valor">-9</span>
+        </div>
+        <div class="redutor-item" data-local="bracos">
+            <span>Braços</span>
+            <span class="redutor-valor">-2</span>
+        </div>
+        <div class="redutor-item" data-local="pernas">
+            <span>Pernas</span>
+            <span class="redutor-valor">-2</span>
+        </div>
+        <div class="redutor-item" data-local="maos">
+            <span>Mãos</span>
+            <span class="redutor-valor">-4</span>
+        </div>
+        <div class="redutor-item" data-local="pes">
+            <span>Pés</span>
+            <span class="redutor-valor">-4</span>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- QUARTA LINHA: CONDIÇÕES -->
+<div class="combate-row linha-condicoes">
+    <div class="card-condicoes">
+        <div class="card-header">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>CONDIÇÕES DE COMBATE</h3>
+            <div class="condicoes-count">
+                <span id="condicoesAtivas">0</span> ativas
             </div>
         </div>
         
-        <!-- QUARTA LINHA: CONDIÇÕES -->
-        <div class="combate-row linha-condicoes">
-            <div class="card-condicoes">
-                <div class="card-header">
-                    <i class="fas fa-clipboard-list"></i>
-                    <h3>CONDIÇÕES DE COMBATE</h3>
-                    <div class="condicoes-count">
-                        <span id="condicoesAtivas">0</span> ativas
-                    </div>
+        <div class="card-content">
+            <div class="condicoes-grid">
+                <div class="condicao-item" data-condicao="inconsciente" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Inconsciente</span>
                 </div>
-                
-                <div class="card-content">
-                    <div class="condicoes-grid">
-                        <div class="condicao-item" data-condicao="inconsciente" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Inconsciente</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="machucado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Machucado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="ferido" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Ferido</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="fadigado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Fadigado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="atordoado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Atordoado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="enjoado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Enjoado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="cego" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Cego</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="surdo" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Surdo</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="paralisado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Paralisado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="envenenado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Envenenado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="sangrando" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Sangrando</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="queimando" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Queimando</span>
-                        </div>
-                    </div>
+                <div class="condicao-item" data-condicao="machucado" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Machucado</span>
+                </div>
+                <div class="condicao-item" data-condicao="ferido" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Ferido</span>
+                </div>
+                <div class="condicao-item" data-condicao="fadigado" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Fadigado</span>
+                </div>
+                <div class="condicao-item" data-condicao="atordoado" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Atordoado</span>
+                </div>
+                <div class="condicao-item" data-condicao="enjoado" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Enjoado</span>
+                </div>
+                <div class="condicao-item" data-condicao="cego" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Cego</span>
+                </div>
+                <div class="condicao-item" data-condicao="surdo" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Surdo</span>
+                </div>
+                <div class="condicao-item" data-condicao="paralisado" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Paralisado</span>
+                </div>
+                <div class="condicao-item" data-condicao="envenenado" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Envenenado</span>
+                </div>
+                <div class="condicao-item" data-condicao="sangrando" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Sangrando</span>
+                </div>
+                <div class="condicao-item" data-condicao="queimando" onclick="alternarCondicao(this)">
+                    <div class="condicao-checkbox"></div>
+                    <span>Queimando</span>
                 </div>
             </div>
         </div>
-        
     </div>
 </div>
 
+</div>
+</div>
 <!-- ABA RESUMO -->
         <div id="resumo" class="tab-content">
             <div class="loading">
