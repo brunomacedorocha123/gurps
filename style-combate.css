@@ -1900,3 +1900,123 @@ input:-webkit-autofill:focus {
     border-radius: 4px;
     border: 1px solid rgba(155, 89, 182, 0.3);
 }
+
+/* ===== SISTEMA RD - ESTILOS ADICIONAIS ===== */
+
+/* Badge de RD */
+.rd-parte .rd-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #e74c3c;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    border: 2px solid #2c3e50;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    display: none;
+}
+
+/* Estados visuais do RD */
+.rd-parte.sem-rd {
+    opacity: 0.7;
+    background: rgba(52, 73, 94, 0.1);
+}
+
+.rd-parte.rd-baixo {
+    background: rgba(46, 204, 113, 0.15);
+    border-color: #27ae60 !important;
+}
+
+.rd-parte.rd-medio {
+    background: rgba(241, 196, 15, 0.15);
+    border-color: #f39c12 !important;
+}
+
+.rd-parte.rd-alto {
+    background: rgba(231, 76, 60, 0.15);
+    border-color: #c0392b !important;
+}
+
+/* Editado manualmente */
+.rd-parte.editado-manualmente {
+    background: rgba(155, 89, 182, 0.2) !important;
+    border-color: #8e44ad !important;
+    border-width: 2px !important;
+}
+
+.rd-parte.editado-manualmente input {
+    color: #8e44ad !important;
+    font-weight: bold !important;
+}
+
+/* Botão de reset */
+.btn-rd-reset {
+    margin-left: auto;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-rd-reset:hover {
+    background: linear-gradient(135deg, #2980b9, #1c5a80);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.btn-rd-reset:active {
+    transform: translateY(0);
+}
+
+/* RD Total com proteção */
+#rdTotal.com-protecao {
+    color: #e74c3c;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    padding: 2px 8px;
+    background: rgba(231, 76, 60, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+/* Feedback do RD */
+.feedback-rd {
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .btn-rd-reset {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+    
+    .rd-badge {
+        font-size: 10px;
+        padding: 1px 4px;
+    }
+}
