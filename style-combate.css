@@ -1387,3 +1387,181 @@ input:-webkit-autofill:focus {
     border-color: #8e44ad !important;
     animation: pulse 2s infinite !important;
 }
+
+/* ===== DEFESAS - VERSÃO COMPACTA ===== */
+.defesa-bonus {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid rgba(155, 89, 182, 0.2);
+    margin-top: 5px;
+}
+
+.bonus-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.bonus-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.bonus-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(155, 89, 182, 0.3);
+}
+
+.bonus-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    width: 100%;
+    justify-content: center;
+}
+
+.bonus-header i {
+    color: var(--defesa-cor);
+    font-size: 0.8rem;
+}
+
+.bonus-header span {
+    color: #ccc;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.bonus-input {
+    width: 70px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(155, 89, 182, 0.3);
+    border-radius: 4px;
+    color: white;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 4px;
+    font-weight: 500;
+    /* Remove setas do input number */
+    -moz-appearance: textfield;
+}
+
+.bonus-input::-webkit-outer-spin-button,
+.bonus-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.bonus-input:focus {
+    outline: none;
+    border-color: var(--defesa-cor);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.bonus-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: rgba(155, 89, 182, 0.15);
+    border-radius: 6px;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+.bonus-total span:first-child {
+    color: #ccc;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.bonus-total span:last-child {
+    color: var(--defesa-cor);
+    font-size: 0.9rem;
+    font-weight: bold;
+    background: rgba(155, 89, 182, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+/* Ajustes para manter o card compacto */
+.card-defesas .card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.defesa-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.defesa-item {
+    padding: 10px;
+    min-height: 55px;
+}
+
+.defesa-modificador .mod-input {
+    width: 45px;
+    font-size: 0.85rem;
+    padding: 3px;
+}
+
+.defesa-valor {
+    width: 55px;
+    height: 35px;
+    font-size: 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .bonus-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+    }
+    
+    .bonus-input {
+        width: 60px;
+        font-size: 0.8rem;
+        padding: 3px;
+    }
+    
+    .bonus-header {
+        flex-direction: column;
+        gap: 3px;
+    }
+    
+    .bonus-header i {
+        font-size: 0.7rem;
+    }
+    
+    .bonus-header span {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .bonus-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .defesa-controles {
+        gap: 8px;
+    }
+    
+    .defesa-modificador {
+        padding: 3px;
+    }
+}
