@@ -1387,8 +1387,142 @@ input:-webkit-autofill:focus {
     border-color: #8e44ad !important;
     animation: pulse 2s infinite !important;
 }
+/* ===== DEFESAS - MODIFICADORES AO LADO ===== */
+.defesa-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(155, 89, 182, 0.1);
+    transition: all 0.2s ease;
+    min-height: 55px;
+}
 
-/* ===== DEFESAS - VERSÃO COMPACTA ===== */
+.defesa-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.defesa-info i {
+    color: var(--defesa-cor);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.defesa-nome {
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.defesa-info small {
+    color: #95a5a6;
+    font-size: 0.75rem;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.defesa-direita {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.defesa-modificador {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mod-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #95a5a6;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.mod-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.mod-btn.plus:hover {
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.2);
+}
+
+.mod-btn.minus:hover {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.2);
+}
+
+.defesa-modificador .mod-input {
+    width: 45px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(155, 89, 182, 0.3);
+    border-radius: 4px;
+    color: white;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 4px;
+    font-weight: 500;
+    /* Remove setas do input number */
+    -moz-appearance: textfield;
+}
+
+.defesa-modificador .mod-input::-webkit-outer-spin-button,
+.defesa-modificador .mod-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.defesa-modificador .mod-input:focus {
+    outline: none;
+    border-color: var(--defesa-cor);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.defesa-valor {
+    width: 55px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(155, 89, 182, 0.2);
+    border: 2px solid var(--defesa-cor);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* BÔNUS COMPACTOS */
 .defesa-bonus {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
@@ -1493,40 +1627,23 @@ input:-webkit-autofill:focus {
     border: 1px solid rgba(155, 89, 182, 0.3);
 }
 
-/* Ajustes para manter o card compacto */
-.card-defesas .card-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.defesa-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-}
-
-.defesa-item {
-    padding: 10px;
-    min-height: 55px;
-}
-
-.defesa-modificador .mod-input {
-    width: 45px;
-    font-size: 0.85rem;
-    padding: 3px;
-}
-
-.defesa-valor {
-    width: 55px;
-    height: 35px;
-    font-size: 1rem;
-}
-
 /* Responsividade */
 @media (max-width: 768px) {
+    .defesa-direita {
+        gap: 10px;
+    }
+    
+    .defesa-modificador .mod-input {
+        width: 40px;
+        font-size: 0.8rem;
+    }
+    
+    .defesa-valor {
+        width: 50px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+    
     .bonus-grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 6px;
@@ -1537,31 +1654,21 @@ input:-webkit-autofill:focus {
         font-size: 0.8rem;
         padding: 3px;
     }
-    
-    .bonus-header {
-        flex-direction: column;
-        gap: 3px;
-    }
-    
-    .bonus-header i {
-        font-size: 0.7rem;
-    }
-    
-    .bonus-header span {
-        font-size: 0.7rem;
-    }
 }
 
 @media (max-width: 480px) {
+    .defesa-item {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+    
+    .defesa-direita {
+        justify-content: space-between;
+        width: 100%;
+    }
+    
     .bonus-grid {
         grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .defesa-controles {
-        gap: 8px;
-    }
-    
-    .defesa-modificador {
-        padding: 3px;
     }
 }
