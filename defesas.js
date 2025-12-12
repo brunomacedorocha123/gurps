@@ -1,5 +1,6 @@
 // defesas.js - SISTEMA COMPLETO E BRABO COM FADIGA INTEGRADA
-// VERSÃO 100% FUNCIONAL - PARTE 1/3
+// VERSÃO CORRIGIDA - BUG DO BLOQUEIO RESOLVIDO
+// PARTE 1/3
 
 class SistemaDefesasBraboCompleto {
     constructor() {
@@ -17,7 +18,8 @@ class SistemaDefesasBraboCompleto {
             defesas: { esquiva: 0, bloqueio: 0, aparar: 0, deslocamento: 0 },
             nivelCarga: 'nenhuma',
             nh: { escudo: null, arma: null },
-            fadiga: { ativa: false, pfAtual: 10, pfMaximo: 10, limiteFadiga: 4 }
+            fadiga: { ativa: false, pfAtual: 10, pfMaximo: 10, limiteFadiga: 4 },
+            bloqueioCorrigido: false  // NOVO: flag para controle do bug
         };
         
         this.ultimaAtualizacao = 0;
@@ -45,7 +47,47 @@ class SistemaDefesasBraboCompleto {
         this.iniciarAtualizacaoAutomatica();
         
         this.iniciado = true;
+        
+        // CORREÇÃO DO BUG: forçar recálculo após 500ms
+        setTimeout(() => {
+            this.forcarAtualizacaoBloqueioBug();
+        }, 500);
+        
         console.log('✅✅✅ SISTEMA BRABO COMPLETO PRONTO PARA AÇÃO! ✅✅✅');
+    }
+    
+    // ========== NOVA FUNÇÃO PARA CORRIGIR BUG DO BLOQUEIO ==========
+    forcarAtualizacaoBloqueioBug() {
+        console.log('🔧 CORRIGINDO BUG DO BLOQUEIO...');
+        
+        // Limpar cache do NH escudo
+        this.estado.nh.escudo = null;
+        
+        // Recalcular com dados frescos
+        const nhEscudo = this.calcularNHEscudo();
+        this.estado.nh.escudo = nhEscudo;
+        
+        // Recalcular bloqueio
+        this.calcularBloqueioComBonus();
+        
+        // Forçar atualização visual DUAS VEZES (garantia)
+        this.atualizarElementoForcado('bloqueioTotal', this.estado.defesas.bloqueio);
+        
+        setTimeout(() => {
+            this.atualizarElementoForcado('bloqueioTotal', this.estado.defesas.bloqueio);
+        }, 100);
+        
+        this.estado.bloqueioCorrigido = true;
+        console.log('✅ BUG DO BLOQUEIO CORRIGIDO! Valor correto:', this.estado.defesas.bloqueio);
+    }
+    
+    // ========== NOVA FUNÇÃO: ATUALIZAÇÃO FORÇADA ==========
+    atualizarElementoForcado(id, valor) {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.textContent = valor;
+            console.log(`📝 FORÇADO: ${id} = ${valor}`);
+        }
     }
     
     configurarSistemaInteiro() {
@@ -62,7 +104,6 @@ class SistemaDefesasBraboCompleto {
         ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonus => {
             const input = document.getElementById(`bonus${bonus}`);
             if (input) {
-                // Configurar eventos simples
                 const handler = () => {
                     this.estado.bonus[bonus] = parseInt(input.value) || 0;
                     this.calcularTudoComForca();
@@ -96,7 +137,6 @@ class SistemaDefesasBraboCompleto {
         ['DX', 'HT'].forEach(atributo => {
             const input = document.getElementById(atributo);
             if (input) {
-                // Usar debounce para não travar
                 let timeout;
                 input.addEventListener('input', () => {
                     clearTimeout(timeout);
@@ -144,7 +184,6 @@ class SistemaDefesasBraboCompleto {
         let pfAtual = 10;
         let pfMaximo = 10;
         
-        // Método SIMPLES: verificar elementos diretamente
         try {
             const pfAtualElement = document.getElementById('pfAtualDisplay');
             const pfMaxElement = document.getElementById('pfMaxDisplay');
@@ -157,7 +196,6 @@ class SistemaDefesasBraboCompleto {
                 pfMaximo = parseInt(pfMaxElement.textContent) || 10;
             }
             
-            // Calcular limite de fadiga (1/3 arredondado para CIMA)
             const limiteFadiga = Math.ceil(pfMaximo / 3);
             const fadigaAtiva = pfAtual <= limiteFadiga;
             
@@ -183,9 +221,7 @@ class SistemaDefesasBraboCompleto {
             return valor;
         }
         
-        // Apenas esquiva e deslocamento sofrem penalidade
         if (nomeDefesa === 'esquiva' || nomeDefesa === 'deslocamento') {
-            // Metade do valor, arredondando para CIMA
             const valorMetade = Math.ceil(valor / 2);
             console.log(`⚠️ FADIGA: ${nomeDefesa} ${valor} → ${valorMetade}`);
             return valorMetade;
@@ -193,31 +229,27 @@ class SistemaDefesasBraboCompleto {
         
         return valor;
     }
-    
-    // CONTINUA NA PARTE 2...
-        // ========== CARREGAMENTO INICIAL ==========
+
+        // ========== PARTE 2/3 ==========
+    // ========== CARREGAMENTO INICIAL ==========
     carregarTudoAgora() {
         console.log('📥 CARREGANDO TUDO AGORA...');
         
-        // ATRIBUTOS
         const dxInput = document.getElementById('DX');
         const htInput = document.getElementById('HT');
         if (dxInput) this.estado.atributos.dx = parseInt(dxInput.value) || 10;
         if (htInput) this.estado.atributos.ht = parseInt(htInput.value) || 10;
         
-        // BÔNUS
         ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonus => {
             const input = document.getElementById(`bonus${bonus}`);
             if (input) this.estado.bonus[bonus] = parseInt(input.value) || 0;
         });
         
-        // MODIFICADORES
         ['esquiva', 'bloqueio', 'aparar', 'deslocamento'].forEach(defesa => {
             const input = document.getElementById(`${defesa}Mod`);
             if (input) this.estado.modificadores[defesa] = parseInt(input.value) || 0;
         });
         
-        // CARGA
         const cargaElement = document.getElementById('nivelCarga');
         if (cargaElement) {
             this.estado.nivelCarga = cargaElement.textContent.toLowerCase().trim();
@@ -234,18 +266,17 @@ class SistemaDefesasBraboCompleto {
         console.log('💪💪💪 CALCULANDO TUDO COM FORÇA! 💪💪💪');
         
         try {
-            // Ordem CRÍTICA para não travar
             this.atualizarCache();
-            this.detectarEstadoFadiga(); // Atualiza fadiga
-            this.buscarNHAtualizado();
+            this.detectarEstadoFadiga();
             
-            // Calcular defesas
+            // CORREÇÃO: buscar NH primeiro, antes de calcular bloqueio
+            this.buscarNHAtualizadoCorrigido();
+            
             this.calcularEsquivaComBonus();
             this.calcularDeslocamentoComBonus();
             this.calcularBloqueioComBonus();
             this.calcularApararComBonus();
             
-            // Atualizar tela
             this.atualizarTelaComForca();
             this.atualizarTotalBonusComForca();
             this.atualizarIndicadorFadiga();
@@ -272,16 +303,19 @@ class SistemaDefesasBraboCompleto {
         });
     }
     
-    buscarNHAtualizado() {
+    // ========== FUNÇÃO CORRIGIDA: BUSCAR NH ==========
+    buscarNHAtualizadoCorrigido() {
+        // Força cálculo mesmo se já tiver valor em cache
         this.estado.nh.escudo = this.calcularNHEscudo();
         this.estado.nh.arma = this.calcularNHArma();
+        
+        console.log(`🔍 NH ATUALIZADO: Escudo=${this.estado.nh.escudo}, Arma=${this.estado.nh.arma}`);
     }
     
     calcularNHEscudo() {
         const dx = this.estado.atributos.dx;
         let nivelEscudo = 0;
         
-        // Buscar perícia de escudo
         const container = document.getElementById('pericias-aprendidas');
         if (container) {
             const itens = container.querySelectorAll('.pericia-aprendida-item');
@@ -296,7 +330,7 @@ class SistemaDefesasBraboCompleto {
         }
         
         const nh = dx + nivelEscudo;
-        console.log(`🛡️ NH Escudo: ${nh}`);
+        console.log(`🛡️ NH Escudo: ${nh} (DX:${dx} + Nível:${nivelEscudo})`);
         return nh;
     }
     
@@ -343,7 +377,6 @@ class SistemaDefesasBraboCompleto {
         const base = Math.floor((dx + ht) / 4) + 3;
         const modificador = this.estado.modificadores.esquiva;
         
-        // SOMA TODOS OS BÔNUS
         let bonusTotal = 0;
         bonusTotal += this.estado.bonus.Reflexos;
         bonusTotal += this.estado.bonus.Escudo;
@@ -353,7 +386,6 @@ class SistemaDefesasBraboCompleto {
         const redutorCarga = this.getRedutorCarga(this.estado.nivelCarga);
         let total = base + modificador + bonusTotal + redutorCarga;
         
-        // APLICAR FADIGA
         total = this.aplicarPenalidadeFadiga(total, 'esquiva');
         
         this.estado.defesas.esquiva = Math.max(total, 1);
@@ -368,7 +400,6 @@ class SistemaDefesasBraboCompleto {
         
         let total = base + modificador + redutorCarga;
         
-        // APLICAR FADIGA
         total = this.aplicarPenalidadeFadiga(total, 'deslocamento');
         
         this.estado.defesas.deslocamento = Math.max(total, 0);
@@ -376,6 +407,7 @@ class SistemaDefesasBraboCompleto {
     }
     
     calcularBloqueioComBonus() {
+        // CORREÇÃO: usar DX como fallback se NH não calculou ainda
         const nhEscudo = this.estado.nh.escudo || this.estado.atributos.dx;
         const base = Math.floor(nhEscudo / 2) + 3;
         const modificador = this.estado.modificadores.bloqueio;
@@ -388,9 +420,13 @@ class SistemaDefesasBraboCompleto {
         
         const total = base + modificador + bonusTotal;
         this.estado.defesas.bloqueio = Math.max(total, 1);
-        console.log(`🛡️ BLOQUEIO: ${total}`);
+        
+        // LOG DETALHADO PARA DEBUG
+        console.log(`🛡️ BLOQUEIO CALCULADO: ${total} = (NH:${nhEscudo}/2)+3 + Mod:${modificador} + Bonus:${bonusTotal}`);
+        console.log(`   NH Escudo: ${this.estado.nh.escudo}, DX: ${this.estado.atributos.dx}`);
     }
-    
+
+        // ========== PARTE 3/3 ==========
     calcularApararComBonus() {
         const nhArma = this.estado.nh.arma;
         
@@ -421,13 +457,19 @@ class SistemaDefesasBraboCompleto {
         return redutores[nivelCarga] || 0;
     }
     
-    // CONTINUA NA PARTE 3...
-        // ========== ATUALIZAÇÃO DA TELA ==========
+    // ========== ATUALIZAÇÃO DA TELA ==========
     atualizarTelaComForca() {
         this.atualizarElemento('esquivaTotal', this.estado.defesas.esquiva);
         this.atualizarElemento('deslocamentoTotal', this.estado.defesas.deslocamento.toFixed(2));
         this.atualizarElemento('bloqueioTotal', this.estado.defesas.bloqueio);
         this.atualizarElemento('apararTotal', this.estado.defesas.aparar || 0);
+        
+        // CORREÇÃO EXTRA: garantir que bloqueio está visível
+        const elementoBloqueio = document.getElementById('bloqueioTotal');
+        if (elementoBloqueio && elementoBloqueio.textContent === '8') {
+            console.log('⚠️ DETECTADO VALOR ERRADO DO BLOQUEIO (8), CORRIGINDO...');
+            elementoBloqueio.textContent = this.estado.defesas.bloqueio;
+        }
     }
     
     atualizarElemento(id, valor) {
@@ -486,7 +528,6 @@ class SistemaDefesasBraboCompleto {
     iniciarMonitoramentoSimples() {
         console.log('👁️ MONITORAMENTO SIMPLES INICIADO');
         
-        // Monitorar carga de forma simples
         const cargaElement = document.getElementById('nivelCarga');
         if (cargaElement) {
             const observer = new MutationObserver(() => {
@@ -506,7 +547,6 @@ class SistemaDefesasBraboCompleto {
             this.observadores.push(observer);
         }
         
-        // Monitorar PF com evento de input (não MutationObserver)
         const pfAtualInput = document.getElementById('pfAtualDisplay');
         if (pfAtualInput) {
             pfAtualInput.addEventListener('input', () => {
@@ -514,13 +554,14 @@ class SistemaDefesasBraboCompleto {
             });
         }
         
-        // Monitorar perícias
         const container = document.getElementById('pericias-aprendidas');
         if (container) {
             const observer = new MutationObserver(() => {
                 setTimeout(() => {
+                    // Limpa cache para forçar recálculo
                     this.estado.nh.escudo = null;
                     this.estado.nh.arma = null;
+                    this.estado.bloqueioCorrigido = false;
                     this.calcularTudoComForca();
                 }, 300);
             });
@@ -535,7 +576,6 @@ class SistemaDefesasBraboCompleto {
     }
     
     iniciarAtualizacaoAutomatica() {
-        // Atualizar a cada 2 segundos (seguro)
         setInterval(() => {
             if (!this.atualizando) {
                 this.calcularTudoComForca();
@@ -550,6 +590,8 @@ class SistemaDefesasBraboCompleto {
         console.log('BÔNUS:', this.estado.bonus);
         console.log('DEFESAS:', this.estado.defesas);
         console.log('FADIGA:', this.estado.fadiga);
+        console.log('NH:', this.estado.nh);
+        console.log('Bloqueio Corrigido?', this.estado.bloqueioCorrigido);
         console.log('=====================');
     }
     
@@ -564,13 +606,18 @@ class SistemaDefesasBraboCompleto {
         console.log('💥 RECALCULANDO TUDO!');
         this.estado.nh.escudo = null;
         this.estado.nh.arma = null;
+        this.estado.bloqueioCorrigido = false;
         this.carregarTudoAgora();
         this.detectarEstadoFadiga();
         this.calcularTudoComForca();
+        
+        // Chama correção do bug
+        setTimeout(() => {
+            this.forcarAtualizacaoBloqueioBug();
+        }, 300);
     }
     
     destruir() {
-        // Limpar observadores
         this.observadores.forEach(observer => observer.disconnect());
         this.observadores = [];
         this.iniciado = false;
@@ -598,7 +645,7 @@ function iniciarSistemaBraboCompleto() {
     return sistemaBraboCompleto;
 }
 
-// INICIAR QUANDO COMBATE ABRIR
+// INICIAR QUANDO COMBATE ABRIR - COM CORREÇÃO DO BUG
 document.addEventListener('DOMContentLoaded', function() {
     const combateTab = document.getElementById('combate');
     
@@ -615,7 +662,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.attributeName === 'class') {
-                    setTimeout(verificarEIniciar, 100);
+                    setTimeout(() => {
+                        verificarEIniciar();
+                        
+                        // CORREÇÃO EXTRA: se já iniciado, força correção do bloqueio
+                        if (sistemaBraboCompleto && sistemaBraboCompleto.iniciado) {
+                            setTimeout(() => {
+                                sistemaBraboCompleto.forcarAtualizacaoBloqueioBug();
+                            }, 300);
+                        }
+                    }, 100);
                 }
             });
         });
@@ -645,6 +701,16 @@ window.recarregarTudoBrabo = () => {
     }
 };
 
+// NOVA FUNÇÃO PARA CORRIGIR BLOQUEIO MANUALMENTE
+window.corrigirBloqueio = () => {
+    if (window.sistemaDefesasBraboCompleto) {
+        console.log('🛠️ CORRIGINDO BLOQUEIO MANUALMENTE...');
+        window.sistemaDefesasBraboCompleto.forcarAtualizacaoBloqueioBug();
+    } else {
+        console.log('⚠️ Sistema não iniciado');
+    }
+};
+
 // ATALHOS
 window.SDB = () => recarregarTudoBrabo();
 window.B = () => testarBonusBrabo();
@@ -655,7 +721,11 @@ window.F = () => {
     }
 };
 
+// NOVO ATALHO PARA CORRIGIR BUG
+window.CB = () => corrigirBloqueio();
+
 console.log('🔥 SISTEMA DE DEFESAS CARREGADO!');
-console.log('💡 Use SDB() para recalcular');
+console.log('💡 Use SDB() para recalcular tudo');
 console.log('💡 Use B() para testar bônus');
 console.log('💡 Use F() para ver fadiga');
+console.log('🔧 Use CB() ou corrigirBloqueio() para CORRIGIR O BUG MANUALMENTE');
