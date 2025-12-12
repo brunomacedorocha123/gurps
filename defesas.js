@@ -1,18 +1,16 @@
-// defesas.js - SISTEMA COMPLETO E BRABO!
+// defesas.js - SISTEMA COMPLETO E BRABO! - VERSÃO CORRIGIDA
 class SistemaDefesasBraboCompleto {
     constructor() {
         console.log('💪💪💪 SISTEMA DE DEFESAS BRABO COMPLETO INICIADO! 💪💪💪');
         
-        // CONFIGURAÇÃO DOS BÔNUS
+        // CONFIGURAÇÃO CORRETA DOS BÔNUS
         this.CONFIG_BONUS = {
-            // BÔNUS QUE APLICAM EM TODAS AS DEFESAS
-            TODOS: ['Outros', 'Capa'],  // Capa e Outros aplicam em TUDO
+            // TODOS os bônus abaixo aplicam SOMENTE em:
+            // ESQUIVA, BLOQUEIO e APARAR
+            BONUS_3_DEFESAS: ['Reflexos', 'Escudo', 'Capa', 'Outros'],
             
-            // BÔNUS ESPECÍFICOS
-            ESPECIFICOS: {
-                'Reflexos': ['esquiva', 'deslocamento'],
-                'Escudo': ['bloqueio']
-            }
+            // Lista das defesas que recebem bônus
+            DEFESAS_COM_BONUS: ['esquiva', 'bloqueio', 'aparar']
         };
         
         // ESTADO DO SISTEMA
@@ -55,19 +53,10 @@ class SistemaDefesasBraboCompleto {
         if (this.iniciado) return;
         console.log('🚀🚀🚀 INICIANDO SISTEMA BRABO COMPLETO! 🚀🚀🚀');
         
-        // 1. CONFIGURAR TUDO
         this.configurarSistemaInteiro();
-        
-        // 2. PEGAR VALORES INICIAIS
         this.carregarTudoAgora();
-        
-        // 3. CALCULAR PELA PRIMEIRA VEZ
         this.calcularTudoComForca();
-        
-        // 4. INICIAR MONITORAMENTO BRABO
         this.iniciarMonitoramentoBrabo();
-        
-        // 5. INICIAR ATUALIZAÇÃO AUTOMÁTICA
         this.iniciarAtualizacaoAutomatica();
         
         this.iniciado = true;
@@ -76,17 +65,9 @@ class SistemaDefesasBraboCompleto {
     
     configurarSistemaInteiro() {
         console.log('🔧 CONFIGURANDO SISTEMA INTEIRO...');
-        
-        // CONFIGURAR INPUTS DE BÔNUS
         this.configurarInputsBonus();
-        
-        // CONFIGURAR INPUTS DE MODIFICADOR
         this.configurarInputsModificador();
-        
-        // CONFIGURAR INPUTS DE ATRIBUTOS
         this.configurarInputsAtributos();
-        
-        // CONFIGURAR BOTÕES
         this.configurarBotoes();
     }
     
@@ -96,11 +77,9 @@ class SistemaDefesasBraboCompleto {
         ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonus => {
             const input = document.getElementById(`bonus${bonus}`);
             if (input) {
-                // REMOVER EVENTOS ANTIGOS
                 const novoInput = input.cloneNode(true);
                 input.parentNode.replaceChild(novoInput, input);
                 
-                // CONFIGURAR NOVOS EVENTOS
                 novoInput.addEventListener('input', () => {
                     this.estado.bonus[bonus] = parseInt(novoInput.value) || 0;
                     console.log(`💰 ${bonus} alterado para: ${this.estado.bonus[bonus]}`);
@@ -113,7 +92,6 @@ class SistemaDefesasBraboCompleto {
                     this.calcularTudoComForca();
                 });
                 
-                // VALOR INICIAL
                 this.estado.bonus[bonus] = parseInt(novoInput.value) || 0;
             }
         });
@@ -122,7 +100,8 @@ class SistemaDefesasBraboCompleto {
     configurarInputsModificador() {
         console.log('🎛️ CONFIGURANDO MODIFICADORES...');
         
-        ['esquiva', 'bloqueio', 'aparar', 'deslocamento'].forEach(defesa => {
+        // SÓ estas 3 defesas recebem modificadores
+        ['esquiva', 'bloqueio', 'aparar'].forEach(defesa => {
             const input = document.getElementById(`${defesa}Mod`);
             if (input) {
                 input.addEventListener('change', () => {
@@ -131,6 +110,15 @@ class SistemaDefesasBraboCompleto {
                 });
             }
         });
+        
+        // Deslocamento é separado
+        const deslocamentoInput = document.getElementById('deslocamentoMod');
+        if (deslocamentoInput) {
+            deslocamentoInput.addEventListener('change', () => {
+                this.estado.modificadores.deslocamento = parseInt(deslocamentoInput.value) || 0;
+                this.calcularTudoComForca();
+            });
+        }
     }
     
     configurarInputsAtributos() {
@@ -181,30 +169,25 @@ class SistemaDefesasBraboCompleto {
     carregarTudoAgora() {
         console.log('📥 CARREGANDO TUDO AGORA...');
         
-        // CARREGAR ATRIBUTOS
+        // ATRIBUTOS
         const dxInput = document.getElementById('DX');
         const htInput = document.getElementById('HT');
-        
         if (dxInput) this.estado.atributos.dx = parseInt(dxInput.value) || 10;
         if (htInput) this.estado.atributos.ht = parseInt(htInput.value) || 10;
         
-        // CARREGAR BÔNUS
+        // BÔNUS
         ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonus => {
             const input = document.getElementById(`bonus${bonus}`);
-            if (input) {
-                this.estado.bonus[bonus] = parseInt(input.value) || 0;
-            }
+            if (input) this.estado.bonus[bonus] = parseInt(input.value) || 0;
         });
         
-        // CARREGAR MODIFICADORES
+        // MODIFICADORES
         ['esquiva', 'bloqueio', 'aparar', 'deslocamento'].forEach(defesa => {
             const input = document.getElementById(`${defesa}Mod`);
-            if (input) {
-                this.estado.modificadores[defesa] = parseInt(input.value) || 0;
-            }
+            if (input) this.estado.modificadores[defesa] = parseInt(input.value) || 0;
         });
         
-        // CARREGAR NÍVEL DE CARGA
+        // NÍVEL DE CARGA
         const cargaElement = document.getElementById('nivelCarga');
         if (cargaElement) {
             this.estado.nivelCarga = cargaElement.textContent.toLowerCase().trim();
@@ -221,22 +204,16 @@ class SistemaDefesasBraboCompleto {
         console.log('💪💪💪 CALCULANDO TUDO COM FORÇA! 💪💪💪');
         
         try {
-            // ATUALIZAR CACHE
             this.atualizarCache();
-            
-            // BUSCAR NH ATUALIZADO
             this.buscarNHAtualizado();
             
-            // CALCULAR CADA DEFESA
+            // CALCULAR AS 4 DEFESAS
             this.calcularEsquivaComBonus();
             this.calcularDeslocamentoComBonus();
             this.calcularBloqueioComBonus();
             this.calcularApararComBonus();
             
-            // ATUALIZAR TELA
             this.atualizarTelaComForca();
-            
-            // ATUALIZAR TOTAL DE BÔNUS
             this.atualizarTotalBonusComForca();
             
             this.ultimaAtualizacao = Date.now();
@@ -249,55 +226,41 @@ class SistemaDefesasBraboCompleto {
     }
     
     atualizarCache() {
-        // ATUALIZAR ATRIBUTOS DO CACHE
         const dxInput = document.getElementById('DX');
         const htInput = document.getElementById('HT');
-        
         if (dxInput) this.estado.atributos.dx = parseInt(dxInput.value) || 10;
         if (htInput) this.estado.atributos.ht = parseInt(htInput.value) || 10;
         
-        // ATUALIZAR BÔNUS DO CACHE
         ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonus => {
             const input = document.getElementById(`bonus${bonus}`);
-            if (input) {
-                this.estado.bonus[bonus] = parseInt(input.value) || 0;
-            }
+            if (input) this.estado.bonus[bonus] = parseInt(input.value) || 0;
         });
     }
     
     buscarNHAtualizado() {
-        // BUSCAR NH DO ESCUDO
         this.estado.nh.escudo = this.calcularNHEscudo();
-        
-        // BUSCAR NH DA ARMA
         this.estado.nh.arma = this.calcularNHArma();
     }
     
     calcularNHEscudo() {
         const dx = this.estado.atributos.dx;
-        
-        // PROCURAR PERÍCIA DE ESCUDO
         let nivelEscudo = 0;
         
-        // MÉTODO 1: PERÍCIAS APRENDIDAS
+        // PROCURAR PERÍCIA DE ESCUDO
         const container = document.getElementById('pericias-aprendidas');
         if (container) {
             const itens = container.querySelectorAll('.pericia-aprendida-item');
-            
             for (let item of itens) {
                 const texto = item.textContent || '';
                 if (texto.toLowerCase().includes('escudo')) {
-                    // EXTRAIR NÍVEL
                     const match = texto.match(/[+-]?\d+/);
-                    if (match) {
-                        nivelEscudo = parseInt(match[0]) || 0;
-                    }
+                    if (match) nivelEscudo = parseInt(match[0]) || 0;
                     break;
                 }
             }
         }
         
-        // MÉTODO 2: LOCALSTORAGE
+        // LOCALSTORAGE
         if (nivelEscudo === 0) {
             try {
                 const salvo = localStorage.getItem('periciasAprendidas');
@@ -306,14 +269,9 @@ class SistemaDefesasBraboCompleto {
                     const escudo = pericias.find(p => 
                         p.nome && p.nome.toLowerCase().includes('escudo')
                     );
-                    
-                    if (escudo) {
-                        nivelEscudo = escudo.nivel || 0;
-                    }
+                    if (escudo) nivelEscudo = escudo.nivel || 0;
                 }
-            } catch (e) {
-                // IGNORA ERRO
-            }
+            } catch (e) {}
         }
         
         const nh = dx + nivelEscudo;
@@ -322,7 +280,6 @@ class SistemaDefesasBraboCompleto {
     }
     
     calcularNHArma() {
-        // VERIFICAR SE TEM ARMA EQUIPADA
         const comArma = document.getElementById('comArma');
         if (!comArma || comArma.style.display === 'none') {
             console.log('⚔️ Nenhuma arma equipada');
@@ -330,8 +287,6 @@ class SistemaDefesasBraboCompleto {
         }
         
         const dx = this.estado.atributos.dx;
-        
-        // BUSCAR PERÍCIA DA ARMA
         let nivelArma = 0;
         let encontrou = false;
         
@@ -339,11 +294,8 @@ class SistemaDefesasBraboCompleto {
         const container = document.getElementById('pericias-aprendidas');
         if (container) {
             const itens = container.querySelectorAll('.pericia-aprendida-item');
-            
             for (let item of itens) {
                 const texto = item.textContent || '';
-                
-                // VERIFICAR SE É PERÍCIA DE ARMA
                 if (this.ehPericiaDeArma(texto)) {
                     const match = texto.match(/[+-]?\d+/);
                     if (match) {
@@ -356,7 +308,6 @@ class SistemaDefesasBraboCompleto {
         }
         
         if (!encontrou) {
-            // TENTAR LOCALSTORAGE
             try {
                 const salvo = localStorage.getItem('periciasAprendidas');
                 if (salvo) {
@@ -369,9 +320,7 @@ class SistemaDefesasBraboCompleto {
                         }
                     }
                 }
-            } catch (e) {
-                // IGNORA ERRO
-            }
+            } catch (e) {}
         }
         
         const nh = encontrou ? (dx + nivelArma) : dx;
@@ -386,120 +335,63 @@ class SistemaDefesasBraboCompleto {
             'martelo', 'faca', 'sabre', 'rapieira', 'terçado', 'bastão',
             'tonfa', 'pistola', 'rifle', 'shotgun', 'besta', 'funda'
         ];
-        
-        for (let arma of armas) {
-            if (textoLower.includes(arma)) {
-                return true;
-            }
-        }
-        
-        return false;
+        return armas.some(arma => textoLower.includes(arma));
     }
     
-    // ========== CÁLCULO DE CADA DEFESA COM BÔNUS ==========
+    // ========== CÁLCULO DE CADA DEFESA ==========
     calcularEsquivaComBonus() {
         const { dx, ht } = this.estado.atributos;
-        
-        // FÓRMULA BASE
         const base = Math.floor((dx + ht) / 4) + 3;
-        
-        // MODIFICADOR
         const modificador = this.estado.modificadores.esquiva;
         
-        // CALCULAR BÔNUS TOTAL
+        // SOMA TODOS OS BÔNUS MANUAIS NA ESQUIVA
         let bonusTotal = 0;
+        bonusTotal += this.estado.bonus.Reflexos;  // ✅
+        bonusTotal += this.estado.bonus.Escudo;    // ✅
+        bonusTotal += this.estado.bonus.Capa;      // ✅
+        bonusTotal += this.estado.bonus.Outros;    // ✅
         
-        // BÔNUS QUE APLICAM NA ESQUIVA
-        if (this.CONFIG_BONUS.TODOS.includes('Capa')) {
-            bonusTotal += this.estado.bonus.Capa;
-        }
-        if (this.CONFIG_BONUS.TODOS.includes('Outros')) {
-            bonusTotal += this.estado.bonus.Outros;
-        }
-        
-        // BÔNUS ESPECÍFICOS
-        if (this.CONFIG_BONUS.ESPECIFICOS['Reflexos']?.includes('esquiva')) {
-            bonusTotal += this.estado.bonus.Reflexos;
-        }
-        
-        // REDUTOR DE CARGA
         const redutorCarga = this.getRedutorCarga(this.estado.nivelCarga);
-        
-        // TOTAL
         const total = base + modificador + bonusTotal + redutorCarga;
         
         this.estado.defesas.esquiva = Math.max(total, 1);
         
-        console.log(`🏃 ESQUIVA: ${total} = base ${base} + mod ${modificador} + bonus ${bonusTotal} + carga ${redutorCarga}`);
+        console.log(`🏃 ESQUIVA: ${total} = base ${base} + mod ${modificador} + TODOS BÔNUS ${bonusTotal} + carga ${redutorCarga}`);
     }
     
     calcularDeslocamentoComBonus() {
         const { dx, ht } = this.estado.atributos;
-        
-        // FÓRMULA BASE
         const base = (dx + ht) / 4;
-        
-        // MODIFICADOR
         const modificador = this.estado.modificadores.deslocamento;
         
-        // CALCULAR BÔNUS TOTAL
-        let bonusTotal = 0;
+        // DESLOCAMENTO NÃO RECEBE BÔNUS MANUAIS! ❌
+        // Apenas modificador e carga
+        const bonusTotal = 0;  // NENHUM bônus aqui
         
-        // BÔNUS QUE APLICAM NO DESLOCAMENTO
-        if (this.CONFIG_BONUS.TODOS.includes('Capa')) {
-            bonusTotal += this.estado.bonus.Capa;
-        }
-        if (this.CONFIG_BONUS.TODOS.includes('Outros')) {
-            bonusTotal += this.estado.bonus.Outros;
-        }
-        
-        // BÔNUS ESPECÍFICOS
-        if (this.CONFIG_BONUS.ESPECIFICOS['Reflexos']?.includes('deslocamento')) {
-            bonusTotal += this.estado.bonus.Reflexos;
-        }
-        
-        // REDUTOR DE CARGA
         const redutorCarga = this.getRedutorCarga(this.estado.nivelCarga);
-        
-        // TOTAL
         const total = base + modificador + bonusTotal + redutorCarga;
         
         this.estado.defesas.deslocamento = Math.max(total, 0);
         
-        console.log(`👣 DESLOCAMENTO: ${total.toFixed(2)} = base ${base.toFixed(2)} + mod ${modificador} + bonus ${bonusTotal} + carga ${redutorCarga}`);
+        console.log(`👣 DESLOCAMENTO: ${total.toFixed(2)} = base ${base.toFixed(2)} + mod ${modificador} + carga ${redutorCarga} (SEM BÔNUS MANUAIS)`);
     }
     
     calcularBloqueioComBonus() {
         const nhEscudo = this.estado.nh.escudo || this.estado.atributos.dx;
-        
-        // FÓRMULA BASE
         const base = Math.floor(nhEscudo / 2) + 3;
-        
-        // MODIFICADOR
         const modificador = this.estado.modificadores.bloqueio;
         
-        // CALCULAR BÔNUS TOTAL
+        // SOMA TODOS OS BÔNUS MANUAIS NO BLOQUEIO
         let bonusTotal = 0;
+        bonusTotal += this.estado.bonus.Reflexos;  // ✅
+        bonusTotal += this.estado.bonus.Escudo;    // ✅
+        bonusTotal += this.estado.bonus.Capa;      // ✅
+        bonusTotal += this.estado.bonus.Outros;    // ✅
         
-        // BÔNUS QUE APLICAM NO BLOQUEIO
-        if (this.CONFIG_BONUS.TODOS.includes('Capa')) {
-            bonusTotal += this.estado.bonus.Capa;
-        }
-        if (this.CONFIG_BONUS.TODOS.includes('Outros')) {
-            bonusTotal += this.estado.bonus.Outros;
-        }
-        
-        // BÔNUS ESPECÍFICOS
-        if (this.CONFIG_BONUS.ESPECIFICOS['Escudo']?.includes('bloqueio')) {
-            bonusTotal += this.estado.bonus.Escudo;
-        }
-        
-        // TOTAL
         const total = base + modificador + bonusTotal;
-        
         this.estado.defesas.bloqueio = Math.max(total, 1);
         
-        console.log(`🛡️ BLOQUEIO: ${total} = base ${base} + mod ${modificador} + bonus ${bonusTotal} (NH: ${nhEscudo})`);
+        console.log(`🛡️ BLOQUEIO: ${total} = base ${base} + mod ${modificador} + TODOS BÔNUS ${bonusTotal}`);
     }
     
     calcularApararComBonus() {
@@ -511,29 +403,20 @@ class SistemaDefesasBraboCompleto {
             return;
         }
         
-        // FÓRMULA BASE
         const base = Math.floor(nhArma / 2) + 3;
-        
-        // MODIFICADOR
         const modificador = this.estado.modificadores.aparar;
         
-        // CALCULAR BÔNUS TOTAL
+        // SOMA TODOS OS BÔNUS MANUAIS NO APARAR
         let bonusTotal = 0;
+        bonusTotal += this.estado.bonus.Reflexos;  // ✅
+        bonusTotal += this.estado.bonus.Escudo;    // ✅
+        bonusTotal += this.estado.bonus.Capa;      // ✅
+        bonusTotal += this.estado.bonus.Outros;    // ✅
         
-        // BÔNUS QUE APLICAM NO APARAR
-        if (this.CONFIG_BONUS.TODOS.includes('Capa')) {
-            bonusTotal += this.estado.bonus.Capa;
-        }
-        if (this.CONFIG_BONUS.TODOS.includes('Outros')) {
-            bonusTotal += this.estado.bonus.Outros;
-        }
-        
-        // TOTAL
         const total = base + modificador + bonusTotal;
-        
         this.estado.defesas.aparar = Math.max(total, 1);
         
-        console.log(`⚔️ APARAR: ${total} = base ${base} + mod ${modificador} + bonus ${bonusTotal} (NH: ${nhArma})`);
+        console.log(`⚔️ APARAR: ${total} = base ${base} + mod ${modificador} + TODOS BÔNUS ${bonusTotal}`);
     }
     
     getRedutorCarga(nivelCarga) {
@@ -551,7 +434,6 @@ class SistemaDefesasBraboCompleto {
     atualizarTelaComForca() {
         console.log('💥 ATUALIZANDO TELA COM FORÇA!');
         
-        // ATUALIZAR CADA VALOR
         this.atualizarElemento('esquivaTotal', this.estado.defesas.esquiva);
         this.atualizarElemento('deslocamentoTotal', this.estado.defesas.deslocamento.toFixed(2));
         this.atualizarElemento('bloqueioTotal', this.estado.defesas.bloqueio);
@@ -585,19 +467,6 @@ class SistemaDefesasBraboCompleto {
         console.log('👁️‍🗨️👁️‍🗨️👁️‍🗨️ INICIANDO MONITORAMENTO BRABO! 👁️‍🗨️👁️‍🗨️👁️‍🗨️');
         
         // MONITORAR NÍVEL DE CARGA
-        this.monitorarCarga();
-        
-        // MONITORAR MUDANÇAS EM PERÍCIAS
-        this.monitorarPericias();
-        
-        // MONITORAR MUDANÇAS EM EQUIPAMENTOS
-        this.monitorarEquipamentos();
-        
-        // MONITORAR MUDANÇAS GERAIS
-        this.monitorarGeral();
-    }
-    
-    monitorarCarga() {
         const cargaElement = document.getElementById('nivelCarga');
         if (cargaElement) {
             const observer = new MutationObserver(() => {
@@ -607,18 +476,12 @@ class SistemaDefesasBraboCompleto {
                     this.calcularTudoComForca();
                 }
             });
-            
-            observer.observe(cargaElement, { 
-                childList: true, 
-                characterData: true 
-            });
+            observer.observe(cargaElement, { childList: true, characterData: true });
         }
-    }
-    
-    monitorarPericias() {
+        
+        // MONITORAR PERÍCIAS
         const container = document.getElementById('pericias-aprendidas') || 
                          document.getElementById('lista-pericias');
-        
         if (container) {
             const observer = new MutationObserver(() => {
                 console.log('📚 Mudança detectada em perícias!');
@@ -626,15 +489,10 @@ class SistemaDefesasBraboCompleto {
                 this.estado.nh.arma = null;
                 setTimeout(() => this.calcularTudoComForca(), 500);
             });
-            
-            observer.observe(container, { 
-                childList: true, 
-                subtree: true 
-            });
+            observer.observe(container, { childList: true, subtree: true });
         }
-    }
-    
-    monitorarEquipamentos() {
+        
+        // MONITORAR EQUIPAMENTOS
         const armaInfo = document.getElementById('armaInfo');
         if (armaInfo) {
             const observer = new MutationObserver(() => {
@@ -642,32 +500,11 @@ class SistemaDefesasBraboCompleto {
                 this.estado.nh.arma = null;
                 setTimeout(() => this.calcularTudoComForca(), 500);
             });
-            
-            observer.observe(armaInfo, { 
-                childList: true, 
-                attributes: true,
-                subtree: true 
-            });
+            observer.observe(armaInfo, { childList: true, attributes: true, subtree: true });
         }
     }
     
-    monitorarGeral() {
-        // MONITORAR MUDANÇAS GERAIS NO DOM
-        const observer = new MutationObserver(() => {
-            // Verificar se houve mudanças relevantes
-            this.calcularTudoComForca();
-        });
-        
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['value', 'class', 'style']
-        });
-    }
-    
     iniciarAtualizacaoAutomatica() {
-        // ATUALIZAR A CADA SEGUNDO (SÓ PRA GARANTIR)
         setInterval(() => {
             if (!this.atualizando) {
                 this.calcularTudoComForca();
@@ -675,7 +512,7 @@ class SistemaDefesasBraboCompleto {
         }, 1000);
     }
     
-    // ========== FUNÇÕES PÚBLICAS BRABAS ==========
+    // ========== FUNÇÕES PÚBLICAS ==========
     mostrarStatusCompleto() {
         console.log('=== 🦾🦾🦾 STATUS COMPLETO DO SISTEMA 🦾🦾🦾 ===');
         console.log('🎯 ATRIBUTOS:', this.estado.atributos);
@@ -694,33 +531,26 @@ class SistemaDefesasBraboCompleto {
         const bonus = this.estado.bonus;
         
         console.log('\n💰 BÔNUS ATUAIS:');
-        console.log(`   Reflexos: ${bonus.Reflexos} → Esquiva, Deslocamento`);
-        console.log(`   Escudo: ${bonus.Escudo} → Bloqueio`);
-        console.log(`   Capa: ${bonus.Capa} → TODAS as defesas`);
-        console.log(`   Outros: ${bonus.Outros} → TODAS as defesas`);
+        console.log(`   Reflexos: ${bonus.Reflexos}`);
+        console.log(`   Escudo: ${bonus.Escudo}`);
+        console.log(`   Capa: ${bonus.Capa}`);
+        console.log(`   Outros: ${bonus.Outros}`);
         
-        console.log('\n🎯 BÔNUS APLICADOS EM CADA DEFESA:');
-        console.log(`🏃 Esquiva: ${bonus.Reflexos + bonus.Capa + bonus.Outros}`);
-        console.log(`🛡️ Bloqueio: ${bonus.Escudo + bonus.Capa + bonus.Outros}`);
-        console.log(`⚔️ Aparar: ${bonus.Capa + bonus.Outros}`);
-        console.log(`👣 Deslocamento: ${bonus.Reflexos + bonus.Capa + bonus.Outros}`);
+        console.log('\n🎯 APLICAÇÃO CORRETA:');
+        console.log(`🏃 Esquiva: Recebe TODOS os 4 bônus = ${bonus.Reflexos + bonus.Escudo + bonus.Capa + bonus.Outros}`);
+        console.log(`🛡️ Bloqueio: Recebe TODOS os 4 bônus = ${bonus.Reflexos + bonus.Escudo + bonus.Capa + bonus.Outros}`);
+        console.log(`⚔️ Aparar: Recebe TODOS os 4 bônus = ${bonus.Reflexos + bonus.Escudo + bonus.Capa + bonus.Outros}`);
+        console.log(`👣 Deslocamento: NÃO recebe NENHUM bônus manual = 0`);
         
         console.log('\n✅ TESTE DE APLICAÇÃO COMPLETO!');
     }
     
     forcarRecalculoTotal() {
         console.log('💥💥💥 FORÇANDO RECÁLCULO TOTAL! 💥💥💥');
-        
-        // LIMPAR CACHE
         this.estado.nh.escudo = null;
         this.estado.nh.arma = null;
-        
-        // RECARREGAR TUDO
         this.carregarTudoAgora();
-        
-        // CALCULAR
         this.calcularTudoComForca();
-        
         console.log('✅ RECÁLCULO FORÇADO COMPLETO!');
     }
 }
@@ -739,7 +569,6 @@ function iniciarSistemaBraboCompleto() {
     sistemaBraboCompleto = new SistemaDefesasBraboCompleto();
     window.sistemaDefesasBraboCompleto = sistemaBraboCompleto;
     
-    // INICIAR IMEDIATAMENTE
     setTimeout(() => {
         sistemaBraboCompleto.iniciar();
     }, 500);
@@ -758,10 +587,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // VERIFICAR INICIALMENTE
     verificarEIniciar();
     
-    // OBSERVAR MUDANÇAS
     if (combateTab) {
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -770,17 +597,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
-        
         observer.observe(combateTab, { attributes: true });
     }
 });
 
-// ========== FUNÇÕES GLOBAIS BRABAS ==========
+// ========== FUNÇÕES GLOBAIS ==========
 window.mostrarStatusBrabo = function() {
     if (window.sistemaDefesasBraboCompleto) {
         window.sistemaDefesasBraboCompleto.mostrarStatusCompleto();
     } else {
-        console.log('❌ Sistema não iniciado. Use iniciarSistemaBraboCompleto()');
+        console.log('❌ Sistema não iniciado.');
     }
 };
 
@@ -802,7 +628,7 @@ window.recarregarTudoBrabo = function() {
 };
 
 // ATALHOS RÁPIDOS
-window.SDB = function() { // Sistema Defesas Brabo
+window.SDB = function() { 
     if (!window.sistemaDefesasBraboCompleto) {
         iniciarSistemaBraboCompleto();
     } else {
@@ -810,7 +636,7 @@ window.SDB = function() { // Sistema Defesas Brabo
     }
 };
 
-window.B = function() { // Bonus
+window.B = function() { 
     if (window.sistemaDefesasBraboCompleto) {
         window.sistemaDefesasBraboCompleto.testarAplicacaoBonus();
     }
