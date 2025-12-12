@@ -1,4 +1,4 @@
-// defesas.js - SISTEMA LIMPO DE DEFESAS (SEM POLUIÇÃO VISUAL)
+// defesas.js - SISTEMA CORRETO DE DEFESAS
 class SistemaDefesas {
     constructor() {
         this.defesas = {
@@ -17,7 +17,7 @@ class SistemaDefesas {
         this.periciaArma = null;
         this.totalBonus = 0;
         
-        // Redutores aplicados SILENCIOSAMENTE
+        // Redutores de carga
         this.redutoresCarga = {
             'nenhuma': 0,
             'leve': -1,
@@ -27,7 +27,7 @@ class SistemaDefesas {
         };
     }
 
-    // ===== MÉTODOS PRINCIPAIS =====
+    // ===== INICIALIZAÇÃO =====
     inicializar() {
         this.configurarEventListeners();
         this.configurarControlesManuais();
@@ -35,8 +35,9 @@ class SistemaDefesas {
         this.calcularTodasDefesas();
     }
 
+    // ===== CONFIGURAÇÃO DE EVENTOS =====
     configurarEventListeners() {
-        // Ouvir atributos
+        // 1. Atributos alterados
         document.addEventListener('atributosAlterados', (e) => {
             if (e.detail) {
                 this.DX = e.detail.DX || 10;
@@ -45,25 +46,24 @@ class SistemaDefesas {
             }
         });
 
-        // Ouvir equipamentos
+        // 2. Equipamentos alterados
         document.addEventListener('equipamentosAtualizados', () => {
             this.atualizarDadosEquipamentos();
             this.calcularTodasDefesas();
         });
 
-        // Monitorar nível de carga silenciosamente
-        this.configurarObservadorCargaSilencioso();
+        // 3. Monitorar nível de carga silenciosamente
+        this.configurarObservadorCarga();
     }
 
-    configurarObservadorCargaSilencioso() {
-        // Observa mudanças no elemento de nível de carga SEM fazer barulho
+    configurarObservadorCarga() {
         const observer = new MutationObserver(() => {
             const nivelCargaElement = document.getElementById('nivelCarga');
             if (nivelCargaElement) {
                 const novoNivel = nivelCargaElement.textContent.toLowerCase().trim();
                 if (novoNivel !== this.nivelCarga) {
                     this.nivelCarga = novoNivel;
-                    this.calcularTodasDefesas(); // Recalcula silenciosamente
+                    this.calcularTodasDefesas();
                 }
             }
         });
@@ -77,8 +77,9 @@ class SistemaDefesas {
         }
     }
 
+    // ===== CONTROLES MANUAIS =====
     configurarControlesManuais() {
-        // Configurar botões +/- de forma limpa
+        // Configurar botões +/- para cada defesa
         const defesasIds = ['esquiva', 'bloqueio', 'aparar', 'deslocamento'];
         
         defesasIds.forEach(defesaId => {
@@ -86,17 +87,14 @@ class SistemaDefesas {
             const container = modInput?.parentElement;
             
             if (container) {
-                // Encontrar botões
                 const minusBtn = container.querySelector('.minus');
                 const plusBtn = container.querySelector('.plus');
                 
                 if (minusBtn && plusBtn) {
-                    // Configurar eventos
                     minusBtn.onclick = () => this.alterarModificador(defesaId, -1);
                     plusBtn.onclick = () => this.alterarModificador(defesaId, 1);
                 }
                 
-                // Input manual
                 modInput.addEventListener('change', (e) => {
                     this.defesas[defesaId].modificador = parseInt(e.target.value) || 0;
                     this.calcularTodasDefesas();
@@ -104,7 +102,7 @@ class SistemaDefesas {
             }
         });
 
-        // Bônus gerais (Reflexos, Escudo, Capa, Outros)
+        // Bônus gerais
         ['Reflexos', 'Escudo', 'Capa', 'Outros'].forEach(bonusId => {
             const input = document.getElementById(`bonus${bonusId}`);
             if (input) {
@@ -137,14 +135,13 @@ class SistemaDefesas {
         
         this.totalBonus = total;
         
-        // Atualizar apenas o número do total
         const totalElement = document.getElementById('totalBonus');
         if (totalElement) {
             totalElement.textContent = total >= 0 ? `+${total}` : `${total}`;
         }
     }
 
-    // ===== ATUALIZAR DADOS EXTERNOS =====
+    // ===== OBTER DADOS EXTERNOS =====
     atualizarTodosDadosExternos() {
         // Atributos
         const dxInput = document.getElementById('DX');
@@ -154,7 +151,7 @@ class SistemaDefesas {
             this.HT = parseInt(htInput.value) || 10;
         }
         
-        // Nível de carga (silenciosamente)
+        // Nível de carga
         const cargaElement = document.getElementById('nivelCarga');
         if (cargaElement) {
             this.nivelCarga = cargaElement.textContent.toLowerCase().trim();
@@ -183,7 +180,7 @@ class SistemaDefesas {
                 p.nome?.toLowerCase().includes('escudo')
             );
             
-            // Perícia da Arma (busca simplificada)
+            // Perícia da Arma
             if (this.armaEquipada) {
                 const nomeArma = this.armaEquipada.nome.toLowerCase();
                 this.periciaArma = estadoPericias.periciasAprendidas.find(p => {
@@ -195,7 +192,7 @@ class SistemaDefesas {
         }
     }
 
-    // ===== CÁLCULOS LIMPOS =====
+    // ===== CÁLCULOS CORRETOS =====
     calcularTodasDefesas() {
         this.calcularEsquiva();
         this.calcularDeslocamento();
@@ -205,8 +202,9 @@ class SistemaDefesas {
     }
 
     calcularEsquiva() {
-        // HT + DX/4 + 3 (arredonda pra baixo) + bônus + modificador - redutorCarga
-        const base = Math.floor(this.HT + (this.DX / 4) + 3);
+        // FÓRMULA CORRETA: floor((DX + HT)/4) + 3
+        const baseCalculada = (this.DX + this.HT) / 4;
+        const base = Math.floor(baseCalculada) + 3; // Arredonda pra baixo e soma 3
         const redutorCarga = this.redutoresCarga[this.nivelCarga] || 0;
         
         this.defesas.esquiva.base = base;
@@ -217,10 +215,12 @@ class SistemaDefesas {
             redutorCarga,
             1
         );
+        
+        console.log(`🏃 Esquiva: floor((${this.DX}+${this.HT})/4)=${Math.floor((this.DX + this.HT) / 4)} + 3 = ${base} + ${redutorCarga} (carga) = ${this.defesas.esquiva.total}`);
     }
 
     calcularDeslocamento() {
-        // (DX + HT)/4 + bônus + modificador - redutorCarga (SEM +3!)
+        // FÓRMULA CORRETA: (DX + HT)/4 (valor exato)
         const base = (this.DX + this.HT) / 4;
         const redutorCarga = this.redutoresCarga[this.nivelCarga] || 0;
         
@@ -232,10 +232,12 @@ class SistemaDefesas {
             redutorCarga,
             0
         );
+        
+        console.log(`👣 Deslocamento: (${this.DX}+${this.HT})/4=${base.toFixed(2)} + ${redutorCarga} (carga) = ${this.defesas.deslocamento.total.toFixed(2)}`);
     }
 
     calcularBloqueio() {
-        // NH_Escudo/2 + 3 (arredonda pra baixo) + bônus + modificador
+        // FÓRMULA CORRETA: floor(NH_Escudo/2) + 3
         let base = 3; // Mínimo sem perícia
         
         if (this.periciaEscudo && this.escudoEquipado) {
@@ -250,10 +252,12 @@ class SistemaDefesas {
             this.defesas.bloqueio.modificador,
             1
         );
+        
+        console.log(`🛡️ Bloqueio: ${base} (base) = ${this.defesas.bloqueio.total}`);
     }
 
     calcularAparar() {
-        // NH_Arma/2 + 3 (arredonda pra baixo) + bônus + modificador
+        // FÓRMULA CORRETA: floor(NH_Arma/2) + 3
         let base = 3; // Mínimo sem perícia
         
         if (this.periciaArma && this.armaEquipada) {
@@ -268,26 +272,26 @@ class SistemaDefesas {
             this.defesas.aparar.modificador,
             1
         );
+        
+        console.log(`⚔️ Aparar: ${base} (base) = ${this.defesas.aparar.total}`);
     }
 
-    // ===== INTERFACE LIMPA =====
+    // ===== INTERFACE =====
     atualizarInterface() {
-        // APENAS OS NÚMEROS FINAIS - nada mais!
+        // Apenas os números finais
         document.getElementById('esquivaTotal').textContent = this.defesas.esquiva.total;
         document.getElementById('deslocamentoTotal').textContent = this.defesas.deslocamento.total.toFixed(2);
         document.getElementById('bloqueioTotal').textContent = this.defesas.bloqueio.total;
         document.getElementById('apararTotal').textContent = this.defesas.aparar.total;
         
-        // Modificadores (apenas números)
+        // Modificadores
         document.getElementById('esquivaMod').value = this.defesas.esquiva.modificador;
         document.getElementById('bloqueioMod').value = this.defesas.bloqueio.modificador;
         document.getElementById('apararMod').value = this.defesas.aparar.modificador;
         document.getElementById('deslocamentoMod').value = this.defesas.deslocamento.modificador;
-        
-        // SEM estilos, SEM indicadores, SEM poluição visual!
     }
 
-    // ===== MÉTODOS PÚBLICOS SIMPLES =====
+    // ===== MÉTODOS PÚBLICOS =====
     obterDadosDefesas() {
         return {
             esquiva: this.defesas.esquiva.total,
@@ -303,7 +307,7 @@ class SistemaDefesas {
     }
 }
 
-// ===== INICIALIZAÇÃO SIMPLES =====
+// ===== INICIALIZAÇÃO GLOBAL =====
 let sistemaDefesas;
 
 function inicializarSistemaDefesas() {
@@ -337,12 +341,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Funções globais mínimas
+// Funções globais
 window.obterDadosDefesas = () => window.sistemaDefesas?.obterDadosDefesas() || null;
 window.forcarRecalculoDefesas = () => window.sistemaDefesas?.forcarRecalculo();
 
-// Exportação limpa
+// Exportação
 window.SistemaDefesas = SistemaDefesas;
 window.inicializarSistemaDefesas = inicializarSistemaDefesas;
 
-console.log('✅ Sistema de Defesas carregado (versão limpa)');
+console.log('✅ Sistema de Defesas carregado (fórmulas corrigidas)');
