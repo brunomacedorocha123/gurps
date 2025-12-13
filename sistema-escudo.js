@@ -53,8 +53,52 @@ class SistemaEscudo {
             observer.observe(abaCombate, { attributes: true, attributeFilter: ['class'] });
         }
         
-        // Configura botões do card
+        // Configura botões do card - CORREÇÃO AQUI
         this.configurarBotoes();
+    }
+
+    // Configura botões do card - MÉTODO CORRIGIDO
+    configurarBotoes() {
+        console.log('🔘 Configurando botões do escudo');
+        
+        // Usar delegação de eventos no container principal
+        const cardEscudo = document.querySelector('.card-escudo');
+        if (cardEscudo) {
+            cardEscudo.addEventListener('click', (e) => {
+                this.handleBotaoClick(e);
+            });
+        }
+        
+        // Também adiciona listener no documento para garantir
+        document.addEventListener('click', (e) => {
+            this.handleBotaoClick(e);
+        });
+    }
+
+    // Handler para clicks nos botões
+    handleBotaoClick(e) {
+        const botao = e.target.closest('.btn-escudo');
+        if (!botao) return;
+        
+        console.log('🔘 Botão clicado:', botao.className);
+        
+        // Previne comportamento padrão
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (botao.classList.contains('dano-5')) {
+            console.log('💥 Botão -5 clicado');
+            this.aplicarDano(5);
+        } else if (botao.classList.contains('dano-1')) {
+            console.log('💥 Botão -1 clicado');
+            this.aplicarDano(1);
+        } else if (botao.classList.contains('cura-1')) {
+            console.log('💚 Botão +1 clicado');
+            this.curar(1);
+        } else if (botao.classList.contains('cura-5')) {
+            console.log('💚 Botão +5 clicado');
+            this.curar(5);
+        }
     }
 
     // Verificação imediata do escudo
@@ -183,30 +227,6 @@ class SistemaEscudo {
                 console.log(`📊 Extraído (apenas número): RD=${this.RD}`);
             }
         }
-    }
-
-    // Configura botões do card
-    configurarBotoes() {
-        console.log('🔘 Configurando botões do escudo');
-        
-        document.addEventListener('click', (e) => {
-            const botao = e.target.closest('.btn-escudo');
-            if (!botao) return;
-            
-            if (botao.classList.contains('dano-5')) {
-                console.log('💥 Botão -5 clicado');
-                this.aplicarDano(5);
-            } else if (botao.classList.contains('dano-1')) {
-                console.log('💥 Botão -1 clicado');
-                this.aplicarDano(1);
-            } else if (botao.classList.contains('cura-1')) {
-                console.log('💚 Botão +1 clicado');
-                this.curar(1);
-            } else if (botao.classList.contains('cura-5')) {
-                console.log('💚 Botão +5 clicado');
-                this.curar(5);
-            }
-        });
     }
 
     // Aplica dano ao escudo
@@ -413,21 +433,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Funções globais para os botões (compatibilidade)
-function danoEscudo(dano) {
-    console.log(`🔧 Função global danoEscudo(${dano}) chamada`);
-    if (window.sistemaEscudo) {
-        window.sistemaEscudo.aplicarDano(dano);
-    } else {
-        console.error('❌ sistemaEscudo não está disponível');
-    }
-}
-
-function curarEscudo(cura) {
-    console.log(`🔧 Função global curarEscudo(${cura}) chamada`);
-    if (window.sistemaEscudo) {
-        window.sistemaEscudo.curar(cura);
-    } else {
-        console.error('❌ sistemaEscudo não está disponível');
-    }
-}
+// Remove as funções globais antigas se existirem
+if (window.danoEscudo) delete window.danoEscudo;
+if (window.curarEscudo) delete window.curarEscudo;
