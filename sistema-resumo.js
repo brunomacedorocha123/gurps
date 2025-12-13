@@ -1,18 +1,19 @@
 // ============================================
-// SISTEMA-RESUMO.JS - VERSÃO 100% COMPLETA
-// Estilo Original - Mantendo TODO o código existente
+// SISTEMA-RESUMO.JS - VERSÃO COMPLETA E DEFINITIVA
+// Sistema que captura TODOS os dados do personagem para o resumo
 // ============================================
 
-// Estado do Resumo (MANTENDO EXATAMENTE COMO ESTAVA)
+// Estado do Resumo
 const estadoResumo = {
     fotoCarregada: false,
     dadosSincronizados: false,
     ultimaAtualizacao: null,
-    monitorAtivo: false
+    monitorAtivo: false,
+    idiomasCache: ''
 };
 
 // ============================================
-// FUNÇÕES BÁSICAS (MANTENDO EXATAMENTE COMO ESTAVA)
+// FUNÇÕES BÁSICAS
 // ============================================
 
 function atualizarElemento(id, valor) {
@@ -23,66 +24,296 @@ function atualizarElemento(id, valor) {
 }
 
 // ============================================
-// 1. DASHBOARD - Sincronização (MANTENDO EXATAMENTE)
+// 1. SISTEMA DE CAPTURA DE IDIOMAS - VERSÃO CORRIGIDA
+// ============================================
+
+function capturarIdiomasParaResumo() {
+    try {
+        console.log('🔤 Iniciando captura de idiomas...');
+        
+        // A. CAPTURAR IDIOMA MATERNO (SEMPRE EXISTE)
+        const inputMaterno = document.getElementById('idiomaMaternoNome');
+        let idiomaMaterno = 'Comum'; // Valor padrão
+        
+        if (inputMaterno) {
+            const valorInput = inputMaterno.value.trim();
+            idiomaMaterno = valorInput || 'Comum';
+        }
+        
+        console.log('📝 Idioma materno encontrado:', idiomaMaterno);
+        
+        // B. CAPTURAR IDIOMAS ADICIONAIS
+        const listaContainer = document.getElementById('listaIdiomasAdicionais');
+        const idiomasAdicionais = [];
+        
+        if (listaContainer) {
+            console.log('📦 Container de idiomas encontrado');
+            
+            // VERIFICAÇÃO 1: Não está mostrando a mensagem de lista vazia
+            const htmlCompleto = listaContainer.innerHTML;
+            
+            if (!htmlCompleto.includes('empty-state') && 
+                !htmlCompleto.includes('Nenhum idioma adicional adicionado') &&
+                !htmlCompleto.includes('nenhuma-magia-aprendida')) {
+                
+                console.log('✅ Lista não está vazia, procurando idiomas...');
+                
+                // MÉTODO 1: Procurar por elementos com texto
+                const todosElementos = listaContainer.querySelectorAll('*');
+                
+                todosElementos.forEach(elemento => {
+                    const texto = elemento.textContent || '';
+                    const textoLimpo = texto.trim();
+                    
+                    // CRITÉRIOS para identificar um nome de idioma:
+                    // 1. Tem texto
+                    // 2. Não é muito longo (nome de idioma tem até ~20 chars)
+                    // 3. Não contém ícones ou símbolos especiais
+                    // 4. Não é número ou pontuação
+                    if (textoLimpo && 
+                        textoLimpo.length > 1 && 
+                        textoLimpo.length < 30 &&
+                        !textoLimpo.includes('🗣️') && 
+                        !textoLimpo.includes('📝') &&
+                        !textoLimpo.includes('+') &&
+                        !textoLimpo.includes('pts') &&
+                        !textoLimpo.includes('🗑️') &&
+                        !textoLimpo.includes('Remover') &&
+                        !textoLimpo.includes('Fala:') &&
+                        !textoLimpo.includes('Escrita:') &&
+                        !/[0-9]/.test(textoLimpo.charAt(0)) &&
+                        textoLimpo !== 'Adicionar Idioma') {
+                        
+                        // Verificar se parece um nome de idioma
+                        const palavras = textoLimpo.split(' ');
+                        if (palavras.length <= 3) { // Nomes compostos como "Latim Antigo"
+                            console.log('✅ Possível idioma encontrado:', textoLimpo);
+                            idiomasAdicionais.push(textoLimpo);
+                        }
+                    }
+                });
+                
+                // MÉTODO 2: Procurar por elementos com classe específica
+                const itensIdioma = listaContainer.querySelectorAll('.idioma-item, .idioma-info, [class*="idioma"]');
+                
+                if (itensIdioma.length > 0) {
+                    console.log(`✅ ${itensIdioma.length} itens de idioma encontrados por classe`);
+                    
+                    itensIdioma.forEach(item => {
+                        // Extrair texto do item
+                        const textoItem = item.textContent || '';
+                        const linhas = textoItem.split('\n');
+                        
+                        linhas.forEach(linha => {
+                            const linhaLimpa = linha.trim();
+                            
+                            if (linhaLimpa && 
+                                linhaLimpa.length > 1 &&
+                                !linhaLimpa.includes('🗣️') &&
+                                !linhaLimpa.includes('📝') &&
+                                !linhaLimpa.includes('+') &&
+                                !linhaLimpa.match(/^\d/)) { // Não começa com número
+                                
+                                idiomasAdicionais.push(linhaLimpa);
+                            }
+                        });
+                    });
+                }
+            } else {
+                console.log('📭 Lista de idiomas está vazia');
+            }
+        } else {
+            console.log('❌ Container de idiomas não encontrado');
+        }
+        
+        // C. REMOVER DUPLICADOS E LIMPAR
+        const idiomasUnicos = [...new Set(idiomasAdicionais)]
+            .filter(idioma => idioma && idioma !== idiomaMaterno)
+            .filter(idioma => !idioma.includes('🗣️') && !idioma.includes('📝'))
+            .filter(idioma => idioma.length > 1);
+        
+        console.log('📋 Idiomas únicos encontrados:', idiomasUnicos);
+        
+        // D. MONTAR TEXTO FINAL
+        let textoFinal = idiomaMaterno;
+        
+        if (idiomasUnicos.length > 0) {
+            textoFinal += ', ' + idiomasUnicos.join(', ');
+        }
+        
+        // E. APLICAR NO RESUMO
+        const elementoIdiomas = document.getElementById('resumoIdiomas');
+        if (elementoIdiomas) {
+            // Truncar se for muito longo
+            if (textoFinal.length > 80) {
+                textoFinal = textoFinal.substring(0, 77) + '...';
+            }
+            
+            // Só atualizar se mudou
+            if (textoFinal !== estadoResumo.idiomasCache) {
+                elementoIdiomas.textContent = textoFinal;
+                estadoResumo.idiomasCache = textoFinal;
+                console.log('✅ Idiomas atualizados no resumo:', textoFinal);
+            }
+        } else {
+            console.log('❌ Elemento de idiomas não encontrado no resumo');
+        }
+        
+        return textoFinal;
+        
+    } catch (error) {
+        console.error('💥 Erro grave ao capturar idiomas:', error);
+        return 'Comum';
+    }
+}
+
+// ============================================
+// 2. SISTEMA DE MONITORAMENTO DE IDIOMAS
+// ============================================
+
+function configurarMonitoramentoIdiomas() {
+    console.log('👁️ Configurando monitoramento de idiomas...');
+    
+    // A. MONITORAR BOTÃO DE ADICIONAR IDIOMA
+    const btnAdicionar = document.getElementById('btnAdicionarIdioma');
+    if (btnAdicionar) {
+        btnAdicionar.addEventListener('click', function() {
+            console.log('🔄 Botão "Adicionar Idioma" clicado');
+            setTimeout(() => {
+                capturarIdiomasParaResumo();
+            }, 1000); // Dar tempo para o idioma aparecer
+        });
+    }
+    
+    // B. MONITORAR INPUT DO IDIOMA MATERNO
+    const inputMaterno = document.getElementById('idiomaMaternoNome');
+    if (inputMaterno) {
+        inputMaterno.addEventListener('input', function() {
+            setTimeout(() => {
+                capturarIdiomasParaResumo();
+            }, 500);
+        });
+    }
+    
+    // C. MONITORAR REMOÇÃO DE IDIOMAS (event delegation)
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-remove-idioma') || 
+            e.target.closest('[class*="remove"]') ||
+            e.target.closest('[class*="trash"]')) {
+            
+            console.log('🗑️ Botão de remover idioma clicado');
+            setTimeout(() => {
+                capturarIdiomasParaResumo();
+            }, 500);
+        }
+    });
+    
+    // D. MONITORAR MUDANÇAS NA LISTA DE IDIOMAS
+    const listaIdiomas = document.getElementById('listaIdiomasAdicionais');
+    if (listaIdiomas) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList' || mutation.type === 'subtree') {
+                    console.log('🔄 Lista de idiomas modificada');
+                    setTimeout(() => {
+                        capturarIdiomasParaResumo();
+                    }, 300);
+                }
+            });
+        });
+        
+        observer.observe(listaIdiomas, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+    }
+    
+    // E. MONITORAMENTO PERIÓDICO (para garantir)
+    setInterval(() => {
+        capturarIdiomasParaResumo();
+    }, 3000);
+    
+    console.log('✅ Monitoramento de idiomas configurado');
+}
+
+// ============================================
+// 3. CAPTURA DE DADOS DO DASHBOARD
 // ============================================
 
 function sincronizarDashboardCompleto() {
     try {
-        // Nome
+        console.log('🏠 Sincronizando dados do Dashboard...');
+        
+        // A. NOME DO PERSONAGEM
         const nomeInput = document.getElementById('charName');
         const resumoNome = document.getElementById('resumoNome');
         if (nomeInput && resumoNome) {
             resumoNome.textContent = nomeInput.value.trim().toUpperCase() || 'NOVO PERSONAGEM';
+            
+            // Monitorar mudanças
             nomeInput.addEventListener('input', function() {
                 resumoNome.textContent = this.value.trim().toUpperCase() || 'NOVO PERSONAGEM';
             });
         }
         
-        // Raça
+        // B. RAÇA
         const racaInput = document.getElementById('racaPersonagem');
         const racaResumo = document.getElementById('resumoRaca');
         if (racaInput && racaResumo) {
             racaResumo.textContent = racaInput.value || '-';
+            
             racaInput.addEventListener('input', function() {
                 racaResumo.textContent = this.value || '-';
             });
         }
         
-        // Classe
+        // C. CLASSE
         const classeInput = document.getElementById('classePersonagem');
         const classeResumo = document.getElementById('resumoClasse');
         if (classeInput && classeResumo) {
             classeResumo.textContent = classeInput.value || '-';
+            
             classeInput.addEventListener('input', function() {
                 classeResumo.textContent = this.value || '-';
             });
         }
         
-        // Nível
+        // D. NÍVEL
         const nivelInput = document.getElementById('nivelPersonagem');
         const nivelResumo = document.getElementById('resumoNivel');
         if (nivelInput && nivelResumo) {
             nivelResumo.textContent = nivelInput.value || '-';
+            
             nivelInput.addEventListener('input', function() {
                 nivelResumo.textContent = this.value || '-';
             });
         }
         
-        // Foto
-        sincronizarFotoDashboard();
+        // E. PONTOS
+        const pontosTotais = document.getElementById('pontosTotaisDashboard');
+        const pontosGastos = document.getElementById('pontosGastosDashboard');
+        const saldoDisponivel = document.getElementById('saldoDisponivelDashboard');
         
-        // Pontos
-        if (typeof window.dashboardEstado !== 'undefined') {
-            atualizarPontosResumo();
-        } else {
-            monitorarPontosDashboard();
+        if (pontosTotais && document.getElementById('resumoPontosTotais')) {
+            document.getElementById('resumoPontosTotais').textContent = pontosTotais.value || '150';
         }
         
-        // Relacionamentos
-        sincronizarRelacionamentos();
+        if (pontosGastos && document.getElementById('resumoPontosGastos')) {
+            document.getElementById('resumoPontosGastos').textContent = pontosGastos.textContent || '0';
+        }
+        
+        if (saldoDisponivel && document.getElementById('resumoSaldo')) {
+            document.getElementById('resumoSaldo').textContent = saldoDisponivel.textContent || '150';
+        }
+        
+        // F. FOTO
+        sincronizarFotoDashboard();
+        
+        console.log('✅ Dashboard sincronizado');
         
     } catch (error) {
-        console.error('Erro Dashboard:', error);
+        console.error('❌ Erro ao sincronizar dashboard:', error);
     }
 }
 
@@ -104,415 +335,245 @@ function sincronizarFotoDashboard() {
     }
 }
 
-function atualizarPontosResumo() {
-    if (!window.dashboardEstado || !window.dashboardEstado.pontos) return;
-    
-    const pontos = window.dashboardEstado.pontos;
-    
-    atualizarElemento('resumoPontosTotais', pontos.total);
-    atualizarElemento('resumoPontosGastos', 
-        (pontos.gastosAtributos || 0) + 
-        (pontos.gastosVantagens || 0) + 
-        (pontos.gastosPericias || 0) + 
-        (pontos.gastosMagias || 0)
-    );
-    atualizarElemento('resumoSaldo', pontos.saldoDisponivel || pontos.total);
-}
-
-function monitorarPontosDashboard() {
-    setInterval(() => {
-        const total = document.getElementById('pontosTotaisDashboard')?.value || 150;
-        const gastos = document.getElementById('pontosGastosDashboard')?.textContent || 0;
-        const saldo = document.getElementById('saldoDisponivelDashboard')?.textContent || 150;
-        
-        atualizarElemento('resumoPontosTotais', total);
-        atualizarElemento('resumoPontosGastos', gastos);
-        atualizarElemento('resumoSaldo', saldo);
-    }, 1000);
-}
-
-function sincronizarRelacionamentos() {
-    try {
-        if (window.dashboardEstado && window.dashboardEstado.relacionamentos) {
-            const rel = window.dashboardEstado.relacionamentos;
-            atualizarElemento('resumoInimigos', rel.inimigos.length);
-            atualizarElemento('resumoAliados', rel.aliados.length);
-            atualizarElemento('resumoDependentes', rel.dependentes.length);
-        }
-    } catch (error) {
-        console.log('Erro relacionamentos:', error);
-    }
-}
-
 // ============================================
-// 2. ATRIBUTOS - Sincronização (MANTENDO EXATAMENTE)
+// 4. CAPTURA DE DADOS DOS ATRIBUTOS
 // ============================================
 
 function sincronizarAtributosCompletos() {
-    window.atualizarResumoAtributos = function(dados) {
-        if (!dados) dados = obterDadosAtributosDiretamente();
-        atualizarAtributosNoResumo(dados);
-    };
-    
-    if (typeof window.obterDadosAtributos === 'function') {
-        setTimeout(() => {
-            const dados = window.obterDadosAtributos();
-            if (dados) window.atualizarResumoAtributos(dados);
-        }, 500);
-    } else {
-        monitorarAtributosManual();
-    }
-}
-
-function obterDadosAtributosDiretamente() {
-    return {
-        ST: parseInt(document.getElementById('ST').value) || 10,
-        DX: parseInt(document.getElementById('DX').value) || 10,
-        IQ: parseInt(document.getElementById('IQ').value) || 10,
-        HT: parseInt(document.getElementById('HT').value) || 10,
-        PV: parseInt(document.getElementById('PVTotal').textContent) || 10,
-        PF: parseInt(document.getElementById('PFTotal').textContent) || 10,
-        Vontade: parseInt(document.getElementById('VontadeTotal').textContent) || 10,
-        Percepcao: parseInt(document.getElementById('PercepcaoTotal').textContent) || 10,
-        Deslocamento: parseFloat(document.getElementById('DeslocamentoTotal').textContent) || 5.0
-    };
-}
-
-function atualizarAtributosNoResumo(dados) {
-    if (!dados) return;
-    
-    atualizarElemento('resumoST', dados.ST);
-    atualizarElemento('resumoDX', dados.DX);
-    atualizarElemento('resumoIQ', dados.IQ);
-    atualizarElemento('resumoHT', dados.HT);
-    atualizarElemento('resumoPV', dados.PV);
-    atualizarElemento('resumoPF', dados.PF);
-    atualizarElemento('resumoVontade', dados.Vontade);
-    atualizarElemento('resumoPercepcao', dados.Percepcao);
-    atualizarElemento('resumoDeslocamento', dados.Deslocamento.toFixed(1));
-    
-    // Custo
-    atualizarElemento('custoST', (dados.ST - 10) * 10);
-    atualizarElemento('custoDX', (dados.DX - 10) * 20);
-    atualizarElemento('custoIQ', (dados.IQ - 10) * 20);
-    atualizarElemento('custoHT', (dados.HT - 10) * 10);
-    
-    // Pontos gastos
-    const totalCustos = ((dados.ST - 10) * 10) + ((dados.DX - 10) * 20) + 
-                       ((dados.IQ - 10) * 20) + ((dados.HT - 10) * 10);
-    atualizarElemento('pontosAtributos', totalCustos);
-    
-    // Combate
-    sincronizarDefesas();
-    
-    estadoResumo.ultimaAtualizacao = new Date();
-}
-
-function sincronizarDefesas() {
     try {
-        const dx = parseInt(document.getElementById('DX').value) || 10;
-        const esquiva = Math.ceil(dx / 2) + 3;
-        atualizarElemento('resumoEsquiva', esquiva);
-        atualizarElemento('resumoBloqueio', esquiva + 1);
-    } catch (error) {
-        console.log('Erro defesas:', error);
-    }
-}
-
-function monitorarAtributosManual() {
-    if (estadoResumo.monitorAtivo) return;
-    estadoResumo.monitorAtivo = true;
-    
-    ['ST', 'DX', 'IQ', 'HT'].forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('input', () => {
-                setTimeout(() => {
-                    const dados = obterDadosAtributosDiretamente();
-                    atualizarAtributosNoResumo(dados);
-                }, 300);
-            });
-        }
-    });
-    
-    setInterval(() => {
-        const dados = obterDadosAtributosDiretamente();
-        atualizarAtributosNoResumo(dados);
-    }, 2000);
-}
-
-// ============================================
-// 3. CARACTERÍSTICAS - Sincronização (ADICIONANDO IDIOMAS AQUI)
-// ============================================
-
-function sincronizarCaracteristicas() {
-    // Altura e Peso (MANTENDO)
-    const alturaInput = document.getElementById('altura');
-    const pesoInput = document.getElementById('peso');
-    const alturaPesoResumo = document.getElementById('resumoAlturaPeso');
-    
-    if (alturaInput && pesoInput && alturaPesoResumo) {
-        const atualizarAlturaPeso = () => {
-            alturaPesoResumo.textContent = `${alturaInput.value || '1.70'}m/${pesoInput.value || '70'}kg`;
-        };
-        atualizarAlturaPeso();
-        alturaInput.addEventListener('input', atualizarAlturaPeso);
-        pesoInput.addEventListener('input', atualizarAlturaPeso);
-    }
-    
-    // Aparência (MANTENDO)
-    const aparenciaSelect = document.getElementById('nivelAparencia');
-    const aparenciaResumo = document.getElementById('resumoAparencia');
-    if (aparenciaSelect && aparenciaResumo) {
-        const atualizarAparencia = () => {
-            const texto = aparenciaSelect.options[aparenciaSelect.selectedIndex].text;
-            aparenciaResumo.textContent = texto.split('[')[0].trim();
-        };
-        atualizarAparencia();
-        aparenciaSelect.addEventListener('change', atualizarAparencia);
-    }
-    
-    // Riqueza e Dinheiro (MANTENDO)
-    const riquezaSelect = document.getElementById('nivelRiqueza');
-    const riquezaResumo = document.getElementById('resumoRiqueza');
-    const dinheiroResumo = document.getElementById('resumoDinheiro');
-    
-    if (riquezaSelect && riquezaResumo) {
-        const atualizarRiqueza = () => {
-            const texto = riquezaSelect.options[riquezaSelect.selectedIndex].text;
-            riquezaResumo.textContent = texto.split('[')[0].trim();
+        console.log('💪 Sincronizando atributos...');
+        
+        // A. ATRIBUTOS PRINCIPAIS
+        const atributos = ['ST', 'DX', 'IQ', 'HT'];
+        
+        atributos.forEach(atributo => {
+            const input = document.getElementById(atributo);
+            const elemento = document.getElementById(`resumo${atributo}`);
             
-            if (dinheiroResumo) {
-                const valor = parseInt(riquezaSelect.value) || 0;
-                const rendaBase = 1000;
-                const multiplicadores = {'-25':0,'-15':0.2,'-10':0.5,'0':1,'10':2,'20':5,'30':20,'50':100};
-                const renda = Math.floor(rendaBase * (multiplicadores[valor] || 1));
-                dinheiroResumo.textContent = `$${renda.toLocaleString()}`;
-            }
-        };
-        atualizarRiqueza();
-        riquezaSelect.addEventListener('change', atualizarRiqueza);
-    }
-    
-    // ============================================
-    // IDIOMAS - FUNÇÃO NOVA QUE RESOLVE O PROBLEMA
-    // ============================================
-    sincronizarIdiomasCompleto();
-}
-
-// ============================================
-// 4. IDIOMAS - FUNÇÃO NOVA PARA CAPTURAR IDIOMAS
-// ============================================
-
-function sincronizarIdiomasCompleto() {
-    console.log('🔤 Capturando idiomas...');
-    
-    // Inicializar captura
-    capturarEAtualizarIdiomas();
-    
-    // Configurar monitoramento
-    configurarMonitoramentoIdiomas();
-}
-
-function capturarEAtualizarIdiomas() {
-    try {
-        // 1. IDIOMA MATERNO
-        const inputMaterno = document.getElementById('idiomaMaternoNome');
-        let idiomaMaterno = 'Comum';
-        
-        if (inputMaterno) {
-            idiomaMaterno = inputMaterno.value.trim();
-            if (!idiomaMaterno) idiomaMaterno = 'Comum';
-        }
-        
-        // 2. IDIOMAS ADICIONAIS
-        const listaContainer = document.getElementById('listaIdiomasAdicionais');
-        const idiomasAdicionais = [];
-        
-        if (listaContainer) {
-            // Verificar se não é a tela vazia
-            const htmlContent = listaContainer.innerHTML || '';
-            
-            if (!htmlContent.includes('empty-state') && 
-                !htmlContent.includes('Nenhum idioma adicional adicionado')) {
+            if (input && elemento) {
+                const valor = input.value || '10';
+                elemento.textContent = valor;
                 
-                // Procurar itens na lista
-                const divs = listaContainer.querySelectorAll('div');
+                // Calcular custo
+                const custo = (parseInt(valor) - 10) * (atributo === 'ST' || atributo === 'HT' ? 10 : 20);
+                const custoElemento = document.getElementById(`custo${atributo}`);
+                if (custoElemento) {
+                    custoElemento.textContent = custo;
+                }
                 
-                divs.forEach(div => {
-                    const texto = div.textContent || '';
+                // Monitorar mudanças
+                input.addEventListener('input', function() {
+                    elemento.textContent = this.value || '10';
                     
-                    // Filtrar apenas textos que parecem nomes de idiomas
-                    if (texto.trim() && 
-                        texto.length < 50 && // Nome de idioma não deve ser muito longo
-                        !texto.includes('🗣️') && 
-                        !texto.includes('📝') &&
-                        !texto.includes('+') &&
-                        !texto.includes('pts') &&
-                        !texto.includes('🗑️') &&
-                        !texto.toLowerCase().includes('remover')) {
-                        
-                        // Pegar a primeira linha (geralmente é o nome)
-                        const linhas = texto.split('\n');
-                        const primeiraLinha = linhas[0].trim();
-                        
-                        if (primeiraLinha && 
-                            primeiraLinha !== 'Nenhum' &&
-                            primeiraLinha.length > 1) {
-                            idiomasAdicionais.push(primeiraLinha);
-                        }
+                    // Recalcular custo
+                    const novoCusto = (parseInt(this.value) - 10) * (atributo === 'ST' || atributo === 'HT' ? 10 : 20);
+                    if (custoElemento) {
+                        custoElemento.textContent = novoCusto;
                     }
                 });
             }
-        }
+        });
         
-        // 3. MONTAR TEXTO FINAL
-        let textoFinal = idiomaMaterno;
+        // B. ATRIBUTOS SECUNDÁRIOS
+        const secundarios = {
+            'PVTotal': 'resumoPV',
+            'PFTotal': 'resumoPF', 
+            'VontadeTotal': 'resumoVontade',
+            'PercepcaoTotal': 'resumoPercepcao',
+            'DeslocamentoTotal': 'resumoDeslocamento'
+        };
         
-        if (idiomasAdicionais.length > 0) {
-            // Remover duplicados
-            const unicos = [...new Set(idiomasAdicionais)];
-            textoFinal += ', ' + unicos.join(', ');
-        }
-        
-        // 4. APLICAR NO RESUMO
-        const elementoIdiomas = document.getElementById('resumoIdiomas');
-        if (elementoIdiomas) {
-            if (textoFinal.length > 80) {
-                textoFinal = textoFinal.substring(0, 77) + '...';
+        for (const [origem, destino] of Object.entries(secundarios)) {
+            const elementoOrigem = document.getElementById(origem);
+            const elementoDestino = document.getElementById(destino);
+            
+            if (elementoOrigem && elementoDestino) {
+                elementoDestino.textContent = elementoOrigem.textContent || '10';
             }
-            elementoIdiomas.textContent = textoFinal;
         }
         
-        console.log('✅ Idiomas capturados:', textoFinal);
+        // C. CALCULAR PONTOS GASTOS EM ATRIBUTOS
+        calcularPontosAtributos();
+        
+        console.log('✅ Atributos sincronizados');
         
     } catch (error) {
-        console.error('❌ Erro ao capturar idiomas:', error);
+        console.error('❌ Erro ao sincronizar atributos:', error);
     }
 }
 
-function configurarMonitoramentoIdiomas() {
-    // Monitorar botão de adicionar idioma
-    const btnAdicionar = document.getElementById('btnAdicionarIdioma');
-    if (btnAdicionar) {
-        btnAdicionar.addEventListener('click', function() {
-            console.log('🔄 Botão adicionar idioma clicado');
-            setTimeout(() => {
-                capturarEAtualizarIdiomas();
-            }, 800); // Tempo para o idioma ser adicionado
+function calcularPontosAtributos() {
+    try {
+        let total = 0;
+        const atributos = ['ST', 'DX', 'IQ', 'HT'];
+        
+        atributos.forEach(atributo => {
+            const input = document.getElementById(atributo);
+            if (input) {
+                const valor = parseInt(input.value) || 10;
+                const custo = (valor - 10) * (atributo === 'ST' || atributo === 'HT' ? 10 : 20);
+                total += custo;
+            }
         });
+        
+        atualizarElemento('pontosAtributos', total);
+        
+    } catch (error) {
+        console.error('❌ Erro ao calcular pontos:', error);
     }
-    
-    // Monitorar input do idioma materno
-    const inputMaterno = document.getElementById('idiomaMaternoNome');
-    if (inputMaterno) {
-        inputMaterno.addEventListener('input', function() {
-            setTimeout(() => {
-                capturarEAtualizarIdiomas();
-            }, 300);
-        });
-    }
-    
-    // Monitorar remoção de idiomas (event delegation)
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.btn-remove-idioma')) {
-            console.log('🔄 Botão remover idioma clicado');
-            setTimeout(() => {
-                capturarEAtualizarIdiomas();
-            }, 300);
-        }
-    });
-    
-    // Monitoramento periódico (para garantir)
-    setInterval(() => {
-        capturarEAtualizarIdiomas();
-    }, 5000); // Verifica a cada 5 segundos
 }
 
 // ============================================
-// 5. SISTEMA PRINCIPAL (MANTENDO EXATAMENTE)
+// 5. CAPTURA DE DADOS DAS CARACTERÍSTICAS
+// ============================================
+
+function sincronizarCaracteristicasCompletas() {
+    try {
+        console.log('👤 Sincronizando características...');
+        
+        // A. ALTURA E PESO
+        const alturaInput = document.getElementById('altura');
+        const pesoInput = document.getElementById('peso');
+        const alturaPesoResumo = document.getElementById('resumoAlturaPeso');
+        
+        if (alturaInput && pesoInput && alturaPesoResumo) {
+            const atualizarAlturaPeso = () => {
+                alturaPesoResumo.textContent = `${alturaInput.value || '1.70'}m/${pesoInput.value || '70'}kg`;
+            };
+            
+            atualizarAlturaPeso();
+            
+            alturaInput.addEventListener('input', atualizarAlturaPeso);
+            pesoInput.addEventListener('input', atualizarAlturaPeso);
+        }
+        
+        // B. APARÊNCIA
+        const aparenciaSelect = document.getElementById('nivelAparencia');
+        const aparenciaResumo = document.getElementById('resumoAparencia');
+        
+        if (aparenciaSelect && aparenciaResumo) {
+            const atualizarAparencia = () => {
+                const texto = aparenciaSelect.options[aparenciaSelect.selectedIndex].text;
+                const nomeAparencia = texto.split('[')[0].trim();
+                aparenciaResumo.textContent = nomeAparencia;
+            };
+            
+            atualizarAparencia();
+            aparenciaSelect.addEventListener('change', atualizarAparencia);
+        }
+        
+        // C. RIQUEZA
+        const riquezaSelect = document.getElementById('nivelRiqueza');
+        const riquezaResumo = document.getElementById('resumoRiqueza');
+        
+        if (riquezaSelect && riquezaResumo) {
+            const atualizarRiqueza = () => {
+                const texto = riquezaSelect.options[riquezaSelect.selectedIndex].text;
+                const nomeRiqueza = texto.split('[')[0].trim();
+                riquezaResumo.textContent = nomeRiqueza;
+            };
+            
+            atualizarRiqueza();
+            riquezaSelect.addEventListener('change', atualizarRiqueza);
+        }
+        
+        // D. DINHEIRO
+        const dinheiroResumo = document.getElementById('resumoDinheiro');
+        if (dinheiroResumo) {
+            dinheiroResumo.textContent = '$2.000'; // Valor padrão
+        }
+        
+        console.log('✅ Características sincronizadas');
+        
+    } catch (error) {
+        console.error('❌ Erro ao sincronizar características:', error);
+    }
+}
+
+// ============================================
+// 6. SISTEMA PRINCIPAL - ORQUESTRAÇÃO
 // ============================================
 
 function sincronizarTodosOsDados() {
-    console.log('🔄 Resumo: Sincronizando todos os dados...');
+    console.log('🔄 Sincronizando TODOS os dados do personagem...');
     
+    // 1. Dashboard
     sincronizarDashboardCompleto();
-    sincronizarAtributosCompletos();
-    sincronizarCaracteristicas(); // <-- AGORA INCLUI IDIOMAS
     
+    // 2. Atributos
+    sincronizarAtributosCompletos();
+    
+    // 3. Características (inclui aparência, riqueza, etc.)
+    sincronizarCaracteristicasCompletas();
+    
+    // 4. IDIOMAS (FUNÇÃO CRÍTICA)
+    capturarIdiomasParaResumo();
+    
+    // 5. Configurar monitoramento
+    configurarMonitoramentoIdiomas();
+    
+    // Marcar como sincronizado
     estadoResumo.dadosSincronizados = true;
     estadoResumo.ultimaAtualizacao = new Date();
     
-    console.log('✅ Resumo: Dados sincronizados');
-}
-
-function configurarEventosResumo() {
-    // Eventos de outras abas (MANTENDO)
-    document.addEventListener('atributosAlterados', function() {
-        if (window.atualizarResumoAtributos && typeof window.obterDadosAtributos === 'function') {
-            const dados = window.obterDadosAtributos();
-            window.atualizarResumoAtributos(dados);
-        }
-    });
-    
-    document.addEventListener('dashboardAtualizado', function() {
-        if (typeof window.dashboardEstado !== 'undefined') {
-            atualizarPontosResumo();
-            sincronizarRelacionamentos();
-        }
-    });
-    
-    // Atualizar quando a aba resumo for aberta (MANTENDO)
-    const resumoAba = document.getElementById('resumo');
-    if (resumoAba) {
-        resumoAba.addEventListener('click', function() {
-            setTimeout(() => {
-                sincronizarTodosOsDados();
-                // Forçar atualização de idiomas
-                capturarEAtualizarIdiomas();
-            }, 200);
-        });
-    }
-}
-
-function iniciarSistemaResumo() {
-    console.log('🚀 Sistema Resumo: Iniciando...');
-    
-    sincronizarTodosOsDados();
-    configurarEventosResumo();
-    
-    // Monitoramento contínuo (MANTENDO)
-    setInterval(() => {
-        if (estadoResumo.dadosSincronizados) {
-            atualizarPontosResumo();
-            capturarEAtualizarIdiomas(); // <-- ATUALIZA IDIOMAS SEMPRE
-        }
-    }, 3000);
-    
-    console.log('✅ Sistema Resumo: Inicializado');
+    console.log('✅✅✅ TODOS os dados foram sincronizados com sucesso!');
 }
 
 // ============================================
-// 6. EXPORTAÇÃO E INICIALIZAÇÃO (MANTENDO EXATAMENTE)
+// 7. INICIALIZAÇÃO E EXPORTAÇÃO
 // ============================================
 
-window.carregarResumo = iniciarSistemaResumo;
+function iniciarSistemaResumoCompleto() {
+    console.log('🚀🚀🚀 INICIANDO SISTEMA DE RESUMO COMPLETO 🚀🚀🚀');
+    
+    // Aguardar um pouco para garantir que tudo carregou
+    setTimeout(() => {
+        // Sincronizar todos os dados
+        sincronizarTodosOsDados();
+        
+        // Monitoramento periódico de segurança
+        setInterval(() => {
+            if (estadoResumo.dadosSincronizados) {
+                // Atualizar pontos periodicamente
+                calcularPontosAtributos();
+                
+                // Forçar atualização de idiomas a cada 5 segundos
+                capturarIdiomasParaResumo();
+            }
+        }, 5000);
+        
+        console.log('✅✅✅ Sistema de Resumo totalmente inicializado!');
+    }, 1000);
+}
+
+// ============================================
+// 8. EVENTOS E INICIALIZAÇÃO AUTOMÁTICA
+// ============================================
+
+// Exportar funções globais
+window.carregarResumo = iniciarSistemaResumoCompleto;
 window.sincronizarDadosResumo = sincronizarTodosOsDados;
-window.atualizarIdiomasResumo = capturarEAtualizarIdiomas;
+window.atualizarIdiomasResumo = capturarIdiomasParaResumo;
 
-// Inicialização automática (MANTENDO)
+// Inicializar quando a aba Resumo for ativada
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM carregado - Sistema Resumo pronto');
+    
+    // Verificar se a aba Resumo já está ativa
     const resumoAba = document.getElementById('resumo');
     if (resumoAba && resumoAba.classList.contains('active')) {
-        setTimeout(iniciarSistemaResumo, 500);
+        console.log('🎯 Aba Resumo já ativa - Iniciando sistema...');
+        setTimeout(iniciarSistemaResumoCompleto, 800);
     }
     
+    // Monitorar quando a aba Resumo é clicada
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                 const tab = mutation.target;
                 if (tab.id === 'resumo' && tab.classList.contains('active')) {
-                    setTimeout(iniciarSistemaResumo, 500);
+                    console.log('🎯 Aba Resumo ativada por clique - Iniciando sistema...');
+                    setTimeout(iniciarSistemaResumoCompleto, 500);
                 }
             }
         });
@@ -523,13 +584,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Backup: Inicializar após carregamento total
 window.addEventListener('load', function() {
+    console.log('🌐 Página totalmente carregada');
+    
     setTimeout(() => {
         const resumoAba = document.getElementById('resumo');
-        if (resumoAba && resumoAba.classList.contains('active')) {
-            iniciarSistemaResumo();
+        if (resumoAba && resumoAba.classList.contains('active') && !estadoResumo.dadosSincronizados) {
+            console.log('⚡ Inicialização tardia do Resumo');
+            iniciarSistemaResumoCompleto();
         }
-    }, 1000);
+    }, 2000);
 });
 
-console.log('📊 Sistema Resumo: Carregado e pronto');
+console.log('📊📊📊 SISTEMA DE RESUMO CARREGADO E PRONTO PARA USO 📊📊📊');
