@@ -1,10 +1,10 @@
 // ============================================
 // RESUMO-PERICIAS.js
 // Sistema COMPLETO para perícias e técnicas no resumo
-// VERSÃO CORRIGIDA 100% - Atualiza sempre que volta ao resumo
+// VERSÃO CORRIGIDA - ATUALIZA SEMPRE AO ABRIR RESUMO
 // ============================================
 
-console.log('🎯 RESUMO-PERICIAS - INICIANDO');
+console.log('🎯 RESUMO-PERICIAS - INICIANDO (VERSÃO CORRIGIDA)');
 
 // ============================================
 // 1. ESTADO GLOBAL
@@ -20,8 +20,8 @@ const resumoState = {
         pontosPericias: 0,
         pontosTecnicas: 0
     },
-    lastTab: null,
-    tabChanged: false
+    lastActiveTab: null,
+    updatePending: false
 };
 
 // ============================================
@@ -39,7 +39,6 @@ function capturarPericiasDireto() {
             window.estadoPericias.periciasAprendidas.forEach(p => {
                 if (!p) return;
                 
-                // Calcular NH
                 const atributoBase = obterValorAtributo(p.atributo);
                 const nh = atributoBase + (p.nivel || 0);
                 const pontos = p.investimentoAcumulado || p.custo || 0;
@@ -68,15 +67,12 @@ function capturarPericiasDireto() {
             const itens = tabelaContainer.querySelectorAll('.pericia-aprendida-item');
             
             itens.forEach(item => {
-                // Extrair nome
                 const nomeElem = item.querySelector('.pericia-aprendida-nome, h4');
                 let nome = nomeElem ? nomeElem.textContent.trim() : '';
                 
                 if (nome) {
-                    // Limpar HTML
                     nome = nome.replace(/<[^>]*>/g, '');
                     
-                    // Extrair pontos
                     let pontos = 0;
                     const pontosElem = item.querySelector('.pericia-aprendida-custo');
                     if (pontosElem) {
@@ -84,14 +80,12 @@ function capturarPericiasDireto() {
                         pontos = match ? parseInt(match[1]) : 0;
                     }
                     
-                    // Extrair NH
                     let nh = 0;
                     const nhElem = item.querySelector('.pericia-aprendida-nh');
                     if (nhElem) {
                         const match = nhElem.textContent.match(/(\d+)/);
                         nh = match ? parseInt(match[1]) : 0;
                     } else {
-                        // Calcular NH aproximado
                         const atributo = extrairAtributo(item.textContent);
                         nh = obterValorAtributo(atributo) + extrairNivel(item.textContent);
                     }
@@ -132,7 +126,6 @@ function capturarTecnicasDireto() {
             window.estadoTecnicas.aprendidas.forEach(t => {
                 if (!t) return;
                 
-                // Calcular NH da técnica
                 let nh = calcularNHTecnica(t);
                 const pontos = t.custoTotal || 0;
                 
@@ -159,27 +152,22 @@ function capturarTecnicasDireto() {
             const itens = listaContainer.querySelectorAll('.pericia-item, .tecnica-item');
             
             itens.forEach(item => {
-                // Extrair nome
                 const nomeElem = item.querySelector('h3, h4');
                 let nome = nomeElem ? nomeElem.textContent.trim() : '';
                 
                 if (nome && !nome.includes('Nenhuma')) {
-                    // Limpar emojis
                     nome = nome.replace(/[🔸🔹🏹✅▶🚫]/g, '').trim();
                     
-                    // Extrair pontos
                     let pontos = 0;
                     const texto = item.textContent;
                     const pontosMatch = texto.match(/(\d+)\s*pts?/);
                     if (pontosMatch) pontos = parseInt(pontosMatch[1]);
                     
-                    // Extrair NH
                     let nh = 0;
                     const nhMatch = texto.match(/NH\s*(\d+)/i);
                     if (nhMatch) {
                         nh = parseInt(nhMatch[1]);
                     } else {
-                        // Calcular NH
                         nh = calcularNHTecnica({ nome: nome });
                     }
                     
@@ -211,10 +199,8 @@ function capturarTecnicasDireto() {
 // ============================================
 
 function obterValorAtributo(atributo) {
-    // Valores padrão
     const defaults = { DX: 10, IQ: 10, HT: 10, PERC: 10 };
     
-    // Tentar pegar do resumo
     const elem = document.getElementById('resumo' + atributo);
     if (elem) {
         const valor = parseInt(elem.textContent || '10');
@@ -229,7 +215,7 @@ function extrairAtributo(texto) {
     if (texto.includes('IQ')) return 'IQ';
     if (texto.includes('HT')) return 'HT';
     if (texto.includes('PERC')) return 'PERC';
-    return 'IQ'; // padrão
+    return 'IQ';
 }
 
 function extrairNivel(texto) {
@@ -238,9 +224,7 @@ function extrairNivel(texto) {
 }
 
 function calcularNHTecnica(tecnica) {
-    // Para Arquearia Montada
     if (tecnica.nome && tecnica.nome.includes('Arquearia Montada')) {
-        // Buscar perícia Arco
         let nhArco = 10;
         if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
             const arco = window.estadoPericias.periciasAprendidas.find(
@@ -251,7 +235,6 @@ function calcularNHTecnica(tecnica) {
             }
         }
         
-        // Arquearia Montada = Arco - 4 + bônus por pontos
         const pontos = tecnica.pontos || tecnica.custoTotal || 0;
         let bonus = 0;
         if (pontos >= 5) bonus = 4;
@@ -262,8 +245,7 @@ function calcularNHTecnica(tecnica) {
         return (nhArco - 4) + bonus;
     }
     
-    // Para outras técnicas
-    return 10; // Default
+    return 10;
 }
 
 // ============================================
@@ -278,27 +260,30 @@ function atualizarInterfaceResumo() {
         const periciasData = capturarPericiasDireto();
         const tecnicasData = capturarTecnicasDireto();
         
-        // Guardar no cache
+        // 2. Atualizar cache
         resumoState.cache.pericias = periciasData.pericias;
         resumoState.cache.tecnicas = tecnicasData.tecnicas;
         resumoState.cache.pontosPericias = periciasData.totalPontos;
         resumoState.cache.pontosTecnicas = tecnicasData.totalPontos;
         resumoState.lastUpdate = new Date();
         
-        // 2. Atualizar pontos totais
+        // 3. Atualizar pontos totais
         const pontosPericiasElem = document.getElementById('pontosPericias');
         const pontosTecnicasElem = document.getElementById('pontosTecnicas');
         
         if (pontosPericiasElem) pontosPericiasElem.textContent = periciasData.totalPontos;
         if (pontosTecnicasElem) pontosTecnicasElem.textContent = tecnicasData.totalPontos;
         
-        // 3. Atualizar tabela de perícias
+        // 4. Atualizar tabela de perícias
         atualizarTabelaPericias(periciasData.pericias);
         
-        // 4. Atualizar lista de técnicas
+        // 5. Atualizar lista de técnicas
         atualizarListaTecnicas(tecnicasData.tecnicas);
         
         console.log(`✅ Interface atualizada: ${periciasData.pericias.length} perícias, ${tecnicasData.tecnicas.length} técnicas`);
+        
+        // Resetar flag de atualização pendente
+        resumoState.updatePending = false;
         
     } catch (error) {
         console.error('❌ Erro ao atualizar interface:', error);
@@ -324,14 +309,12 @@ function atualizarTabelaPericias(pericias) {
     
     let html = '';
     
-    pericias.forEach((pericia, index) => {
-        // Formatar nome (limitar tamanho)
+    pericias.forEach((pericia) => {
         let nomeDisplay = pericia.nome || 'Perícia';
         if (nomeDisplay.length > 25) {
             nomeDisplay = nomeDisplay.substring(0, 22) + '...';
         }
         
-        // Remover tags HTML
         nomeDisplay = nomeDisplay.replace(/<[^>]*>/g, '');
         
         html += `
@@ -351,7 +334,6 @@ function atualizarTabelaPericias(pericias) {
     
     tbody.innerHTML = html;
     
-    // Atualizar cabeçalho da tabela
     const table = tbody.closest('table');
     if (table) {
         const thead = table.querySelector('thead');
@@ -383,7 +365,6 @@ function atualizarListaTecnicas(tecnicas) {
     let html = '';
     
     tecnicas.forEach(tecnica => {
-        // Formatar nome
         let nomeDisplay = tecnica.nome || 'Técnica';
         nomeDisplay = nomeDisplay.replace(/<[^>]*>/g, '');
         
@@ -404,7 +385,7 @@ function atualizarListaTecnicas(tecnicas) {
 }
 
 // ============================================
-// 5. CRIAÇÃO DE ELEMENTOS SE NÃO EXISTIREM
+// 5. CRIAÇÃO DE ELEMENTOS
 // ============================================
 
 function criarTabelaPericias() {
@@ -417,7 +398,6 @@ function criarTabelaPericias() {
         return;
     }
     
-    // Criar tabela se não existir
     const table = card.querySelector('table') || document.createElement('table');
     table.className = 'tabela-micro';
     
@@ -456,7 +436,6 @@ function criarListaTecnicas() {
         return;
     }
     
-    // Criar lista se não existir
     const container = card.querySelector('.micro-scroll-container') || card;
     const lista = document.createElement('div');
     lista.id = 'listaTecnicasResumo';
@@ -467,13 +446,19 @@ function criarListaTecnicas() {
 }
 
 // ============================================
-// 6. SOLUÇÃO DEFINITIVA - SEMPRE ATUALIZAR AO VOLTAR AO RESUMO
+// 6. SOLUÇÃO DEFINITIVA - INICIALIZAÇÃO FIXA
 // ============================================
 
 function inicializarSistemaResumo() {
-    if (resumoState.initialized) return;
+    if (resumoState.initialized) {
+        console.log('⚠️ Sistema já inicializado, forçando nova inicialização');
+    }
     
-    console.log('🚀 Inicializando sistema de resumo...');
+    console.log('🚀 INICIALIZANDO SISTEMA DE RESUMO (VERSÃO CORRIGIDA)');
+    
+    // Resetar estado
+    resumoState.initialized = false;
+    resumoState.updatePending = true;
     
     // 1. Criar elementos se necessário
     criarTabelaPericias();
@@ -482,103 +467,154 @@ function inicializarSistemaResumo() {
     // 2. Aplicar estilos CSS
     aplicarEstilosResumo();
     
-    // 3. Primeira atualização
+    // 3. PRIMEIRA ATUALIZAÇÃO IMEDIATA
+    console.log('⚡ Primeira atualização imediata...');
     atualizarInterfaceResumo();
     
-    // 4. Configurar monitoramento AVANÇADO
-    configurarMonitoramentoAvancado();
+    // 4. SOLUÇÃO SIMPLES: SEMPRE atualizar quando resumo estiver visível
+    configurarAtualizacaoAutomatica();
+    
+    // 5. Configurar monitoramento de abas
+    monitorarMudancasDeAba();
     
     resumoState.initialized = true;
-    console.log('✅ Sistema de resumo inicializado!');
+    console.log('✅ Sistema de resumo inicializado com sucesso!');
+    
+    // Forçar atualização após 2 segundos para garantir
+    setTimeout(() => {
+        console.log('🔧 Atualização de garantia após 2 segundos');
+        atualizarInterfaceResumo();
+    }, 2000);
 }
 
-function configurarMonitoramentoAvancado() {
-    console.log('🎯 Configurando monitoramento AVANÇADO do resumo...');
+// SOLUÇÃO SIMPLES: Verificar periodicamente se estamos na aba resumo
+function configurarAtualizacaoAutomatica() {
+    console.log('⚙️ Configurando atualização automática...');
     
-    // 1. OBSERVADOR DE MUDANÇAS DE ABA
+    // Limpar intervalo anterior se existir
+    if (resumoState.intervalId) {
+        clearInterval(resumoState.intervalId);
+    }
+    
+    // Verificar a cada 1 segundo se estamos na aba resumo
+    resumoState.intervalId = setInterval(() => {
+        // Verificar se a aba resumo está visível
+        const resumoAtivo = isResumoVisivel();
+        
+        if (resumoAtivo) {
+            // Se acabamos de entrar no resumo, atualizar
+            if (resumoState.lastActiveTab !== 'resumo') {
+                console.log('🎯 ACABOU DE ENTRAR NA ABA RESUMO - ATUALIZANDO!');
+                atualizarInterfaceResumo();
+            }
+            resumoState.lastActiveTab = 'resumo';
+        } else {
+            // Estamos em outra aba
+            resumoState.lastActiveTab = 'outra';
+            resumoState.updatePending = true; // Marcar que precisa atualizar quando voltar
+        }
+    }, 1000);
+}
+
+// Função para detectar se a aba resumo está visível
+function isResumoVisivel() {
+    // Tentar várias formas de detectar
+    const resumoElement = document.getElementById('resumo');
+    if (resumoElement) {
+        // Verificar se tem classe active
+        if (resumoElement.classList.contains('active')) {
+            return true;
+        }
+        
+        // Verificar estilo display/visibility
+        const style = window.getComputedStyle(resumoElement);
+        if (style.display !== 'none' && style.visibility !== 'hidden') {
+            return true;
+        }
+    }
+    
+    // Verificar por URL hash
+    if (window.location.hash === '#resumo') {
+        return true;
+    }
+    
+    // Verificar botão ativo
+    const activeTabBtn = document.querySelector('.tab-btn.active');
+    if (activeTabBtn && 
+        (activeTabBtn.dataset?.tab === 'resumo' || 
+         activeTabBtn.textContent?.includes('Resumo') ||
+         activeTabBtn.id?.includes('resumo'))) {
+        return true;
+    }
+    
+    return false;
+}
+
+// Monitorar cliques em TODAS as abas
+function monitorarMudancasDeAba() {
+    console.log('👁️ Monitorando mudanças de aba...');
+    
+    // Observar cliques em qualquer elemento que possa ser uma aba
     document.addEventListener('click', function(event) {
-        const tabBtn = event.target.closest('.tab-btn');
-        if (tabBtn) {
-            const tabAtual = tabBtn.dataset.tab;
+        const target = event.target;
+        
+        // Verificar se é um botão de aba
+        let isTabButton = false;
+        let tabName = '';
+        
+        // Verificar por data-tab
+        const tabElement = target.closest('[data-tab]');
+        if (tabElement) {
+            isTabButton = true;
+            tabName = tabElement.dataset.tab;
+        }
+        
+        // Verificar por classe
+        if (target.classList?.contains('tab-btn') || 
+            target.closest('.tab-btn')) {
+            isTabButton = true;
+            const btn = target.closest('.tab-btn') || target;
+            tabName = btn.dataset?.tab || btn.textContent;
+        }
+        
+        // Verificar por conteúdo
+        const tabTexts = ['Perícias', 'Técnicas', 'Vantagens', 'Desvantagens', 'Equipamentos', 'Resumo', 'Habilidades'];
+        if (target.textContent && tabTexts.some(text => target.textContent.includes(text))) {
+            isTabButton = true;
+            tabName = target.textContent.trim();
+        }
+        
+        if (isTabButton) {
+            console.log(`📱 Clicou na aba: ${tabName}`);
             
-            // Se estava em outra aba e agora vai para o resumo
-            if (tabAtual === 'resumo' && resumoState.lastTab !== 'resumo') {
-                console.log(`📱 Voltando para a aba RESUMO (de ${resumoState.lastTab}) - ATUALIZANDO...`);
+            // Se está indo para o resumo
+            if (tabName === 'resumo' || tabName.includes('Resumo')) {
+                console.log('🎯 INDO PARA O RESUMO - Atualizando em 300ms...');
                 
-                // Pequeno delay para garantir que a aba carregou
+                // Atualizar imediatamente
                 setTimeout(() => {
                     atualizarInterfaceResumo();
                 }, 300);
-            }
-            
-            // Atualizar última aba
-            resumoState.lastTab = tabAtual;
-            resumoState.tabChanged = true;
-        }
-    });
-    
-    // 2. OBSERVAR TODAS AS MUDANÇAS NAS ABAS RELEVANTES
-    const abasMonitoradas = ['pericias', 'tecnicas', 'habilidades', 'vantagens', 'desvantagens', 'equipamentos'];
-    
-    abasMonitoradas.forEach(aba => {
-        const tabElement = document.querySelector(`[data-tab="${aba}"]`);
-        if (tabElement) {
-            // Marcar que houve mudança quando entra em qualquer aba
-            tabElement.addEventListener('click', () => {
-                console.log(`📍 Entrando na aba ${aba} - marcando para atualizar resumo`);
-                resumoState.tabChanged = true;
-            });
-        }
-    });
-    
-    // 3. OBSERVADOR DE MUTAÇÃO PARA DETECTAR MUDANÇAS
-    const observer = new MutationObserver((mutations) => {
-        // Verificar se há mudanças relevantes em qualquer aba
-        let mudancaRelevante = false;
-        
-        mutations.forEach((mutation) => {
-            // Se mudou qualquer tabela ou lista de perícias/habilidades
-            if (mutation.target && 
-                (mutation.target.id && mutation.target.id.includes('aprendidas') ||
-                 mutation.target.classList && 
-                 (mutation.target.classList.contains('item') ||
-                  mutation.target.classList.contains('lista') ||
-                  mutation.target.classList.contains('tabela')))) {
-                mudancaRelevante = true;
-            }
-        });
-        
-        if (mudancaRelevante && resumoState.tabChanged) {
-            console.log('🔍 Detecção de mudança em dados do personagem');
-            resumoState.tabChanged = false;
-        }
-    });
-    
-    // Observar todo o body para mudanças
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: false,
-        characterData: false
-    });
-    
-    // 4. ATUALIZAÇÃO PERIÓDICA QUANDO NA ABA RESUMO
-    resumoState.intervalId = setInterval(() => {
-        const resumoAtivo = document.getElementById('resumo')?.classList.contains('active');
-        
-        if (resumoAtivo) {
-            // Atualizar mais frequentemente se acabou de mudar de aba
-            if (resumoState.tabChanged) {
-                atualizarInterfaceResumo();
-                resumoState.tabChanged = false;
+                
+                // Atualizar novamente após 1 segundo para garantir
+                setTimeout(() => {
+                    atualizarInterfaceResumo();
+                }, 1000);
+            } else {
+                // Saiu do resumo, marcar que precisa atualizar quando voltar
+                resumoState.updatePending = true;
+                console.log(`📍 Saiu do resumo (foi para ${tabName}), marcado para atualizar`);
             }
         }
-    }, 2000);
+    }, true); // Usar capture: true para pegar todos os cliques
     
-    // 5. EVENTOS PERSONALIZADOS
-    document.addEventListener('periciasAlteradas', atualizarInterfaceResumo);
-    document.addEventListener('tecnicasAlteradas', atualizarInterfaceResumo);
-    document.addEventListener('personagemAlterado', atualizarInterfaceResumo);
+    // Monitorar eventos de teclado (atalhos)
+    document.addEventListener('keydown', function(event) {
+        // Se pressionou algo que possa mudar de aba
+        if (event.ctrlKey || event.altKey || event.metaKey) {
+            resumoState.updatePending = true;
+        }
+    });
 }
 
 // ============================================
@@ -719,74 +755,75 @@ function aplicarEstilosResumo() {
 }
 
 // ============================================
-// 8. INICIALIZAÇÃO AUTOMÁTICA
+// 8. INICIALIZAÇÃO AUTOMÁTICA OTIMIZADA
 // ============================================
 
-// Iniciar quando DOM carregar
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 DOM carregado, iniciando sistema de resumo...');
-    setTimeout(inicializarSistemaResumo, 1500);
-});
+// Aguardar DOM completamente carregado
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('📄 DOM completamente carregado');
+        setTimeout(inicializarSistemaResumo, 1000);
+    });
+} else {
+    // DOM já carregado
+    console.log('⚡ DOM já carregado, inicializando imediatamente');
+    setTimeout(inicializarSistemaResumo, 500);
+}
 
-// Iniciar se ainda não iniciou
+// Também monitorar quando a página terminar de carregar tudo
 window.addEventListener('load', () => {
-    setTimeout(() => {
-        if (!resumoState.initialized) {
-            console.log('⚡ Iniciando via window.load');
-            inicializarSistemaResumo();
-        }
-    }, 2000);
+    console.log('🖼️ Página completamente carregada');
+    if (!resumoState.initialized) {
+        setTimeout(inicializarSistemaResumo, 1500);
+    }
 });
 
 // Forçar inicialização se chamado manualmente
-window.iniciarResumoPericias = inicializarSistemaResumo;
-
-// Disparar evento quando há mudança em qualquer aba
-document.addEventListener('DOMContentLoaded', () => {
-    // Rastrear última aba ativa
-    let lastActiveTab = null;
-    
-    setInterval(() => {
-        const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-        if (activeTab && activeTab !== lastActiveTab) {
-            lastActiveTab = activeTab;
-        }
-    }, 500);
-});
+window.iniciarResumoPericias = function() {
+    console.log('🔧 Inicialização manual solicitada');
+    inicializarSistemaResumo();
+    return 'Sistema de resumo inicializado!';
+};
 
 // ============================================
-// 9. FUNÇÕES DE DEBUG
+// 9. FUNÇÕES DE DEBUG E DIAGNÓSTICO
 // ============================================
 
 window.debugResumo = function() {
     console.log('🔍 DEBUG RESUMO:');
     console.log('- Estado:', resumoState);
-    console.log('- Cache:', resumoState.cache);
-    console.log('- Última aba:', resumoState.lastTab);
-    console.log('- Mudou de aba:', resumoState.tabChanged);
-    console.log('- Tabela existe:', !!document.getElementById('tabelaPericiasResumo'));
-    console.log('- Lista existe:', !!document.getElementById('listaTecnicasResumo'));
+    console.log('- Inicializado:', resumoState.initialized);
+    console.log('- Última atualização:', resumoState.lastUpdate);
+    console.log('- Última aba:', resumoState.lastActiveTab);
+    console.log('- Atualização pendente:', resumoState.updatePending);
+    console.log('- Resumo visível?', isResumoVisivel());
+    console.log('- Elemento resumo:', document.getElementById('resumo'));
     console.log('- estadoPericias:', window.estadoPericias ? 'Disponível' : 'Não disponível');
     console.log('- estadoTecnicas:', window.estadoTecnicas ? 'Disponível' : 'Não disponível');
+    
+    // Testar captura
+    console.log('🧪 Testando captura...');
+    const periciasTest = capturarPericiasDireto();
+    const tecnicasTest = capturarTecnicasDireto();
+    console.log('- Perícias capturadas:', periciasTest.pericias.length);
+    console.log('- Técnicas capturadas:', tecnicasTest.tecnicas.length);
     
     // Forçar atualização
     atualizarInterfaceResumo();
     
-    return 'Debug realizado!';
+    return 'Debug realizado! Verifique o console.';
 };
 
 window.forcarAtualizacaoResumo = function() {
-    console.log('🔧 FORÇANDO ATUALIZAÇÃO MANUAL');
+    console.log('🔧 FORÇANDO ATUALIZAÇÃO IMEDIATA');
     atualizarInterfaceResumo();
     return 'Atualizado!';
 };
 
-// Evento para outras partes do sistema dispararem
-window.dispatchPericiasAlteradas = function() {
-    console.log('🚀 Disparando evento de perícias alteradas');
-    const event = new Event('periciasAlteradas');
-    document.dispatchEvent(event);
+// Disparar evento de atualização manualmente
+window.atualizarResumoAgora = function() {
+    console.log('⚡ Atualização manual do resumo');
     atualizarInterfaceResumo();
 };
 
-console.log('✅ RESUMO-PERICIAS.js carregado - VERSÃO CORRIGIDA 100%');
+console.log('✅ RESUMO-PERICIAS.js carregado - PRONTO PARA USAR');
