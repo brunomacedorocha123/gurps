@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="style-magias.css">
     <link rel="stylesheet" href="style-equipamentos.css">
     <link rel="stylesheet" href="style-combate.css">
+    <link rel="stylesheet" href="style-resumo.css">
    
     <style>
         * {
@@ -3049,12 +3050,99 @@
 </div>
 
 
-<!-- ABA RESUMO -->
-        <div id="resumo" class="tab-content">
-            <div class="loading">
-                <div class="spinner"></div>
+<!-- Na aba Resumo -->
+<div id="resumo" class="tab-content">
+    <div class="resumo-container">
+        
+        <!-- SEÇÃO 1: CABEÇALHO COM FOTO -->
+        <div class="resumo-cabecalho">
+            
+            <!-- CARD DA FOTO -->
+            <div class="foto-card-resumo">
+                <div class="foto-wrapper-resumo" id="fotoResumoWrapper">
+                    <!-- Preview da imagem -->
+                    <img id="fotoResumoImg" src="" alt="Foto do Personagem" 
+                         style="display: none;">
+                    
+                    <!-- Placeholder quando não tem foto -->
+                    <div class="foto-placeholder-resumo" id="fotoPlaceholderResumo">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Adicionar Foto</span>
+                    </div>
+                    
+                    <!-- Overlay para upload -->
+                    <div class="foto-overlay-resumo">
+                        <button class="btn-upload-resumo" onclick="abrirUploadResumo()">
+                            <i class="fas fa-camera"></i>
+                            Alterar Foto
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Info da foto -->
+                <div class="foto-metadata">
+                    <small><i class="fas fa-info-circle"></i> Clique na foto para alterar</small>
+                </div>
+            </div>
+            
+            <!-- DADOS DE IDENTIFICAÇÃO -->
+            <div class="identificacao-resumo">
+                <h1 id="resumoNome" class="nome-personagem">Novo Personagem</h1>
+                
+                <div class="dados-grid-identificacao">
+                    <div class="dado-coluna">
+                        <div class="dado-item">
+                            <span class="dado-label">Raça/Espécie:</span>
+                            <span id="resumoRaca" class="dado-valor">Humano</span>
+                        </div>
+                        <div class="dado-item">
+                            <span class="dado-label">Classe/Profissão:</span>
+                            <span id="resumoClasse" class="dado-valor">Guerreiro</span>
+                        </div>
+                        <div class="dado-item">
+                            <span class="dado-label">Nível/Hierarquia:</span>
+                            <span id="resumoNivel" class="dado-valor">Novato</span>
+                        </div>
+                    </div>
+                    
+                    <div class="dado-coluna">
+                        <div class="dado-item">
+                            <span class="dado-label">Pontos Totais:</span>
+                            <span id="resumoPontosTotais" class="dado-valor">150</span>
+                        </div>
+                        <div class="dado-item">
+                            <span class="dado-label">Pontos Gastos:</span>
+                            <span id="resumoPontosGastos" class="dado-valor">0</span>
+                        </div>
+                        <div class="dado-item">
+                            <span class="dado-label">Saldo Disponível:</span>
+                            <span id="resumoSaldo" class="dado-valor destaque">150</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- BREVE DESCRIÇÃO -->
+                <div class="descricao-resumo">
+                    <h4><i class="fas fa-scroll"></i> Breve Descrição</h4>
+                    <p id="resumoDescricao">Personagem em criação...</p>
+                </div>
             </div>
         </div>
+        
+        <!-- RESTANTE DAS SEÇÕES (em colunas) -->
+        <div class="resumo-colunas">
+            <!-- Coluna 1, 2, 3... -->
+        </div>
+        
+        <!-- MODAL PARA UPLOAD (oculto inicialmente) -->
+        <div id="modalUploadResumo" class="modal-overlay" style="display: none;">
+            <div class="modal-resumo-foto">
+                <!-- Conteúdo do modal -->
+            </div>
+        </div>
+        
+    </div>
+</div>
 
     </main> 
 
