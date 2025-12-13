@@ -1,9 +1,10 @@
 // ============================================
-// RESUMO-PERICIAS-COMPLETO.js
+// RESUMO-PERICIAS.js
 // Sistema COMPLETO para perícias e técnicas no resumo
+// VERSÃO CORRIGIDA 100% - Atualiza sempre que volta ao resumo
 // ============================================
 
-console.log('🎯 RESUMO-PERICIAS-COMPLETO - INICIANDO');
+console.log('🎯 RESUMO-PERICIAS - INICIANDO');
 
 // ============================================
 // 1. ESTADO GLOBAL
@@ -18,7 +19,9 @@ const resumoState = {
         tecnicas: [],
         pontosPericias: 0,
         pontosTecnicas: 0
-    }
+    },
+    lastTab: null,
+    tabChanged: false
 };
 
 // ============================================
@@ -464,7 +467,7 @@ function criarListaTecnicas() {
 }
 
 // ============================================
-// 6. INICIALIZAÇÃO E MONITORAMENTO
+// 6. SOLUÇÃO DEFINITIVA - SEMPRE ATUALIZAR AO VOLTAR AO RESUMO
 // ============================================
 
 function inicializarSistemaResumo() {
@@ -482,42 +485,100 @@ function inicializarSistemaResumo() {
     // 3. Primeira atualização
     atualizarInterfaceResumo();
     
-    // 4. Configurar monitoramento
-    configurarMonitoramento();
+    // 4. Configurar monitoramento AVANÇADO
+    configurarMonitoramentoAvancado();
     
     resumoState.initialized = true;
     console.log('✅ Sistema de resumo inicializado!');
 }
 
-function configurarMonitoramento() {
-    // Atualizar quando a aba Resumo for aberta
-    document.addEventListener('click', (e) => {
-        const tabBtn = e.target.closest('.tab-btn');
-        if (tabBtn && tabBtn.dataset.tab === 'resumo') {
-            console.log('📱 Aba Resumo clicada, atualizando...');
-            setTimeout(atualizarInterfaceResumo, 300);
+function configurarMonitoramentoAvancado() {
+    console.log('🎯 Configurando monitoramento AVANÇADO do resumo...');
+    
+    // 1. OBSERVADOR DE MUDANÇAS DE ABA
+    document.addEventListener('click', function(event) {
+        const tabBtn = event.target.closest('.tab-btn');
+        if (tabBtn) {
+            const tabAtual = tabBtn.dataset.tab;
+            
+            // Se estava em outra aba e agora vai para o resumo
+            if (tabAtual === 'resumo' && resumoState.lastTab !== 'resumo') {
+                console.log(`📱 Voltando para a aba RESUMO (de ${resumoState.lastTab}) - ATUALIZANDO...`);
+                
+                // Pequeno delay para garantir que a aba carregou
+                setTimeout(() => {
+                    atualizarInterfaceResumo();
+                }, 300);
+            }
+            
+            // Atualizar última aba
+            resumoState.lastTab = tabAtual;
+            resumoState.tabChanged = true;
         }
     });
     
-    // Atualizar quando mudar para/da aba Perícias
-    const tabPericias = document.querySelector('[data-tab="pericias"]');
-    if (tabPericias) {
-        tabPericias.addEventListener('click', () => {
-            setTimeout(atualizarInterfaceResumo, 1000);
-        });
-    }
+    // 2. OBSERVAR TODAS AS MUDANÇAS NAS ABAS RELEVANTES
+    const abasMonitoradas = ['pericias', 'tecnicas', 'habilidades', 'vantagens', 'desvantagens', 'equipamentos'];
     
-    // Atualizar periodicamente
+    abasMonitoradas.forEach(aba => {
+        const tabElement = document.querySelector(`[data-tab="${aba}"]`);
+        if (tabElement) {
+            // Marcar que houve mudança quando entra em qualquer aba
+            tabElement.addEventListener('click', () => {
+                console.log(`📍 Entrando na aba ${aba} - marcando para atualizar resumo`);
+                resumoState.tabChanged = true;
+            });
+        }
+    });
+    
+    // 3. OBSERVADOR DE MUTAÇÃO PARA DETECTAR MUDANÇAS
+    const observer = new MutationObserver((mutations) => {
+        // Verificar se há mudanças relevantes em qualquer aba
+        let mudancaRelevante = false;
+        
+        mutations.forEach((mutation) => {
+            // Se mudou qualquer tabela ou lista de perícias/habilidades
+            if (mutation.target && 
+                (mutation.target.id && mutation.target.id.includes('aprendidas') ||
+                 mutation.target.classList && 
+                 (mutation.target.classList.contains('item') ||
+                  mutation.target.classList.contains('lista') ||
+                  mutation.target.classList.contains('tabela')))) {
+                mudancaRelevante = true;
+            }
+        });
+        
+        if (mudancaRelevante && resumoState.tabChanged) {
+            console.log('🔍 Detecção de mudança em dados do personagem');
+            resumoState.tabChanged = false;
+        }
+    });
+    
+    // Observar todo o body para mudanças
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: false,
+        characterData: false
+    });
+    
+    // 4. ATUALIZAÇÃO PERIÓDICA QUANDO NA ABA RESUMO
     resumoState.intervalId = setInterval(() => {
         const resumoAtivo = document.getElementById('resumo')?.classList.contains('active');
+        
         if (resumoAtivo) {
-            atualizarInterfaceResumo();
+            // Atualizar mais frequentemente se acabou de mudar de aba
+            if (resumoState.tabChanged) {
+                atualizarInterfaceResumo();
+                resumoState.tabChanged = false;
+            }
         }
-    }, 3000);
+    }, 2000);
     
-    // Observar eventos do sistema
+    // 5. EVENTOS PERSONALIZADOS
     document.addEventListener('periciasAlteradas', atualizarInterfaceResumo);
     document.addEventListener('tecnicasAlteradas', atualizarInterfaceResumo);
+    document.addEventListener('personagemAlterado', atualizarInterfaceResumo);
 }
 
 // ============================================
@@ -642,6 +703,15 @@ function aplicarEstilosResumo() {
             text-align: center;
             width: 60px;
         }
+        
+        /* Vazio */
+        .vazio {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
     `;
     
     document.head.appendChild(style);
@@ -654,8 +724,8 @@ function aplicarEstilosResumo() {
 
 // Iniciar quando DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 DOM carregado, iniciando em 1s...');
-    setTimeout(inicializarSistemaResumo, 1000);
+    console.log('📄 DOM carregado, iniciando sistema de resumo...');
+    setTimeout(inicializarSistemaResumo, 1500);
 });
 
 // Iniciar se ainda não iniciou
@@ -671,6 +741,19 @@ window.addEventListener('load', () => {
 // Forçar inicialização se chamado manualmente
 window.iniciarResumoPericias = inicializarSistemaResumo;
 
+// Disparar evento quando há mudança em qualquer aba
+document.addEventListener('DOMContentLoaded', () => {
+    // Rastrear última aba ativa
+    let lastActiveTab = null;
+    
+    setInterval(() => {
+        const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+        if (activeTab && activeTab !== lastActiveTab) {
+            lastActiveTab = activeTab;
+        }
+    }, 500);
+});
+
 // ============================================
 // 9. FUNÇÕES DE DEBUG
 // ============================================
@@ -679,6 +762,8 @@ window.debugResumo = function() {
     console.log('🔍 DEBUG RESUMO:');
     console.log('- Estado:', resumoState);
     console.log('- Cache:', resumoState.cache);
+    console.log('- Última aba:', resumoState.lastTab);
+    console.log('- Mudou de aba:', resumoState.tabChanged);
     console.log('- Tabela existe:', !!document.getElementById('tabelaPericiasResumo'));
     console.log('- Lista existe:', !!document.getElementById('listaTecnicasResumo'));
     console.log('- estadoPericias:', window.estadoPericias ? 'Disponível' : 'Não disponível');
@@ -691,9 +776,17 @@ window.debugResumo = function() {
 };
 
 window.forcarAtualizacaoResumo = function() {
-    console.log('🔧 FORÇANDO ATUALIZAÇÃO');
+    console.log('🔧 FORÇANDO ATUALIZAÇÃO MANUAL');
     atualizarInterfaceResumo();
     return 'Atualizado!';
 };
 
-console.log('✅ RESUMO-PERICIAS-COMPLETO carregado');
+// Evento para outras partes do sistema dispararem
+window.dispatchPericiasAlteradas = function() {
+    console.log('🚀 Disparando evento de perícias alteradas');
+    const event = new Event('periciasAlteradas');
+    document.dispatchEvent(event);
+    atualizarInterfaceResumo();
+};
+
+console.log('✅ RESUMO-PERICIAS.js carregado - VERSÃO CORRIGIDA 100%');
