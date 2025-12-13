@@ -2668,137 +2668,137 @@
                 </div>
             </div>
             
-           
-<!-- CARD DEFESAS COMPLETO E CORRETO -->
-<div class="card-defesas">
-    <div class="card-header">
-        <i class="fas fa-shield-alt"></i>
-        <h3>DEFESAS ATIVAS</h3>
-    </div>
-    
-    <div class="card-content">
-        <div class="defesa-lista">
-            <!-- ESQUIVA -->
-            <div class="defesa-item">
-                <div class="defesa-info">
-                    <i class="fas fa-running"></i>
-                    <div>
-                        <div class="defesa-nome">Esquiva</div>
-                        <small>DX + HT/4 + 3</small>
-                    </div>
-                </div>
-                <div class="defesa-controle">
-                    <div class="defesa-modificador">
-                        <button class="mod-btn minus">-</button>
-                        <input type="number" id="esquivaMod" value="0" class="mod-input">
-                        <button class="mod-btn plus">+</button>
-                    </div>
-                    <div class="defesa-valor" id="esquivaTotal">10</div>
-                </div>
-            </div>
-            
-            <!-- BLOQUEIO -->
-            <div class="defesa-item">
-                <div class="defesa-info">
+            <!-- CARD DEFESAS COMPLETO E CORRETO -->
+            <div class="card-defesas">
+                <div class="card-header">
                     <i class="fas fa-shield-alt"></i>
-                    <div>
-                        <div class="defesa-nome">Bloqueio</div>
-                        <small>Escudo/2 + 3</small>
-                    </div>
+                    <h3>DEFESAS ATIVAS</h3>
                 </div>
-                <div class="defesa-controle">
-                    <div class="defesa-modificador">
-                        <button class="mod-btn minus">-</button>
-                        <input type="number" id="bloqueioMod" value="0" class="mod-input">
-                        <button class="mod-btn plus">+</button>
+                
+                <div class="card-content">
+                    <div class="defesa-lista">
+                        <!-- ESQUIVA -->
+                        <div class="defesa-item">
+                            <div class="defesa-info">
+                                <i class="fas fa-running"></i>
+                                <div>
+                                    <div class="defesa-nome">Esquiva</div>
+                                    <small>DX + HT/4 + 3</small>
+                                </div>
+                            </div>
+                            <div class="defesa-controle">
+                                <div class="defesa-modificador">
+                                    <button class="mod-btn minus">-</button>
+                                    <input type="number" id="esquivaMod" value="0" class="mod-input">
+                                    <button class="mod-btn plus">+</button>
+                                </div>
+                                <div class="defesa-valor" id="esquivaTotal">10</div>
+                            </div>
+                        </div>
+                        
+                        <!-- BLOQUEIO -->
+                        <div class="defesa-item">
+                            <div class="defesa-info">
+                                <i class="fas fa-shield-alt"></i>
+                                <div>
+                                    <div class="defesa-nome">Bloqueio</div>
+                                    <small>Escudo/2 + 3</small>
+                                </div>
+                            </div>
+                            <div class="defesa-controle">
+                                <div class="defesa-modificador">
+                                    <button class="mod-btn minus">-</button>
+                                    <input type="number" id="bloqueioMod" value="0" class="mod-input">
+                                    <button class="mod-btn plus">+</button>
+                                </div>
+                                <div class="defesa-valor" id="bloqueioTotal">11</div>
+                            </div>
+                        </div>
+                        
+                        <!-- APARAR -->
+                        <div class="defesa-item">
+                            <div class="defesa-info">
+                                <i class="fas fa-sword"></i>
+                                <div>
+                                    <div class="defesa-nome">Aparar</div>
+                                    <small>Arma/2 + 3</small>
+                                </div>
+                            </div>
+                            <div class="defesa-controle">
+                                <div class="defesa-modificador">
+                                    <button class="mod-btn minus">-</button>
+                                    <input type="number" id="apararMod" value="0" class="mod-input">
+                                    <button class="mod-btn plus">+</button>
+                                </div>
+                                <div class="defesa-valor" id="apararTotal">3</div>
+                            </div>
+                        </div>
+                        
+                        <!-- DESLOCAMENTO -->
+                        <div class="defesa-item">
+                            <div class="defesa-info">
+                                <i class="fas fa-walking"></i>
+                                <div>
+                                    <div class="defesa-nome">Deslocamento</div>
+                                    <small>(DX + HT)/4</small>
+                                </div>
+                            </div>
+                            <div class="defesa-controle">
+                                <div class="defesa-modificador">
+                                    <button class="mod-btn minus">-</button>
+                                    <input type="number" id="deslocamentoMod" value="0" class="mod-input">
+                                    <button class="mod-btn plus">+</button>
+                                </div>
+                                <div class="defesa-valor" id="deslocamentoTotal">5.00</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="defesa-valor" id="bloqueioTotal">3</div>
-                </div>
-            </div>
-            
-            <!-- APARAR -->
-            <div class="defesa-item">
-                <div class="defesa-info">
-                    <i class="fas fa-sword"></i>
-                    <div>
-                        <div class="defesa-nome">Aparar</div>
-                        <small>Arma/2 + 3</small>
+                    
+                    <!-- BÔNUS -->
+                    <div class="defesa-bonus">
+                        <div class="bonus-grid">
+                            <div class="bonus-item">
+                                <div class="bonus-header">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Reflexos</span>
+                                </div>
+                                <input type="number" id="bonusReflexos" value="0" class="bonus-input">
+                            </div>
+                            
+                            <div class="bonus-item">
+                                <div class="bonus-header">
+                                    <i class="fas fa-shield"></i>
+                                    <span>Escudo</span>
+                                </div>
+                                <input type="number" id="bonusEscudo" value="0" class="bonus-input">
+                            </div>
+                            
+                            <div class="bonus-item">
+                                <div class="bonus-header">
+                                    <i class="fas fa-vest"></i>
+                                    <span>Capa</span>
+                                </div>
+                                <input type="number" id="bonusCapa" value="0" class="bonus-input">
+                            </div>
+                            
+                            <div class="bonus-item">
+                                <div class="bonus-header">
+                                    <i class="fas fa-star"></i>
+                                    <span>Outros</span>
+                                </div>
+                                <input type="number" id="bonusOutros" value="0" class="bonus-input">
+                            </div>
+                        </div>
+                        
+                        <div class="bonus-total">
+                            <span>Total de Bônus:</span>
+                            <span id="totalBonus">+0</span>
+                        </div>
                     </div>
-                </div>
-                <div class="defesa-controle">
-                    <div class="defesa-modificador">
-                        <button class="mod-btn minus">-</button>
-                        <input type="number" id="apararMod" value="0" class="mod-input">
-                        <button class="mod-btn plus">+</button>
-                    </div>
-                    <div class="defesa-valor" id="apararTotal">3</div>
-                </div>
-            </div>
-            
-            <!-- DESLOCAMENTO -->
-            <div class="defesa-item">
-                <div class="defesa-info">
-                    <i class="fas fa-walking"></i>
-                    <div>
-                        <div class="defesa-nome">Deslocamento</div>
-                        <small>(DX + HT)/4</small>
-                    </div>
-                </div>
-                <div class="defesa-controle">
-                    <div class="defesa-modificador">
-                        <button class="mod-btn minus">-</button>
-                        <input type="number" id="deslocamentoMod" value="0" class="mod-input">
-                        <button class="mod-btn plus">+</button>
-                    </div>
-                    <div class="defesa-valor" id="deslocamentoTotal">5.00</div>
                 </div>
             </div>
         </div>
         
-        <!-- BÔNUS (MANTIVE SEU ORIGINAL) -->
-        <div class="defesa-bonus">
-            <div class="bonus-grid">
-                <div class="bonus-item">
-                    <div class="bonus-header">
-                        <i class="fas fa-bolt"></i>
-                        <span>Reflexos</span>
-                    </div>
-                    <input type="number" id="bonusReflexos" value="0" class="bonus-input">
-                </div>
-                
-                <div class="bonus-item">
-                    <div class="bonus-header">
-                        <i class="fas fa-shield"></i>
-                        <span>Escudo</span>
-                    </div>
-                    <input type="number" id="bonusEscudo" value="0" class="bonus-input">
-                </div>
-                
-                <div class="bonus-item">
-                    <div class="bonus-header">
-                        <i class="fas fa-vest"></i>
-                        <span>Capa</span>
-                    </div>
-                    <input type="number" id="bonusCapa" value="0" class="bonus-input">
-                </div>
-                
-                <div class="bonus-item">
-                    <div class="bonus-header">
-                        <i class="fas fa-star"></i>
-                        <span>Outros</span>
-                    </div>
-                    <input type="number" id="bonusOutros" value="0" class="bonus-input">
-                </div>
-            </div>
-            
-            <div class="bonus-total">
-                <span>Total de Bônus:</span>
-                <span id="totalBonus">+0</span>
-            </div>
-        </div>
-    </div>
-</div>
-
         <!-- TERCEIRA LINHA: RESISTÊNCIA A DANO -->
         <div class="combate-row linha-rd">
             <div class="card-rd">
@@ -2883,133 +2883,173 @@
                         </div>
                     </div>
                     
-                   <!-- TABELA DE REDUTORES -->
-<div class="redutores-container">
-    <h4><i class="fas fa-crosshairs"></i> Penalidades para Ataque</h4>
-    <div class="redutores-grid">
-        <div class="redutor-item" data-local="tronco">
-            <span>Tronco</span>
-            <span class="redutor-valor">0</span>
-        </div>
-        <div class="redutor-item" data-local="orgaos">
-            <span>Órgãos</span>
-            <span class="redutor-valor">-3</span>
-        </div>
-        <div class="redutor-item" data-local="crânio">
-            <span>Crânio</span>
-            <span class="redutor-valor">-7</span>
-        </div>
-        <div class="redutor-item" data-local="pescoco">
-            <span>Pescoço</span>
-            <span class="redutor-valor">-5</span>
-        </div>
-        <div class="redutor-item" data-local="virilha">
-            <span>Virilha</span>
-            <span class="redutor-valor">-3</span>
-        </div>
-        <!-- OLHO ADICIONADO AQUI -->
-        <div class="redutor-item" data-local="olho">
-            <span>Olho</span>
-            <span class="redutor-valor">-9</span>
-        </div>
-        <!-- ROSTO ADICIONADO AQUI -->
-        <div class="redutor-item" data-local="rosto">
-            <span>Rosto</span>
-            <span class="redutor-valor">-5</span>
-        </div>
-        <div class="redutor-item" data-local="bracos">
-            <span>Braços</span>
-            <span class="redutor-valor">-2</span>
-        </div>
-        <div class="redutor-item" data-local="pernas">
-            <span>Pernas</span>
-            <span class="redutor-valor">-2</span>
-        </div>
-        <div class="redutor-item" data-local="maos">
-            <span>Mãos</span>
-            <span class="redutor-valor">-4</span>
-        </div>
-        <div class="redutor-item" data-local="pes">
-            <span>Pés</span>
-            <span class="redutor-valor">-4</span>
-        </div>
-    </div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-<!-- QUARTA LINHA: CONDIÇÕES -->
-<div class="combate-row linha-condicoes">
-    <div class="card-condicoes">
-        <div class="card-header">
-            <i class="fas fa-clipboard-list"></i>
-            <h3>CONDIÇÕES DE COMBATE</h3>
-            <div class="condicoes-count">
-                <span id="condicoesAtivas">0</span> ativas
+                    <!-- TABELA DE REDUTORES -->
+                    <div class="redutores-container">
+                        <h4><i class="fas fa-crosshairs"></i> Penalidades para Ataque</h4>
+                        <div class="redutores-grid">
+                            <div class="redutor-item" data-local="tronco">
+                                <span>Tronco</span>
+                                <span class="redutor-valor">0</span>
+                            </div>
+                            <div class="redutor-item" data-local="orgaos">
+                                <span>Órgãos</span>
+                                <span class="redutor-valor">-3</span>
+                            </div>
+                            <div class="redutor-item" data-local="crânio">
+                                <span>Crânio</span>
+                                <span class="redutor-valor">-7</span>
+                            </div>
+                            <div class="redutor-item" data-local="pescoco">
+                                <span>Pescoço</span>
+                                <span class="redutor-valor">-5</span>
+                            </div>
+                            <div class="redutor-item" data-local="virilha">
+                                <span>Virilha</span>
+                                <span class="redutor-valor">-3</span>
+                            </div>
+                            <div class="redutor-item" data-local="olho">
+                                <span>Olho</span>
+                                <span class="redutor-valor">-9</span>
+                            </div>
+                            <div class="redutor-item" data-local="rosto">
+                                <span>Rosto</span>
+                                <span class="redutor-valor">-5</span>
+                            </div>
+                            <div class="redutor-item" data-local="bracos">
+                                <span>Braços</span>
+                                <span class="redutor-valor">-2</span>
+                            </div>
+                            <div class="redutor-item" data-local="pernas">
+                                <span>Pernas</span>
+                                <span class="redutor-valor">-2</span>
+                            </div>
+                            <div class="redutor-item" data-local="maos">
+                                <span>Mãos</span>
+                                <span class="redutor-valor">-4</span>
+                            </div>
+                            <div class="redutor-item" data-local="pes">
+                                <span>Pés</span>
+                                <span class="redutor-valor">-4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="card-content">
-            <div class="condicoes-grid">
-                <div class="condicao-item" data-condicao="inconsciente" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Inconsciente</span>
+        <!-- QUARTA LINHA: ESCUDO (NOVO!) -->
+        <div class="combate-row linha-escudo">
+            <div class="card-escudo">
+                <div class="card-header">
+                    <i class="fas fa-shield"></i>
+                    <h3>ESCUDO</h3>
+                    <div class="escudo-status">
+                        <span class="status-badge ativo" id="escudoStatus">Ativo</span>
+                    </div>
                 </div>
-                <div class="condicao-item" data-condicao="machucado" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Machucado</span>
+                
+                <div class="card-content">
+                    <!-- INFORMAÇÕES BÁSICAS -->
+                    <div class="escudo-info">
+                        <div class="escudo-nome" id="escudoNome">Escudo Médio (Aço)</div>
+                        <div class="escudo-dr">
+                            <span class="dr-label">DR:</span>
+                            <span class="dr-valor" id="escudoDR">4</span>
+                        </div>
+                    </div>
+                    
+                    <!-- BARRA DE PV -->
+                    <div class="escudo-pv-container">
+                        <div class="pv-header">
+                            <i class="fas fa-heart"></i>
+                            <span class="pv-texto" id="escudoPVTexto">15/20</span>
+                        </div>
+                        
+                        <div class="barra-pv-escudo">
+                            <div class="barra-fill" id="escudoPVFill" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- CONTROLES -->
+                    <div class="escudo-controles">
+                        <button class="btn-escudo dano-5" onclick="danoEscudo(5)">-5</button>
+                        <button class="btn-escudo dano-1" onclick="danoEscudo(1)">-1</button>
+                        <button class="btn-escudo cura-1" onclick="curarEscudo(1)">+1</button>
+                        <button class="btn-escudo cura-5" onclick="curarEscudo(5)">+5</button>
+                    </div>
                 </div>
-                <div class="condicao-item" data-condicao="ferido" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Ferido</span>
+            </div>
+        </div>
+        
+        <!-- QUINTA LINHA: CONDIÇÕES -->
+        <div class="combate-row linha-condicoes">
+            <div class="card-condicoes">
+                <div class="card-header">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>CONDIÇÕES DE COMBATE</h3>
+                    <div class="condicoes-count">
+                        <span id="condicoesAtivas">0</span> ativas
+                    </div>
                 </div>
-                <div class="condicao-item" data-condicao="fadigado" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Fadigado</span>
-                </div>
-                <div class="condicao-item" data-condicao="atordoado" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Atordoado</span>
-                </div>
-                <div class="condicao-item" data-condicao="enjoado" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Enjoado</span>
-                </div>
-                <div class="condicao-item" data-condicao="cego" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Cego</span>
-                </div>
-                <div class="condicao-item" data-condicao="surdo" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Surdo</span>
-                </div>
-                <div class="condicao-item" data-condicao="paralisado" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Paralisado</span>
-                </div>
-                <div class="condicao-item" data-condicao="envenenado" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Envenenado</span>
-                </div>
-                <div class="condicao-item" data-condicao="sangrando" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Sangrando</span>
-                </div>
-                <div class="condicao-item" data-condicao="queimando" onclick="alternarCondicao(this)">
-                    <div class="condicao-checkbox"></div>
-                    <span>Queimando</span>
+                
+                <div class="card-content">
+                    <div class="condicoes-grid">
+                        <div class="condicao-item" data-condicao="inconsciente" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Inconsciente</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="machucado" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Machucado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="ferido" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Ferido</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="fadigado" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Fadigado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="atordoado" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Atordoado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="enjoado" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Enjoado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="cego" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Cego</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="surdo" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Surdo</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="paralisado" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Paralisado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="envenenado" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Envenenado</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="sangrando" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Sangrando</span>
+                        </div>
+                        <div class="condicao-item" data-condicao="queimando" onclick="alternarCondicao(this)">
+                            <div class="condicao-checkbox"></div>
+                            <span>Queimando</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-</div>
-</div>
+
 <!-- ABA RESUMO -->
         <div id="resumo" class="tab-content">
             <div class="loading">
