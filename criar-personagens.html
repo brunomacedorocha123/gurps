@@ -3050,166 +3050,128 @@
 </div>
 
 
-<!-- ABA RESUMO - VERSÃO COMPLETA E COMPACTA -->
+<!-- ABA RESUMO - VERSÃO COMPACTA E ORGANIZADA -->
 <div id="resumo" class="tab-content">
     <div class="resumo-container">
         
         <!-- ====================== -->
-        <!-- CABEÇALHO COMPACTO -->
+        <!-- CABEÇALHO SUPER COMPACTO -->
         <!-- ====================== -->
-        <div class="resumo-header">
-            <div class="header-esquerda">
-                <!-- FOTO MINIATURA -->
-                <div class="foto-mini">
-                    <div class="foto-mini-wrapper" id="fotoResumoWrapper">
-                        <img id="fotoResumoImg" src="" alt="Foto" style="display: none;">
-                        <div class="foto-mini-placeholder" id="fotoPlaceholderMini">
-                            <i class="fas fa-user"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- DADOS PRINCIPAIS -->
-                <div class="dados-principais">
-                    <h2 id="resumoNome">Novo Personagem</h2>
-                    <div class="tags-rapidas">
-                        <span class="tag" id="resumoRaca">Humano</span>
-                        <span class="tag" id="resumoClasse">Guerreiro</span>
-                        <span class="tag" id="resumoNivel">Novato</span>
-                    </div>
+        <div class="resumo-header-ultracompacto">
+            <!-- FOTO MICRO -->
+            <div class="foto-micro-wrapper" id="fotoResumoWrapper">
+                <img id="fotoResumoImg" src="" alt="F" style="display: none;">
+                <div class="foto-micro-placeholder">
+                    <i class="fas fa-user"></i>
                 </div>
             </div>
             
-            <!-- PONTUAÇÃO -->
-            <div class="pontuacao-resumo">
-                <div class="ponto-item">
-                    <span class="ponto-label">Total</span>
-                    <span class="ponto-valor" id="resumoPontosTotais">150</span>
+            <!-- DADOS EM UMA LINHA -->
+            <div class="dados-micro">
+                <h3 id="resumoNome">NOVO PERSONAGEM</h3>
+                <div class="tags-micro">
+                    <span id="resumoRaca" class="tag-micro">Humano</span>
+                    <span id="resumoClasse" class="tag-micro">Guerreiro</span>
+                    <span id="resumoNivel" class="tag-micro">Novato</span>
                 </div>
-                <div class="ponto-item">
-                    <span class="ponto-label">Gastos</span>
-                    <span class="ponto-valor gasto" id="resumoPontosGastos">0</span>
+            </div>
+            
+            <!-- PONTOS MICRO -->
+            <div class="pontos-micro">
+                <div class="ponto-micro">
+                    <small>Total</small>
+                    <span id="resumoPontosTotais">150</span>
                 </div>
-                <div class="ponto-item destaque">
-                    <span class="ponto-label">Saldo</span>
-                    <span class="ponto-valor saldo" id="resumoSaldo">150</span>
+                <div class="ponto-micro">
+                    <small>Gasto</small>
+                    <span id="resumoPontosGastos" class="gasto">0</span>
+                </div>
+                <div class="ponto-micro">
+                    <small>Saldo</small>
+                    <span id="resumoSaldo" class="saldo">150</span>
                 </div>
             </div>
         </div>
         
-        <!-- DESCRIÇÃO RÁPIDA -->
-        <div class="descricao-rapida">
-            <p id="resumoDescricao">Personagem em criação...</p>
-        </div>
-        
         <!-- ====================== -->
-        <!-- 3 COLUNAS PRINCIPAIS -->
+        <!-- 3 COLUNAS FIXAS E COMPACTAS -->
         <!-- ====================== -->
-        <div class="resumo-colunas">
+        <div class="resumo-colunas-compactas">
             
             <!-- ========== COLUNA 1 ========== -->
-            <div class="coluna">
+            <div class="coluna-compacta">
                 
-                <!-- ATRIBUTOS -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-dumbbell"></i> Atributos</h3>
-                        <span class="pontos-secao" id="pontosAtributosResumo">0 pts</span>
+                <!-- ATRIBUTOS (FIXO) -->
+                <div class="card-atributos">
+                    <div class="card-header">
+                        <h4><i class="fas fa-dumbbell"></i> ATRIBUTOS</h4>
+                        <span class="card-pontos" id="pontosAtributos">0</span>
                     </div>
-                    <div class="secao-conteudo">
-                        <div class="grid-atributos">
-                            <!-- PRINCIPAIS -->
-                            <div class="grupo">
-                                <h4>PRINCIPAIS</h4>
-                                <div class="linha">
-                                    <span>FOR (ST):</span>
-                                    <span class="valor" id="resumoST">10</span>
-                                    <span class="custo" id="custoSTResumo">0</span>
-                                </div>
-                                <div class="linha">
-                                    <span>DES (DX):</span>
-                                    <span class="valor" id="resumoDX">10</span>
-                                    <span class="custo" id="custoDXResumo">0</span>
-                                </div>
-                                <div class="linha">
-                                    <span>INT (IQ):</span>
-                                    <span class="valor" id="resumoIQ">10</span>
-                                    <span class="custo" id="custoIQResumo">0</span>
-                                </div>
-                                <div class="linha">
-                                    <span>VIG (HT):</span>
-                                    <span class="valor" id="resumoHT">10</span>
-                                    <span class="custo" id="custoHTResumo">0</span>
-                                </div>
-                            </div>
-                            
-                            <!-- SECUNDÁRIOS -->
-                            <div class="grupo">
-                                <h4>SECUNDÁRIOS</h4>
-                                <div class="linha">
-                                    <span>PV:</span>
-                                    <span class="valor" id="resumoPV">10</span>
-                                </div>
-                                <div class="linha">
-                                    <span>PF:</span>
-                                    <span class="valor" id="resumoPF">10</span>
-                                </div>
-                                <div class="linha">
-                                    <span>Vontade:</span>
-                                    <span class="valor" id="resumoVontade">10</span>
-                                </div>
-                                <div class="linha">
-                                    <span>Percepção:</span>
-                                    <span class="valor" id="resumoPercepcao">10</span>
-                                </div>
-                                <div class="linha">
-                                    <span>Deslocamento:</span>
-                                    <span class="valor" id="resumoDeslocamento">5.00</span>
-                                </div>
-                            </div>
+                    <div class="atributos-grid-micro">
+                        <div class="attr-micro">
+                            <span class="attr-label">ST</span>
+                            <span class="attr-valor" id="resumoST">10</span>
+                            <span class="attr-custo" id="custoST">0</span>
+                        </div>
+                        <div class="attr-micro">
+                            <span class="attr-label">DX</span>
+                            <span class="attr-valor" id="resumoDX">10</span>
+                            <span class="attr-custo" id="custoDX">0</span>
+                        </div>
+                        <div class="attr-micro">
+                            <span class="attr-label">IQ</span>
+                            <span class="attr-valor" id="resumoIQ">10</span>
+                            <span class="attr-custo" id="custoIQ">0</span>
+                        </div>
+                        <div class="attr-micro">
+                            <span class="attr-label">HT</span>
+                            <span class="attr-valor" id="resumoHT">10</span>
+                            <span class="attr-custo" id="custoHT">0</span>
+                        </div>
+                        <div class="attr-micro">
+                            <span class="attr-label">PV</span>
+                            <span class="attr-valor" id="resumoPV">10</span>
+                        </div>
+                        <div class="attr-micro">
+                            <span class="attr-label">PF</span>
+                            <span class="attr-valor" id="resumoPF">10</span>
+                        </div>
+                        <div class="attr-micro">
+                            <span class="attr-label">Von</span>
+                            <span class="attr-valor" id="resumoVontade">10</span>
+                        </div>
+                        <div class="attr-micro">
+                            <span class="attr-label">Per</span>
+                            <span class="attr-valor" id="resumoPercepcao">10</span>
+                        </div>
+                        <div class="attr-micro">
+                            <span class="attr-label">Des</span>
+                            <span class="attr-valor" id="resumoDeslocamento">5.0</span>
                         </div>
                     </div>
                 </div>
                 
-                <!-- CARACTERÍSTICAS FÍSICAS -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-user"></i> Características</h3>
+                <!-- CARACTERÍSTICAS (FIXO) -->
+                <div class="card-micro">
+                    <div class="card-header">
+                        <h4><i class="fas fa-user"></i> CARACTERÍSTICAS</h4>
                     </div>
-                    <div class="secao-conteudo">
-                        <div class="lista-simples">
-                            <div class="item">
-                                <span class="label">Altura/Peso:</span>
-                                <span class="valor" id="resumoAlturaPeso">1.70m / 70kg</span>
-                            </div>
-                            <div class="item">
-                                <span class="label">Aparência:</span>
-                                <span class="valor" id="resumoAparencia">Comum</span>
-                            </div>
-                            <div class="item">
-                                <span class="label">Riqueza:</span>
-                                <span class="valor" id="resumoRiqueza">Média</span>
-                            </div>
-                            <div class="item">
-                                <span class="label">Idiomas:</span>
-                                <span class="valor" id="resumoIdiomas">Comum (Nativo)</span>
-                            </div>
+                    <div class="micro-lista">
+                        <div class="micro-item">
+                            <span class="micro-label">Alt/Peso:</span>
+                            <span class="micro-valor" id="resumoAlturaPeso">1.70m/70kg</span>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- VANTAGENS -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-star"></i> Vantagens</h3>
-                        <span class="pontos-secao positivo" id="pontosVantagensResumo">+0</span>
-                    </div>
-                    <div class="secao-conteudo">
-                        <div class="lista-compacta" id="listaVantagensResumo">
-                            <div class="vazio">
-                                <i class="fas fa-plus-circle"></i>
-                                <span>Adicione vantagens</span>
-                            </div>
+                        <div class="micro-item">
+                            <span class="micro-label">Aparência:</span>
+                            <span class="micro-valor" id="resumoAparencia">Comum</span>
+                        </div>
+                        <div class="micro-item">
+                            <span class="micro-label">Riqueza:</span>
+                            <span class="micro-valor" id="resumoRiqueza">Média</span>
+                        </div>
+                        <div class="micro-item">
+                            <span class="micro-label">Idiomas:</span>
+                            <span class="micro-valor" id="resumoIdiomas">Comum</span>
                         </div>
                     </div>
                 </div>
@@ -3217,65 +3179,41 @@
             </div><!-- FIM COLUNA 1 -->
             
             <!-- ========== COLUNA 2 ========== -->
-            <div class="coluna">
+            <div class="coluna-compacta">
                 
-                <!-- DESVANTAGENS -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-exclamation-triangle"></i> Desvantagens</h3>
-                        <span class="pontos-secao negativo" id="pontosDesvantagensResumo">-0</span>
+                <!-- PERÍCIAS (TABELA COM SCROLL - 20 itens) -->
+                <div class="card-tabela" style="height: 380px;">
+                    <div class="card-header">
+                        <h4><i class="fas fa-graduation-cap"></i> PERÍCIAS</h4>
+                        <span class="card-pontos" id="pontosPericias">0</span>
                     </div>
-                    <div class="secao-conteudo">
-                        <div class="lista-compacta" id="listaDesvantagensResumo">
-                            <div class="vazio">
-                                <i class="fas fa-plus-circle"></i>
-                                <span>Adicione desvantagens</span>
-                            </div>
-                        </div>
+                    <div class="tabela-micro-container">
+                        <table class="tabela-micro">
+                            <thead>
+                                <tr>
+                                    <th>PERÍCIA</th>
+                                    <th class="th-nivel">NVL</th>
+                                    <th class="th-pontos">PTS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaPericiasResumo">
+                                <tr class="vazio">
+                                    <td colspan="3">Nenhuma perícia</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 
-                <!-- PERÍCIAS -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-graduation-cap"></i> Perícias</h3>
-                        <span class="pontos-secao" id="pontosPericiasResumo">0 pts</span>
+                <!-- TÉCNICAS (LISTA COM SCROLL) -->
+                <div class="card-lista-micro" style="height: 200px;">
+                    <div class="card-header">
+                        <h4><i class="fas fa-tools"></i> TÉCNICAS</h4>
+                        <span class="card-pontos" id="pontosTecnicas">0</span>
                     </div>
-                    <div class="secao-conteudo">
-                        <div class="tabela-pericias-resumo">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Nome</th>
-                                        <th class="nivel">Nvl</th>
-                                        <th class="pontos">Pts</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaPericiasResumo">
-                                    <tr class="vazio">
-                                        <td colspan="3">
-                                            <i class="fas fa-book"></i>
-                                            <span>Nenhuma perícia</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- TÉCNICAS -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-tools"></i> Técnicas</h3>
-                        <span class="pontos-secao" id="pontosTecnicasResumo">0 pts</span>
-                    </div>
-                    <div class="secao-conteudo">
-                        <div class="lista-compacta" id="listaTecnicasResumo">
-                            <div class="vazio">
-                                <i class="fas fa-tools"></i>
-                                <span>Nenhuma técnica</span>
-                            </div>
+                    <div class="micro-scroll-container">
+                        <div class="micro-lista-scroll" id="listaTecnicasResumo">
+                            <div class="vazio">Nenhuma técnica</div>
                         </div>
                     </div>
                 </div>
@@ -3283,607 +3221,727 @@
             </div><!-- FIM COLUNA 2 -->
             
             <!-- ========== COLUNA 3 ========== -->
-            <div class="coluna">
+            <div class="coluna-compacta">
                 
-                <!-- MAGIAS -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-hat-wizard"></i> Magias</h3>
-                        <span class="pontos-secao" id="pontosMagiasResumo">0 pts</span>
+                <!-- MAGIAS (LISTA COM SCROLL - 20 itens) -->
+                <div class="card-lista-micro" style="height: 380px;">
+                    <div class="card-header">
+                        <h4><i class="fas fa-hat-wizard"></i> MAGIAS</h4>
+                        <span class="card-pontos" id="pontosMagias">0</span>
                     </div>
-                    <div class="secao-conteudo">
-                        <div class="status-magia">
-                            <div class="status-item">
-                                <span>Aptidão:</span>
-                                <span class="valor" id="resumoAptidaoMagica">0</span>
-                            </div>
-                            <div class="status-item">
-                                <span>Mana:</span>
-                                <span class="valor" id="resumoMana">10/10</span>
-                            </div>
-                        </div>
-                        <div class="lista-compacta" id="listaMagiasResumo">
-                            <div class="vazio">
-                                <i class="fas fa-wand-magic-sparkles"></i>
-                                <span>Nenhuma magia</span>
-                            </div>
-                        </div>
+                    <div class="magia-status-micro">
+                        <span class="magia-stat">Apt: <strong id="resumoAptidao">0</strong></span>
+                        <span class="magia-stat">Mana: <strong id="resumoMana">10/10</strong></span>
                     </div>
-                </div>
-                
-                <!-- EQUIPAMENTO -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-backpack"></i> Equipamento</h3>
-                    </div>
-                    <div class="secao-conteudo">
-                        <div class="status-equipamento">
-                            <div class="status-item">
-                                <span>Dinheiro:</span>
-                                <span class="valor dinheiro" id="resumoDinheiro">$2.000</span>
-                            </div>
-                            <div class="status-item">
-                                <span>Carga:</span>
-                                <span class="valor" id="resumoCarga">0/60 kg</span>
-                            </div>
-                        </div>
-                        <div class="lista-compacta" id="listaEquipamentoResumo">
-                            <div class="vazio">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>Inventário vazio</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- COMBATE -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-fist-raised"></i> Combate</h3>
-                    </div>
-                    <div class="secao-conteudo">
-                        <div class="grid-combate">
-                            <div class="combate-item">
-                                <span class="label">Esquiva:</span>
-                                <span class="valor" id="resumoEsquiva">10</span>
-                            </div>
-                            <div class="combate-item">
-                                <span class="label">Bloqueio:</span>
-                                <span class="valor" id="resumoBloqueio">11</span>
-                            </div>
-                            <div class="combate-item">
-                                <span class="label">Aparar:</span>
-                                <span class="valor" id="resumoAparar">3</span>
-                            </div>
-                            <div class="combate-item">
-                                <span class="label">Dano Base:</span>
-                                <span class="valor" id="resumoDano">1d-2/1d</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RELACIONAMENTOS -->
-                <div class="secao-card">
-                    <div class="secao-header">
-                        <h3><i class="fas fa-users"></i> Relacionamentos</h3>
-                    </div>
-                    <div class="secao-conteudo">
-                        <div class="relacionamentos-grid">
-                            <div class="rel-tipo">
-                                <h4><i class="fas fa-skull-crossbones"></i> Inimigos</h4>
-                                <div class="rel-lista" id="listaInimigosResumo">
-                                    <span class="nenhum">Nenhum</span>
-                                </div>
-                            </div>
-                            <div class="rel-tipo">
-                                <h4><i class="fas fa-handshake"></i> Aliados</h4>
-                                <div class="rel-lista" id="listaAliadosResumo">
-                                    <span class="nenhum">Nenhum</span>
-                                </div>
-                            </div>
+                    <div class="micro-scroll-container">
+                        <div class="micro-lista-scroll" id="listaMagiasResumo">
+                            <div class="vazio">Nenhuma magia</div>
                         </div>
                     </div>
                 </div>
                 
             </div><!-- FIM COLUNA 3 -->
             
-        </div><!-- FIM DAS COLUNAS -->
+        </div><!-- FIM DAS 3 COLUNAS -->
+        
+        <!-- ====================== -->
+        <!-- LINHA INFERIOR (VANTAGENS, DESVANTAGENS, EQUIPAMENTO) -->
+        <!-- ====================== -->
+        <div class="resumo-linha-inferior">
+            
+            <!-- VANTAGENS (LISTA COM SCROLL - 10 itens) -->
+            <div class="card-lista-larga" style="height: 280px;">
+                <div class="card-header">
+                    <h4><i class="fas fa-star"></i> VANTAGENS</h4>
+                    <span class="card-pontos positivo" id="pontosVantagens">+0</span>
+                </div>
+                <div class="larga-scroll-container">
+                    <div class="larga-lista" id="listaVantagensResumo">
+                        <div class="vazio">Nenhuma vantagem</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- DESVANTAGENS (LISTA COM SCROLL - 10 itens) -->
+            <div class="card-lista-larga" style="height: 280px;">
+                <div class="card-header">
+                    <h4><i class="fas fa-exclamation-triangle"></i> DESVANTAGENS</h4>
+                    <span class="card-pontos negativo" id="pontosDesvantagens">-0</span>
+                </div>
+                <div class="larga-scroll-container">
+                    <div class="larga-lista" id="listaDesvantagensResumo">
+                        <div class="vazio">Nenhuma desvantagem</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PECULIARIDADES (LISTA COM SCROLL - 5 itens) -->
+            <div class="card-lista-larga" style="height: 280px;">
+                <div class="card-header">
+                    <h4><i class="fas fa-comment"></i> PECULIARIDADES</h4>
+                    <span class="card-pontos negativo" id="pontosPeculiaridades">-0</span>
+                </div>
+                <div class="larga-scroll-container">
+                    <div class="larga-lista" id="listaPeculiaridadesResumo">
+                        <div class="vazio">Nenhuma peculiaridade</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div><!-- FIM LINHA INFERIOR -->
+        
+        <!-- ====================== -->
+        <!-- LINHA STATUS -->
+        <!-- ====================== -->
+        <div class="resumo-status-linha">
+            
+            <!-- EQUIPAMENTO -->
+            <div class="card-status">
+                <div class="card-header">
+                    <h4><i class="fas fa-backpack"></i> EQUIPAMENTO</h4>
+                </div>
+                <div class="status-content">
+                    <div class="status-item">
+                        <span class="status-label">Dinheiro:</span>
+                        <span class="status-valor dinheiro" id="resumoDinheiro">$2.000</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Carga:</span>
+                        <span class="status-valor" id="resumoCarga">0/60 kg</span>
+                    </div>
+                    <div class="equipamento-micro" id="listaEquipamentoResumo">
+                        <span class="vazio">Inventário vazio</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- COMBATE -->
+            <div class="card-status">
+                <div class="card-header">
+                    <h4><i class="fas fa-fist-raised"></i> COMBATE</h4>
+                </div>
+                <div class="status-content">
+                    <div class="combate-grid-micro">
+                        <div class="combate-micro">
+                            <span class="combate-label">Esquiva:</span>
+                            <span class="combate-valor" id="resumoEsquiva">10</span>
+                        </div>
+                        <div class="combate-micro">
+                            <span class="combate-label">Bloqueio:</span>
+                            <span class="combate-valor" id="resumoBloqueio">11</span>
+                        </div>
+                        <div class="combate-micro">
+                            <span class="combate-label">Aparar:</span>
+                            <span class="combate-valor" id="resumoAparar">3</span>
+                        </div>
+                        <div class="combate-micro">
+                            <span class="combate-label">Dano:</span>
+                            <span class="combate-valor" id="resumoDano">1d-2/1d</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- RELACIONAMENTOS -->
+            <div class="card-status">
+                <div class="card-header">
+                    <h4><i class="fas fa-users"></i> RELACIONAMENTOS</h4>
+                </div>
+                <div class="status-content">
+                    <div class="relacionamentos-micro">
+                        <div class="rel-micro">
+                            <span class="rel-label"><i class="fas fa-skull-crossbones"></i> Inimigos:</span>
+                            <span class="rel-valor" id="resumoInimigos">0</span>
+                        </div>
+                        <div class="rel-micro">
+                            <span class="rel-label"><i class="fas fa-handshake"></i> Aliados:</span>
+                            <span class="rel-valor" id="resumoAliados">0</span>
+                        </div>
+                        <div class="rel-micro">
+                            <span class="rel-label"><i class="fas fa-child"></i> Dependentes:</span>
+                            <span class="rel-valor" id="resumoDependentes">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div><!-- FIM LINHA STATUS -->
         
     </div>
 </div>
 
-<!-- CSS COMPLEMENTAR PARA ESTE LAYOUT -->
+<!-- CSS INLINE (depois movemos para arquivo separado) -->
 <style>
-/* ====================== */
-/* ESTILOS DA ABA RESUMO */
-/* ====================== */
+/* ============================================
+   ESTILOS DA ABA RESUMO - VERSÃO ULTRA COMPACTA
+   ============================================ */
 
 .resumo-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px;
     color: #fff;
+    font-size: 0.9rem;
 }
 
-/* CABEÇALHO */
-.resumo-header {
+/* CABEÇALHO SUPER COMPACTO */
+.resumo-header-ultracompacto {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    background: rgba(30, 30, 40, 0.8);
-    border-radius: 10px;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(30, 30, 40, 0.9);
+    border-radius: 6px;
     border: 1px solid rgba(255, 140, 0, 0.3);
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
-.header-esquerda {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-/* FOTO MINIATURA */
-.foto-mini {
+.foto-micro-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 140, 0, 0.5);
+    background: rgba(20, 20, 30, 0.9);
+    cursor: pointer;
     flex-shrink: 0;
 }
 
-.foto-mini-wrapper {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid rgba(255, 140, 0, 0.5);
-    background: rgba(20, 20, 30, 0.9);
-    cursor: pointer;
-    position: relative;
-}
-
-.foto-mini-wrapper img {
+.foto-micro-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.foto-mini-placeholder {
+.foto-micro-placeholder {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: rgba(255, 140, 0, 0.3);
-    font-size: 2.5rem;
+    font-size: 1.2rem;
 }
 
-/* DADOS PRINCIPAIS */
-.dados-principais h2 {
+.dados-micro {
+    flex: 1;
+    min-width: 0;
+}
+
+.dados-micro h3 {
     color: #ffd700;
-    font-size: 1.8rem;
-    margin-bottom: 10px;
+    font-size: 1.1rem;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.tags-rapidas {
+.tags-micro {
     display: flex;
-    gap: 10px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
-.tag {
-    background: rgba(255, 140, 0, 0.2);
+.tag-micro {
+    background: rgba(255, 140, 0, 0.15);
     color: #ff8c00;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.9rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
     font-weight: 500;
 }
 
-/* PONTUAÇÃO */
-.pontuacao-resumo {
+.pontos-micro {
     display: flex;
-    gap: 15px;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.ponto-micro {
     text-align: center;
-}
-
-.ponto-item {
-    padding: 10px 15px;
+    padding: 4px 8px;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    min-width: 80px;
+    border-radius: 4px;
+    min-width: 50px;
 }
 
-.ponto-label {
+.ponto-micro small {
     display: block;
     color: #aaa;
-    font-size: 0.9rem;
-    margin-bottom: 5px;
+    font-size: 0.7rem;
+    margin-bottom: 2px;
 }
 
-.ponto-valor {
+.ponto-micro span {
     display: block;
-    font-size: 1.3rem;
+    font-size: 1rem;
     font-weight: 600;
 }
 
-.ponto-valor.saldo {
-    color: #2ecc71;
-}
-
-.ponto-valor.gasto {
+.ponto-micro .gasto {
     color: #e74c3c;
 }
 
-/* DESCRIÇÃO RÁPIDA */
-.descricao-rapida {
-    padding: 15px;
-    background: rgba(255, 140, 0, 0.1);
-    border-radius: 8px;
-    margin-bottom: 25px;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: #ccc;
+.ponto-micro .saldo {
+    color: #2ecc71;
 }
 
-/* COLUNAS */
-.resumo-colunas {
+/* 3 COLUNAS FIXAS */
+.resumo-colunas-compactas {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
-.coluna {
+.coluna-compacta {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 8px;
 }
 
-/* CARDS DAS SEÇÕES */
-.secao-card {
-    background: rgba(30, 30, 40, 0.8);
-    border-radius: 8px;
+/* CARDS GERAIS */
+.card-atributos,
+.card-micro,
+.card-tabela,
+.card-lista-micro {
+    background: rgba(30, 30, 40, 0.9);
+    border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
 }
 
-.secao-header {
+.card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 15px;
+    padding: 6px 10px;
     background: rgba(255, 140, 0, 0.1);
     border-bottom: 1px solid rgba(255, 140, 0, 0.2);
 }
 
-.secao-header h3 {
+.card-header h4 {
     color: #ff8c00;
-    font-size: 1.1rem;
+    font-size: 0.85rem;
+    margin: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
-.pontos-secao {
+.card-pontos {
     background: rgba(255, 255, 255, 0.1);
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.9rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
     font-weight: 600;
 }
 
-.pontos-secao.positivo {
+.card-pontos.positivo {
     color: #2ecc71;
 }
 
-.pontos-secao.negativo {
+.card-pontos.negativo {
     color: #e74c3c;
 }
 
-.secao-conteudo {
-    padding: 15px;
-}
-
 /* ATRIBUTOS */
-.grid-atributos {
+.atributos-grid-micro {
     display: grid;
-    gap: 15px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 8px;
 }
 
-.grupo h4 {
-    color: #aaa;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.linha {
+.attr-micro {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 0;
+    padding: 4px 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+}
+
+.attr-label {
+    color: #aaa;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 20px;
+}
+
+.attr-valor {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-width: 25px;
+    text-align: center;
+}
+
+.attr-custo {
+    color: #ffd700;
+    font-size: 0.7rem;
+    min-width: 20px;
+    text-align: right;
+}
+
+/* LISTAS MICRO */
+.micro-lista {
+    padding: 6px 10px;
+}
+
+.micro-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
     border-bottom: 1px dotted rgba(255, 255, 255, 0.05);
 }
 
-.linha:last-child {
+.micro-item:last-child {
     border-bottom: none;
 }
 
-.linha .valor {
-    color: #fff;
-    font-weight: 600;
-    min-width: 30px;
-    text-align: right;
-}
-
-.linha .custo {
-    color: #ffd700;
-    font-size: 0.85rem;
-    min-width: 25px;
-    text-align: right;
-}
-
-/* LISTAS SIMPLES */
-.lista-simples .item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
-}
-
-.lista-simples .item:last-child {
-    border-bottom: none;
-}
-
-.lista-simples .label {
+.micro-label {
     color: #aaa;
+    font-size: 0.8rem;
 }
 
-.lista-simples .valor {
+.micro-valor {
     color: #fff;
     font-weight: 500;
+    font-size: 0.8rem;
 }
 
-/* LISTAS COMPACTAS */
-.lista-compacta {
-    max-height: 150px;
+/* TABELA DE PERÍCIAS */
+.tabela-micro-container {
+    height: calc(380px - 35px);
     overflow-y: auto;
-    padding-right: 5px;
 }
 
-.vazio {
-    text-align: center;
-    padding: 15px;
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.vazio i {
-    display: block;
-    font-size: 1.5rem;
-    margin-bottom: 8px;
-    color: rgba(255, 140, 0, 0.3);
-}
-
-/* TABELA PERÍCIAS */
-.tabela-pericias-resumo table {
+.tabela-micro {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
-.tabela-pericias-resumo th {
+.tabela-micro th {
     text-align: left;
-    padding: 8px 5px;
+    padding: 6px 8px;
     color: #aaa;
     font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
-.tabela-pericias-resumo td {
-    padding: 8px 5px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.tabela-pericias-resumo th.nivel,
-.tabela-pericias-resumo th.pontos {
+.tabela-micro th.th-nivel,
+.tabela-micro th.th-pontos {
     text-align: center;
     width: 40px;
 }
 
-.tabela-pericias-resumo .vazio td {
+.tabela-micro td {
+    padding: 5px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    color: #ccc;
+}
+
+.tabela-micro tr:hover td {
+    background: rgba(255, 140, 0, 0.05);
+}
+
+.tabela-micro .vazio {
     text-align: center;
     padding: 20px;
     color: #666;
+    font-style: italic;
 }
 
-.tabela-pericias-resumo .vazio i {
-    font-size: 1.2rem;
-    margin-bottom: 5px;
-    color: rgba(255, 140, 0, 0.3);
+/* LISTAS COM SCROLL */
+.micro-scroll-container {
+    height: calc(100% - 35px);
+    overflow-y: auto;
 }
 
-/* STATUS */
-.status-magia,
-.status-equipamento {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 15px;
+.micro-lista-scroll {
+    padding: 6px 8px;
+}
+
+.micro-lista-scroll .vazio {
+    text-align: center;
     padding: 10px;
-    background: rgba(255, 255, 255, 0.05);
+    color: #666;
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+/* STATUS MAGIA */
+.magia-status-micro {
+    display: flex;
+    gap: 10px;
+    padding: 6px 10px;
+    background: rgba(255, 140, 0, 0.05);
+    border-bottom: 1px solid rgba(255, 140, 0, 0.1);
+    font-size: 0.8rem;
+}
+
+.magia-stat {
+    color: #aaa;
+}
+
+.magia-stat strong {
+    color: #ff8c00;
+    margin-left: 4px;
+}
+
+/* LINHA INFERIOR (VANTAGENS, DESVANTAGENS, PECULIARIDADES) */
+.resumo-linha-inferior {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.card-lista-larga {
+    background: rgba(30, 30, 40, 0.9);
     border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.larga-scroll-container {
+    height: calc(280px - 35px);
+    overflow-y: auto;
+}
+
+.larga-lista {
+    padding: 6px 8px;
+}
+
+.larga-lista .vazio {
+    text-align: center;
+    padding: 10px;
+    color: #666;
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+/* LINHA STATUS (EQUIPAMENTO, COMBATE, RELACIONAMENTOS) */
+.resumo-status-linha {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.card-status {
+    background: rgba(30, 30, 40, 0.9);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.status-content {
+    padding: 8px 10px;
 }
 
 .status-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.05);
 }
 
-.status-item .valor.dinheiro {
+.status-label {
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+.status-valor {
+    color: #fff;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.status-valor.dinheiro {
     color: #ffd700;
-    font-weight: 600;
+}
+
+.equipamento-micro {
+    margin-top: 6px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #aaa;
+    min-height: 40px;
 }
 
 /* COMBATE */
-.grid-combate {
+.combate-grid-micro {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
 }
 
-.combate-item {
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
+.combate-micro {
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
     text-align: center;
 }
 
-.combate-item .label {
+.combate-label {
     display: block;
     color: #aaa;
-    font-size: 0.85rem;
-    margin-bottom: 4px;
+    font-size: 0.7rem;
+    margin-bottom: 3px;
 }
 
-.combate-item .valor {
+.combate-valor {
     display: block;
     color: #fff;
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
 }
 
 /* RELACIONAMENTOS */
-.relacionamentos-grid {
-    display: grid;
-    gap: 15px;
+.relacionamentos-micro {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.rel-tipo h4 {
-    color: #ff8c00;
-    font-size: 0.9rem;
-    margin-bottom: 8px;
+.rel-micro {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+}
+
+.rel-label {
+    color: #aaa;
+    font-size: 0.8rem;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.rel-lista {
-    min-height: 30px;
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    font-size: 0.85rem;
-}
-
-.nenhum {
-    color: #666;
-    font-style: italic;
+.rel-valor {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 
 /* RESPONSIVIDADE */
 @media (max-width: 1200px) {
-    .resumo-colunas {
+    .resumo-colunas-compactas,
+    .resumo-linha-inferior,
+    .resumo-status-linha {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 768px) {
-    .resumo-colunas {
+    .resumo-colunas-compactas,
+    .resumo-linha-inferior,
+    .resumo-status-linha {
         grid-template-columns: 1fr;
     }
     
-    .resumo-header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-    }
-    
-    .header-esquerda {
+    .resumo-header-ultracompacto {
         flex-direction: column;
         text-align: center;
+        gap: 8px;
     }
     
-    .pontuacao-resumo {
+    .pontos-micro {
         width: 100%;
         justify-content: center;
     }
-    
-    .grid-atributos {
-        grid-template-columns: 1fr;
-    }
-    
-    .status-magia,
-    .status-equipamento {
-        grid-template-columns: 1fr;
-    }
-    
-    .grid-combate {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
-@media (max-width: 480px) {
-    .resumo-container {
-        padding: 10px;
-    }
-    
-    .secao-conteudo {
-        padding: 10px;
-    }
-    
-    .tabela-pericias-resumo {
-        font-size: 0.8rem;
-    }
-    
-    .grid-combate {
-        grid-template-columns: 1fr;
-    }
+/* SCROLLBAR PERSONALIZADA */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.5);
 }
 </style>
 
-<!-- JAVASCRIPT SIMPLIFICADO -->
+<!-- JAVASCRIPT MINIMAL -->
 <script>
-// Função carregarResumo - VERSÃO SIMPLIFICADA
+// Função carregarResumo - VERSÃO MINIMAL
 function carregarResumo() {
-    console.log('Carregando aba Resumo...');
+    console.log('Carregando Resumo - Versão Compacta');
     
-    // Sincronizar dados básicos
-    sincronizarDadosBasicos();
+    // 1. Sincronizar dados básicos
+    sincronizarDadosResumo();
     
-    // Configurar eventos da foto
-    configurarFotoResumo();
+    // 2. Configurar foto
+    configurarFotoMicro();
     
-    // Preencher dados de atributos
-    atualizarAtributosResumo();
+    // 3. Atualizar atributos
+    atualizarAtributosMicro();
 }
 
-function sincronizarDadosBasicos() {
+function sincronizarDadosResumo() {
     // Nome
     const nomeInput = document.getElementById('charName');
-    if (nomeInput) {
-        document.getElementById('resumoNome').textContent = nomeInput.value || 'Novo Personagem';
+    if (nomeInput && document.getElementById('resumoNome')) {
+        document.getElementById('resumoNome').textContent = 
+            nomeInput.value.toUpperCase() || 'NOVO PERSONAGEM';
     }
     
     // Dados da dashboard
-    const dados = {
+    const dadosMap = {
         'racaPersonagem': 'resumoRaca',
         'classePersonagem': 'resumoClasse',
-        'nivelPersonagem': 'resumoNivel',
-        'descricaoPersonagem': 'resumoDescricao'
+        'nivelPersonagem': 'resumoNivel'
     };
     
-    for (const [origem, destino] of Object.entries(dados)) {
+    for (const [origem, destino] of Object.entries(dadosMap)) {
         const origemEl = document.getElementById(origem);
         const destinoEl = document.getElementById(destino);
         if (origemEl && destinoEl) {
             destinoEl.textContent = origemEl.value || '-';
         }
     }
+    
+    // Pontos
+    const pontosEls = {
+        'pontosTotais': 'resumoPontosTotais',
+        'pontosGastos': 'resumoPontosGastos',
+        'pontosSaldo': 'resumoSaldo'
+    };
+    
+    for (const [origem, destino] of Object.entries(pontosEls)) {
+        const origemEl = document.getElementById(origem);
+        const destinoEl = document.getElementById(destino);
+        if (origemEl && destinoEl && origemEl.textContent) {
+            destinoEl.textContent = origemEl.textContent;
+        }
+    }
 }
 
-function configurarFotoResumo() {
+function configurarFotoMicro() {
     const fotoWrapper = document.getElementById('fotoResumoWrapper');
     const fotoInput = document.getElementById('fotoUpload');
     
@@ -3892,18 +3950,13 @@ function configurarFotoResumo() {
         
         fotoInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file) {
+            if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const fotoImg = document.getElementById('fotoResumoImg');
-                    const placeholder = document.getElementById('fotoPlaceholderMini');
-                    
                     if (fotoImg) {
                         fotoImg.src = e.target.result;
                         fotoImg.style.display = 'block';
-                    }
-                    if (placeholder) {
-                        placeholder.style.display = 'none';
                     }
                 };
                 reader.readAsDataURL(file);
@@ -3912,36 +3965,46 @@ function configurarFotoResumo() {
     }
 }
 
-function atualizarAtributosResumo() {
-    // Esta função será expandida para buscar dados reais
+function atualizarAtributosMicro() {
+    // Esta função busca dados reais das outras abas
     // Por enquanto usa valores padrão
     
-    const atributos = {
-        'resumoST': '10',
-        'resumoDX': '10',
-        'resumoIQ': '10',
-        'resumoHT': '10',
-        'resumoPV': '10',
-        'resumoPF': '10',
-        'resumoVontade': '10',
-        'resumoPercepcao': '10',
-        'resumoDeslocamento': '5.00'
-    };
-    
-    for (const [id, valor] of Object.entries(atributos)) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = valor;
+    try {
+        if (typeof obterDadosAtributos === 'function') {
+            const dados = obterDadosAtributos();
+            
+            const atributosMap = {
+                'ST': 'resumoST',
+                'DX': 'resumoDX',
+                'IQ': 'resumoIQ',
+                'HT': 'resumoHT',
+                'PV': 'resumoPV',
+                'PF': 'resumoPF',
+                'Vontade': 'resumoVontade',
+                'Percepcao': 'resumoPercepcao',
+                'Deslocamento': 'resumoDeslocamento'
+            };
+            
+            for (const [chave, id] of Object.entries(atributosMap)) {
+                const el = document.getElementById(id);
+                if (el && dados[chave]) {
+                    el.textContent = dados[chave];
+                }
+            }
+        }
+    } catch (e) {
+        console.log('Usando valores padrão para atributos');
     }
 }
 
-// Adicionar evento de input no nome para atualizar em tempo real
+// Evento para atualizar nome em tempo real
 document.addEventListener('DOMContentLoaded', function() {
     const nomeInput = document.getElementById('charName');
     if (nomeInput) {
         nomeInput.addEventListener('input', function() {
             const resumoNome = document.getElementById('resumoNome');
             if (resumoNome) {
-                resumoNome.textContent = this.value || 'Novo Personagem';
+                resumoNome.textContent = this.value.toUpperCase() || 'NOVO PERSONAGEM';
             }
         });
     }
