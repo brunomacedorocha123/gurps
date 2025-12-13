@@ -512,3 +512,348 @@
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 140, 0, 0.5);
 }
+
+/* NOVO CARD DE EQUIPAMENTOS EXPANDIDO - VISÍVEL PARA O GM */
+.resumo-equipamento-expandido {
+    background: rgba(30, 30, 40, 0.95);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 140, 0, 0.3);
+    overflow: hidden;
+    height: auto; /* Altura automática */
+    max-height: 450px; /* Altura máxima maior */
+    display: flex;
+    flex-direction: column;
+}
+
+.resumo-equipamento-expandido .card-header {
+    background: rgba(255, 140, 0, 0.15);
+    border-bottom: 2px solid rgba(255, 140, 0, 0.3);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.resumo-equipamento-expandido .card-header h4 {
+    color: #ffd700;
+    font-size: 0.9rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.resumo-equipamento-expandido .card-header h4 i {
+    color: #ff8c00;
+}
+
+.resumo-equipamento-expandido .status-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+/* ESTATÍSTICAS RÁPIDAS DO EQUIPAMENTO */
+.equipamento-stats-micro {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.equipamento-stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.equipamento-stat-label {
+    color: #aaa;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.equipamento-stat-label i {
+    color: #ff8c00;
+    font-size: 0.9rem;
+}
+
+.equipamento-stat-valor {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.equipamento-stat-valor.dinheiro {
+    color: #ffd700;
+    font-weight: 700;
+}
+
+.equipamento-stat-valor.carga-normal {
+    color: #2ecc71;
+}
+
+.equipamento-stat-valor.carga-media {
+    color: #f39c12;
+}
+
+.equipamento-stat-valor.carga-pesada {
+    color: #e74c3c;
+}
+
+/* LISTA DE EQUIPAMENTOS COM SCROLL */
+.equipamento-lista-container {
+    flex: 1;
+    min-height: 250px;
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 6px;
+    background: rgba(20, 20, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.equipamento-lista-scroll {
+    padding: 8px;
+}
+
+/* ITEM DE EQUIPAMENTO VISÍVEL */
+.equipamento-item-resumo {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+    border-left: 3px solid #ff8c00;
+    transition: all 0.2s ease;
+}
+
+.equipamento-item-resumo:hover {
+    background: rgba(255, 140, 0, 0.1);
+    transform: translateX(2px);
+}
+
+.equipamento-item-resumo.equipado {
+    border-left-color: #2ecc71;
+    background: rgba(46, 204, 113, 0.05);
+}
+
+.equipamento-item-resumo.no-corpo {
+    border-left-color: #3498db;
+    background: rgba(52, 152, 219, 0.05);
+}
+
+.equipamento-item-resumo.no-deposito {
+    border-left-color: #95a5a6;
+    background: rgba(149, 165, 166, 0.05);
+    opacity: 0.7;
+}
+
+.equipamento-icone {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.equipamento-icone i {
+    font-size: 0.9rem;
+    color: #ff8c00;
+}
+
+.equipamento-icone.equipado i {
+    color: #2ecc71;
+}
+
+.equipamento-info-micro {
+    flex: 1;
+    min-width: 0;
+}
+
+.equipamento-nome-micro {
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 0 0 3px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.equipamento-detalhes-micro {
+    display: flex;
+    gap: 10px;
+    font-size: 0.75rem;
+}
+
+.equipamento-detalhe {
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.equipamento-detalhe i {
+    font-size: 0.7rem;
+    color: #ff8c00;
+}
+
+.equipamento-detalhe.peso {
+    color: #95a5a6;
+}
+
+.equipamento-detalhe.quantidade {
+    color: #3498db;
+}
+
+/* ÍCONES DE TIPO DE EQUIPAMENTO */
+.icone-arma {
+    color: #e74c3c;
+}
+
+.icone-armadura {
+    color: #3498db;
+}
+
+.icone-escudo {
+    color: #2ecc71;
+}
+
+.icone-geral {
+    color: #f39c12;
+}
+
+/* MÃOS DISPONÍVEIS */
+.maos-container {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 5px;
+    justify-content: center;
+}
+
+.mao-icon {
+    font-size: 1.1rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.mao-livre {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.mao-ocupada {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+/* BOTÃO PARA VER MAIS */
+.btn-ver-equipamentos {
+    background: rgba(255, 140, 0, 0.2);
+    color: #ff8c00;
+    border: 1px solid rgba(255, 140, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-ver-equipamentos:hover {
+    background: rgba(255, 140, 0, 0.3);
+    transform: translateY(-1px);
+}
+
+/* VERSÃO SEM EQUIPAMENTOS */
+.equipamento-vazio {
+    text-align: center;
+    padding: 30px 20px;
+    color: #666;
+    font-style: italic;
+}
+
+.equipamento-vazio i {
+    font-size: 2rem;
+    color: rgba(255, 140, 0, 0.3);
+    margin-bottom: 10px;
+    display: block;
+}
+
+.equipamento-vazio span {
+    display: block;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 1200px) {
+    .resumo-equipamento-expandido {
+        max-height: 400px;
+    }
+    
+    .equipamento-lista-container {
+        min-height: 200px;
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .resumo-equipamento-expandido {
+        max-height: 350px;
+    }
+    
+    .equipamento-stats-micro {
+        grid-template-columns: 1fr;
+    }
+    
+    .equipamento-detalhes-micro {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+}
+
+/* SCROLLBAR PERSONALIZADA */
+.equipamento-lista-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.equipamento-lista-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.equipamento-lista-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.4);
+    border-radius: 4px;
+}
+
+.equipamento-lista-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.6);
+}
