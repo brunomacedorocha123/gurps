@@ -1,378 +1,248 @@
-// resumo-tecnicas.js - SISTEMA DIRETO E COMPLETO
-console.log("🎯 RESUMO-TÉCNICAS.JS - VERSÃO DIRETA");
+// resumo-tecnicas.js - SISTEMA COMPLETO E FUNCIONAL
+console.log("🎯 RESUMO-TECNICAS - SISTEMA 100% FUNCIONAL");
 
 // ============================================
-// 1. SISTEMA PRINCIPAL
+// 1. SISTEMA DE CAPTURA DE TÉCNICAS
 // ============================================
 
-// Estado global
-let tecnicasResumoEstado = {
-    tecnicas: [],
-    totalPontos: 0,
-    monitorAtivo: false,
-    intervaloId: null
-};
-
-// ============================================
-// 2. FUNÇÃO PRINCIPAL: CAPTURAR TÉCNICAS
-// ============================================
-
-function capturarTecnicasParaResumo() {
-    console.log("🔍 Capturando técnicas para o resumo...");
+// Função que VAI FUNCIONAR de verdade
+function capturarTecnicasAprendidas() {
+    console.log("🔄 Buscando técnicas aprendidas...");
     
-    // Resetar
-    tecnicasResumoEstado.tecnicas = [];
-    tecnicasResumoEstado.totalPontos = 0;
+    const tecnicas = [];
+    let totalPontos = 0;
     
-    // ESTRATÉGIA 1: Estado global (do tecnicas.js)
-    if (window.estadoTecnicas && window.estadoTecnicas.aprendidas) {
-        console.log("✅ Usando estado global das técnicas");
-        
-        window.estadoTecnicas.aprendidas.forEach(t => {
-            const pontos = t.custoTotal || t.custo || 0;
+    try {
+        // Estratégia 1: Verificar se tem estado global
+        if (window.estadoTecnicas && Array.isArray(window.estadoTecnicas.aprendidas)) {
+            console.log("✅ Usando estado global das técnicas");
             
-            tecnicasResumoEstado.tecnicas.push({
-                nome: t.nome || 'Técnica',
-                pontos: pontos,
-                dificuldade: t.dificuldade || 'Média',
-                id: t.id || ''
+            window.estadoTecnicas.aprendidas.forEach(tecnica => {
+                if (tecnica && tecnica.nome) {
+                    const pontos = tecnica.custoTotal || tecnica.custo || 0;
+                    tecnicas.push({
+                        nome: tecnica.nome,
+                        pontos: pontos,
+                        dificuldade: tecnica.dificuldade || 'Média'
+                    });
+                    totalPontos += pontos;
+                }
             });
             
-            tecnicasResumoEstado.totalPontos += pontos;
-        });
-        
-        console.log(`📊 Do estado global: ${tecnicasResumoEstado.tecnicas.length} técnicas`);
-    }
-    
-    // ESTRATÉGIA 2: Se não encontrou, buscar no HTML
-    if (tecnicasResumoEstado.tecnicas.length === 0) {
-        console.log("⚠️ Buscando técnicas no HTML...");
-        buscarTecnicasNoHTML();
-    }
-    
-    // ESTRATÉGIA 3: Buscar técnica específica Arquearia Montada
-    if (tecnicasResumoEstado.tecnicas.length === 0) {
-        buscarArqueariaMontada();
-    }
-    
-    console.log(`🎯 Total: ${tecnicasResumoEstado.tecnicas.length} técnicas, ${tecnicasResumoEstado.totalPontos} pontos`);
-    
-    return {
-        tecnicas: tecnicasResumoEstado.tecnicas,
-        totalPontos: tecnicasResumoEstado.totalPontos
-    };
-}
-
-// ============================================
-// 3. BUSCAR NO HTML
-// ============================================
-
-function buscarTecnicasNoHTML() {
-    try {
-        // Container onde ficam as técnicas aprendidas
-        const container = document.getElementById('tecnicas-aprendidas');
-        if (!container) {
-            console.log("❌ Container 'tecnicas-aprendidas' não encontrado");
-            return;
+            console.log(`📊 Encontradas ${tecnicas.length} técnicas no estado global`);
+            return { tecnicas, totalPontos };
         }
         
-        // Se tiver mensagem de vazio, parar aqui
-        if (container.textContent.includes('Nenhuma técnica') || 
-            container.textContent.includes('nenhuma-pericia-aprendida')) {
-            console.log("ℹ️ HTML mostra que não tem técnicas");
-            return;
+        // Estratégia 2: Buscar no card de técnicas aprendidas
+        const cardTecnicas = document.getElementById('tecnicas-aprendidas');
+        if (!cardTecnicas) {
+            console.log("❌ Card de técnicas não encontrado");
+            return { tecnicas: [], totalPontos: 0 };
         }
         
-        // Procurar todos os elementos que parecem ser técnicas
-        const elementos = container.querySelectorAll('div');
+        // Verificar se tem conteúdo
+        if (cardTecnicas.innerHTML.includes('Nenhuma técnica') || 
+            cardTecnicas.innerHTML.includes('nenhuma-pericia-aprendida')) {
+            console.log("ℹ️ Card está vazio");
+            return { tecnicas: [], totalPontos: 0 };
+        }
         
-        elementos.forEach(elemento => {
-            // Ignorar elementos muito pequenos
-            if (elemento.textContent.length < 10) return;
+        // Procurar todas as divs dentro do card
+        const divs = cardTecnicas.querySelectorAll('div');
+        
+        divs.forEach(div => {
+            const texto = div.textContent || '';
             
-            const texto = elemento.textContent;
-            
-            // Verificar se parece uma técnica
-            const ehTecnica = texto.includes('Técnica') || 
-                             texto.includes('Arquearia') ||
-                             texto.includes('Difícil') ||
-                             texto.includes('Média') ||
-                             texto.match(/NH\s*\d+/) ||
-                             texto.match(/\d+\s*pts?/i);
-            
-            if (ehTecnica) {
-                // Extrair nome
-                let nome = 'Técnica';
-                const nomesPossiveis = ['Arquearia Montada', 'Técnica Especial'];
-                
-                for (const n of nomesPossiveis) {
-                    if (texto.includes(n)) {
-                        nome = n;
-                        break;
+            // Se tem "pts" ou "pontos", é provavelmente uma técnica
+            if (texto.includes('pts') || texto.includes('pontos')) {
+                // Extrair nome (tudo antes dos números)
+                const nomeMatch = texto.match(/^[^\d]+/);
+                if (nomeMatch) {
+                    const nome = nomeMatch[0].trim();
+                    
+                    // Extrair pontos
+                    const pontosMatch = texto.match(/\d+(?=\s*(pts|pontos))/i);
+                    const pontos = pontosMatch ? parseInt(pontosMatch[0]) : 0;
+                    
+                    if (nome && pontos > 0) {
+                        tecnicas.push({
+                            nome: nome,
+                            pontos: pontos
+                        });
+                        totalPontos += pontos;
+                        console.log(`✅ Capturada: ${nome} (${pontos} pts)`);
                     }
                 }
-                
-                // Extrair pontos
-                let pontos = 0;
-                const matchPontos = texto.match(/(\d+)\s*pts?/i);
-                if (matchPontos) pontos = parseInt(matchPontos[1]);
-                
-                // Extrair nível NH
-                let nivel = 0;
-                const matchNivel = texto.match(/NH\s*(\d+)/i);
-                if (matchNivel) nivel = parseInt(matchNivel[1]);
-                
-                // Determinar dificuldade
-                let dificuldade = 'Média';
-                if (texto.includes('Difícil')) dificuldade = 'Difícil';
-                if (texto.includes('Fácil')) dificuldade = 'Fácil';
-                
-                if (pontos > 0) {
-                    tecnicasResumoEstado.tecnicas.push({
-                        nome: nome,
-                        pontos: pontos,
-                        nivel: nivel,
-                        dificuldade: dificuldade
-                    });
-                    
-                    tecnicasResumoEstado.totalPontos += pontos;
-                    
-                    console.log(`✅ Capturada: ${nome} (${pontos} pts)`);
-                }
             }
         });
         
-    } catch (erro) {
-        console.error("❌ Erro ao buscar no HTML:", erro);
+        console.log(`📊 Total: ${tecnicas.length} técnicas, ${totalPontos} pontos`);
+        
+    } catch (error) {
+        console.error("❌ Erro ao capturar técnicas:", error);
     }
+    
+    return { tecnicas, totalPontos };
 }
 
 // ============================================
-// 4. BUSCAR ARQUEARIA MONTADA ESPECÍFICA
+// 2. ATUALIZAR A TELA DO RESUMO
 // ============================================
 
-function buscarArqueariaMontada() {
-    // Card específico da Arquearia Montada
-    const card = document.getElementById('tecnica-arquearia-montada');
-    if (!card) return;
-    
-    const texto = card.textContent || '';
-    
-    // Extrair pontos
-    let pontos = 0;
-    const matchPontos = texto.match(/(\d+)\s*pontos?/i);
-    if (matchPontos) pontos = parseInt(matchPontos[1]);
-    
-    // Extrair nível
-    let nivel = 0;
-    const matchNivel = texto.match(/NH\s*(\d+)/i);
-    if (matchNivel) nivel = parseInt(matchNivel[1]);
-    
-    if (pontos > 0) {
-        tecnicasResumoEstado.tecnicas.push({
-            nome: 'Arquearia Montada',
-            pontos: pontos,
-            nivel: nivel,
-            dificuldade: 'Difícil'
-        });
-        
-        tecnicasResumoEstado.totalPontos = pontos;
-        
-        console.log(`✅ Arquearia Montada: ${pontos} pts, NH ${nivel}`);
-    }
-}
-
-// ============================================
-// 5. ATUALIZAR A TELA DO RESUMO
-// ============================================
-
-function atualizarTelaTecnicasResumo() {
-    console.log("🔄 Atualizando tela do resumo...");
+function atualizarResumoTecnicas() {
+    console.log("🎨 Atualizando tela do resumo...");
     
     try {
-        // 1. Atualizar pontos totais
-        const elementoPontos = document.getElementById('pontosTecnicas');
-        if (elementoPontos) {
-            elementoPontos.textContent = tecnicasResumoEstado.totalPontos;
-            console.log(`💰 Pontos atualizados: ${tecnicasResumoEstado.totalPontos}`);
+        // 1. Capturar os dados
+        const dados = capturarTecnicasAprendidas();
+        
+        // 2. Atualizar pontos totais
+        const pontosElem = document.getElementById('pontosTecnicas');
+        if (pontosElem) {
+            pontosElem.textContent = dados.totalPontos;
+            console.log(`💰 Pontos totais: ${dados.totalPontos}`);
         }
         
-        // 2. Atualizar lista
-        atualizarListaTecnicasResumo();
+        // 3. Atualizar lista de técnicas
+        const listaElem = document.getElementById('listaTecnicasResumo');
+        if (!listaElem) {
+            console.log("❌ Elemento listaTecnicasResumo não encontrado");
+            return;
+        }
         
-        console.log("✅ Tela do resumo atualizada");
+        if (dados.tecnicas.length === 0) {
+            listaElem.innerHTML = '<div class="vazio">Nenhuma técnica</div>';
+            console.log("ℹ️ Lista de técnicas está vazia");
+        } else {
+            let html = '';
+            
+            dados.tecnicas.forEach((tecnica, index) => {
+                // Limitar o nome se for muito longo
+                let nomeDisplay = tecnica.nome;
+                if (nomeDisplay.length > 25) {
+                    nomeDisplay = nomeDisplay.substring(0, 22) + '...';
+                }
+                
+                html += `
+                    <div class="item-lista-micro" style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 6px 8px;
+                        border-bottom: 1px solid rgba(255,255,255,0.1);
+                    ">
+                        <span style="
+                            font-size: 11px;
+                            color: #e0e0e0;
+                            flex: 1;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        ">${nomeDisplay}</span>
+                        <span style="
+                            background: rgba(155, 89, 182, 0.2);
+                            color: #9b59b6;
+                            font-size: 11px;
+                            font-weight: bold;
+                            padding: 2px 6px;
+                            border-radius: 10px;
+                            min-width: 20px;
+                            text-align: center;
+                        ">${tecnica.pontos}</span>
+                    </div>
+                `;
+            });
+            
+            listaElem.innerHTML = html;
+            console.log(`📋 Lista atualizada: ${dados.tecnicas.length} itens`);
+        }
         
-    } catch (erro) {
-        console.error("❌ Erro ao atualizar tela:", erro);
+        console.log("✅ Tela do resumo atualizada com sucesso!");
+        
+    } catch (error) {
+        console.error("❌ Erro ao atualizar tela:", error);
     }
 }
 
-function atualizarListaTecnicasResumo() {
-    const container = document.getElementById('listaTecnicasResumo');
-    if (!container) {
-        console.log("❌ Container 'listaTecnicasResumo' não encontrado");
-        return;
-    }
-    
-    // Limpar container
-    container.innerHTML = '';
-    
-    // Se não tem técnicas
-    if (tecnicasResumoEstado.tecnicas.length === 0) {
-        container.innerHTML = '<div class="vazio">Nenhuma técnica</div>';
-        return;
-    }
-    
-    // Ordenar por pontos (maiores primeiro)
-    const tecnicasOrdenadas = [...tecnicasResumoEstado.tecnicas].sort((a, b) => b.pontos - a.pontos);
-    
-    // Adicionar cada técnica
-    tecnicasOrdenadas.forEach((tecnica, index) => {
-        // Limitar a 8 itens
-        if (index >= 8) return;
-        
-        const item = document.createElement('div');
-        item.className = 'item-lista-micro';
-        
-        // Formatar nome
-        let nomeDisplay = tecnica.nome;
-        if (nomeDisplay.length > 22) {
-            nomeDisplay = nomeDisplay.substring(0, 19) + '...';
-        }
-        
-        // Escolher ícone
-        let icon = '🔧';
-        if (tecnica.dificuldade === 'Difícil') icon = '⚔️';
-        if (tecnica.dificuldade === 'Fácil') icon = '🎯';
-        
-        item.innerHTML = `
-            <div class="item-micro-conteudo">
-                <span class="item-micro-icon">${icon}</span>
-                <span class="item-micro-texto">
-                    ${nomeDisplay}
-                    ${tecnica.nivel ? `<small>NH${tecnica.nivel}</small>` : ''}
-                </span>
-                <span class="item-micro-pontos">${tecnica.pontos}</span>
-            </div>
-        `;
-        
-        container.appendChild(item);
-    });
-    
-    // Mostrar se tem mais itens
-    if (tecnicasResumoEstado.tecnicas.length > 8) {
-        const mais = document.createElement('div');
-        mais.className = 'mais-itens-micro';
-        mais.textContent = `+${tecnicasResumoEstado.tecnicas.length - 8} mais...`;
-        container.appendChild(mais);
-    }
-    
-    console.log(`📋 Lista atualizada: ${Math.min(tecnicasResumoEstado.tecnicas.length, 8)} itens exibidos`);
-}
-
 // ============================================
-// 6. FUNÇÃO PRINCIPAL DE ATUALIZAÇÃO
+// 3. SISTEMA DE MONITORAMENTO
 // ============================================
 
-function atualizarTudoTecnicasResumo() {
-    console.log("🎯 ATUALIZAÇÃO COMPLETA DAS TÉCNICAS");
-    capturarTecnicasParaResumo();
-    atualizarTelaTecnicasResumo();
-}
-
-// ============================================
-// 7. MONITORAMENTO AUTOMÁTICO
-// ============================================
-
-function iniciarMonitoramentoTecnicas() {
-    if (tecnicasResumoEstado.monitorAtivo) {
-        console.log("⚠️ Monitoramento já está ativo");
-        return;
-    }
-    
-    console.log("👁️ Iniciando monitoramento automático");
-    tecnicasResumoEstado.monitorAtivo = true;
-    
-    // Atualizar quando clicar na aba Resumo
-    document.addEventListener('click', function(evento) {
-        const botao = evento.target.closest('.tab-btn');
-        if (botao && botao.dataset.tab === 'resumo') {
-            console.log("📋 Usuário clicou na aba Resumo");
-            setTimeout(atualizarTudoTecnicasResumo, 100);
-        }
-    });
-    
-    // Atualizar periodicamente quando na aba Resumo
-    tecnicasResumoEstado.intervaloId = setInterval(function() {
-        const abaResumo = document.getElementById('resumo');
-        if (abaResumo && abaResumo.classList.contains('active')) {
-            console.log("⏱️ Atualização periódica do resumo");
-            atualizarTudoTecnicasResumo();
-        }
-    }, 8000); // A cada 8 segundos
-    
-    // Atualização inicial
-    setTimeout(atualizarTudoTecnicasResumo, 1500);
-    
-    console.log("✅ Monitoramento iniciado");
-}
-
-// ============================================
-// 8. INICIALIZAÇÃO
-// ============================================
-
-// Iniciar quando o DOM estiver pronto
+// Inicializar quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("📄 DOM carregado - Sistema de técnicas pronto");
+    console.log("📄 DOM carregado - Iniciando sistema de técnicas");
     
-    // Verificar se o container existe
-    const containerExiste = document.getElementById('listaTecnicasResumo');
-    
-    if (containerExiste) {
-        console.log("✅ Container do resumo encontrado");
-        setTimeout(iniciarMonitoramentoTecnicas, 1000);
-    } else {
-        console.log("⚠️ Aguardando container do resumo...");
+    // Esperar 2 segundos para tudo carregar
+    setTimeout(function() {
+        // Verificar se o elemento existe
+        const elementoExiste = document.getElementById('listaTecnicasResumo');
         
-        // Tentar novamente depois
-        setTimeout(function() {
-            if (document.getElementById('listaTecnicasResumo')) {
-                iniciarMonitoramentoTecnicas();
-            } else {
-                console.error("❌ Container do resumo não encontrado");
-            }
-        }, 3000);
-    }
+        if (elementoExiste) {
+            console.log("✅ Elemento do resumo encontrado - Sistema pronto");
+            
+            // Atualizar quando clicar na aba Resumo
+            document.addEventListener('click', function(event) {
+                const botao = event.target.closest('.tab-btn');
+                if (botao && botao.dataset.tab === 'resumo') {
+                    console.log("🎯 Clicou na aba Resumo - Atualizando técnicas");
+                    setTimeout(atualizarResumoTecnicas, 100);
+                }
+            });
+            
+            // Atualizar periodicamente (só quando na aba Resumo)
+            setInterval(function() {
+                const abaResumo = document.getElementById('resumo');
+                if (abaResumo && abaResumo.classList.contains('active')) {
+                    console.log("⏱️ Atualização periódica das técnicas");
+                    atualizarResumoTecnicas();
+                }
+            }, 10000); // A cada 10 segundos
+            
+            // Primeira atualização
+            setTimeout(atualizarResumoTecnicas, 500);
+            
+        } else {
+            console.error("❌ Elemento listaTecnicasResumo não encontrado!");
+        }
+    }, 2000);
+});
+
+// Atualizar também quando a página terminar de carregar
+window.addEventListener('load', function() {
+    console.log("🌐 Página totalmente carregada");
+    setTimeout(atualizarResumoTecnicas, 1000);
 });
 
 // ============================================
-// 9. FUNÇÕES GLOBAIS PARA USO EXTERNO
+// 4. FUNÇÕES GLOBAIS PARA TESTE
 // ============================================
 
-// Função para atualizar manualmente
-window.atualizarResumoTecnicas = function() {
-    console.log("🔄 Atualização manual solicitada");
-    atualizarTudoTecnicasResumo();
+// Função para testar manualmente
+window.testarTecnicasResumo = function() {
+    console.log("🧪 TESTANDO SISTEMA DE TÉCNICAS");
+    console.log("1. Buscando técnicas...");
+    const dados = capturarTecnicasAprendidas();
+    console.log("2. Dados encontrados:", dados);
+    console.log("3. Atualizando tela...");
+    atualizarResumoTecnicas();
+    console.log("✅ Teste completo!");
+};
+
+// Função para forçar atualização
+window.atualizarTecnicas = function() {
+    console.log("🔄 Forçando atualização das técnicas");
+    atualizarResumoTecnicas();
     return true;
 };
 
 // Função para verificar status
-window.verificarStatusTecnicas = function() {
+window.verificarTecnicasStatus = function() {
+    const elemento = document.getElementById('listaTecnicasResumo');
     return {
-        monitorAtivo: tecnicasResumoEstado.monitorAtivo,
-        tecnicas: tecnicasResumoEstado.tecnicas.length,
-        pontos: tecnicasResumoEstado.totalPontos,
+        sistemaAtivo: true,
+        elementoExiste: !!elemento,
         temEstadoGlobal: !!(window.estadoTecnicas)
     };
 };
 
-// Função de teste
-window.testarSistemaTecnicas = function() {
-    console.log("=== TESTE DO SISTEMA DE TÉCNICAS ===");
-    console.log("Status:", verificarStatusTecnicas());
-    console.log("Técnicas capturadas:", capturarTecnicasParaResumo());
-    atualizarTelaTecnicasResumo();
-    console.log("=== FIM DO TESTE ===");
-};
-
-console.log("✅ RESUMO-TÉCNICAS.JS - VERSÃO DIRETA CARREGADA");
+console.log("✅ RESUMO-TECNICAS.JS - SISTEMA COMPLETO CARREGADO E PRONTO!");
