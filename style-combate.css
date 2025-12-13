@@ -2460,3 +2460,37 @@ input:-webkit-autofill:focus {
     50% { filter: brightness(1.3); }
     100% { filter: brightness(1); }
 }
+
+/* Estado ativo (marcado) */
+.condicao-item.ativa {
+    background: rgba(231, 76, 60, 0.15);
+    border-color: #e74c3c;
+}
+
+.condicao-item.ativa .condicao-checkbox {
+    background: #e74c3c;
+    border-color: #e74c3c;
+}
+
+/* Para a aba de resumo */
+#resumoCondicoes {
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    min-height: 50px;
+}
+
+.condicao-resumo {
+    display: inline-block;
+    background: #e74c3c;
+    color: white;
+    padding: 4px 10px;
+    margin: 3px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.sem-condicoes {
+    color: #95a5a6;
+    font-style: italic;
+}
