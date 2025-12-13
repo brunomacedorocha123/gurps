@@ -1,107 +1,92 @@
-// sistema-escudo.js - SISTEMA SIMPLES QUE FUNCIONA
+// sistema-escudo.js - SISTEMA COMPLETO E FUNCIONAL
 
 class SistemaEscudo {
     constructor() {
         this.escudoEquipado = null;
         this.PVMaximo = 0;
         this.PVAtual = 0;
-        this.RD = 0; // Só para informação
+        this.RD = 0;
         
         console.log('🛡️ SistemaEscudo criado');
         this.init();
     }
 
     init() {
-        console.log('🛡️ Inicializando...');
+        console.log('🛡️ Inicializando sistema de escudo...');
         
-        // Configura botões
         this.configurarBotoes();
-        
-        // Escuta eventos
+        this.configurarEventos();
+        this.atualizarDadosEscudo();
+    }
+
+    configurarEventos() {
         document.addEventListener('equipamentosAtualizados', () => {
-            console.log('📢 Evento recebido - atualizando escudo');
             this.atualizarDadosEscudo();
         });
-        
-        // Atualiza inicialmente
-        setTimeout(() => this.atualizarDadosEscudo(), 500);
     }
 
     configurarBotoes() {
-        console.log('🔘 Configurando botões...');
-        
         // Botão -5
         document.querySelector('.btn-escudo.dano-5').addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('💥 Botão -5 clicado');
             this.aplicarDano(5);
         });
         
         // Botão -1
         document.querySelector('.btn-escudo.dano-1').addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('💥 Botão -1 clicado');
             this.aplicarDano(1);
         });
         
         // Botão +1
         document.querySelector('.btn-escudo.cura-1').addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('💚 Botão +1 clicado');
             this.aplicarCura(1);
         });
         
         // Botão +5
         document.querySelector('.btn-escudo.cura-5').addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('💚 Botão +5 clicado');
             this.aplicarCura(5);
         });
     }
 
     atualizarDadosEscudo() {
-        console.log('📊 Buscando escudo...');
-        
         if (!window.sistemaEquipamentos) {
-            console.log('⏳ Aguardando sistema de equipamentos...');
+            console.log('Aguardando sistema de equipamentos...');
+            setTimeout(() => this.atualizarDadosEscudo(), 1000);
             return;
         }
         
         try {
-            // Busca escudo equipado
-            let escudo = null;
+            let escudoEncontrado = null;
             
             if (window.sistemaEquipamentos.equipamentosEquipados &&
                 window.sistemaEquipamentos.equipamentosEquipados.escudos) {
                 const escudos = window.sistemaEquipamentos.equipamentosEquipados.escudos;
                 
                 if (escudos.length > 0) {
-                    escudo = escudos[0];
-                    console.log('✅ Escudo encontrado:', escudo.nome);
+                    escudoEncontrado = escudos[0];
                 }
             }
             
-            if (!escudo) {
-                console.log('❌ Nenhum escudo equipado');
+            if (!escudoEncontrado) {
                 this.escudoEquipado = null;
                 this.atualizarCardVazio();
                 return;
             }
             
-            // Atualiza dados
-            this.escudoEquipado = escudo;
-            this.extrairDadosEscudo(escudo);
+            this.escudoEquipado = escudoEncontrado;
+            this.extrairDadosEscudo(escudoEncontrado);
             this.atualizarCard();
             
         } catch (error) {
-            console.error('❌ Erro:', error);
+            console.error('Erro ao atualizar escudo:', error);
             this.atualizarCardVazio();
         }
     }
 
     extrairDadosEscudo(escudo) {
-        console.log('🔧 Extraindo dados:', escudo.rdpv);
-        
         if (!escudo.rdpv) {
             this.RD = 0;
             this.PVMaximo = 0;
@@ -125,13 +110,11 @@ class SistemaEscudo {
                 const chave = `escudo_${escudo.idUnico || escudo.id}`;
                 const salvo = localStorage.getItem(chave);
                 
-                if (salvo) {
-                    this.PVAtual = parseInt(salvo) || this.PVMaximo;
+                if (salvo !== null) {
+                    this.PVAtual = parseInt(salvo) || 0;
                 } else {
                     this.PVAtual = this.PVMaximo;
                 }
-                
-                console.log(`📊 RD: ${this.RD}, PV: ${this.PVAtual}/${this.PVMaximo}`);
             }
         }
         // Formato só RD
@@ -153,22 +136,16 @@ class SistemaEscudo {
     }
 
     aplicarDano(dano) {
-        console.log(`💥 Aplicando ${dano} de dano NO ESCUDO`);
-        
         if (!this.escudoEquipado) {
-            alert('Nenhum escudo equipado!');
             return;
         }
         
         if (this.PVMaximo === 0) {
-            alert('Este escudo não tem PV!');
             return;
         }
         
-        // DANO DIRETO - SEM VERIFICAR RD
+        // Aplica dano direto
         this.PVAtual = Math.max(0, this.PVAtual - dano);
-        
-        console.log(`💔 Novo PV: ${this.PVAtual}/${this.PVMaximo}`);
         
         // Salva no localStorage
         if (this.escudoEquipado.idUnico || this.escudoEquipado.id) {
@@ -176,33 +153,23 @@ class SistemaEscudo {
             localStorage.setItem(chave, this.PVAtual.toString());
         }
         
-        // Atualiza visual
         this.atualizarCard();
-        
-        // Efeito visual
-        this.efeitoDano();
     }
 
     aplicarCura(cura) {
-        console.log(`💚 Aplicando ${cura} de cura NO ESCUDO`);
-        
         if (!this.escudoEquipado) {
-            alert('Nenhum escudo equipado!');
             return;
         }
         
         if (this.PVMaximo === 0) {
-            alert('Este escudo não tem PV!');
             return;
         }
         
-        // CURA DIRETA
+        // Aplica cura
         const curaEfetiva = Math.min(cura, this.PVMaximo - this.PVAtual);
         
         if (curaEfetiva > 0) {
             this.PVAtual += curaEfetiva;
-            
-            console.log(`💚 Novo PV: ${this.PVAtual}/${this.PVMaximo}`);
             
             // Salva
             if (this.escudoEquipado.idUnico || this.escudoEquipado.id) {
@@ -211,31 +178,6 @@ class SistemaEscudo {
             }
             
             this.atualizarCard();
-            this.efeitoCura();
-        }
-    }
-
-    efeitoDano() {
-        const pvFill = document.getElementById('escudoPVFill');
-        if (pvFill) {
-            pvFill.style.transform = 'scaleX(1.05)';
-            pvFill.style.transition = 'transform 0.1s';
-            
-            setTimeout(() => {
-                pvFill.style.transform = 'scaleX(1)';
-            }, 100);
-        }
-    }
-
-    efeitoCura() {
-        const pvFill = document.getElementById('escudoPVFill');
-        if (pvFill) {
-            pvFill.style.filter = 'brightness(1.3)';
-            pvFill.style.transition = 'filter 0.3s';
-            
-            setTimeout(() => {
-                pvFill.style.filter = 'brightness(1)';
-            }, 300);
         }
     }
 
@@ -257,7 +199,7 @@ class SistemaEscudo {
             // Nome
             nomeElement.textContent = this.escudoEquipado.nome;
             
-            // RD (só para informação)
+            // RD
             drElement.textContent = this.RD;
             
             // Status
@@ -271,7 +213,7 @@ class SistemaEscudo {
                 pvTextoElement.textContent = `${this.PVAtual}/${this.PVMaximo}`;
                 pvFillElement.style.width = `${porcentagem}%`;
                 
-                // Cor
+                // Cor baseada na porcentagem
                 if (porcentagem > 60) {
                     pvFillElement.style.background = 'linear-gradient(90deg, #2ecc71, #27ae60)';
                 } else if (porcentagem > 30) {
@@ -286,7 +228,8 @@ class SistemaEscudo {
             }
             
         } catch (error) {
-            console.error('❌ Erro ao atualizar card:', error);
+            console.error('Erro ao atualizar card:', error);
+            this.atualizarCardVazio();
         }
     }
 
@@ -329,20 +272,17 @@ class SistemaEscudo {
     }
 }
 
-// Inicializa quando o DOM carrega
+// Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 DOM carregado - procurando card de escudo');
-    
     setTimeout(() => {
         const cardEscudo = document.querySelector('.card-escudo');
         if (cardEscudo) {
-            console.log('✅ Card encontrado - criando sistema');
             window.sistemaEscudo = new SistemaEscudo();
         }
     }, 1000);
 });
 
-// Mantém as funções globais para compatibilidade
+// Funções globais para compatibilidade
 function danoEscudo(dano) {
     if (window.sistemaEscudo) {
         window.sistemaEscudo.aplicarDano(dano);
