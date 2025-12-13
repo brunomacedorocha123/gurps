@@ -858,14 +858,17 @@
     background: rgba(255, 140, 0, 0.6);
 }
 
-/* resumo-combate.css - ESTILOS EXPANDIDOS PARA O GM */
+/* ============================================
+   CARD DE COMBATE EXPANDIDO - VERSÃO CORRIGIDA
+   Altura aumentada e conteúdo com scroll interno
+   ============================================ */
+
 .resumo-combate-expandido {
     background: rgba(40, 30, 30, 0.95);
     border-radius: 8px;
     border: 1px solid rgba(220, 53, 69, 0.3);
     overflow: hidden;
-    height: auto;
-    max-height: 550px; /* Aumentado para caber mais informações */
+    height: 650px; /* ALTURA AUMENTADA de 550px para 650px */
     display: flex;
     flex-direction: column;
 }
@@ -877,6 +880,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0; /* Garante que o cabeçalho não encolha */
 }
 
 .resumo-combate-expandido .card-header h4 {
@@ -888,20 +892,30 @@
     gap: 8px;
 }
 
-/* SECÇÃO VITALIDADE (PV/PF) */
+/* CONTEÚDO COM SCROLL INTERNO */
+.resumo-combate-expandido .status-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* SECÇÃO VITALIDADE (PV/PF) - COMPACTA */
 .vitalidade-micro {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-bottom: 10px;
-    padding: 8px;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding: 6px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .vitalidade-micro-item {
-    padding: 6px;
+    padding: 5px;
     border-radius: 4px;
     text-align: center;
 }
@@ -945,8 +959,8 @@
 .barras-vitalidade-micro {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin: 8px 0;
+    gap: 5px;
+    margin: 4px 0;
 }
 
 .barra-micro {
@@ -985,20 +999,20 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-/* SECÇÃO DE DEFESAS */
+/* SECÇÃO DE DEFESAS COMPACTAS */
 .defesas-micro-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin: 8px 0;
-    padding: 8px;
+    gap: 5px;
+    margin: 6px 0;
+    padding: 6px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 6px;
 }
 
 .defesa-micro-card {
     text-align: center;
-    padding: 6px 4px;
+    padding: 5px 3px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
     transition: all 0.2s ease;
@@ -1024,7 +1038,7 @@
 .defesa-micro-label {
     color: #aaa;
     font-size: 0.65rem;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     display: block;
 }
 
@@ -1035,12 +1049,12 @@
     display: block;
 }
 
-/* SECÇÃO DE DANO */
+/* SECÇÃO DE DANO COMPACTA */
 .dano-micro-container {
     background: rgba(220, 53, 69, 0.1);
     border-radius: 4px;
-    padding: 8px;
-    margin: 8px 0;
+    padding: 6px;
+    margin: 6px 0;
     border-left: 3px solid #dc3545;
 }
 
@@ -1048,22 +1062,22 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .dano-micro-titulo {
     color: #ff6b6b;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
 .dano-micro-base {
     display: flex;
     justify-content: space-around;
-    gap: 10px;
+    gap: 8px;
 }
 
 .dano-micro-tipo {
@@ -1086,22 +1100,22 @@
     font-family: 'Courier New', monospace;
 }
 
-/* ARMAS EQUIPADAS */
+/* ARMAS EQUIPADAS (ALTURA REDUZIDA) */
 .armas-micro-container {
-    max-height: 120px;
+    max-height: 100px; /* REDUZIDO de 120px */
     overflow-y: auto;
-    margin: 8px 0;
+    margin: 6px 0;
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .arma-micro-item {
-    padding: 6px 8px;
+    padding: 5px 6px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .arma-micro-item:last-child {
@@ -1109,8 +1123,8 @@
 }
 
 .arma-micro-icone {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1120,7 +1134,7 @@
 }
 
 .arma-micro-icone i {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #ff8c00;
 }
 
@@ -1141,8 +1155,9 @@
 
 .arma-micro-detalhes {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     font-size: 0.65rem;
+    flex-wrap: wrap;
 }
 
 .arma-micro-dano {
@@ -1154,19 +1169,20 @@
     color: #3498db;
 }
 
-/* RD (RESISTÊNCIA A DANO) */
+/* RD (RESISTÊNCIA A DANO) COM MAIS ESPAÇO */
 .rd-micro-container {
-    margin: 8px 0;
+    margin: 6px 0;
     padding: 8px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 6px;
+    min-height: 100px; /* ESPAÇO GARANTIDO PARA RD */
 }
 
 .rd-micro-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 .rd-micro-titulo {
@@ -1191,11 +1207,15 @@
 
 .rd-parte-micro {
     text-align: center;
-    padding: 4px 2px;
+    padding: 5px 2px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 3px;
     font-size: 0.7rem;
     position: relative;
+    min-height: 40px; /* ALTURA MÍNIMA PARA NÃO FICAR MUITO COMPRIMIDO */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .rd-parte-micro.com-protecao {
@@ -1211,29 +1231,30 @@
     color: #aaa;
     display: block;
     font-size: 0.65rem;
+    margin-bottom: 3px;
 }
 
 .rd-parte-valor {
     color: #fff;
     font-weight: 600;
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.85rem; /* AUMENTADO para melhor visibilidade */
 }
 
-/* CONDIÇÕES ATIVAS */
+/* CONDIÇÕES ATIVAS (ALTURA REDUZIDA) */
 .condicoes-micro-container {
-    margin-top: 8px;
-    padding: 8px;
+    margin-top: 6px;
+    padding: 6px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 6px;
-    max-height: 80px;
+    max-height: 70px; /* REDUZIDO de 80px */
     overflow-y: auto;
 }
 
 .condicoes-micro-header {
     color: #aaa;
-    font-size: 0.8rem;
-    margin-bottom: 6px;
+    font-size: 0.75rem;
+    margin-bottom: 5px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -1242,13 +1263,13 @@
 .condicoes-grid-micro {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 3px;
 }
 
 .condicao-micro-item {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 3px;
-    padding: 3px 6px;
+    padding: 3px 5px;
     font-size: 0.7rem;
     color: #aaa;
 }
@@ -1276,6 +1297,7 @@
     justify-content: center;
     gap: 6px;
     width: 100%;
+    flex-shrink: 0; /* Garante que o botão não encolha */
 }
 
 .btn-ver-combate:hover {
@@ -1283,41 +1305,25 @@
     transform: translateY(-1px);
 }
 
-/* RESPONSIVIDADE */
-@media (max-width: 1200px) {
-    .resumo-combate-expandido {
-        max-height: 500px;
-    }
-    
-    .defesas-micro-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .rd-grid-micro {
-        grid-template-columns: repeat(3, 1fr);
-    }
+/* SCROLLBAR PERSONALIZADA PARA TODO O CARD */
+.resumo-combate-expandido .status-content::-webkit-scrollbar {
+    width: 6px;
 }
 
-@media (max-width: 768px) {
-    .resumo-combate-expandido {
-        max-height: 450px;
-    }
-    
-    .vitalidade-micro {
-        grid-template-columns: 1fr;
-    }
-    
-    .defesas-micro-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .arma-micro-detalhes {
-        flex-wrap: wrap;
-        gap: 4px;
-    }
+.resumo-combate-expandido .status-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
 }
 
-/* SCROLLBAR PERSONALIZADA */
+.resumo-combate-expandido .status-content::-webkit-scrollbar-thumb {
+    background: rgba(220, 53, 69, 0.3);
+    border-radius: 3px;
+}
+
+.resumo-combate-expandido .status-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(220, 53, 69, 0.5);
+}
+
 .armas-micro-container::-webkit-scrollbar,
 .condicoes-micro-container::-webkit-scrollbar {
     width: 4px;
@@ -1333,4 +1339,44 @@
 .condicoes-micro-container::-webkit-scrollbar-thumb {
     background: rgba(220, 53, 69, 0.3);
     border-radius: 2px;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 1200px) {
+    .resumo-combate-expandido {
+        height: 600px; /* REDUZIDO para telas menores */
+    }
+    
+    .defesas-micro-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .rd-grid-micro {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, auto);
+    }
+}
+
+@media (max-width: 768px) {
+    .resumo-combate-expandido {
+        height: 550px; /* REDUZIDO para mobile */
+    }
+    
+    .vitalidade-micro {
+        grid-template-columns: 1fr;
+    }
+    
+    .defesas-micro-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .arma-micro-detalhes {
+        flex-wrap: wrap;
+        gap: 3px;
+    }
+    
+    .rd-grid-micro {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, auto);
+    }
 }
