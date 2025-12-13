@@ -1,5 +1,5 @@
-// resumo-equipamentos.js - SISTEMA DE RESUMO DE EQUIPAMENTOS (VERSÃO EXPANDIDA)
-// ✅ Mostra até 10 equipamentos visíveis com detalhes importantes para o GM
+// resumo-equipamentos.js - CORREÇÃO DO DINHEIRO EM TEMPO REAL
+// ✅ Agora monitora dinheiro em tempo real através do sistemaEquipamentos
 
 class ResumoEquipamentos {
     constructor() {
@@ -33,7 +33,7 @@ class ResumoEquipamentos {
                 
                 if (window.sistemaEquipamentos && 
                     typeof window.sistemaEquipamentos === 'object' &&
-                    window.sistemaEquipamentos.exportarDados) {
+                    window.sistemaEquipamentos.dinheiro !== undefined) {
                     resolve();
                 } else if (tentativas < maxTentativas) {
                     setTimeout(verificarSistema, 100);
@@ -130,6 +130,18 @@ class ResumoEquipamentos {
             }
         });
         
+        // Observa mudanças de dinheiro específicas
+        document.addEventListener('dinheiroAlterado', (e) => {
+            this.atualizarDinheiro(e.detail);
+        });
+        
+        // Observa mudanças diretas no dinheiro do sistema
+        const intervalObservador = setInterval(() => {
+            if (window.sistemaEquipamentos && window.sistemaEquipamentos.dinheiro !== undefined) {
+                this.atualizarDinheiro(window.sistemaEquipamentos.dinheiro);
+            }
+        }, 500); // Verifica a cada 500ms
+        
         // Observa quando a aba Resumo é ativada
         const abaResumoBtn = document.querySelector('[data-tab="resumo"]');
         if (abaResumoBtn) {
@@ -141,11 +153,47 @@ class ResumoEquipamentos {
         this.observadorAtivo = true;
     }
 
+    atualizarDinheiro(valorOuEvento) {
+        const dinheiroElem = document.getElementById('resumoDinheiro');
+        if (!dinheiroElem) return;
+        
+        let valorDinheiro;
+        
+        if (typeof valorOuEvento === 'object') {
+            // É um evento com detalhes
+            valorDinheiro = valorOuEvento.dinheiro || valorOuEvento.valor;
+        } else {
+            // É um valor direto
+            valorDinheiro = valorOuEvento;
+        }
+        
+        if (valorDinheiro !== undefined) {
+            dinheiroElem.textContent = `$${valorDinheiro}`;
+            
+            // Muda a cor baseada no valor
+            if (valorDinheiro <= 0) {
+                dinheiroElem.style.color = '#e74c3c';
+            } else if (valorDinheiro < 500) {
+                dinheiroElem.style.color = '#f39c12';
+            } else {
+                dinheiroElem.style.color = '#ffd700';
+            }
+        }
+    }
+
     atualizarResumoEquipamentos() {
         if (!this.sistemaEquipamentos || !window.sistemaEquipamentos) return;
         
         try {
-            const dados = this.sistemaEquipamentos.exportarDados();
+            const dados = this.sistemaEquipamentos.exportarDados ? 
+                this.sistemaEquipamentos.exportarDados() : 
+                this.sistemaEquipamentos;
+            
+            // Atualiza dinheiro DIRETAMENTE da propriedade
+            const dinheiroAtual = this.sistemaEquipamentos.dinheiro;
+            if (dinheiroAtual !== undefined) {
+                this.atualizarDinheiro(dinheiroAtual);
+            }
             
             // Atualiza estatísticas rápidas
             this.atualizarEstatisticas(dados);
@@ -164,20 +212,28 @@ class ResumoEquipamentos {
     }
 
     atualizarEstatisticas(dados) {
-        // Dinheiro
-        const dinheiroElem = document.getElementById('resumoDinheiro');
-        if (dinheiroElem) {
-            dinheiroElem.textContent = `$${dados.dinheiro || 0}`;
-        }
-        
         // Carga
         const cargaElem = document.getElementById('resumoCarga');
         if (cargaElem) {
-            const pesoMax = dados.pesoMaximo || dados.capacidadeCarga?.muitoPesada || 60;
-            cargaElem.textContent = `${dados.pesoAtual || 0}/${pesoMax} kg`;
+            let pesoAtual = dados.pesoAtual || 0;
+            let pesoMax = dados.pesoMaximo || 60;
+            
+            // Se não encontrar no exportarDados, tenta acessar diretamente
+            if (pesoAtual === 0 && this.sistemaEquipamentos.pesoAtual !== undefined) {
+                pesoAtual = this.sistemaEquipamentos.pesoAtual;
+            }
+            if (pesoMax === 60 && this.sistemaEquipamentos.pesoMaximo !== undefined) {
+                pesoMax = this.sistemaEquipamentos.pesoMaximo;
+            }
+            
+            cargaElem.textContent = `${pesoAtual.toFixed(1)}/${pesoMax.toFixed(1)} kg`;
             
             // Adiciona classe baseada no nível de carga
-            const nivelCarga = dados.nivelCargaAtual || 'nenhuma';
+            let nivelCarga = dados.nivelCargaAtual || 'nenhuma';
+            if (!nivelCarga && this.sistemaEquipamentos.nivelCargaAtual) {
+                nivelCarga = this.sistemaEquipamentos.nivelCargaAtual;
+            }
+            
             cargaElem.className = 'equipamento-stat-valor';
             
             if (nivelCarga.includes('média') || nivelCarga.includes('media')) {
@@ -191,14 +247,29 @@ class ResumoEquipamentos {
         
         // Total de itens
         const totalItensElem = document.getElementById('resumoTotalItens');
-        if (totalItensElem && dados.equipamentosAdquiridos) {
-            totalItensElem.textContent = dados.equipamentosAdquiridos.length;
+        if (totalItensElem) {
+            let totalItens = 0;
+            
+            if (dados.equipamentosAdquiridos) {
+                totalItens = dados.equipamentosAdquiridos.length;
+            } else if (this.sistemaEquipamentos.equipamentosAdquiridos) {
+                totalItens = this.sistemaEquipamentos.equipamentosAdquiridos.length;
+            }
+            
+            totalItensElem.textContent = totalItens;
         }
         
         // Itens equipados
         const equipadosElem = document.getElementById('resumoEquipados');
-        if (equipadosElem && dados.equipamentosAdquiridos) {
-            const equipados = dados.equipamentosAdquiridos.filter(item => item.equipado).length;
+        if (equipadosElem) {
+            let equipados = 0;
+            
+            if (dados.equipamentosAdquiridos) {
+                equipados = dados.equipamentosAdquiridos.filter(item => item.equipado).length;
+            } else if (this.sistemaEquipamentos.equipamentosAdquiridos) {
+                equipados = this.sistemaEquipamentos.equipamentosAdquiridos.filter(item => item.equipado).length;
+            }
+            
             equipadosElem.textContent = equipados;
         }
     }
@@ -210,28 +281,31 @@ class ResumoEquipamentos {
         // Calcula mãos ocupadas
         let maosOcupadas = 0;
         
-        if (dados.equipamentosEquipados) {
-            // Armaduras de mãos
-            if (dados.equipamentosEquipados.armaduras) {
-                maosOcupadas += dados.equipamentosEquipados.armaduras
-                    .filter(a => a.local === 'Mãos')
-                    .reduce((total, item) => total + (item.maos || 0), 0);
-            }
-            
-            // Armas equipadas
-            if (dados.equipamentosEquipados.maos) {
-                maosOcupadas += dados.equipamentosEquipados.maos
-                    .reduce((total, item) => total + (item.maos || 1), 0);
-            }
-            
-            // Escudos equipados
-            if (dados.equipamentosEquipados.escudos) {
-                maosOcupadas += dados.equipamentosEquipados.escudos
-                    .reduce((total, item) => total + (item.maos || 1), 0);
+        // Tenta acessar diretamente do sistema se disponível
+        if (this.sistemaEquipamentos.calcularMaosOcupadas) {
+            maosOcupadas = this.sistemaEquipamentos.calcularMaosOcupadas();
+        } else {
+            // Cálculo manual como fallback
+            if (dados.equipamentosEquipados) {
+                if (dados.equipamentosEquipados.armaduras) {
+                    maosOcupadas += dados.equipamentosEquipados.armaduras
+                        .filter(a => a.local === 'Mãos')
+                        .reduce((total, item) => total + (item.maos || 0), 0);
+                }
+                
+                if (dados.equipamentosEquipados.maos) {
+                    maosOcupadas += dados.equipamentosEquipados.maos
+                        .reduce((total, item) => total + (item.maos || 1), 0);
+                }
+                
+                if (dados.equipamentosEquipados.escudos) {
+                    maosOcupadas += dados.equipamentosEquipados.escudos
+                        .reduce((total, item) => total + (item.maos || 1), 0);
+                }
             }
         }
         
-        const maosDisponiveis = dados.maosDisponiveis || 2;
+        const maosDisponiveis = dados.maosDisponiveis || this.sistemaEquipamentos.maosDisponiveis || 2;
         const maosLivres = Math.max(0, maosDisponiveis - maosOcupadas);
         
         // Atualiza display de mãos
@@ -258,7 +332,16 @@ class ResumoEquipamentos {
         const listaElem = document.getElementById('listaEquipamentosResumo');
         if (!listaElem) return;
         
-        if (!dados.equipamentosAdquiridos || dados.equipamentosAdquiridos.length === 0) {
+        let equipamentosAdquiridos = [];
+        
+        // Obtém a lista de equipamentos de várias formas possíveis
+        if (dados.equipamentosAdquiridos) {
+            equipamentosAdquiridos = dados.equipamentosAdquiridos;
+        } else if (this.sistemaEquipamentos.equipamentosAdquiridos) {
+            equipamentosAdquiridos = this.sistemaEquipamentos.equipamentosAdquiridos;
+        }
+        
+        if (equipamentosAdquiridos.length === 0) {
             listaElem.innerHTML = `
                 <div class="equipamento-vazio">
                     <i class="fas fa-box-open"></i>
@@ -270,7 +353,7 @@ class ResumoEquipamentos {
         }
         
         // Ordena: primeiro os equipados, depois os importantes, depois o resto
-        const equipamentosOrdenados = [...dados.equipamentosAdquiridos].sort((a, b) => {
+        const equipamentosOrdenados = [...equipamentosAdquiridos].sort((a, b) => {
             // Equipados primeiro
             if (a.equipado && !b.equipado) return -1;
             if (!a.equipado && b.equipado) return 1;
@@ -389,4 +472,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }, 1000);
+});
+
+// Adiciona evento global para mudanças de dinheiro
+document.addEventListener('riquezaAlterada', function(e) {
+    if (e.detail && e.detail.pontos !== undefined && window.resumoEquipamentos) {
+        window.resumoEquipamentos.atualizarResumoEquipamentos();
+    }
 });
