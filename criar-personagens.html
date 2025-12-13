@@ -3368,29 +3368,103 @@
         }
     }
 
-    // Carregar resumo
-    function carregarResumo() {
-        const resumoContent = document.getElementById('resumo');
-        if (!resumoContent) return;
+    // Carregar resumo - VERSÃO SIMPLIFICADA
+function carregarResumo() {
+    console.log('Aba Resumo carregada');
+    
+    // Apenas sincroniza dados, NÃO substitui o HTML
+    sincronizarDadosResumo();
+    configurarEventosFoto();
+}
+
+// Sincroniza dados do Dashboard para o Resumo
+function sincronizarDadosResumo() {
+    try {
+        // Nome
+        const nomeInput = document.getElementById('charName');
+        if (nomeInput && document.getElementById('resumoNome')) {
+            document.getElementById('resumoNome').textContent = nomeInput.value || 'Novo Personagem';
+        }
         
-        resumoContent.innerHTML = `
-            <div class="resumo-container">
-                <h2>Resumo do Personagem</h2>
-                <p>Carregando resumo...</p>
-            </div>
-        `;
+        // Dados básicos
+        const campos = {
+            'racaPersonagem': 'resumoRaca',
+            'classePersonagem': 'resumoClasse', 
+            'nivelPersonagem': 'resumoNivel',
+            'descricaoPersonagem': 'resumoDescricao'
+        };
         
-        // Simular carregamento
-        setTimeout(() => {
-            resumoContent.innerHTML = `
-                <div class="resumo-container">
-                    <h2>Resumo de ${personagemAtual.nome}</h2>
-                    <p>Esta aba está em desenvolvimento.</p>
-                    <p>Mostrará um resumo completo do personagem com todas as informações.</p>
-                </div>
-            `;
-        }, 500);
+        for (const [origem, destino] of Object.entries(campos)) {
+            const origemEl = document.getElementById(origem);
+            const destinoEl = document.getElementById(destino);
+            if (origemEl && destinoEl) {
+                destinoEl.textContent = origemEl.value || '-';
+            }
+        }
+        
+        // Pontos
+        const pontosEls = {
+            'pontosTotais': 'resumoPontosTotais',
+            'pontosGastos': 'resumoPontosGastos', 
+            'pontosSaldo': 'resumoSaldo'
+        };
+        
+        for (const [origem, destino] of Object.entries(pontosEls)) {
+            const origemEl = document.getElementById(origem);
+            const destinoEl = document.getElementById(destino);
+            if (origemEl && destinoEl && origemEl.textContent) {
+                destinoEl.textContent = origemEl.textContent;
+            }
+        }
+        
+    } catch (error) {
+        console.error('Erro ao sincronizar dados:', error);
     }
+}
+
+// Configura eventos para a foto
+function configurarEventosFoto() {
+    const fotoWrapper = document.getElementById('fotoResumoWrapper');
+    const fotoInput = document.getElementById('fotoUpload');
+    
+    if (fotoWrapper && fotoInput) {
+        fotoWrapper.addEventListener('click', () => {
+            fotoInput.click();
+        });
+        
+        fotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Atualiza foto no resumo
+                    const fotoImg = document.getElementById('fotoResumoImg');
+                    const placeholder = document.getElementById('fotoPlaceholderResumo');
+                    
+                    if (fotoImg) {
+                        fotoImg.src = e.target.result;
+                        fotoImg.style.display = 'block';
+                    }
+                    if (placeholder) {
+                        placeholder.style.display = 'none';
+                    }
+                    
+                    // Também atualiza na dashboard
+                    const fotoDashboard = document.getElementById('fotoPreview');
+                    const placeholderDashboard = document.getElementById('fotoPlaceholder');
+                    if (fotoDashboard) {
+                        fotoDashboard.src = e.target.result;
+                        fotoDashboard.style.display = 'block';
+                    }
+                    if (placeholderDashboard) {
+                        placeholderDashboard.style.display = 'none';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
 
     // Salvar personagem
     async function salvarPersonagem() {
