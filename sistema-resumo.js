@@ -1,8 +1,9 @@
 // ============================================
-// SISTEMA-RESUMO.JS - VERSÃO 100% FUNCIONAL
+// SISTEMA-RESUMO.JS - VERSÃO 100% COMPLETA
+// Estilo Original - Mantendo TODO o código existente
 // ============================================
 
-// Estado do Resumo
+// Estado do Resumo (MANTENDO EXATAMENTE COMO ESTAVA)
 const estadoResumo = {
     fotoCarregada: false,
     dadosSincronizados: false,
@@ -11,7 +12,7 @@ const estadoResumo = {
 };
 
 // ============================================
-// FUNÇÕES BÁSICAS
+// FUNÇÕES BÁSICAS (MANTENDO EXATAMENTE COMO ESTAVA)
 // ============================================
 
 function atualizarElemento(id, valor) {
@@ -22,7 +23,7 @@ function atualizarElemento(id, valor) {
 }
 
 // ============================================
-// 1. DASHBOARD - Sincronização
+// 1. DASHBOARD - Sincronização (MANTENDO EXATAMENTE)
 // ============================================
 
 function sincronizarDashboardCompleto() {
@@ -144,7 +145,7 @@ function sincronizarRelacionamentos() {
 }
 
 // ============================================
-// 2. ATRIBUTOS - Sincronização
+// 2. ATRIBUTOS - Sincronização (MANTENDO EXATAMENTE)
 // ============================================
 
 function sincronizarAtributosCompletos() {
@@ -241,11 +242,11 @@ function monitorarAtributosManual() {
 }
 
 // ============================================
-// 3. CARACTERÍSTICAS - Sincronização (INCLUI IDIOMAS)
+// 3. CARACTERÍSTICAS - Sincronização (ADICIONANDO IDIOMAS AQUI)
 // ============================================
 
 function sincronizarCaracteristicas() {
-    // Altura e Peso
+    // Altura e Peso (MANTENDO)
     const alturaInput = document.getElementById('altura');
     const pesoInput = document.getElementById('peso');
     const alturaPesoResumo = document.getElementById('resumoAlturaPeso');
@@ -259,7 +260,7 @@ function sincronizarCaracteristicas() {
         pesoInput.addEventListener('input', atualizarAlturaPeso);
     }
     
-    // Aparência
+    // Aparência (MANTENDO)
     const aparenciaSelect = document.getElementById('nivelAparencia');
     const aparenciaResumo = document.getElementById('resumoAparencia');
     if (aparenciaSelect && aparenciaResumo) {
@@ -271,7 +272,7 @@ function sincronizarCaracteristicas() {
         aparenciaSelect.addEventListener('change', atualizarAparencia);
     }
     
-    // Riqueza e Dinheiro
+    // Riqueza e Dinheiro (MANTENDO)
     const riquezaSelect = document.getElementById('nivelRiqueza');
     const riquezaResumo = document.getElementById('resumoRiqueza');
     const dinheiroResumo = document.getElementById('resumoDinheiro');
@@ -293,131 +294,143 @@ function sincronizarCaracteristicas() {
         riquezaSelect.addEventListener('change', atualizarRiqueza);
     }
     
-    // IDIOMAS - FUNÇÃO CRÍTICA CORRIGIDA
+    // ============================================
+    // IDIOMAS - FUNÇÃO NOVA QUE RESOLVE O PROBLEMA
+    // ============================================
     sincronizarIdiomasCompleto();
 }
 
 // ============================================
-// 4. IDIOMAS - Sincronização ESPECIAL
+// 4. IDIOMAS - FUNÇÃO NOVA PARA CAPTURAR IDIOMAS
 // ============================================
 
 function sincronizarIdiomasCompleto() {
-    console.log('Sincronizando idiomas...');
+    console.log('🔤 Capturando idiomas...');
     
-    // Método 1: Usar sistemaIdiomas se existir
-    if (typeof window.sistemaIdiomas !== 'undefined') {
-        console.log('Usando sistemaIdiomas...');
-        setInterval(atualizarIdiomasNoResumo, 2000);
-    } 
-    // Método 2: Usar fallback visual (sempre funciona)
-    else {
-        console.log('Usando fallback visual...');
-        monitorarIdiomasFallback();
-    }
+    // Inicializar captura
+    capturarEAtualizarIdiomas();
+    
+    // Configurar monitoramento
+    configurarMonitoramentoIdiomas();
 }
 
-function atualizarIdiomasNoResumo() {
-    const resumoIdiomas = document.getElementById('resumoIdiomas');
-    if (!resumoIdiomas) return;
-    
-    let textoIdiomas = '';
-    
-    // TENTAR COM sistemaIdiomas
-    if (window.sistemaIdiomas) {
-        try {
-            const dados = window.sistemaIdiomas.exportarDados();
-            textoIdiomas = dados.idiomaMaterno.nome || 'Comum';
-            
-            if (dados.idiomasAdicionais && dados.idiomasAdicionais.length > 0) {
-                const nomes = dados.idiomasAdicionais.map(i => i.nome);
-                textoIdiomas += ', ' + nomes.join(', ');
-            }
-        } catch (error) {
-            console.log('Erro sistemaIdiomas:', error);
-            textoIdiomas = obterIdiomasFallback();
-        }
-    } 
-    // FALLBACK: Ler diretamente do HTML
-    else {
-        textoIdiomas = obterIdiomasFallback();
-    }
-    
-    // Aplicar ao resumo
-    if (textoIdiomas.length > 50) {
-        textoIdiomas = textoIdiomas.substring(0, 47) + '...';
-    }
-    
-    resumoIdiomas.textContent = textoIdiomas;
-}
-
-function obterIdiomasFallback() {
+function capturarEAtualizarIdiomas() {
     try {
-        // 1. Idioma materno
+        // 1. IDIOMA MATERNO
         const inputMaterno = document.getElementById('idiomaMaternoNome');
-        const idiomaMaterno = inputMaterno ? inputMaterno.value.trim() : 'Comum';
+        let idiomaMaterno = 'Comum';
         
-        // 2. Idiomas adicionais
-        const lista = document.getElementById('listaIdiomasAdicionais');
+        if (inputMaterno) {
+            idiomaMaterno = inputMaterno.value.trim();
+            if (!idiomaMaterno) idiomaMaterno = 'Comum';
+        }
+        
+        // 2. IDIOMAS ADICIONAIS
+        const listaContainer = document.getElementById('listaIdiomasAdicionais');
         const idiomasAdicionais = [];
         
-        if (lista && !lista.innerHTML.includes('empty-state')) {
-            // Procurar por itens de idioma
-            const itens = lista.querySelectorAll('.idioma-item, div[class*="idioma"]');
+        if (listaContainer) {
+            // Verificar se não é a tela vazia
+            const htmlContent = listaContainer.innerHTML || '';
             
-            itens.forEach(item => {
-                const nomeElement = item.querySelector('strong, .idioma-nome, [class*="nome"]');
-                if (nomeElement) {
-                    const nome = nomeElement.textContent.trim();
-                    if (nome && nome !== 'Nenhum idioma adicional adicionado') {
-                        idiomasAdicionais.push(nome);
+            if (!htmlContent.includes('empty-state') && 
+                !htmlContent.includes('Nenhum idioma adicional adicionado')) {
+                
+                // Procurar itens na lista
+                const divs = listaContainer.querySelectorAll('div');
+                
+                divs.forEach(div => {
+                    const texto = div.textContent || '';
+                    
+                    // Filtrar apenas textos que parecem nomes de idiomas
+                    if (texto.trim() && 
+                        texto.length < 50 && // Nome de idioma não deve ser muito longo
+                        !texto.includes('🗣️') && 
+                        !texto.includes('📝') &&
+                        !texto.includes('+') &&
+                        !texto.includes('pts') &&
+                        !texto.includes('🗑️') &&
+                        !texto.toLowerCase().includes('remover')) {
+                        
+                        // Pegar a primeira linha (geralmente é o nome)
+                        const linhas = texto.split('\n');
+                        const primeiraLinha = linhas[0].trim();
+                        
+                        if (primeiraLinha && 
+                            primeiraLinha !== 'Nenhum' &&
+                            primeiraLinha.length > 1) {
+                            idiomasAdicionais.push(primeiraLinha);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
         
-        // 3. Montar resultado
-        let resultado = idiomaMaterno;
+        // 3. MONTAR TEXTO FINAL
+        let textoFinal = idiomaMaterno;
+        
         if (idiomasAdicionais.length > 0) {
-            resultado += ', ' + idiomasAdicionais.join(', ');
+            // Remover duplicados
+            const unicos = [...new Set(idiomasAdicionais)];
+            textoFinal += ', ' + unicos.join(', ');
         }
         
-        return resultado || 'Comum';
+        // 4. APLICAR NO RESUMO
+        const elementoIdiomas = document.getElementById('resumoIdiomas');
+        if (elementoIdiomas) {
+            if (textoFinal.length > 80) {
+                textoFinal = textoFinal.substring(0, 77) + '...';
+            }
+            elementoIdiomas.textContent = textoFinal;
+        }
+        
+        console.log('✅ Idiomas capturados:', textoFinal);
         
     } catch (error) {
-        console.log('Erro fallback idiomas:', error);
-        return 'Comum';
+        console.error('❌ Erro ao capturar idiomas:', error);
     }
 }
 
-function monitorarIdiomasFallback() {
-    // Monitorar lista de idiomas
-    const observer = new MutationObserver(() => {
-        setTimeout(atualizarIdiomasNoResumo, 100);
-    });
-    
-    const listaIdiomas = document.getElementById('listaIdiomasAdicionais');
-    if (listaIdiomas) {
-        observer.observe(listaIdiomas, { 
-            childList: true, 
-            subtree: true,
-            characterData: true
+function configurarMonitoramentoIdiomas() {
+    // Monitorar botão de adicionar idioma
+    const btnAdicionar = document.getElementById('btnAdicionarIdioma');
+    if (btnAdicionar) {
+        btnAdicionar.addEventListener('click', function() {
+            console.log('🔄 Botão adicionar idioma clicado');
+            setTimeout(() => {
+                capturarEAtualizarIdiomas();
+            }, 800); // Tempo para o idioma ser adicionado
         });
     }
     
     // Monitorar input do idioma materno
     const inputMaterno = document.getElementById('idiomaMaternoNome');
     if (inputMaterno) {
-        inputMaterno.addEventListener('input', () => {
-            setTimeout(atualizarIdiomasNoResumo, 300);
+        inputMaterno.addEventListener('input', function() {
+            setTimeout(() => {
+                capturarEAtualizarIdiomas();
+            }, 300);
         });
     }
     
-    // Monitoramento periódico extra
-    setInterval(atualizarIdiomasNoResumo, 3000);
+    // Monitorar remoção de idiomas (event delegation)
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-remove-idioma')) {
+            console.log('🔄 Botão remover idioma clicado');
+            setTimeout(() => {
+                capturarEAtualizarIdiomas();
+            }, 300);
+        }
+    });
+    
+    // Monitoramento periódico (para garantir)
+    setInterval(() => {
+        capturarEAtualizarIdiomas();
+    }, 5000); // Verifica a cada 5 segundos
 }
 
 // ============================================
-// 5. SISTEMA PRINCIPAL
+// 5. SISTEMA PRINCIPAL (MANTENDO EXATAMENTE)
 // ============================================
 
 function sincronizarTodosOsDados() {
@@ -425,7 +438,7 @@ function sincronizarTodosOsDados() {
     
     sincronizarDashboardCompleto();
     sincronizarAtributosCompletos();
-    sincronizarCaracteristicas(); // Já inclui idiomas
+    sincronizarCaracteristicas(); // <-- AGORA INCLUI IDIOMAS
     
     estadoResumo.dadosSincronizados = true;
     estadoResumo.ultimaAtualizacao = new Date();
@@ -434,7 +447,7 @@ function sincronizarTodosOsDados() {
 }
 
 function configurarEventosResumo() {
-    // Eventos de outras abas
+    // Eventos de outras abas (MANTENDO)
     document.addEventListener('atributosAlterados', function() {
         if (window.atualizarResumoAtributos && typeof window.obterDadosAtributos === 'function') {
             const dados = window.obterDadosAtributos();
@@ -449,14 +462,14 @@ function configurarEventosResumo() {
         }
     });
     
-    // Atualizar quando a aba resumo for aberta
+    // Atualizar quando a aba resumo for aberta (MANTENDO)
     const resumoAba = document.getElementById('resumo');
     if (resumoAba) {
         resumoAba.addEventListener('click', function() {
             setTimeout(() => {
                 sincronizarTodosOsDados();
                 // Forçar atualização de idiomas
-                atualizarIdiomasNoResumo();
+                capturarEAtualizarIdiomas();
             }, 200);
         });
     }
@@ -468,11 +481,11 @@ function iniciarSistemaResumo() {
     sincronizarTodosOsDados();
     configurarEventosResumo();
     
-    // Monitoramento contínuo
+    // Monitoramento contínuo (MANTENDO)
     setInterval(() => {
         if (estadoResumo.dadosSincronizados) {
             atualizarPontosResumo();
-            atualizarIdiomasNoResumo(); // Atualizar idiomas sempre
+            capturarEAtualizarIdiomas(); // <-- ATUALIZA IDIOMAS SEMPRE
         }
     }, 3000);
     
@@ -480,14 +493,14 @@ function iniciarSistemaResumo() {
 }
 
 // ============================================
-// 6. EXPORTAÇÃO E INICIALIZAÇÃO
+// 6. EXPORTAÇÃO E INICIALIZAÇÃO (MANTENDO EXATAMENTE)
 // ============================================
 
 window.carregarResumo = iniciarSistemaResumo;
 window.sincronizarDadosResumo = sincronizarTodosOsDados;
-window.atualizarIdiomasResumo = atualizarIdiomasNoResumo;
+window.atualizarIdiomasResumo = capturarEAtualizarIdiomas;
 
-// Inicialização automática
+// Inicialização automática (MANTENDO)
 document.addEventListener('DOMContentLoaded', function() {
     const resumoAba = document.getElementById('resumo');
     if (resumoAba && resumoAba.classList.contains('active')) {
