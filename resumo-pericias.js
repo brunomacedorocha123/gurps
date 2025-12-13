@@ -1,237 +1,241 @@
 // ============================================
-// SISTEMA DE SINCRONIZAÇÃO DIRETA
+// RESUMO-PERICIAS-FORÇADO.js
+// Sistema que FORÇA carregamento das perícias
 // ============================================
 
-console.log('🎯 RESUMO-PERICIAS-COMPLETO - INICIANDO SISTEMA DIRETO');
+console.log('🚀 RESUMO-PERICIAS-FORÇADO - INICIANDO');
 
 // ============================================
-// 1. ESTADO GLOBAL FORTE
+// 1. ESTADO
 // ============================================
 
 const resumoState = {
-  initialized: false,
-  lastPericiasCount: 0,
-  lastTecnicasCount: 0,
-  lastPontosPericias: 0,
-  lastPontosTecnicas: 0,
-  cache: {
-    pericias: [],
-    tecnicas: []
-  }
+  pericias: [],
+  tecnicas: [],
+  carregando: false,
+  tentativas: 0
 };
 
 // ============================================
-// 2. FUNÇÃO PRINCIPAL - SEMPRE CHAMAR
+// 2. FORÇAR CARREGAMENTO DAS PERÍCIAS
 // ============================================
 
-function sincronizarResumoPericias() {
-  console.log('🔄 Sincronizando resumo de perícias...');
+function forcarCarregamentoPericias() {
+  console.log('⚡ FORÇANDO carregamento de perícias...');
   
-  try {
-    // FORÇAR captura dos dados ATUAIS
-    const periciasAtuais = capturarPericiasReais();
-    const tecnicasAtuais = capturarTecnicasReais();
+  if (resumoState.carregando) {
+    console.log('⏳ Já está carregando...');
+    return;
+  }
+  
+  resumoState.carregando = true;
+  resumoState.tentativas++;
+  
+  // Método 1: Simular clique na aba de perícias
+  const tabPericias = document.querySelector('[data-tab="pericias"], #tab-pericias, .tab-pericias');
+  
+  if (tabPericias) {
+    console.log('🎯 Encontrada aba de perícias, clicando...');
     
-    // Verificar se mudou algo
-    const periciasMudaram = JSON.stringify(periciasAtuais) !== JSON.stringify(resumoState.cache.pericias);
-    const tecnicasMudaram = JSON.stringify(tecnicasAtuais) !== JSON.stringify(resumoState.cache.tecnicas);
+    // Salvar aba atual
+    const abaAtual = document.querySelector('.tab.active, [data-tab].active');
     
-    if (periciasMudaram || tecnicasMudaram) {
-      console.log('📈 Dados mudaram! Atualizando interface...');
-      resumoState.cache.pericias = periciasAtuais;
-      resumoState.cache.tecnicas = tecnicasAtuais;
+    // Clicar na aba de perícias
+    tabPericias.click();
+    
+    // Aguardar carregamento
+    setTimeout(() => {
+      console.log('⏱️ Perícias devem estar carregadas, capturando...');
       
-      // Atualizar na tela IMEDIATAMENTE
-      atualizarResumoNaTela(periciasAtuais, tecnicasAtuais);
-    } else {
-      console.log('✓ Dados estão atualizados');
-    }
-    
-  } catch (error) {
-    console.error('❌ Erro na sincronização:', error);
+      // Capturar perícias AGORA
+      const pericias = capturarPericiasDaAbaAtiva();
+      
+      if (pericias.length > 0) {
+        console.log(`✅ ${pericias.length} perícias capturadas!`);
+        resumoState.pericias = pericias;
+        atualizarResumoComPericias(pericias);
+      } else {
+        console.log('⚠️ Nenhuma perícia capturada, tentando método 2...');
+        tentarOutrosMetodos();
+      }
+      
+      // Voltar para a aba original se estava em outra
+      if (abaAtual && !abaAtual.classList.contains('active')) {
+        setTimeout(() => {
+          console.log('↩️ Voltando para aba anterior...');
+          abaAtual.click();
+        }, 500);
+      }
+      
+      resumoState.carregando = false;
+      
+    }, 800); // Tempo para carregar as perícias
+  } else {
+    console.log('❌ Aba de perícias não encontrada');
+    tentarOutrosMetodos();
   }
 }
 
 // ============================================
-// 3. CAPTURA DIRETA - SEM DEPENDÊNCIAS
+// 3. CAPTURAR PERÍCIAS DA ABA ATIVA
 // ============================================
 
-function capturarPericiasReais() {
-  console.log('🎯 Capturando perícias REAIS...');
+function capturarPericiasDaAbaAtiva() {
+  console.log('📋 Capturando perícias da aba ativa...');
   
   const pericias = [];
   
-  // PRIMEIRO: Tentar do estado global (fonte principal)
-  if (window.estadoPericias && Array.isArray(window.estadoPericias.periciasAprendidas)) {
-    console.log('📊 Usando estadoPericias.periciasAprendidas');
+  // Procurar na aba ATIVA (perícias)
+  const abaAtiva = document.querySelector('.tab-content .active, [data-tab-content].active');
+  
+  if (abaAtiva) {
+    console.log('🎯 Aba ativa encontrada:', abaAtiva.id || abaAtiva.className);
     
-    window.estadoPericias.periciasAprendidas.forEach((p, index) => {
-      if (!p || !p.nome) return;
+    // Método A: Tabela de perícias
+    const tabelas = abaAtiva.querySelectorAll('table');
+    tabelas.forEach((tabela, i) => {
+      console.log(`📊 Verificando tabela ${i + 1}...`);
       
-      // Calcular NH real
-      let nh = 0;
-      if (p.atributo && p.nivel !== undefined) {
-        const valorAtributo = obterValorAtributoResumo(p.atributo);
-        nh = valorAtributo + p.nivel;
-      } else if (p.nh) {
-        nh = p.nh;
-      }
-      
-      // Pontos
-      const pontos = p.investimentoAcumulado || p.custo || p.pontos || 0;
-      
-      pericias.push({
-        nome: p.nome,
-        pontos: pontos,
-        nh: nh,
-        id: index
+      const linhas = tabela.querySelectorAll('tr');
+      linhas.forEach(linha => {
+        const texto = linha.textContent.trim();
+        if (texto && texto.length > 5 && 
+            !texto.includes('Nenhuma') && 
+            !texto.toLowerCase().includes('esquiva')) {
+          
+          // Extrair dados
+          const dados = extrairDadosDaTabela(linha);
+          if (dados.nome) {
+            pericias.push(dados);
+            console.log(`✅ Perícia: ${dados.nome}`);
+          }
+        }
       });
     });
     
-    console.log(`✅ ${pericias.length} perícias do estado`);
-    
-    if (pericias.length > 0) {
-      return pericias;
-    }
-  }
-  
-  // SEGUNDO: Ler do localStorage (backup)
-  try {
-    const saved = localStorage.getItem('estadoPericias');
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (data && data.periciasAprendidas) {
-        console.log('💾 Usando localStorage backup');
-        data.periciasAprendidas.forEach(p => {
-          if (p && p.nome) {
-            pericias.push({
-              nome: p.nome,
-              pontos: p.custo || 0,
-              nh: p.nivel || 0
-            });
-          }
-        });
-      }
-    }
-  } catch (e) { /* ignorar */ }
-  
-  // TERCEIRO: Tentar pegar da tabela visível
-  const tabela = document.querySelector('#pericias-aprendidas, .pericias-lista, .lista-pericias');
-  if (tabela && !tabela.innerHTML.includes('Nenhuma')) {
-    console.log('📄 Lendo da tabela HTML');
-    const linhas = tabela.querySelectorAll('.pericia-item, tr, li');
-    
-    linhas.forEach(linha => {
-      const texto = linha.textContent;
-      if (texto && texto.trim() && !texto.includes('Nenhuma')) {
-        // Extrair nome (primeira parte)
-        const nomeMatch = texto.match(/^[^0-9+-]+/);
-        const nome = nomeMatch ? nomeMatch[0].trim() : 'Perícia';
-        
-        // Extrair pontos
-        const pontosMatch = texto.match(/(\d+)\s*(pontos?|pts?)/i);
-        const pontos = pontosMatch ? parseInt(pontosMatch[1]) : 0;
-        
-        // Extrair NH
-        const nhMatch = texto.match(/NH\s*[:=]?\s*(\d+)/i) || texto.match(/(\d+)\s*NH/i);
-        const nh = nhMatch ? parseInt(nhMatch[1]) : 10;
-        
-        if (nome !== 'Perícia' && pontos > 0) {
-          pericias.push({ nome, pontos, nh });
+    // Método B: Lista de itens
+    const itens = abaAtiva.querySelectorAll('.pericia-item, .pericia-aprendida-item, [data-pericia]');
+    itens.forEach(item => {
+      const texto = item.textContent.trim();
+      if (texto && texto.length > 5) {
+        const dados = extrairDadosDeItem(texto);
+        if (dados.nome && !dados.nome.toLowerCase().includes('esquiva')) {
+          pericias.push(dados);
         }
       }
     });
   }
   
-  // QUARTO: Mock para teste
+  // Se ainda não encontrou, procurar em TODO o documento
   if (pericias.length === 0) {
-    console.log('⚠️ Usando dados de teste');
-    pericias.push(
-      { nome: "Arquearia (Arco Curto)", pontos: 8, nh: 14 },
-      { nome: "Esquiva", pontos: 4, nh: 12 },
-      { nome: "Cavalgar (Cavalo)", pontos: 4, nh: 11 }
-    );
-  }
-  
-  return pericias;
-}
-
-function capturarTecnicasReais() {
-  console.log('🎯 Capturando técnicas REAIS...');
-  
-  const tecnicas = [];
-  
-  // Do estado global
-  if (window.estadoTecnicas && Array.isArray(window.estadoTecnicas.aprendidas)) {
-    console.log('📊 Usando estadoTecnicas.aprendidas');
+    console.log('🔍 Procurando em todo o documento...');
     
-    window.estadoTecnicas.aprendidas.forEach(t => {
-      if (!t || !t.nome) return;
+    const todasTabelas = document.querySelectorAll('table');
+    todasTabelas.forEach(tabela => {
+      // Verificar se é tabela de perícias (pela estrutura)
+      const ths = tabela.querySelectorAll('th');
+      const textoThs = Array.from(ths).map(th => th.textContent.toLowerCase()).join('');
       
-      tecnicas.push({
-        nome: t.nome,
-        pontos: t.custoTotal || t.custo || 0,
-        nh: calcularNHTecnica(t)
-      });
-    });
-    
-    if (tecnicas.length > 0) return tecnicas;
-  }
-  
-  // Da tabela HTML
-  const lista = document.querySelector('#tecnicas-aprendidas, .tecnicas-lista');
-  if (lista) {
-    const itens = lista.querySelectorAll('.tecnica-item, li, div[class*="tecnica"]');
-    
-    itens.forEach(item => {
-      if (item.textContent && !item.textContent.includes('Nenhuma')) {
-        tecnicas.push({
-          nome: item.textContent.split('\n')[0].trim(),
-          pontos: 4,
-          nh: 10
+      if (textoThs.includes('perícia') || textoThs.includes('nh') || textoThs.includes('nível')) {
+        console.log('📋 Tabela de perícias identificada');
+        
+        const linhas = tabela.querySelectorAll('tr');
+        linhas.forEach(linha => {
+          const cols = linha.querySelectorAll('td');
+          if (cols.length >= 3) {
+            const nome = cols[0].textContent.trim();
+            const pontos = cols[1].textContent.trim();
+            const nh = cols[2].textContent.trim();
+            
+            if (nome && nome.length > 2 && !nome.toLowerCase().includes('esquiva')) {
+              pericias.push({
+                nome: nome,
+                pontos: parseInt(pontos) || 0,
+                nh: parseInt(nh) || 10
+              });
+            }
+          }
         });
       }
     });
   }
   
-  return tecnicas;
+  return pericias;
 }
 
 // ============================================
-// 4. ATUALIZAÇÃO DIRETA NA TELA
+// 4. FUNÇÕES DE EXTRAÇÃO
 // ============================================
 
-function atualizarResumoNaTela(pericias, tecnicas) {
-  console.log('🎨 Atualizando tela do resumo...');
+function extrairDadosDaTabela(linha) {
+  const cols = linha.querySelectorAll('td');
   
-  // 1. Atualizar contadores totais
-  const totalPontosPericias = pericias.reduce((sum, p) => sum + (p.pontos || 0), 0);
-  const totalPontosTecnicas = tecnicas.reduce((sum, t) => sum + (t.pontos || 0), 0);
+  if (cols.length >= 3) {
+    return {
+      nome: cols[0].textContent.trim(),
+      pontos: parseInt(cols[1].textContent) || 0,
+      nh: parseInt(cols[2].textContent) || 10
+    };
+  } else {
+    // Tentar extrair do texto
+    const texto = linha.textContent;
+    return extrairDadosDeItem(texto);
+  }
+}
+
+function extrairDadosDeItem(texto) {
+  // Padrão: "Nome da Perícia 8 14" ou "Nome (Especialização) 8 NH 14"
+  const partes = texto.split(/\s+/).filter(p => p.trim());
   
-  // Encontrar elementos de pontos
-  document.querySelectorAll('.pontos-pericias, [id*="pontosPericias"], [class*="pontos-pericias"]').forEach(elem => {
-    elem.textContent = totalPontosPericias;
-  });
+  if (partes.length >= 3) {
+    // Últimos dois são provavelmente pontos e NH
+    const pontos = parseInt(partes[partes.length - 2]) || 0;
+    const nh = parseInt(partes[partes.length - 1]) || 10;
+    
+    // O resto é o nome
+    const nomePartes = partes.slice(0, partes.length - 2);
+    const nome = nomePartes.join(' ').trim();
+    
+    // Remover "NH" se estiver no nome
+    const nomeLimpo = nome.replace(/\s+NH$/i, '');
+    
+    return {
+      nome: nomeLimpo,
+      pontos: pontos,
+      nh: nh
+    };
+  }
   
-  document.querySelectorAll('.pontos-tecnicas, [id*="pontosTecnicas"], [class*="pontos-tecnicas"]').forEach(elem => {
-    elem.textContent = totalPontosTecnicas;
-  });
+  return { nome: '', pontos: 0, nh: 10 };
+}
+
+// ============================================
+// 5. ATUALIZAR RESUMO
+// ============================================
+
+function atualizarResumoComPericias(pericias) {
+  console.log('🎨 Atualizando resumo com', pericias.length, 'perícias');
   
-  // 2. Atualizar tabela de perícias (CRIAR se não existe)
-  let tbody = document.getElementById('tabelaPericiasResumo');
-  if (!tbody) {
-    // Criar tabela se não existe
-    const container = document.querySelector('#resumo .card-body, #resumo .resumo-container, #resumo');
-    if (container) {
+  // Encontrar ou criar tabela no resumo
+  let tabelaResumo = document.getElementById('tabelaPericiasResumo');
+  
+  if (!tabelaResumo) {
+    console.log('📝 Criando tabela no resumo...');
+    
+    // Procurar onde colocar a tabela
+    const resumoContainer = document.querySelector('#resumo, .resumo-container, [data-tab="resumo"].active');
+    
+    if (resumoContainer) {
+      // Criar estrutura
       const html = `
-        <div class="pericias-resumo-section">
-          <h4>Perícias Aprendidas</h4>
-          <table class="tabela-resumo-pericias">
+        <div class="pericias-resumo-card" style="margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+          <h4 style="margin-bottom: 10px; color: #ff8c00;">Perícias Aprendidas</h4>
+          <table style="width: 100%; border-collapse: collapse;">
             <thead>
               <tr>
-                <th>Perícia</th>
-                <th class="text-center">Pts</th>
-                <th class="text-center">NH</th>
+                <th style="text-align: left; padding: 8px; background: rgba(255,140,0,0.3);">Perícia</th>
+                <th style="text-align: center; padding: 8px; background: rgba(255,140,0,0.3);">Pontos</th>
+                <th style="text-align: center; padding: 8px; background: rgba(255,140,0,0.3);">NH</th>
               </tr>
             </thead>
             <tbody id="tabelaPericiasResumo">
@@ -239,304 +243,187 @@ function atualizarResumoNaTela(pericias, tecnicas) {
           </table>
         </div>
       `;
-      container.insertAdjacentHTML('beforeend', html);
-      tbody = document.getElementById('tabelaPericiasResumo');
+      
+      resumoContainer.insertAdjacentHTML('beforeend', html);
+      tabelaResumo = document.getElementById('tabelaPericiasResumo');
     }
   }
   
-  // Preencher tabela
-  if (tbody) {
-    if (pericias.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" class="text-center">Nenhuma perícia</td></tr>';
-    } else {
-      let html = '';
-      pericias.forEach(p => {
-        html += `
-          <tr>
-            <td class="pericia-nome">${p.nome || 'Perícia'}</td>
-            <td class="pericia-pontos text-center">${p.pontos || 0}</td>
-            <td class="pericia-nh text-center">${p.nh || 10}</td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
-    }
-  }
-  
-  // 3. Atualizar lista de técnicas
-  let listaTecnicas = document.getElementById('listaTecnicasResumo');
-  if (!listaTecnicas) {
-    const container = document.querySelector('#resumo .card-body, #resumo');
-    if (container) {
-      const html = `
-        <div class="tecnicas-resumo-section">
-          <h4>Técnicas Aprendidas</h4>
-          <div class="lista-tecnicas-resumo" id="listaTecnicasResumo">
-          </div>
-        </div>
+  // Atualizar tabela
+  if (tabelaResumo) {
+    let html = '';
+    
+    pericias.forEach(p => {
+      html += `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <td style="padding: 8px; color: #ddd;">${p.nome}</td>
+          <td style="padding: 8px; text-align: center; color: #ffd700; font-weight: bold;">${p.pontos}</td>
+          <td style="padding: 8px; text-align: center; color: #2ecc71; font-weight: bold;">${p.nh}</td>
+        </tr>
       `;
-      container.insertAdjacentHTML('beforeend', html);
-      listaTecnicas = document.getElementById('listaTecnicasResumo');
-    }
+    });
+    
+    tabelaResumo.innerHTML = html;
+    
+    // Atualizar contador de pontos
+    const totalPontos = pericias.reduce((sum, p) => sum + p.pontos, 0);
+    document.querySelectorAll('.pontos-pericias, [id*="pontosPericias"]').forEach(elem => {
+      elem.textContent = totalPontos;
+    });
+    
+    console.log(`✅ Resumo atualizado com ${pericias.length} perícias (${totalPontos} pontos)`);
   }
-  
-  if (listaTecnicas) {
-    if (tecnicas.length === 0) {
-      listaTecnicas.innerHTML = '<div class="text-center">Nenhuma técnica</div>';
-    } else {
-      let html = '';
-      tecnicas.forEach(t => {
-        html += `
-          <div class="tecnica-item-resumo">
-            <span class="tecnica-nome">${t.nome || 'Técnica'}</span>
-            <span class="tecnica-pontos">${t.pontos || 0}</span>
-            <span class="tecnica-nh">${t.nh || 10}</span>
-          </div>
-        `;
-      });
-      listaTecnicas.innerHTML = html;
-    }
-  }
-  
-  console.log(`✅ Tela atualizada: ${pericias.length} perícias, ${tecnicas.length} técnicas`);
 }
 
 // ============================================
-// 5. GATILHOS DE ATUALIZAÇÃO - SIMPLES E DIRETOS
+// 6. TENTAR OUTROS MÉTODOS
 // ============================================
 
-function iniciarMonitoramentoDireto() {
-  console.log('🚀 Iniciando monitoramento DIRETO');
+function tentarOutrosMetodos() {
+  console.log('🔄 Tentando métodos alternativos...');
   
-  // 1. Sempre atualizar quando a aba Resumo for aberta
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('[data-tab="resumo"], .tab-resumo, #btn-resumo')) {
-      console.log('🎯 Aba Resumo clicada - SINCRONIZAR');
-      setTimeout(sincronizarResumoPericias, 100);
+  // Método 1: Buscar em localStorage
+  try {
+    const saved = localStorage.getItem('periciasSalvas');
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (Array.isArray(data) && data.length > 0) {
+        console.log(`📦 ${data.length} perícias no localStorage`);
+        resumoState.pericias = data;
+        atualizarResumoComPericias(data);
+        return;
+      }
+    }
+  } catch (e) {}
+  
+  // Método 2: Tentar forçar função de carregamento do sistema
+  if (window.carregarPericias && typeof window.carregarPericias === 'function') {
+    console.log('🎛️ Executando carregarPericias() do sistema...');
+    window.carregarPericias();
+    setTimeout(() => {
+      const pericias = capturarPericiasDaAbaAtiva();
+      if (pericias.length > 0) {
+        atualizarResumoComPericias(pericias);
+      }
+    }, 1000);
+  }
+  
+  // Método 3: Verificar se há eventos que disparam carregamento
+  const eventos = ['carregarPericias', 'loadPericias', 'loadSkills'];
+  eventos.forEach(evento => {
+    if (window[evento]) {
+      console.log(`⚡ Disparando evento ${evento}...`);
+      if (typeof window[evento] === 'function') {
+        window[evento]();
+      } else if (window[evento].dispatchEvent) {
+        window[evento].dispatchEvent(new Event('load'));
+      }
     }
   });
+}
+
+// ============================================
+// 7. INICIALIZAÇÃO INTELIGENTE
+// ============================================
+
+function inicializarResumoPericias() {
+  console.log('🎯 Inicializando sistema de resumo...');
   
-  // 2. Sempre atualizar quando SAIR da aba Perícias
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('[data-tab="pericias"], .tab-pericias, #btn-pericias')) {
-      console.log('📋 Saindo da aba Perícias - SINCRONIZAR em 500ms');
-      setTimeout(sincronizarResumoPericias, 500);
-    }
-  });
-  
-  // 3. Atualizar a CADA SEGUNDO quando na aba Resumo
-  setInterval(() => {
-    const resumoVisivel = document.querySelector('#resumo, .tab-resumo.active, [data-tab="resumo"].active');
-    if (resumoVisivel) {
-      sincronizarResumoPericias();
+  // 1. Primeiro, tentar capturar sem forçar
+  setTimeout(() => {
+    const pericias = capturarPericiasDaAbaAtiva();
+    
+    if (pericias.length > 0) {
+      console.log(`✅ ${pericias.length} perícias capturadas na inicialização`);
+      atualizarResumoComPericias(pericias);
+    } else {
+      console.log('⚠️ Nenhuma perícia capturada, forçando carregamento...');
+      
+      // Esperar um pouco e forçar
+      setTimeout(() => {
+        forcarCarregamentoPericias();
+      }, 1500);
     }
   }, 1000);
   
-  // 4. "Espiar" as funções de adicionar/remover perícias
-  if (window.adicionarPericia && typeof window.adicionarPericia === 'function') {
-    const originalAdicionar = window.adicionarPericia;
-    window.adicionarPericia = function(...args) {
-      console.log('➕ Perícia sendo adicionada - forçar atualização');
-      const result = originalAdicionar.apply(this, args);
-      setTimeout(sincronizarResumoPericias, 300);
-      return result;
-    };
-  }
+  // 2. Configurar monitoramento
+  configurarMonitoramentoInteligente();
+}
+
+// ============================================
+// 8. MONITORAMENTO INTELIGENTE
+// ============================================
+
+function configurarMonitoramentoInteligente() {
+  console.log('👁️ Configurando monitoramento inteligente...');
   
-  if (window.removerPericia && typeof window.removerPericia === 'function') {
-    const originalRemover = window.removerPericia;
-    window.removerPericia = function(...args) {
-      console.log('➖ Perícia sendo removida - forçar atualização');
-      const result = originalRemover.apply(this, args);
-      setTimeout(sincronizarResumoPericias, 300);
-      return result;
-    };
-  }
+  // Sempre que clicar na aba resumo, atualizar
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-tab="resumo"], #btn-resumo, .tab-resumo');
+    if (btn) {
+      console.log('🎯 Aba resumo clicada - atualizando...');
+      setTimeout(() => {
+        forcarCarregamentoPericias();
+      }, 300);
+    }
+  });
   
-  // 5. Observar mudanças no estadoPericias (método simples)
-  let ultimoEstado = '';
+  // Sempre que SAIR da aba perícias, atualizar
+  let estavaEmPericias = false;
+  
   setInterval(() => {
-    if (window.estadoPericias) {
-      const estadoAtual = JSON.stringify(window.estadoPericias.periciasAprendidas);
-      if (estadoAtual !== ultimoEstado) {
-        console.log('🔄 estadoPericias mudou!');
-        ultimoEstado = estadoAtual;
-        sincronizarResumoPericias();
+    const emPericias = document.querySelector('[data-tab="pericias"].active, .tab-pericias.active');
+    
+    if (estavaEmPericias && !emPericias) {
+      console.log('🚪 Saiu da aba perícias - atualizando resumo...');
+      setTimeout(forcarCarregamentoPericias, 200);
+    }
+    
+    estavaEmPericias = !!emPericias;
+  }, 500);
+  
+  // Atualizar a cada 2 segundos quando na aba resumo
+  setInterval(() => {
+    const noResumo = document.querySelector('[data-tab="resumo"].active, #resumo.active');
+    if (noResumo) {
+      // Verificar se precisa atualizar
+      if (resumoState.tentativas < 3) { // Limitar tentativas
+        forcarCarregamentoPericias();
       }
     }
-  }, 800);
-  
-  console.log('✅ Monitoramento direto ativo');
-}
-
-// ============================================
-// 6. FUNÇÕES AUXILIARES
-// ============================================
-
-function obterValorAtributoResumo(atributo) {
-  // Valores simples
-  const valores = {
-    'DX': 10, 'IQ': 10, 'HT': 10, 'PERC': 10,
-    'Destreza': 10, 'Inteligência': 10, 'Saúde': 10, 'Percepção': 10
-  };
-  
-  // Tentar pegar do resumo
-  const elem = document.querySelector(`[data-atributo="${atributo}"], .${atributo}-valor, #valor-${atributo}`);
-  if (elem) {
-    const num = parseInt(elem.textContent);
-    if (!isNaN(num)) return num;
-  }
-  
-  return valores[atributo] || 10;
-}
-
-// ============================================
-// 7. INICIALIZAÇÃO
-// ============================================
-
-function iniciarSistemaResumoDireto() {
-  if (resumoState.initialized) return;
-  
-  console.log('🎯 INICIANDO SISTEMA DIRETO DE RESUMO');
-  
-  // 1. Primeira sincronização
-  setTimeout(() => {
-    sincronizarResumoPericias();
-  }, 1500);
-  
-  // 2. Iniciar monitoramento
-  setTimeout(() => {
-    iniciarMonitoramentoDireto();
   }, 2000);
-  
-  // 3. Aplicar estilos
-  aplicarEstilosDiretos();
-  
-  resumoState.initialized = true;
-  
-  // 4. Forçar atualização periódica
-  setInterval(sincronizarResumoPericias, 3000);
-  
-  console.log('✅ Sistema direto iniciado!');
 }
 
 // ============================================
-// 8. INICIAR AUTOMATICAMENTE
+// 9. INICIAR
 // ============================================
 
 // Iniciar quando a página carregar
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', iniciarSistemaResumoDireto);
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(inicializarResumoPericias, 2000);
+  });
 } else {
-  setTimeout(iniciarSistemaResumoDireto, 1000);
+  setTimeout(inicializarResumoPericias, 2000);
 }
 
-// Iniciar também quando window carregar
-window.addEventListener('load', () => {
-  setTimeout(iniciarSistemaResumoDireto, 500);
-});
-
-// Função manual para forçar
-window.atualizarResumoAgora = function() {
-  console.log('⚡ FORÇANDO ATUALIZAÇÃO IMEDIATA');
-  sincronizarResumoPericias();
-  return 'Resumo atualizado!';
+// Função para forçar manualmente
+window.forcarAtualizacaoPericias = function() {
+  console.clear();
+  console.log('⚡ FORÇANDO ATUALIZAÇÃO MANUAL');
+  forcarCarregamentoPericias();
+  return 'Forçando atualização...';
 };
 
-// ============================================
-// 9. ESTILOS
-// ============================================
+// Verificar estado atual
+window.verificarPericias = function() {
+  console.log('🔍 ESTADO ATUAL:');
+  console.log('- Perícias capturadas:', resumoState.pericias.length);
+  console.log('- Tentativas:', resumoState.tentativas);
+  console.log('- Carregando:', resumoState.carregando);
+  console.log('- Perícias:', resumoState.pericias);
+  
+  return resumoState.pericias;
+};
 
-function aplicarEstilosDiretos() {
-  const style = document.createElement('style');
-  style.textContent = `
-    .pericias-resumo-section {
-      margin-top: 20px;
-      padding: 15px;
-      background: rgba(0,0,0,0.2);
-      border-radius: 8px;
-    }
-    
-    .tabela-resumo-pericias {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    
-    .tabela-resumo-pericias th {
-      background: rgba(255,140,0,0.3);
-      color: #ff8c00;
-      padding: 8px;
-      font-size: 0.9rem;
-      text-align: left;
-    }
-    
-    .tabela-resumo-pericias td {
-      padding: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .tabela-resumo-pericias tr:hover {
-      background: rgba(255,140,0,0.1);
-    }
-    
-    .pericia-pontos {
-      color: #ffd700;
-      font-weight: bold;
-      background: rgba(255,215,0,0.1);
-      border-radius: 4px;
-      padding: 2px 8px;
-    }
-    
-    .pericia-nh {
-      color: #2ecc71;
-      font-weight: bold;
-      background: rgba(46,204,113,0.1);
-      border-radius: 4px;
-      padding: 2px 8px;
-    }
-    
-    .tecnicas-resumo-section {
-      margin-top: 20px;
-      padding: 15px;
-      background: rgba(0,0,0,0.2);
-      border-radius: 8px;
-    }
-    
-    .tecnica-item-resumo {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-      margin: 5px 0;
-      background: rgba(155,89,182,0.1);
-      border-radius: 6px;
-      border-left: 3px solid #9b59b6;
-    }
-    
-    .tecnica-nome {
-      flex: 1;
-      color: #eee;
-    }
-    
-    .tecnica-pontos {
-      color: #ffd700;
-      font-weight: bold;
-      margin: 0 10px;
-      padding: 2px 8px;
-      background: rgba(255,215,0,0.1);
-      border-radius: 12px;
-    }
-    
-    .tecnica-nh {
-      color: #2ecc71;
-      font-weight: bold;
-      padding: 2px 10px;
-      background: rgba(46,204,113,0.1);
-      border-radius: 12px;
-    }
-  `;
-  document.head.appendChild(style);
-}
-
-console.log('✅ SISTEMA DIRETO DE RESUMO CARREGADO - PRONTO PARA USAR');
+console.log('✅ Sistema carregado. Use window.forcarAtualizacaoPericias() para testar');
