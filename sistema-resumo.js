@@ -1,5 +1,6 @@
 // ============================================
-// SISTEMA-RESUMO.JS - FOCADO EM DASHBOARD E ATRIBUTOS
+// SISTEMA-RESUMO.JS - VERSÃO 100% COMPLETA
+// Integração com TODAS as abas do sistema GURPS
 // ============================================
 
 // Estado do Resumo
@@ -7,11 +8,20 @@ const estadoResumo = {
     fotoCarregada: false,
     dadosSincronizados: false,
     ultimaAtualizacao: null,
-    monitorAtivo: false
+    monitorAtivo: false,
+    cache: {
+        idiomas: { materno: 'Comum', adicionais: [], pontos: 0 },
+        pericias: [],
+        vantagens: [],
+        desvantagens: [],
+        magias: [],
+        equipamentos: [],
+        tecnicas: []
+    }
 };
 
 // ============================================
-// 1. INTEGRAÇÃO COM DASHBOARD
+// 1. INTEGRAÇÃO COM DASHBOARD (COMPLETA)
 // ============================================
 
 function sincronizarDashboardCompleto() {
@@ -24,7 +34,6 @@ function sincronizarDashboardCompleto() {
         if (nomeInput && resumoNome) {
             resumoNome.textContent = nomeInput.value.trim().toUpperCase() || 'NOVO PERSONAGEM';
             
-            // Atualização em tempo real
             nomeInput.addEventListener('input', function() {
                 resumoNome.textContent = this.value.trim().toUpperCase() || 'NOVO PERSONAGEM';
             });
@@ -60,18 +69,18 @@ function sincronizarDashboardCompleto() {
             });
         }
         
-        // E. Foto - EXTRAIR DA DASHBOARD
+        // E. Foto
         sincronizarFotoDashboard();
         
-        // F. Pontos - Usar função do dashboard se disponível
+        // F. Pontos
         if (typeof window.dashboardEstado !== 'undefined') {
             atualizarPontosResumo();
         } else {
-            // Fallback: monitorar elementos do dashboard
             monitorarPontosDashboard();
         }
         
-        // G. Características (aparência e riqueza já estão em outras funções)
+        // G. Relacionamentos (Dashboard)
+        sincronizarRelacionamentos();
         
         console.log('✅ Dashboard sincronizado no Resumo');
         
@@ -81,7 +90,6 @@ function sincronizarDashboardCompleto() {
 }
 
 function sincronizarFotoDashboard() {
-    // Tentar pegar a foto da dashboard
     const fotoDashboard = document.getElementById('fotoPreview');
     const fotoResumo = document.getElementById('fotoResumoImg');
     
@@ -90,11 +98,9 @@ function sincronizarFotoDashboard() {
         fotoResumo.style.display = 'block';
         estadoResumo.fotoCarregada = true;
         
-        // Configurar upload para ambos
         configurarUploadFotoUniversal();
     }
     
-    // Configurar placeholder
     const fotoWrapper = document.getElementById('fotoResumoWrapper');
     if (fotoWrapper) {
         fotoWrapper.addEventListener('click', function() {
@@ -114,14 +120,12 @@ function configurarUploadFotoUniversal() {
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Atualizar no Resumo
                     if (fotoResumo) {
                         fotoResumo.src = e.target.result;
                         fotoResumo.style.display = 'block';
                         estadoResumo.fotoCarregada = true;
                     }
                     
-                    // Atualizar na Dashboard se existir
                     if (fotoDashboard) {
                         fotoDashboard.src = e.target.result;
                         fotoDashboard.style.display = 'block';
@@ -141,85 +145,80 @@ function atualizarPontosResumo() {
     
     const pontos = window.dashboardEstado.pontos;
     
-    // Total
     const resumoPontosTotais = document.getElementById('resumoPontosTotais');
-    if (resumoPontosTotais) {
-        resumoPontosTotais.textContent = pontos.total;
-    }
+    if (resumoPontosTotais) resumoPontosTotais.textContent = pontos.total;
     
-    // Gastos totais (atributos + vantagens + perícias + magias)
     const gastosTotais = 
         (pontos.gastosAtributos || 0) + 
         (pontos.gastosVantagens || 0) + 
         (pontos.gastosPericias || 0) + 
-        (pontos.gastosMagias || 0);
+        (pontos.gastosMagias || 0) +
+        (pontos.gastosIdiomas || 0) +
+        (pontos.gastosTecnicas || 0);
     
     const resumoPontosGastos = document.getElementById('resumoPontosGastos');
-    if (resumoPontosGastos) {
-        resumoPontosGastos.textContent = gastosTotais;
-    }
+    if (resumoPontosGastos) resumoPontosGastos.textContent = gastosTotais;
     
-    // Saldo
     const resumoSaldo = document.getElementById('resumoSaldo');
-    if (resumoSaldo) {
-        resumoSaldo.textContent = pontos.saldoDisponivel || pontos.total - gastosTotais;
-    }
+    if (resumoSaldo) resumoSaldo.textContent = pontos.saldoDisponivel || pontos.total - gastosTotais;
 }
 
 function monitorarPontosDashboard() {
-    // Monitorar elementos visuais do dashboard
     setInterval(() => {
-        // Total
         const pontosTotaisElement = document.getElementById('pontosTotaisDashboard');
         if (pontosTotaisElement) {
-            const total = parseInt(pontosTotaisElement.value) || 150;
-            document.getElementById('resumoPontosTotais').textContent = total;
+            document.getElementById('resumoPontosTotais').textContent = parseInt(pontosTotaisElement.value) || 150;
         }
         
-        // Gastos
         const pontosGastosElement = document.getElementById('pontosGastosDashboard');
         if (pontosGastosElement) {
-            const gastos = parseInt(pontosGastosElement.textContent) || 0;
-            document.getElementById('resumoPontosGastos').textContent = gastos;
+            document.getElementById('resumoPontosGastos').textContent = parseInt(pontosGastosElement.textContent) || 0;
         }
         
-        // Saldo
         const saldoElement = document.getElementById('saldoDisponivelDashboard');
         if (saldoElement) {
-            const saldo = parseInt(saldoElement.textContent) || 150;
-            document.getElementById('resumoSaldo').textContent = saldo;
+            document.getElementById('resumoSaldo').textContent = parseInt(saldoElement.textContent) || 150;
         }
     }, 1000);
 }
 
+function sincronizarRelacionamentos() {
+    try {
+        if (window.dashboardEstado && window.dashboardEstado.relacionamentos) {
+            const rel = window.dashboardEstado.relacionamentos;
+            
+            const resumoInimigos = document.getElementById('resumoInimigos');
+            const resumoAliados = document.getElementById('resumoAliados');
+            const resumoDependentes = document.getElementById('resumoDependentes');
+            
+            if (resumoInimigos) resumoInimigos.textContent = rel.inimigos.length;
+            if (resumoAliados) resumoAliados.textContent = rel.aliados.length;
+            if (resumoDependentes) resumoDependentes.textContent = rel.dependentes.length;
+        }
+    } catch (error) {
+        console.log('Erro ao sincronizar relacionamentos:', error);
+    }
+}
+
 // ============================================
-// 2. INTEGRAÇÃO COM ATRIBUTOS
+// 2. INTEGRAÇÃO COM ATRIBUTOS (COMPLETA)
 // ============================================
 
 function sincronizarAtributosCompletos() {
     console.log('Resumo: Sincronizando Atributos...');
     
     try {
-        // Configurar função que será chamada quando atributos mudarem
         window.atualizarResumoAtributos = function(dados) {
-            if (!dados) {
-                // Se não passar dados, pegar dos elementos
-                dados = obterDadosAtributosDiretamente();
-            }
-            
+            if (!dados) dados = obterDadosAtributosDiretamente();
             atualizarAtributosNoResumo(dados);
         };
         
-        // Se já existir a função obterDadosAtributos, pegar dados iniciais
         if (typeof window.obterDadosAtributos === 'function') {
             setTimeout(() => {
                 const dados = window.obterDadosAtributos();
-                if (dados) {
-                    window.atualizarResumoAtributos(dados);
-                }
+                if (dados) window.atualizarResumoAtributos(dados);
             }, 500);
         } else {
-            // Fallback: monitorar elementos manualmente
             monitorarAtributosManual();
         }
         
@@ -249,7 +248,7 @@ function obterDadosAtributosDiretamente() {
 function atualizarAtributosNoResumo(dados) {
     if (!dados) return;
     
-    // Atualizar valores principais
+    // Valores principais
     atualizarElemento('resumoST', dados.ST);
     atualizarElemento('resumoDX', dados.DX);
     atualizarElemento('resumoIQ', dados.IQ);
@@ -258,20 +257,15 @@ function atualizarAtributosNoResumo(dados) {
     atualizarElemento('resumoPF', dados.PF);
     atualizarElemento('resumoVontade', dados.Vontade);
     atualizarElemento('resumoPercepcao', dados.Percepcao);
-    atualizarElemento('resumoDeslocamento', dados.Deslocamento);
+    atualizarElemento('resumoDeslocamento', dados.Deslocamento.toFixed(1));
     
-    // Atualizar custos
-    const custoST = document.getElementById('custoST');
-    const custoDX = document.getElementById('custoDX');
-    const custoIQ = document.getElementById('custoIQ');
-    const custoHT = document.getElementById('custoHT');
+    // Custo
+    document.getElementById('custoST').textContent = (dados.ST - 10) * 10;
+    document.getElementById('custoDX').textContent = (dados.DX - 10) * 20;
+    document.getElementById('custoIQ').textContent = (dados.IQ - 10) * 20;
+    document.getElementById('custoHT').textContent = (dados.HT - 10) * 10;
     
-    if (custoST) custoST.textContent = (dados.ST - 10) * 10;
-    if (custoDX) custoDX.textContent = (dados.DX - 10) * 20;
-    if (custoIQ) custoIQ.textContent = (dados.IQ - 10) * 20;
-    if (custoHT) custoHT.textContent = (dados.HT - 10) * 10;
-    
-    // Atualizar pontos gastos em atributos
+    // Pontos gastos em atributos
     const pontosAtributosElement = document.getElementById('pontosAtributos');
     if (pontosAtributosElement) {
         const totalCustos = 
@@ -282,28 +276,38 @@ function atualizarAtributosNoResumo(dados) {
         pontosAtributosElement.textContent = totalCustos;
     }
     
-    // Atualizar combate (dano)
+    // Combate (dano)
     const resumoDano = document.getElementById('resumoDano');
     if (resumoDano && dados.DanoGDP && dados.DanoGEB) {
         resumoDano.textContent = `${dados.DanoGDP}/${dados.DanoGEB}`;
     }
     
+    // Defesas (se disponível)
+    sincronizarDefesas();
+    
     estadoResumo.ultimaAtualizacao = new Date();
 }
 
-function atualizarElemento(id, valor) {
-    const elemento = document.getElementById(id);
-    if (elemento) {
-        elemento.textContent = valor;
+function sincronizarDefesas() {
+    try {
+        // Esquiva (DX/2 + 3, arredondado para cima)
+        const dx = parseInt(document.getElementById('DX').value) || 10;
+        const esquiva = Math.ceil(dx / 2) + 3;
+        document.getElementById('resumoEsquiva').textContent = esquiva;
+        
+        // Bloqueio (se houver escudo)
+        const bloqueio = esquiva + 1; // Base: esquiva + 1
+        document.getElementById('resumoBloqueio').textContent = bloqueio;
+        
+    } catch (error) {
+        console.log('Erro ao calcular defesas:', error);
     }
 }
 
 function monitorarAtributosManual() {
     if (estadoResumo.monitorAtivo) return;
-    
     estadoResumo.monitorAtivo = true;
     
-    // Monitorar inputs de atributos
     const atributosIds = ['ST', 'DX', 'IQ', 'HT'];
     atributosIds.forEach(id => {
         const input = document.getElementById(id);
@@ -317,7 +321,6 @@ function monitorarAtributosManual() {
         }
     });
     
-    // Monitorar em intervalos também
     setInterval(() => {
         const dados = obterDadosAtributosDiretamente();
         atualizarAtributosNoResumo(dados);
@@ -325,7 +328,7 @@ function monitorarAtributosManual() {
 }
 
 // ============================================
-// 3. INTEGRAÇÃO COM CARACTERÍSTICAS
+// 3. INTEGRAÇÃO COM CARACTERÍSTICAS (COMPLETA)
 // ============================================
 
 function sincronizarCaracteristicas() {
@@ -375,7 +378,6 @@ function sincronizarCaracteristicas() {
                 const nome = texto.split('[')[0].trim();
                 riquezaResumo.textContent = nome;
                 
-                // Atualizar dinheiro também
                 if (dinheiroResumo) {
                     const valor = parseInt(riquezaSelect.value) || 0;
                     const rendaBase = 1000;
@@ -393,6 +395,9 @@ function sincronizarCaracteristicas() {
             riquezaSelect.addEventListener('change', atualizarRiqueza);
         }
         
+        // Idiomas (IMPORTANTE!)
+        sincronizarIdiomasCompleto();
+        
         console.log('✅ Características sincronizadas no Resumo');
         
     } catch (error) {
@@ -401,55 +406,578 @@ function sincronizarCaracteristicas() {
 }
 
 // ============================================
-// 4. INTEGRAÇÃO COM OUTRAS ABAS (ESQUELETO)
+// 4. INTEGRAÇÃO COM IDIOMAS (COMPLETA)
+// ============================================
+
+function sincronizarIdiomasCompleto() {
+    console.log('Resumo: Sincronizando Idiomas...');
+    
+    try {
+        const resumoIdiomas = document.getElementById('resumoIdiomas');
+        if (!resumoIdiomas) return;
+        
+        if (typeof window.sistemaIdiomas !== 'undefined') {
+            // Usar sistemaIdiomas se disponível
+            setInterval(() => {
+                atualizarIdiomasNoResumo();
+            }, 2000);
+        } else {
+            // Fallback: monitorar visualmente
+            monitorarIdiomasManual();
+        }
+        
+        console.log('✅ Idiomas sincronizados no Resumo');
+        
+    } catch (error) {
+        console.error('Erro ao sincronizar Idiomas:', error);
+    }
+}
+
+function atualizarIdiomasNoResumo() {
+    const resumoIdiomas = document.getElementById('resumoIdiomas');
+    if (!resumoIdiomas) return;
+    
+    let textoIdiomas = '';
+    
+    if (window.sistemaIdiomas) {
+        try {
+            const dadosIdiomas = window.sistemaIdiomas.exportarDados();
+            
+            // Idioma materno
+            textoIdiomas = dadosIdiomas.idiomaMaterno.nome || 'Comum';
+            
+            // Idiomas adicionais
+            if (dadosIdiomas.idiomasAdicionais && dadosIdiomas.idiomasAdicionais.length > 0) {
+                const nomesIdiomas = dadosIdiomas.idiomasAdicionais.map(i => i.nome);
+                textoIdiomas += ', ' + nomesIdiomas.join(', ');
+            }
+            
+            estadoResumo.cache.idiomas = {
+                materno: dadosIdiomas.idiomaMaterno.nome,
+                adicionais: dadosIdiomas.idiomasAdicionais,
+                pontos: dadosIdiomas.pontosTotais
+            };
+            
+        } catch (error) {
+            console.log('Erro ao obter dados de idiomas:', error);
+            textoIdiomas = 'Comum';
+        }
+    } else {
+        textoIdiomas = obterIdiomasVisualmente();
+    }
+    
+    // Limitar comprimento
+    if (textoIdiomas.length > 50) {
+        textoIdiomas = textoIdiomas.substring(0, 47) + '...';
+    }
+    
+    resumoIdiomas.textContent = textoIdiomas;
+}
+
+function obterIdiomasVisualmente() {
+    try {
+        const listaIdiomas = document.getElementById('listaIdiomasAdicionais');
+        if (!listaIdiomas) return 'Comum';
+        
+        const inputIdiomaMaterno = document.getElementById('idiomaMaternoNome');
+        const idiomaMaterno = inputIdiomaMaterno ? inputIdiomaMaterno.value : 'Comum';
+        
+        const itensIdiomas = listaIdiomas.querySelectorAll('.idioma-item');
+        const idiomasAdicionais = [];
+        
+        itensIdiomas.forEach(item => {
+            const nomeElement = item.querySelector('strong');
+            if (nomeElement) {
+                idiomasAdicionais.push(nomeElement.textContent);
+            }
+        });
+        
+        let resultado = idiomaMaterno;
+        if (idiomasAdicionais.length > 0) {
+            resultado += ', ' + idiomasAdicionais.join(', ');
+        }
+        
+        return resultado || 'Comum';
+        
+    } catch (error) {
+        console.log('Erro ao obter idiomas visualmente:', error);
+        return 'Comum';
+    }
+}
+
+function monitorarIdiomasManual() {
+    const observer = new MutationObserver(() => {
+        atualizarIdiomasNoResumo();
+    });
+    
+    const listaIdiomas = document.getElementById('listaIdiomasAdicionais');
+    if (listaIdiomas) {
+        observer.observe(listaIdiomas, { 
+            childList: true, 
+            subtree: true 
+        });
+    }
+    
+    const inputIdiomaMaterno = document.getElementById('idiomaMaternoNome');
+    if (inputIdiomaMaterno) {
+        inputIdiomaMaterno.addEventListener('input', () => {
+            setTimeout(() => atualizarIdiomasNoResumo(), 300);
+        });
+    }
+}
+
+// ============================================
+// 5. INTEGRAÇÃO COM VANTAGENS/DESVANTAGENS
 // ============================================
 
 function sincronizarVantagensDesvantagens() {
-    // Esta função será expandida quando você integrar vantagens.js
-    console.log('⚠️ Vantagens/Desvantagens - Implementar quando a aba estiver pronta');
+    console.log('Resumo: Sincronizando Vantagens/Desvantagens...');
+    
+    try {
+        // Verificar se os sistemas estão disponíveis
+        if (typeof window.vantagensSistema !== 'undefined') {
+            // Usar sistema de vantagens
+            setInterval(() => {
+                atualizarVantagensResumoDireto();
+                atualizarDesvantagensResumoDireto();
+            }, 2000);
+        } else {
+            // Monitorar elementos visuais
+            monitorarVantagensDesvantagensManual();
+        }
+        
+        console.log('✅ Vantagens/Desvantagens sincronizadas no Resumo');
+        
+    } catch (error) {
+        console.error('Erro ao sincronizar Vantagens/Desvantagens:', error);
+    }
 }
 
-function sincronizarPericias() {
-    // Esta função será expandida quando você integrar pericias.js
-    console.log('⚠️ Perícias - Implementar quando a aba estiver pronta');
+function atualizarVantagensResumoDireto() {
+    try {
+        // Tentar pegar da lista de vantagens
+        const listaVantagens = document.getElementById('lista-vantagens');
+        if (!listaVantagens) return;
+        
+        const itens = listaVantagens.querySelectorAll('.vantagem-item');
+        const vantagens = [];
+        
+        itens.forEach(item => {
+            const nomeElement = item.querySelector('.vantagem-nome');
+            const pontosElement = item.querySelector('.vantagem-pontos');
+            
+            if (nomeElement && pontosElement) {
+                const pontosTexto = pontosElement.textContent;
+                const match = pontosTexto.match(/([+-]?\d+)/);
+                const pontos = match ? parseInt(match[1]) : 0;
+                
+                vantagens.push({
+                    nome: nomeElement.textContent.trim(),
+                    pontos: pontos
+                });
+            }
+        });
+        
+        // Atualizar no resumo
+        atualizarVantagensResumo(vantagens);
+        
+    } catch (error) {
+        console.log('Erro ao pegar vantagens:', error);
+    }
 }
 
-function sincronizarMagias() {
-    // Esta função será expandida quando você integrar magias.js
-    console.log('⚠️ Magias - Implementar quando a aba estiver pronta');
+function atualizarDesvantagensResumoDireto() {
+    try {
+        const listaDesvantagens = document.getElementById('lista-desvantagens');
+        if (!listaDesvantagens) return;
+        
+        const itens = listaDesvantagens.querySelectorAll('.desvantagem-item');
+        const desvantagens = [];
+        
+        itens.forEach(item => {
+            const nomeElement = item.querySelector('.desvantagem-nome');
+            const pontosElement = item.querySelector('.desvantagem-pontos');
+            
+            if (nomeElement && pontosElement) {
+                const pontosTexto = pontosElement.textContent;
+                const match = pontosTexto.match(/([+-]?\d+)/);
+                const pontos = match ? parseInt(match[1]) : 0;
+                
+                desvantagens.push({
+                    nome: nomeElement.textContent.trim(),
+                    pontos: pontos
+                });
+            }
+        });
+        
+        atualizarDesvantagensResumo(desvantagens);
+        
+    } catch (error) {
+        console.log('Erro ao pegar desvantagens:', error);
+    }
+}
+
+function monitorarVantagensDesvantagensManual() {
+    // Monitorar mudanças nas listas
+    const observerVantagens = new MutationObserver(() => {
+        atualizarVantagensResumoDireto();
+    });
+    
+    const observerDesvantagens = new MutationObserver(() => {
+        atualizarDesvantagensResumoDireto();
+    });
+    
+    const listaVantagens = document.getElementById('lista-vantagens');
+    const listaDesvantagens = document.getElementById('lista-desvantagens');
+    
+    if (listaVantagens) observerVantagens.observe(listaVantagens, { childList: true, subtree: true });
+    if (listaDesvantagens) observerDesvantagens.observe(listaDesvantagens, { childList: true, subtree: true });
 }
 
 // ============================================
-// 5. FUNÇÃO PRINCIPAL DE SINCRONIZAÇÃO
+// 6. INTEGRAÇÃO COM PERÍCIAS
+// ============================================
+
+function sincronizarPericias() {
+    console.log('Resumo: Sincronizando Perícias...');
+    
+    try {
+        if (typeof window.sistemaPericias !== 'undefined') {
+            setInterval(() => {
+                atualizarPericiasResumoDireto();
+            }, 2000);
+        } else {
+            monitorarPericiasManual();
+        }
+        
+        console.log('✅ Perícias sincronizadas no Resumo');
+        
+    } catch (error) {
+        console.error('Erro ao sincronizar Perícias:', error);
+    }
+}
+
+function atualizarPericiasResumoDireto() {
+    try {
+        const tabelaPericias = document.getElementById('tabela-pericias');
+        if (!tabelaPericias) return;
+        
+        const rows = tabelaPericias.querySelectorAll('tbody tr');
+        const pericias = [];
+        
+        rows.forEach(row => {
+            const nomeElement = row.querySelector('.pericia-nome');
+            const nivelElement = row.querySelector('.pericia-nivel');
+            const pontosElement = row.querySelector('.pericia-pontos');
+            
+            if (nomeElement && nivelElement && pontosElement) {
+                pericias.push({
+                    nome: nomeElement.textContent.trim(),
+                    nivel: parseInt(nivelElement.textContent) || 0,
+                    pontos: parseInt(pontosElement.textContent) || 0
+                });
+            }
+        });
+        
+        atualizarPericiasResumo(pericias);
+        
+    } catch (error) {
+        console.log('Erro ao pegar perícias:', error);
+    }
+}
+
+function monitorarPericiasManual() {
+    const observer = new MutationObserver(() => {
+        atualizarPericiasResumoDireto();
+    });
+    
+    const tabelaPericias = document.getElementById('tabela-pericias');
+    if (tabelaPericias) {
+        observer.observe(tabelaPericias, { childList: true, subtree: true });
+    }
+}
+
+// ============================================
+// 7. INTEGRAÇÃO COM TÉCNICAS
+// ============================================
+
+function sincronizarTecnicas() {
+    console.log('Resumo: Sincronizando Técnicas...');
+    
+    try {
+        const listaTecnicasResumo = document.getElementById('listaTecnicasResumo');
+        if (!listaTecnicasResumo) return;
+        
+        setInterval(() => {
+            atualizarTecnicasResumoDireto();
+        }, 2000);
+        
+        console.log('✅ Técnicas sincronizadas no Resumo');
+        
+    } catch (error) {
+        console.error('Erro ao sincronizar Técnicas:', error);
+    }
+}
+
+function atualizarTecnicasResumoDireto() {
+    try {
+        const listaTecnicas = document.getElementById('tecnicas-lista');
+        const listaTecnicasResumo = document.getElementById('listaTecnicasResumo');
+        const pontosTecnicas = document.getElementById('pontosTecnicas');
+        
+        if (!listaTecnicas || !listaTecnicasResumo) return;
+        
+        const itens = listaTecnicas.querySelectorAll('.tecnica-item');
+        
+        if (itens.length === 0) {
+            listaTecnicasResumo.innerHTML = '<div class="vazio">Nenhuma técnica</div>';
+            if (pontosTecnicas) pontosTecnicas.textContent = '0';
+            return;
+        }
+        
+        let html = '';
+        let totalPontos = 0;
+        
+        // Limitar a 10 técnicas
+        const limite = Math.min(itens.length, 10);
+        
+        for (let i = 0; i < limite; i++) {
+            const item = itens[i];
+            const nomeElement = item.querySelector('.tecnica-nome');
+            const nivelElement = item.querySelector('.tecnica-nivel');
+            const custoElement = item.querySelector('.tecnica-custo');
+            
+            if (nomeElement && nivelElement) {
+                const nome = nomeElement.textContent.trim();
+                const nivel = nivelElement.textContent.trim();
+                const custo = custoElement ? parseInt(custoElement.textContent) || 0 : 0;
+                
+                html += `<div class="tecnica-micro-item">${nome} (${nivel})</div>`;
+                totalPontos += custo;
+            }
+        }
+        
+        listaTecnicasResumo.innerHTML = html;
+        if (pontosTecnicas) pontosTecnicas.textContent = totalPontos;
+        
+    } catch (error) {
+        console.log('Erro ao atualizar técnicas:', error);
+    }
+}
+
+// ============================================
+// 8. INTEGRAÇÃO COM MAGIAS
+// ============================================
+
+function sincronizarMagias() {
+    console.log('Resumo: Sincronizando Magias...');
+    
+    try {
+        if (typeof window.sistemaMagias !== 'undefined') {
+            setInterval(() => {
+                atualizarMagiasResumoDireto();
+            }, 2000);
+        } else {
+            monitorarMagiasManual();
+        }
+        
+        console.log('✅ Magias sincronizadas no Resumo');
+        
+    } catch (error) {
+        console.error('Erro ao sincronizar Magias:', error);
+    }
+}
+
+function atualizarMagiasResumoDireto() {
+    try {
+        const listaMagias = document.getElementById('lista-magias-aprendidas');
+        const listaMagiasResumo = document.getElementById('listaMagiasResumo');
+        const pontosMagias = document.getElementById('pontosMagias');
+        
+        if (!listaMagias || !listaMagiasResumo) return;
+        
+        const itens = listaMagias.querySelectorAll('.magia-item');
+        
+        if (itens.length === 0) {
+            listaMagiasResumo.innerHTML = '<div class="vazio">Nenhuma magia</div>';
+            if (pontosMagias) pontosMagias.textContent = '0';
+            return;
+        }
+        
+        let html = '';
+        let totalPontos = 0;
+        
+        // Limitar a 20 magias
+        const limite = Math.min(itens.length, 20);
+        
+        for (let i = 0; i < limite; i++) {
+            const item = itens[i];
+            const nomeElement = item.querySelector('.magia-nome');
+            const nivelElement = item.querySelector('.magia-nivel');
+            const custoElement = item.querySelector('.magia-custo');
+            
+            if (nomeElement && nivelElement) {
+                const nome = nomeElement.textContent.trim();
+                const nivel = nivelElement.textContent.trim();
+                const custo = custoElement ? parseInt(custoElement.textContent) || 0 : 0;
+                
+                html += `<div class="magia-micro-item">${nome} (${nivel})</div>`;
+                totalPontos += custo;
+            }
+        }
+        
+        listaMagiasResumo.innerHTML = html;
+        if (pontosMagias) pontosMagias.textContent = totalPontos;
+        
+        // Aptidão Mágica e Mana
+        const aptidaoElement = document.getElementById('aptidaoMagica');
+        const manaElement = document.getElementById('manaAtual');
+        
+        if (aptidaoElement && document.getElementById('resumoAptidao')) {
+            document.getElementById('resumoAptidao').textContent = aptidaoElement.textContent || '0';
+        }
+        
+        if (manaElement && document.getElementById('resumoMana')) {
+            document.getElementById('resumoMana').textContent = manaElement.textContent || '0/0';
+        }
+        
+    } catch (error) {
+        console.log('Erro ao atualizar magias:', error);
+    }
+}
+
+function monitorarMagiasManual() {
+    const observer = new MutationObserver(() => {
+        atualizarMagiasResumoDireto();
+    });
+    
+    const listaMagias = document.getElementById('lista-magias-aprendidas');
+    if (listaMagias) {
+        observer.observe(listaMagias, { childList: true, subtree: true });
+    }
+}
+
+// ============================================
+// 9. INTEGRAÇÃO COM EQUIPAMENTOS
+// ============================================
+
+function sincronizarEquipamentos() {
+    console.log('Resumo: Sincronizando Equipamentos...');
+    
+    try {
+        setInterval(() => {
+            atualizarEquipamentoResumoDireto();
+        }, 2000);
+        
+        console.log('✅ Equipamentos sincronizados no Resumo');
+        
+    } catch (error) {
+        console.error('Erro ao sincronizar Equipamentos:', error);
+    }
+}
+
+function atualizarEquipamentoResumoDireto() {
+    try {
+        const inventario = document.getElementById('inventario-lista');
+        const listaEquipamentoResumo = document.getElementById('listaEquipamentoResumo');
+        const cargaResumo = document.getElementById('resumoCarga');
+        
+        if (!inventario || !listaEquipamentoResumo) return;
+        
+        const itens = inventario.querySelectorAll('.item-inventario');
+        
+        if (itens.length === 0) {
+            listaEquipamentoResumo.innerHTML = '<span class="vazio">Inventário vazio</span>';
+            if (cargaResumo) cargaResumo.textContent = '0/0 kg';
+            return;
+        }
+        
+        // Mostrar apenas os primeiros 5 itens
+        let html = '';
+        let totalPeso = 0;
+        let contador = 0;
+        
+        itens.forEach(item => {
+            if (contador < 5) {
+                const nomeElement = item.querySelector('.item-nome');
+                const quantidadeElement = item.querySelector('.item-quantidade');
+                
+                if (nomeElement && quantidadeElement) {
+                    const nome = nomeElement.textContent.trim();
+                    const quantidade = parseInt(quantidadeElement.textContent) || 1;
+                    
+                    html += `<div class="equipamento-item-micro">${quantidade}x ${nome}</div>`;
+                    contador++;
+                }
+            }
+            
+            // Calcular peso total
+            const pesoElement = item.querySelector('.item-peso');
+            if (pesoElement) {
+                const pesoTexto = pesoElement.textContent;
+                const pesoMatch = pesoTexto.match(/(\d+\.?\d*)/);
+                if (pesoMatch) {
+                    totalPeso += parseFloat(pesoMatch[1]);
+                }
+            }
+        });
+        
+        listaEquipamentoResumo.innerHTML = html;
+        
+        // Calcular carga máxima baseada em ST
+        const ST = parseInt(document.getElementById('ST').value) || 10;
+        const cargaMaxima = ST * 6; // Base: ST * 6 kg
+        
+        if (cargaResumo) {
+            cargaResumo.textContent = `${totalPeso.toFixed(1)}/${cargaMaxima} kg`;
+        }
+        
+    } catch (error) {
+        console.log('Erro ao atualizar equipamentos:', error);
+    }
+}
+
+// ============================================
+// 10. FUNÇÕES DE UTILIDADE
+// ============================================
+
+function atualizarElemento(id, valor) {
+    const elemento = document.getElementById(id);
+    if (elemento) {
+        elemento.textContent = valor;
+    }
+}
+
+// ============================================
+// 11. FUNÇÃO PRINCIPAL DE SINCRONIZAÇÃO TOTAL
 // ============================================
 
 function sincronizarTodosOsDados() {
-    console.log('🔄 Resumo: Sincronizando todos os dados...');
+    console.log('🔄 Resumo: Sincronizando TODOS os dados...');
     
+    // Todas as integrações
     sincronizarDashboardCompleto();
     sincronizarAtributosCompletos();
-    sincronizarCaracteristicas();
-    
-    // Estas serão ativadas conforme você for criando as outras abas
+    sincronizarCaracteristicas(); // Inclui idiomas
     sincronizarVantagensDesvantagens();
     sincronizarPericias();
+    sincronizarTecnicas();
     sincronizarMagias();
+    sincronizarEquipamentos();
     
     estadoResumo.dadosSincronizados = true;
     estadoResumo.ultimaAtualizacao = new Date();
     
-    console.log('✅ Resumo: Todos os dados sincronizados');
+    console.log('✅ Resumo: TODOS os dados sincronizados');
 }
 
 // ============================================
-// 6. CONFIGURAÇÃO DE EVENTOS
+// 12. CONFIGURAÇÃO DE EVENTOS
 // ============================================
 
 function configurarEventosResumo() {
-    // Escutar eventos de outras abas
+    // Eventos de outras abas
     document.addEventListener('atributosAlterados', function(e) {
-        console.log('📡 Resumo: Evento de atributos alterados recebido');
-        
         if (window.atualizarResumoAtributos) {
             if (e.detail) {
                 window.atualizarResumoAtributos(e.detail);
@@ -460,13 +988,18 @@ function configurarEventosResumo() {
         }
     });
     
-    // Escutar quando o dashboard atualizar
     document.addEventListener('dashboardAtualizado', function() {
-        console.log('📡 Resumo: Dashboard atualizado');
-        atualizarPontosResumo();
+        if (typeof window.dashboardEstado !== 'undefined') {
+            atualizarPontosResumo();
+            sincronizarRelacionamentos();
+        }
     });
     
-    // Forçar atualização quando a aba resumo for aberta
+    document.addEventListener('idiomasAtualizados', function(e) {
+        atualizarIdiomasNoResumo();
+    });
+    
+    // Atualizar quando a aba resumo for aberta
     const resumoAba = document.getElementById('resumo');
     if (resumoAba) {
         resumoAba.addEventListener('click', function() {
@@ -478,30 +1011,22 @@ function configurarEventosResumo() {
 }
 
 // ============================================
-// 7. FUNÇÕES DE UTILIDADE PARA OUTROS SISTEMAS
+// 13. FUNÇÕES PARA OUTROS SISTEMAS USAREM
 // ============================================
 
-// Funções que outros sistemas podem chamar para atualizar o resumo
 function atualizarPericiasResumo(pericias) {
     const tabela = document.getElementById('tabelaPericiasResumo');
     if (!tabela) return;
     
     if (!pericias || pericias.length === 0) {
-        tabela.innerHTML = `
-            <tr class="vazio">
-                <td colspan="3">Nenhuma perícia</td>
-            </tr>
-        `;
+        tabela.innerHTML = '<tr class="vazio"><td colspan="3">Nenhuma perícia</td></tr>';
         return;
     }
     
     let html = '';
     let totalPontos = 0;
     
-    // Ordenar por nome
     pericias.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-    
-    // Limitar a 20 itens para não sobrecarregar
     const periciasLimitadas = pericias.slice(0, 20);
     
     periciasLimitadas.forEach(pericia => {
@@ -517,11 +1042,8 @@ function atualizarPericiasResumo(pericias) {
     
     tabela.innerHTML = html;
     
-    // Atualizar contador de pontos
     const pontosElement = document.getElementById('pontosPericias');
-    if (pontosElement) {
-        pontosElement.textContent = totalPontos;
-    }
+    if (pontosElement) pontosElement.textContent = totalPontos;
 }
 
 function atualizarVantagensResumo(vantagens) {
@@ -529,17 +1051,14 @@ function atualizarVantagensResumo(vantagens) {
     if (!lista) return;
     
     if (!vantagens || vantagens.length === 0) {
-        lista.innerHTML = `<div class="vazio">Nenhuma vantagem</div>`;
+        lista.innerHTML = '<div class="vazio">Nenhuma vantagem</div>';
         return;
     }
     
     let html = '';
     let totalPontos = 0;
     
-    // Ordenar por nome
     vantagens.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-    
-    // Limitar a 10 itens
     const vantagensLimitadas = vantagens.slice(0, 10);
     
     vantagensLimitadas.forEach(vantagem => {
@@ -554,11 +1073,8 @@ function atualizarVantagensResumo(vantagens) {
     
     lista.innerHTML = html;
     
-    // Atualizar contador de pontos
     const pontosElement = document.getElementById('pontosVantagens');
-    if (pontosElement) {
-        pontosElement.textContent = `+${totalPontos}`;
-    }
+    if (pontosElement) pontosElement.textContent = `+${totalPontos}`;
 }
 
 function atualizarDesvantagensResumo(desvantagens) {
@@ -566,17 +1082,14 @@ function atualizarDesvantagensResumo(desvantagens) {
     if (!lista) return;
     
     if (!desvantagens || desvantagens.length === 0) {
-        lista.innerHTML = `<div class="vazio">Nenhuma desvantagem</div>`;
+        lista.innerHTML = '<div class="vazio">Nenhuma desvantagem</div>';
         return;
     }
     
     let html = '';
     let totalPontos = 0;
     
-    // Ordenar por pontos (mais negativos primeiro)
     desvantagens.sort((a, b) => (a.pontos || 0) - (b.pontos || 0));
-    
-    // Limitar a 10 itens
     const desvantagensLimitadas = desvantagens.slice(0, 10);
     
     desvantagensLimitadas.forEach(desvantagem => {
@@ -586,48 +1099,43 @@ function atualizarDesvantagensResumo(desvantagens) {
                 <span class="pontos negativo">${desvantagem.pontos || 0}</span>
             </div>
         `;
-        totalPontos += desvantagem.pontos || 0;
+        totalPontos += Math.abs(desvantagem.pontos || 0);
     });
     
     lista.innerHTML = html;
     
-    // Atualizar contador de pontos
     const pontosElement = document.getElementById('pontosDesvantagens');
-    if (pontosElement) {
-        pontosElement.textContent = totalPontos;
-    }
+    if (pontosElement) pontosElement.textContent = `-${totalPontos}`;
 }
 
 // ============================================
-// 8. INICIALIZAÇÃO
+// 14. INICIALIZAÇÃO COMPLETA
 // ============================================
 
 function iniciarSistemaResumo() {
-    console.log('🚀 Sistema Resumo: Iniciando...');
+    console.log('🚀 Sistema Resumo COMPLETO: Iniciando...');
     
-    // Sincronizar dados imediatamente
     sincronizarTodosOsDados();
-    
-    // Configurar eventos
     configurarEventosResumo();
     
-    // Monitorar atualizações periódicas
+    // Monitoramento contínuo
     setInterval(() => {
         if (estadoResumo.dadosSincronizados) {
-            // Atualizar dados que podem mudar sem eventos
             atualizarPontosResumo();
             
-            // Atualizar atributos se necessário
             const dados = obterDadosAtributosDiretamente();
             atualizarAtributosNoResumo(dados);
+            
+            atualizarIdiomasNoResumo();
+            atualizarEquipamentoResumoDireto();
         }
-    }, 5000);
+    }, 3000);
     
-    console.log('✅ Sistema Resumo: Inicializado com sucesso');
+    console.log('✅ Sistema Resumo COMPLETO: Inicializado com sucesso');
 }
 
 // ============================================
-// 9. EXPORTAÇÃO DE FUNÇÕES
+// 15. EXPORTAÇÃO DE FUNÇÕES GLOBAIS
 // ============================================
 
 window.carregarResumo = iniciarSistemaResumo;
@@ -636,22 +1144,21 @@ window.atualizarPericiasResumo = atualizarPericiasResumo;
 window.atualizarVantagensResumo = atualizarVantagensResumo;
 window.atualizarDesvantagensResumo = atualizarDesvantagensResumo;
 window.atualizarResumoAtributos = atualizarAtributosNoResumo;
+window.atualizarIdiomasResumo = atualizarIdiomasNoResumo;
 
 // ============================================
-// 10. INICIALIZAÇÃO AUTOMÁTICA
+// 16. INICIALIZAÇÃO AUTOMÁTICA
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
     const resumoAba = document.getElementById('resumo');
     
-    // Se a aba já estiver ativa, inicializa
     if (resumoAba && resumoAba.classList.contains('active')) {
         setTimeout(() => {
             iniciarSistemaResumo();
         }, 500);
     }
     
-    // Observa mudança para a aba Resumo
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
@@ -670,7 +1177,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Inicialização tardia para garantir que tudo está carregado
 window.addEventListener('load', function() {
     setTimeout(() => {
         const resumoAba = document.getElementById('resumo');
@@ -680,4 +1186,4 @@ window.addEventListener('load', function() {
     }, 1000);
 });
 
-console.log('📊 Sistema Resumo: Script carregado e pronto');
+console.log('📊 Sistema Resumo COMPLETO: Script carregado e pronto para TODAS as abas');
