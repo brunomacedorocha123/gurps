@@ -2937,49 +2937,49 @@
             </div>
         </div>
         
-        <!-- QUARTA LINHA: ESCUDO (NOVO!) -->
-        <div class="combate-row linha-escudo">
-            <div class="card-escudo">
-                <div class="card-header">
-                    <i class="fas fa-shield"></i>
-                    <h3>ESCUDO</h3>
-                    <div class="escudo-status">
-                        <span class="status-badge ativo" id="escudoStatus">Ativo</span>
-                    </div>
-                </div>
-                
-                <div class="card-content">
-                    <!-- INFORMAÇÕES BÁSICAS -->
-                    <div class="escudo-info">
-                        <div class="escudo-nome" id="escudoNome">Escudo Médio (Aço)</div>
-                        <div class="escudo-dr">
-                            <span class="dr-label">DR:</span>
-                            <span class="dr-valor" id="escudoDR">4</span>
-                        </div>
-                    </div>
-                    
-                    <!-- BARRA DE PV -->
-                    <div class="escudo-pv-container">
-                        <div class="pv-header">
-                            <i class="fas fa-heart"></i>
-                            <span class="pv-texto" id="escudoPVTexto">15/20</span>
-                        </div>
-                        
-                        <div class="barra-pv-escudo">
-                            <div class="barra-fill" id="escudoPVFill" style="width: 75%"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- CONTROLES -->
-                    <div class="escudo-controles">
-                        <button class="btn-escudo dano-5" onclick="danoEscudo(5)">-5</button>
-                        <button class="btn-escudo dano-1" onclick="danoEscudo(1)">-1</button>
-                        <button class="btn-escudo cura-1" onclick="curarEscudo(1)">+1</button>
-                        <button class="btn-escudo cura-5" onclick="curarEscudo(5)">+5</button>
-                    </div>
-                </div>
+        <!-- QUARTA LINHA: ESCUDO -->
+<div class="combate-row linha-escudo">
+    <div class="card-escudo">
+        <div class="card-header">
+            <i class="fas fa-shield"></i>
+            <h3>ESCUDO</h3>
+            <div class="escudo-status">
+                <span class="status-badge inativo" id="escudoStatus">Inativo</span>
             </div>
         </div>
+        
+        <div class="card-content">
+            <!-- INFORMAÇÕES BÁSICAS -->
+            <div class="escudo-info">
+                <div class="escudo-nome" id="escudoNome">Nenhum escudo equipado</div>
+                <div class="escudo-dr">
+                    <span class="dr-label">DR:</span>
+                    <span class="dr-valor" id="escudoDR">0</span>
+                </div>
+            </div>
+            
+            <!-- BARRA DE PV -->
+            <div class="escudo-pv-container">
+                <div class="pv-header">
+                    <i class="fas fa-heart"></i>
+                    <span class="pv-texto" id="escudoPVTexto">0/0</span>
+                </div>
+                
+                <div class="barra-pv-escudo">
+                    <div class="barra-fill" id="escudoPVFill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <!-- CONTROLES -->
+            <div class="escudo-controles">
+                <button class="btn-escudo dano-5" onclick="danoEscudo(5)">-5</button>
+                <button class="btn-escudo dano-1" onclick="danoEscudo(1)">-1</button>
+                <button class="btn-escudo cura-1" onclick="curarEscudo(1)">+1</button>
+                <button class="btn-escudo cura-5" onclick="curarEscudo(5)">+5</button>
+            </div>
+        </div>
+    </div>
+</div>
         
         <!-- QUINTA LINHA: CONDIÇÕES -->
         <div class="combate-row linha-condicoes">
