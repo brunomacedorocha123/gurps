@@ -1,4 +1,4 @@
-// dashboard.js - VERSÃO LIMPA COM SUPABASE
+// dashboard.js - VERSÃO CORRIGIDA
 class DashboardSupabase {
     constructor() {
         this.estado = this.criarEstadoInicial();
@@ -21,6 +21,7 @@ class DashboardSupabase {
                 riquezaDesvantagens: 0,
                 riquezaVantagens: 0,
                 caracteristicasFisicasDesvantagens: 0,
+                peculiaridades: 0,
                 totalDesvantagens: 0,
                 limiteDesvantagens: -50,
                 saldoDisponivel: 150
@@ -62,7 +63,6 @@ class DashboardSupabase {
 
         if (!fotoUpload || !fotoPreview) return;
 
-        // Armazenar a foto em memória
         this.fotoTemporaria = null;
 
         fotoUpload.addEventListener('change', (e) => {
@@ -75,7 +75,6 @@ class DashboardSupabase {
                     if (fotoPlaceholder) fotoPlaceholder.style.display = 'none';
                     if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
                     
-                    // Armazenar a foto para salvar depois
                     this.fotoTemporaria = {
                         file: file,
                         dataUrl: e.target.result
@@ -97,11 +96,6 @@ class DashboardSupabase {
         }
     }
 
-    // Obter a foto para salvar
-    getFotoParaSalvar() {
-        return this.fotoTemporaria;
-    }
-
     // ===== SISTEMA DE IDENTIFICAÇÃO =====
     configurarCamposIdentificacao() {
         const campos = ['charName', 'racaPersonagem', 'classePersonagem', 'nivelPersonagem', 'descricaoPersonagem'];
@@ -110,7 +104,6 @@ class DashboardSupabase {
             const campo = document.getElementById(campoId);
             if (campo) {
                 campo.addEventListener('input', () => {
-                    // Atualizar estado local
                     if (campoId === 'charName') {
                         this.estado.identificacao.nome = campo.value;
                     } else if (campoId === 'racaPersonagem') {
@@ -166,7 +159,6 @@ class DashboardSupabase {
     monitorarAtributos() {
         this.puxarValoresAtributos();
         
-        // Monitorar a cada segundo
         setInterval(() => {
             this.puxarValoresAtributos();
         }, 1000);
@@ -230,6 +222,7 @@ class DashboardSupabase {
         this.puxarDadosAparencia();
         this.puxarDadosRiqueza();
         this.puxarDadosTecnicas();
+        this.puxarDadosPeculiaridades();
         
         this.calcularTotalDesvantagens();
         this.atualizarDisplayResumoGastos();
@@ -385,9 +378,30 @@ class DashboardSupabase {
 
     puxarDadosTecnicas() {
         try {
-            // Técnicas agora serão monitoradas de outra forma
-            // Pode ser implementado posteriormente
-            this.estado.pontos.gastosTecnicas = 0;
+            const tecnicasElement = document.getElementById('total-tecnicas');
+            if (tecnicasElement) {
+                const texto = tecnicasElement.textContent;
+                const match = texto.match(/(\d+)/);
+                if (match) {
+                    this.estado.pontos.gastosTecnicas = parseInt(match[1]) || 0;
+                }
+            }
+        } catch (error) {
+            // Silencioso
+        }
+    }
+
+    puxarDadosPeculiaridades() {
+        try {
+            const peculiaridadesElement = document.getElementById('total-peculiaridades');
+            if (peculiaridadesElement) {
+                const texto = peculiaridadesElement.textContent;
+                const match = texto.match(/([+-]?\d+)/);
+                if (match) {
+                    const valor = parseInt(match[1]) || 0;
+                    this.estado.pontos.peculiaridades = valor < 0 ? Math.abs(valor) : 0;
+                }
+            }
         } catch (error) {
             // Silencioso
         }
@@ -399,7 +413,8 @@ class DashboardSupabase {
             this.estado.pontos.desvantagensVantagens +
             this.estado.pontos.aparenciaDesvantagens +
             this.estado.pontos.riquezaDesvantagens +
-            this.estado.pontos.caracteristicasFisicasDesvantagens;
+            this.estado.pontos.caracteristicasFisicasDesvantagens +
+            this.estado.pontos.peculiaridades;
         
         this.estado.pontos.totalDesvantagens = total;
         return total;
@@ -420,7 +435,7 @@ class DashboardSupabase {
             totalDesvantagens 
         } = this.estado.pontos;
         
-        // Incluir aparência positiva
+        // CORREÇÃO: Incluir aparência positiva como vantagem
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -430,11 +445,17 @@ class DashboardSupabase {
             }
         }
         
+        // CORREÇÃO: Técnicas e Magias são POSITIVAS (gastam pontos)
         const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
-        const gastosTotais = gastosAtributos + vantagensTotais + 
-                            (gastosPericias + gastosTecnicas) + gastosMagias;
         
+        // CORREÇÃO: Incluir técnicas e magias no total gasto
+        const gastosTotais = gastosAtributos + vantagensTotais + 
+                            gastosPericias + gastosTecnicas + gastosMagias;
+        
+        // CORREÇÃO CRÍTICA: Desvantagens dão pontos, então SUBTRAEM do gasto
+        // Se totalDesvantagens = -20 pontos, então você tem 20 pontos extras
         this.estado.pontos.saldoDisponivel = total - gastosTotais + totalDesvantagens;
+        
         return this.estado.pontos.saldoDisponivel;
     }
 
@@ -505,7 +526,6 @@ class DashboardSupabase {
             limiteDesvantagens 
         } = this.estado.pontos;
         
-        // Incluir aparência positiva
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -515,9 +535,10 @@ class DashboardSupabase {
             }
         }
         
+        // CORREÇÃO: Incluir técnicas e magias nos pontos gastos
         const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
         const pontosGastosDashboard = gastosAtributos + vantagensTotais + 
-                                     (gastosPericias + gastosTecnicas) + gastosMagias;
+                                     gastosPericias + gastosTecnicas + gastosMagias;
         
         // Pontos Gastos
         const pontosGastosElement = document.getElementById('pontosGastosDashboard');
@@ -566,7 +587,6 @@ class DashboardSupabase {
             totalDesvantagens 
         } = this.estado.pontos;
         
-        // Incluir aparência positiva
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -576,8 +596,8 @@ class DashboardSupabase {
             }
         }
         
+        // CORREÇÃO: Técnicas são positivas (gastam pontos)
         const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
-        const totalPericiasETecnicas = gastosPericias + gastosTecnicas;
         
         const elementos = {
             gastosAtributos: document.getElementById('gastosAtributos'),
@@ -596,8 +616,9 @@ class DashboardSupabase {
             elementos.gastosVantagens.textContent = vantagensTotais;
         }
         
+        // CORREÇÃO: Mostrar técnicas junto com perícias ou separado
         if (elementos.gastosPericias) {
-            elementos.gastosPericias.textContent = totalPericiasETecnicas;
+            elementos.gastosPericias.textContent = gastosPericias + gastosTecnicas;
         }
         
         if (elementos.gastosMagias) {
@@ -609,8 +630,9 @@ class DashboardSupabase {
             elementos.gastosDesvantagens.style.color = '#9b59b6';
         }
         
-        // Total Gastos
-        const gastosTotais = gastosAtributos + vantagensTotais + totalPericiasETecnicas + gastosMagias;
+        // CORREÇÃO: Cálculo correto do total
+        const gastosTotais = gastosAtributos + vantagensTotais + 
+                            gastosPericias + gastosTecnicas + gastosMagias;
         const gastosLiquidos = gastosTotais - totalDesvantagens;
         
         if (elementos.gastosTotal) {
@@ -628,33 +650,6 @@ class DashboardSupabase {
         }
     }
 
-    // ===== COLETAR DADOS PARA SALVAR =====
-    coletarDadosParaSalvar() {
-        // Coletar dados básicos do formulário
-        const nome = document.getElementById('charName')?.value || 'Novo Personagem';
-        const raca = document.getElementById('racaPersonagem')?.value || '';
-        const classe = document.getElementById('classePersonagem')?.value || '';
-        const nivel = document.getElementById('nivelPersonagem')?.value || '';
-        const descricao = document.getElementById('descricaoPersonagem')?.value || '';
-        
-        // Atualizar estado com dados atuais
-        this.estado.identificacao.nome = nome;
-        this.estado.identificacao.raca = raca;
-        this.estado.identificacao.classe = classe;
-        this.estado.identificacao.nivel = nivel;
-        this.estado.identificacao.descricao = descricao;
-        
-        // Retornar dados estruturados
-        return {
-            identificacao: this.estado.identificacao,
-            pontos: this.estado.pontos,
-            atributos: this.estado.atributos,
-            caracteristicas: this.estado.caracteristicas,
-            relacionamentos: this.estado.relacionamentos,
-            foto: this.fotoTemporaria
-        };
-    }
-
     // ===== INICIALIZAÇÃO =====
     inicializar() {
         this.configurarSistemaFoto();
@@ -664,7 +659,6 @@ class DashboardSupabase {
         this.monitorarAtributos();
         this.monitorarOutrasAbas();
         
-        // Inicializar displays
         setTimeout(() => {
             this.atualizarDisplayAtributos();
             this.atualizarDisplayVitalidade();
@@ -686,7 +680,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => window.dashboard.inicializar(), 300);
     }
     
-    // Observar mudanças de aba
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
