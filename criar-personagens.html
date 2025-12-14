@@ -3445,24 +3445,14 @@
 <script src="salvamento-supabase.js"></script>
 
 <!-- NO criar-personagens.html, substitua TODO o script por este: -->
+
 <script>
-    // ============================================
-    // CONFIGURAÇÃO DO SUPABASE - CORRIGIDA
-    // ============================================
+    // Configuração do Supabase
+    const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
     
-    // USAR A INSTÂNCIA GLOBAL que já existe
-    let supabase;
-    
-    // Verificar se já existe supabase global
-    if (window.supabase) {
-        supabase = window.supabase;
-    } else {
-        // Se não existir, configurar
-        const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
-        window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        supabase = window.supabase;
-    }
+    // Inicializar Supabase
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     // Estado global
     let personagemId = null;
@@ -3853,4 +3843,4 @@
 
 </script>
 </body>
-</html>
+</html>  
