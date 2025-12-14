@@ -13,7 +13,6 @@ function capturarVantagensResumo() {
         const vantagens = [];
         let totalPontos = 0;
         
-        // Tentar pegar do sistemaVantagens
         if (window.sistemaVantagens && window.sistemaVantagens.vantagensAdquiridas) {
             window.sistemaVantagens.vantagensAdquiridas.forEach(v => {
                 vantagens.push({
@@ -25,7 +24,6 @@ function capturarVantagensResumo() {
             });
         }
         
-        // Se não achou, tentar do HTML
         if (vantagens.length === 0) {
             const lista = document.getElementById('vantagens-adquiridas');
             if (lista && !lista.innerHTML.includes('lista-vazia')) {
@@ -59,7 +57,6 @@ function capturarVantagensResumo() {
         return { vantagens, totalPontos };
         
     } catch (error) {
-        console.error('Erro capturar vantagens:', error);
         return { vantagens: [], totalPontos: 0 };
     }
 }
@@ -73,7 +70,6 @@ function capturarDesvantagensResumo() {
         const desvantagens = [];
         let totalPontos = 0;
         
-        // Tentar pegar do sistemaDesvantagens
         if (window.sistemaDesvantagens && window.sistemaDesvantagens.desvantagensAdquiridas) {
             window.sistemaDesvantagens.desvantagensAdquiridas.forEach(d => {
                 desvantagens.push({
@@ -85,7 +81,6 @@ function capturarDesvantagensResumo() {
             });
         }
         
-        // Se não achou, tentar do HTML
         if (desvantagens.length === 0) {
             const lista = document.getElementById('desvantagens-adquiridas');
             if (lista && !lista.innerHTML.includes('lista-vazia')) {
@@ -119,7 +114,6 @@ function capturarDesvantagensResumo() {
         return { desvantagens, totalPontos: Math.abs(totalPontos) };
         
     } catch (error) {
-        console.error('Erro capturar desvantagens:', error);
         return { desvantagens: [], totalPontos: 0 };
     }
 }
@@ -133,7 +127,6 @@ function capturarPeculiaridadesResumo() {
         const peculiaridades = [];
         let totalPontos = 0;
         
-        // Tentar pegar do sistemaVantagens
         if (window.sistemaVantagens && window.sistemaVantagens.peculiaridades) {
             window.sistemaVantagens.peculiaridades.forEach(p => {
                 peculiaridades.push({
@@ -144,7 +137,6 @@ function capturarPeculiaridadesResumo() {
             });
         }
         
-        // Se não achou, tentar do HTML
         if (peculiaridades.length === 0) {
             const lista = document.getElementById('lista-peculiaridades');
             if (lista && !lista.innerHTML.includes('lista-vazia')) {
@@ -168,7 +160,6 @@ function capturarPeculiaridadesResumo() {
         return { peculiaridades, totalPontos: Math.abs(totalPontos) };
         
     } catch (error) {
-        console.error('Erro capturar peculiaridades:', error);
         return { peculiaridades: [], totalPontos: 0 };
     }
 }
@@ -179,14 +170,10 @@ function capturarPeculiaridadesResumo() {
 
 function atualizarVantagensNoResumo() {
     try {
-        console.log('🔄 Atualizando vantagens/desvantagens no resumo...');
-        
-        // 1. Capturar dados
         const vantagensData = capturarVantagensResumo();
         const desvantagensData = capturarDesvantagensResumo();
         const peculiaridadesData = capturarPeculiaridadesResumo();
         
-        // 2. Atualizar pontos
         const pontosVantagens = document.getElementById('pontosVantagens');
         const pontosDesvantagens = document.getElementById('pontosDesvantagens');
         const pontosPeculiaridades = document.getElementById('pontosPeculiaridades');
@@ -206,15 +193,12 @@ function atualizarVantagensNoResumo() {
             pontosPeculiaridades.className = 'card-pontos negativo';
         }
         
-        // 3. Atualizar listas
         atualizarListaResumo('listaVantagensResumo', vantagensData.vantagens, 'vantagem');
         atualizarListaResumo('listaDesvantagensResumo', desvantagensData.desvantagens, 'desvantagem');
         atualizarListaResumo('listaPeculiaridadesResumo', peculiaridadesData.peculiaridades, 'peculiaridade');
         
-        console.log(`✅ Atualizado: ${vantagensData.vantagens.length}V, ${desvantagensData.desvantagens.length}D, ${peculiaridadesData.peculiaridades.length}P`);
-        
     } catch (error) {
-        console.error('❌ Erro ao atualizar resumo:', error);
+        // Silencioso
     }
 }
 
@@ -230,7 +214,6 @@ function atualizarListaResumo(containerId, itens, tipo) {
         return;
     }
     
-    // Limitar a 10 itens
     const itensLimitados = itens.slice(0, 10);
     let html = '';
     
@@ -250,7 +233,6 @@ function atualizarListaResumo(containerId, itens, tipo) {
         `;
     });
     
-    // Se tiver mais itens
     if (itens.length > 10) {
         html += `<div class="mais-itens">+${itens.length - 10} mais...</div>`;
     }
@@ -263,13 +245,9 @@ function atualizarListaResumo(containerId, itens, tipo) {
 // ============================================
 
 function iniciarMonitoramentoVantagens() {
-    // Só inicia uma vez
     if (window.monitorVantagensAtivo) return;
     window.monitorVantagensAtivo = true;
     
-    console.log('👁️ Iniciando monitoramento de vantagens...');
-    
-    // Atualizar quando a aba Resumo for aberta
     document.addEventListener('click', function(e) {
         const tabBtn = e.target.closest('.tab-btn');
         if (tabBtn && tabBtn.dataset.tab === 'resumo') {
@@ -277,7 +255,6 @@ function iniciarMonitoramentoVantagens() {
         }
     });
     
-    // Atualizar periodicamente quando na aba Resumo
     setInterval(() => {
         const resumoAba = document.getElementById('resumo');
         if (resumoAba && resumoAba.classList.contains('active')) {
@@ -285,7 +262,6 @@ function iniciarMonitoramentoVantagens() {
         }
     }, 5000);
     
-    // Atualização inicial
     setTimeout(atualizarVantagensNoResumo, 1000);
 }
 
@@ -293,13 +269,8 @@ function iniciarMonitoramentoVantagens() {
 // 6. INICIALIZAÇÃO
 // ============================================
 
-// Iniciar quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 Carregado - Aguardando para iniciar monitoramento...');
-    
-    // Esperar um pouco para tudo carregar
     setTimeout(() => {
-        // Verificar se os containers existem
         const temContainers = 
             document.getElementById('listaVantagensResumo') &&
             document.getElementById('listaDesvantagensResumo') &&
@@ -308,13 +279,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (temContainers) {
             iniciarMonitoramentoVantagens();
         } else {
-            // Se não existir, tentar novamente depois
             setTimeout(iniciarMonitoramentoVantagens, 2000);
         }
     }, 1500);
 });
 
-// Backup: Iniciar após load completo
 window.addEventListener('load', function() {
     setTimeout(() => {
         if (!window.monitorVantagensAtivo) {
@@ -327,13 +296,11 @@ window.addEventListener('load', function() {
 // 7. FUNÇÃO PARA USO EXTERNO
 // ============================================
 
-// Função para ser chamada pelo sistema-resumo.js
 window.atualizarResumoVantagens = function() {
     atualizarVantagensNoResumo();
     return true;
 };
 
-// Função para verificar status
 window.verificarStatusVantagensResumo = function() {
     return {
         monitorAtivo: window.monitorVantagensAtivo || false,
@@ -344,5 +311,3 @@ window.verificarStatusVantagensResumo = function() {
         }
     };
 };
-
-console.log('✅ resumo-vantagens.js carregado - Pronto para usar');
