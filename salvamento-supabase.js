@@ -68,9 +68,9 @@ class SalvamentoSupabase {
         if (!file || !personagemId || !this.usuarioLogado) return null;
 
         try {
-            const fileExt = file.name.split('.').pop();
+            const fileExt = file.name.split('.').pop().toLowerCase();
             const fileName = `avatar_${personagemId}.${fileExt}`;
-            const filePath = `${this.usuarioLogado.id}/${fileName}`;
+            const filePath = `avatars/${this.usuarioLogado.id}/${fileName}`;
 
             const { data, error } = await this.supabase.storage
                 .from('characters')
@@ -275,16 +275,20 @@ class SalvamentoSupabase {
             let resultado;
             
             if (personagemId) {
+                // Se tiver foto, salvar
                 if (fotoFile) {
                     fotoUrl = await this.salvarFotoNoSupabase(fotoFile, personagemId);
                 }
                 
+                // Se obteve URL da foto, adicionar aos dados
                 if (fotoUrl) {
                     dados.avatar_url = fotoUrl;
                 }
                 
+                // Remover campo created_at para update
                 delete dados.created_at;
                 
+                // Atualizar personagem
                 resultado = await this.supabase
                     .from('characters')
                     .update(dados)
@@ -293,23 +297,25 @@ class SalvamentoSupabase {
                     .select();
                     
             } else {
+                // Criar novo personagem
                 resultado = await this.supabase
                     .from('characters')
                     .insert([dados])
                     .select();
                 
-                if (resultado.data && resultado.data[0]) {
+                // Se criou com sucesso e tem foto
+                if (resultado.data && resultado.data[0] && fotoFile) {
                     const novoId = resultado.data[0].id;
                     
-                    if (fotoFile) {
-                        fotoUrl = await this.salvarFotoNoSupabase(fotoFile, novoId);
-                        
-                        if (fotoUrl) {
-                            await this.supabase
-                                .from('characters')
-                                .update({ avatar_url: fotoUrl })
-                                .eq('id', novoId);
-                        }
+                    // Salvar foto
+                    fotoUrl = await this.salvarFotoNoSupabase(fotoFile, novoId);
+                    
+                    // Atualizar personagem com URL da foto
+                    if (fotoUrl) {
+                        await this.supabase
+                            .from('characters')
+                            .update({ avatar_url: fotoUrl })
+                            .eq('id', novoId);
                     }
                 }
             }
