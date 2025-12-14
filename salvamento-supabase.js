@@ -37,7 +37,7 @@ class SalvamentoSupabase {
             if (error) {
                 console.error('Erro ao contar:', error);
                 return {
-                    podeCriar: true,
+                    podeCriar: true, // Permite mesmo com erro
                     quantidade: 0,
                     limite: this.limitePersonagens,
                     motivo: ''
@@ -113,526 +113,349 @@ class SalvamentoSupabase {
     }
 
     // ======================
-    // COLETA DE DADOS COMPLETA
+    // PEGAR DADOS DO DASHBOARD (DIRETO DOS DISPLAYS)
     // ======================
-    coletarTodosDados() {
-        // OBJETO PRINCIPAL PARA SALVAR
-        const dados = {
-            // Dados serão coletados abaixo
-        };
-
-        // ========== DASHBOARD ==========
-        this.coletarDadosDashboard(dados);
+    pegarDadosDashboard() {
+        console.log('📊 Pegando dados do Dashboard...');
         
-        // ========== ATRIBUTOS ==========
-        this.coletarDadosAtributos(dados);
+        const dados = {};
         
-        // ========== CARACTERÍSTICAS ==========
-        this.coletarDadosCaracteristicas(dados);
-        
-        // ========== VANTAGENS ==========
-        this.coletarDadosVantagens(dados);
-        
-        // ========== PERÍCIAS ==========
-        this.coletarDadosPericias(dados);
-        
-        // ========== MAGIAS ==========
-        this.coletarDadosMagias(dados);
-        
-        // ========== EQUIPAMENTO ==========
-        this.coletarDadosEquipamento(dados);
-        
-        // ========== COMBATE ==========
-        this.coletarDadosCombate(dados);
-
-        // Timestamp
-        dados.updated_at = new Date().toISOString();
+        try {
+            // 1. DADOS BÁSICOS
+            dados.nome = document.getElementById('charName')?.value || 'Novo Personagem';
+            dados.raca = document.getElementById('racaPersonagem')?.value || '';
+            dados.classe = document.getElementById('classePersonagem')?.value || '';
+            dados.nivel = document.getElementById('nivelPersonagem')?.value || 'Nível 1';
+            dados.descricao = document.getElementById('descricaoPersonagem')?.value || '';
+            
+            // 2. PONTOS (DIRETO DOS DISPLAYS VISÍVEIS)
+            // Pontos totais do input
+            const pontosTotaisInput = document.getElementById('pontosTotaisDashboard');
+            if (pontosTotaisInput) {
+                dados.pontos_totais = parseInt(pontosTotaisInput.value) || 150;
+            } else {
+                dados.pontos_totais = 150;
+            }
+            
+            // Pontos gastos do display
+            const pontosGastosElement = document.getElementById('pontosGastosDashboard');
+            if (pontosGastosElement) {
+                dados.pontos_gastos = parseInt(pontosGastosElement.textContent) || 0;
+            } else {
+                dados.pontos_gastos = 0;
+            }
+            
+            // Saldo disponível do display
+            const saldoElement = document.getElementById('saldoDisponivelDashboard');
+            if (saldoElement) {
+                dados.pontos_disponiveis = parseInt(saldoElement.textContent) || 150;
+            } else {
+                dados.pontos_disponiveis = 150;
+            }
+            
+            // Limite de desvantagens
+            const limiteDesvantagensInput = document.getElementById('limiteDesvantagens');
+            if (limiteDesvantagensInput) {
+                dados.limite_desvantagens = parseInt(limiteDesvantagensInput.value) || -50;
+            } else {
+                dados.limite_desvantagens = -50;
+            }
+            
+            // Desvantagens atuais
+            const desvantagensElement = document.getElementById('desvantagensAtuais');
+            if (desvantagensElement) {
+                dados.desvantagens_atuais = parseInt(desvantagensElement.textContent) || 0;
+            } else {
+                dados.desvantagens_atuais = 0;
+            }
+            
+            console.log('✅ Pontos coletados do Dashboard:', {
+                totais: dados.pontos_totais,
+                gastos: dados.pontos_gastos,
+                disponiveis: dados.pontos_disponiveis,
+                desvantagens: dados.desvantagens_atuais
+            });
+            
+        } catch (error) {
+            console.error('Erro ao pegar dados do Dashboard:', error);
+            // Valores padrão
+            dados.pontos_totais = 150;
+            dados.pontos_gastos = 0;
+            dados.pontos_disponiveis = 150;
+            dados.limite_desvantagens = -50;
+            dados.desvantagens_atuais = 0;
+        }
         
         return dados;
     }
 
-    // ========== DASHBOARD ==========
-    coletarDadosDashboard(dados) {
-        // Dados básicos
-        dados.nome = document.getElementById('charName')?.value || 'Novo Personagem';
-        dados.raca = document.getElementById('racaPersonagem')?.value || '';
-        dados.classe = document.getElementById('classePersonagem')?.value || '';
-        dados.nivel = document.getElementById('nivelPersonagem')?.value || 'Nível 1';
-        dados.descricao = document.getElementById('descricaoPersonagem')?.value || '';
-        dados.status = 'Ativo';
+    // ======================
+    // PEGAR DADOS DOS ATRIBUTOS
+    // ======================
+    pegarDadosAtributos() {
+        const dados = {};
         
-        // Pontos do dashboard
-        dados.pontos_totais = parseInt(document.getElementById('pontosTotaisDashboard')?.value) || 150;
-        dados.limite_desvantagens = parseInt(document.getElementById('limiteDesvantagens')?.value) || -50;
-        dados.desvantagens_atuais = parseInt(document.getElementById('desvantagensAtuais')?.textContent) || 0;
-    }
-
-    // ========== ATRIBUTOS ==========
-    coletarDadosAtributos(dados) {
-        // Atributos principais
-        dados.forca = parseInt(document.getElementById('ST')?.value) || 10;
-        dados.destreza = parseInt(document.getElementById('DX')?.value) || 10;
-        dados.inteligencia = parseInt(document.getElementById('IQ')?.value) || 10;
-        dados.saude = parseInt(document.getElementById('HT')?.value) || 10;
-        
-        // Atributos secundários
-        dados.pontos_vida = parseInt(document.getElementById('PVTotal')?.textContent) || 10;
-        dados.bonus_pv = parseInt(document.getElementById('bonusPV')?.value) || 0;
-        dados.pontos_fadiga = parseInt(document.getElementById('PFTotal')?.textContent) || 10;
-        dados.bonus_pf = parseInt(document.getElementById('bonusPF')?.value) || 0;
-        dados.vontade = parseInt(document.getElementById('VontadeTotal')?.textContent) || 10;
-        dados.bonus_vontade = parseInt(document.getElementById('bonusVontade')?.value) || 0;
-        dados.percepcao = parseInt(document.getElementById('PercepcaoTotal')?.textContent) || 10;
-        dados.bonus_percepcao = parseInt(document.getElementById('bonusPercepcao')?.value) || 0;
-        dados.deslocamento = parseFloat(document.getElementById('DeslocamentoTotal')?.textContent) || 5.00;
-        dados.bonus_deslocamento = parseFloat(document.getElementById('bonusDeslocamento')?.value) || 0;
-        
-        // Dano
-        dados.dano_gdp = document.getElementById('danoGDP')?.textContent || '1d-2';
-        dados.dano_geb = document.getElementById('danoGEB')?.textContent || '1d';
-        
-        // Carga
-        dados.carga_nenhuma = parseFloat(document.getElementById('cargaNenhuma')?.textContent) || 10.00;
-        dados.carga_leve = parseFloat(document.getElementById('cargaLeve')?.textContent) || 20.00;
-        dados.carga_media = parseFloat(document.getElementById('cargaMedia')?.textContent) || 30.00;
-        dados.carga_pesada = parseFloat(document.getElementById('cargaPesada')?.textContent) || 60.00;
-        dados.carga_muito_pesada = parseFloat(document.getElementById('cargaMuitoPesada')?.textContent) || 100.00;
-    }
-
-    // ========== CARACTERÍSTICAS ==========
-    coletarDadosCaracteristicas(dados) {
-        // Aparência
-        const selectAparencia = document.getElementById('nivelAparencia');
-        if (selectAparencia) {
-            dados.aparencia = selectAparencia.options[selectAparencia.selectedIndex]?.text.split('[')[0]?.trim() || 'Comum';
-            dados.custo_aparencia = parseInt(selectAparencia.value) || 0;
-        }
-        
-        // Riqueza
-        const selectRiqueza = document.getElementById('nivelRiqueza');
-        if (selectRiqueza) {
-            dados.riqueza = selectRiqueza.options[selectRiqueza.selectedIndex]?.text.split('[')[0]?.trim() || 'Média';
-            dados.custo_riqueza = parseInt(selectRiqueza.value) || 0;
-            dados.renda_mensal = document.getElementById('rendaMensal')?.textContent || '$1.000';
-        }
-        
-        // Altura e peso
-        dados.altura = parseFloat(document.getElementById('altura')?.value) || 1.70;
-        dados.peso = parseFloat(document.getElementById('peso')?.value) || 70.00;
-        
-        // Idiomas (em JSON)
         try {
-            const idiomas = [];
-            // Idioma materno
-            const idiomaMaterno = document.getElementById('idiomaMaternoNome')?.value;
-            if (idiomaMaterno) {
-                idiomas.push({
-                    nome: idiomaMaterno,
-                    fala: 'Nativo',
-                    escrita: 'Nativo',
-                    custo: 0
-                });
-            }
+            // Atributos principais
+            dados.forca = parseInt(document.getElementById('ST')?.value) || 10;
+            dados.destreza = parseInt(document.getElementById('DX')?.value) || 10;
+            dados.inteligencia = parseInt(document.getElementById('IQ')?.value) || 10;
+            dados.saude = parseInt(document.getElementById('HT')?.value) || 10;
             
-            // Idiomas adicionais
-            const listaIdiomas = document.getElementById('listaIdiomasAdicionais');
-            if (listaIdiomas) {
-                const itens = listaIdiomas.querySelectorAll('.idioma-item');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.idioma-nome')?.textContent;
-                    const fala = item.querySelector('.idioma-fala')?.textContent;
-                    const escrita = item.querySelector('.idioma-escrita')?.textContent;
-                    const custo = parseInt(item.querySelector('.idioma-custo')?.textContent) || 0;
-                    
-                    if (nome) {
-                        idiomas.push({
-                            nome,
-                            fala: fala || '',
-                            escrita: escrita || '',
-                            custo
-                        });
-                    }
-                });
-            }
+            // Atributos secundários (se disponíveis)
+            const pvTotal = document.getElementById('PVTotal');
+            if (pvTotal) dados.pontos_vida = parseInt(pvTotal.textContent) || 10;
             
-            dados.idiomas = JSON.stringify(idiomas);
+            const pfTotal = document.getElementById('PFTotal');
+            if (pfTotal) dados.pontos_fadiga = parseInt(pfTotal.textContent) || 10;
+            
+            const vontadeTotal = document.getElementById('VontadeTotal');
+            if (vontadeTotal) dados.vontade = parseInt(vontadeTotal.textContent) || 10;
+            
+            const percepcaoTotal = document.getElementById('PercepcaoTotal');
+            if (percepcaoTotal) dados.percepcao = parseInt(percepcaoTotal.textContent) || 10;
+            
+            const deslocamentoTotal = document.getElementById('DeslocamentoTotal');
+            if (deslocamentoTotal) dados.deslocamento = parseFloat(deslocamentoTotal.textContent) || 5.00;
+            
         } catch (error) {
-            console.warn('Erro ao coletar idiomas:', error);
-            dados.idiomas = '[]';
+            console.error('Erro ao pegar atributos:', error);
+            // Valores padrão
+            dados.forca = 10;
+            dados.destreza = 10;
+            dados.inteligencia = 10;
+            dados.saude = 10;
+            dados.pontos_vida = 10;
+            dados.pontos_fadiga = 10;
+            dados.vontade = 10;
+            dados.percepcao = 10;
+            dados.deslocamento = 5.00;
         }
         
-        // Características físicas (em JSON)
-        try {
-            const caracteristicas = [];
-            const selecionadas = document.getElementById('caracteristicasSelecionadas');
-            if (selecionadas) {
-                const itens = selecionadas.querySelectorAll('.caracteristica-selecionada');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.caracteristica-nome')?.textContent;
-                    const custo = parseInt(item.querySelector('.caracteristica-custo')?.textContent) || 0;
-                    
-                    if (nome) {
-                        caracteristicas.push({
-                            nome,
-                            custo
-                        });
-                    }
-                });
-            }
-            
-            dados.caracteristicas_fisicas = JSON.stringify(caracteristicas);
-        } catch (error) {
-            console.warn('Erro ao coletar características físicas:', error);
-            dados.caracteristicas_fisicas = '[]';
-        }
+        return dados;
     }
 
-    // ========== VANTAGENS ==========
-    coletarDadosVantagens(dados) {
+    // ======================
+    // PEGAR DADOS DAS CARACTERÍSTICAS
+    // ======================
+    pegarDadosCaracteristicas() {
+        const dados = {};
+        
         try {
-            // Vantagens adquiridas
-            const vantagens = [];
-            const listaVantagens = document.getElementById('vantagens-adquiridas');
-            if (listaVantagens) {
-                const itens = listaVantagens.querySelectorAll('.vantagem-adquirida');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.vantagem-nome')?.textContent;
-                    const custo = parseInt(item.querySelector('.vantagem-custo')?.textContent) || 0;
-                    
-                    if (nome) {
-                        vantagens.push({
-                            nome,
-                            custo
-                        });
-                    }
-                });
+            // Aparência
+            const selectAparencia = document.getElementById('nivelAparencia');
+            if (selectAparencia) {
+                const texto = selectAparencia.options[selectAparencia.selectedIndex]?.text;
+                dados.aparencia = texto?.split('[')[0]?.trim() || 'Comum';
+                dados.custo_aparencia = parseInt(selectAparencia.value) || 0;
             }
             
-            dados.vantagens = JSON.stringify(vantagens);
-            dados.total_vantagens = vantagens.reduce((sum, v) => sum + (v.custo > 0 ? v.custo : 0), 0);
-            
-            // Desvantagens adquiridas
-            const desvantagens = [];
-            const listaDesvantagens = document.getElementById('desvantagens-adquiridas');
-            if (listaDesvantagens) {
-                const itens = listaDesvantagens.querySelectorAll('.desvantagem-adquirida');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.desvantagem-nome')?.textContent;
-                    const custo = parseInt(item.querySelector('.desvantagem-custo')?.textContent) || 0;
-                    
-                    if (nome) {
-                        desvantagens.push({
-                            nome,
-                            custo: Math.abs(custo) // Armazenar como positivo
-                        });
-                    }
-                });
+            // Riqueza
+            const selectRiqueza = document.getElementById('nivelRiqueza');
+            if (selectRiqueza) {
+                const texto = selectRiqueza.options[selectRiqueza.selectedIndex]?.text;
+                dados.riqueza = texto?.split('[')[0]?.trim() || 'Média';
+                dados.custo_riqueza = parseInt(selectRiqueza.value) || 0;
             }
             
-            dados.desvantagens = JSON.stringify(desvantagens);
-            dados.total_desvantagens = desvantagens.reduce((sum, d) => sum + d.custo, 0);
+            // Altura e peso
+            dados.altura = parseFloat(document.getElementById('altura')?.value) || 1.70;
+            dados.peso = parseFloat(document.getElementById('peso')?.value) || 70.00;
+            
+        } catch (error) {
+            console.error('Erro ao pegar características:', error);
+            // Valores padrão
+            dados.aparencia = 'Comum';
+            dados.custo_aparencia = 0;
+            dados.riqueza = 'Média';
+            dados.custo_riqueza = 0;
+            dados.altura = 1.70;
+            dados.peso = 70.00;
+        }
+        
+        return dados;
+    }
+
+    // ======================
+    // PEGAR DADOS DAS VANTAGENS/DESVANTAGENS
+    // ======================
+    pegarDadosVantagensDesvantagens() {
+        const dados = {
+            vantagens: '[]',
+            desvantagens: '[]',
+            peculiaridades: '[]',
+            total_vantagens: 0,
+            total_desvantagens: 0,
+            total_peculiaridades: 0
+        };
+        
+        try {
+            // Verificar se existe algum display com pontos
+            const totalVantagensElement = document.getElementById('total-vantagens');
+            if (totalVantagensElement) {
+                const texto = totalVantagensElement.textContent;
+                const match = texto.match(/[+-]?\d+/);
+                if (match) {
+                    const valor = parseInt(match[0]);
+                    if (valor > 0) dados.total_vantagens = valor;
+                    if (valor < 0) dados.total_desvantagens = Math.abs(valor);
+                }
+            }
             
             // Peculiaridades
-            const peculiaridades = [];
             const listaPeculiaridades = document.getElementById('lista-peculiaridades');
             if (listaPeculiaridades) {
                 const itens = listaPeculiaridades.querySelectorAll('.peculiaridade-item');
+                const peculiaridades = [];
                 itens.forEach(item => {
                     const texto = item.querySelector('.peculiaridade-texto')?.textContent;
-                    if (texto) {
-                        peculiaridades.push(texto);
-                    }
+                    if (texto) peculiaridades.push(texto);
                 });
+                dados.total_peculiaridades = peculiaridades.length;
+                dados.peculiaridades = JSON.stringify(peculiaridades);
             }
-            
-            dados.peculiaridades = JSON.stringify(peculiaridades);
-            dados.total_peculiaridades = peculiaridades.length;
             
         } catch (error) {
-            console.warn('Erro ao coletar vantagens:', error);
-            dados.vantagens = '[]';
-            dados.desvantagens = '[]';
-            dados.peculiaridades = '[]';
-            dados.total_vantagens = 0;
-            dados.total_desvantagens = 0;
-            dados.total_peculiaridades = 0;
-        }
-    }
-
-    // ========== PERÍCIAS ==========
-    coletarDadosPericias(dados) {
-        try {
-            // Perícias aprendidas
-            const pericias = [];
-            const listaPericias = document.getElementById('pericias-aprendidas');
-            if (listaPericias) {
-                const itens = listaPericias.querySelectorAll('.pericia-adquirida');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.pericia-nome')?.textContent;
-                    const nivel = parseInt(item.querySelector('.pericia-nivel')?.textContent) || 0;
-                    const custo = parseInt(item.querySelector('.pericia-custo')?.textContent) || 0;
-                    
-                    if (nome) {
-                        pericias.push({
-                            nome,
-                            nivel,
-                            custo
-                        });
-                    }
-                });
-            }
-            
-            dados.pericias = JSON.stringify(pericias);
-            dados.total_pericias = pericias.length;
-            dados.pontos_pericias = pericias.reduce((sum, p) => sum + p.custo, 0);
-            
-            // Técnicas aprendidas
-            const tecnicas = [];
-            const listaTecnicas = document.getElementById('tecnicas-aprendidas');
-            if (listaTecnicas) {
-                const itens = listaTecnicas.querySelectorAll('.tecnica-adquirida');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.tecnica-nome')?.textContent;
-                    const nivel = parseInt(item.querySelector('.tecnica-nivel')?.textContent) || 0;
-                    const custo = parseInt(item.querySelector('.tecnica-custo')?.textContent) || 0;
-                    
-                    if (nome) {
-                        tecnicas.push({
-                            nome,
-                            nivel,
-                            custo
-                        });
-                    }
-                });
-            }
-            
-            dados.tecnicas = JSON.stringify(tecnicas);
-            dados.total_tecnicas = tecnicas.length;
-            dados.pontos_tecnicas = tecnicas.reduce((sum, t) => sum + t.custo, 0);
-            
-        } catch (error) {
-            console.warn('Erro ao coletar perícias:', error);
-            dados.pericias = '[]';
-            dados.tecnicas = '[]';
-            dados.total_pericias = 0;
-            dados.total_tecnicas = 0;
-            dados.pontos_pericias = 0;
-            dados.pontos_tecnicas = 0;
-        }
-    }
-
-    // ========== MAGIAS ==========
-    coletarDadosMagias(dados) {
-        try {
-            // Status mágico
-            dados.aptidao_magica = parseInt(document.getElementById('aptidao-magica')?.value) || 0;
-            dados.mana_atual = parseInt(document.getElementById('mana-atual')?.value) || 10;
-            dados.mana_base = parseInt(document.getElementById('mana-base')?.textContent) || 10;
-            dados.bonus_mana = parseInt(document.getElementById('bonus-mana')?.value) || 0;
-            
-            // Magias aprendidas
-            const magias = [];
-            const listaMagias = document.getElementById('magias-aprendidas');
-            if (listaMagias) {
-                const itens = listaMagias.querySelectorAll('.magia-adquirida');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.magia-nome')?.textContent;
-                    const nivel = parseInt(item.querySelector('.magia-nivel')?.textContent) || 0;
-                    const custo = parseInt(item.querySelector('.magia-custo')?.textContent) || 0;
-                    
-                    if (nome) {
-                        magias.push({
-                            nome,
-                            nivel,
-                            custo
-                        });
-                    }
-                });
-            }
-            
-            dados.magias = JSON.stringify(magias);
-            dados.total_magias = magias.length;
-            dados.pontos_magias = magias.reduce((sum, m) => sum + m.custo, 0);
-            
-        } catch (error) {
-            console.warn('Erro ao coletar magias:', error);
-            dados.aptidao_magica = 0;
-            dados.mana_atual = 10;
-            dados.mana_base = 10;
-            dados.bonus_mana = 0;
-            dados.magias = '[]';
-            dados.total_magias = 0;
-            dados.pontos_magias = 0;
-        }
-    }
-
-    // ========== EQUIPAMENTO ==========
-    coletarDadosEquipamento(dados) {
-        try {
-            // Status de equipamento
-            dados.dinheiro = parseFloat(document.getElementById('dinheiroEquipamento')?.textContent.replace('$', '').replace('.', '')) || 2000.00;
-            dados.peso_atual = parseFloat(document.getElementById('pesoAtual')?.textContent) || 0.00;
-            dados.peso_maximo = parseFloat(document.getElementById('pesoMaximo')?.textContent) || 60.00;
-            dados.nivel_carga = document.getElementById('nivelCarga')?.textContent || 'LEVE';
-            dados.penalidades_carga = document.getElementById('penalidadesCarga')?.textContent || 'MOV +0 / DODGE +0';
-            
-            // Equipamentos adquiridos (inventário)
-            const inventario = [];
-            const listaInventario = document.getElementById('lista-equipamentos-adquiridos');
-            if (listaInventario) {
-                const itens = listaInventario.querySelectorAll('.equipamento-item');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.equipamento-nome')?.textContent;
-                    const quantidade = parseInt(item.querySelector('.equipamento-quantidade')?.textContent) || 1;
-                    const peso = parseFloat(item.querySelector('.equipamento-peso')?.textContent) || 0;
-                    const custo = parseFloat(item.querySelector('.equipamento-custo')?.textContent.replace('$', '')) || 0;
-                    const equipado = item.classList.contains('equipado') || false;
-                    
-                    if (nome) {
-                        inventario.push({
-                            nome,
-                            quantidade,
-                            peso,
-                            custo,
-                            equipado
-                        });
-                    }
-                });
-            }
-            
-            dados.inventario = JSON.stringify(inventario);
-            
-        } catch (error) {
-            console.warn('Erro ao coletar equipamento:', error);
-            dados.dinheiro = 2000.00;
-            dados.peso_atual = 0.00;
-            dados.peso_maximo = 60.00;
-            dados.nivel_carga = 'LEVE';
-            dados.penalidades_carga = 'MOV +0 / DODGE +0';
-            dados.inventario = '[]';
-        }
-    }
-
-    // ========== COMBATE ==========
-    coletarDadosCombate(dados) {
-        try {
-            // PV e PF
-            dados.pv_atual = parseInt(document.getElementById('pvAtualDisplay')?.value) || 10;
-            dados.pv_maximo = parseInt(document.getElementById('pvMaxDisplay')?.textContent) || 10;
-            dados.pv_modificador = parseInt(document.getElementById('pvModificador')?.value) || 0;
-            dados.pv_estado = document.getElementById('pvEstadoDisplay')?.textContent || 'Saudável';
-            
-            dados.pf_atual = parseInt(document.getElementById('pfAtualDisplay')?.value) || 10;
-            dados.pf_maximo = parseInt(document.getElementById('pfMaxDisplay')?.textContent) || 10;
-            dados.pf_modificador = parseInt(document.getElementById('pfModificador')?.value) || 0;
-            dados.pf_estado = document.getElementById('pfEstadoDisplay')?.textContent || 'Normal';
-            
-            // Defesas
-            dados.esquiva = parseInt(document.getElementById('esquivaTotal')?.textContent) || 10;
-            dados.esquiva_mod = parseInt(document.getElementById('esquivaMod')?.value) || 0;
-            dados.bloqueio = parseInt(document.getElementById('bloqueioTotal')?.textContent) || 11;
-            dados.bloqueio_mod = parseInt(document.getElementById('bloqueioMod')?.value) || 0;
-            dados.aparar = parseInt(document.getElementById('apararTotal')?.textContent) || 3;
-            dados.aparar_mod = parseInt(document.getElementById('apararMod')?.value) || 0;
-            
-            // Bônus de defesa
-            dados.bonus_reflexos = parseInt(document.getElementById('bonusReflexos')?.value) || 0;
-            dados.bonus_escudo = parseInt(document.getElementById('bonusEscudo')?.value) || 0;
-            dados.bonus_capa = parseInt(document.getElementById('bonusCapa')?.value) || 0;
-            dados.bonus_outros = parseInt(document.getElementById('bonusOutros')?.value) || 0;
-            
-            // RD (Resistência a Dano)
-            const rdCampos = ['cabeca', 'tronco', 'rosto', 'cranio', 'pescoco', 'virilha', 'bracos', 'pernas', 'maos', 'pes'];
-            rdCampos.forEach(campo => {
-                dados[`rd_${campo}`] = parseInt(document.querySelector(`.rd-parte[data-parte="${campo}"] input`)?.value) || 0;
-            });
-            dados.rd_total = parseInt(document.getElementById('rdTotal')?.textContent) || 0;
-            
-            // Escudo
-            dados.escudo_equipado = document.getElementById('escudoStatus')?.textContent === 'Ativo' || false;
-            dados.escudo_nome = document.getElementById('escudoNome')?.textContent || '';
-            dados.escudo_dr = parseInt(document.getElementById('escudoDR')?.textContent) || 0;
-            dados.escudo_pv_atual = parseInt(document.getElementById('escudoPVTexto')?.textContent.split('/')[0]) || 0;
-            dados.escudo_pv_maximo = parseInt(document.getElementById('escudoPVTexto')?.textContent.split('/')[1]) || 0;
-            
-            // Condições ativas
-            const condicoesAtivas = [];
-            const condicoesItems = document.querySelectorAll('.condicao-item.ativa');
-            condicoesItems.forEach(item => {
-                const condicao = item.getAttribute('data-condicao');
-                if (condicao) {
-                    condicoesAtivas.push(condicao);
-                }
-            });
-            
-            dados.condicoes = JSON.stringify(condicoesAtivas);
-            dados.condicoes_ativas = condicoesAtivas.length;
-            
-        } catch (error) {
-            console.warn('Erro ao coletar dados de combate:', error);
-            // Valores padrão
-            dados.pv_atual = 10;
-            dados.pv_maximo = 10;
-            dados.pv_modificador = 0;
-            dados.pv_estado = 'Saudável';
-            
-            dados.pf_atual = 10;
-            dados.pf_maximo = 10;
-            dados.pf_modificador = 0;
-            dados.pf_estado = 'Normal';
-            
-            dados.esquiva = 10;
-            dados.esquiva_mod = 0;
-            dados.bloqueio = 11;
-            dados.bloqueio_mod = 0;
-            dados.aparar = 3;
-            dados.aparar_mod = 0;
-            
-            dados.bonus_reflexos = 0;
-            dados.bonus_escudo = 0;
-            dados.bonus_capa = 0;
-            dados.bonus_outros = 0;
-            
-            // RD
-            const rdCampos = ['cabeca', 'tronco', 'rosto', 'cranio', 'pescoco', 'virilha', 'bracos', 'pernas', 'maos', 'pes'];
-            rdCampos.forEach(campo => {
-                dados[`rd_${campo}`] = 0;
-            });
-            dados.rd_total = 0;
-            
-            dados.escudo_equipado = false;
-            dados.escudo_nome = '';
-            dados.escudo_dr = 0;
-            dados.escudo_pv_atual = 0;
-            dados.escudo_pv_maximo = 0;
-            
-            dados.condicoes = '[]';
-            dados.condicoes_ativas = 0;
-        }
-    }
-
-    // ======================
-    // VALIDAÇÃO
-    // ======================
-    validarPontos(dados) {
-        // Validação básica de pontos
-        if (window.sistemaPontos) {
-            const pontos = window.sistemaPontos.pontos;
-            
-            if (pontos.gastos > pontos.totais) {
-                alert(`Erro: Você gastou ${pontos.gastos} pontos, mas tem apenas ${pontos.totais} pontos totais!`);
-                return false;
-            }
-            
-            if (pontos.desvantagensAtuais < pontos.limiteDesvantagens) {
-                alert('Erro: Você excedeu o limite de desvantagens!');
-                return false;
-            }
+            console.error('Erro ao pegar vantagens:', error);
         }
         
+        return dados;
+    }
+
+    // ======================
+    // PEGAR DADOS DAS PERÍCIAS
+    // ======================
+    pegarDadosPericias() {
+        const dados = {
+            pericias: '[]',
+            tecnicas: '[]',
+            total_pericias: 0,
+            total_tecnicas: 0,
+            pontos_pericias: 0,
+            pontos_tecnicas: 0
+        };
+        
+        try {
+            // Pontos de perícias
+            const pontosPericiasElement = document.getElementById('pontos-pericias-total');
+            if (pontosPericiasElement) {
+                const texto = pontosPericiasElement.textContent;
+                const match = texto.match(/\d+/);
+                if (match) dados.pontos_pericias = parseInt(match[0]) || 0;
+            }
+            
+        } catch (error) {
+            console.error('Erro ao pegar perícias:', error);
+        }
+        
+        return dados;
+    }
+
+    // ======================
+    // PEGAR DADOS DAS MAGIAS
+    // ======================
+    pegarDadosMagias() {
+        const dados = {
+            aptidao_magica: 0,
+            mana_atual: 10,
+            mana_base: 10,
+            bonus_mana: 0,
+            magias: '[]',
+            total_magias: 0,
+            pontos_magias: 0
+        };
+        
+        try {
+            // Status mágico
+            const aptidaoInput = document.getElementById('aptidao-magica');
+            if (aptidaoInput) dados.aptidao_magica = parseInt(aptidaoInput.value) || 0;
+            
+            const manaAtualInput = document.getElementById('mana-atual');
+            if (manaAtualInput) dados.mana_atual = parseInt(manaAtualInput.value) || 10;
+            
+            const manaBaseElement = document.getElementById('mana-base');
+            if (manaBaseElement) dados.mana_base = parseInt(manaBaseElement.textContent) || 10;
+            
+            const bonusManaInput = document.getElementById('bonus-mana');
+            if (bonusManaInput) dados.bonus_mana = parseInt(bonusManaInput.value) || 0;
+            
+        } catch (error) {
+            console.error('Erro ao pegar magias:', error);
+        }
+        
+        return dados;
+    }
+
+    // ======================
+    // COLETAR TODOS OS DADOS
+    // ======================
+    coletarTodosDados() {
+        console.log('📦 Coletando todos os dados...');
+        
+        const dados = {
+            // Dados serão combinados abaixo
+        };
+        
+        // 1. Dashboard (INCLUINDO PONTOS)
+        const dadosDashboard = this.pegarDadosDashboard();
+        Object.assign(dados, dadosDashboard);
+        
+        // 2. Atributos
+        const dadosAtributos = this.pegarDadosAtributos();
+        Object.assign(dados, dadosAtributos);
+        
+        // 3. Características
+        const dadosCaracteristicas = this.pegarDadosCaracteristicas();
+        Object.assign(dados, dadosCaracteristicas);
+        
+        // 4. Vantagens/Desvantagens
+        const dadosVantagens = this.pegarDadosVantagensDesvantagens();
+        Object.assign(dados, dadosVantagens);
+        
+        // 5. Perícias
+        const dadosPericias = this.pegarDadosPericias();
+        Object.assign(dados, dadosPericias);
+        
+        // 6. Magias
+        const dadosMagias = this.pegarDadosMagias();
+        Object.assign(dados, dadosMagias);
+        
+        // 7. Campos obrigatórios
+        dados.status = 'Ativo';
+        dados.updated_at = new Date().toISOString();
+        
+        // 8. Log para debug
+        console.log('✅ Dados coletados para salvar:', {
+            nome: dados.nome,
+            pontos: {
+                totais: dados.pontos_totais,
+                gastos: dados.pontos_gastos,
+                disponiveis: dados.pontos_disponiveis
+            },
+            atributos: {
+                forca: dados.forca,
+                destreza: dados.destreza
+            }
+        });
+        
+        return dados;
+    }
+
+    // ======================
+    // VALIDAÇÃO SIMPLES
+    // ======================
+    validarDados(dados) {
+        // Nome é obrigatório
         if (!dados.nome || dados.nome.trim() === '') {
-            alert('Erro: O personagem precisa ter um nome!');
+            alert('❌ Erro: O personagem precisa ter um nome!');
             return false;
+        }
+        
+        // Verificar pontos (opcional, pode remover se quiser)
+        if (dados.pontos_gastos > dados.pontos_totais) {
+            if (!confirm(`⚠️ Atenção: Você gastou ${dados.pontos_gastos} pontos, mas tem apenas ${dados.pontos_totais} pontos totais.\n\nDeseja salvar mesmo assim?`)) {
+                return false;
+            }
         }
         
         return true;
@@ -643,7 +466,7 @@ class SalvamentoSupabase {
     // ======================
     async salvarPersonagem(personagemId = null) {
         try {
-            console.log('💾 Iniciando salvamento COMPLETO...');
+            console.log('💾 Iniciando salvamento...');
             
             // 1. VERIFICAR AUTENTICAÇÃO
             const { data: { session } } = await this.supabase.auth.getSession();
@@ -665,23 +488,13 @@ class SalvamentoSupabase {
             }
 
             // 3. COLETAR TODOS OS DADOS
-            console.log('📊 Coletando dados de todas as abas...');
             const dados = this.coletarTodosDados();
             
             // 4. ADICIONAR user_id (CRÍTICO!)
             dados.user_id = userId;
             
-            // 5. ATUALIZAR PONTOS DO SISTEMA
-            if (window.sistemaPontos) {
-                dados.pontos_totais = window.sistemaPontos.pontos.totais || 150;
-                dados.pontos_gastos = window.sistemaPontos.pontos.gastos || 0;
-                dados.pontos_disponiveis = window.sistemaPontos.pontos.disponiveis || 150;
-                dados.limite_desvantagens = window.sistemaPontos.pontos.limiteDesvantagens || -50;
-                dados.desvantagens_atuais = window.sistemaPontos.pontos.desvantagensAtuais || 0;
-            }
-
-            // 6. VALIDAR
-            if (!this.validarPontos(dados)) {
+            // 5. VALIDAR
+            if (!this.validarDados(dados)) {
                 if (btnSalvar) {
                     btnSalvar.innerHTML = btnSalvarOriginal;
                     btnSalvar.disabled = false;
@@ -691,25 +504,22 @@ class SalvamentoSupabase {
 
             let resultado;
             let personagemSalvoId = personagemId;
-            let fotoUrl = null;
 
-            // 7. GERENCIAR FOTO
+            // 6. GERENCIAR FOTO
+            let fotoUrl = null;
             try {
                 if (window.dashboard && typeof window.dashboard.getFotoParaSalvar === 'function') {
                     const fotoData = window.dashboard.getFotoParaSalvar();
-                    if (fotoData && fotoData.file && personagemSalvoId) {
-                        console.log('🖼️ Salvando foto...');
-                        fotoUrl = await this.salvarFotoNoSupabase(fotoData.file, personagemSalvoId);
-                        if (fotoUrl) {
-                            dados.avatar_url = fotoUrl;
-                        }
+                    if (fotoData && fotoData.file) {
+                        console.log('🖼️ Foto encontrada para salvar');
+                        // A foto será processada depois de salvar o personagem
                     }
                 }
             } catch (error) {
-                console.warn('⚠️ Erro ao processar foto:', error);
+                console.warn('⚠️ Erro ao verificar foto:', error);
             }
 
-            // 8. SALVAR NO BANCO
+            // 7. SALVAR NO BANCO
             if (personagemId) {
                 // MODO EDIÇÃO
                 console.log('✏️ Editando personagem:', personagemId);
@@ -717,11 +527,6 @@ class SalvamentoSupabase {
                 // Remover campos que não devem ser atualizados
                 delete dados.created_at;
                 delete dados.user_id; // Manter o original
-                
-                // Atualizar foto se for upload novo
-                if (fotoUrl) {
-                    dados.avatar_url = fotoUrl;
-                }
                 
                 const { data, error } = await this.supabase
                     .from('characters')
@@ -741,7 +546,6 @@ class SalvamentoSupabase {
                 dados.created_at = new Date().toISOString();
                 dados.status = 'Ativo';
                 
-                // Criar
                 const { data, error } = await this.supabase
                     .from('characters')
                     .insert([dados])
@@ -753,27 +557,30 @@ class SalvamentoSupabase {
                     personagemSalvoId = data[0].id;
                     console.log('✅ ID criado:', personagemSalvoId);
                     resultado = data;
-                    
-                    // Salvar foto após criar
-                    if (!fotoUrl) {
-                        try {
-                            if (window.dashboard && typeof window.dashboard.getFotoParaSalvar === 'function') {
-                                const fotoData = window.dashboard.getFotoParaSalvar();
-                                if (fotoData && fotoData.file) {
-                                    fotoUrl = await this.salvarFotoNoSupabase(fotoData.file, personagemSalvoId);
-                                    
-                                    if (fotoUrl) {
-                                        await this.supabase
-                                            .from('characters')
-                                            .update({ avatar_url: fotoUrl })
-                                            .eq('id', personagemSalvoId);
-                                    }
-                                }
+                }
+            }
+
+            // 8. SALVAR FOTO (se houver e após salvar o personagem)
+            if (personagemSalvoId) {
+                try {
+                    if (window.dashboard && typeof window.dashboard.getFotoParaSalvar === 'function') {
+                        const fotoData = window.dashboard.getFotoParaSalvar();
+                        if (fotoData && fotoData.file) {
+                            console.log('📸 Salvando foto no Supabase...');
+                            fotoUrl = await this.salvarFotoNoSupabase(fotoData.file, personagemSalvoId);
+                            
+                            if (fotoUrl) {
+                                await this.supabase
+                                    .from('characters')
+                                    .update({ avatar_url: fotoUrl })
+                                    .eq('id', personagemSalvoId);
+                                console.log('✅ Foto salva:', fotoUrl);
                             }
-                        } catch (error) {
-                            console.warn('⚠️ Erro ao salvar foto após criação:', error);
                         }
                     }
+                } catch (error) {
+                    console.warn('⚠️ Erro ao salvar foto:', error);
+                    // Não falha o salvamento se a foto der erro
                 }
             }
 
@@ -792,14 +599,17 @@ class SalvamentoSupabase {
             }
             
             const mensagem = personagemId 
-                ? 'Personagem atualizado com sucesso!' 
-                : 'Personagem criado com sucesso!';
+                ? '✅ Personagem atualizado com sucesso!' 
+                : '✅ Personagem criado com sucesso!';
             
-            alert(mensagem + '\n\nRedirecionando para seus personagens...');
+            // Mostrar os pontos salvos na mensagem
+            const pontosMsg = `\n\nPontos: ${dados.pontos_gastos}/${dados.pontos_totais} (Saldo: ${dados.pontos_disponiveis})`;
+            
+            alert(mensagem + pontosMsg + '\n\nRedirecionando para seus personagens...');
             
             setTimeout(() => {
                 window.location.href = 'personagens.html';
-            }, 1500);
+            }, 2000);
             
             return true;
 
@@ -819,12 +629,14 @@ class SalvamentoSupabase {
             if (error.message.includes('permission denied') || error.code === '42501') {
                 mensagemErro = 'ERRO DE PERMISSÃO!\n\nVerifique se você está logado corretamente.';
             } else if (error.message.includes('network') || error.message.includes('fetch')) {
-                mensagemErro = 'Problema de conexão. Verifique sua internet.';
+                mensagemErro = '❌ Problema de conexão. Verifique sua internet.';
             } else if (error.message.includes('auth')) {
-                mensagemErro = 'Problema de autenticação. Faça login novamente.';
+                mensagemErro = '🔐 Problema de autenticação. Faça login novamente.';
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 2000);
+            } else if (error.message.includes('duplicate key')) {
+                mensagemErro = '⚠️ Este personagem já existe!';
             } else {
                 mensagemErro += error.message;
             }
@@ -857,6 +669,7 @@ class SalvamentoSupabase {
                 return null;
             }
 
+            console.log('✅ Personagem carregado:', personagem.nome);
             return personagem;
 
         } catch (error) {
@@ -876,7 +689,7 @@ class SalvamentoSupabase {
                 return false;
             }
 
-            if (!confirm('Tem certeza que deseja excluir este personagem?\n\nEsta ação não pode ser desfeita!')) {
+            if (!confirm('⚠️ Tem certeza que deseja excluir este personagem?\n\nEsta ação não pode ser desfeita!')) {
                 return false;
             }
 
@@ -910,7 +723,7 @@ class SalvamentoSupabase {
             if (!session) {
                 return {
                     sucesso: false,
-                    mensagem: 'Não autenticado'
+                    mensagem: '❌ Não autenticado'
                 };
             }
             
@@ -923,19 +736,19 @@ class SalvamentoSupabase {
             if (error) {
                 return {
                     sucesso: false,
-                    mensagem: 'Erro na consulta: ' + error.message
+                    mensagem: '❌ Erro na consulta: ' + error.message
                 };
             }
             
             return {
                 sucesso: true,
-                mensagem: `Conexão OK! Personagens: ${count || 0}`
+                mensagem: `✅ Conexão OK! Personagens: ${count || 0}`
             };
             
         } catch (error) {
             return {
                 sucesso: false,
-                mensagem: 'Erro: ' + error.message
+                mensagem: '❌ Erro: ' + error.message
             };
         }
     }
@@ -951,16 +764,21 @@ try {
     salvamento = new SalvamentoSupabase();
     window.salvamento = salvamento;
     
-    console.log('✅ Sistema de salvamento COMPLETO carregado');
+    console.log('✅ Sistema de salvamento carregado com sucesso!');
     
 } catch (error) {
     console.error('❌ Erro ao carregar salvamento:', error);
     
-    // Fallback
+    // Fallback simples
     salvamento = {
-        verificarLimitePersonagens: async () => ({ podeCriar: true, quantidade: 0, limite: 10, motivo: '' }),
+        verificarLimitePersonagens: async () => ({ 
+            podeCriar: true, 
+            quantidade: 0, 
+            limite: 10, 
+            motivo: '' 
+        }),
         salvarPersonagem: async () => {
-            alert('Sistema de salvamento não disponível.');
+            alert('Sistema de salvamento não disponível. Tente recarregar a página.');
             return false;
         },
         carregarPersonagem: async () => null,
@@ -971,8 +789,8 @@ try {
 }
 
 // Função para teste rápido
-window.testeSalvamentoCompleto = async function() {
-    console.log('🧪 Testando salvamento COMPLETO...');
+window.testeSalvamento = async function() {
+    console.log('🧪 Testando salvamento...');
     
     if (!window.salvamento) {
         alert('Sistema de salvamento não carregado!');
@@ -982,8 +800,8 @@ window.testeSalvamentoCompleto = async function() {
     const teste = await window.salvamento.testarConexao();
     
     if (teste.sucesso) {
-        alert('✅ CONEXÃO OK!\n' + teste.mensagem);
+        alert(teste.mensagem);
     } else {
-        alert('❌ PROBLEMA!\n' + teste.mensagem);
+        alert(teste.mensagem);
     }
 };
