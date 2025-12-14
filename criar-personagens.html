@@ -3465,24 +3465,40 @@
         try {
             console.log('🚀 Inicializando sistema...');
             
-            // 1. Verificar autenticação
+            // 1. Verificar autenticação - CORREÇÃO CRÍTICA
             console.log('🔐 Verificando autenticação...');
-            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
             
-            if (sessionError) {
-                console.error('❌ Erro ao verificar sessão:', sessionError);
-                alert('Erro de conexão. Tente recarregar a página.');
+            // PRIMEIRO: Tenta pegar o usuário diretamente (mais confiável)
+            const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError) {
+                console.error('❌ Erro ao verificar usuário:', userError);
+                alert('Erro de conexão com autenticação. Tente recarregar a página.');
                 return;
             }
             
-            if (!session) {
-                console.warn('⚠️ Nenhuma sessão encontrada. Redirecionando para login...');
-                alert('Você precisa estar logado para criar personagens.');
-                window.location.href = 'login.html';
-                return;
+            // SEGUNDO: Se não tem usuário, tenta pegar sessão
+            if (!userData) {
+                console.log('⚠️ Nenhum usuário direto, verificando sessão...');
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                
+                if (sessionError) {
+                    console.error('❌ Erro ao verificar sessão:', sessionError);
+                    alert('Erro de conexão. Tente recarregar a página.');
+                    return;
+                }
+                
+                if (!session) {
+                    console.warn('❌ Nenhuma autenticação encontrada. Redirecionando...');
+                    alert('Você precisa estar logado para criar personagens.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                console.log('✅ Usuário autenticado via sessão:', session.user.email);
+            } else {
+                console.log('✅ Usuário autenticado via getUser():', userData.email);
             }
-            
-            console.log('✅ Usuário autenticado:', session.user.email);
             
             // 2. Inicializar navegação por abas
             inicializarNavegacaoAbas();
@@ -3753,15 +3769,31 @@
         }
     }
 
-    // Salvar personagem (função principal)
+    // Salvar personagem (função principal) - CORREÇÃO CRÍTICA
     async function salvarPersonagem() {
         console.log('💾 Iniciando salvamento do personagem...');
         
         try {
-            // Verificar autenticação antes de salvar
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                alert('Sua sessão expirou. Por favor, faça login novamente.');
+            // Verificar autenticação antes de salvar - VERIFICAÇÃO DUPLA
+            let usuarioAutenticado = false;
+            
+            // Tenta pegar usuário
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user) {
+                usuarioAutenticado = true;
+                console.log('✅ Usuário autenticado (getUser):', user.email);
+            } else {
+                // Se não tem usuário, tenta sessão
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    usuarioAutenticado = true;
+                    console.log('✅ Usuário autenticado (session):', session.user.email);
+                }
+            }
+            
+            if (!usuarioAutenticado) {
+                alert('❌ Sua sessão expirou. Faça login novamente para salvar.');
                 window.location.href = 'login.html';
                 return false;
             }
@@ -3990,7 +4022,7 @@
             
             reader.onerror = function() {
                 console.error('❌ Erro ao ler arquivo');
-                alert('Erro ao processar a imagem. Tente novamente.');
+                alert('Erro ao processar a imagem. Terve novamente.');
             };
             
             reader.readAsDataURL(file);
@@ -4010,19 +4042,28 @@
         console.log('🔍 Testando autenticação...');
         
         try {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { user } } = await supabase.auth.getUser();
             
+            if (user) {
+                console.log('✅ Usuário autenticado (getUser):', {
+                    email: user.email,
+                    id: user.id
+                });
+                return true;
+            }
+            
+            const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                console.log('✅ Sessão ativa:', {
+                console.log('✅ Sessão ativa (getSession):', {
                     email: session.user.email,
-                    id: session.user.id,
                     expires: new Date(session.expires_at * 1000)
                 });
                 return true;
-            } else {
-                console.warn('⚠️ Nenhuma sessão encontrada');
-                return false;
             }
+            
+            console.warn('⚠️ Nenhuma autenticação encontrada');
+            return false;
+            
         } catch (error) {
             console.error('❌ Erro no teste de autenticação:', error);
             return false;
