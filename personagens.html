@@ -113,7 +113,7 @@
             margin-bottom: 40px;
         }
 
-        /* Card de Personagem - ATUALIZADO */
+        /* Card de Personagem */
         .personagem-card {
             background: rgba(30, 30, 40, 0.8);
             border-radius: 15px;
@@ -140,7 +140,7 @@
             margin-bottom: 20px;
         }
 
-        /* Foto do Personagem */
+        /* Foto do Personagem - VOLTA ORIGINAL */
         .personagem-foto {
             width: 100px;
             height: 100px;
@@ -161,9 +161,6 @@
             justify-content: center;
             color: #ff8c00;
             font-size: 0.8rem;
-            position: absolute;
-            top: 0;
-            left: 0;
         }
 
         .foto-placeholder i {
@@ -175,7 +172,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: none;
         }
 
         .card-info {
@@ -711,7 +707,7 @@
             }
         }
 
-        // Renderizar lista de personagens - VERSÃO COMPLETA
+        // Renderizar lista de personagens - VERSÃO SIMPLIFICADA QUE FUNCIONA
         function renderizarPersonagens() {
             const grid = document.getElementById('personagensGrid');
             const emptyState = document.getElementById('emptyState');
@@ -752,19 +748,18 @@
                 // Status
                 const status = personagem.status || 'Ativo';
                 
-                // FOTO - VERIFICAÇÃO CORRIGIDA
+                // FOTO - LÓGICA SIMPLES QUE FUNCIONA
                 let fotoHTML = '';
                 let mostrarPlaceholder = true;
                 
                 if (personagem.avatar_url && 
                     personagem.avatar_url.trim() !== '' && 
                     personagem.avatar_url !== 'null' && 
-                    personagem.avatar_url !== 'undefined' &&
-                    personagem.avatar_url.startsWith('http')) {
+                    personagem.avatar_url !== 'undefined') {
                     
                     fotoHTML = `<img src="${personagem.avatar_url}" alt="${nome}" 
-                                onerror="this.style.display='none'; this.parentElement.querySelector('.foto-placeholder').style.display='flex';"
-                                onload="this.style.display='block';">`;
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                style="display: block;">`;
                     mostrarPlaceholder = false;
                 }
                 
@@ -956,7 +951,7 @@
             mostrarNotificacao(mensagem, 'error');
         }
 
-        // Função para recarregar personagens (útil para atualizar após salvar)
+        // Função para recarregar personagens
         window.recarregarPersonagens = function() {
             carregarPersonagens();
         };
