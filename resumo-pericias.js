@@ -26,7 +26,7 @@ const resumoState = {
 
 
 // ============================================
-// 2. FUNÇÕES DE CAPTURA
+// 2. FUNÇÕES DE CAPTURA - VERSÃO CORRIGIDA (SEM MOCK)
 // ============================================
 
 
@@ -35,13 +35,14 @@ function capturarPericiasDireto() {
     const pericias = [];
     let totalPontos = 0;
     
-    // Método 1: Usar estadoPericias se disponível
+    // Método 1: Usar estadoPericias se disponível - PRINCIPAL
     if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
       console.log(' Capturando perícias do estadoPericias');
+      
       window.estadoPericias.periciasAprendidas.forEach(p => {
         if (!p) return;
         
-        // Calcular NH
+        // Calcular NH baseado no atributo real
         const atributoBase = obterValorAtributo(p.atributo);
         const nh = atributoBase + (p.nivel || 0);
         const pontos = p.investimentoAcumulado || p.custo || 0;
@@ -57,12 +58,12 @@ function capturarPericiasDireto() {
       });
       
       if (pericias.length > 0) {
-        console.log(`✅ ${pericias.length} perícias capturadas`);
+        console.log(`✅ ${pericias.length} perícias capturadas do estadoPericias`);
         return { pericias, totalPontos };
       }
     }
     
-    // Método 2: Extrair da tabela HTML
+    // Método 2: Extrair da tabela HTML (fallback)
     console.log(' Extraindo perícias da tabela HTML');
     const tabelaContainer = document.getElementById('pericias-aprendidas');
     
@@ -104,15 +105,10 @@ function capturarPericiasDireto() {
       });
     }
     
-    // Método 3: Mock data para teste
+    // Método 3: NÃO USAR MOCK DATA - apenas retornar vazio se não encontrar
     if (pericias.length === 0) {
-      console.log('⚠️ Nenhuma perícia encontrada, usando dados de teste');
-      pericias.push(
-        { nome: "Arquearia (Arco Curto)", pontos: 8, nh: 14 },
-        { nome: "Esquiva", pontos: 4, nh: 12 },
-        { nome: "Cavalgar (Cavalo)", pontos: 4, nh: 11 }
-      );
-      totalPontos = 16;
+      console.log('ℹ️ Nenhuma perícia encontrada - retornando vazio');
+      // NÃO ADICIONAR DADOS MOCK - apenas retornar vazio
     }
     
     return { pericias, totalPontos };
@@ -192,13 +188,10 @@ function capturarTecnicasDireto() {
       });
     }
     
-    // Método 3: Mock data para teste
+    // Método 3: NÃO USAR MOCK DATA - apenas retornar vazio se não encontrar
     if (tecnicas.length === 0) {
-      console.log('⚠️ Nenhuma técnica encontrada, usando dados de teste');
-      tecnicas.push(
-        { nome: "Arquearia Montada", pontos: 5, nh: 12 }
-      );
-      totalPontos = 5;
+      console.log('ℹ️ Nenhuma técnica encontrada - retornando vazio');
+      // NÃO ADICIONAR DADOS MOCK - apenas retornar vazio
     }
     
     return { tecnicas, totalPontos };
