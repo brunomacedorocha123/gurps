@@ -635,7 +635,8 @@
 
     // Carregar personagens ao iniciar
     document.addEventListener('DOMContentLoaded', function() {
-        carregarPersonagens();
+        console.log('📄 Página personagens carregada');
+        carregarPersonagens(true); // Forçar recarregamento
         configurarEventListeners();
     });
 
@@ -651,6 +652,14 @@
                 fecharModal();
             }
         });
+        
+        // Forçar recarregamento ao voltar para a página
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                console.log('🔄 Página carregada do cache - recarregando dados');
+                carregarPersonagens(true);
+            }
+        });
     }
 
     // Criar novo personagem
@@ -658,9 +667,15 @@
         window.location.href = 'criar-personagens.html';
     }
 
-    // Carregar personagens do usuário
-    async function carregarPersonagens() {
+    // Carregar personagens do usuário - VERSÃO COMPLETA
+    async function carregarPersonagens(forcarRecarregamento = false) {
         try {
+            // Mostrar loading
+            const grid = document.getElementById('personagensGrid');
+            if (grid) {
+                grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando personagens...</p></div>';
+            }
+
             // 1. Verificar autenticação
             const { data: { session } } = await supabase.auth.getSession();
             
@@ -672,7 +687,8 @@
 
             console.log('✅ Usuário autenticado:', session.user.email);
 
-            // 2. Buscar personagens do usuário
+            // 2. Buscar personagens SEM CACHE
+            console.log('🔄 Buscando dados ATUALIZADOS do Supabase...');
             const { data: personagensData, error } = await supabase
                 .from('characters')
                 .select('*')
@@ -685,16 +701,29 @@
                 return;
             }
 
+            // 3. DEBUG: Mostrar o que veio do banco
+            console.log('📊 Dados recebidos do Supabase:');
+            if (personagensData && personagensData.length > 0) {
+                personagensData.forEach((p, i) => {
+                    console.log(`${i+1}. ${p.nome}:`);
+                    console.log(`   Pontos: ${p.pontos_gastos || 0}/${p.pontos_totais || 150}`);
+                    console.log(`   Saldo: ${p.pontos_disponiveis || 150}`);
+                    console.log(`   Atributos: ST=${p.forca || 10}, DX=${p.destreza || 10}`);
+                });
+            } else {
+                console.log('⚠️ Nenhum personagem encontrado');
+            }
+
             personagens = personagensData || [];
             renderizarPersonagens();
             
         } catch (error) {
             console.error('Erro ao carregar personagens:', error);
-            mostrarErro('Erro ao carregar personagens');
+            mostrarErro('Erro ao carregar personagens: ' + error.message);
         }
     }
 
-    // Renderizar lista de personagens - VERSÃO CORRIGIDA
+    // Renderizar lista de personagens - VERSÃO QUE MOSTRA OS PONTOS REAIS
     function renderizarPersonagens() {
         const grid = document.getElementById('personagensGrid');
         const emptyState = document.getElementById('emptyState');
@@ -710,7 +739,7 @@
         grid.style.display = 'grid';
         if (emptyState) emptyState.style.display = 'none';
 
-        grid.innerHTML = personagens.map(personagem => {
+        grid.innerHTML = personagens.map((personagem, index) => {
             // Formatar dados
             const nome = escapeHtml(personagem.nome || 'Personagem Sem Nome');
             const nomeTruncado = nome.length > 30 ? nome.substring(0, 27) + '...' : nome;
@@ -718,12 +747,16 @@
             const raca = escapeHtml(personagem.raca || 'Sem Raça');
             const nivel = escapeHtml(personagem.nivel || 'Nível 1');
             
-            // PONTOS REAIS DO BANCO - CORRIGIDO!
+            // PONTOS DO BANCO - USAR OS VALORES REAIS
             const pontosTotais = personagem.pontos_totais || 150;
             const pontosGastos = personagem.pontos_gastos || 0;
             const pontosDisponiveis = personagem.pontos_disponiveis || (pontosTotais - pontosGastos);
             const limiteDesvantagens = personagem.limite_desvantagens || -50;
             const desvantagensAtuais = personagem.desvantagens_atuais || 0;
+            
+            // DEBUG: Mostrar no console
+            console.log(`Personagem ${index + 1}: ${nome}`);
+            console.log(`  Pontos no banco: Gastos=${pontosGastos}, Totais=${pontosTotais}, Disponíveis=${pontosDisponiveis}`);
             
             // Atributos
             const forca = personagem.forca || 10;
@@ -742,15 +775,8 @@
                 ? `<img src="${personagem.avatar_url}" alt="${nome}" onerror="this.style.display='none'; this.parentElement.querySelector('.foto-placeholder').style.display='flex';">`
                 : '';
             
-            // Cores dinâmicas baseadas nos pontos
-            const corSaldo = pontosDisponiveis < 0 ? '#e74c3c' : 
-                            pontosDisponiveis < 50 ? '#f39c12' : '#27ae60';
-            
-            const corDesvantagens = desvantagensAtuais > Math.abs(limiteDesvantagens) ? '#e74c3c' :
-                                   desvantagensAtuais > Math.abs(limiteDesvantagens) * 0.8 ? '#f39c12' : '#9b59b6';
-            
             return `
-            <div class="personagem-card" data-id="${personagem.id}">
+            <div class="personagem-card" data-id="${personagem.id}" data-index="${index}">
                 <div class="card-topo">
                     <!-- Foto do Personagem -->
                     <div class="personagem-foto">
@@ -766,9 +792,7 @@
                         <div class="nome-classe">
                             <h3 class="personagem-nome" title="${nome}">
                                 ${nomeTruncado}
-                                <span class="personagem-status" style="background: ${status === 'Ativo' ? 'rgba(46, 204, 113, 0.2)' : 'rgba(241, 196, 15, 0.2)'}; border-color: ${status === 'Ativo' ? '#2ecc71' : '#f1c40f'}">
-                                    ${status}
-                                </span>
+                                <span class="personagem-status">${status}</span>
                             </h3>
                             <div class="personagem-classe">${classe}</div>
                             <div class="personagem-raca">${raca} • ${nivel}</div>
@@ -784,15 +808,15 @@
                     </div>
                     <div class="info-item">
                         <span class="info-label">Saldo Disponível</span>
-                        <span class="info-value" style="color: ${corSaldo}">${pontosDisponiveis}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Desvantagens</span>
-                        <span class="info-value" style="color: ${corDesvantagens}">${desvantagensAtuais}/${Math.abs(limiteDesvantagens)}</span>
+                        <span class="info-value" id="saldo-${personagem.id}">${pontosDisponiveis}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Criado em</span>
                         <span class="info-value">${dataCriacao}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="info-value">${status}</span>
                     </div>
                 </div>
 
@@ -816,31 +840,6 @@
                     </div>
                 </div>
 
-                <!-- Status de Pontos (NOVO) -->
-                <div class="pontos-status">
-                    <div class="progresso-pontos">
-                        <div class="progresso-label">
-                            <span>Progresso: </span>
-                            <span>${pontosGastos}/${pontosTotais} pts</span>
-                        </div>
-                        <div class="progresso-barra">
-                            <div class="progresso-fill" style="width: ${Math.min((pontosGastos / pontosTotais) * 100, 100)}%"></div>
-                        </div>
-                    </div>
-                    
-                    ${desvantagensAtuais > 0 ? `
-                    <div class="desvantagens-status">
-                        <span class="desvantagens-label">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Desvantagens: ${desvantagensAtuais} pts
-                        </span>
-                        <div class="desvantagens-barra">
-                            <div class="desvantagens-fill" style="width: ${Math.min((desvantagensAtuais / Math.abs(limiteDesvantagens)) * 100, 100)}%"></div>
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-
                 <!-- Ações -->
                 <div class="card-actions">
                     <button class="btn-acao btn-editar" onclick="editarPersonagem('${personagem.id}')">
@@ -852,68 +851,18 @@
                         Excluir
                     </button>
                 </div>
+                
+                <!-- DEBUG: Mostrar dados brutos (remover depois) -->
+                <div style="display: none; font-size: 10px; color: #666; margin-top: 10px; border-top: 1px solid #333; padding-top: 5px;">
+                    ID: ${personagem.id}<br>
+                    Pontos no BD: G=${pontosGastos}, T=${pontosTotais}, D=${pontosDisponiveis}
+                </div>
             </div>
             `;
         }).join('');
         
-        // Adicionar CSS dinâmico para as barras de progresso
-        adicionarCSSPontos();
-    }
-
-    // CSS dinâmico para as barras de progresso
-    function adicionarCSSPontos() {
-        if (document.getElementById('pontos-css-dinamico')) return;
-        
-        const style = document.createElement('style');
-        style.id = 'pontos-css-dinamico';
-        style.textContent = `
-            .pontos-status {
-                margin: 15px 0;
-                padding: 10px;
-                background: rgba(20, 20, 30, 0.6);
-                border-radius: 8px;
-            }
-            
-            .progresso-pontos, .desvantagens-status {
-                margin-bottom: 8px;
-            }
-            
-            .progresso-label, .desvantagens-label {
-                display: flex;
-                justify-content: space-between;
-                font-size: 0.85rem;
-                margin-bottom: 4px;
-                color: #ccc;
-            }
-            
-            .progresso-barra, .desvantagens-barra {
-                height: 6px;
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 3px;
-                overflow: hidden;
-            }
-            
-            .progresso-fill {
-                height: 100%;
-                background: linear-gradient(90deg, #3498db, #2ecc71);
-                border-radius: 3px;
-                transition: width 0.5s ease;
-            }
-            
-            .desvantagens-fill {
-                height: 100%;
-                background: linear-gradient(90deg, #e74c3c, #f39c12);
-                border-radius: 3px;
-                transition: width 0.5s ease;
-            }
-            
-            .desvantagens-label i {
-                color: #f39c12;
-                margin-right: 5px;
-            }
-        `;
-        
-        document.head.appendChild(style);
+        // Adicionar log para verificar renderização
+        console.log(`✅ Renderizados ${personagens.length} personagens`);
     }
 
     // Editar personagem existente
@@ -975,9 +924,7 @@
             return data.toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+                year: 'numeric'
             });
         } catch {
             return 'Data inválida';
@@ -1019,8 +966,19 @@
     }
 
     // Função para recarregar personagens
-    window.recarregarPersonagens = function() {
-        carregarPersonagens();
+    window.recarregarPersonagens = function(forcar = true) {
+        console.log('🔁 Recarregando personagens...');
+        carregarPersonagens(forcar);
+    };
+    
+    // Teste rápido: verificar dados no console
+    window.verificarDados = function() {
+        console.log('🔍 Verificando dados dos personagens:');
+        personagens.forEach((p, i) => {
+            console.log(`${i+1}. ${p.nome}`);
+            console.log(`   Pontos: ${p.pontos_gastos || 0}/${p.pontos_totais || 150}`);
+            console.log(`   Saldo: ${p.pontos_disponiveis || 150}`);
+        });
     };
 </script>
 </body>

@@ -3945,6 +3945,33 @@
     window.atualizarResumoNome = atualizarResumoNome;
 
     console.log('✅ Script principal carregado e pronto!');
+
+    // FORÇAR ATUALIZAÇÃO DO CACHE
+window.addEventListener('beforeunload', function() {
+    // Limpar cache quando sair da página de criação
+    localStorage.removeItem('personagens_cache');
+});
+
+// Função para verificar o que está sendo salvo
+window.testarSalvamento = async function() {
+    console.log('🧪 TESTANDO SALVAMENTO...');
+    
+    // Verificar valores atuais no Dashboard
+    const pontosGastos = document.getElementById('pontosGastosDashboard')?.textContent || '0';
+    const saldoDisponivel = document.getElementById('saldoDisponivelDashboard')?.textContent || '150';
+    const pontosTotais = document.getElementById('pontosTotaisDashboard')?.value || '150';
+    
+    console.log('📊 Valores no Dashboard:');
+    console.log(`- Pontos Gastos: ${pontosGastos}`);
+    console.log(`- Saldo Disponível: ${saldoDisponivel}`);
+    console.log(`- Pontos Totais: ${pontosTotais}`);
+    
+    // Verificar se está autenticado
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log(`- Usuário: ${session?.user?.email || 'Não autenticado'}`);
+    
+    alert(`Teste de Salvamento:\n\nGastos: ${pontosGastos}\nSaldo: ${saldoDisponivel}\nTotais: ${pontosTotais}`);
+};
 </script>
 </body>
 </html>  
