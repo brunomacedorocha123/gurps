@@ -7,20 +7,13 @@ class SistemaEscudo {
         this.PVAtual = 0;
         this.RD = 0;
         
-        console.log('SistemaEscudo criado');
         this.init();
     }
 
     init() {
-        console.log('Iniciando sistema de escudo...');
-        
-        // Configura botões
         this.configurarBotoes();
-        
-        // Atualiza imediatamente
         this.atualizarDadosEscudo();
         
-        // Verifica periodicamente
         setInterval(() => {
             if (window.sistemaEquipamentos) {
                 this.verificarEscudo();
@@ -49,41 +42,33 @@ class SistemaEscudo {
         if (!window.sistemaEquipamentos) return;
         
         try {
-            // Verifica se há escudo equipado
             const escudosEquipados = window.sistemaEquipamentos.equipamentosEquipados.escudos;
             
             if (escudosEquipados && escudosEquipados.length > 0) {
                 const escudoAtual = escudosEquipados[0];
                 
-                // Se mudou o escudo ou é primeiro
                 if (!this.escudoEquipado || this.escudoEquipado.idUnico !== escudoAtual.idUnico) {
                     this.escudoEquipado = escudoAtual;
                     this.carregarDadosEscudo(escudoAtual);
                     this.atualizarCard();
                 }
             } else {
-                // Sem escudo
                 if (this.escudoEquipado) {
                     this.escudoEquipado = null;
                     this.atualizarCardVazio();
                 }
             }
         } catch (error) {
-            console.log('Erro ao verificar escudo:', error);
+            // Silencioso
         }
     }
 
     atualizarDadosEscudo() {
         this.verificarEscudo();
-        
-        // Tenta novamente após 1 segundo
         setTimeout(() => this.verificarEscudo(), 1000);
     }
 
     carregarDadosEscudo(escudo) {
-        console.log('Carregando escudo:', escudo.nome);
-        
-        // Extrai RD e PV do formato "5/20"
         if (escudo.rdpv && escudo.rdpv.includes('/')) {
             const partes = escudo.rdpv.split('/');
             this.RD = parseInt(partes[0].replace(/\D/g, '')) || 0;
@@ -93,7 +78,6 @@ class SistemaEscudo {
             this.PVMaximo = 0;
         }
         
-        // Tenta carregar PV salvo
         const chave = `escudo_${escudo.idUnico}`;
         const salvo = localStorage.getItem(chave);
         this.PVAtual = salvo ? parseInt(salvo) : this.PVMaximo;
@@ -103,8 +87,6 @@ class SistemaEscudo {
         if (!this.escudoEquipado || this.PVAtual <= 0) return;
         
         this.PVAtual = Math.max(0, this.PVAtual - dano);
-        
-        // Salva
         this.salvarPVAtual();
         this.atualizarCard();
     }
@@ -132,15 +114,12 @@ class SistemaEscudo {
             return;
         }
 
-        // Atualiza nome
         const nomeElement = document.getElementById('escudoNome');
         if (nomeElement) nomeElement.textContent = this.escudoEquipado.nome;
         
-        // Atualiza RD
         const drElement = document.getElementById('escudoDR');
         if (drElement) drElement.textContent = this.RD;
         
-        // Atualiza status
         const statusElement = document.getElementById('escudoStatus');
         if (statusElement) {
             if (this.PVMaximo > 0) {
@@ -157,7 +136,6 @@ class SistemaEscudo {
             }
         }
         
-        // Atualiza PV
         const pvTextoElement = document.getElementById('escudoPVTexto');
         const pvFillElement = document.getElementById('escudoPVFill');
         
@@ -167,7 +145,6 @@ class SistemaEscudo {
                 pvTextoElement.textContent = `${this.PVAtual}/${this.PVMaximo}`;
                 pvFillElement.style.width = `${porcentagem}%`;
                 
-                // Cor simples (sem animação)
                 if (porcentagem > 50) {
                     pvFillElement.style.background = '#2ecc71';
                 } else if (porcentagem > 25) {
@@ -204,16 +181,13 @@ class SistemaEscudo {
     }
 }
 
-// Inicialização DIRETA
 setTimeout(() => {
     const cardEscudo = document.querySelector('.card-escudo');
     if (cardEscudo) {
         window.sistemaEscudo = new SistemaEscudo();
-        console.log('Sistema de escudo inicializado');
     }
 }, 1500);
 
-// Funções globais
 function danoEscudo(dano) {
     if (window.sistemaEscudo) {
         window.sistemaEscudo.aplicarDano(dano);
