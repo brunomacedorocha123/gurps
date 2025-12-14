@@ -1,9 +1,11 @@
-// dashboard.js - VERSÃO CORRIGIDA
+// dashboard.js - VERSÃO COMPLETA CONECTADA COM TODOS OS SISTEMAS
 class DashboardSupabase {
     constructor() {
         this.estado = this.criarEstadoInicial();
         this.supabase = window.supabase;
         this.fotoTemporaria = null;
+        this.ultimoUpdate = 0;
+        this.updateInterval = null;
     }
 
     criarEstadoInicial() {
@@ -159,7 +161,7 @@ class DashboardSupabase {
     monitorarAtributos() {
         this.puxarValoresAtributos();
         
-        setInterval(() => {
+        this.updateInterval = setInterval(() => {
             this.puxarValoresAtributos();
         }, 1000);
     }
@@ -203,7 +205,7 @@ class DashboardSupabase {
         this.calcularSaldoDisponivel();
     }
 
-    // ===== MONITORAMENTO DE OUTRAS ABAS =====
+    // ===== MONITORAMENTO DE OUTRAS ABAS - SISTEMA COMPLETO =====
     monitorarOutrasAbas() {
         this.puxarTodosDados();
         
@@ -229,23 +231,40 @@ class DashboardSupabase {
         this.atualizarDisplayPontos();
     }
 
+    // 1. VANTAGENS E DESVANTAGENS - Conectado com sistemaVantagens
     puxarDadosVantagensDesvantagens() {
         try {
-            const totalVantagensElement = document.getElementById('total-vantagens');
-            if (totalVantagensElement) {
-                const texto = totalVantagensElement.textContent;
+            // PRIMEIRO: Tentar buscar do sistema de vantagens
+            if (window.sistemaVantagens) {
+                // Buscar vantagens positivas
+                const totalVantagens = window.sistemaVantagens.calcularTotalVantagens();
+                this.estado.pontos.gastosVantagens = Math.max(0, totalVantagens);
+                
+                // Buscar desvantagens negativas
+                const totalDesvantagens = window.sistemaVantagens.calcularTotalDesvantagens();
+                this.estado.pontos.desvantagensVantagens = Math.abs(Math.min(0, totalDesvantagens));
+            }
+        } catch (error) {
+            // Fallback para elementos da página
+            const totalElement = document.getElementById('total-vantagens');
+            if (totalElement) {
+                const texto = totalElement.textContent;
                 const match = texto.match(/([+-]?\d+)/);
                 if (match) {
                     const valor = parseInt(match[1]) || 0;
-                    this.estado.pontos.gastosVantagens = valor > 0 ? valor : 0;
-                    this.estado.pontos.desvantagensVantagens = valor < 0 ? Math.abs(valor) : 0;
+                    if (valor >= 0) {
+                        this.estado.pontos.gastosVantagens = valor;
+                        this.estado.pontos.desvantagensVantagens = 0;
+                    } else {
+                        this.estado.pontos.gastosVantagens = 0;
+                        this.estado.pontos.desvantagensVantagens = Math.abs(valor);
+                    }
                 }
             }
-        } catch (error) {
-            // Silencioso
         }
     }
 
+    // 2. PERÍCIAS
     puxarDadosPericias() {
         try {
             const pontosPericiasTotalElement = document.getElementById('pontos-pericias-total');
@@ -261,6 +280,7 @@ class DashboardSupabase {
         }
     }
 
+    // 3. MAGIAS
     puxarDadosMagias() {
         try {
             const totalGastoMagiaElement = document.getElementById('total-gasto-magia');
@@ -276,6 +296,7 @@ class DashboardSupabase {
         }
     }
 
+    // 4. IDIOMAS
     puxarDadosIdiomas() {
         try {
             const badgeIdiomas = document.getElementById('pontosIdiomas');
@@ -284,7 +305,7 @@ class DashboardSupabase {
                 const match = texto.match(/([+-]?\d+)/);
                 if (match) {
                     const pontos = parseInt(match[1]) || 0;
-                    this.estado.pontos.gastosIdiomas = pontos > 0 ? pontos : 0;
+                    this.estado.pontos.gastosIdiomas = Math.max(0, pontos);
                 }
             }
         } catch (error) {
@@ -292,6 +313,7 @@ class DashboardSupabase {
         }
     }
 
+    // 5. CARACTERÍSTICAS FÍSICAS
     puxarDadosCaracteristicasFisicas() {
         try {
             const badgeCaracteristicas = document.getElementById('pontosCaracteristicas');
@@ -300,7 +322,7 @@ class DashboardSupabase {
                 const match = texto.match(/([+-]?\d+)/);
                 if (match) {
                     const pontos = parseInt(match[1]) || 0;
-                    this.estado.pontos.caracteristicasFisicasDesvantagens = pontos < 0 ? Math.abs(pontos) : 0;
+                    this.estado.pontos.caracteristicasFisicasDesvantagens = Math.abs(Math.min(0, pontos));
                 }
             }
         } catch (error) {
@@ -308,11 +330,13 @@ class DashboardSupabase {
         }
     }
 
+    // 6. APARÊNCIA
     puxarDadosAparencia() {
         try {
             const selectAparencia = document.getElementById('nivelAparencia');
             if (selectAparencia) {
                 const valor = parseInt(selectAparencia.value) || 0;
+                // Negativo é desvantagem
                 this.estado.pontos.aparenciaDesvantagens = valor < 0 ? Math.abs(valor) : 0;
             }
         } catch (error) {
@@ -320,6 +344,7 @@ class DashboardSupabase {
         }
     }
 
+    // 7. RIQUEZA
     puxarDadosRiqueza() {
         try {
             const selectRiqueza = document.getElementById('nivelRiqueza');
@@ -342,6 +367,7 @@ class DashboardSupabase {
         }
     }
 
+    // 8. CARACTERÍSTICAS (para display)
     puxarDadosCaracteristicas() {
         try {
             const nivelAparenciaSelect = document.getElementById('nivelAparencia');
@@ -376,45 +402,106 @@ class DashboardSupabase {
         }
     }
 
+    // 9. TÉCNICAS - Conectado com sistema de técnicas
     puxarDadosTecnicas() {
         try {
+            // Método 1: Buscar do sistema de técnicas
+            if (window.estadoTecnicas && window.estadoTecnicas.aprendidas) {
+                const totalPontos = window.estadoTecnicas.aprendidas.reduce((total, tecnica) => {
+                    return total + (tecnica.custoTotal || 0);
+                }, 0);
+                this.estado.pontos.gastosTecnicas = totalPontos;
+                return;
+            }
+            
+            // Método 2: Buscar do localStorage
+            const tecnicasSalvas = localStorage.getItem('tecnicasAprendidas');
+            if (tecnicasSalvas) {
+                try {
+                    const tecnicas = JSON.parse(tecnicasSalvas);
+                    const totalPontos = tecnicas.reduce((total, tecnica) => {
+                        return total + (tecnica.custoTotal || 0);
+                    }, 0);
+                    this.estado.pontos.gastosTecnicas = totalPontos;
+                    return;
+                } catch (e) {
+                    // Ignorar erro
+                }
+            }
+            
+            // Método 3: Verificar na interface
             const tecnicasElement = document.getElementById('total-tecnicas');
             if (tecnicasElement) {
                 const texto = tecnicasElement.textContent;
                 const match = texto.match(/(\d+)/);
                 if (match) {
                     this.estado.pontos.gastosTecnicas = parseInt(match[1]) || 0;
+                    return;
                 }
             }
+            
+            // Default
+            this.estado.pontos.gastosTecnicas = 0;
+            
         } catch (error) {
-            // Silencioso
+            this.estado.pontos.gastosTecnicas = 0;
         }
     }
 
+    // 10. PECULIARIDADES - IMPORTANTE: -1 ponto cada
     puxarDadosPeculiaridades() {
         try {
-            const peculiaridadesElement = document.getElementById('total-peculiaridades');
-            if (peculiaridadesElement) {
-                const texto = peculiaridadesElement.textContent;
-                const match = texto.match(/([+-]?\d+)/);
-                if (match) {
-                    const valor = parseInt(match[1]) || 0;
-                    this.estado.pontos.peculiaridades = valor < 0 ? Math.abs(valor) : 0;
+            let totalPeculiaridades = 0;
+            
+            // Método 1: Buscar do sistema de vantagens
+            if (window.sistemaVantagens && window.sistemaVantagens.peculiaridades) {
+                totalPeculiaridades = window.sistemaVantagens.peculiaridades.length;
+                this.estado.pontos.peculiaridades = totalPeculiaridades;
+                return;
+            }
+            
+            // Método 2: Buscar do localStorage
+            const peculiaridadesSalvas = localStorage.getItem('peculiaridades');
+            if (peculiaridadesSalvas) {
+                try {
+                    const peculiaridades = JSON.parse(peculiaridadesSalvas);
+                    totalPeculiaridades = peculiaridades.length;
+                    this.estado.pontos.peculiaridades = totalPeculiaridades;
+                    return;
+                } catch (e) {
+                    // Ignorar erro
                 }
             }
+            
+            // Método 3: Buscar da interface
+            const contadorPeculiaridades = document.getElementById('contador-peculiaridades');
+            if (contadorPeculiaridades) {
+                const texto = contadorPeculiaridades.textContent;
+                const match = texto.match(/(\d+)/);
+                if (match) {
+                    totalPeculiaridades = parseInt(match[0]) || 0;
+                    this.estado.pontos.peculiaridades = totalPeculiaridades;
+                    return;
+                }
+            }
+            
+            // Default
+            this.estado.pontos.peculiaridades = 0;
+            
         } catch (error) {
-            // Silencioso
+            this.estado.pontos.peculiaridades = 0;
         }
     }
 
-    // ===== CÁLCULOS =====
+    // ===== CÁLCULOS CORRETOS =====
     calcularTotalDesvantagens() {
+        // SOMAR TODAS AS DESVANTAGENS (valores negativos)
         const total = 
-            this.estado.pontos.desvantagensVantagens +
-            this.estado.pontos.aparenciaDesvantagens +
-            this.estado.pontos.riquezaDesvantagens +
-            this.estado.pontos.caracteristicasFisicasDesvantagens +
-            this.estado.pontos.peculiaridades;
+            this.estado.pontos.desvantagensVantagens + // Desvantagens do sistema
+            this.estado.pontos.aparenciaDesvantagens + // Aparência negativa
+            this.estado.pontos.riquezaDesvantagens +   // Riqueza negativa
+            this.estado.pontos.caracteristicasFisicasDesvantagens + // Características físicas negativas
+            this.estado.pontos.peculiaridades;         // Peculiaridades (-1 cada)
         
         this.estado.pontos.totalDesvantagens = total;
         return total;
@@ -435,7 +522,8 @@ class DashboardSupabase {
             totalDesvantagens 
         } = this.estado.pontos;
         
-        // CORREÇÃO: Incluir aparência positiva como vantagem
+        // VANTAGENS POSITIVAS (tudo que gasta pontos):
+        // - Aparência positiva
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -445,15 +533,23 @@ class DashboardSupabase {
             }
         }
         
-        // CORREÇÃO: Técnicas e Magias são POSITIVAS (gastam pontos)
-        const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
+        // - Riqueza positiva
+        const riquezaVantagensTotal = this.estado.pontos.riquezaVantagens;
         
-        // CORREÇÃO: Incluir técnicas e magias no total gasto
-        const gastosTotais = gastosAtributos + vantagensTotais + 
-                            gastosPericias + gastosTecnicas + gastosMagias;
+        // TOTAL DE VANTAGENS (gastam pontos)
+        const vantagensTotais = gastosVantagens + 
+                                riquezaVantagensTotal + 
+                                gastosIdiomas + 
+                                aparenciaVantagens;
         
-        // CORREÇÃO CRÍTICA: Desvantagens dão pontos, então SUBTRAEM do gasto
-        // Se totalDesvantagens = -20 pontos, então você tem 20 pontos extras
+        // TOTAL DE GASTOS (tudo que custa pontos positivos)
+        const gastosTotais = gastosAtributos +           // Atributos
+                            vantagensTotais +            // Vantagens
+                            gastosPericias +            // Perícias
+                            gastosTecnicas +            // Técnicas
+                            gastosMagias;               // Magias
+        
+        // SALDO = Total inicial - Gastos + Desvantagens (que dão pontos extras)
         this.estado.pontos.saldoDisponivel = total - gastosTotais + totalDesvantagens;
         
         return this.estado.pontos.saldoDisponivel;
@@ -526,6 +622,7 @@ class DashboardSupabase {
             limiteDesvantagens 
         } = this.estado.pontos;
         
+        // Calcular aparência positiva
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -535,22 +632,25 @@ class DashboardSupabase {
             }
         }
         
-        // CORREÇÃO: Incluir técnicas e magias nos pontos gastos
+        // Total de vantagens (gastos positivos)
         const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
+        
+        // Total gasto em pontos positivos
         const pontosGastosDashboard = gastosAtributos + vantagensTotais + 
                                      gastosPericias + gastosTecnicas + gastosMagias;
         
-        // Pontos Gastos
+        // 1. PONTOS GASTOS
         const pontosGastosElement = document.getElementById('pontosGastosDashboard');
         if (pontosGastosElement) {
             pontosGastosElement.textContent = pontosGastosDashboard;
         }
         
-        // Saldo Disponível
+        // 2. SALDO DISPONÍVEL
         const saldoElement = document.getElementById('saldoDisponivelDashboard');
         if (saldoElement) {
             saldoElement.textContent = saldoDisponivel;
             
+            // Colorir conforme saldo
             if (saldoDisponivel < 0) {
                 saldoElement.style.color = '#e74c3c';
             } else if (saldoDisponivel < 50) {
@@ -560,11 +660,12 @@ class DashboardSupabase {
             }
         }
         
-        // Desvantagens Atuais
+        // 3. DESVANTAGENS ATUAIS
         const desvantagensElement = document.getElementById('desvantagensAtuais');
         if (desvantagensElement) {
             desvantagensElement.textContent = totalDesvantagens;
             
+            // Colorir conforme limite
             if (totalDesvantagens > Math.abs(limiteDesvantagens)) {
                 desvantagensElement.style.color = '#e74c3c';
             } else if (totalDesvantagens > Math.abs(limiteDesvantagens) * 0.8) {
@@ -587,6 +688,7 @@ class DashboardSupabase {
             totalDesvantagens 
         } = this.estado.pontos;
         
+        // Aparência positiva
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -596,9 +698,10 @@ class DashboardSupabase {
             }
         }
         
-        // CORREÇÃO: Técnicas são positivas (gastam pontos)
+        // Vantagens totais (gastos positivos)
         const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
         
+        // Elementos da interface
         const elementos = {
             gastosAtributos: document.getElementById('gastosAtributos'),
             gastosVantagens: document.getElementById('gastosVantagens'),
@@ -608,44 +711,51 @@ class DashboardSupabase {
             gastosTotal: document.getElementById('gastosTotal')
         };
         
+        // 1. ATRIBUTOS
         if (elementos.gastosAtributos) {
             elementos.gastosAtributos.textContent = gastosAtributos;
         }
         
+        // 2. VANTAGENS
         if (elementos.gastosVantagens) {
             elementos.gastosVantagens.textContent = vantagensTotais;
         }
         
-        // CORREÇÃO: Mostrar técnicas junto com perícias ou separado
+        // 3. PERÍCIAS + TÉCNICAS
         if (elementos.gastosPericias) {
             elementos.gastosPericias.textContent = gastosPericias + gastosTecnicas;
         }
         
+        // 4. MAGIAS
         if (elementos.gastosMagias) {
             elementos.gastosMagias.textContent = gastosMagias;
         }
         
+        // 5. DESVANTAGENS & PECULIARIDADES (NEGATIVAS)
         if (elementos.gastosDesvantagens) {
             elementos.gastosDesvantagens.textContent = totalDesvantagens;
             elementos.gastosDesvantagens.style.color = '#9b59b6';
         }
         
-        // CORREÇÃO: Cálculo correto do total
+        // 6. TOTAL LÍQUIDO
+        // Gastos totais (pontos positivos)
         const gastosTotais = gastosAtributos + vantagensTotais + 
                             gastosPericias + gastosTecnicas + gastosMagias;
+        // Total líquido = Gastos - Desvantagens
         const gastosLiquidos = gastosTotais - totalDesvantagens;
         
         if (elementos.gastosTotal) {
             elementos.gastosTotal.textContent = gastosLiquidos;
             
+            // Colorir conforme situação
             if (gastosLiquidos < 0) {
-                elementos.gastosTotal.style.color = '#9b59b6';
+                elementos.gastosTotal.style.color = '#9b59b6'; // Desvantagens > Gastos
             } else if (gastosLiquidos > this.estado.pontos.total) {
-                elementos.gastosTotal.style.color = '#e74c3c';
+                elementos.gastosTotal.style.color = '#e74c3c'; // Excedeu limite
             } else if (gastosLiquidos > this.estado.pontos.total * 0.8) {
-                elementos.gastosTotal.style.color = '#f39c12';
+                elementos.gastosTotal.style.color = '#f39c12'; // Quase excedendo
             } else {
-                elementos.gastosTotal.style.color = '#27ae60';
+                elementos.gastosTotal.style.color = '#27ae60'; // OK
             }
         }
     }
@@ -659,6 +769,7 @@ class DashboardSupabase {
         this.monitorarAtributos();
         this.monitorarOutrasAbas();
         
+        // Atualizar display inicial
         setTimeout(() => {
             this.atualizarDisplayAtributos();
             this.atualizarDisplayVitalidade();
@@ -667,6 +778,14 @@ class DashboardSupabase {
             this.atualizarDisplayResumoGastos();
             this.atualizarContadorDescricao();
         }, 500);
+    }
+
+    // ===== LIMPEZA =====
+    destruir() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+        }
     }
 }
 
@@ -677,15 +796,26 @@ window.dashboard = new DashboardSupabase();
 document.addEventListener('DOMContentLoaded', function() {
     const dashboardTab = document.getElementById('dashboard');
     if (dashboardTab && dashboardTab.classList.contains('active')) {
-        setTimeout(() => window.dashboard.inicializar(), 300);
+        setTimeout(() => {
+            if (window.dashboard) {
+                window.dashboard.inicializar();
+            }
+        }, 300);
     }
     
+    // Observar mudanças de aba
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                 const tab = mutation.target;
                 if (tab.id === 'dashboard' && tab.classList.contains('active')) {
-                    setTimeout(() => window.dashboard.inicializar(), 300);
+                    setTimeout(() => {
+                        if (window.dashboard) {
+                            window.dashboard.destruir();
+                            window.dashboard = new DashboardSupabase();
+                            window.dashboard.inicializar();
+                        }
+                    }, 300);
                 }
             }
         });
