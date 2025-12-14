@@ -3444,6 +3444,7 @@
 <script src="coletor-dados.js"></script>
 <script src="salvamento-supabase.js"></script>
 
+<!-- NO criar-personagens.html, substitua TODO o script por este: -->
 <script>
     // Configuração do Supabase
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
@@ -3455,449 +3456,12 @@
     // Estado global
     let personagemId = null;
     let personagemCarregado = false;
-    let salvamentoSistema = null;
 
     // ======================
-    // SISTEMA DE SALVAMENTO
+    // INICIALIZAÇÃO DO SISTEMA
     // ======================
-    class SistemaSalvamento {
-        constructor() {
-            this.supabase = supabase;
-            this.usuarioLogado = null;
-            this.limitePersonagens = 10;
-        }
-
-        // Verificar autenticação
-        async verificarAutenticacao() {
-            try {
-                const { data: { session }, error } = await this.supabase.auth.getSession();
-                
-                if (error) {
-                    console.error('Erro na sessão:', error);
-                    return false;
-                }
-                
-                if (!session) {
-                    console.warn('Usuário não autenticado');
-                    return false;
-                }
-                
-                this.usuarioLogado = session.user;
-                console.log('Usuário autenticado:', this.usuarioLogado.email);
-                return true;
-                
-            } catch (error) {
-                console.error('Erro ao verificar autenticação:', error);
-                return false;
-            }
-        }
-
-        // Verificar limite de personagens
-        async verificarLimitePersonagens() {
-            try {
-                const autenticado = await this.verificarAutenticacao();
-                
-                if (!autenticado) {
-                    return {
-                        podeCriar: true,
-                        quantidade: 0,
-                        limite: this.limitePersonagens,
-                        motivo: ''
-                    };
-                }
-
-                const { count, error } = await this.supabase
-                    .from('characters')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', this.usuarioLogado.id);
-
-                if (error) {
-                    console.warn('Erro ao contar personagens:', error);
-                    return {
-                        podeCriar: true,
-                        quantidade: 0,
-                        limite: this.limitePersonagens,
-                        motivo: ''
-                    };
-                }
-
-                const podeCriar = count < this.limitePersonagens;
-                const motivo = podeCriar ? '' : `Limite de ${this.limitePersonagens} personagens atingido`;
-
-                return {
-                    podeCriar,
-                    quantidade: count,
-                    limite: this.limitePersonagens,
-                    motivo
-                };
-
-            } catch (error) {
-                console.error('Erro ao verificar limite:', error);
-                return {
-                    podeCriar: true,
-                    quantidade: 0,
-                    limite: this.limitePersonagens,
-                    motivo: 'Erro na verificação'
-                };
-            }
-        }
-
-        // Coletar dados completos do formulário
-        coletarDadosCompletos() {
-            // Usar o coletor existente se disponível
-            if (window.coletor && typeof window.coletor.coletarTodosDados === 'function') {
-                const dados = window.coletor.coletarTodosDados();
-                
-                // Adicionar campos obrigatórios
-                dados.user_id = this.usuarioLogado?.id;
-                dados.created_at = new Date().toISOString();
-                dados.updated_at = new Date().toISOString();
-                dados.status = 'Ativo';
-                
-                return dados;
-            }
-
-            // Coletar dados manualmente
-            return {
-                // Dados básicos
-                user_id: this.usuarioLogado?.id,
-                nome: document.getElementById('charName')?.value || 'Novo Personagem',
-                classe: document.getElementById('classePersonagem')?.value || '',
-                raca: document.getElementById('racaPersonagem')?.value || '',
-                nivel: document.getElementById('nivelPersonagem')?.value || 'Nível 1',
-                descricao: document.getElementById('descricaoPersonagem')?.value || '',
-                status: 'Ativo',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-
-                // Sistema de pontos
-                pontos_totais: window.sistemaPontos?.pontos?.totais || 150,
-                pontos_gastos: window.sistemaPontos?.pontos?.gastos || 0,
-                pontos_disponiveis: window.sistemaPontos?.pontos?.disponiveis || 150,
-                limite_desvantagens: window.sistemaPontos?.pontos?.limiteDesvantagens || -50,
-                desvantagens_atuais: window.sistemaPontos?.pontos?.desvantagensAtuais || 0,
-
-                // Atributos principais
-                forca: parseInt(document.getElementById('ST')?.value) || 10,
-                destreza: parseInt(document.getElementById('DX')?.value) || 10,
-                inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
-                saude: parseInt(document.getElementById('HT')?.value) || 10,
-
-                // Campos com valores padrão (serão preenchidos pelos sistemas)
-                pontos_vida: 10,
-                bonus_pv: 0,
-                pontos_fadiga: 10,
-                bonus_pf: 0,
-                vontade: 10,
-                bonus_vontade: 0,
-                percepcao: 10,
-                bonus_percepcao: 0,
-                deslocamento: 5.00,
-                bonus_deslocamento: 0,
-
-                // Campos JSON (arrays vazios)
-                idiomas: [],
-                caracteristicas_fisicas: [],
-                vantagens: [],
-                desvantagens: [],
-                peculiaridades: [],
-                pericias: [],
-                tecnicas: [],
-                magias: [],
-                equipamentos: [],
-                inventario: [],
-                deposito: [],
-                condicoes: [],
-                inimigos: [],
-                aliados: [],
-                dependentes: []
-            };
-        }
-
-        // Validar dados antes de salvar
-        validarDados(dados) {
-            if (!dados.nome || dados.nome.trim() === '') {
-                alert('O personagem precisa ter um nome!');
-                return false;
-            }
-
-            if (dados.pontos_gastos > dados.pontos_totais) {
-                alert(`Erro: Você gastou ${dados.pontos_gastos} pontos, mas só tem ${dados.pontos_totais} pontos totais!`);
-                return false;
-            }
-
-            if (dados.desvantagens_atuais < dados.limite_desvantagens) {
-                alert(`Erro: Você excedeu o limite de desvantagens! (Atual: ${dados.desvantagens_atuais}, Limite: ${dados.limite_desvantagens})`);
-                return false;
-            }
-
-            return true;
-        }
-
-        // Salvar personagem
-        async salvarPersonagem(personagemId = null) {
-            try {
-                console.log('💾 Iniciando salvamento...');
-
-                // Verificar autenticação
-                const autenticado = await this.verificarAutenticacao();
-                if (!autenticado) {
-                    alert('Você precisa estar logado para salvar personagens!');
-                    window.location.href = 'login.html';
-                    return false;
-                }
-
-                // Coletar dados
-                const dados = this.coletarDadosCompletos();
-                console.log('Dados coletados:', dados);
-
-                // Validar dados
-                if (!this.validarDados(dados)) {
-                    return false;
-                }
-
-                // Preparar dados para salvar
-                const dadosParaSalvar = { ...dados };
-                
-                // Converter arrays para JSON
-                const camposJson = ['idiomas', 'caracteristicas_fisicas', 'vantagens', 'desvantagens', 
-                    'peculiaridades', 'pericias', 'tecnicas', 'magias', 'equipamentos',
-                    'inventario', 'deposito', 'condicoes', 'inimigos', 'aliados', 'dependentes'];
-                
-                camposJson.forEach(campo => {
-                    if (Array.isArray(dadosParaSalvar[campo])) {
-                        dadosParaSalvar[campo] = JSON.stringify(dadosParaSalvar[campo]);
-                    }
-                });
-
-                let resultado;
-
-                if (personagemId) {
-                    // Modo edição
-                    console.log('📝 Editando personagem existente:', personagemId);
-                    
-                    resultado = await this.supabase
-                        .from('characters')
-                        .update(dadosParaSalvar)
-                        .eq('id', personagemId)
-                        .eq('user_id', this.usuarioLogado.id)
-                        .select();
-                } else {
-                    // Modo criação
-                    console.log('🎮 Criando novo personagem');
-                    
-                    resultado = await this.supabase
-                        .from('characters')
-                        .insert([dadosParaSalvar])
-                        .select();
-                }
-
-                if (resultado.error) {
-                    console.error('❌ Erro do Supabase:', resultado.error);
-                    this.mostrarErro(resultado.error);
-                    return false;
-                }
-
-                console.log('✅ Salvamento bem-sucedido:', resultado.data);
-                
-                // Mostrar mensagem de sucesso
-                this.mostrarMensagemSucesso(personagemId ? 'editado' : 'criado');
-                
-                // Retornar dados do personagem salvo
-                return {
-                    success: true,
-                    data: resultado.data[0],
-                    id: resultado.data[0]?.id || personagemId
-                };
-
-            } catch (error) {
-                console.error('💥 Erro ao salvar personagem:', error);
-                alert('Erro inesperado: ' + error.message);
-                return false;
-            }
-        }
-
-        // Carregar personagem
-        async carregarPersonagem(personagemId) {
-            try {
-                const autenticado = await this.verificarAutenticacao();
-                if (!autenticado) {
-                    alert('Você precisa estar logado!');
-                    return null;
-                }
-
-                const { data: personagem, error } = await this.supabase
-                    .from('characters')
-                    .select('*')
-                    .eq('id', personagemId)
-                    .eq('user_id', this.usuarioLogado.id)
-                    .single();
-
-                if (error) {
-                    console.error('Erro ao carregar:', error);
-                    alert('Erro ao carregar personagem: ' + error.message);
-                    return null;
-                }
-
-                console.log('Personagem carregado:', personagem.nome);
-                return personagem;
-
-            } catch (error) {
-                console.error('Erro ao carregar personagem:', error);
-                return null;
-            }
-        }
-
-        // Excluir personagem
-        async excluirPersonagem(personagemId) {
-            try {
-                const autenticado = await this.verificarAutenticacao();
-                if (!autenticado) {
-                    alert('Você precisa estar logado!');
-                    return false;
-                }
-
-                if (!confirm('Tem certeza que deseja excluir este personagem?\nEsta ação não pode ser desfeita!')) {
-                    return false;
-                }
-
-                const { error } = await this.supabase
-                    .from('characters')
-                    .delete()
-                    .eq('id', personagemId)
-                    .eq('user_id', this.usuarioLogado.id);
-
-                if (error) {
-                    console.error('Erro ao excluir:', error);
-                    alert('Erro ao excluir: ' + error.message);
-                    return false;
-                }
-
-                alert('✅ Personagem excluído com sucesso!');
-                return true;
-
-            } catch (error) {
-                console.error('Erro ao excluir:', error);
-                alert('Erro ao excluir: ' + error.message);
-                return false;
-            }
-        }
-
-        // Mostrar mensagem de erro
-        mostrarErro(erro) {
-            let mensagem = 'Erro ao salvar: ';
-            
-            switch(erro.code) {
-                case '23505':
-                    mensagem += 'Personagem já existe';
-                    break;
-                case '42501':
-                    mensagem += 'Permissão negada. Verifique as políticas RLS no Supabase.';
-                    break;
-                case '42P01':
-                    mensagem += 'Tabela não existe. Execute o SQL da tabela primeiro.';
-                    break;
-                default:
-                    mensagem += erro.message;
-            }
-            
-            alert(mensagem);
-        }
-
-        // Mostrar mensagem de sucesso
-        mostrarMensagemSucesso(tipo) {
-            const mensagem = tipo === 'criado' 
-                ? '🎉 Personagem criado com sucesso!' 
-                : '✅ Personagem atualizado com sucesso!';
-
-            // Criar modal de sucesso
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.9);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 99999;
-            `;
-            
-            modal.innerHTML = `
-                <div style="
-                    background: rgba(30,30,40,0.95);
-                    padding: 40px;
-                    border-radius: 15px;
-                    text-align: center;
-                    border: 2px solid #ff8c00;
-                    max-width: 500px;
-                    width: 90%;
-                ">
-                    <div style="font-size: 60px; margin-bottom: 20px;">🎮</div>
-                    <h2 style="color: #ffd700; margin-bottom: 20px;">${mensagem}</h2>
-                    <p style="color: #ccc; margin-bottom: 30px;">
-                        Redirecionando para seus personagens em <span id="contador">3</span> segundos...
-                    </p>
-                    <button id="btnIrPersonagens" style="
-                        background: #ff8c00;
-                        color: white;
-                        border: none;
-                        padding: 12px 30px;
-                        border-radius: 8px;
-                        font-weight: bold;
-                        cursor: pointer;
-                        font-size: 16px;
-                    ">
-                        Ir para Meus Personagens
-                    </button>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Contador
-            let segundos = 3;
-            const contador = modal.querySelector('#contador');
-            const contadorInterval = setInterval(() => {
-                segundos--;
-                contador.textContent = segundos;
-                
-                if (segundos <= 0) {
-                    clearInterval(contadorInterval);
-                    window.location.href = 'personagens.html';
-                }
-            }, 1000);
-            
-            // Botão para ir para personagens
-            modal.querySelector('#btnIrPersonagens').addEventListener('click', () => {
-                clearInterval(contadorInterval);
-                window.location.href = 'personagens.html';
-            });
-            
-            // Fechar modal ao clicar fora
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    clearInterval(contadorInterval);
-                    document.body.removeChild(modal);
-                }
-            });
-        }
-    }
-
-    // ======================
-    // FUNÇÕES PRINCIPAIS
-    // ======================
-    
-    // Inicializar sistema
     async function inicializarSistema() {
         try {
-            console.log('⚙️ Inicializando sistema...');
-            
-            // Inicializar sistema de salvamento
-            salvamentoSistema = new SistemaSalvamento();
-            
             // Verificar autenticação
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -3918,7 +3482,7 @@
                 document.title = 'Editar Personagem - RPG System';
             } else {
                 // Modo criação - verificar limite
-                const limite = await salvamentoSistema.verificarLimitePersonagens();
+                const limite = await window.salvamento.verificarLimitePersonagens();
                 if (!limite.podeCriar) {
                     alert(limite.motivo);
                     window.location.href = 'personagens.html';
@@ -3938,15 +3502,14 @@
                 window.sistemaPontos.calcularPontos();
             }
             
-            console.log('✅ Sistema inicializado com sucesso');
-            
         } catch (error) {
-            console.error('❌ Erro na inicialização:', error);
             alert('Erro ao inicializar sistema. Tente recarregar a página.');
         }
     }
 
-    // Navegação entre abas
+    // ======================
+    // NAVEGAÇÃO ENTRE ABAS
+    // ======================
     function inicializarNavegacaoAbas() {
         const tabButtons = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
@@ -3970,7 +3533,6 @@
         });
     }
 
-    // Inicializar todos os sistemas de abas
     function inicializarSistemaAbas() {
         const activeTab = document.querySelector('.tab-btn.active');
         if (activeTab) {
@@ -3979,11 +3541,7 @@
         }
     }
 
-    // Inicializar sistemas específicos de cada aba
     function inicializarSistemasAba(abaId) {
-        console.log('Inicializando aba:', abaId);
-        
-        // Chama as funções de inicialização específicas de cada aba
         setTimeout(() => {
             switch(abaId) {
                 case 'dashboard':
@@ -4014,7 +3572,9 @@
         }, 100);
     }
 
-    // Configurar event listeners
+    // ======================
+    // CONFIGURAR EVENTOS
+    // ======================
     function configurarEventListeners() {
         // Botões do header
         const btnSalvar = document.getElementById('btnSalvar');
@@ -4052,13 +3612,17 @@
         }
     }
 
+    // ======================
+    // FUNÇÕES PRINCIPAIS
+    // ======================
+
     // Carregar personagem para edição
     async function carregarPersonagemParaEdicao(personagemId) {
         try {
-            const personagem = await salvamentoSistema.carregarPersonagem(personagemId);
+            const personagem = await window.salvamento.carregarPersonagem(personagemId);
             
             if (!personagem) {
-                alert('Personagem não encontrado ou você não tem permissão para editá-lo.');
+                alert('Personagem não encontrado!');
                 window.location.href = 'personagens.html';
                 return;
             }
@@ -4084,7 +3648,7 @@
             document.getElementById('IQ').value = personagem.inteligencia || 10;
             document.getElementById('HT').value = personagem.saude || 10;
             
-            // Foto
+            // Foto (se houver)
             if (personagem.avatar_url) {
                 const fotoPreview = document.getElementById('fotoPreview');
                 const fotoPlaceholder = document.getElementById('fotoPlaceholder');
@@ -4098,11 +3662,8 @@
             // Atualizar UI
             atualizarResumoNome(personagem.nome);
             
-            console.log('✅ Personagem carregado para edição:', personagem.nome);
-            
         } catch (error) {
-            console.error('Erro ao carregar personagem:', error);
-            alert('Erro ao carregar personagem para edição.');
+            alert('Erro ao carregar personagem: ' + error.message);
         }
     }
 
@@ -4111,20 +3672,14 @@
         try {
             // Obter ID do personagem se estiver editando
             const urlParams = new URLSearchParams(window.location.search);
-            const idParaSalvar = urlParams.get('id') || personagemId;
+            const idParaSalvar = urlParams.get('id');
             
             // Chamar sistema de salvamento
-            const resultado = await salvamentoSistema.salvarPersonagem(idParaSalvar);
+            const resultado = await window.salvamento.salvarPersonagem(idParaSalvar);
             
-            if (resultado && resultado.success) {
-                console.log('✅ Personagem salvo com sucesso:', resultado);
-                return true;
-            }
-            
-            return false;
+            return resultado;
             
         } catch (error) {
-            console.error('❌ Erro ao salvar personagem:', error);
             alert('Erro ao salvar: ' + error.message);
             return false;
         }
@@ -4149,17 +3704,16 @@
     // Excluir personagem
     async function excluirPersonagem(personagemId) {
         try {
-            const sucesso = await salvamentoSistema.excluirPersonagem(personagemId);
+            const sucesso = await window.salvamento.excluirPersonagem(personagemId);
             
             if (sucesso) {
-                // Redirecionar após exclusão
                 setTimeout(() => {
                     window.location.href = 'personagens.html';
                 }, 1000);
             }
             
         } catch (error) {
-            console.error('Erro ao excluir:', error);
+            alert('Erro ao excluir: ' + error.message);
         }
     }
 
@@ -4209,7 +3763,7 @@
             }
             
         } catch (error) {
-            console.error('Erro ao sincronizar dados:', error);
+            // Silencioso
         }
     }
 
@@ -4234,7 +3788,7 @@
     }
 
     // Manipular upload de foto
-    async function handleUploadFoto(file) {
+    function handleUploadFoto(file) {
         try {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -4257,13 +3811,16 @@
                 if (placeholderResumo) {
                     placeholderResumo.style.display = 'none';
                 }
+                
+                // Salvar foto no dashboard (para depois salvar no Supabase)
+                if (window.dashboard) {
+                    window.dashboard.salvarFotoTemporaria(file, e.target.result);
+                }
             };
             reader.readAsDataURL(file);
             
-            // TODO: Implementar upload para o Supabase Storage quando necessário
-            
         } catch (error) {
-            console.error('Erro ao processar foto:', error);
+            alert('Erro ao processar foto');
         }
     }
 
@@ -4283,8 +3840,6 @@
         }
     };
 
-    // Sistema de salvamento disponível globalmente
-    window.salvamento = salvamentoSistema;
 </script>
 </body>
 </html>
