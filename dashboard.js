@@ -1,4 +1,4 @@
-// dashboard.js - VERSÃO LIMPA E FUNCIONAL
+// dashboard.js - VERSÃO LIMPA COM SUPABASE
 class DashboardSupabase {
     constructor() {
         this.estado = this.criarEstadoInicial();
@@ -62,6 +62,7 @@ class DashboardSupabase {
 
         if (!fotoUpload || !fotoPreview) return;
 
+        // Armazenar a foto em memória
         this.fotoTemporaria = null;
 
         fotoUpload.addEventListener('change', (e) => {
@@ -74,6 +75,7 @@ class DashboardSupabase {
                     if (fotoPlaceholder) fotoPlaceholder.style.display = 'none';
                     if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
                     
+                    // Armazenar a foto para salvar depois
                     this.fotoTemporaria = {
                         file: file,
                         dataUrl: e.target.result
@@ -95,121 +97,9 @@ class DashboardSupabase {
         }
     }
 
-    // ===== UPLOAD DA FOTO =====
-    async fazerUploadFoto(personagemId) {
-        if (!this.fotoTemporaria || !this.fotoTemporaria.file) {
-            return null;
-        }
-
-        try {
-            const { data: { session } } = await this.supabase.auth.getSession();
-            if (!session) {
-                return null;
-            }
-
-            const userId = session.user.id;
-            const file = this.fotoTemporaria.file;
-            
-            const fileExt = file.name.split('.').pop().toLowerCase();
-            const fileName = `avatar_${personagemId}.${fileExt}`;
-            const filePath = `avatars/${userId}/${fileName}`;
-
-            const { data, error } = await this.supabase.storage
-                .from('characters')
-                .upload(filePath, file, {
-                    cacheControl: '3600',
-                    upsert: true
-                });
-
-            if (error) {
-                return null;
-            }
-
-            const { data: urlData } = this.supabase.storage
-                .from('characters')
-                .getPublicUrl(filePath);
-
-            return urlData.publicUrl;
-
-        } catch (error) {
-            return null;
-        }
-    }
-
-    // ===== SALVAR FOTO NO BANCO =====
-    async salvarFotoNoBanco(personagemId, avatarUrl) {
-        try {
-            const { error } = await this.supabase
-                .from('characters')
-                .update({ 
-                    avatar_url: avatarUrl,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', personagemId);
-
-            return !error;
-            
-        } catch (error) {
-            return false;
-        }
-    }
-
-    // ===== SALVAR PERSONAGEM COM FOTO =====
-    async salvarPersonagemComFoto(dadosPersonagem) {
-        try {
-            const { data: { session } } = await this.supabase.auth.getSession();
-            if (!session) {
-                return { error: 'Usuário não autenticado' };
-            }
-
-            const dadosParaSalvar = {
-                ...dadosPersonagem,
-                user_id: session.user.id,
-                updated_at: new Date().toISOString()
-            };
-
-            let personagemId = dadosPersonagem.id;
-            let result;
-
-            if (personagemId) {
-                result = await this.supabase
-                    .from('characters')
-                    .update(dadosParaSalvar)
-                    .eq('id', personagemId)
-                    .select();
-            } else {
-                result = await this.supabase
-                    .from('characters')
-                    .insert([dadosParaSalvar])
-                    .select();
-            }
-
-            if (result.error) {
-                return result;
-            }
-
-            if (!personagemId && result.data && result.data[0]) {
-                personagemId = result.data[0].id;
-            }
-
-            if (this.fotoTemporaria && personagemId) {
-                const avatarUrl = await this.fazerUploadFoto(personagemId);
-                
-                if (avatarUrl) {
-                    await this.salvarFotoNoBanco(personagemId, avatarUrl);
-                    dadosParaSalvar.avatar_url = avatarUrl;
-                }
-            }
-
-            return { 
-                data: result.data, 
-                personagemId: personagemId,
-                temFoto: !!this.fotoTemporaria
-            };
-
-        } catch (error) {
-            return { error: error.message };
-        }
+    // Obter a foto para salvar
+    getFotoParaSalvar() {
+        return this.fotoTemporaria;
     }
 
     // ===== SISTEMA DE IDENTIFICAÇÃO =====
@@ -220,6 +110,7 @@ class DashboardSupabase {
             const campo = document.getElementById(campoId);
             if (campo) {
                 campo.addEventListener('input', () => {
+                    // Atualizar estado local
                     if (campoId === 'charName') {
                         this.estado.identificacao.nome = campo.value;
                     } else if (campoId === 'racaPersonagem') {
@@ -275,6 +166,7 @@ class DashboardSupabase {
     monitorarAtributos() {
         this.puxarValoresAtributos();
         
+        // Monitorar a cada segundo
         setInterval(() => {
             this.puxarValoresAtributos();
         }, 1000);
@@ -493,6 +385,8 @@ class DashboardSupabase {
 
     puxarDadosTecnicas() {
         try {
+            // Técnicas agora serão monitoradas de outra forma
+            // Pode ser implementado posteriormente
             this.estado.pontos.gastosTecnicas = 0;
         } catch (error) {
             // Silencioso
@@ -526,6 +420,7 @@ class DashboardSupabase {
             totalDesvantagens 
         } = this.estado.pontos;
         
+        // Incluir aparência positiva
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -610,6 +505,7 @@ class DashboardSupabase {
             limiteDesvantagens 
         } = this.estado.pontos;
         
+        // Incluir aparência positiva
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -623,11 +519,13 @@ class DashboardSupabase {
         const pontosGastosDashboard = gastosAtributos + vantagensTotais + 
                                      (gastosPericias + gastosTecnicas) + gastosMagias;
         
+        // Pontos Gastos
         const pontosGastosElement = document.getElementById('pontosGastosDashboard');
         if (pontosGastosElement) {
             pontosGastosElement.textContent = pontosGastosDashboard;
         }
         
+        // Saldo Disponível
         const saldoElement = document.getElementById('saldoDisponivelDashboard');
         if (saldoElement) {
             saldoElement.textContent = saldoDisponivel;
@@ -641,6 +539,7 @@ class DashboardSupabase {
             }
         }
         
+        // Desvantagens Atuais
         const desvantagensElement = document.getElementById('desvantagensAtuais');
         if (desvantagensElement) {
             desvantagensElement.textContent = totalDesvantagens;
@@ -667,6 +566,7 @@ class DashboardSupabase {
             totalDesvantagens 
         } = this.estado.pontos;
         
+        // Incluir aparência positiva
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -709,6 +609,7 @@ class DashboardSupabase {
             elementos.gastosDesvantagens.style.color = '#9b59b6';
         }
         
+        // Total Gastos
         const gastosTotais = gastosAtributos + vantagensTotais + totalPericiasETecnicas + gastosMagias;
         const gastosLiquidos = gastosTotais - totalDesvantagens;
         
@@ -729,18 +630,21 @@ class DashboardSupabase {
 
     // ===== COLETAR DADOS PARA SALVAR =====
     coletarDadosParaSalvar() {
+        // Coletar dados básicos do formulário
         const nome = document.getElementById('charName')?.value || 'Novo Personagem';
         const raca = document.getElementById('racaPersonagem')?.value || '';
         const classe = document.getElementById('classePersonagem')?.value || '';
         const nivel = document.getElementById('nivelPersonagem')?.value || '';
         const descricao = document.getElementById('descricaoPersonagem')?.value || '';
         
+        // Atualizar estado com dados atuais
         this.estado.identificacao.nome = nome;
         this.estado.identificacao.raca = raca;
         this.estado.identificacao.classe = classe;
         this.estado.identificacao.nivel = nivel;
         this.estado.identificacao.descricao = descricao;
         
+        // Retornar dados estruturados
         return {
             identificacao: this.estado.identificacao,
             pontos: this.estado.pontos,
@@ -760,6 +664,7 @@ class DashboardSupabase {
         this.monitorarAtributos();
         this.monitorarOutrasAbas();
         
+        // Inicializar displays
         setTimeout(() => {
             this.atualizarDisplayAtributos();
             this.atualizarDisplayVitalidade();
@@ -781,6 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => window.dashboard.inicializar(), 300);
     }
     
+    // Observar mudanças de aba
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
@@ -796,31 +702,3 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(tab, { attributes: true });
     });
 });
-
-// ===== FUNÇÃO GLOBAL PARA SALVAR =====
-window.salvarPersonagemComFoto = async function(personagemId = null) {
-    if (!window.dashboard) {
-        return;
-    }
-    
-    let dadosPersonagem;
-    
-    if (window.coletor) {
-        dadosPersonagem = window.coletor.coletarTodosDados();
-    } else {
-        dadosPersonagem = window.dashboard.coletarDadosParaSalvar();
-    }
-    
-    if (personagemId) {
-        dadosPersonagem.id = personagemId;
-    }
-    
-    const resultado = await window.dashboard.salvarPersonagemComFoto(dadosPersonagem);
-    
-    if (resultado.error) {
-        alert('Erro ao salvar personagem: ' + resultado.error);
-        return null;
-    }
-    
-    return resultado;
-};

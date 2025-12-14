@@ -113,7 +113,7 @@
             margin-bottom: 40px;
         }
 
-        /* Card de Personagem */
+        /* Card de Personagem - ATUALIZADO */
         .personagem-card {
             background: rgba(30, 30, 40, 0.8);
             border-radius: 15px;
@@ -140,7 +140,7 @@
             margin-bottom: 20px;
         }
 
-        /* Foto do Personagem - VOLTA ORIGINAL */
+        /* Foto do Personagem */
         .personagem-foto {
             width: 100px;
             height: 100px;
@@ -148,7 +148,6 @@
             overflow: hidden;
             border: 2px solid rgba(255, 140, 0, 0.3);
             flex-shrink: 0;
-            position: relative;
         }
 
         .foto-placeholder {
@@ -707,7 +706,7 @@
             }
         }
 
-        // Renderizar lista de personagens - VERSÃO SIMPLIFICADA QUE FUNCIONA
+        // Renderizar lista de personagens - VERSÃO COMPLETA
         function renderizarPersonagens() {
             const grid = document.getElementById('personagensGrid');
             const emptyState = document.getElementById('emptyState');
@@ -747,21 +746,12 @@
                 
                 // Status
                 const status = personagem.status || 'Ativo';
+                const statusClass = status.toLowerCase().includes('criação') ? 'status-criando' : 'status-ativo';
                 
-                // FOTO - LÓGICA SIMPLES QUE FUNCIONA
-                let fotoHTML = '';
-                let mostrarPlaceholder = true;
-                
-                if (personagem.avatar_url && 
-                    personagem.avatar_url.trim() !== '' && 
-                    personagem.avatar_url !== 'null' && 
-                    personagem.avatar_url !== 'undefined') {
-                    
-                    fotoHTML = `<img src="${personagem.avatar_url}" alt="${nome}" 
-                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                style="display: block;">`;
-                    mostrarPlaceholder = false;
-                }
+                // Foto
+                const fotoHTML = personagem.avatar_url 
+                    ? `<img src="${personagem.avatar_url}" alt="${nome}" onerror="this.style.display='none'; this.parentElement.querySelector('.foto-placeholder').style.display='flex';">`
+                    : '';
                 
                 return `
                 <div class="personagem-card" data-id="${personagem.id}">
@@ -769,7 +759,7 @@
                         <!-- Foto do Personagem -->
                         <div class="personagem-foto">
                             ${fotoHTML}
-                            <div class="foto-placeholder" style="display: ${mostrarPlaceholder ? 'flex' : 'none'}">
+                            <div class="foto-placeholder" ${personagem.avatar_url ? 'style="display: none;"' : ''}>
                                 <i class="fas fa-user-circle"></i>
                                 <span>Sem foto</span>
                             </div>
@@ -951,7 +941,7 @@
             mostrarNotificacao(mensagem, 'error');
         }
 
-        // Função para recarregar personagens
+        // Função para recarregar personagens (útil para atualizar após salvar)
         window.recarregarPersonagens = function() {
             carregarPersonagens();
         };
