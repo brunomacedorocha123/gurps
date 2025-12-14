@@ -26,7 +26,7 @@ const resumoState = {
 
 
 // ============================================
-// 2. FUNÇÕES DE CAPTURA - VERSÃO CORRIGIDA (SEM MOCK)
+// 2. FUNÇÕES DE CAPTURA - CORRIGIDAS
 // ============================================
 
 
@@ -35,14 +35,13 @@ function capturarPericiasDireto() {
     const pericias = [];
     let totalPontos = 0;
     
-    // Método 1: Usar estadoPericias se disponível - PRINCIPAL
+    // Método 1: Usar estadoPericias se disponível
     if (window.estadoPericias && window.estadoPericias.periciasAprendidas) {
       console.log(' Capturando perícias do estadoPericias');
-      
       window.estadoPericias.periciasAprendidas.forEach(p => {
         if (!p) return;
         
-        // Calcular NH baseado no atributo real
+        // Calcular NH
         const atributoBase = obterValorAtributo(p.atributo);
         const nh = atributoBase + (p.nivel || 0);
         const pontos = p.investimentoAcumulado || p.custo || 0;
@@ -58,12 +57,12 @@ function capturarPericiasDireto() {
       });
       
       if (pericias.length > 0) {
-        console.log(`✅ ${pericias.length} perícias capturadas do estadoPericias`);
+        console.log(`✅ ${pericias.length} perícias capturadas`);
         return { pericias, totalPontos };
       }
     }
     
-    // Método 2: Extrair da tabela HTML (fallback)
+    // Método 2: Extrair da tabela HTML
     console.log(' Extraindo perícias da tabela HTML');
     const tabelaContainer = document.getElementById('pericias-aprendidas');
     
@@ -105,10 +104,43 @@ function capturarPericiasDireto() {
       });
     }
     
-    // Método 3: NÃO USAR MOCK DATA - apenas retornar vazio se não encontrar
+    // Método 3: Carregar direto do localStorage (NOVO - CORREÇÃO DO PROBLEMA)
     if (pericias.length === 0) {
-      console.log('ℹ️ Nenhuma perícia encontrada - retornando vazio');
-      // NÃO ADICIONAR DADOS MOCK - apenas retornar vazio
+      console.log('📁 Carregando perícias do localStorage...');
+      try {
+        const salvo = localStorage.getItem('periciasAprendidas');
+        if (salvo) {
+          const periciasSalvas = JSON.parse(salvo);
+          
+          periciasSalvas.forEach(p => {
+            if (p && p.nome) {
+              const atributoBase = obterValorAtributo(p.atributo);
+              const nh = atributoBase + (p.nivel || 0);
+              const pontos = p.investimentoAcumulado || p.custo || 0;
+              
+              pericias.push({
+                nome: p.nome,
+                pontos: pontos,
+                nh: nh,
+                especializacao: p.especializacao || null
+              });
+              
+              totalPontos += pontos;
+            }
+          });
+          
+          if (pericias.length > 0) {
+            console.log(`✅ ${pericias.length} perícias carregadas do localStorage`);
+          }
+        }
+      } catch (e) {
+        console.log('⚠️ Erro ao carregar do localStorage:', e);
+      }
+    }
+    
+    // NÃO USAR MOCK DATA - apenas retornar o que encontrou
+    if (pericias.length === 0) {
+      console.log('ℹ️ Nenhuma perícia encontrada em nenhuma fonte');
     }
     
     return { pericias, totalPontos };
@@ -191,7 +223,6 @@ function capturarTecnicasDireto() {
     // Método 3: NÃO USAR MOCK DATA - apenas retornar vazio se não encontrar
     if (tecnicas.length === 0) {
       console.log('ℹ️ Nenhuma técnica encontrada - retornando vazio');
-      // NÃO ADICIONAR DADOS MOCK - apenas retornar vazio
     }
     
     return { tecnicas, totalPontos };
