@@ -658,10 +658,10 @@
         window.location.href = 'criar-personagens.html';
     }
 
-    // Carregar personagens do usuário - VERSÃO CORRIGIDA
+    // Carregar personagens do usuário
     async function carregarPersonagens() {
         try {
-            // 1. Verificar autenticação de forma SIMPLES
+            // 1. Verificar autenticação
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
@@ -694,7 +694,7 @@
         }
     }
 
-    // Renderizar lista de personagens
+    // Renderizar lista de personagens - VERSÃO CORRIGIDA
     function renderizarPersonagens() {
         const grid = document.getElementById('personagensGrid');
         const emptyState = document.getElementById('emptyState');
@@ -718,6 +718,13 @@
             const raca = escapeHtml(personagem.raca || 'Sem Raça');
             const nivel = escapeHtml(personagem.nivel || 'Nível 1');
             
+            // PONTOS REAIS DO BANCO - CORRIGIDO!
+            const pontosTotais = personagem.pontos_totais || 150;
+            const pontosGastos = personagem.pontos_gastos || 0;
+            const pontosDisponiveis = personagem.pontos_disponiveis || (pontosTotais - pontosGastos);
+            const limiteDesvantagens = personagem.limite_desvantagens || -50;
+            const desvantagensAtuais = personagem.desvantagens_atuais || 0;
+            
             // Atributos
             const forca = personagem.forca || 10;
             const destreza = personagem.destreza || 10;
@@ -734,6 +741,13 @@
             const fotoHTML = personagem.avatar_url 
                 ? `<img src="${personagem.avatar_url}" alt="${nome}" onerror="this.style.display='none'; this.parentElement.querySelector('.foto-placeholder').style.display='flex';">`
                 : '';
+            
+            // Cores dinâmicas baseadas nos pontos
+            const corSaldo = pontosDisponiveis < 0 ? '#e74c3c' : 
+                            pontosDisponiveis < 50 ? '#f39c12' : '#27ae60';
+            
+            const corDesvantagens = desvantagensAtuais > Math.abs(limiteDesvantagens) ? '#e74c3c' :
+                                   desvantagensAtuais > Math.abs(limiteDesvantagens) * 0.8 ? '#f39c12' : '#9b59b6';
             
             return `
             <div class="personagem-card" data-id="${personagem.id}">
@@ -752,7 +766,9 @@
                         <div class="nome-classe">
                             <h3 class="personagem-nome" title="${nome}">
                                 ${nomeTruncado}
-                                <span class="personagem-status">${status}</span>
+                                <span class="personagem-status" style="background: ${status === 'Ativo' ? 'rgba(46, 204, 113, 0.2)' : 'rgba(241, 196, 15, 0.2)'}; border-color: ${status === 'Ativo' ? '#2ecc71' : '#f1c40f'}">
+                                    ${status}
+                                </span>
                             </h3>
                             <div class="personagem-classe">${classe}</div>
                             <div class="personagem-raca">${raca} • ${nivel}</div>
@@ -764,19 +780,19 @@
                 <div class="personagem-info">
                     <div class="info-item">
                         <span class="info-label">Pontos Gastos</span>
-                        <span class="info-value">${personagem.pontos_gastos || 0}/${personagem.pontos_totais || 150}</span>
+                        <span class="info-value">${pontosGastos}/${pontosTotais}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Saldo Disponível</span>
-                        <span class="info-value">${personagem.pontos_disponiveis || 150}</span>
+                        <span class="info-value" style="color: ${corSaldo}">${pontosDisponiveis}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Desvantagens</span>
+                        <span class="info-value" style="color: ${corDesvantagens}">${desvantagensAtuais}/${Math.abs(limiteDesvantagens)}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Criado em</span>
                         <span class="info-value">${dataCriacao}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Status</span>
-                        <span class="info-value">${status}</span>
                     </div>
                 </div>
 
@@ -800,6 +816,31 @@
                     </div>
                 </div>
 
+                <!-- Status de Pontos (NOVO) -->
+                <div class="pontos-status">
+                    <div class="progresso-pontos">
+                        <div class="progresso-label">
+                            <span>Progresso: </span>
+                            <span>${pontosGastos}/${pontosTotais} pts</span>
+                        </div>
+                        <div class="progresso-barra">
+                            <div class="progresso-fill" style="width: ${Math.min((pontosGastos / pontosTotais) * 100, 100)}%"></div>
+                        </div>
+                    </div>
+                    
+                    ${desvantagensAtuais > 0 ? `
+                    <div class="desvantagens-status">
+                        <span class="desvantagens-label">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Desvantagens: ${desvantagensAtuais} pts
+                        </span>
+                        <div class="desvantagens-barra">
+                            <div class="desvantagens-fill" style="width: ${Math.min((desvantagensAtuais / Math.abs(limiteDesvantagens)) * 100, 100)}%"></div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+
                 <!-- Ações -->
                 <div class="card-actions">
                     <button class="btn-acao btn-editar" onclick="editarPersonagem('${personagem.id}')">
@@ -814,6 +855,65 @@
             </div>
             `;
         }).join('');
+        
+        // Adicionar CSS dinâmico para as barras de progresso
+        adicionarCSSPontos();
+    }
+
+    // CSS dinâmico para as barras de progresso
+    function adicionarCSSPontos() {
+        if (document.getElementById('pontos-css-dinamico')) return;
+        
+        const style = document.createElement('style');
+        style.id = 'pontos-css-dinamico';
+        style.textContent = `
+            .pontos-status {
+                margin: 15px 0;
+                padding: 10px;
+                background: rgba(20, 20, 30, 0.6);
+                border-radius: 8px;
+            }
+            
+            .progresso-pontos, .desvantagens-status {
+                margin-bottom: 8px;
+            }
+            
+            .progresso-label, .desvantagens-label {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.85rem;
+                margin-bottom: 4px;
+                color: #ccc;
+            }
+            
+            .progresso-barra, .desvantagens-barra {
+                height: 6px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            
+            .progresso-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #3498db, #2ecc71);
+                border-radius: 3px;
+                transition: width 0.5s ease;
+            }
+            
+            .desvantagens-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #e74c3c, #f39c12);
+                border-radius: 3px;
+                transition: width 0.5s ease;
+            }
+            
+            .desvantagens-label i {
+                color: #f39c12;
+                margin-right: 5px;
+            }
+        `;
+        
+        document.head.appendChild(style);
     }
 
     // Editar personagem existente
@@ -875,7 +975,9 @@
             return data.toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
         } catch {
             return 'Data inválida';
