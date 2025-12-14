@@ -108,12 +108,12 @@
         /* Personagens Grid */
         .personagens-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
             gap: 25px;
             margin-bottom: 40px;
         }
 
-        /* Card de Personagem */
+        /* Card de Personagem - ATUALIZADO */
         .personagem-card {
             background: rgba(30, 30, 40, 0.8);
             border-radius: 15px;
@@ -122,6 +122,9 @@
             transition: all 0.3s ease;
             position: relative;
             backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .personagem-card:hover {
@@ -130,17 +133,81 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
-        .card-header {
+        .card-topo {
             display: flex;
-            justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Foto do Personagem */
+        .personagem-foto {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 140, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        .foto-placeholder {
+            width: 100%;
+            height: 100%;
+            background: rgba(20, 20, 30, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ff8c00;
+            font-size: 0.8rem;
+        }
+
+        .foto-placeholder i {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        .personagem-foto img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-info {
+            flex: 1;
         }
 
         .personagem-nome {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             color: #ffd700;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nome-classe {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .personagem-classe {
+            font-size: 1rem;
+            color: #ff8c00;
+            font-weight: 600;
+            padding: 4px 12px;
+            background: rgba(255, 140, 0, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .personagem-raca {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 10px;
         }
 
         .personagem-status {
@@ -149,13 +216,18 @@
             border-radius: 20px;
             font-size: 0.8rem;
             border: 1px solid rgba(255, 140, 0, 0.5);
+            display: inline-block;
         }
 
+        /* Informações do Personagem */
         .personagem-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(20, 20, 30, 0.6);
+            border-radius: 10px;
         }
 
         .info-item {
@@ -174,8 +246,10 @@
             color: #ff8c00;
         }
 
+        /* Atributos Rápidos */
         .atributos-rapidos {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin-bottom: 20px;
             padding: 15px;
@@ -185,23 +259,28 @@
 
         .atributo {
             text-align: center;
-            flex: 1;
         }
 
         .atributo-valor {
             font-size: 1.4rem;
             font-weight: bold;
             color: #ffd700;
+            margin-bottom: 3px;
         }
 
         .atributo-nome {
             font-size: 0.8rem;
             color: #ccc;
+            text-transform: uppercase;
         }
 
+        /* Ações do Card */
         .card-actions {
             display: flex;
             gap: 10px;
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .btn-acao {
@@ -216,6 +295,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            font-size: 0.9rem;
         }
 
         .btn-editar {
@@ -251,18 +331,18 @@
         /* Estado Vazio */
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 80px 20px;
             color: #888;
         }
 
         .empty-state i {
-            font-size: 4rem;
+            font-size: 5rem;
             margin-bottom: 20px;
             color: #555;
         }
 
         .empty-state h3 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             margin-bottom: 15px;
             color: #ccc;
         }
@@ -270,9 +350,12 @@
         .empty-state p {
             margin-bottom: 25px;
             font-size: 1.1rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* Responsividade - Mobile First */
+        /* Responsividade */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -295,10 +378,15 @@
                 padding: 20px;
             }
 
-            .card-header {
+            .card-topo {
                 flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
+                align-items: center;
+                text-align: center;
+            }
+
+            .personagem-foto {
+                width: 120px;
+                height: 120px;
             }
 
             .personagem-info {
@@ -307,13 +395,8 @@
             }
 
             .atributos-rapidos {
-                flex-wrap: wrap;
+                grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
-            }
-
-            .atributo {
-                flex: 1 1 calc(50% - 10px);
-                min-width: 80px;
             }
 
             .card-actions {
@@ -336,7 +419,7 @@
             }
 
             .personagem-nome {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
             }
 
             .atributo-valor {
@@ -344,11 +427,11 @@
             }
 
             .empty-state i {
-                font-size: 3rem;
+                font-size: 4rem;
             }
 
             .empty-state h3 {
-                font-size: 1.3rem;
+                font-size: 1.4rem;
             }
         }
 
@@ -364,12 +447,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 60px;
+            padding: 100px 20px;
+            grid-column: 1 / -1;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border: 4px solid rgba(255, 140, 0, 0.3);
             border-left: 4px solid #ff8c00;
             border-radius: 50%;
@@ -447,6 +531,36 @@
 
         .btn-cancelar:hover {
             background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Notificação */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: rgba(30, 30, 40, 0.95);
+            border-left: 4px solid #ff8c00;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.success {
+            border-left-color: #27ae60;
+        }
+
+        .notification.error {
+            border-left-color: #e74c3c;
         }
     </style>
 </head>
@@ -530,6 +644,13 @@
             // Modal de exclusão
             document.getElementById('btnConfirmarExcluir').addEventListener('click', confirmarExclusao);
             document.getElementById('btnCancelarExcluir').addEventListener('click', fecharModal);
+            
+            // Fechar modal ao clicar fora
+            document.getElementById('modalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    fecharModal();
+                }
+            });
         }
 
         // Criar novo personagem
@@ -547,14 +668,34 @@
                     return;
                 }
 
-                // Buscar personagens do usuário
+                // Buscar personagens do usuário com TODOS os campos necessários
                 const { data: personagensData, error } = await supabase
                     .from('characters')
-                    .select('*')
+                    .select(`
+                        id,
+                        nome,
+                        avatar_url,
+                        classe,
+                        raca,
+                        nivel,
+                        pontos_totais,
+                        pontos_gastos,
+                        pontos_disponiveis,
+                        forca,
+                        destreza,
+                        inteligencia,
+                        saude,
+                        created_at,
+                        status,
+                        descricao
+                    `)
                     .eq('user_id', session.user.id)
                     .order('created_at', { ascending: false });
 
-                if (error) throw error;
+                if (error) {
+                    mostrarErro('Erro ao carregar personagens: ' + error.message);
+                    return;
+                }
 
                 personagens = personagensData || [];
                 renderizarPersonagens();
@@ -565,7 +706,7 @@
             }
         }
 
-        // Renderizar lista de personagens
+        // Renderizar lista de personagens - VERSÃO COMPLETA
         function renderizarPersonagens() {
             const grid = document.getElementById('personagensGrid');
             const emptyState = document.getElementById('emptyState');
@@ -579,44 +720,112 @@
             grid.style.display = 'grid';
             emptyState.style.display = 'none';
 
-            grid.innerHTML = personagens.map(personagem => `
+            grid.innerHTML = personagens.map(personagem => {
+                // Formatar nome (máx 30 caracteres)
+                const nome = escapeHtml(personagem.nome || 'Personagem Sem Nome');
+                const nomeTruncado = nome.length > 30 ? nome.substring(0, 27) + '...' : nome;
+                
+                // Formatar classe e raça
+                const classe = escapeHtml(personagem.classe || 'Sem Classe');
+                const raca = escapeHtml(personagem.raca || 'Sem Raça');
+                const nivel = escapeHtml(personagem.nivel || 'Nível 1');
+                
+                // Pontos
+                const pontosGastos = personagem.pontos_gastos || 0;
+                const pontosTotais = personagem.pontos_totais || 150;
+                const pontosDisponiveis = personagem.pontos_disponiveis || (pontosTotais - pontosGastos);
+                
+                // Atributos
+                const forca = personagem.forca || 10;
+                const destreza = personagem.destreza || 10;
+                const inteligencia = personagem.inteligencia || 10;
+                const saude = personagem.saude || 10;
+                
+                // Data formatada
+                const dataCriacao = formatarData(personagem.created_at);
+                
+                // Status
+                const status = personagem.status || 'Ativo';
+                const statusClass = status.toLowerCase().includes('criação') ? 'status-criando' : 'status-ativo';
+                
+                // Foto
+                const fotoHTML = personagem.avatar_url 
+                    ? `<img src="${personagem.avatar_url}" alt="${nome}" onerror="this.style.display='none'; this.parentElement.querySelector('.foto-placeholder').style.display='flex';">`
+                    : '';
+                
+                return `
                 <div class="personagem-card" data-id="${personagem.id}">
-                    <div class="card-header">
-                        <div>
-                            <h3 class="personagem-nome">${escapeHtml(personagem.nome || 'Personagem Sem Nome')}</h3>
-                            <div class="personagem-info">
-                                <div class="info-item">
-                                    <span class="info-label">Pontos</span>
-                                    <span class="info-value">${personagem.pontos_gastos || 0}/${personagem.pontos_totais || 0}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Criado em</span>
-                                    <span class="info-value">${formatarData(personagem.created_at)}</span>
-                                </div>
+                    <div class="card-topo">
+                        <!-- Foto do Personagem -->
+                        <div class="personagem-foto">
+                            ${fotoHTML}
+                            <div class="foto-placeholder" ${personagem.avatar_url ? 'style="display: none;"' : ''}>
+                                <i class="fas fa-user-circle"></i>
+                                <span>Sem foto</span>
                             </div>
                         </div>
-                        <span class="personagem-status">${personagem.status || 'Ativo'}</span>
+                        
+                        <!-- Informações Básicas -->
+                        <div class="card-info">
+                            <div class="nome-classe">
+                                <h3 class="personagem-nome" title="${nome}">
+                                    ${nomeTruncado}
+                                    <span class="personagem-status">${status}</span>
+                                </h3>
+                                <div class="personagem-classe">${classe}</div>
+                                <div class="personagem-raca">${raca} • ${nivel}</div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Informações Detalhadas -->
+                    <div class="personagem-info">
+                        <div class="info-item">
+                            <span class="info-label">Pontos Gastos</span>
+                            <span class="info-value">${pontosGastos}/${pontosTotais}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Saldo Disponível</span>
+                            <span class="info-value">${pontosDisponiveis}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Criado em</span>
+                            <span class="info-value">${dataCriacao}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="info-value">${status}</span>
+                        </div>
+                    </div>
+
+                    <!-- Atributos Rápidos -->
                     <div class="atributos-rapidos">
                         <div class="atributo">
-                            <div class="atributo-valor">${personagem.forca || 10}</div>
+                            <div class="atributo-valor">${forca}</div>
                             <div class="atributo-nome">FOR</div>
                         </div>
                         <div class="atributo">
-                            <div class="atributo-valor">${personagem.destreza || 10}</div>
+                            <div class="atributo-valor">${destreza}</div>
                             <div class="atributo-nome">DES</div>
                         </div>
                         <div class="atributo">
-                            <div class="atributo-valor">${personagem.inteligencia || 10}</div>
+                            <div class="atributo-valor">${inteligencia}</div>
                             <div class="atributo-nome">INT</div>
                         </div>
                         <div class="atributo">
-                            <div class="atributo-valor">${personagem.saude || 10}</div>
+                            <div class="atributo-valor">${saude}</div>
                             <div class="atributo-nome">SAÚ</div>
                         </div>
                     </div>
 
+                    <!-- Descrição (se existir) -->
+                    ${personagem.descricao ? `
+                    <div class="personagem-descricao">
+                        <p>${escapeHtml(personagem.descricao.substring(0, 150))}${personagem.descricao.length > 150 ? '...' : ''}</p>
+                    </div>
+                    ` : ''}
+
+                    <!-- Ações -->
                     <div class="card-actions">
                         <button class="btn-acao btn-editar" onclick="editarPersonagem('${personagem.id}')">
                             <i class="fas fa-edit"></i>
@@ -626,13 +835,14 @@
                             <i class="fas fa-file-alt"></i>
                             Resumo
                         </button>
-                        <button class="btn-acao btn-excluir" onclick="solicitarExclusao('${personagem.id}', '${escapeHtml(personagem.nome || 'Personagem Sem Nome')}')">
+                        <button class="btn-acao btn-excluir" onclick="solicitarExclusao('${personagem.id}', '${escapeHtml(nome)}')">
                             <i class="fas fa-trash"></i>
                             Excluir
                         </button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Editar personagem existente
@@ -669,11 +879,11 @@
                 renderizarPersonagens();
                 fecharModal();
                 
-                mostrarMensagem('Personagem excluído com sucesso!');
+                mostrarNotificacao('Personagem excluído com sucesso!', 'success');
                 
             } catch (error) {
                 console.error('Erro ao excluir personagem:', error);
-                mostrarErro('Erro ao excluir personagem');
+                mostrarErro('Erro ao excluir personagem: ' + error.message);
             }
         }
 
@@ -685,33 +895,56 @@
 
         // Funções utilitárias
         function formatarData(dataString) {
-            const data = new Date(dataString);
-            return data.toLocaleDateString('pt-BR');
+            try {
+                const data = new Date(dataString);
+                return data.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            } catch {
+                return 'Data inválida';
+            }
         }
 
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        function mostrarMensagem(mensagem) {
-            // Implementar toast notification se necessário
-            console.log(mensagem);
+        function mostrarNotificacao(mensagem, tipo = 'info') {
+            // Remove notificação anterior
+            const notificacaoAnterior = document.querySelector('.notification');
+            if (notificacaoAnterior) {
+                notificacaoAnterior.remove();
+            }
+            
+            const notificacao = document.createElement('div');
+            notificacao.className = `notification ${tipo}`;
+            notificacao.innerHTML = `
+                <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${mensagem}</span>
+            `;
+            
+            document.body.appendChild(notificacao);
+            
+            // Remove após 5 segundos
+            setTimeout(() => {
+                notificacao.remove();
+            }, 5000);
         }
 
         function mostrarErro(mensagem) {
-            // Implementar erro visual se necessário
             console.error(mensagem);
-            alert(mensagem);
+            mostrarNotificacao(mensagem, 'error');
         }
 
-        // Fechar modal ao clicar fora
-        document.getElementById('modalOverlay').addEventListener('click', function(e) {
-            if (e.target === this) {
-                fecharModal();
-            }
-        });
+        // Função para recarregar personagens (útil para atualizar após salvar)
+        window.recarregarPersonagens = function() {
+            carregarPersonagens();
+        };
     </script>
 </body>
 </html>
