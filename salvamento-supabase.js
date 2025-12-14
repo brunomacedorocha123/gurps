@@ -1,37 +1,23 @@
-// salvamento-supabase.js - VERSÃO LIMPA E FUNCIONAL
+// salvamento-supabase.js - VERSÃO DEFINITIVA FUNCIONAL
 class SalvamentoSupabase {
     constructor() {
-        // Configuração do Supabase
-        this.supabaseUrl = 'https://pujufdfhaxveuytkneqw.supabase.co';
-        this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
-        
-        this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
+        this.supabase = window.supabase;
         this.limitePersonagens = 10;
         this.usuarioLogado = null;
     }
     
-    // ======================
-    // VERIFICAR AUTENTICAÇÃO
-    // ======================
     async verificarAutenticacao() {
         try {
-            const { data: { session }, error } = await this.supabase.auth.getSession();
-            
-            if (error || !session) {
-                return false;
-            }
+            const { data: { session } } = await this.supabase.auth.getSession();
+            if (!session) return false;
             
             this.usuarioLogado = session.user;
             return true;
-            
         } catch {
             return false;
         }
     }
     
-    // ======================
-    // VERIFICAR LIMITE DE PERSONAGENS
-    // ======================
     async verificarLimitePersonagens() {
         const autenticado = await this.verificarAutenticacao();
         
@@ -68,7 +54,6 @@ class SalvamentoSupabase {
                 limite: this.limitePersonagens,
                 motivo
             };
-            
         } catch {
             return {
                 podeCriar: true,
@@ -79,19 +64,14 @@ class SalvamentoSupabase {
         }
     }
     
-    // ======================
-    // SALVAR FOTO NO SUPABASE
-    // ======================
     async salvarFotoNoSupabase(file, personagemId) {
         if (!file || !personagemId || !this.usuarioLogado) return null;
 
         try {
-            // Nome único para o arquivo
             const fileExt = file.name.split('.').pop();
-            const fileName = `avatar_${personagemId}_${Date.now()}.${fileExt}`;
+            const fileName = `avatar_${personagemId}.${fileExt}`;
             const filePath = `${this.usuarioLogado.id}/${fileName}`;
 
-            // Fazer upload
             const { data, error } = await this.supabase.storage
                 .from('characters')
                 .upload(filePath, file, {
@@ -103,7 +83,6 @@ class SalvamentoSupabase {
                 return null;
             }
 
-            // Obter URL pública
             const { data: { publicUrl } } = this.supabase.storage
                 .from('characters')
                 .getPublicUrl(filePath);
@@ -115,11 +94,7 @@ class SalvamentoSupabase {
         }
     }
     
-    // ======================
-    // COLETAR DADOS COMPLETOS
-    // ======================
     coletarDadosCompletos() {
-        // Usar o coletor existente se disponível
         if (window.coletor && typeof window.coletor.coletarTodosDados === 'function') {
             const dados = window.coletor.coletarTodosDados();
             dados.user_id = this.usuarioLogado?.id;
@@ -128,7 +103,6 @@ class SalvamentoSupabase {
             return dados;
         }
 
-        // Coletar dados básicos
         return {
             user_id: this.usuarioLogado?.id,
             nome: document.getElementById('charName')?.value || 'Novo Personagem',
@@ -140,20 +114,17 @@ class SalvamentoSupabase {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
 
-            // Sistema de pontos
             pontos_totais: window.sistemaPontos?.pontos?.totais || 150,
             pontos_gastos: window.sistemaPontos?.pontos?.gastos || 0,
             pontos_disponiveis: window.sistemaPontos?.pontos?.disponiveis || 150,
             limite_desvantagens: window.sistemaPontos?.pontos?.limiteDesvantagens || -50,
             desvantagens_atuais: window.sistemaPontos?.pontos?.desvantagensAtuais || 0,
 
-            // Atributos
             forca: parseInt(document.getElementById('ST')?.value) || 10,
             destreza: parseInt(document.getElementById('DX')?.value) || 10,
             inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
             saude: parseInt(document.getElementById('HT')?.value) || 10,
 
-            // Dados padrão
             pontos_vida: 10,
             bonus_pv: 0,
             pontos_fadiga: 10,
@@ -242,7 +213,8 @@ class SalvamentoSupabase {
             
             condicoes_ativas: 0,
             
-            // Campos JSON vazios
+            avatar_url: null,
+            
             idiomas: '[]',
             caracteristicas_fisicas: '[]',
             vantagens: '[]',
@@ -261,9 +233,6 @@ class SalvamentoSupabase {
         };
     }
     
-    // ======================
-    // VALIDAR PONTOS
-    // ======================
     validarPontos(dados) {
         if (dados.pontos_gastos > dados.pontos_totais) {
             alert(`Erro: Você gastou ${dados.pontos_gastos} pontos, mas tem apenas ${dados.pontos_totais} pontos totais!`);
@@ -278,12 +247,8 @@ class SalvamentoSupabase {
         return true;
     }
     
-    // ======================
-    // SALVAR PERSONAGEM
-    // ======================
     async salvarPersonagem(personagemId = null) {
         try {
-            // 1. Verificar autenticação
             const autenticado = await this.verificarAutenticacao();
             if (!autenticado) {
                 alert('Você precisa estar logado para salvar personagens!');
@@ -291,34 +256,33 @@ class SalvamentoSupabase {
                 return false;
             }
             
-            // 2. Coletar dados
             const dados = this.coletarDadosCompletos();
             
-            // 3. Validar pontos
             if (!this.validarPontos(dados)) {
                 return false;
             }
             
-            let resultado;
             let fotoUrl = null;
+            let fotoFile = null;
             
-            // 4. Obter foto da dashboard (se houver)
             if (window.dashboard && window.dashboard.getFotoParaSalvar) {
                 const fotoData = window.dashboard.getFotoParaSalvar();
                 if (fotoData && fotoData.file) {
-                    // Usar personagemId existente ou criar novo depois
-                    const idParaFoto = personagemId || 'temp';
-                    fotoUrl = await this.salvarFotoNoSupabase(fotoData.file, idParaFoto);
+                    fotoFile = fotoData.file;
                 }
             }
             
+            let resultado;
+            
             if (personagemId) {
-                // ===== MODO EDIÇÃO =====
+                if (fotoFile) {
+                    fotoUrl = await this.salvarFotoNoSupabase(fotoFile, personagemId);
+                }
+                
                 if (fotoUrl) {
                     dados.avatar_url = fotoUrl;
                 }
                 
-                // Remover created_at para não sobrescrever
                 delete dados.created_at;
                 
                 resultado = await this.supabase
@@ -329,8 +293,6 @@ class SalvamentoSupabase {
                     .select();
                     
             } else {
-                // ===== MODO CRIAÇÃO =====
-                // Criar personagem primeiro
                 resultado = await this.supabase
                     .from('characters')
                     .insert([dados])
@@ -339,32 +301,24 @@ class SalvamentoSupabase {
                 if (resultado.data && resultado.data[0]) {
                     const novoId = resultado.data[0].id;
                     
-                    // Se tiver foto e ainda não salvou, salvar agora com o ID correto
-                    if (fotoUrl && fotoUrl.includes('temp')) {
-                        // Refazer upload com ID correto
-                        const fotoData = window.dashboard.getFotoParaSalvar();
-                        if (fotoData && fotoData.file) {
-                            fotoUrl = await this.salvarFotoNoSupabase(fotoData.file, novoId);
+                    if (fotoFile) {
+                        fotoUrl = await this.salvarFotoNoSupabase(fotoFile, novoId);
+                        
+                        if (fotoUrl) {
+                            await this.supabase
+                                .from('characters')
+                                .update({ avatar_url: fotoUrl })
+                                .eq('id', novoId);
                         }
-                    }
-                    
-                    // Atualizar com a foto se existir
-                    if (fotoUrl) {
-                        await this.supabase
-                            .from('characters')
-                            .update({ avatar_url: fotoUrl })
-                            .eq('id', novoId);
                     }
                 }
             }
             
-            // 5. Verificar erros
             if (resultado.error) {
                 this.tratarErroSupabase(resultado.error);
                 return false;
             }
             
-            // 6. Sucesso
             this.mostrarModalSucesso(personagemId ? 'editado' : 'criado');
             return true;
             
@@ -374,9 +328,6 @@ class SalvamentoSupabase {
         }
     }
     
-    // ======================
-    // TRATAR ERROS
-    // ======================
     tratarErroSupabase(error) {
         let mensagem = 'Erro ao salvar: ';
         
@@ -397,9 +348,6 @@ class SalvamentoSupabase {
         alert(mensagem);
     }
     
-    // ======================
-    // CARREGAR PERSONAGEM
-    // ======================
     async carregarPersonagem(personagemId) {
         try {
             const autenticado = await this.verificarAutenticacao();
@@ -427,9 +375,6 @@ class SalvamentoSupabase {
         }
     }
     
-    // ======================
-    // EXCLUIR PERSONAGEM
-    // ======================
     async excluirPersonagem(personagemId) {
         try {
             const autenticado = await this.verificarAutenticacao();
@@ -461,9 +406,6 @@ class SalvamentoSupabase {
         }
     }
     
-    // ======================
-    // MODAL DE SUCESSO
-    // ======================
     mostrarModalSucesso(tipo) {
         const mensagem = tipo === 'criado' 
             ? '🎉 Personagem criado com sucesso!' 
@@ -515,7 +457,6 @@ class SalvamentoSupabase {
         
         document.body.appendChild(modal);
         
-        // Contador
         let segundos = 3;
         const contador = modal.querySelector('#contador');
         const contadorInterval = setInterval(() => {
@@ -528,13 +469,11 @@ class SalvamentoSupabase {
             }
         }, 1000);
         
-        // Botão para ir para personagens
         modal.querySelector('#btnIrPersonagens').addEventListener('click', () => {
             clearInterval(contadorInterval);
             window.location.href = 'personagens.html';
         });
         
-        // Fechar modal ao clicar fora
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 clearInterval(contadorInterval);
@@ -544,9 +483,6 @@ class SalvamentoSupabase {
     }
 }
 
-// ======================
-// INICIALIZAÇÃO
-// ======================
 let salvamento;
 
 try {
@@ -568,5 +504,4 @@ try {
     };
 }
 
-// Exportar para uso global
 window.salvamento = salvamento;
