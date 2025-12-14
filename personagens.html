@@ -622,329 +622,304 @@
         </div>
     </div>
 
-    <script>
-        // Configuração do Supabase
-        const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
+   <script>
+    // Configuração do Supabase
+    const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Estado global
+    let personagens = [];
+    let personagemParaExcluir = null;
+
+    // Carregar personagens ao iniciar
+    document.addEventListener('DOMContentLoaded', function() {
+        carregarPersonagens();
+        configurarEventListeners();
+    });
+
+    // Configurar event listeners
+    function configurarEventListeners() {
+        // Modal de exclusão
+        document.getElementById('btnConfirmarExcluir').addEventListener('click', confirmarExclusao);
+        document.getElementById('btnCancelarExcluir').addEventListener('click', fecharModal);
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        // Estado global
-        let personagens = [];
-        let personagemParaExcluir = null;
-
-        // Carregar personagens ao iniciar
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarPersonagens();
-            configurarEventListeners();
-        });
-
-        // Configurar event listeners
-        function configurarEventListeners() {
-            // Modal de exclusão
-            document.getElementById('btnConfirmarExcluir').addEventListener('click', confirmarExclusao);
-            document.getElementById('btnCancelarExcluir').addEventListener('click', fecharModal);
-            
-            // Fechar modal ao clicar fora
-            document.getElementById('modalOverlay').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    fecharModal();
-                }
-            });
-        }
-
-        // Criar novo personagem
-        function criarNovoPersonagem() {
-            window.location.href = 'criar-personagens.html';
-        }
-
-        // Carregar personagens do usuário
-        async function carregarPersonagens() {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                
-                if (!session) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                // Buscar personagens do usuário com TODOS os campos necessários
-                const { data: personagensData, error } = await supabase
-                    .from('characters')
-                    .select(`
-                        id,
-                        nome,
-                        avatar_url,
-                        classe,
-                        raca,
-                        nivel,
-                        pontos_totais,
-                        pontos_gastos,
-                        pontos_disponiveis,
-                        forca,
-                        destreza,
-                        inteligencia,
-                        saude,
-                        created_at,
-                        status,
-                        descricao
-                    `)
-                    .eq('user_id', session.user.id)
-                    .order('created_at', { ascending: false });
-
-                if (error) {
-                    mostrarErro('Erro ao carregar personagens: ' + error.message);
-                    return;
-                }
-
-                personagens = personagensData || [];
-                renderizarPersonagens();
-                
-            } catch (error) {
-                console.error('Erro ao carregar personagens:', error);
-                mostrarErro('Erro ao carregar personagens');
+        // Fechar modal ao clicar fora
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModal();
             }
-        }
+        });
+    }
 
-        // Renderizar lista de personagens - VERSÃO COMPLETA
-        function renderizarPersonagens() {
-            const grid = document.getElementById('personagensGrid');
-            const emptyState = document.getElementById('emptyState');
+    // Criar novo personagem
+    function criarNovoPersonagem() {
+        window.location.href = 'criar-personagens.html';
+    }
 
-            if (personagens.length === 0) {
-                grid.style.display = 'none';
-                emptyState.style.display = 'block';
+    // Carregar personagens do usuário - VERSÃO CORRIGIDA
+    async function carregarPersonagens() {
+        try {
+            // 1. Verificar autenticação de forma SIMPLES
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                console.warn('Nenhuma sessão encontrada. Redirecionando...');
+                window.location.href = 'login.html';
                 return;
             }
 
-            grid.style.display = 'grid';
-            emptyState.style.display = 'none';
+            console.log('✅ Usuário autenticado:', session.user.email);
 
-            grid.innerHTML = personagens.map(personagem => {
-                // Formatar nome (máx 30 caracteres)
-                const nome = escapeHtml(personagem.nome || 'Personagem Sem Nome');
-                const nomeTruncado = nome.length > 30 ? nome.substring(0, 27) + '...' : nome;
-                
-                // Formatar classe e raça
-                const classe = escapeHtml(personagem.classe || 'Sem Classe');
-                const raca = escapeHtml(personagem.raca || 'Sem Raça');
-                const nivel = escapeHtml(personagem.nivel || 'Nível 1');
-                
-                // Pontos
-                const pontosGastos = personagem.pontos_gastos || 0;
-                const pontosTotais = personagem.pontos_totais || 150;
-                const pontosDisponiveis = personagem.pontos_disponiveis || (pontosTotais - pontosGastos);
-                
-                // Atributos
-                const forca = personagem.forca || 10;
-                const destreza = personagem.destreza || 10;
-                const inteligencia = personagem.inteligencia || 10;
-                const saude = personagem.saude || 10;
-                
-                // Data formatada
-                const dataCriacao = formatarData(personagem.created_at);
-                
-                // Status
-                const status = personagem.status || 'Ativo';
-                const statusClass = status.toLowerCase().includes('criação') ? 'status-criando' : 'status-ativo';
-                
-                // Foto
-                const fotoHTML = personagem.avatar_url 
-                    ? `<img src="${personagem.avatar_url}" alt="${nome}" onerror="this.style.display='none'; this.parentElement.querySelector('.foto-placeholder').style.display='flex';">`
-                    : '';
-                
-                return `
-                <div class="personagem-card" data-id="${personagem.id}">
-                    <div class="card-topo">
-                        <!-- Foto do Personagem -->
-                        <div class="personagem-foto">
-                            ${fotoHTML}
-                            <div class="foto-placeholder" ${personagem.avatar_url ? 'style="display: none;"' : ''}>
-                                <i class="fas fa-user-circle"></i>
-                                <span>Sem foto</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Informações Básicas -->
-                        <div class="card-info">
-                            <div class="nome-classe">
-                                <h3 class="personagem-nome" title="${nome}">
-                                    ${nomeTruncado}
-                                    <span class="personagem-status">${status}</span>
-                                </h3>
-                                <div class="personagem-classe">${classe}</div>
-                                <div class="personagem-raca">${raca} • ${nivel}</div>
-                            </div>
+            // 2. Buscar personagens do usuário
+            const { data: personagensData, error } = await supabase
+                .from('characters')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Erro ao carregar personagens:', error);
+                mostrarErro('Erro ao carregar personagens: ' + error.message);
+                return;
+            }
+
+            personagens = personagensData || [];
+            renderizarPersonagens();
+            
+        } catch (error) {
+            console.error('Erro ao carregar personagens:', error);
+            mostrarErro('Erro ao carregar personagens');
+        }
+    }
+
+    // Renderizar lista de personagens
+    function renderizarPersonagens() {
+        const grid = document.getElementById('personagensGrid');
+        const emptyState = document.getElementById('emptyState');
+
+        if (!grid) return;
+
+        if (personagens.length === 0) {
+            grid.style.display = 'none';
+            if (emptyState) emptyState.style.display = 'block';
+            return;
+        }
+
+        grid.style.display = 'grid';
+        if (emptyState) emptyState.style.display = 'none';
+
+        grid.innerHTML = personagens.map(personagem => {
+            // Formatar dados
+            const nome = escapeHtml(personagem.nome || 'Personagem Sem Nome');
+            const nomeTruncado = nome.length > 30 ? nome.substring(0, 27) + '...' : nome;
+            const classe = escapeHtml(personagem.classe || 'Sem Classe');
+            const raca = escapeHtml(personagem.raca || 'Sem Raça');
+            const nivel = escapeHtml(personagem.nivel || 'Nível 1');
+            
+            // Atributos
+            const forca = personagem.forca || 10;
+            const destreza = personagem.destreza || 10;
+            const inteligencia = personagem.inteligencia || 10;
+            const saude = personagem.saude || 10;
+            
+            // Data formatada
+            const dataCriacao = formatarData(personagem.created_at);
+            
+            // Status
+            const status = personagem.status || 'Ativo';
+            
+            // Foto
+            const fotoHTML = personagem.avatar_url 
+                ? `<img src="${personagem.avatar_url}" alt="${nome}" onerror="this.style.display='none'; this.parentElement.querySelector('.foto-placeholder').style.display='flex';">`
+                : '';
+            
+            return `
+            <div class="personagem-card" data-id="${personagem.id}">
+                <div class="card-topo">
+                    <!-- Foto do Personagem -->
+                    <div class="personagem-foto">
+                        ${fotoHTML}
+                        <div class="foto-placeholder" ${personagem.avatar_url ? 'style="display: none;"' : ''}>
+                            <i class="fas fa-user-circle"></i>
+                            <span>Sem foto</span>
                         </div>
                     </div>
-
-                    <!-- Informações Detalhadas -->
-                    <div class="personagem-info">
-                        <div class="info-item">
-                            <span class="info-label">Pontos Gastos</span>
-                            <span class="info-value">${pontosGastos}/${pontosTotais}</span>
+                    
+                    <!-- Informações Básicas -->
+                    <div class="card-info">
+                        <div class="nome-classe">
+                            <h3 class="personagem-nome" title="${nome}">
+                                ${nomeTruncado}
+                                <span class="personagem-status">${status}</span>
+                            </h3>
+                            <div class="personagem-classe">${classe}</div>
+                            <div class="personagem-raca">${raca} • ${nivel}</div>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Saldo Disponível</span>
-                            <span class="info-value">${pontosDisponiveis}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Criado em</span>
-                            <span class="info-value">${dataCriacao}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Status</span>
-                            <span class="info-value">${status}</span>
-                        </div>
-                    </div>
-
-                    <!-- Atributos Rápidos -->
-                    <div class="atributos-rapidos">
-                        <div class="atributo">
-                            <div class="atributo-valor">${forca}</div>
-                            <div class="atributo-nome">FOR</div>
-                        </div>
-                        <div class="atributo">
-                            <div class="atributo-valor">${destreza}</div>
-                            <div class="atributo-nome">DES</div>
-                        </div>
-                        <div class="atributo">
-                            <div class="atributo-valor">${inteligencia}</div>
-                            <div class="atributo-nome">INT</div>
-                        </div>
-                        <div class="atributo">
-                            <div class="atributo-valor">${saude}</div>
-                            <div class="atributo-nome">SAÚ</div>
-                        </div>
-                    </div>
-
-                    <!-- Descrição (se existir) -->
-                    ${personagem.descricao ? `
-                    <div class="personagem-descricao">
-                        <p>${escapeHtml(personagem.descricao.substring(0, 150))}${personagem.descricao.length > 150 ? '...' : ''}</p>
-                    </div>
-                    ` : ''}
-
-                    <!-- Ações -->
-                    <div class="card-actions">
-                        <button class="btn-acao btn-editar" onclick="editarPersonagem('${personagem.id}')">
-                            <i class="fas fa-edit"></i>
-                            Editar
-                        </button>
-                        <button class="btn-acao btn-resumo" onclick="verResumo('${personagem.id}')">
-                            <i class="fas fa-file-alt"></i>
-                            Resumo
-                        </button>
-                        <button class="btn-acao btn-excluir" onclick="solicitarExclusao('${personagem.id}', '${escapeHtml(nome)}')">
-                            <i class="fas fa-trash"></i>
-                            Excluir
-                        </button>
                     </div>
                 </div>
-                `;
-            }).join('');
-        }
 
-        // Editar personagem existente
-        function editarPersonagem(personagemId) {
-            window.location.href = `criar-personagens.html?id=${personagemId}`;
-        }
+                <!-- Informações Detalhadas -->
+                <div class="personagem-info">
+                    <div class="info-item">
+                        <span class="info-label">Pontos Gastos</span>
+                        <span class="info-value">${personagem.pontos_gastos || 0}/${personagem.pontos_totais || 150}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Saldo Disponível</span>
+                        <span class="info-value">${personagem.pontos_disponiveis || 150}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Criado em</span>
+                        <span class="info-value">${dataCriacao}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="info-value">${status}</span>
+                    </div>
+                </div>
 
-        // Ver resumo do personagem
-        function verResumo(personagemId) {
-            window.location.href = `resumo-personagem.html?id=${personagemId}`;
-        }
+                <!-- Atributos Rápidos -->
+                <div class="atributos-rapidos">
+                    <div class="atributo">
+                        <div class="atributo-valor">${forca}</div>
+                        <div class="atributo-nome">FOR</div>
+                    </div>
+                    <div class="atributo">
+                        <div class="atributo-valor">${destreza}</div>
+                        <div class="atributo-nome">DES</div>
+                    </div>
+                    <div class="atributo">
+                        <div class="atributo-valor">${inteligencia}</div>
+                        <div class="atributo-nome">INT</div>
+                    </div>
+                    <div class="atributo">
+                        <div class="atributo-valor">${saude}</div>
+                        <div class="atributo-nome">SAÚ</div>
+                    </div>
+                </div>
 
-        // Solicitar exclusão de personagem
-        function solicitarExclusao(personagemId, nome) {
-            personagemParaExcluir = personagemId;
-            document.getElementById('personagemNomeExcluir').textContent = nome;
-            document.getElementById('modalOverlay').style.display = 'flex';
-        }
-
-        // Confirmar exclusão
-        async function confirmarExclusao() {
-            if (!personagemParaExcluir) return;
-
-            try {
-                const { error } = await supabase
-                    .from('characters')
-                    .delete()
-                    .eq('id', personagemParaExcluir);
-
-                if (error) throw error;
-
-                // Remover da lista local
-                personagens = personagens.filter(p => p.id !== personagemParaExcluir);
-                renderizarPersonagens();
-                fecharModal();
-                
-                mostrarNotificacao('Personagem excluído com sucesso!', 'success');
-                
-            } catch (error) {
-                console.error('Erro ao excluir personagem:', error);
-                mostrarErro('Erro ao excluir personagem: ' + error.message);
-            }
-        }
-
-        // Fechar modal
-        function fecharModal() {
-            document.getElementById('modalOverlay').style.display = 'none';
-            personagemParaExcluir = null;
-        }
-
-        // Funções utilitárias
-        function formatarData(dataString) {
-            try {
-                const data = new Date(dataString);
-                return data.toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
-            } catch {
-                return 'Data inválida';
-            }
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function mostrarNotificacao(mensagem, tipo = 'info') {
-            // Remove notificação anterior
-            const notificacaoAnterior = document.querySelector('.notification');
-            if (notificacaoAnterior) {
-                notificacaoAnterior.remove();
-            }
-            
-            const notificacao = document.createElement('div');
-            notificacao.className = `notification ${tipo}`;
-            notificacao.innerHTML = `
-                <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                <span>${mensagem}</span>
+                <!-- Ações -->
+                <div class="card-actions">
+                    <button class="btn-acao btn-editar" onclick="editarPersonagem('${personagem.id}')">
+                        <i class="fas fa-edit"></i>
+                        Editar
+                    </button>
+                    <button class="btn-acao btn-excluir" onclick="solicitarExclusao('${personagem.id}', '${escapeHtml(nome)}')">
+                        <i class="fas fa-trash"></i>
+                        Excluir
+                    </button>
+                </div>
+            </div>
             `;
-            
-            document.body.appendChild(notificacao);
-            
-            // Remove após 5 segundos
-            setTimeout(() => {
-                notificacao.remove();
-            }, 5000);
-        }
+        }).join('');
+    }
 
-        function mostrarErro(mensagem) {
-            console.error(mensagem);
-            mostrarNotificacao(mensagem, 'error');
-        }
+    // Editar personagem existente
+    function editarPersonagem(personagemId) {
+        window.location.href = `criar-personagens.html?id=${personagemId}`;
+    }
 
-        // Função para recarregar personagens (útil para atualizar após salvar)
-        window.recarregarPersonagens = function() {
-            carregarPersonagens();
-        };
-    </script>
+    // Solicitar exclusão de personagem
+    function solicitarExclusao(personagemId, nome) {
+        personagemParaExcluir = personagemId;
+        document.getElementById('personagemNomeExcluir').textContent = nome;
+        document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    // Confirmar exclusão
+    async function confirmarExclusao() {
+        if (!personagemParaExcluir) return;
+
+        try {
+            // Verificar autenticação antes
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                alert('Sessão expirada. Faça login novamente.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const { error } = await supabase
+                .from('characters')
+                .delete()
+                .eq('id', personagemParaExcluir)
+                .eq('user_id', session.user.id);
+
+            if (error) throw error;
+
+            // Remover da lista local
+            personagens = personagens.filter(p => p.id !== personagemParaExcluir);
+            renderizarPersonagens();
+            fecharModal();
+            
+            mostrarNotificacao('Personagem excluído com sucesso!', 'success');
+            
+        } catch (error) {
+            console.error('Erro ao excluir personagem:', error);
+            mostrarErro('Erro ao excluir personagem: ' + error.message);
+        }
+    }
+
+    // Fechar modal
+    function fecharModal() {
+        document.getElementById('modalOverlay').style.display = 'none';
+        personagemParaExcluir = null;
+    }
+
+    // Funções utilitárias
+    function formatarData(dataString) {
+        try {
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch {
+            return 'Data inválida';
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function mostrarNotificacao(mensagem, tipo = 'info') {
+        // Remove notificação anterior
+        const notificacaoAnterior = document.querySelector('.notification');
+        if (notificacaoAnterior) {
+            notificacaoAnterior.remove();
+        }
+        
+        const notificacao = document.createElement('div');
+        notificacao.className = `notification ${tipo}`;
+        notificacao.innerHTML = `
+            <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${mensagem}</span>
+        `;
+        
+        document.body.appendChild(notificacao);
+        
+        // Remove após 5 segundos
+        setTimeout(() => {
+            notificacao.remove();
+        }, 5000);
+    }
+
+    function mostrarErro(mensagem) {
+        console.error(mensagem);
+        mostrarNotificacao(mensagem, 'error');
+    }
+
+    // Função para recarregar personagens
+    window.recarregarPersonagens = function() {
+        carregarPersonagens();
+    };
+</script>
 </body>
 </html>
