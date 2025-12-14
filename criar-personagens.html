@@ -3463,48 +3463,86 @@
     // ======================
     async function inicializarSistema() {
         try {
-            // Verificar autenticação
-            const { data: { session } } = await supabase.auth.getSession();
+            console.log('🚀 Inicializando sistema...');
+            
+            // 1. Verificar autenticação
+            console.log('🔐 Verificando autenticação...');
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError) {
+                console.error('❌ Erro ao verificar sessão:', sessionError);
+                alert('Erro de conexão. Tente recarregar a página.');
+                return;
+            }
+            
             if (!session) {
+                console.warn('⚠️ Nenhuma sessão encontrada. Redirecionando para login...');
+                alert('Você precisa estar logado para criar personagens.');
                 window.location.href = 'login.html';
                 return;
             }
             
-            // Inicializar navegação por abas
+            console.log('✅ Usuário autenticado:', session.user.email);
+            
+            // 2. Inicializar navegação por abas
             inicializarNavegacaoAbas();
             
-            // Verificar se é edição ou criação
+            // 3. Verificar se é edição ou criação
             const urlParams = new URLSearchParams(window.location.search);
             personagemId = urlParams.get('id');
             
             if (personagemId) {
                 // Modo edição
-                await carregarPersonagemParaEdicao(personagemId);
+                console.log('✏️ Modo EDIÇÃO - ID:', personagemId);
                 document.title = 'Editar Personagem - RPG System';
-            } else {
-                // Modo criação - verificar limite
-                const limite = await window.salvamento.verificarLimitePersonagens();
-                if (!limite.podeCriar) {
-                    alert(limite.motivo);
-                    window.location.href = 'personagens.html';
+                
+                try {
+                    await carregarPersonagemParaEdicao(personagemId);
+                } catch (error) {
+                    console.error('Erro ao carregar personagem:', error);
+                    alert('Erro ao carregar personagem. Redirecionando...');
+                    setTimeout(() => {
+                        window.location.href = 'personagens.html';
+                    }, 2000);
                     return;
                 }
+            } else {
+                // Modo criação
+                console.log('🆕 Modo CRIAÇÃO');
                 document.title = 'Criar Personagem - RPG System';
+                
+                // Verificar limite
+                try {
+                    const limite = await window.salvamento?.verificarLimitePersonagens?.();
+                    console.log('📊 Verificação de limite:', limite);
+                    
+                    if (limite && !limite.podeCriar) {
+                        alert(limite.motivo);
+                        window.location.href = 'personagens.html';
+                        return;
+                    }
+                } catch (limiteError) {
+                    console.warn('⚠️ Erro na verificação de limite:', limiteError);
+                    // Continuar mesmo com erro na verificação
+                }
             }
             
-            // Configurar eventos
+            // 4. Configurar eventos
             configurarEventListeners();
             
-            // Inicializar sistema de abas
+            // 5. Inicializar sistema de abas
             inicializarSistemaAbas();
             
-            // Inicializar sistema de pontos
+            // 6. Inicializar sistema de pontos
             if (window.sistemaPontos) {
                 window.sistemaPontos.calcularPontos();
             }
             
+            console.log('✅ Sistema inicializado com sucesso!');
+            
         } catch (error) {
-            alert('Erro ao inicializar sistema. Tente recarregar a página.');
+            console.error('❌ Erro ao inicializar sistema:', error);
+            alert('Erro ao inicializar sistema. Tente recarregar a página.\n\nErro: ' + error.message);
         }
     }
 
@@ -3546,29 +3584,59 @@
         setTimeout(() => {
             switch(abaId) {
                 case 'dashboard':
-                    if (typeof inicializarDashboard === 'function') inicializarDashboard();
+                    if (typeof inicializarDashboard === 'function') {
+                        console.log('📊 Inicializando dashboard...');
+                        inicializarDashboard();
+                    }
                     break;
                 case 'atributos':
-                    if (typeof inicializarAtributos === 'function') inicializarAtributos();
+                    if (typeof inicializarAtributos === 'function') {
+                        console.log('💪 Inicializando atributos...');
+                        inicializarAtributos();
+                    }
                     break;
                 case 'caracteristicas':
-                    if (typeof inicializarCaracteristicas === 'function') inicializarCaracteristicas();
+                    if (typeof inicializarCaracteristicas === 'function') {
+                        console.log('👤 Inicializando características...');
+                        inicializarCaracteristicas();
+                    }
                     break;
                 case 'vantagens':
-                    if (typeof inicializarVantagens === 'function') inicializarVantagens();
+                    if (typeof inicializarVantagens === 'function') {
+                        console.log('⭐ Inicializando vantagens...');
+                        inicializarVantagens();
+                    }
                     break;
                 case 'pericias':
-                    if (typeof inicializarSistemaPericias === 'function') inicializarSistemaPericias();
+                    if (typeof inicializarSistemaPericias === 'function') {
+                        console.log('🎓 Inicializando perícias...');
+                        inicializarSistemaPericias();
+                    }
                     break;
                 case 'magia':
-                    if (typeof inicializarMagias === 'function') inicializarMagias();
+                    if (typeof inicializarMagias === 'function') {
+                        console.log('🔮 Inicializando magias...');
+                        inicializarMagias();
+                    }
                     break;
                 case 'equipamento':
-                    if (typeof inicializarEquipamentos === 'function') inicializarEquipamentos();
+                    if (typeof inicializarEquipamentos === 'function') {
+                        console.log('🎒 Inicializando equipamentos...');
+                        inicializarEquipamentos();
+                    }
+                    break;
+                case 'combate':
+                    if (typeof inicializarCombate === 'function') {
+                        console.log('⚔️ Inicializando combate...');
+                        inicializarCombate();
+                    }
                     break;
                 case 'resumo':
+                    console.log('📄 Carregando resumo...');
                     carregarResumo();
                     break;
+                default:
+                    console.log(`ℹ️  Aba ${abaId} - nenhuma inicialização específica`);
             }
         }, 100);
     }
@@ -3577,6 +3645,8 @@
     // CONFIGURAR EVENTOS
     // ======================
     function configurarEventListeners() {
+        console.log('🎮 Configurando eventos...');
+        
         // Botões do header
         const btnSalvar = document.getElementById('btnSalvar');
         const btnExcluir = document.getElementById('btnExcluir');
@@ -3584,14 +3654,17 @@
         
         if (btnSalvar) {
             btnSalvar.addEventListener('click', salvarPersonagem);
+            console.log('✅ Botão salvar configurado');
         }
         
         if (btnExcluir) {
             btnExcluir.addEventListener('click', solicitarExclusao);
+            console.log('✅ Botão excluir configurado');
         }
         
         if (btnSair) {
             btnSair.addEventListener('click', sairSemSalvar);
+            console.log('✅ Botão sair configurado');
         }
         
         // Nome do personagem
@@ -3600,6 +3673,7 @@
             charName.addEventListener('input', function() {
                 atualizarResumoNome(this.value);
             });
+            console.log('✅ Evento nome configurado');
         }
         
         // Upload de foto
@@ -3610,7 +3684,10 @@
                     handleUploadFoto(e.target.files[0]);
                 }
             });
+            console.log('✅ Evento foto configurado');
         }
+        
+        console.log('✅ Eventos configurados');
     }
 
     // ======================
@@ -3619,6 +3696,8 @@
 
     // Carregar personagem para edição
     async function carregarPersonagemParaEdicao(personagemId) {
+        console.log(`📥 Carregando personagem para edição: ${personagemId}`);
+        
         try {
             const personagem = await window.salvamento.carregarPersonagem(personagemId);
             
@@ -3629,6 +3708,7 @@
             }
             
             personagemCarregado = true;
+            console.log('✅ Personagem carregado:', personagem.nome);
             
             // Preencher dados básicos
             document.getElementById('charName').value = personagem.nome || 'Novo Personagem';
@@ -3641,6 +3721,7 @@
             if (window.sistemaPontos) {
                 window.sistemaPontos.setPontosTotais(personagem.pontos_totais || 150);
                 window.sistemaPontos.setLimiteDesvantagens(personagem.limite_desvantagens || -50);
+                console.log('✅ Pontos configurados');
             }
             
             // Atributos
@@ -3648,6 +3729,7 @@
             document.getElementById('DX').value = personagem.destreza || 10;
             document.getElementById('IQ').value = personagem.inteligencia || 10;
             document.getElementById('HT').value = personagem.saude || 10;
+            console.log('✅ Atributos configurados');
             
             // Foto (se houver)
             if (personagem.avatar_url) {
@@ -3657,31 +3739,89 @@
                     fotoPreview.src = personagem.avatar_url;
                     fotoPreview.style.display = 'block';
                     fotoPlaceholder.style.display = 'none';
+                    console.log('✅ Foto carregada');
                 }
             }
             
             // Atualizar UI
             atualizarResumoNome(personagem.nome);
+            console.log('✅ UI atualizada');
             
         } catch (error) {
-            alert('Erro ao carregar personagem: ' + error.message);
+            console.error('❌ Erro ao carregar personagem:', error);
+            throw error;
         }
     }
 
     // Salvar personagem (função principal)
     async function salvarPersonagem() {
+        console.log('💾 Iniciando salvamento do personagem...');
+        
         try {
+            // Verificar autenticação antes de salvar
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                alert('Sua sessão expirou. Por favor, faça login novamente.');
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            // Mostrar indicador de carregamento
+            const btnSalvar = document.getElementById('btnSalvar');
+            const btnSalvarOriginal = btnSalvar.innerHTML;
+            btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            btnSalvar.disabled = true;
+            
             // Obter ID do personagem se estiver editando
             const urlParams = new URLSearchParams(window.location.search);
             const idParaSalvar = urlParams.get('id');
             
+            console.log(`📝 Salvando personagem (ID: ${idParaSalvar || 'novo'})...`);
+            
             // Chamar sistema de salvamento
+            if (!window.salvamento || typeof window.salvamento.salvarPersonagem !== 'function') {
+                throw new Error('Sistema de salvamento não disponível');
+            }
+            
             const resultado = await window.salvamento.salvarPersonagem(idParaSalvar);
+            
+            // Restaurar botão
+            btnSalvar.innerHTML = btnSalvarOriginal;
+            btnSalvar.disabled = false;
+            
+            if (resultado) {
+                console.log('✅ Personagem salvo com sucesso!');
+            } else {
+                console.warn('⚠️ Salvamento retornou falso');
+            }
             
             return resultado;
             
         } catch (error) {
-            alert('Erro ao salvar: ' + error.message);
+            console.error('❌ Erro ao salvar:', error);
+            
+            // Restaurar botão
+            const btnSalvar = document.getElementById('btnSalvar');
+            btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
+            btnSalvar.disabled = false;
+            
+            // Mostrar erro detalhado
+            let mensagemErro = 'Erro ao salvar: ';
+            
+            if (error.message.includes('permission denied') || error.message.includes('RLS')) {
+                mensagemErro += 'Permissão negada. Verifique as políticas RLS no Supabase.';
+            } else if (error.message.includes('network')) {
+                mensagemErro += 'Problema de conexão. Verifique sua internet.';
+            } else if (error.message.includes('auth')) {
+                mensagemErro += 'Problema de autenticação. Faça login novamente.';
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else {
+                mensagemErro += error.message;
+            }
+            
+            alert(mensagemErro);
             return false;
         }
     }
@@ -3692,7 +3832,7 @@
         const idParaExcluir = urlParams.get('id');
         
         if (idParaExcluir) {
-            if (confirm('Tem certeza que deseja excluir este personagem?\nEsta ação não pode ser desfeita!')) {
+            if (confirm('⚠️ Tem certeza que deseja excluir este personagem?\n\nEsta ação não pode ser desfeita!')) {
                 excluirPersonagem(idParaExcluir);
             }
         } else {
@@ -3704,16 +3844,26 @@
 
     // Excluir personagem
     async function excluirPersonagem(personagemId) {
+        console.log(`🗑️  Excluindo personagem: ${personagemId}`);
+        
         try {
             const sucesso = await window.salvamento.excluirPersonagem(personagemId);
             
             if (sucesso) {
+                console.log('✅ Personagem excluído com sucesso');
+                
+                // Mostrar mensagem antes de redirecionar
+                alert('✅ Personagem excluído com sucesso!');
+                
                 setTimeout(() => {
                     window.location.href = 'personagens.html';
                 }, 1000);
+            } else {
+                console.warn('⚠️ Exclusão falhou');
             }
             
         } catch (error) {
+            console.error('❌ Erro ao excluir:', error);
             alert('Erro ao excluir: ' + error.message);
         }
     }
@@ -3727,6 +3877,7 @@
 
     // Carregar resumo
     function carregarResumo() {
+        console.log('📄 Carregando resumo...');
         sincronizarDadosResumo();
         configurarEventosFotoResumo();
     }
@@ -3734,6 +3885,8 @@
     // Sincronizar dados do Dashboard para o Resumo
     function sincronizarDadosResumo() {
         try {
+            console.log('🔄 Sincronizando dados para resumo...');
+            
             // Nome
             const nomeInput = document.getElementById('charName');
             if (nomeInput && document.getElementById('resumoNome')) {
@@ -3763,8 +3916,10 @@
                 document.getElementById('resumoSaldo').textContent = window.sistemaPontos.pontos.disponiveis;
             }
             
+            console.log('✅ Resumo sincronizado');
+            
         } catch (error) {
-            // Silencioso
+            console.warn('⚠️ Erro ao sincronizar resumo:', error);
         }
     }
 
@@ -3790,7 +3945,19 @@
 
     // Manipular upload de foto
     function handleUploadFoto(file) {
+        console.log('🖼️ Processando upload de foto...');
+        
         try {
+            if (!file.type.match('image.*')) {
+                alert('Por favor, selecione apenas arquivos de imagem.');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) { // 5MB
+                alert('A imagem é muito grande. Tamanho máximo: 5MB');
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 // Atualiza preview
@@ -3814,14 +3981,74 @@
                 }
                 
                 // Salvar foto no dashboard (para depois salvar no Supabase)
-                if (window.dashboard) {
+                if (window.dashboard && typeof window.dashboard.salvarFotoTemporaria === 'function') {
                     window.dashboard.salvarFotoTemporaria(file, e.target.result);
                 }
+                
+                console.log('✅ Foto processada e salva temporariamente');
             };
+            
+            reader.onerror = function() {
+                console.error('❌ Erro ao ler arquivo');
+                alert('Erro ao processar a imagem. Tente novamente.');
+            };
+            
             reader.readAsDataURL(file);
             
         } catch (error) {
-            alert('Erro ao processar foto');
+            console.error('❌ Erro ao processar foto:', error);
+            alert('Erro ao processar foto: ' + error.message);
+        }
+    }
+
+    // ======================
+    // FUNÇÕES DE DEPURAÇÃO
+    // ======================
+
+    // Função para testar autenticação
+    async function testarAutenticacao() {
+        console.log('🔍 Testando autenticação...');
+        
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session) {
+                console.log('✅ Sessão ativa:', {
+                    email: session.user.email,
+                    id: session.user.id,
+                    expires: new Date(session.expires_at * 1000)
+                });
+                return true;
+            } else {
+                console.warn('⚠️ Nenhuma sessão encontrada');
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ Erro no teste de autenticação:', error);
+            return false;
+        }
+    }
+
+    // Função para testar conexão com Supabase
+    async function testarConexaoSupabase() {
+        console.log('🔌 Testando conexão com Supabase...');
+        
+        try {
+            // Teste simples de consulta
+            const { data, error } = await supabase
+                .from('characters')
+                .select('count', { count: 'exact', head: true });
+            
+            if (error && error.code !== '42P01') { // Ignorar erro de tabela não existente
+                console.error('❌ Erro na conexão:', error);
+                return false;
+            }
+            
+            console.log('✅ Conexão com Supabase OK');
+            return true;
+        } catch (error) {
+            console.error('❌ Erro na conexão:', error);
+            return false;
         }
     }
 
@@ -3829,10 +4056,44 @@
     // INICIALIZAÇÃO
     // ======================
     document.addEventListener('DOMContentLoaded', function() {
-        inicializarSistema();
+        console.log('📄 DOM carregado - inicializando...');
+        
+        // Adicionar botão de teste temporário (remover depois)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            const testBtn = document.createElement('button');
+            testBtn.innerHTML = '🔧 Testar Sistema';
+            testBtn.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #3498db;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+                z-index: 9999;
+            `;
+            testBtn.onclick = async () => {
+                console.log('🧪 Executando testes...');
+                
+                const authOk = await testarAutenticacao();
+                const supabaseOk = await testarConexaoSupabase();
+                
+                alert(`Testes:\n\n🔐 Autenticação: ${authOk ? '✅ OK' : '❌ FALHOU'}\n🔌 Supabase: ${supabaseOk ? '✅ OK' : '❌ FALHOU'}`);
+            };
+            document.body.appendChild(testBtn);
+        }
+        
+        // Inicializar sistema
+        setTimeout(() => {
+            inicializarSistema();
+        }, 500);
     });
 
-    // Exportar funções para uso global
+    // ======================
+    // EXPORTAR FUNÇÕES PARA USO GLOBAL
+    // ======================
     window.salvarPersonagem = salvarPersonagem;
     window.sincronizarResumo = sincronizarDadosResumo;
     window.atualizarPontos = () => {
@@ -3840,7 +4101,42 @@
             window.sistemaPontos.calcularPontos();
         }
     };
+    window.testarAutenticacao = testarAutenticacao;
+    window.testarConexaoSupabase = testarConexaoSupabase;
 
+    // ======================
+    // FUNÇÃO DE EMERGÊNCIA - SALVAR LOCALMENTE
+    // ======================
+    window.salvarLocalmente = function() {
+        try {
+            const dados = {
+                nome: document.getElementById('charName')?.value || 'Personagem Local',
+                raca: document.getElementById('racaPersonagem')?.value || '',
+                classe: document.getElementById('classePersonagem')?.value || '',
+                nivel: document.getElementById('nivelPersonagem')?.value || '',
+                descricao: document.getElementById('descricaoPersonagem')?.value || '',
+                forca: document.getElementById('ST')?.value || 10,
+                destreza: document.getElementById('DX')?.value || 10,
+                inteligencia: document.getElementById('IQ')?.value || 10,
+                saude: document.getElementById('HT')?.value || 10,
+                dataSalvamento: new Date().toISOString()
+            };
+            
+            localStorage.setItem('personagem_backup', JSON.stringify(dados));
+            
+            const link = document.createElement('a');
+            link.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dados, null, 2));
+            link.download = `personagem_backup_${Date.now()}.json`;
+            link.click();
+            
+            alert('✅ Personagem salvo localmente e backup baixado!\n\nArquivo salvo como JSON.');
+            
+        } catch (error) {
+            alert('❌ Erro ao salvar localmente: ' + error.message);
+        }
+    };
+
+    console.log('✅ Script principal carregado e pronto!');
 </script>
 </body>
 </html>  
