@@ -1,4 +1,3 @@
-// caracteristicas-aparencia.js - VERSÃO COM INTEGRAÇÃO DE PONTOS
 class SistemaAparencia {
     constructor() {
         this.niveisAparencia = {
@@ -83,13 +82,9 @@ class SistemaAparencia {
     inicializar() {
         if (this.inicializado) return;
         
-        console.log('🎭 Inicializando Sistema de Aparência com Integração de Pontos...');
-        this.carregarDadosSalvos();
         this.configurarEventos();
         this.atualizarDisplayAparencia();
         this.inicializado = true;
-        
-        // Notificar sistema de pontos imediatamente
         this.notificarSistemaPontos();
     }
 
@@ -100,7 +95,6 @@ class SistemaAparencia {
                 this.nivelAtual = this.obterNomePorPontos(parseInt(e.target.value));
                 this.pontosAtuais = parseInt(e.target.value);
                 this.atualizarDisplayAparencia();
-                this.salvarDados();
                 this.notificarSistemaPontos();
             });
         }
@@ -117,7 +111,6 @@ class SistemaAparencia {
         const nivel = this.obterNivelPorPontos(valor);
         
         if (nivel) {
-            // Atualizar texto de reação
             let textoReacao = '';
             if (typeof nivel.reacao === 'object') {
                 textoReacao = `Reação: +${nivel.reacao.outroSexo} (outro sexo), +${nivel.reacao.mesmoSexo} (mesmo sexo)`;
@@ -125,7 +118,6 @@ class SistemaAparencia {
                 textoReacao = `Reação: ${nivel.reacao >= 0 ? '+' : ''}${nivel.reacao}`;
             }
             
-            // Atualizar display
             display.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                     <i class="${nivel.icone}" style="color: ${nivel.tipo === 'vantagem' ? '#27ae60' : nivel.tipo === 'desvantagem' ? '#e74c3c' : '#3498db'};"></i>
@@ -137,25 +129,22 @@ class SistemaAparencia {
                 </div>
             `;
 
-            // Atualizar badge de pontos
             const pontosTexto = valor >= 0 ? `+${valor} pts` : `${valor} pts`;
             badge.textContent = pontosTexto;
             
-            // Cor do badge baseada no tipo
             if (nivel.tipo === 'vantagem') {
-                badge.style.background = '#27ae60'; // Verde para vantagens
+                badge.style.background = '#27ae60';
                 badge.style.color = '#fff';
             } else if (nivel.tipo === 'desvantagem') {
-                badge.style.background = '#e74c3c'; // Vermelho para desvantagens
+                badge.style.background = '#e74c3c';
                 badge.style.color = '#fff';
             } else {
-                badge.style.background = '#95a5a6'; // Cinza para neutro
+                badge.style.background = '#95a5a6';
                 badge.style.color = '#fff';
             }
         }
     }
 
-    // ===== SISTEMA DE PONTOS =====
     getPontosAparencia() {
         const select = document.getElementById('nivelAparencia');
         return select ? parseInt(select.value) || 0 : 0;
@@ -172,7 +161,6 @@ class SistemaAparencia {
         const pontos = this.getPontosAparencia();
         const tipo = this.getTipoPontos();
         
-        // Disparar evento customizado para o dashboard
         const evento = new CustomEvent('aparenciaPontosAtualizados', {
             detail: {
                 pontos: pontos,
@@ -182,11 +170,8 @@ class SistemaAparencia {
             }
         });
         document.dispatchEvent(evento);
-        
-        console.log(`🎭 Aparência atualizada: ${pontos >= 0 ? '+' : ''}${pontos} pts (${tipo})`);
     }
 
-    // ===== MÉTODOS AUXILIARES =====
     obterNivelPorPontos(pontos) {
         return Object.values(this.niveisAparencia).find(nivel => nivel.pontos === pontos);
     }
@@ -202,43 +187,6 @@ class SistemaAparencia {
             .join(' ');
     }
 
-    // ===== SISTEMA DE SALVAMENTO =====
-    carregarDadosSalvos() {
-        try {
-            const dadosSalvos = localStorage.getItem('sistemaAparencia_data');
-            if (dadosSalvos) {
-                const dados = JSON.parse(dadosSalvos);
-                const select = document.getElementById('nivelAparencia');
-                if (select && dados.nivelAparencia !== undefined) {
-                    select.value = dados.nivelAparencia;
-                    this.nivelAtual = this.obterNomePorPontos(dados.nivelAparencia);
-                    this.pontosAtuais = dados.nivelAparencia;
-                    console.log('✅ Dados de aparência carregados:', dados.nivelAparencia);
-                }
-            }
-        } catch (error) {
-            console.log('❌ Erro ao carregar dados de aparência:', error);
-        }
-    }
-
-    salvarDados() {
-        try {
-            const select = document.getElementById('nivelAparencia');
-            if (select) {
-                const dadosParaSalvar = {
-                    nivelAparencia: parseInt(select.value),
-                    nivelAtual: this.nivelAtual,
-                    pontosAtuais: this.pontosAtuais,
-                    ultimaAtualizacao: new Date().toISOString()
-                };
-                localStorage.setItem('sistemaAparencia_data', JSON.stringify(dadosParaSalvar));
-            }
-        } catch (error) {
-            console.log('❌ Erro ao salvar dados de aparência:', error);
-        }
-    }
-
-    // ===== MÉTODOS PARA INTEGRAÇÃO =====
     exportarDados() {
         return {
             aparencia: {
@@ -264,7 +212,6 @@ class SistemaAparencia {
         }
     }
 
-    // ===== VALIDAÇÕES =====
     validarAparencia() {
         const pontos = this.getPontosAparencia();
         const tipo = this.getTipoPontos();
@@ -278,19 +225,15 @@ class SistemaAparencia {
     }
 }
 
-// ===== INICIALIZAÇÃO E EXPORTAÇÃO =====
 let sistemaAparencia;
 
 document.addEventListener('DOMContentLoaded', function() {
     sistemaAparencia = new SistemaAparencia();
 });
 
-// ===== DISPONIBILIZAR GLOBALMENTE =====
 window.SistemaAparencia = SistemaAparencia;
 window.sistemaAparencia = sistemaAparencia;
 
-// ===== OUVIDOR PARA O DASHBOARD =====
-// Event listener para quando a aba características for carregada
 document.addEventListener('caracteristicasCarregadas', function() {
     if (sistemaAparencia) {
         sistemaAparencia.inicializar();
