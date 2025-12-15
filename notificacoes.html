@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificações - RPG System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ESTILOS ESPECÍFICOS DAS NOTIFICAÇÕES */
+        
+        .notifications-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .notifications-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+        }
+        
+        .header-title {
+            color: #ffd700;
+            font-size: 1.6rem;
+        }
+        
+        .notifications-count {
+            background: rgba(255, 140, 0, 0.2);
+            color: #ff8c00;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .notifications-tabs {
+            display: flex;
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .notification-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            color: #ccc;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .notification-tab:last-child {
+            border-right: none;
+        }
+        
+        .notification-tab:hover {
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+        }
+        
+        .notification-tab.active {
+            background: rgba(255, 140, 0, 0.2);
+            color: #ffd700;
+            border-bottom: 3px solid #ff8c00;
+        }
+        
+        .notification-content {
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .notifications-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .notification-item {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-item:hover {
+            background: rgba(255, 140, 0, 0.05);
+        }
+        
+        .notification-item.unread {
+            background: rgba(255, 140, 0, 0.1);
+            border-left: 3px solid #ff8c00;
+        }
+        
+        .notification-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .icon-guild {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+        
+        .icon-campaign {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+        
+        .icon-friend {
+            background: rgba(155, 89, 182, 0.2);
+            color: #9b59b6;
+        }
+        
+        .icon-system {
+            background: rgba(255, 140, 0, 0.2);
+            color: #ff8c00;
+        }
+        
+        .notification-details {
+            flex: 1;
+        }
+        
+        .notification-title {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .notification-message {
+            color: #aaa;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .notification-time {
+            color: #888;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .notification-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .notification-btn {
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .btn-accept {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+        
+        .btn-accept:hover {
+            background: rgba(46, 204, 113, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-decline {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        
+        .btn-decline:hover {
+            background: rgba(231, 76, 60, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-view {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+        
+        .btn-view:hover {
+            background: rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .empty-notifications {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            color: rgba(255, 140, 0, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .empty-title {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+        
+        .empty-text {
+            color: #888;
+            font-size: 1.1rem;
+        }
+        
+        .mark-all-read {
+            background: none;
+            border: none;
+            color: #ff8c00;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .mark-all-read:hover {
+            color: #ffd700;
+        }
+        
+        /* Modal de detalhes */
+        .notification-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .notification-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: rgba(30, 30, 40, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            color: #ffd700;
+            font-size: 1.4rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .notifications-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .notification-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .notification-actions {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .notification-tab {
+                padding: 12px 10px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .notifications-tabs {
+                flex-direction: column;
+            }
+            
+            .notification-tab {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>RPG SYSTEM</h1>
+                <p>A vida imita GURPS</p>
+            </div>
+            <div class="player-id">
+                ID do Jogador: <span id="playerId">#------</span>
+            </div>
+            <div class="user-menu">
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sair
+                </button>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="home.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                Início
+            </a>
+            <a href="personagens.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                Personagens
+            </a>
+            <a href="campanhas.html" class="nav-item">
+                <i class="fas fa-map"></i>
+                Campanhas
+            </a>
+            <a href="guilda.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                Guilda
+            </a>
+            <a href="notificacoes.html" class="nav-item active">
+                <i class="fas fa-bell"></i>
+                Notificações
+                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+            </a>
+            <a href="ferramentas-gm.html" class="nav-item">
+                <i class="fas fa-crown"></i>
+                Ferramentas GM
+            </a>
+            <a href="minha-conta.html" class="nav-item">
+                <i class="fas fa-cog"></i>
+                Minha Conta
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="notifications-container">
+            <div class="notifications-header">
+                <h1 class="header-title">
+                    <i class="fas fa-bell"></i> Notificações
+                </h1>
+                <div>
+                    <button class="mark-all-read" id="markAllReadBtn">
+                        <i class="fas fa-check-double"></i> Marcar todas como lidas
+                    </button>
+                    <div class="notifications-count">
+                        <span id="totalNotifications">0</span> notificações
+                    </div>
+                </div>
+            </div>
+
+            <div class="notifications-tabs">
+                <button class="notification-tab active" data-tab="all">
+                    Todas
+                </button>
+                <button class="notification-tab" data-tab="guild">
+                    <i class="fas fa-users"></i> Guilda
+                </button>
+                <button class="notification-tab" data-tab="campaign">
+                    <i class="fas fa-map"></i> Campanhas
+                </button>
+                <button class="notification-tab" data-tab="system">
+                    <i class="fas fa-cog"></i> Sistema
+                </button>
+            </div>
+
+            <div class="notification-content">
+                <div class="notifications-list" id="notificationsList">
+                    <!-- Notificações serão carregadas aqui -->
+                    <div class="empty-notifications">
+                        <div class="empty-icon">
+                            <i class="fas fa-bell-slash"></i>
+                        </div>
+                        <h3 class="empty-title">Nenhuma notificação</h3>
+                        <p class="empty-text">Suas notificações aparecerão aqui</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Detalhes da Notificação -->
+    <div class="notification-modal" id="notificationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalNotificationTitle"></h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="modalNotificationBody"></div>
+            <div class="modal-actions" id="modalNotificationActions">
+                <!-- Ações serão adicionadas dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>RPG System &copy; 2024 - A vida imita GURPS</p>
+    </footer>
+
+    <!-- ARQUIVO JS SEPARADO -->
+    <script src="notificacoes.js"></script>
+</body>
+</html>
