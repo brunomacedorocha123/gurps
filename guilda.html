@@ -837,8 +837,8 @@
         <p>RPG System &copy; 2024 - A vida imita GURPS</p>
     </footer>
 
-    <script>
-       // Configuração do Supabase
+    <<script>
+// Configuração do Supabase
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
@@ -887,7 +887,7 @@ async function loadUserGuild() {
             .eq('owner_id', currentUser.id)
             .single();
 
-        if (ownerError && ownerError.code !== 'PGRST116') { // PGRST116 = no rows
+        if (ownerError && ownerError.code !== 'PGRST116') {
             console.error('Erro ao buscar guilda do dono:', ownerError);
         }
 
@@ -1422,26 +1422,45 @@ async function demoteToMember(memberId) {
     }
 }
 
+// FUNÇÃO CORRIGIDA - EXCLUSÃO DE MEMBRO
 async function kickMember(memberId, memberName) {
-    if (!confirm(`Expulsar ${memberName} da guilda?`)) {
+    if (!confirm(`Expulsar ${memberName} da guilda?\n\nEsta ação não pode ser desfeita.`)) {
         return;
     }
     
     try {
+        // TENTA EXCLUIR COMPLETAMENTE O MEMBRO
         const { error } = await supabase
             .from('guild_members')
-            .update({ status: 'banned' })
+            .delete()
             .eq('id', memberId)
             .eq('guild_id', userGuild.id);
         
         if (error) {
-            console.error('Erro ao expulsar membro:', error);
-            alert('Erro ao expulsar membro');
-            return;
+            console.error('Erro ao excluir membro (tentativa DELETE):', error);
+            
+            // SE NÃO CONSEGUIR EXCLUIR, MARCA COMO REJEITADO
+            const { error: updateError } = await supabase
+                .from('guild_members')
+                .update({ 
+                    status: 'rejected',
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', memberId)
+                .eq('guild_id', userGuild.id);
+            
+            if (updateError) {
+                console.error('Erro ao marcar como rejeitado:', updateError);
+                alert('Erro ao expulsar membro. Tente novamente.');
+                return;
+            }
+            
+            alert('Membro marcado como removido!');
+        } else {
+            alert(`${memberName} foi expulso da guilda!`);
         }
         
         await loadMembers();
-        alert('Membro expulso da guilda!');
         
     } catch (error) {
         console.error('Erro ao expulsar membro:', error);
@@ -1537,6 +1556,6 @@ function formatDate(dateString) {
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', initGuild);
-    </script>
+</script>
 </body>
 </html>
