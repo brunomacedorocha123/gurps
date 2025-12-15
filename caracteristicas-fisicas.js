@@ -28,14 +28,12 @@ window.ponteCaracteristicas = {
         const caracteristica = caracteristicas[0];
         const multiplicador = this.obterMultiplicador(caracteristica.tipo);
         
-        // Atualizar status físico
         const statusFisico = document.getElementById('statusFisico');
         if (statusFisico) {
             statusFisico.textContent = caracteristica.nome;
             statusFisico.style.background = "#f39c12";
         }
         
-        // Atualizar faixa de peso
         const pesoFaixa = document.getElementById('pesoFaixa');
         if (pesoFaixa && window.sistemaAlturaPeso) {
             const st = window.sistemaAlturaPeso.stBase || 10;
@@ -43,13 +41,11 @@ window.ponteCaracteristicas = {
             pesoFaixa.textContent = `${(faixa.min * multiplicador).toFixed(1)}kg - ${(faixa.max * multiplicador).toFixed(1)}kg (${caracteristica.nome})`;
         }
         
-        // Atualizar modificador
         const modificador = document.getElementById('modificadorPeso');
         if (modificador) {
             modificador.textContent = `${caracteristica.nome} (${multiplicador}x)`;
         }
         
-        // Mostrar desvantagens ativas
         this.mostrarDesvantagensAtivas(caracteristicas);
     },
     
@@ -228,7 +224,6 @@ class SistemaCaracteristicasFisicas {
     inicializar() {
         if (this.inicializado) return;
         
-        this.carregarDadosSalvos();
         this.configurarEventos();
         this.atualizarDisplay();
         
@@ -242,13 +237,11 @@ class SistemaCaracteristicasFisicas {
     }
 
     configurarEventosBotoes() {
-        // Remover listeners antigos
         document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
             const novoBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(novoBtn, btn);
         });
         
-        // Adicionar novos listeners
         document.querySelectorAll('.btn-add-caracteristica').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -292,7 +285,6 @@ class SistemaCaracteristicasFisicas {
         this.caracteristicasSelecionadas.push(caracteristicaObj);
         
         this.atualizarDisplay();
-        this.salvarDados();
         
         window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
         
@@ -324,7 +316,6 @@ class SistemaCaracteristicasFisicas {
             this.caracteristicasSelecionadas.splice(index, 1);
             
             this.atualizarDisplay();
-            this.salvarDados();
             
             window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
             
@@ -486,25 +477,33 @@ class SistemaCaracteristicasFisicas {
         }, 3000);
     }
 
-    carregarDadosSalvos() {
-        try {
-            const dadosSalvos = localStorage.getItem('sistemaCaracteristicasFisicas_data');
-            if (dadosSalvos) {
-                const dados = JSON.parse(dadosSalvos);
-                if (dados.caracteristicasSelecionadas) {
-                    this.caracteristicasSelecionadas = dados.caracteristicasSelecionadas;
-                }
+    // MÉTODOS PARA SUPABASE
+    exportarDados() {
+        return {
+            caracteristicasFisicas: {
+                selecionadas: this.caracteristicasSelecionadas,
+                pontosTotais: this.calcularPontosTotais(),
+                modificadores: this.getModificadores(),
+                multiplicadorPeso: this.getMultiplicadorPeso()
             }
-        } catch (error) {}
+        };
     }
 
-    salvarDados() {
-        try {
-            const dadosParaSalvar = {
-                caracteristicasSelecionadas: this.caracteristicasSelecionadas
-            };
-            localStorage.setItem('sistemaCaracteristicasFisicas_data', JSON.stringify(dadosParaSalvar));
-        } catch (error) {}
+    carregarDados(dados) {
+        if (dados.caracteristicasFisicas && dados.caracteristicasFisicas.selecionadas) {
+            this.caracteristicasSelecionadas = dados.caracteristicasFisicas.selecionadas;
+            this.atualizarDisplay();
+            window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
+            return true;
+        }
+        return false;
+    }
+
+    // Método para resetar quando não há dados salvos
+    resetarParaPadrao() {
+        this.caracteristicasSelecionadas = [];
+        this.atualizarDisplay();
+        window.ponteCaracteristicas.atualizarDoCardEsquerda(this.caracteristicasSelecionadas);
     }
 }
 
@@ -512,11 +511,9 @@ class SistemaCaracteristicasFisicas {
 let sistemaCaracteristicasFisicas;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Aguardar um pouco para garantir que tudo está carregado
     setTimeout(() => {
         sistemaCaracteristicasFisicas = new SistemaCaracteristicasFisicas();
         
-        // Corrigir botões novamente após 1 segundo (para garantir)
         setTimeout(() => {
             if (sistemaCaracteristicasFisicas) {
                 sistemaCaracteristicasFisicas.configurarEventosBotoes();
@@ -534,8 +531,5 @@ window.corrigirCaracteristicas = function() {
     if (window.sistemaCaracteristicasFisicas) {
         window.sistemaCaracteristicasFisicas.configurarEventosBotoes();
         window.sistemaCaracteristicasFisicas.atualizarDisplay();
-        alert('Botões das características corrigidos!');
-    } else {
-        alert('Sistema de características não inicializado. Recarregue a página.');
     }
 };
