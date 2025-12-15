@@ -900,14 +900,69 @@
         <p>RPG System &copy; 2024 - A vida imita GURPS</p>
     </footer>
 
-    <!-- ARQUIVO SEPARADO: guilda.js -->
-    <script src="guilda.js"></script>
+    <!-- ARQUIVO JS SEPARADO - versão básica -->
     <script>
-        // Configuração do Supabase (temporária no HTML)
+        // Configuração do Supabase
         const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let currentUser = null;
+        
+        // Funções principais
+        async function initGuild() {
+            await checkAuth();
+            await loadUserData();
+            showCreateGuildScreen();
+        }
+        
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = session.user;
+        }
+        
+        async function loadUserData() {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (profile) {
+                const initials = profile.username?.charAt(0).toUpperCase() || 'U';
+                document.getElementById('userAvatar').innerHTML = initials;
+            }
+        }
+        
+        function showCreateGuildScreen() {
+            const content = `
+                <div class="no-guild-container">
+                    <div class="no-guild-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h2 class="no-guild-title">Você não possui uma guilda</h2>
+                    <p class="no-guild-text">
+                        Crie sua própria guilda para reunir seus amigos e jogadores.<br>
+                        Como dono da guilda, você poderá convidar outros jogadores, 
+                        gerenciar membros e organizar campanhas.
+                    </p>
+                    <button class="btn" id="showCreateModalBtn">
+                        <i class="fas fa-plus"></i> Criar Guilda
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('guild-content').innerHTML = content;
+            
+            // Adicionar evento ao botão
+            document.getElementById('showCreateModalBtn').addEventListener('click', () => {
+                document.getElementById('createGuildModal').classList.add('active');
+            });
+        }
         
         // Função Voltar para Home
         document.getElementById('backBtn').addEventListener('click', () => {
@@ -925,6 +980,51 @@
             }
         });
         
+        // Modal Criar Guilda
+        document.getElementById('createGuildForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const guildName = document.getElementById('guildName').value;
+            const guildId = document.getElementById('guildId').value;
+            const description = document.getElementById('guildDescription').value;
+            const maxMembers = document.getElementById('maxMembers').value;
+            
+            try {
+                alert(`Guilda criada com sucesso!\nNome: ${guildName}\nID: ${guildId}`);
+                
+                // Fechar modal
+                document.getElementById('createGuildModal').classList.remove('active');
+                
+                // Mostrar exemplo de guilda criada
+                showExampleGuild(guildName, guildId, description);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro: ' + error.message);
+            }
+        });
+        
+        // Cancelar criação
+        document.getElementById('cancelCreate').addEventListener('click', () => {
+            document.getElementById('createGuildModal').classList.remove('active');
+        });
+        
+        // Modal Convidar Membro
+        document.getElementById('inviteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const playerId = document.getElementById('invitePlayerId').value;
+            alert(`Convite enviado para ${playerId}`);
+            
+            document.getElementById('inviteModal').classList.remove('active');
+            document.getElementById('invitePlayerId').value = '';
+        });
+        
+        // Cancelar convite
+        document.getElementById('cancelInvite').addEventListener('click', () => {
+            document.getElementById('inviteModal').classList.remove('active');
+        });
+        
         // Fechar modais ao clicar fora
         document.querySelectorAll('.modal-overlay').forEach(modal => {
             modal.addEventListener('click', (e) => {
@@ -933,6 +1033,149 @@
                 }
             });
         });
+        
+        // Função de exemplo para mostrar guilda criada
+        function showExampleGuild(name, id, description) {
+            const content = `
+                <div class="guild-header">
+                    <div class="guild-avatar">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="guild-info">
+                        <h2 class="guild-name">${name}</h2>
+                        <div class="guild-id">ID: ${id}</div>
+                        <p class="guild-description">${description || 'Sem descrição'}</p>
+                        <div class="guild-stats">
+                            <div class="guild-stat">
+                                <i class="fas fa-users"></i>
+                                <span>Membros: <span class="stat-value">1/10</span></span>
+                            </div>
+                            <div class="guild-stat">
+                                <i class="fas fa-crown"></i>
+                                <span>Dono: <span class="stat-value">Você</span></span>
+                            </div>
+                            <div class="guild-stat">
+                                <i class="fas fa-calendar"></i>
+                                <span>Criada: <span class="stat-value">Hoje</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guild-tabs">
+                    <button class="guild-tab active" data-tab="members">
+                        <i class="fas fa-users"></i> Membros
+                    </button>
+                    <button class="guild-tab" data-tab="invites">
+                        <i class="fas fa-user-plus"></i> Convites
+                    </button>
+                    <button class="guild-tab" data-tab="settings">
+                        <i class="fas fa-cog"></i> Configurações
+                    </button>
+                </div>
+
+                <div id="tab-contents">
+                    <!-- Aba de Membros -->
+                    <div class="tab-content active" id="tab-members">
+                        <div class="tab-container">
+                            <div class="members-header">
+                                <h3 style="color: #ffd700;">Membros da Guilda</h3>
+                                <button class="btn" id="showInviteModalBtn">
+                                    <i class="fas fa-user-plus"></i> Convidar
+                                </button>
+                            </div>
+                            <div class="members-grid">
+                                <div class="member-card">
+                                    <div class="member-header">
+                                        <div class="member-avatar">${currentUser.email?.charAt(0).toUpperCase() || 'U'}</div>
+                                        <div class="member-info">
+                                            <div class="member-name">Você</div>
+                                            <div class="member-player-id">#${currentUser.id.slice(0, 8)}</div>
+                                            <div class="member-role role-owner">Dono</div>
+                                        </div>
+                                    </div>
+                                    <div class="member-actions">
+                                        <button class="btn" disabled>
+                                            <i class="fas fa-crown"></i> Dono
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba de Convites -->
+                    <div class="tab-content" id="tab-invites">
+                        <div class="tab-container">
+                            <h3 style="color: #ffd700; margin-bottom: 20px;">Convites Pendentes</h3>
+                            <div class="invites-list">
+                                <p style="color: #888; text-align: center;">Nenhum convite pendente</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba de Configurações -->
+                    <div class="tab-content" id="tab-settings">
+                        <div class="tab-container">
+                            <div class="settings-grid">
+                                <div class="settings-section">
+                                    <h3>Gerenciar Guilda</h3>
+                                    <div class="settings-actions">
+                                        <button class="btn" id="editGuildBtn">
+                                            <i class="fas fa-edit"></i> Editar Guilda
+                                        </button>
+                                        <button class="btn" id="transferGuildBtn">
+                                            <i class="fas fa-exchange-alt"></i> Transferir Guilda
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="settings-section danger-zone">
+                                    <h3>Zona de Perigo</h3>
+                                    <div class="settings-actions">
+                                        <button class="btn btn-danger" id="deleteGuildBtn">
+                                            <i class="fas fa-trash"></i> Excluir Guilda
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('guild-content').innerHTML = content;
+            
+            // Configurar abas
+            setupTabs();
+            
+            // Configurar eventos
+            document.getElementById('showInviteModalBtn')?.addEventListener('click', () => {
+                document.getElementById('inviteModal').classList.add('active');
+            });
+        }
+        
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.guild-tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Remover active de todas as tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    
+                    // Adicionar active na tab clicada
+                    tab.classList.add('active');
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                });
+            });
+        }
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', initGuild);
     </script>
 </body>
 </html>
