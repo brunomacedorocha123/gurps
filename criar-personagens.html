@@ -3447,97 +3447,51 @@
 <!-- NO criar-personagens.html, substitua TODO o script por este: -->
 
 <script>
-    // Configuração do Supabase
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
     
-    // Inicializar Supabase
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // Estado global
     let personagemId = null;
 
-    // ======================
-    // INICIALIZAÇÃO DO SISTEMA
-    // ======================
     async function inicializarSistema() {
         try {
-            console.log('🚀 Inicializando sistema...');
-            
-            // 1. Verificar autenticação - VERSÃO SIMPLIFICADA E FUNCIONAL
-            console.log('🔐 Verificando autenticação...');
-            
-            // Método DIRETO: getSession
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
-                console.warn('❌ Nenhuma sessão encontrada. Redirecionando...');
                 alert('Você precisa estar logado para criar personagens.');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1000);
+                setTimeout(() => window.location.href = 'login.html', 1000);
                 return;
             }
             
-            console.log('✅ Usuário autenticado:', session.user.email);
-            
-            // 2. Inicializar navegação por abas
             inicializarNavegacaoAbas();
             
-            // 3. Verificar se é edição ou criação
             const urlParams = new URLSearchParams(window.location.search);
             personagemId = urlParams.get('id');
             
             if (personagemId) {
-                // Modo edição
-                console.log('✏️ Modo EDIÇÃO - ID:', personagemId);
                 document.title = 'Editar Personagem - RPG System';
-                
-                try {
-                    // Carregar personagem
-                    await carregarPersonagemParaEdicao(personagemId);
-                } catch (error) {
-                    console.error('Erro ao carregar personagem:', error);
-                    alert('Erro ao carregar personagem. Redirecionando...');
-                    setTimeout(() => {
-                        window.location.href = 'personagens.html';
-                    }, 2000);
-                    return;
-                }
+                await carregarPersonagemParaEdicao(personagemId);
             } else {
-                // Modo criação
-                console.log('🆕 Modo CRIAÇÃO');
                 document.title = 'Criar Personagem - RPG System';
             }
             
-            // 4. Configurar eventos
             configurarEventListeners();
-            
-            // 5. Inicializar sistema de abas
             inicializarSistemaAbas();
             
-            console.log('✅ Sistema inicializado com sucesso!');
-            
         } catch (error) {
-            console.error('❌ Erro ao inicializar sistema:', error);
             alert('Erro ao inicializar sistema: ' + error.message);
         }
     }
 
-    // ======================
-    // NAVEGAÇÃO ENTRE ABAS
-    // ======================
     function inicializarNavegacaoAbas() {
         const tabButtons = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
         
         tabButtons.forEach(btn => {
             btn.addEventListener('click', function() {
-                // Remove active de todos
                 tabButtons.forEach(b => b.classList.remove('active'));
                 tabContents.forEach(c => c.classList.remove('active'));
                 
-                // Ativa a aba clicada
                 this.classList.add('active');
                 const tabId = this.getAttribute('data-tab');
                 const tabContent = document.getElementById(tabId);
@@ -3563,50 +3517,27 @@
             switch(abaId) {
                 case 'dashboard':
                     if (typeof window.dashboard?.inicializar === 'function') {
-                        console.log('📊 Inicializando dashboard...');
                         window.dashboard.inicializar();
                     }
                     break;
                 case 'resumo':
-                    console.log('📄 Carregando resumo...');
                     if (typeof sincronizarResumo === 'function') {
                         sincronizarResumo();
                     }
                     break;
-                // Outras abas...
-                default:
-                    console.log(`ℹ️  Aba ${abaId}`);
             }
         }, 100);
     }
 
-    // ======================
-    // CONFIGURAR EVENTOS
-    // ======================
     function configurarEventListeners() {
-        console.log('🎮 Configurando eventos...');
-        
-        // Botões do header
         const btnSalvar = document.getElementById('btnSalvar');
         const btnExcluir = document.getElementById('btnExcluir');
         const btnSair = document.getElementById('btnSair');
         
-        if (btnSalvar) {
-            btnSalvar.addEventListener('click', salvarPersonagem);
-            console.log('✅ Botão salvar configurado');
-        }
+        if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
+        if (btnExcluir) btnExcluir.addEventListener('click', solicitarExclusao);
+        if (btnSair) btnSair.addEventListener('click', sairSemSalvar);
         
-        if (btnExcluir) {
-            btnExcluir.addEventListener('click', solicitarExclusao);
-            console.log('✅ Botão excluir configurado');
-        }
-        
-        if (btnSair) {
-            btnSair.addEventListener('click', sairSemSalvar);
-            console.log('✅ Botão sair configurado');
-        }
-        
-        // Nome do personagem
         const charName = document.getElementById('charName');
         if (charName) {
             charName.addEventListener('input', function() {
@@ -3614,28 +3545,14 @@
                     atualizarResumoNome(this.value);
                 }
             });
-            console.log('✅ Evento nome configurado');
         }
-        
-        console.log('✅ Eventos configurados');
     }
 
-    // ======================
-    // FUNÇÕES PRINCIPAIS
-    // ======================
-
-    // Carregar personagem para edição
     async function carregarPersonagemParaEdicao(personagemId) {
-        console.log(`📥 Carregando personagem para edição: ${personagemId}`);
-        
         try {
-            // 1. Obter autenticação
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                throw new Error('Usuário não autenticado');
-            }
+            if (!session) throw new Error('Usuário não autenticado');
             
-            // 2. Carregar personagem
             const { data: personagem, error } = await supabase
                 .from('characters')
                 .select('*')
@@ -3646,22 +3563,17 @@
             if (error) throw error;
             if (!personagem) throw new Error('Personagem não encontrado');
             
-            console.log('✅ Personagem carregado:', personagem.nome);
-            
-            // 3. Preencher dados básicos
             document.getElementById('charName').value = personagem.nome || 'Novo Personagem';
             document.getElementById('racaPersonagem').value = personagem.raca || '';
             document.getElementById('classePersonagem').value = personagem.classe || '';
             document.getElementById('nivelPersonagem').value = personagem.nivel || '';
             document.getElementById('descricaoPersonagem').value = personagem.descricao || '';
             
-            // 4. Preencher atributos
             document.getElementById('ST').value = personagem.forca || 10;
             document.getElementById('DX').value = personagem.destreza || 10;
             document.getElementById('IQ').value = personagem.inteligencia || 10;
             document.getElementById('HT').value = personagem.saude || 10;
             
-            // 5. Foto (se houver)
             if (personagem.avatar_url) {
                 const fotoPreview = document.getElementById('fotoPreview');
                 const fotoPlaceholder = document.getElementById('fotoPlaceholder');
@@ -3670,46 +3582,34 @@
                     fotoPreview.style.display = 'block';
                     fotoPlaceholder.style.display = 'none';
                     
-                    // Ativar botão remover
                     const btnRemoverFoto = document.getElementById('btnRemoverFoto');
-                    if (btnRemoverFoto) {
-                        btnRemoverFoto.style.display = 'inline-block';
-                    }
-                    
-                    console.log('✅ Foto carregada');
+                    if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
                 }
             }
             
-            console.log('✅ Personagem carregado com sucesso!');
-            
         } catch (error) {
-            console.error('❌ Erro ao carregar personagem:', error);
+            alert('Erro ao carregar personagem: ' + error.message);
+            setTimeout(() => window.location.href = 'personagens.html', 2000);
             throw error;
         }
     }
 
-    // Salvar personagem (função principal)
+    // FUNÇÃO PRINCIPAL DE SALVAMENTO - VERSÃO CORRIGIDA
     async function salvarPersonagem() {
-        console.log('💾 Iniciando salvamento do personagem...');
-        
         try {
-            // 1. Verificar autenticação
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                alert('❌ Sua sessão expirou. Faça login novamente para salvar.');
+                alert('Sua sessão expirou. Faça login novamente.');
                 window.location.href = 'login.html';
                 return false;
             }
-            
-            console.log('✅ Usuário autenticado:', session.user.email);
 
-            // 2. Mostrar indicador de carregamento
             const btnSalvar = document.getElementById('btnSalvar');
             const btnSalvarOriginal = btnSalvar.innerHTML;
             btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
             btnSalvar.disabled = true;
             
-            // 3. Coletar dados básicos
+            // COLETAR DADOS BÁSICOS
             const dados = {
                 user_id: session.user.id,
                 nome: document.getElementById('charName')?.value || 'Novo Personagem',
@@ -3724,26 +3624,18 @@
                 updated_at: new Date().toISOString()
             };
             
-            // 4. Obter dados de outras abas se existirem
-            try {
-                if (window.sistemaPontos) {
-                    dados.pontos_totais = window.sistemaPontos.pontos?.totais || 150;
-                    dados.pontos_gastos = window.sistemaPontos.pontos?.gastos || 0;
-                    dados.pontos_disponiveis = window.sistemaPontos.pontos?.disponiveis || 150;
-                    dados.limite_desvantagens = window.sistemaPontos.pontos?.limiteDesvantagens || -50;
-                    dados.desvantagens_atuais = window.sistemaPontos.pontos?.desvantagensAtuais || 0;
-                }
-            } catch (error) {
-                console.warn('⚠️ Erro ao coletar pontos:', error);
-            }
+            // AGORA A PARTE IMPORTANTE: COLETAR PONTOS DO DASHBOARD
+            // Pega os valores DIRETAMENTE dos elementos visíveis na tela
+            dados.pontos_totais = parseInt(document.getElementById('pontosTotaisDashboard')?.value) || 150;
+            dados.pontos_gastos = parseInt(document.getElementById('pontosGastosDashboard')?.textContent) || 0;
+            dados.pontos_disponiveis = parseInt(document.getElementById('saldoDisponivelDashboard')?.textContent) || 150;
+            dados.limite_desvantagens = parseInt(document.getElementById('limiteDesvantagens')?.value) || -50;
+            dados.desvantagens_atuais = parseInt(document.getElementById('desvantagensAtuais')?.textContent) || 0;
             
             let resultado;
             
             if (personagemId) {
                 // MODO EDIÇÃO
-                console.log('✏️ Editando personagem:', personagemId);
-                
-                // Atualizar
                 const { data, error } = await supabase
                     .from('characters')
                     .update(dados)
@@ -3756,13 +3648,9 @@
                 
             } else {
                 // MODO CRIAÇÃO
-                console.log('🆕 Criando novo personagem');
-                
-                // Adicionar campos de criação
                 dados.created_at = new Date().toISOString();
                 dados.status = 'Ativo';
                 
-                // Criar
                 const { data, error } = await supabase
                     .from('characters')
                     .insert([dados])
@@ -3771,9 +3659,6 @@
                 if (error) throw error;
                 resultado = data;
             }
-            
-            // 5. SUCESSO
-            console.log('✅ Personagem salvo com sucesso!');
             
             const mensagem = personagemId 
                 ? 'Personagem atualizado com sucesso!' 
@@ -3788,25 +3673,19 @@
             return true;
 
         } catch (error) {
-            console.error('❌ Erro ao salvar:', error);
-            
-            // Restaurar botão
             const btnSalvar = document.getElementById('btnSalvar');
             btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
             btnSalvar.disabled = false;
             
-            // Mostrar erro
             let mensagemErro = 'Erro ao salvar: ';
             
             if (error.message.includes('permission denied') || error.code === '42501') {
-                mensagemErro = 'ERRO DE PERMISSÃO!\n\nVerifique se você está logado corretamente.';
+                mensagemErro = 'ERRO DE PERMISSÃO! Verifique se você está logado corretamente.';
             } else if (error.message.includes('network')) {
                 mensagemErro = 'Problema de conexão. Verifique sua internet.';
             } else if (error.message.includes('auth')) {
                 mensagemErro = 'Problema de autenticação. Faça login novamente.';
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
+                setTimeout(() => window.location.href = 'login.html', 2000);
             } else {
                 mensagemErro += error.message;
             }
@@ -3816,10 +3695,9 @@
         }
     }
 
-    // Solicitar exclusão
     function solicitarExclusao() {
         if (personagemId) {
-            if (confirm('⚠️ Tem certeza que deseja excluir este personagem?\n\nEsta ação não pode ser desfeita!')) {
+            if (confirm('Tem certeza que deseja excluir este personagem?\n\nEsta ação não pode ser desfeita!')) {
                 excluirPersonagem(personagemId);
             }
         } else {
@@ -3829,12 +3707,8 @@
         }
     }
 
-    // Excluir personagem
     async function excluirPersonagem(personagemId) {
-        console.log(`🗑️  Excluindo personagem: ${personagemId}`);
-        
         try {
-            // Verificar autenticação
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 alert('Sessão expirada. Faça login novamente.');
@@ -3850,37 +3724,30 @@
             
             if (error) throw error;
             
-            alert('✅ Personagem excluído com sucesso!');
+            alert('Personagem excluído com sucesso!');
             
             setTimeout(() => {
                 window.location.href = 'personagens.html';
             }, 1000);
             
         } catch (error) {
-            console.error('❌ Erro ao excluir:', error);
             alert('Erro ao excluir: ' + error.message);
         }
     }
 
-    // Sair sem salvar
     function sairSemSalvar() {
         if (confirm('Sair sem salvar as alterações?')) {
             window.location.href = 'personagens.html';
         }
     }
 
-    // ======================
-    // FUNÇÕES DE RESUMO
-    // ======================
     function sincronizarResumo() {
         try {
-            // Nome
             const nomeInput = document.getElementById('charName');
             if (nomeInput && document.getElementById('resumoNome')) {
                 document.getElementById('resumoNome').textContent = nomeInput.value || 'Novo Personagem';
             }
             
-            // Dados básicos
             const campos = {
                 'racaPersonagem': 'resumoRaca',
                 'classePersonagem': 'resumoClasse', 
@@ -3895,7 +3762,6 @@
                 }
             }
             
-            // Atributos
             const atributos = {
                 'ST': 'resumoST',
                 'DX': 'resumoDX',
@@ -3911,10 +3777,8 @@
                 }
             }
             
-            console.log('✅ Resumo sincronizado');
-            
         } catch (error) {
-            console.warn('⚠️ Erro ao sincronizar resumo:', error);
+            // Silencioso
         }
     }
 
@@ -3925,53 +3789,20 @@
         }
     }
 
-    // ======================
-    // INICIALIZAÇÃO
-    // ======================
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 DOM carregado - inicializando...');
-        
-        // Inicializar sistema
         setTimeout(() => {
             inicializarSistema();
         }, 500);
     });
 
-    // ======================
-    // EXPORTAR FUNÇÕES PARA USO GLOBAL
-    // ======================
     window.salvarPersonagem = salvarPersonagem;
     window.sincronizarResumo = sincronizarResumo;
     window.atualizarResumoNome = atualizarResumoNome;
 
-    console.log('✅ Script principal carregado e pronto!');
-
-    // FORÇAR ATUALIZAÇÃO DO CACHE
-window.addEventListener('beforeunload', function() {
-    // Limpar cache quando sair da página de criação
-    localStorage.removeItem('personagens_cache');
-});
-
-// Função para verificar o que está sendo salvo
-window.testarSalvamento = async function() {
-    console.log('🧪 TESTANDO SALVAMENTO...');
-    
-    // Verificar valores atuais no Dashboard
-    const pontosGastos = document.getElementById('pontosGastosDashboard')?.textContent || '0';
-    const saldoDisponivel = document.getElementById('saldoDisponivelDashboard')?.textContent || '150';
-    const pontosTotais = document.getElementById('pontosTotaisDashboard')?.value || '150';
-    
-    console.log('📊 Valores no Dashboard:');
-    console.log(`- Pontos Gastos: ${pontosGastos}`);
-    console.log(`- Saldo Disponível: ${saldoDisponivel}`);
-    console.log(`- Pontos Totais: ${pontosTotais}`);
-    
-    // Verificar se está autenticado
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log(`- Usuário: ${session?.user?.email || 'Não autenticado'}`);
-    
-    alert(`Teste de Salvamento:\n\nGastos: ${pontosGastos}\nSaldo: ${saldoDisponivel}\nTotais: ${pontosTotais}`);
-};
+    // Limpar cache ao sair
+    window.addEventListener('beforeunload', function() {
+        localStorage.removeItem('personagens_cache');
+    });
 </script>
 </body>
 </html>  
