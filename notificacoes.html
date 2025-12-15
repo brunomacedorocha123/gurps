@@ -6,14 +6,178 @@
     <title>Notificações - RPG System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="styles.css">
     <style>
-        /* ESTILOS ESPECÍFICOS DAS NOTIFICAÇÕES */
+        /* ============================================
+           ESTILOS GERAIS (IGUAL DA GUILDA.HTML)
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('Cris2.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .header {
+            background: rgba(30, 30, 40, 0.9);
+            padding: 15px 20px;
+            border-bottom: 2px solid rgba(255, 140, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #ffd700, #ff8c00, #ff4500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo p {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+
+        .player-id {
+            background: rgba(255, 140, 0, 0.1);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #ff8c00;
+        }
+
+        .player-id span {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: rgba(231, 76, 60, 0.8);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 1);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff8c00, #ff4500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            border: 2px solid rgba(255, 140, 0, 0.5);
+        }
+
+        /* NAVIGATION */
+        .nav {
+            background: rgba(30, 30, 40, 0.8);
+            border-bottom: 1px solid rgba(255, 140, 0, 0.2);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 20px;
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            color: #ccc;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            color: #ff8c00;
+            background: rgba(255, 140, 0, 0.1);
+        }
+
+        .nav-item.active {
+            color: #ffd700;
+            border-bottom-color: #ff8c00;
+            background: rgba(255, 140, 0, 0.05);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* CONTEÚDO PRINCIPAL */
+        .main-content {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* ============================================
+           ESTILOS ESPECÍFICOS DAS NOTIFICAÇÕES
+           ============================================ */
         
         .notifications-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            padding: 25px;
         }
         
         .notifications-header {
@@ -21,28 +185,54 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            background: rgba(30, 30, 40, 0.8);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255, 140, 0, 0.2);
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 140, 0, 0.2);
         }
         
         .header-title {
             color: #ffd700;
             font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
         
         .notifications-count {
             background: rgba(255, 140, 0, 0.2);
             color: #ff8c00;
-            padding: 5px 15px;
+            padding: 8px 20px;
             border-radius: 20px;
             font-weight: bold;
+            font-size: 0.95rem;
+        }
+        
+        .mark-all-read {
+            background: rgba(52, 152, 219, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .mark-all-read:hover {
+            background: rgba(52, 152, 219, 1);
         }
         
         .notifications-tabs {
             display: flex;
-            background: rgba(30, 30, 40, 0.8);
+            background: rgba(40, 40, 50, 0.5);
             border-radius: 10px;
             margin-bottom: 25px;
             border: 1px solid rgba(255, 140, 0, 0.2);
@@ -60,6 +250,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .notification-tab:last-child {
@@ -78,9 +272,9 @@
         }
         
         .notification-content {
-            background: rgba(30, 30, 40, 0.7);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 140, 0, 0.2);
+            background: rgba(40, 40, 50, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             overflow: hidden;
         }
         
@@ -94,7 +288,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
             transition: all 0.3s ease;
         }
         
@@ -103,13 +297,14 @@
         }
         
         .notification-item.unread {
-            background: rgba(255, 140, 0, 0.1);
-            border-left: 3px solid #ff8c00;
+            background: rgba(255, 140, 0, 0.08);
+            border-left: 4px solid #ff8c00;
         }
         
         .notification-icon {
             width: 50px;
             height: 50px;
+            min-width: 50px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -175,11 +370,15 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         .btn-accept {
             background: rgba(46, 204, 113, 0.2);
             color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
         }
         
         .btn-accept:hover {
@@ -190,6 +389,7 @@
         .btn-decline {
             background: rgba(231, 76, 60, 0.2);
             color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
         }
         
         .btn-decline:hover {
@@ -200,6 +400,7 @@
         .btn-view {
             background: rgba(52, 152, 219, 0.2);
             color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.3);
         }
         
         .btn-view:hover {
@@ -229,22 +430,6 @@
             font-size: 1.1rem;
         }
         
-        .mark-all-read {
-            background: none;
-            border: none;
-            color: #ff8c00;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .mark-all-read:hover {
-            color: #ffd700;
-        }
-        
         /* Modal de detalhes */
         .notification-modal {
             display: none;
@@ -258,6 +443,7 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            padding: 20px;
         }
         
         .notification-modal.active {
@@ -292,6 +478,16 @@
             color: #ccc;
             font-size: 1.5rem;
             cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .modal-body {
@@ -305,17 +501,60 @@
             gap: 15px;
         }
         
-        /* Responsividade */
+        .modal-actions .notification-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 12px;
+        }
+        
+        /* FOOTER */
+        .footer {
+            background: rgba(20, 20, 30, 0.9);
+            padding: 15px 0;
+            text-align: center;
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 140, 0, 0.2);
+        }
+        
+        .footer p {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        
+        /* ============================================
+           RESPONSIVIDADE
+           ============================================ */
         @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .nav-content {
+                flex-wrap: wrap;
+            }
+            
+            .nav-item {
+                flex: 1 0 33.333%;
+                font-size: 0.85rem;
+            }
+            
             .notifications-header {
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
             }
             
+            .header-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
             .notification-item {
                 flex-direction: column;
                 text-align: center;
+                gap: 15px;
             }
             
             .notification-actions {
@@ -324,12 +563,22 @@
             }
             
             .notification-tab {
-                padding: 12px 10px;
-                font-size: 0.9rem;
+                padding: 12px 8px;
+                font-size: 0.85rem;
             }
         }
         
         @media (max-width: 480px) {
+            .nav-content {
+                flex-direction: column;
+            }
+            
+            .nav-item {
+                flex: 1;
+                width: 100%;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
             .notifications-tabs {
                 flex-direction: column;
             }
@@ -337,6 +586,14 @@
             .notification-tab {
                 border-right: none;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                padding: 20px;
             }
         }
     </style>
@@ -406,7 +663,7 @@
                 <h1 class="header-title">
                     <i class="fas fa-bell"></i> Notificações
                 </h1>
-                <div>
+                <div class="header-controls">
                     <button class="mark-all-read" id="markAllReadBtn">
                         <i class="fas fa-check-double"></i> Marcar todas como lidas
                     </button>
