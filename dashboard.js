@@ -1,4 +1,4 @@
-// dashboard.js - VERSÃO COMPLETA COM DISPLAY NOS CARDS
+// dashboard.js - VERSÃO COMPLETA 100% FUNCIONAL
 class DashboardSupabase {
     constructor() {
         this.estado = this.criarEstadoInicial();
@@ -16,7 +16,7 @@ class DashboardSupabase {
                 gastosMagias: 0,
                 gastosIdiomas: 0,
                 gastosTecnicas: 0,
-                desvantagens: 0,
+                desvantagensVantagens: 0,
                 aparenciaDesvantagens: 0,
                 riquezaDesvantagens: 0,
                 riquezaVantagens: 0,
@@ -213,8 +213,7 @@ class DashboardSupabase {
     }
 
     puxarTodosDados() {
-        this.puxarDadosVantagens();
-        this.puxarDadosDesvantagens();
+        this.puxarDadosVantagensDesvantagens();
         this.puxarDadosPericias();
         this.puxarDadosMagias();
         this.puxarDadosIdiomas();
@@ -226,12 +225,11 @@ class DashboardSupabase {
         this.puxarDadosPeculiaridades();
         
         this.calcularTotalDesvantagens();
-        this.calcularSaldoDisponivel();
         this.atualizarDisplayResumoGastos();
         this.atualizarDisplayPontos();
     }
 
-    puxarDadosVantagens() {
+    puxarDadosVantagensDesvantagens() {
         try {
             const totalVantagensElement = document.getElementById('total-vantagens');
             if (totalVantagensElement) {
@@ -240,19 +238,8 @@ class DashboardSupabase {
                 if (match) {
                     const valor = parseInt(match[1]) || 0;
                     this.estado.pontos.gastosVantagens = valor > 0 ? valor : 0;
+                    this.estado.pontos.desvantagensVantagens = valor < 0 ? Math.abs(valor) : 0;
                 }
-            }
-        } catch (error) {
-            // Silencioso
-        }
-    }
-
-    puxarDadosDesvantagens() {
-        try {
-            // Buscar do sistema de desvantagens
-            if (window.sistemaDesvantagens) {
-                const total = window.sistemaDesvantagens.calcularTotalDesvantagens();
-                this.estado.pontos.desvantagens = Math.abs(total);
             }
         } catch (error) {
             // Silencioso
@@ -391,33 +378,49 @@ class DashboardSupabase {
 
     puxarDadosTecnicas() {
         try {
-            // Buscar do sistema de técnicas
-            if (window.estadoTecnicas && window.estadoTecnicas.aprendidas) {
-                const totalPontos = window.estadoTecnicas.aprendidas.reduce((total, tecnica) => {
-                    return total + (tecnica.custoTotal || 0);
-                }, 0);
-                this.estado.pontos.gastosTecnicas = totalPontos;
+            // Buscar do localStorage (do seu sistema de técnicas)
+            const tecnicasSalvas = localStorage.getItem('tecnicasAprendidas');
+            if (tecnicasSalvas) {
+                try {
+                    const tecnicas = JSON.parse(tecnicasSalvas);
+                    const totalPontos = tecnicas.reduce((total, tecnica) => {
+                        return total + (tecnica.custoTotal || 0);
+                    }, 0);
+                    this.estado.pontos.gastosTecnicas = totalPontos;
+                } catch (e) {
+                    this.estado.pontos.gastosTecnicas = 0;
+                }
+            } else {
+                this.estado.pontos.gastosTecnicas = 0;
             }
         } catch (error) {
-            // Silencioso
+            this.estado.pontos.gastosTecnicas = 0;
         }
     }
 
     puxarDadosPeculiaridades() {
         try {
-            // Buscar do sistema de vantagens
-            if (window.sistemaVantagens && window.sistemaVantagens.peculiaridades) {
-                this.estado.pontos.peculiaridades = window.sistemaVantagens.peculiaridades.length;
+            // Buscar do localStorage (do seu sistema de vantagens)
+            const peculiaridadesSalvas = localStorage.getItem('peculiaridades');
+            if (peculiaridadesSalvas) {
+                try {
+                    const peculiaridades = JSON.parse(peculiaridadesSalvas);
+                    this.estado.pontos.peculiaridades = peculiaridades.length;
+                } catch (e) {
+                    this.estado.pontos.peculiaridades = 0;
+                }
+            } else {
+                this.estado.pontos.peculiaridades = 0;
             }
         } catch (error) {
-            // Silencioso
+            this.estado.pontos.peculiaridades = 0;
         }
     }
 
     // ===== CÁLCULOS =====
     calcularTotalDesvantagens() {
         const total = 
-            this.estado.pontos.desvantagens +
+            this.estado.pontos.desvantagensVantagens +
             this.estado.pontos.aparenciaDesvantagens +
             this.estado.pontos.riquezaDesvantagens +
             this.estado.pontos.caracteristicasFisicasDesvantagens +
@@ -442,7 +445,6 @@ class DashboardSupabase {
             totalDesvantagens 
         } = this.estado.pontos;
         
-        // Incluir aparência positiva
         const selectAparencia = document.getElementById('nivelAparencia');
         let aparenciaVantagens = 0;
         if (selectAparencia) {
@@ -452,14 +454,11 @@ class DashboardSupabase {
             }
         }
         
-        // Total de vantagens (gastam pontos)
         const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
-        
-        // Total gasto em pontos
         const gastosTotais = gastosAtributos + vantagensTotais + 
                             gastosPericias + gastosTecnicas + gastosMagias;
         
-        // Desvantagens dão pontos extras (são subtraídas dos gastos)
+        // CORREÇÃO CRÍTICA: Desvantagens dão pontos extras
         this.estado.pontos.saldoDisponivel = total - gastosTotais + totalDesvantagens;
         
         return this.estado.pontos.saldoDisponivel;
@@ -545,13 +544,13 @@ class DashboardSupabase {
         const pontosGastosDashboard = gastosAtributos + vantagensTotais + 
                                      gastosPericias + gastosTecnicas + gastosMagias;
         
-        // 1. PONTOS GASTOS - Card principal
+        // Pontos Gastos
         const pontosGastosElement = document.getElementById('pontosGastosDashboard');
         if (pontosGastosElement) {
             pontosGastosElement.textContent = pontosGastosDashboard;
         }
         
-        // 2. SALDO DISPONÍVEL - Card principal
+        // Saldo Disponível
         const saldoElement = document.getElementById('saldoDisponivelDashboard');
         if (saldoElement) {
             saldoElement.textContent = saldoDisponivel;
@@ -565,7 +564,7 @@ class DashboardSupabase {
             }
         }
         
-        // 3. DESVANTAGENS ATUAIS - Card específico
+        // Desvantagens Atuais
         const desvantagensElement = document.getElementById('desvantagensAtuais');
         if (desvantagensElement) {
             desvantagensElement.textContent = totalDesvantagens;
@@ -602,9 +601,7 @@ class DashboardSupabase {
         }
         
         const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
-        const totalPericiasTecnicas = gastosPericias + gastosTecnicas;
         
-        // Atualizar cada card do resumo
         const elementos = {
             gastosAtributos: document.getElementById('gastosAtributos'),
             gastosVantagens: document.getElementById('gastosVantagens'),
@@ -614,35 +611,29 @@ class DashboardSupabase {
             gastosTotal: document.getElementById('gastosTotal')
         };
         
-        // Card: ATRIBUTOS
         if (elementos.gastosAtributos) {
             elementos.gastosAtributos.textContent = gastosAtributos;
         }
         
-        // Card: VANTAGENS
         if (elementos.gastosVantagens) {
             elementos.gastosVantagens.textContent = vantagensTotais;
         }
         
-        // Card: PERÍCIAS (inclui técnicas)
         if (elementos.gastosPericias) {
-            elementos.gastosPericias.textContent = totalPericiasTecnicas;
+            elementos.gastosPericias.textContent = gastosPericias + gastosTecnicas;
         }
         
-        // Card: MAGIAS
         if (elementos.gastosMagias) {
             elementos.gastosMagias.textContent = gastosMagias;
         }
         
-        // Card: DESVANTAGENS & PECULIARIDADES
         if (elementos.gastosDesvantagens) {
             elementos.gastosDesvantagens.textContent = totalDesvantagens;
             elementos.gastosDesvantagens.style.color = '#9b59b6';
         }
         
-        // Card: TOTAL GASTOS (card especial)
         const gastosTotais = gastosAtributos + vantagensTotais + 
-                            totalPericiasTecnicas + gastosMagias;
+                            gastosPericias + gastosTecnicas + gastosMagias;
         const gastosLiquidos = gastosTotais - totalDesvantagens;
         
         if (elementos.gastosTotal) {
@@ -658,6 +649,30 @@ class DashboardSupabase {
                 elementos.gastosTotal.style.color = '#27ae60';
             }
         }
+    }
+
+    // ===== COLETAR DADOS PARA SALVAR =====
+    coletarDadosParaSalvar() {
+        const nome = document.getElementById('charName')?.value || 'Novo Personagem';
+        const raca = document.getElementById('racaPersonagem')?.value || '';
+        const classe = document.getElementById('classePersonagem')?.value || '';
+        const nivel = document.getElementById('nivelPersonagem')?.value || '';
+        const descricao = document.getElementById('descricaoPersonagem')?.value || '';
+        
+        this.estado.identificacao.nome = nome;
+        this.estado.identificacao.raca = raca;
+        this.estado.identificacao.classe = classe;
+        this.estado.identificacao.nivel = nivel;
+        this.estado.identificacao.descricao = descricao;
+        
+        return {
+            identificacao: this.estado.identificacao,
+            pontos: this.estado.pontos,
+            atributos: this.estado.atributos,
+            caracteristicas: this.estado.caracteristicas,
+            relacionamentos: this.estado.relacionamentos,
+            foto: this.fotoTemporaria
+        };
     }
 
     // ===== INICIALIZAÇÃO =====
