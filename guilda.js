@@ -107,7 +107,6 @@ function renderNoGuildPage() {
     
     document.getElementById('guild-content').innerHTML = content;
     
-    // Adicionar evento ao botão
     document.getElementById('createGuildBtn')?.addEventListener('click', () => {
         document.getElementById('createGuildModal').classList.add('active');
     });
@@ -153,7 +152,6 @@ function renderGuildPage() {
         </div>
 
         <div id="tab-contents">
-            <!-- Aba de Membros -->
             <div class="tab-content active" id="tab-members">
                 <div class="members-container">
                     <div class="members-header">
@@ -170,7 +168,6 @@ function renderGuildPage() {
                 </div>
             </div>
 
-            <!-- Aba de Convites -->
             <div class="tab-content" id="tab-invites">
                 <div class="invites-container">
                     <h3 style="color: #ffd700; margin-bottom: 20px;">Convites Enviados</h3>
@@ -180,7 +177,6 @@ function renderGuildPage() {
                 </div>
             </div>
 
-            <!-- Aba de Configurações -->
             <div class="tab-content" id="tab-settings">
                 <div class="members-container">
                     <h3 style="color: #ffd700; margin-bottom: 20px;">Configurações da Guilda</h3>
@@ -191,11 +187,7 @@ function renderGuildPage() {
     `;
     
     document.getElementById('guild-content').innerHTML = content;
-    
-    // Configurar abas
     setupTabs();
-    
-    // Carregar dados
     loadMembers();
     loadInvites();
 }
@@ -251,12 +243,8 @@ function setupTabs() {
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
-            
-            // Remover active de todas as tabs
             tabs.forEach(t => t.classList.remove('active'));
             contents.forEach(c => c.classList.remove('active'));
-            
-            // Adicionar active na tab clicada
             tab.classList.add('active');
             document.getElementById(`tab-${tabId}`).classList.add('active');
         });
@@ -267,7 +255,6 @@ async function loadMembers() {
     try {
         const membersGrid = document.getElementById('membersGrid');
         
-        // Carregar membros da guilda
         const { data: members, error } = await supabase
             .from('guild_members_with_profiles')
             .select('*')
@@ -329,7 +316,6 @@ async function loadInvites() {
     try {
         const invitesList = document.getElementById('invitesList');
         
-        // Carregar convites pendentes
         const { data: invites, error } = await supabase
             .from('guild_invitations_with_details')
             .select('*')
@@ -370,12 +356,10 @@ async function loadInvites() {
 }
 
 function setupEventListeners() {
-    // Voltar para Home
     document.getElementById('backBtn')?.addEventListener('click', () => {
         window.location.href = 'home.html';
     });
     
-    // Logout
     document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         try {
             await supabase.auth.signOut();
@@ -386,7 +370,6 @@ function setupEventListeners() {
         }
     });
     
-    // Modal Criar Guilda
     document.getElementById('createGuildForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         await createGuild();
@@ -397,7 +380,6 @@ function setupEventListeners() {
         clearCreateForm();
     });
     
-    // Modal Convidar Membro
     document.addEventListener('click', (e) => {
         if (e.target.id === 'inviteMemberBtn' || e.target.closest('#inviteMemberBtn')) {
             document.getElementById('inviteModal').classList.add('active');
@@ -414,7 +396,6 @@ function setupEventListeners() {
         document.getElementById('invitePlayerId').value = '';
     });
     
-    // Botões de Configurações
     document.addEventListener('click', (e) => {
         if (e.target.id === 'editGuildBtn' || e.target.closest('#editGuildBtn')) {
             editGuild();
@@ -430,7 +411,6 @@ function setupEventListeners() {
         }
     });
     
-    // Fechar modais ao clicar fora
     document.querySelectorAll('.modal-overlay').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -450,7 +430,6 @@ async function createGuild() {
     const maxMembers = parseInt(document.getElementById('maxMembers').value) || 10;
     
     try {
-        // Validações básicas
         if (!name || !customId) {
             alert('Nome e ID da guilda são obrigatórios');
             return;
@@ -466,7 +445,6 @@ async function createGuild() {
             return;
         }
         
-        // Chama a função do Supabase para criar guilda
         const { data, error } = await supabase.rpc('create_guild_with_owner', {
             p_custom_id: customId,
             p_name: name,
@@ -481,11 +459,9 @@ async function createGuild() {
             return;
         }
         
-        // Fechar modal e limpar formulário
         document.getElementById('createGuildModal').classList.remove('active');
         clearCreateForm();
         
-        // Recarregar página para mostrar a nova guilda
         setTimeout(() => location.reload(), 1000);
         
     } catch (error) {
@@ -503,7 +479,6 @@ async function sendInvite() {
             return;
         }
         
-        // Chama a função do Supabase para convidar
         const { data, error } = await supabase.rpc('invite_to_guild', {
             p_guild_id: userGuild.id,
             p_receiver_player_id: playerId
@@ -515,13 +490,10 @@ async function sendInvite() {
             return;
         }
         
-        // Fechar modal e limpar formulário
         document.getElementById('inviteModal').classList.remove('active');
         document.getElementById('invitePlayerId').value = '';
         
-        // Recarregar lista de convites
         await loadInvites();
-        
         alert('Convite enviado com sucesso!');
         
     } catch (error) {
@@ -547,7 +519,6 @@ async function cancelInvite(invitationId, receiverName) {
             return;
         }
         
-        // Recarregar lista de convites
         await loadInvites();
         alert('Convite cancelado com sucesso!');
         
@@ -575,7 +546,6 @@ async function promoteToAdmin(memberId) {
             return;
         }
         
-        // Recarregar lista de membros
         await loadMembers();
         alert('Membro promovido a Administrador!');
         
@@ -603,7 +573,6 @@ async function demoteToMember(memberId) {
             return;
         }
         
-        // Recarregar lista de membros
         await loadMembers();
         alert('Administrador rebaixado a Membro!');
         
@@ -631,7 +600,6 @@ async function kickMember(memberId, memberName) {
             return;
         }
         
-        // Recarregar lista de membros
         await loadMembers();
         alert('Membro expulso da guilda!');
         
@@ -703,7 +671,6 @@ async function leaveGuild() {
     }
 }
 
-// Funções auxiliares
 function clearCreateForm() {
     document.getElementById('guildName').value = '';
     document.getElementById('guildId').value = '';
