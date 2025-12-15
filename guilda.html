@@ -645,9 +645,8 @@
             </div>
         </div>
     </div>
-
-    <script>
-       // Configuração do Supabase
+<script>
+   // Configuração do Supabase
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
@@ -899,7 +898,6 @@ async function loadMembers() {
     try {
         const membersGrid = document.getElementById('membersGrid');
         
-        // CORREÇÃO: Usando a view que funciona
         const { data: members, error } = await supabase
             .from('guild_members_with_profiles')
             .select('*')
@@ -919,10 +917,9 @@ async function loadMembers() {
                 membersGrid.innerHTML = '<p style="color: #888; text-align: center;">Nenhum membro na guilda</p>';
             } else {
                 membersGrid.innerHTML = guildMembers.map(member => {
-                    // CORREÇÃO: Agora usando o ID correto da view
                     const username = member.username || 'Usuário';
                     const playerId = member.player_id || '';
-                    const membershipId = member.id; // Este é o ID CORRETO da guild_members
+                    const membershipId = member.id;
                     
                     return `
                         <div class="member-card">
@@ -1180,18 +1177,17 @@ async function cancelInvite(invitationId, receiverName) {
     }
 }
 
-// FUNÇÕES DE GERENCIAMENTO DE MEMBROS CORRIGIDAS
+// FUNÇÕES DE GERENCIAMENTO DE MEMBROS - USANDO FUNÇÕES RPC DO SQL
 async function promoteToAdmin(membershipId) {
     if (!confirm('Promover este membro a Administrador?')) {
         return;
     }
     
     try {
-        const { error } = await supabase
-            .from('guild_members')
-            .update({ role: 'admin' })
-            .eq('id', membershipId)
-            .eq('guild_id', userGuild.id);
+        const { error } = await supabase.rpc('update_guild_member_role', {
+            p_membership_id: membershipId,
+            p_new_role: 'admin'
+        });
         
         if (error) {
             console.error('Erro ao promover membro:', error);
@@ -1214,11 +1210,10 @@ async function demoteToMember(membershipId) {
     }
     
     try {
-        const { error } = await supabase
-            .from('guild_members')
-            .update({ role: 'member' })
-            .eq('id', membershipId)
-            .eq('guild_id', userGuild.id);
+        const { error } = await supabase.rpc('update_guild_member_role', {
+            p_membership_id: membershipId,
+            p_new_role: 'member'
+        });
         
         if (error) {
             console.error('Erro ao rebaixar membro:', error);
@@ -1235,19 +1230,16 @@ async function demoteToMember(membershipId) {
     }
 }
 
-// FUNÇÃO DE EXPULSAR MEMBRO CORRIGIDA - 100% FUNCIONAL
+// FUNÇÃO DE EXPULSAR MEMBRO - USANDO FUNÇÃO RPC DO SQL
 async function kickMember(membershipId, memberName) {
     if (!confirm(`Expulsar ${memberName} da guilda?\n\nEsta ação não pode ser desfeita.`)) {
         return;
     }
     
     try {
-        // CORREÇÃO: Usa o membershipId correto (ID da tabela guild_members)
-        const { error } = await supabase
-            .from('guild_members')
-            .delete()
-            .eq('id', membershipId)
-            .eq('guild_id', userGuild.id);
+        const { error } = await supabase.rpc('expel_guild_member', {
+            p_membership_id: membershipId
+        });
         
         if (error) {
             console.error('Erro ao expulsar membro:', error);
@@ -1265,11 +1257,152 @@ async function kickMember(membershipId, memberName) {
 }
 
 async function editGuild() {
-    alert('Funcionalidade de edição da guilda será implementada em breve!');
+    // Criar modal para edição
+    const modalContent = `
+        <div class="modal-header">
+            <h3>Editar Guilda</h3>
+        </div>
+        <form id="editGuildForm">
+            <div class="form-group">
+                <label for="editGuildName">Nome da Guilda</label>
+                <input type="text" id="editGuildName" value="${escapeHtml(userGuild.name)}" required>
+            </div>
+            <div class="form-group">
+                <label for="editGuildDescription">Descrição</label>
+                <textarea id="editGuildDescription" rows="3">${escapeHtml(userGuild.description || '')}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="editMaxMembers">Máximo de Membros (${userGuild.max_members})</label>
+                <select id="editMaxMembers">
+                    <option value="10" ${userGuild.max_members === 10 ? 'selected' : ''}>10</option>
+                    <option value="20" ${userGuild.max_members === 20 ? 'selected' : ''}>20</option>
+                    <option value="30" ${userGuild.max_members === 30 ? 'selected' : ''}>30</option>
+                    <option value="50" ${userGuild.max_members === 50 ? 'selected' : ''}>50</option>
+                    <option value="100" ${userGuild.max_members === 100 ? 'selected' : ''}>100</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" id="cancelEdit">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+    `;
+    
+    showCustomModal(modalContent);
+    
+    document.getElementById('editGuildForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await updateGuild();
+    });
+    
+    document.getElementById('cancelEdit')?.addEventListener('click', () => {
+        document.querySelector('.modal-overlay.active')?.classList.remove('active');
+    });
+}
+
+async function updateGuild() {
+    const name = document.getElementById('editGuildName').value.trim();
+    const description = document.getElementById('editGuildDescription').value.trim();
+    const maxMembers = parseInt(document.getElementById('editMaxMembers').value) || 10;
+    
+    try {
+        const { error } = await supabase.rpc('update_guild_info', {
+            p_guild_id: userGuild.id,
+            p_name: name,
+            p_description: description || null,
+            p_max_members: maxMembers,
+            p_image_url: null
+        });
+        
+        if (error) {
+            console.error('Erro ao atualizar guilda:', error);
+            alert('Erro ao atualizar guilda: ' + error.message);
+            return;
+        }
+        
+        document.querySelector('.modal-overlay.active')?.classList.remove('active');
+        alert('Guilda atualizada com sucesso!');
+        setTimeout(() => location.reload(), 500);
+        
+    } catch (error) {
+        console.error('Erro ao atualizar guilda:', error);
+        alert('Erro: ' + error.message);
+    }
 }
 
 async function transferGuild() {
-    alert('Funcionalidade de transferência da guilda será implementada em breve!');
+    // Filtrar membros que podem ser promovidos (não owner, status accepted)
+    const eligibleMembers = guildMembers.filter(member => 
+        member.role !== 'owner' && 
+        member.status === 'accepted'
+    );
+    
+    if (eligibleMembers.length === 0) {
+        alert('Não há membros elegíveis para transferir a guilda');
+        return;
+    }
+    
+    const options = eligibleMembers.map(member => 
+        `<option value="${member.id}">${escapeHtml(member.username || 'Usuário')} (${member.role})</option>`
+    ).join('');
+    
+    const modalContent = `
+        <div class="modal-header">
+            <h3>Transferir Guilda</h3>
+        </div>
+        <div style="padding: 20px;">
+            <p style="color: #ff8c00; margin-bottom: 20px;">
+                <i class="fas fa-exclamation-triangle"></i> 
+                <strong>Atenção:</strong> Ao transferir a guilda, você deixará de ser o dono e se tornará um administrador.
+            </p>
+            <div class="form-group">
+                <label for="newOwnerSelect">Selecione o novo dono:</label>
+                <select id="newOwnerSelect" class="form-control">
+                    ${options}
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" id="cancelTransfer">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmTransfer">Transferir</button>
+            </div>
+        </div>
+    `;
+    
+    showCustomModal(modalContent);
+    
+    document.getElementById('confirmTransfer')?.addEventListener('click', async () => {
+        const newOwnerMembershipId = document.getElementById('newOwnerSelect').value;
+        const selectedMember = eligibleMembers.find(m => m.id === newOwnerMembershipId);
+        
+        if (!confirm(`Tem certeza que deseja transferir a guilda para ${selectedMember?.username || 'este membro'}?\n\nEsta ação é irreversível.`)) {
+            return;
+        }
+        
+        try {
+            const { error } = await supabase.rpc('transfer_guild_ownership', {
+                p_guild_id: userGuild.id,
+                p_new_owner_membership_id: newOwnerMembershipId
+            });
+            
+            if (error) {
+                console.error('Erro ao transferir guilda:', error);
+                alert('Erro ao transferir guilda: ' + error.message);
+                return;
+            }
+            
+            document.querySelector('.modal-overlay.active')?.classList.remove('active');
+            alert('Guilda transferida com sucesso!');
+            setTimeout(() => location.reload(), 500);
+            
+        } catch (error) {
+            console.error('Erro ao transferir guilda:', error);
+            alert('Erro: ' + error.message);
+        }
+    });
+    
+    document.getElementById('cancelTransfer')?.addEventListener('click', () => {
+        document.querySelector('.modal-overlay.active')?.classList.remove('active');
+    });
 }
 
 async function deleteGuild() {
@@ -1286,7 +1419,7 @@ async function deleteGuild() {
         
         if (error) {
             console.error('Erro ao excluir guilda:', error);
-            alert('Erro ao excluir guilda');
+            alert('Erro ao excluir guilda: ' + error.message);
             return;
         }
         
@@ -1305,15 +1438,14 @@ async function leaveGuild() {
     }
     
     try {
-        const { error } = await supabase
-            .from('guild_members')
-            .delete()
-            .eq('guild_id', userGuild.id)
-            .eq('user_id', currentUser.id);
+        // Usar a função RPC do SQL
+        const { error } = await supabase.rpc('leave_guild', {
+            p_guild_id: userGuild.id
+        });
         
         if (error) {
             console.error('Erro ao sair da guilda:', error);
-            alert('Erro ao sair da guilda');
+            alert('Erro ao sair da guilda: ' + error.message);
             return;
         }
         
@@ -1331,6 +1463,31 @@ function clearCreateForm() {
     document.getElementById('guildId').value = '';
     document.getElementById('guildDescription').value = '';
     document.getElementById('maxMembers').value = '10';
+}
+
+function showCustomModal(content) {
+    // Remover modais customizados existentes
+    const existingModal = document.querySelector('.custom-modal-overlay');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    const modalHTML = `
+        <div class="modal-overlay custom-modal-overlay active">
+            <div class="modal">
+                ${content}
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Fechar ao clicar fora
+    document.querySelector('.custom-modal-overlay')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+            e.target.classList.remove('active');
+        }
+    });
 }
 
 function escapeHtml(text) {
@@ -1352,6 +1509,6 @@ function formatDate(dateString) {
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', initGuild);
-    </script>
+</script>
 </body>
 </html>
