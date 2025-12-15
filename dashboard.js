@@ -1,4 +1,4 @@
-// dashboard.js - VERSÃO COMPLETA 100% FUNCIONAL
+// dashboard.js - VERSÃO COMPLETA COM CORREÇÃO DE DESVANTAGENS
 class DashboardSupabase {
     constructor() {
         this.estado = this.criarEstadoInicial();
@@ -19,9 +19,9 @@ class DashboardSupabase {
                 desvantagensVantagens: 0,
                 aparenciaDesvantagens: 0,
                 riquezaDesvantagens: 0,
-                riquezaVantagens: 0,
                 caracteristicasFisicasDesvantagens: 0,
                 peculiaridades: 0,
+                desvantagensSeparadas: 0,
                 totalDesvantagens: 0,
                 limiteDesvantagens: -50,
                 saldoDisponivel: 150
@@ -54,7 +54,6 @@ class DashboardSupabase {
         };
     }
 
-    // ===== SISTEMA DE FOTO =====
     configurarSistemaFoto() {
         const fotoUpload = document.getElementById('fotoUpload');
         const fotoPreview = document.getElementById('fotoPreview');
@@ -74,7 +73,6 @@ class DashboardSupabase {
                     fotoPreview.style.display = 'block';
                     if (fotoPlaceholder) fotoPlaceholder.style.display = 'none';
                     if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
-                    
                     this.fotoTemporaria = {
                         file: file,
                         dataUrl: e.target.result
@@ -96,7 +94,6 @@ class DashboardSupabase {
         }
     }
 
-    // ===== SISTEMA DE IDENTIFICAÇÃO =====
     configurarCamposIdentificacao() {
         const campos = ['charName', 'racaPersonagem', 'classePersonagem', 'nivelPersonagem', 'descricaoPersonagem'];
         
@@ -132,7 +129,6 @@ class DashboardSupabase {
         }
     }
 
-    // ===== SISTEMA DE PONTOS =====
     configurarControlePontos() {
         const pontosTotaisInput = document.getElementById('pontosTotaisDashboard');
         const limiteDesvantagensInput = document.getElementById('limiteDesvantagens');
@@ -155,42 +151,33 @@ class DashboardSupabase {
         }
     }
 
-    // ===== MONITORAMENTO DE ATRIBUTOS =====
     monitorarAtributos() {
         this.puxarValoresAtributos();
-        
-        setInterval(() => {
-            this.puxarValoresAtributos();
-        }, 1000);
+        setInterval(() => this.puxarValoresAtributos(), 1000);
     }
 
     puxarValoresAtributos() {
-        try {
-            const stInput = document.getElementById('ST');
-            const dxInput = document.getElementById('DX');
-            const iqInput = document.getElementById('IQ');
-            const htInput = document.getElementById('HT');
+        const stInput = document.getElementById('ST');
+        const dxInput = document.getElementById('DX');
+        const iqInput = document.getElementById('IQ');
+        const htInput = document.getElementById('HT');
+        
+        if (stInput && dxInput && iqInput && htInput) {
+            const ST = parseInt(stInput.value) || 10;
+            const DX = parseInt(dxInput.value) || 10;
+            const IQ = parseInt(iqInput.value) || 10;
+            const HT = parseInt(htInput.value) || 10;
             
-            if (stInput && dxInput && iqInput && htInput) {
-                const ST = parseInt(stInput.value) || 10;
-                const DX = parseInt(dxInput.value) || 10;
-                const IQ = parseInt(iqInput.value) || 10;
-                const HT = parseInt(htInput.value) || 10;
-                
-                this.estado.atributos.ST = ST;
-                this.estado.atributos.DX = DX;
-                this.estado.atributos.IQ = IQ;
-                this.estado.atributos.HT = HT;
-                
-                this.calcularCustoAtributos(ST, DX, IQ, HT);
-            }
+            this.estado.atributos.ST = ST;
+            this.estado.atributos.DX = DX;
+            this.estado.atributos.IQ = IQ;
+            this.estado.atributos.HT = HT;
             
-            this.atualizarDisplayAtributos();
-            this.atualizarDisplayVitalidade();
-            
-        } catch (error) {
-            // Silencioso
+            this.calcularCustoAtributos(ST, DX, IQ, HT);
         }
+        
+        this.atualizarDisplayAtributos();
+        this.atualizarDisplayVitalidade();
     }
 
     calcularCustoAtributos(ST, DX, IQ, HT) {
@@ -203,13 +190,9 @@ class DashboardSupabase {
         this.calcularSaldoDisponivel();
     }
 
-    // ===== MONITORAMENTO DE OUTRAS ABAS =====
     monitorarOutrasAbas() {
         this.puxarTodosDados();
-        
-        setInterval(() => {
-            this.puxarTodosDados();
-        }, 1500);
+        setInterval(() => this.puxarTodosDados(), 1500);
     }
 
     puxarTodosDados() {
@@ -223,6 +206,7 @@ class DashboardSupabase {
         this.puxarDadosRiqueza();
         this.puxarDadosTecnicas();
         this.puxarDadosPeculiaridades();
+        this.puxarDadosDesvantagensSeparadas();
         
         this.calcularTotalDesvantagens();
         this.atualizarDisplayResumoGastos();
@@ -230,201 +214,148 @@ class DashboardSupabase {
     }
 
     puxarDadosVantagensDesvantagens() {
-        try {
-            const totalVantagensElement = document.getElementById('total-vantagens');
-            if (totalVantagensElement) {
-                const texto = totalVantagensElement.textContent;
-                const match = texto.match(/([+-]?\d+)/);
-                if (match) {
-                    const valor = parseInt(match[1]) || 0;
-                    this.estado.pontos.gastosVantagens = valor > 0 ? valor : 0;
-                    this.estado.pontos.desvantagensVantagens = valor < 0 ? Math.abs(valor) : 0;
-                }
+        const totalVantagensElement = document.getElementById('total-vantagens');
+        if (totalVantagensElement) {
+            const texto = totalVantagensElement.textContent;
+            const match = texto.match(/([+-]?\d+)/);
+            if (match) {
+                const valor = parseInt(match[1]) || 0;
+                this.estado.pontos.gastosVantagens = valor > 0 ? valor : 0;
+                this.estado.pontos.desvantagensVantagens = valor < 0 ? Math.abs(valor) : 0;
             }
-        } catch (error) {
-            // Silencioso
         }
     }
 
     puxarDadosPericias() {
-        try {
-            const pontosPericiasTotalElement = document.getElementById('pontos-pericias-total');
-            if (pontosPericiasTotalElement) {
-                const texto = pontosPericiasTotalElement.textContent;
-                const match = texto.match(/(\d+)/);
-                if (match) {
-                    this.estado.pontos.gastosPericias = parseInt(match[1]) || 0;
-                }
+        const pontosPericiasTotalElement = document.getElementById('pontos-pericias-total');
+        if (pontosPericiasTotalElement) {
+            const texto = pontosPericiasTotalElement.textContent;
+            const match = texto.match(/(\d+)/);
+            if (match) {
+                this.estado.pontos.gastosPericias = parseInt(match[1]) || 0;
             }
-        } catch (error) {
-            // Silencioso
         }
     }
 
     puxarDadosMagias() {
-        try {
-            const totalGastoMagiaElement = document.getElementById('total-gasto-magia');
-            if (totalGastoMagiaElement) {
-                const texto = totalGastoMagiaElement.textContent;
-                const match = texto.match(/(\d+)/);
-                if (match) {
-                    this.estado.pontos.gastosMagias = parseInt(match[1]) || 0;
-                }
+        const totalGastoMagiaElement = document.getElementById('total-gasto-magia');
+        if (totalGastoMagiaElement) {
+            const texto = totalGastoMagiaElement.textContent;
+            const match = texto.match(/(\d+)/);
+            if (match) {
+                this.estado.pontos.gastosMagias = parseInt(match[1]) || 0;
             }
-        } catch (error) {
-            // Silencioso
         }
     }
 
     puxarDadosIdiomas() {
-        try {
-            const badgeIdiomas = document.getElementById('pontosIdiomas');
-            if (badgeIdiomas) {
-                const texto = badgeIdiomas.textContent;
-                const match = texto.match(/([+-]?\d+)/);
-                if (match) {
-                    const pontos = parseInt(match[1]) || 0;
-                    this.estado.pontos.gastosIdiomas = pontos > 0 ? pontos : 0;
-                }
+        const badgeIdiomas = document.getElementById('pontosIdiomas');
+        if (badgeIdiomas) {
+            const texto = badgeIdiomas.textContent;
+            const match = texto.match(/([+-]?\d+)/);
+            if (match) {
+                const pontos = parseInt(match[1]) || 0;
+                this.estado.pontos.gastosIdiomas = pontos > 0 ? pontos : 0;
             }
-        } catch (error) {
-            // Silencioso
         }
     }
 
     puxarDadosCaracteristicasFisicas() {
-        try {
-            const badgeCaracteristicas = document.getElementById('pontosCaracteristicas');
-            if (badgeCaracteristicas) {
-                const texto = badgeCaracteristicas.textContent;
-                const match = texto.match(/([+-]?\d+)/);
-                if (match) {
-                    const pontos = parseInt(match[1]) || 0;
-                    this.estado.pontos.caracteristicasFisicasDesvantagens = pontos < 0 ? Math.abs(pontos) : 0;
-                }
+        const badgeCaracteristicas = document.getElementById('pontosCaracteristicas');
+        if (badgeCaracteristicas) {
+            const texto = badgeCaracteristicas.textContent;
+            const match = texto.match(/([+-]?\d+)/);
+            if (match) {
+                const pontos = parseInt(match[1]) || 0;
+                this.estado.pontos.caracteristicasFisicasDesvantagens = pontos < 0 ? Math.abs(pontos) : 0;
             }
-        } catch (error) {
-            // Silencioso
         }
     }
 
     puxarDadosAparencia() {
-        try {
-            const selectAparencia = document.getElementById('nivelAparencia');
-            if (selectAparencia) {
-                const valor = parseInt(selectAparencia.value) || 0;
-                this.estado.pontos.aparenciaDesvantagens = valor < 0 ? Math.abs(valor) : 0;
-            }
-        } catch (error) {
-            // Silencioso
+        const selectAparencia = document.getElementById('nivelAparencia');
+        if (selectAparencia) {
+            const valor = parseInt(selectAparencia.value) || 0;
+            this.estado.pontos.aparenciaDesvantagens = valor < 0 ? Math.abs(valor) : 0;
         }
     }
 
     puxarDadosRiqueza() {
-        try {
-            const selectRiqueza = document.getElementById('nivelRiqueza');
-            if (selectRiqueza) {
-                const valor = parseInt(selectRiqueza.value) || 0;
-                
-                if (valor < 0) {
-                    this.estado.pontos.riquezaDesvantagens = Math.abs(valor);
-                    this.estado.pontos.riquezaVantagens = 0;
-                } else if (valor > 0) {
-                    this.estado.pontos.riquezaDesvantagens = 0;
-                    this.estado.pontos.riquezaVantagens = valor;
-                } else {
-                    this.estado.pontos.riquezaDesvantagens = 0;
-                    this.estado.pontos.riquezaVantagens = 0;
-                }
-            }
-        } catch (error) {
-            // Silencioso
+        const selectRiqueza = document.getElementById('nivelRiqueza');
+        if (selectRiqueza) {
+            const valor = parseInt(selectRiqueza.value) || 0;
+            this.estado.pontos.riquezaDesvantagens = valor < 0 ? Math.abs(valor) : 0;
         }
     }
 
     puxarDadosCaracteristicas() {
-        try {
-            const nivelAparenciaSelect = document.getElementById('nivelAparencia');
-            if (nivelAparenciaSelect) {
-                const texto = nivelAparenciaSelect.options[nivelAparenciaSelect.selectedIndex].text;
-                const nome = texto.split('[')[0].trim();
-                this.estado.caracteristicas.aparencia = nome;
-            }
-            
-            const nivelRiquezaSelect = document.getElementById('nivelRiqueza');
-            if (nivelRiquezaSelect) {
-                const texto = nivelRiquezaSelect.options[nivelRiquezaSelect.selectedIndex].text;
-                const nome = texto.split('[')[0].trim();
-                this.estado.caracteristicas.riqueza = nome;
-                
-                const valor = parseInt(nivelRiquezaSelect.value) || 0;
-                const rendaBase = 1000;
-                const multiplicadores = {
-                    '-25': 0, '-15': 0.2, '-10': 0.5, '0': 1,
-                    '10': 2, '20': 5, '30': 20, '50': 100
-                };
-                const multiplicador = multiplicadores[valor.toString()] || 1;
-                const renda = Math.floor(rendaBase * multiplicador);
-                
-                this.estado.caracteristicas.saldo = `$${renda.toLocaleString('en-US')}`;
-            }
-            
-            this.atualizarDisplayCaracteristicas();
-            
-        } catch (error) {
-            // Silencioso
+        const nivelAparenciaSelect = document.getElementById('nivelAparencia');
+        if (nivelAparenciaSelect) {
+            const texto = nivelAparenciaSelect.options[nivelAparenciaSelect.selectedIndex].text;
+            const nome = texto.split('[')[0].trim();
+            this.estado.caracteristicas.aparencia = nome;
         }
+        
+        const nivelRiquezaSelect = document.getElementById('nivelRiqueza');
+        if (nivelRiquezaSelect) {
+            const texto = nivelRiquezaSelect.options[nivelRiquezaSelect.selectedIndex].text;
+            const nome = texto.split('[')[0].trim();
+            this.estado.caracteristicas.riqueza = nome;
+            
+            const valor = parseInt(nivelRiquezaSelect.value) || 0;
+            const rendaBase = 1000;
+            const multiplicadores = {
+                '-25': 0, '-15': 0.2, '-10': 0.5, '0': 1,
+                '10': 2, '20': 5, '30': 20, '50': 100
+            };
+            const multiplicador = multiplicadores[valor.toString()] || 1;
+            const renda = Math.floor(rendaBase * multiplicador);
+            this.estado.caracteristicas.saldo = `$${renda.toLocaleString('en-US')}`;
+        }
+        
+        this.atualizarDisplayCaracteristicas();
     }
 
     puxarDadosTecnicas() {
-        try {
-            // Buscar do localStorage (do seu sistema de técnicas)
-            const tecnicasSalvas = localStorage.getItem('tecnicasAprendidas');
-            if (tecnicasSalvas) {
-                try {
-                    const tecnicas = JSON.parse(tecnicasSalvas);
-                    const totalPontos = tecnicas.reduce((total, tecnica) => {
-                        return total + (tecnica.custoTotal || 0);
-                    }, 0);
-                    this.estado.pontos.gastosTecnicas = totalPontos;
-                } catch (e) {
-                    this.estado.pontos.gastosTecnicas = 0;
-                }
-            } else {
-                this.estado.pontos.gastosTecnicas = 0;
-            }
-        } catch (error) {
+        const tecnicasSalvas = localStorage.getItem('tecnicasAprendidas');
+        if (tecnicasSalvas) {
+            const tecnicas = JSON.parse(tecnicasSalvas);
+            const totalPontos = tecnicas.reduce((total, tecnica) => {
+                return total + (tecnica.custoTotal || 0);
+            }, 0);
+            this.estado.pontos.gastosTecnicas = totalPontos;
+        } else {
             this.estado.pontos.gastosTecnicas = 0;
         }
     }
 
     puxarDadosPeculiaridades() {
-        try {
-            // Buscar do localStorage (do seu sistema de vantagens)
-            const peculiaridadesSalvas = localStorage.getItem('peculiaridades');
-            if (peculiaridadesSalvas) {
-                try {
-                    const peculiaridades = JSON.parse(peculiaridadesSalvas);
-                    this.estado.pontos.peculiaridades = peculiaridades.length;
-                } catch (e) {
-                    this.estado.pontos.peculiaridades = 0;
-                }
-            } else {
-                this.estado.pontos.peculiaridades = 0;
-            }
-        } catch (error) {
+        const peculiaridadesSalvas = localStorage.getItem('peculiaridades');
+        if (peculiaridadesSalvas) {
+            const peculiaridades = JSON.parse(peculiaridadesSalvas);
+            this.estado.pontos.peculiaridades = peculiaridades.length;
+        } else {
             this.estado.pontos.peculiaridades = 0;
         }
     }
 
-    // ===== CÁLCULOS =====
+    puxarDadosDesvantagensSeparadas() {
+        if (window.sistemaDesvantagens && typeof window.sistemaDesvantagens.calcularTotalDesvantagens === 'function') {
+            const totalDesvantagens = window.sistemaDesvantagens.calcularTotalDesvantagens();
+            this.estado.pontos.desvantagensSeparadas = Math.abs(totalDesvantagens);
+        } else {
+            this.estado.pontos.desvantagensSeparadas = 0;
+        }
+    }
+
     calcularTotalDesvantagens() {
         const total = 
             this.estado.pontos.desvantagensVantagens +
             this.estado.pontos.aparenciaDesvantagens +
             this.estado.pontos.riquezaDesvantagens +
             this.estado.pontos.caracteristicasFisicasDesvantagens +
-            this.estado.pontos.peculiaridades;
+            this.estado.pontos.peculiaridades +
+            this.estado.pontos.desvantagensSeparadas;
         
         this.estado.pontos.totalDesvantagens = total;
         return total;
@@ -441,30 +372,18 @@ class DashboardSupabase {
             gastosMagias,
             gastosIdiomas,
             gastosTecnicas,
-            riquezaVantagens,
             totalDesvantagens 
         } = this.estado.pontos;
         
-        const selectAparencia = document.getElementById('nivelAparencia');
-        let aparenciaVantagens = 0;
-        if (selectAparencia) {
-            const valorAparencia = parseInt(selectAparencia.value) || 0;
-            if (valorAparencia > 0) {
-                aparenciaVantagens = valorAparencia;
-            }
-        }
+        const gastosTotais = gastosAtributos + gastosVantagens + 
+                            gastosPericias + gastosTecnicas + 
+                            gastosMagias + gastosIdiomas;
         
-        const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
-        const gastosTotais = gastosAtributos + vantagensTotais + 
-                            gastosPericias + gastosTecnicas + gastosMagias;
-        
-        // CORREÇÃO CRÍTICA: Desvantagens dão pontos extras
         this.estado.pontos.saldoDisponivel = total - gastosTotais + totalDesvantagens;
         
         return this.estado.pontos.saldoDisponivel;
     }
 
-    // ===== ATUALIZAÇÃO DE DISPLAY =====
     atualizarDisplayAtributos() {
         const { ST, DX, IQ, HT } = this.estado.atributos;
         
@@ -525,32 +444,20 @@ class DashboardSupabase {
             gastosMagias,
             gastosIdiomas,
             gastosTecnicas,
-            riquezaVantagens,
             totalDesvantagens,
             saldoDisponivel, 
             limiteDesvantagens 
         } = this.estado.pontos;
         
-        const selectAparencia = document.getElementById('nivelAparencia');
-        let aparenciaVantagens = 0;
-        if (selectAparencia) {
-            const valorAparencia = parseInt(selectAparencia.value) || 0;
-            if (valorAparencia > 0) {
-                aparenciaVantagens = valorAparencia;
-            }
-        }
-        
-        const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
+        const vantagensTotais = gastosVantagens + gastosIdiomas;
         const pontosGastosDashboard = gastosAtributos + vantagensTotais + 
                                      gastosPericias + gastosTecnicas + gastosMagias;
         
-        // Pontos Gastos
         const pontosGastosElement = document.getElementById('pontosGastosDashboard');
         if (pontosGastosElement) {
             pontosGastosElement.textContent = pontosGastosDashboard;
         }
         
-        // Saldo Disponível
         const saldoElement = document.getElementById('saldoDisponivelDashboard');
         if (saldoElement) {
             saldoElement.textContent = saldoDisponivel;
@@ -564,7 +471,6 @@ class DashboardSupabase {
             }
         }
         
-        // Desvantagens Atuais
         const desvantagensElement = document.getElementById('desvantagensAtuais');
         if (desvantagensElement) {
             desvantagensElement.textContent = totalDesvantagens;
@@ -587,20 +493,10 @@ class DashboardSupabase {
             gastosMagias,
             gastosIdiomas,
             gastosTecnicas,
-            riquezaVantagens,
             totalDesvantagens 
         } = this.estado.pontos;
         
-        const selectAparencia = document.getElementById('nivelAparencia');
-        let aparenciaVantagens = 0;
-        if (selectAparencia) {
-            const valorAparencia = parseInt(selectAparencia.value) || 0;
-            if (valorAparencia > 0) {
-                aparenciaVantagens = valorAparencia;
-            }
-        }
-        
-        const vantagensTotais = gastosVantagens + riquezaVantagens + gastosIdiomas + aparenciaVantagens;
+        const vantagensTotais = gastosVantagens + gastosIdiomas;
         
         const elementos = {
             gastosAtributos: document.getElementById('gastosAtributos'),
@@ -651,7 +547,6 @@ class DashboardSupabase {
         }
     }
 
-    // ===== COLETAR DADOS PARA SALVAR =====
     coletarDadosParaSalvar() {
         const nome = document.getElementById('charName')?.value || 'Novo Personagem';
         const raca = document.getElementById('racaPersonagem')?.value || '';
@@ -675,7 +570,6 @@ class DashboardSupabase {
         };
     }
 
-    // ===== INICIALIZAÇÃO =====
     inicializar() {
         this.configurarSistemaFoto();
         this.configurarCamposIdentificacao();
@@ -695,10 +589,8 @@ class DashboardSupabase {
     }
 }
 
-// Criar instância global
 window.dashboard = new DashboardSupabase();
 
-// Inicialização automática quando a aba dashboard estiver ativa
 document.addEventListener('DOMContentLoaded', function() {
     const dashboardTab = document.getElementById('dashboard');
     if (dashboardTab && dashboardTab.classList.contains('active')) {
