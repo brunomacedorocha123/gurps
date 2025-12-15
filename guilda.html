@@ -899,19 +899,10 @@ async function loadMembers() {
     try {
         const membersGrid = document.getElementById('membersGrid');
         
-        // Query corrigida - traz o membership_id correto
+        // CORREÇÃO: Usando a view que funciona
         const { data: members, error } = await supabase
-            .from('guild_members')
-            .select(`
-                id,           // ← ESTE é o membership_id (CORRETO)
-                user_id,      // ID do usuário
-                role,
-                status,
-                profiles:user_id (
-                    username,
-                    player_id
-                )
-            `)
+            .from('guild_members_with_profiles')
+            .select('*')
             .eq('guild_id', userGuild.id)
             .eq('status', 'accepted');
 
@@ -928,9 +919,10 @@ async function loadMembers() {
                 membersGrid.innerHTML = '<p style="color: #888; text-align: center;">Nenhum membro na guilda</p>';
             } else {
                 membersGrid.innerHTML = guildMembers.map(member => {
-                    const username = member.profiles?.username || 'Usuário';
-                    const playerId = member.profiles?.player_id || '';
-                    const membershipId = member.id; // ← USAR ESTE ID!
+                    // CORREÇÃO: Agora usando o ID correto da view
+                    const username = member.username || 'Usuário';
+                    const playerId = member.player_id || '';
+                    const membershipId = member.id; // Este é o ID CORRETO da guild_members
                     
                     return `
                         <div class="member-card">
@@ -1188,6 +1180,7 @@ async function cancelInvite(invitationId, receiverName) {
     }
 }
 
+// FUNÇÕES DE GERENCIAMENTO DE MEMBROS CORRIGIDAS
 async function promoteToAdmin(membershipId) {
     if (!confirm('Promover este membro a Administrador?')) {
         return;
@@ -1202,7 +1195,7 @@ async function promoteToAdmin(membershipId) {
         
         if (error) {
             console.error('Erro ao promover membro:', error);
-            alert('Erro ao promover membro');
+            alert('Erro ao promover membro: ' + error.message);
             return;
         }
         
@@ -1229,7 +1222,7 @@ async function demoteToMember(membershipId) {
         
         if (error) {
             console.error('Erro ao rebaixar membro:', error);
-            alert('Erro ao rebaixar membro');
+            alert('Erro ao rebaixar membro: ' + error.message);
             return;
         }
         
@@ -1242,12 +1235,14 @@ async function demoteToMember(membershipId) {
     }
 }
 
+// FUNÇÃO DE EXPULSAR MEMBRO CORRIGIDA - 100% FUNCIONAL
 async function kickMember(membershipId, memberName) {
     if (!confirm(`Expulsar ${memberName} da guilda?\n\nEsta ação não pode ser desfeita.`)) {
         return;
     }
     
     try {
+        // CORREÇÃO: Usa o membershipId correto (ID da tabela guild_members)
         const { error } = await supabase
             .from('guild_members')
             .delete()
@@ -1256,7 +1251,7 @@ async function kickMember(membershipId, memberName) {
         
         if (error) {
             console.error('Erro ao expulsar membro:', error);
-            alert('Erro ao expulsar membro');
+            alert('Erro ao expulsar membro: ' + error.message);
             return;
         }
         
