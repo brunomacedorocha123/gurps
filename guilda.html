@@ -838,6 +838,7 @@
     </footer>
 
     <<script>
+<script>
 // Configuração do Supabase
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
@@ -900,12 +901,7 @@ async function loadUserGuild() {
         // Se não for dono, verificar se é membro
         const { data: memberships, error: memberError } = await supabase
             .from('guild_members')
-            .select(`
-                guild_id,
-                role,
-                status,
-                guilds(*)
-            `)
+            .select('guild_id, role, status, guilds(*)')
             .eq('user_id', currentUser.id)
             .eq('status', 'accepted');
 
@@ -1422,44 +1418,48 @@ async function demoteToMember(memberId) {
     }
 }
 
-// FUNÇÃO CORRIGIDA - EXCLUSÃO DE MEMBRO
+// FUNÇÃO CORRIGIDA - EXPULSÃO DE MEMBRO
 async function kickMember(memberId, memberName) {
     if (!confirm(`Expulsar ${memberName} da guilda?\n\nEsta ação não pode ser desfeita.`)) {
         return;
     }
     
     try {
-        // TENTA EXCLUIR COMPLETAMENTE O MEMBRO
-        const { error } = await supabase
+        // Busca o user_id do membro
+        const { data: memberData, error: findError } = await supabase
             .from('guild_members')
-            .delete()
+            .select('user_id')
             .eq('id', memberId)
-            .eq('guild_id', userGuild.id);
+            .eq('guild_id', userGuild.id)
+            .single();
+        
+        if (findError || !memberData) {
+            alert('Membro não encontrado');
+            return;
+        }
+        
+        // Tenta usar a função SQL se existir
+        const { data, error } = await supabase.rpc('expel_guild_member', {
+            p_guild_id: userGuild.id,
+            p_member_user_id: memberData.user_id
+        }).catch(() => ({ error: { message: 'Função não disponível' } }));
         
         if (error) {
-            console.error('Erro ao excluir membro (tentativa DELETE):', error);
-            
-            // SE NÃO CONSEGUIR EXCLUIR, MARCA COMO REJEITADO
-            const { error: updateError } = await supabase
+            // Se a função não existir, faz DELETE direto
+            const { error: deleteError } = await supabase
                 .from('guild_members')
-                .update({ 
-                    status: 'rejected',
-                    updated_at: new Date().toISOString()
-                })
+                .delete()
                 .eq('id', memberId)
                 .eq('guild_id', userGuild.id);
             
-            if (updateError) {
-                console.error('Erro ao marcar como rejeitado:', updateError);
+            if (deleteError) {
+                console.error('Erro ao excluir:', deleteError);
                 alert('Erro ao expulsar membro. Tente novamente.');
                 return;
             }
-            
-            alert('Membro marcado como removido!');
-        } else {
-            alert(`${memberName} foi expulso da guilda!`);
         }
         
+        alert(`${memberName} foi expulso da guilda!`);
         await loadMembers();
         
     } catch (error) {
@@ -1556,6 +1556,7 @@ function formatDate(dateString) {
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', initGuild);
+</script>
 </script>
 </body>
 </html>
