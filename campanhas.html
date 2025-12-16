@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Campanhas - RPG System</title>
+    <title>Campanhas - RPG System GURPS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ESTILOS GERAIS */
+        /* ESTILOS BASE */
         * {
             margin: 0;
             padding: 0;
@@ -21,24 +21,22 @@
         }
 
         body {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('Cris2.jpg') no-repeat center center fixed;
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('Cris2.jpg') no-repeat center center fixed;
             background-size: cover;
             color: #fff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* HEADER (mesmo da guilda.html) */
+        /* HEADER */
         .header {
             background: rgba(30, 30, 40, 0.95);
             padding: 12px 15px;
-            border-bottom: 2px solid rgba(255, 140, 0, 0.3);
+            border-bottom: 2px solid rgba(255, 140, 0, 0.4);
             position: sticky;
             top: 0;
             z-index: 100;
-            backdrop-filter: blur(10px);
         }
 
         .header-content {
@@ -52,11 +50,10 @@
 
         .logo h1 {
             font-size: 1.5rem;
-            background: linear-gradient(45deg, #ffd700, #ff8c00, #ff4500);
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            white-space: nowrap;
         }
 
         .logo p {
@@ -68,7 +65,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            flex-wrap: nowrap;
         }
 
         .header-btn {
@@ -77,12 +73,10 @@
             border: none;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 5px;
             font-size: 0.85rem;
-            white-space: nowrap;
         }
 
         .back-btn {
@@ -90,23 +84,14 @@
             color: white;
         }
 
-        .back-btn:hover, .back-btn:active {
-            background: rgba(52, 152, 219, 1);
-        }
-
         .logout-btn {
             background: rgba(231, 76, 60, 0.8);
             color: white;
         }
 
-        .logout-btn:hover, .logout-btn:active {
-            background: rgba(231, 76, 60, 1);
-        }
-
         .user-avatar {
             width: 35px;
             height: 35px;
-            min-width: 35px;
             border-radius: 50%;
             background: linear-gradient(45deg, #ff8c00, #ff4500);
             display: flex;
@@ -114,11 +99,9 @@
             justify-content: center;
             font-weight: bold;
             color: white;
-            border: 2px solid rgba(255, 140, 0, 0.5);
-            font-size: 0.9rem;
         }
 
-        /* CONTEÚDO PRINCIPAL */
+        /* CONTEÚDO */
         .main-content {
             max-width: 1200px;
             margin: 20px auto;
@@ -127,14 +110,13 @@
             width: 100%;
         }
 
-        /* TABS PRINCIPAIS */
+        /* TABS */
         .main-tabs {
             display: flex;
             background: rgba(30, 30, 40, 0.8);
             border-radius: 10px;
             margin-bottom: 20px;
             border: 1px solid rgba(255, 140, 0, 0.2);
-            overflow: hidden;
         }
 
         .main-tab {
@@ -146,32 +128,17 @@
             color: #ccc;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            font-size: 1rem;
-        }
-
-        .main-tab:last-child {
-            border-right: none;
-        }
-
-        .main-tab:hover {
-            background: rgba(255, 140, 0, 0.1);
-            color: #ff8c00;
         }
 
         .main-tab.active {
             background: rgba(255, 140, 0, 0.2);
             color: #ffd700;
             border-bottom: 3px solid #ff8c00;
-        }
-
-        .main-tab i {
-            font-size: 1.1rem;
         }
 
         /* SUB-TABS */
@@ -182,7 +149,6 @@
             margin-bottom: 20px;
             border: 1px solid rgba(255, 140, 0, 0.15);
             overflow-x: auto;
-            scrollbar-width: thin;
         }
 
         .sub-tab {
@@ -192,22 +158,11 @@
             color: #aaa;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
             border-right: 1px solid rgba(255, 255, 255, 0.05);
             white-space: nowrap;
-            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 6px;
-        }
-
-        .sub-tab:last-child {
-            border-right: none;
-        }
-
-        .sub-tab:hover {
-            background: rgba(255, 140, 0, 0.08);
-            color: #ff8c00;
         }
 
         .sub-tab.active {
@@ -216,11 +171,7 @@
             border-bottom: 2px solid #ff8c00;
         }
 
-        .sub-tab i {
-            font-size: 0.9rem;
-        }
-
-        /* CONTEÚDO DAS SUB-TABS */
+        /* CONTEÚDO DAS TABS */
         .tab-content {
             display: none;
             background: rgba(30, 30, 40, 0.7);
@@ -228,20 +179,12 @@
             padding: 25px;
             border: 1px solid rgba(255, 140, 0, 0.2);
             margin-bottom: 25px;
-            min-height: 400px;
         }
 
         .tab-content.active {
             display: block;
-            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ESTILOS COMUNS PARA CONTEÚDO */
         .content-header {
             margin-bottom: 25px;
             text-align: center;
@@ -258,40 +201,9 @@
             font-size: 0.95rem;
             max-width: 600px;
             margin: 0 auto;
-            line-height: 1.5;
         }
 
-        /* MENSAGENS (mesmo da guilda.html) */
-        .message {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            display: none;
-        }
-
-        .message.success {
-            background: rgba(46, 204, 113, 0.2);
-            border: 1px solid rgba(46, 204, 113, 0.3);
-            color: #2ecc71;
-            display: block;
-        }
-
-        .message.error {
-            background: rgba(231, 76, 60, 0.2);
-            border: 1px solid rgba(231, 76, 60, 0.3);
-            color: #e74c3c;
-            display: block;
-        }
-
-        .message.info {
-            background: rgba(52, 152, 219, 0.2);
-            border: 1px solid rgba(52, 152, 219, 0.3);
-            color: #3498db;
-            display: block;
-        }
-
-        /* FORMULÁRIOS */
+        /* FORMULÁRIO */
         .form-container {
             max-width: 600px;
             margin: 0 auto;
@@ -310,7 +222,6 @@
             margin-bottom: 8px;
             color: #ccc;
             font-weight: 500;
-            font-size: 0.9rem;
         }
 
         .form-input {
@@ -321,13 +232,6 @@
             border-radius: 6px;
             color: white;
             font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #ff8c00;
-            box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2);
         }
 
         .form-textarea {
@@ -337,26 +241,8 @@
             border: 1px solid rgba(255, 140, 0, 0.3);
             border-radius: 6px;
             color: white;
-            font-size: 0.95rem;
             min-height: 100px;
             resize: vertical;
-            font-family: inherit;
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            border-radius: 6px;
-            color: white;
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
-
-        .form-select option {
-            background: rgba(30, 30, 40, 0.95);
-            color: white;
         }
 
         .form-note {
@@ -366,7 +252,7 @@
             display: block;
         }
 
-        /* BOTÕES (mesmo da guilda.html) */
+        /* BOTÕES */
         .btn {
             padding: 12px 20px;
             background: linear-gradient(45deg, #ff8c00, #ff4500);
@@ -375,32 +261,10 @@
             color: white;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             font-size: 0.9rem;
-            text-decoration: none;
-        }
-
-        .btn:hover, .btn:active {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ccc;
-        }
-
-        .btn-secondary:hover, .btn-secondary:active {
-            background: rgba(255, 255, 255, 0.2);
         }
 
         .btn-full {
@@ -410,7 +274,44 @@
             font-size: 1rem;
         }
 
-        /* FOOTER (mesmo da guilda.html) */
+        .generate-btn {
+            padding: 12px 18px;
+            background: rgba(52, 152, 219, 0.8);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* MENSAGENS */
+        .message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            color: #2ecc71;
+            display: block;
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+            display: block;
+        }
+
+        /* FOOTER */
         .footer {
             background: rgba(20, 20, 30, 0.9);
             padding: 12px 0;
@@ -424,27 +325,8 @@
             font-size: 0.8rem;
         }
 
-        /* LOADING (mesmo da guilda.html) */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #ff8c00;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
         /* RESPONSIVIDADE */
         @media (max-width: 768px) {
-            html {
-                font-size: 15px;
-            }
-            
             .header-content {
                 flex-direction: row;
             }
@@ -460,12 +342,10 @@
             .main-tab {
                 padding: 12px 8px;
                 font-size: 0.9rem;
-                gap: 6px;
             }
             
             .sub-tabs {
                 flex-wrap: nowrap;
-                overflow-x: auto;
             }
             
             .sub-tab {
@@ -476,21 +356,9 @@
             .tab-content {
                 padding: 20px;
             }
-            
-            .content-header h2 {
-                font-size: 1.5rem;
-            }
-            
-            .form-container {
-                padding: 20px;
-            }
         }
 
         @media (max-width: 480px) {
-            html {
-                font-size: 14px;
-            }
-            
             .header {
                 padding: 10px;
             }
@@ -517,11 +385,6 @@
             .main-tab {
                 padding: 10px 6px;
                 font-size: 0.85rem;
-                gap: 4px;
-            }
-            
-            .main-tab i {
-                font-size: 1rem;
             }
             
             .sub-tab {
@@ -537,17 +400,6 @@
                 font-size: 1.3rem;
             }
         }
-
-        @media (max-width: 320px) {
-            .main-tab {
-                font-size: 0.8rem;
-            }
-            
-            .btn {
-                padding: 10px 16px;
-                font-size: 0.85rem;
-            }
-        }
     </style>
 </head>
 <body>
@@ -555,128 +407,98 @@
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <h1>RPG SYSTEM</h1>
+                <h1>RPG SYSTEM GURPS</h1>
                 <p>Campanhas</p>
             </div>
             
             <div class="user-menu">
-                <button class="header-btn back-btn" id="backBtn" aria-label="Voltar">
+                <button class="header-btn back-btn" id="backBtn">
                     <i class="fas fa-arrow-left"></i>
                     <span class="text">Voltar</span>
                 </button>
                 
-                <button class="header-btn logout-btn" id="logoutBtn" aria-label="Sair">
+                <button class="header-btn logout-btn" id="logoutBtn">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="text">Sair</span>
                 </button>
                 
-                <div class="user-avatar" id="userAvatar" aria-label="Avatar do usuário">
+                <div class="user-avatar" id="userAvatar">
                     <i class="fas fa-user"></i>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL -->
+    <!-- CONTEÚDO -->
     <main class="main-content">
         <!-- TABS PRINCIPAIS -->
-        <div class="main-tabs" role="tablist">
-            <button class="main-tab active" data-main-tab="player" role="tab" aria-selected="true" aria-controls="player-tab" id="player-tab-btn">
-                <i class="fas fa-user"></i> <span class="tab-text">JOGADOR</span>
+        <div class="main-tabs">
+            <button class="main-tab active" data-main-tab="player">
+                <i class="fas fa-user"></i> <span>JOGADOR</span>
             </button>
-            <button class="main-tab" data-main-tab="gm" role="tab" aria-selected="false" aria-controls="gm-tab" id="gm-tab-btn">
-                <i class="fas fa-crown"></i> <span class="tab-text">MESTRE (GM)</span>
+            <button class="main-tab" data-main-tab="gm">
+                <i class="fas fa-crown"></i> <span>MESTRE</span>
             </button>
         </div>
 
-        <!-- SUB-TABS DO JOGADOR -->
+        <!-- SUB-TABS JOGADOR -->
         <div class="sub-tabs player-subtabs" id="player-subtabs">
-            <button class="sub-tab active" data-sub-tab="player-campaigns" data-main-tab="player" role="tab" aria-selected="true" aria-controls="player-campaigns-content">
+            <button class="sub-tab active" data-sub-tab="player-campaigns" data-main-tab="player">
                 <i class="fas fa-book"></i> <span>Minhas Campanhas</span>
             </button>
-            <button class="sub-tab" data-sub-tab="player-sheets" data-main-tab="player" role="tab" aria-selected="false" aria-controls="player-sheets-content">
+            <button class="sub-tab" data-sub-tab="player-sheets" data-main-tab="player">
                 <i class="fas fa-scroll"></i> <span>Fichas</span>
             </button>
-            <button class="sub-tab" data-sub-tab="player-rolls" data-main-tab="player" role="tab" aria-selected="false" aria-controls="player-rolls-content">
-                <i class="fas fa-dice"></i> <span>Rolagens</span>
-            </button>
         </div>
 
-        <!-- SUB-TABS DO MESTRE -->
+        <!-- SUB-TABS MESTRE -->
         <div class="sub-tabs gm-subtabs" id="gm-subtabs" style="display: none;">
-            <button class="sub-tab" data-sub-tab="gm-campaigns" data-main-tab="gm" role="tab" aria-selected="false" aria-controls="gm-campaigns-content">
+            <button class="sub-tab" data-sub-tab="gm-campaigns" data-main-tab="gm">
                 <i class="fas fa-book"></i> <span>Minhas Campanhas</span>
             </button>
-            <button class="sub-tab active" data-sub-tab="gm-create" data-main-tab="gm" role="tab" aria-selected="true" aria-controls="gm-create-content">
+            <button class="sub-tab active" data-sub-tab="gm-create" data-main-tab="gm">
                 <i class="fas fa-plus-circle"></i> <span>Criar Campanha</span>
             </button>
-            <button class="sub-tab" data-sub-tab="gm-npcs" data-main-tab="gm" role="tab" aria-selected="false" aria-controls="gm-npcs-content">
-                <i class="fas fa-robot"></i> <span>NPCs</span>
-            </button>
-            <button class="sub-tab" data-sub-tab="gm-encounters" data-main-tab="gm" role="tab" aria-selected="false" aria-controls="gm-encounters-content">
-                <i class="fas fa-fist-raised"></i> <span>Encontros</span>
-            </button>
-            <button class="sub-tab" data-sub-tab="gm-loot" data-main-tab="gm" role="tab" aria-selected="false" aria-controls="gm-loot-content">
-                <i class="fas fa-gem"></i> <span>Tesouros</span>
-            </button>
         </div>
 
-        <!-- CONTEÚDO DAS SUB-TABS DO JOGADOR -->
-        
-        <!-- JOGADOR: Minhas Campanhas -->
-        <div class="tab-content active" id="player-campaigns-content" role="tabpanel" aria-labelledby="player-tab-btn">
+        <!-- CONTEÚDO JOGADOR: Minhas Campanhas -->
+        <div class="tab-content active" id="player-campaigns-content">
             <div class="content-header">
                 <h2>Minhas Campanhas como Jogador</h2>
-                <p>Campanhas onde você está participando como jogador. Gerencie suas fichas e veja o progresso.</p>
+                <p>Campanhas GURPS onde você está participando como jogador.</p>
             </div>
             <div id="player-campaigns-list">
-                <p style="color: #888; text-align: center; padding: 40px;">Carregando suas campanhas...</p>
+                <p style="color: #888; text-align: center; padding: 40px;">Carregando campanhas...</p>
             </div>
         </div>
 
-        <!-- JOGADOR: Fichas -->
-        <div class="tab-content" id="player-sheets-content" role="tabpanel" aria-labelledby="player-tab-btn" hidden>
+        <!-- CONTEÚDO JOGADOR: Fichas -->
+        <div class="tab-content" id="player-sheets-content" hidden>
             <div class="content-header">
-                <h2>Fichas de Personagem</h2>
-                <p>Crie e gerencie suas fichas de personagem para as campanhas.</p>
+                <h2>Fichas de Personagem GURPS</h2>
+                <p>Gerencie suas fichas de personagem para campanhas GURPS.</p>
             </div>
             <div style="text-align: center; padding: 40px;">
-                <p style="color: #888; margin-bottom: 20px;">Funcionalidade em desenvolvimento</p>
-                <button class="btn btn-secondary" disabled>
-                    <i class="fas fa-plus"></i> Criar Nova Ficha
-                </button>
+                <p style="color: #888;">Em desenvolvimento</p>
             </div>
         </div>
 
-        <!-- JOGADOR: Rolagens -->
-        <div class="tab-content" id="player-rolls-content" role="tabpanel" aria-labelledby="player-tab-btn" hidden>
-            <div class="content-header">
-                <h2>Rolagens</h2>
-                <p>Histórico de rolagens e dados para suas campanhas.</p>
-            </div>
-            <div style="text-align: center; padding: 40px;">
-                <p style="color: #888;">Funcionalidade em desenvolvimento</p>
-            </div>
-        </div>
-
-        <!-- CONTEÚDO DAS SUB-TABS DO MESTRE -->
-        
-        <!-- MESTRE: Minhas Campanhas -->
-        <div class="tab-content" id="gm-campaigns-content" role="tabpanel" aria-labelledby="gm-tab-btn" hidden>
+        <!-- CONTEÚDO MESTRE: Minhas Campanhas -->
+        <div class="tab-content" id="gm-campaigns-content" hidden>
             <div class="content-header">
                 <h2>Minhas Campanhas como Mestre</h2>
-                <p>Campanhas onde você é o mestre. Gerencie jogadores, encontros e NPCs.</p>
+                <p>Campanhas GURPS onde você é o mestre.</p>
             </div>
             <div id="gm-campaigns-list">
-                <p style="color: #888; text-align: center; padding: 40px;">Carregando suas campanhas como mestre...</p>
+                <p style="color: #888; text-align: center; padding: 40px;">Carregando campanhas...</p>
             </div>
         </div>
 
-        <!-- MESTRE: Criar Campanha -->
-        <div class="tab-content" id="gm-create-content" role="tabpanel" aria-labelledby="gm-tab-btn" hidden>
+        <!-- CONTEÚDO MESTRE: Criar Campanha -->
+        <div class="tab-content" id="gm-create-content" hidden>
             <div class="content-header">
-                <h2>Criar Nova Campanha</h2>
-                <p>Comece uma nova aventura! Preencha os detalhes básicos da campanha.</p>
+                <h2>Criar Nova Campanha GURPS</h2>
+                <p>Crie uma nova campanha para o sistema GURPS.</p>
             </div>
             
             <div class="form-container">
@@ -684,110 +506,74 @@
                     <div class="form-group">
                         <label class="form-label" for="campaignName">Nome da Campanha *</label>
                         <input type="text" class="form-input" id="campaignName" required 
-                               placeholder="Ex: A Lenda do Dragão Esquecido" maxlength="100">
+                               placeholder="Ex: Aventuras em Ciudad Juárez" maxlength="100">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="campaignCode">Código da Campanha *</label>
-                        <input type="text" class="form-input" id="campaignCode" required 
-                               placeholder="Ex: DRAGON123" pattern="[A-Z0-9]{3,20}"
-                               title="3-20 caracteres: letras maiúsculas e números">
-                        <span class="form-note">3-20 caracteres: apenas letras maiúsculas e números (ex: DRAGON123)</span>
+                        <label class="form-label" for="campaignId">Código da Campanha (7 dígitos) *</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" class="form-input" id="campaignId" required 
+                                   placeholder="Ex: 1234567" min="1000000" max="9999999"
+                                   style="flex: 1;">
+                            <button type="button" class="generate-btn" id="generateCodeBtn">
+                                <i class="fas fa-redo"></i> Gerar
+                            </button>
+                        </div>
+                        <span class="form-note">7 dígitos numéricos únicos</span>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="gameSystem">Sistema de Jogo *</label>
-                        <select class="form-select" id="gameSystem" required>
-                            <option value="">Selecione um sistema</option>
-                            <option value="GURPS">GURPS</option>
-                            <option value="D&D 5e">D&D 5ª Edição</option>
-                            <option value="D&D 3.5">D&D 3.5</option>
-                            <option value="Pathfinder">Pathfinder</option>
-                            <option value="Pathfinder 2e">Pathfinder 2ª Edição</option>
-                            <option value="Call of Cthulhu">Call of Cthulhu</option>
-                            <option value="Tormenta20">Tormenta20</option>
-                            <option value="Old Dragon">Old Dragon</option>
-                            <option value="3D&T">3D&T</option>
-                            <option value="Ordem Paranormal">Ordem Paranormal</option>
-                            <option value="Outro">Outro Sistema</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="campaignDescription">Descrição da Campanha</label>
+                        <label class="form-label" for="campaignDescription">Descrição</label>
                         <textarea class="form-textarea" id="campaignDescription" 
-                                  placeholder="Descreva o mundo, a premissa, o tom da campanha... Ex: 'Em um reino esquecido, dragões dominam as montanhas e heróis são necessários para restaurar a paz...'"
-                                  maxlength="1000" rows="4"></textarea>
-                        <span class="form-note">Opcional, máximo 1000 caracteres</span>
+                                  placeholder="Descreva sua campanha GURPS..."
+                                  maxlength="500"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="campaignSetting">Cenário/Mundo</label>
+                        <input type="text" class="form-input" id="campaignSetting" 
+                               placeholder="Ex: Ciudad Juárez, Mundo Moderno" maxlength="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="startingPoints">Pontos Iniciais</label>
+                        <input type="number" class="form-input" id="startingPoints" 
+                               value="100" min="25" max="1000">
+                        <span class="form-note">Pontos GURPS para criação de personagem</span>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="maxPlayers">Limite de Jogadores</label>
                         <input type="number" class="form-input" id="maxPlayers" 
                                value="6" min="1" max="10">
-                        <span class="form-note">Número máximo de jogadores (sem contar o mestre)</span>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="campaignImage">Imagem da Campanha (URL)</label>
-                        <input type="url" class="form-input" id="campaignImage" 
-                               placeholder="https://exemplo.com/imagem.jpg (opcional)">
-                        <span class="form-note">Opcional - URL de uma imagem para capa da campanha</span>
+                        <label class="form-label" for="campaignStatus">Status</label>
+                        <select class="form-input" id="campaignStatus">
+                            <option value="preparation">Preparação</option>
+                            <option value="active">Ativa</option>
+                            <option value="paused">Pausada</option>
+                        </select>
                     </div>
                     
-                    <div id="createCampaignMessage" style="display: none;"></div>
+                    <div id="createCampaignMessage"></div>
                     
                     <button type="submit" class="btn btn-full" id="submitCreateCampaign">
-                        <i class="fas fa-plus-circle"></i> Criar Campanha
+                        <i class="fas fa-plus-circle"></i> Criar Campanha GURPS
                     </button>
                 </form>
-            </div>
-        </div>
-
-        <!-- MESTRE: NPCs -->
-        <div class="tab-content" id="gm-npcs-content" role="tabpanel" aria-labelledby="gm-tab-btn" hidden>
-            <div class="content-header">
-                <h2>NPCs (Personagens Não-Jogadores)</h2>
-                <p>Crie e gerencie os NPCs da sua campanha.</p>
-            </div>
-            <div style="text-align: center; padding: 40px;">
-                <p style="color: #888; margin-bottom: 20px;">Funcionalidade em desenvolvimento</p>
-                <button class="btn btn-secondary" disabled>
-                    <i class="fas fa-robot"></i> Criar Novo NPC
-                </button>
-            </div>
-        </div>
-
-        <!-- MESTRE: Encontros -->
-        <div class="tab-content" id="gm-encounters-content" role="tabpanel" aria-labelledby="gm-tab-btn" hidden>
-            <div class="content-header">
-                <h2>Encontros e Combates</h2>
-                <p>Prepare encontros e gerencie combates em suas campanhas.</p>
-            </div>
-            <div style="text-align: center; padding: 40px;">
-                <p style="color: #888;">Funcionalidade em desenvolvimento</p>
-            </div>
-        </div>
-
-        <!-- MESTRE: Tesouros -->
-        <div class="tab-content" id="gm-loot-content" role="tabpanel" aria-labelledby="gm-tab-btn" hidden>
-            <div class="content-header">
-                <h2>Tesouros e Itens</h2>
-                <p>Crie itens mágicos, tesouros e recompensas para os jogadores.</p>
-            </div>
-            <div style="text-align: center; padding: 40px;">
-                <p style="color: #888;">Funcionalidade em desenvolvimento</p>
             </div>
         </div>
     </main>
 
     <!-- FOOTER -->
     <footer class="footer">
-        <p>RPG System &copy; 2024 - A vida imita GURPS</p>
+        <p>RPG System GURPS &copy; 2024</p>
     </footer>
 
     <script>
-// Configuração do Supabase
+// Configuração
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
@@ -804,8 +590,8 @@ async function initCampaigns() {
         setupEventListeners();
         setupTabs();
     } catch (error) {
-        console.error('Erro na inicialização:', error);
-        showMessage('Erro ao carregar campanhas. Tente recarregar a página.', 'error');
+        console.error('Erro:', error);
+        showMessage('Erro ao carregar.', 'error');
     }
 }
 
@@ -828,44 +614,27 @@ async function loadUserData() {
     if (profile) {
         const initials = profile.username?.charAt(0).toUpperCase() || 'U';
         document.getElementById('userAvatar').innerHTML = initials;
-        document.getElementById('userAvatar').setAttribute('aria-label', `Usuário: ${profile.username || 'Anônimo'}`);
     }
 }
 
 async function loadUserGuild() {
     try {
-        // Verificar se é dono ou membro de uma guilda
-        const { data: ownedGuild, error: ownerError } = await supabase
+        const { data: ownedGuild } = await supabase
             .from('guilds')
             .select('*')
             .eq('owner_id', currentUser.id)
             .maybeSingle();
-
-        if (ownerError) {
-            console.error('Erro ao buscar guilda do dono:', ownerError);
-        }
 
         if (ownedGuild) {
             userGuild = ownedGuild;
             return;
         }
 
-        // Se não for dono, verificar se é membro
-        const { data: memberships, error: memberError } = await supabase
+        const { data: memberships } = await supabase
             .from('guild_members')
-            .select(`
-                guild_id,
-                role,
-                status,
-                guilds(*)
-            `)
+            .select('guilds(*)')
             .eq('user_id', currentUser.id)
             .eq('status', 'accepted');
-
-        if (memberError) {
-            console.error('Erro ao buscar membros:', memberError);
-            return;
-        }
 
         if (memberships && memberships.length > 0) {
             userGuild = memberships[0].guilds;
@@ -875,113 +644,69 @@ async function loadUserGuild() {
     }
 }
 
-// Configuração das tabs
+// Tabs
 function setupTabs() {
     // Tabs principais
-    const mainTabs = document.querySelectorAll('.main-tab[data-main-tab]');
-    
-    mainTabs.forEach(tab => {
+    document.querySelectorAll('.main-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const tabType = tab.getAttribute('data-main-tab');
             
-            // Atualiza tabs principais
-            mainTabs.forEach(t => {
-                const isSelected = t === tab;
-                t.classList.toggle('active', isSelected);
-                t.setAttribute('aria-selected', isSelected);
+            document.querySelectorAll('.main-tab').forEach(t => {
+                t.classList.toggle('active', t === tab);
             });
             
-            // Mostra/esconde sub-tabs correspondentes
             const playerSubtabs = document.getElementById('player-subtabs');
             const gmSubtabs = document.getElementById('gm-subtabs');
             
             if (tabType === 'player') {
                 playerSubtabs.style.display = 'flex';
                 gmSubtabs.style.display = 'none';
-                
-                // Ativa primeira sub-tab do jogador
-                activateFirstPlayerSubtab();
+                activateFirstSubtab('player');
             } else {
                 playerSubtabs.style.display = 'none';
                 gmSubtabs.style.display = 'flex';
-                
-                // Ativa primeira sub-tab do mestre
-                activateFirstGmSubtab();
+                activateFirstSubtab('gm');
             }
             
-            // Atualiza conteúdo
             updateTabContent();
         });
     });
     
     // Sub-tabs
-    const subTabs = document.querySelectorAll('.sub-tab[data-sub-tab]');
-    
-    subTabs.forEach(tab => {
+    document.querySelectorAll('.sub-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const mainTab = tab.getAttribute('data-main-tab');
-            const subTab = tab.getAttribute('data-sub-tab');
             
-            // Atualiza todas as sub-tabs do mesmo grupo principal
             document.querySelectorAll(`.sub-tab[data-main-tab="${mainTab}"]`).forEach(t => {
                 t.classList.toggle('active', t === tab);
-                t.setAttribute('aria-selected', t === tab);
             });
             
-            // Atualiza conteúdo
             updateTabContent();
         });
     });
 }
 
-function activateFirstPlayerSubtab() {
-    const firstPlayerTab = document.querySelector('.sub-tab[data-main-tab="player"]');
-    if (firstPlayerTab) {
-        firstPlayerTab.classList.add('active');
-        firstPlayerTab.setAttribute('aria-selected', 'true');
-        
-        // Desativa outras
-        document.querySelectorAll('.sub-tab[data-main-tab="player"]').forEach(tab => {
-            if (tab !== firstPlayerTab) {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-            }
-        });
-    }
-}
-
-function activateFirstGmSubtab() {
-    const firstGmTab = document.querySelector('.sub-tab[data-main-tab="gm"]');
-    if (firstGmTab) {
-        firstGmTab.classList.add('active');
-        firstGmTab.setAttribute('aria-selected', 'true');
-        
-        // Desativa outras
-        document.querySelectorAll('.sub-tab[data-main-tab="gm"]').forEach(tab => {
-            if (tab !== firstGmTab) {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-            }
+function activateFirstSubtab(mainTab) {
+    const firstTab = document.querySelector(`.sub-tab[data-main-tab="${mainTab}"]`);
+    if (firstTab) {
+        firstTab.classList.add('active');
+        document.querySelectorAll(`.sub-tab[data-main-tab="${mainTab}"]`).forEach(tab => {
+            if (tab !== firstTab) tab.classList.remove('active');
         });
     }
 }
 
 function updateTabContent() {
-    // Esconde todos os conteúdos
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
         content.hidden = true;
     });
     
-    // Encontra a tab ativa
     const activeMainTab = document.querySelector('.main-tab.active');
     const activeSubTab = document.querySelector('.sub-tab.active');
     
     if (activeMainTab && activeSubTab) {
-        const mainTabType = activeMainTab.getAttribute('data-main-tab');
         const subTabId = activeSubTab.getAttribute('data-sub-tab');
-        
-        // Mostra o conteúdo correspondente
         const contentId = `${subTabId}-content`;
         const contentElement = document.getElementById(contentId);
         
@@ -990,208 +715,140 @@ function updateTabContent() {
             contentElement.hidden = false;
         }
         
-        // Carrega dados específicos se necessário
-        if (subTabId === 'player-campaigns') {
-            loadPlayerCampaigns();
-        } else if (subTabId === 'gm-campaigns') {
-            loadGMCampaigns();
-        }
+        if (subTabId === 'player-campaigns') loadPlayerCampaigns();
+        if (subTabId === 'gm-campaigns') loadGMCampaigns();
     }
 }
 
-// Configuração de eventos
+// Eventos
 function setupEventListeners() {
-    // Botões do header
-    document.getElementById('backBtn')?.addEventListener('click', () => {
+    document.getElementById('backBtn').addEventListener('click', () => {
         window.location.href = 'guilda.html';
     });
     
-    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-        if (!confirm('Tem certeza que deseja sair?')) return;
-        
-        try {
-            await supabase.auth.signOut();
-            window.location.href = 'login.html';
-        } catch (error) {
-            console.error('Erro ao sair:', error);
-            showMessage('Erro ao sair. Tente novamente.', 'error');
-        }
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        if (!confirm('Sair?')) return;
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
     });
     
-    // Formulário de criar campanha
-    const createForm = document.getElementById('createCampaignForm');
-    if (createForm) {
-        createForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await createCampaign();
-        });
-    }
+    // Gerar código
+    document.getElementById('generateCodeBtn').addEventListener('click', generateCampaignId);
+    
+    // Formulário
+    document.getElementById('createCampaignForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await createCampaign();
+    });
 }
 
-// Função para criar campanha
+// Gerar ID de 7 dígitos
+function generateCampaignId() {
+    const idInput = document.getElementById('campaignId');
+    let newId;
+    
+    do {
+        newId = Math.floor(1000000 + Math.random() * 9000000);
+    } while (newId > 9999999);
+    
+    idInput.value = newId;
+}
+
+// Criar campanha
 async function createCampaign() {
     if (!userGuild) {
-        showMessage('Você precisa estar em uma guilda para criar uma campanha.', 'error', 'gm-create-content');
+        showMessage('Você precisa estar em uma guilda.', 'error', 'gm-create-content');
         return;
     }
     
-    const nameInput = document.getElementById('campaignName');
-    const codeInput = document.getElementById('campaignCode');
-    const systemInput = document.getElementById('gameSystem');
-    const descInput = document.getElementById('campaignDescription');
-    const maxPlayersInput = document.getElementById('maxPlayers');
-    const imageInput = document.getElementById('campaignImage');
+    const name = document.getElementById('campaignName').value.trim();
+    const campaignId = document.getElementById('campaignId').value;
+    const description = document.getElementById('campaignDescription').value.trim();
+    const setting = document.getElementById('campaignSetting').value.trim();
+    const startingPoints = parseInt(document.getElementById('startingPoints').value) || 100;
+    const maxPlayers = parseInt(document.getElementById('maxPlayers').value) || 6;
+    const status = document.getElementById('campaignStatus').value;
     const submitBtn = document.getElementById('submitCreateCampaign');
     
-    const name = nameInput.value.trim();
-    const code = codeInput.value.trim().toUpperCase();
-    const system = systemInput.value;
-    const description = descInput.value.trim();
-    const maxPlayers = parseInt(maxPlayersInput.value) || 6;
-    const imageUrl = imageInput.value.trim() || null;
+    if (!name || !campaignId) {
+        showMessage('Nome e código são obrigatórios', 'error', 'gm-create-content');
+        return;
+    }
+    
+    if (campaignId.length !== 7) {
+        showMessage('Código deve ter 7 dígitos', 'error', 'gm-create-content');
+        return;
+    }
+    
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'Criando...';
+    submitBtn.disabled = true;
     
     try {
-        // Validação
-        if (!name || !code || !system) {
-            showMessage('Nome, código e sistema são obrigatórios', 'error', 'gm-create-content');
-            return;
-        }
+        // TODO: Chamar função do banco
+        showMessage(`Campanha "${name}" criada! Código: ${campaignId}`, 'success', 'gm-create-content');
         
-        if (code.length < 3 || code.length > 20) {
-            showMessage('Código deve ter entre 3 e 20 caracteres', 'error', 'gm-create-content');
-            codeInput.focus();
-            return;
-        }
+        // Limpar formulário
+        document.getElementById('campaignName').value = '';
+        document.getElementById('campaignId').value = '';
+        document.getElementById('campaignDescription').value = '';
+        document.getElementById('campaignSetting').value = '';
+        document.getElementById('startingPoints').value = '100';
+        document.getElementById('maxPlayers').value = '6';
+        document.getElementById('campaignStatus').value = 'preparation';
         
-        if (!/^[A-Z0-9]+$/.test(code)) {
-            showMessage('Código só pode conter letras maiúsculas e números', 'error', 'gm-create-content');
-            codeInput.focus();
-            return;
-        }
-        
-        // Desabilita botão durante a criação
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="loading"></span> Criando...';
-        submitBtn.disabled = true;
-        
-        // TODO: Chamar função do banco de dados para criar campanha
-        // Por enquanto, apenas mensagem de sucesso
-        setTimeout(() => {
-            showMessage(`Campanha "${name}" criada com sucesso! Código: ${code}`, 'success', 'gm-create-content');
-            
-            // Limpa formulário
-            nameInput.value = '';
-            codeInput.value = '';
-            systemInput.value = '';
-            descInput.value = '';
-            maxPlayersInput.value = '6';
-            imageInput.value = '';
-            
-            // Restaura botão
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-            
-            // Atualiza lista de campanhas
-            loadGMCampaigns();
-            
-        }, 1500);
+        // Atualizar lista
+        loadGMCampaigns();
         
     } catch (error) {
-        console.error('Erro ao criar campanha:', error);
         showMessage('Erro: ' + error.message, 'error', 'gm-create-content');
-        
-        // Restaura botão em caso de erro
-        if (submitBtn) {
-            submitBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Criar Campanha';
-            submitBtn.disabled = false;
-        }
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 }
 
 // Funções auxiliares
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function showMessage(text, type = 'info', containerId = null) {
-    // Remove mensagens anteriores
-    const oldMessages = document.querySelectorAll('.message');
-    oldMessages.forEach(msg => msg.remove());
-    
-    // Cria nova mensagem
+function showMessage(text, type, containerId) {
+    const container = document.getElementById(containerId) || document.querySelector('.main-content');
     const messageEl = document.createElement('div');
     messageEl.className = `message ${type}`;
     messageEl.textContent = text;
-    messageEl.setAttribute('role', 'alert');
     
-    // Adiciona ao container apropriado
+    const oldMsg = container.querySelector('.message');
+    if (oldMsg) oldMsg.remove();
+    
     if (containerId) {
-        const container = document.getElementById(containerId);
-        if (container) {
-            container.prepend(messageEl);
-        }
+        const form = document.getElementById('createCampaignForm');
+        if (form) form.prepend(messageEl);
     } else {
-        document.querySelector('.main-content').prepend(messageEl);
+        container.prepend(messageEl);
     }
     
-    // Remove automaticamente após 5 segundos
-    setTimeout(() => {
-        if (messageEl.parentNode) {
-            messageEl.style.opacity = '0';
-            setTimeout(() => messageEl.remove(), 300);
-        }
-    }, 5000);
+    setTimeout(() => messageEl.remove(), 5000);
 }
 
-// Funções para carregar campanhas (placeholder)
 async function loadPlayerCampaigns() {
     const container = document.getElementById('player-campaigns-list');
-    if (!container) return;
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando...</p>';
     
-    container.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
-            <p style="color: #888; margin-bottom: 20px;">Carregando suas campanhas como jogador...</p>
-            <div class="loading" style="margin: 0 auto;"></div>
-        </div>
-    `;
-    
-    // TODO: Carregar campanhas do jogador do banco de dados
+    // TODO: Carregar do banco
     setTimeout(() => {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <p style="color: #888; margin-bottom: 20px;">Você ainda não está em nenhuma campanha como jogador.</p>
-                <p style="color: #aaa; font-size: 0.9rem;">Peça ao mestre da campanha para te convidar usando o código da campanha.</p>
-            </div>
-        `;
+        container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Nenhuma campanha encontrada.</p>';
     }, 1000);
 }
 
 async function loadGMCampaigns() {
     const container = document.getElementById('gm-campaigns-list');
-    if (!container) return;
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando...</p>';
     
-    container.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
-            <p style="color: #888; margin-bottom: 20px;">Carregando suas campanhas como mestre...</p>
-            <div class="loading" style="margin: 0 auto;"></div>
-        </div>
-    `;
-    
-    // TODO: Carregar campanhas do mestre do banco de dados
+    // TODO: Carregar do banco
     setTimeout(() => {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <p style="color: #888; margin-bottom: 20px;">Você ainda não criou nenhuma campanha como mestre.</p>
-                <p style="color: #aaa; font-size: 0.9rem;">Use a aba "Criar Campanha" para começar sua primeira aventura!</p>
-            </div>
-        `;
+        container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Nenhuma campanha encontrada.</p>';
     }, 1000);
 }
 
-// Inicializar quando o DOM estiver pronto
+// Iniciar
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initCampaigns);
 } else {
