@@ -1040,66 +1040,133 @@
     </div>
 
     <script>
-    // Configuração do Supabase
-    const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // Estado global
-    let currentUser = null;
-    let userGuilds = [];
-    let campaignData = {
-        characters: [],
-        npcs: [],
-        diceRolls: [],
-        tables: []
-    };
+// Configuração do Supabase
+const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', async () => {
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Estado global
+let currentUser = null;
+let userGuilds = [];
+let campaignData = {
+    characters: [],
+    npcs: [],
+    diceRolls: [],
+    tables: []
+};
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Iniciando aplicação...');
+    await initializeApp();
+});
+
+// Função principal de inicialização
+async function initializeApp() {
+    try {
         await checkAuth();
         await loadUserData();
         await loadUserGuilds();
         setupEventListeners();
         generateCampaignId();
-    });
-
-    // Verificar autenticação
-    async function checkAuth() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            window.location.href = 'login.html';
-        }
-        return session;
+        console.log('Aplicação inicializada com sucesso!');
+    } catch (error) {
+        console.error('Erro na inicialização:', error);
+        alert('Erro ao inicializar aplicação. Verifique o console.');
     }
+}
 
-    // Carregar dados do usuário
-    async function loadUserData() {
+// Verificar autenticação
+async function checkAuth() {
+    console.log('Verificando autenticação...');
+    const { data: { session }, error } = await supabase.auth.getSession();
+    
+    if (error) {
+        console.error('Erro ao verificar sessão:', error);
+        throw error;
+    }
+    
+    if (!session) {
+        console.log('Nenhuma sessão encontrada, redirecionando...');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    console.log('Usuário autenticado:', session.user.id);
+    return session;
+}
+
+// Carregar dados do usuário
+async function loadUserData() {
+    console.log('Carregando dados do usuário...');
+    
+    try {
         const session = await checkAuth();
-        const { data: profile } = await supabase
+        
+        const { data: profile, error } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
             .single();
         
+        if (error) {
+            console.error('Erro ao carregar perfil:', error);
+            throw error;
+        }
+        
         if (profile) {
             currentUser = {
                 id: session.user.id,
                 username: profile.username,
-                playerId: profile.player_id
+                playerId: profile.player_id,
+                email: session.user.email
             };
             
-            document.getElementById('playerId').textContent = '#' + profile.player_id;
-            document.getElementById('userAvatar').textContent = profile.username.charAt(0).toUpperCase();
+            console.log('Dados do usuário carregados:', currentUser);
+            
+            // Atualizar UI
+            document.getElementById('playerId').textContent = '#' + (profile.player_id || '---');
+            
+            const avatarElement = document.getElementById('userAvatar');
+            if (avatarElement) {
+                const initial = profile.username ? profile.username.charAt(0).toUpperCase() : '?';
+                avatarElement.textContent = initial;
+            }
         }
+    } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+        throw error;
     }
+}
 
-    // Carregar guildas do usuário - CORRIGIDO para sua estrutura
-    async function loadUserGuilds() {
-        console.log('Carregando guildas do usuário:', currentUser.id);
+// Carregar guildas do usuário (CORRIGIDO - versão segura)
+async function loadUserGuilds() {
+    console.log('Carregando guildas do usuário...');
+    
+    try {
+        // PRIMEIRO: Verificar se a view existe
+        const { data: viewExists, error: viewError } = await supabase
+            .from('guild_members_with_profiles')
+            .select('*')
+            .limit(1);
         
-        // USANDO SUA VIEW: guild_members_with_profiles
+        if (viewError) {
+            console.log('View não encontrada, usando tabela guild_members...');
+            await loadGuildsFromTable();
+        } else {
+            console.log('View encontrada, usando view...');
+            await loadGuildsFromView();
+        }
+    } catch (error) {
+        console.error('Erro ao verificar view:', error);
+        await loadGuildsFromTable();
+    }
+}
+
+// Carregar guildas da view
+async function loadGuildsFromView() {
+    try {
         const { data: memberships, error } = await supabase
             .from('guild_members_with_profiles')
             .select('*')
@@ -1107,170 +1174,367 @@
             .eq('status', 'accepted');
         
         if (error) {
-            console.error('Erro ao carregar guildas:', error);
+            console.error('Erro ao carregar da view:', error);
+            throw error;
+        }
+        
+        console.log('Guildas da view:', memberships);
+        await processGuilds(memberships);
+    } catch (error) {
+        console.error('Erro no loadGuildsFromView:', error);
+        throw error;
+    }
+}
+
+// Carregar guildas da tabela direto
+async function loadGuildsFromTable() {
+    console.log('Carregando guildas da tabela...');
+    
+    try {
+        // Buscar membros das guildas
+        const { data: memberships, error: memberError } = await supabase
+            .from('guild_members')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .eq('status', 'accepted');
+        
+        if (memberError) {
+            console.error('Erro ao buscar membros:', memberError);
             showNoGuildMessage();
             return;
         }
         
-        console.log('Guildas encontradas:', memberships);
-        
-        if (memberships && memberships.length > 0) {
-            // Para cada membership, buscar os dados completos da guilda
-            userGuilds = [];
-            
-            for (const membership of memberships) {
-                const { data: guildData, error: guildError } = await supabase
-                    .from('guilds')
-                    .select('*')
-                    .eq('id', membership.guild_id)
-                    .single();
-                
-                if (!guildError && guildData) {
-                    userGuilds.push({
-                        ...guildData,
-                        member_role: membership.role
-                    });
-                }
-            }
-            
-            console.log('Guildas processadas:', userGuilds);
-            
-            // Preencher select de guildas
-            const guildSelect = document.getElementById('campaignGuild');
-            guildSelect.innerHTML = '<option value="">Selecione uma Guilda</option>';
-            
-            userGuilds.forEach(guild => {
-                const option = document.createElement('option');
-                option.value = guild.id;
-                option.textContent = `${guild.name} (${guild.custom_id})`;
-                
-                // Adicionar indicador do seu cargo
-                if (guild.member_role === 'owner') option.textContent += ' 👑';
-                if (guild.member_role === 'admin') option.textContent += ' ⭐';
-                if (guild.member_role === 'member') option.textContent += ' 👤';
-                
-                guildSelect.appendChild(option);
-            });
-            
-            // Mostrar info da primeira guilda
-            if (userGuilds[0]) {
-                document.getElementById('currentGuildName').textContent = 
-                    `${userGuilds[0].name} (${userGuilds[0].member_role})`;
-                
-                // Se o usuário só tem uma guilda, selecionar automaticamente
-                if (userGuilds.length === 1) {
-                    guildSelect.value = userGuilds[0].id;
-                }
-            }
-            
-        } else {
-            console.log('Usuário não tem guildas');
+        if (!memberships || memberships.length === 0) {
+            console.log('Usuário não é membro de nenhuma guilda');
             showNoGuildMessage();
-        }
-    }
-
-    // Mostrar mensagem quando não tem guilda - SIMPLES
-    function showNoGuildMessage() {
-        const guildInfo = document.getElementById('guildInfo');
-        if (guildInfo) {
-            guildInfo.innerHTML = `
-                <i class="fas fa-exclamation-triangle"></i>
-                <div>
-                    <strong>Atenção:</strong> Você precisa estar em uma Guilda para criar campanhas.
-                    <a href="guilda.html" style="color: #f59e0b; margin-left: 10px;">Ir para Guilda</a>
-                </div>
-            `;
+            return;
         }
         
-        // Desabilitar botão de criar campanha
-        const createBtn = document.getElementById('createCampaignBtn');
-        if (createBtn) {
-            createBtn.disabled = true;
-            createBtn.style.opacity = '0.5';
-            createBtn.style.cursor = 'not-allowed';
-            createBtn.innerHTML = '<i class="fas fa-ban"></i> Necessita Guilda';
-        }
-    }
-
-    // Gerar ID da campanha
-    function generateCampaignId() {
-        const timestamp = Date.now().toString().slice(-4);
-        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        const campaignId = `CAMP${timestamp}${random}`;
-        document.getElementById('campaignId').value = campaignId;
-        return campaignId;
-    }
-
-    // Mostrar subaba
-    function showSubaba(subaba) {
-        document.querySelectorAll('.subaba-content').forEach(el => {
-            el.classList.remove('active');
-        });
-        document.querySelectorAll('.subaba-tab-top').forEach(tab => {
-            tab.classList.remove('active');
+        console.log('Membros de guildas:', memberships);
+        
+        // Para cada membership, buscar dados da guilda
+        userGuilds = [];
+        const guildPromises = memberships.map(async (membership) => {
+            const { data: guildData, error: guildError } = await supabase
+                .from('guilds')
+                .select('*')
+                .eq('id', membership.guild_id)
+                .single();
+            
+            if (!guildError && guildData) {
+                userGuilds.push({
+                    ...guildData,
+                    member_role: membership.role
+                });
+            }
         });
         
-        document.getElementById(`subaba-${subaba}`).classList.add('active');
-        document.querySelector(`.subaba-tab-top[onclick="showSubaba('${subaba}')"]`).classList.add('active');
+        await Promise.all(guildPromises);
+        
+        console.log('Guildas processadas:', userGuilds);
+        updateGuildUI();
+        
+    } catch (error) {
+        console.error('Erro no loadGuildsFromTable:', error);
+        showNoGuildMessage();
     }
+}
 
-    // Mostrar modal
-    function showModal(modalId) {
-        document.getElementById(modalId).style.display = 'flex';
+// Processar guildas (método auxiliar)
+async function processGuilds(memberships) {
+    if (!memberships || memberships.length === 0) {
+        console.log('Usuário não tem guildas');
+        showNoGuildMessage();
+        return;
     }
+    
+    userGuilds = [];
+    
+    for (const membership of memberships) {
+        const { data: guildData, error: guildError } = await supabase
+            .from('guilds')
+            .select('*')
+            .eq('id', membership.guild_id)
+            .single();
+        
+        if (!guildError && guildData) {
+            userGuilds.push({
+                ...guildData,
+                member_role: membership.role
+            });
+        }
+    }
+    
+    console.log('Guildas finais:', userGuilds);
+    updateGuildUI();
+}
 
-    // Fechar modal
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
+// Atualizar UI das guildas
+function updateGuildUI() {
+    console.log('Atualizando UI das guildas...');
+    
+    const guildInfo = document.getElementById('guildInfo');
+    const guildSelect = document.getElementById('campaignGuild');
+    const createBtn = document.getElementById('createCampaignBtn');
+    
+    if (userGuilds.length === 0) {
+        showNoGuildMessage();
+        return;
+    }
+    
+    // Atualizar info da guilda
+    if (guildInfo) {
+        guildInfo.innerHTML = `
+            <i class="fas fa-users"></i>
+            <div>
+                <strong>Guilda:</strong> 
+                <span id="currentGuildName">${userGuilds[0].name} (${userGuilds[0].member_role})</span>
+            </div>
+        `;
+    }
+    
+    // Preencher select de guildas
+    if (guildSelect) {
+        guildSelect.innerHTML = '<option value="">Selecione uma Guilda</option>';
+        
+        userGuilds.forEach(guild => {
+            const option = document.createElement('option');
+            option.value = guild.id;
+            
+            let roleIcon = '👤';
+            if (guild.member_role === 'owner') roleIcon = '👑';
+            if (guild.member_role === 'admin') roleIcon = '⭐';
+            
+            option.textContent = `${guild.name} ${roleIcon}`;
+            option.setAttribute('data-guild-id', guild.id);
+            option.setAttribute('data-guild-name', guild.name);
+            
+            guildSelect.appendChild(option);
+        });
+        
+        // Se tiver apenas uma guilda, selecionar automaticamente
+        if (userGuilds.length === 1) {
+            guildSelect.value = userGuilds[0].id;
+            guildSelect.dispatchEvent(new Event('change'));
+        }
+    }
+    
+    // Habilitar botão de criar
+    if (createBtn) {
+        createBtn.disabled = false;
+        createBtn.style.opacity = '1';
+        createBtn.style.cursor = 'pointer';
+        createBtn.innerHTML = '<i class="fas fa-save"></i> Criar Campanha';
+    }
+    
+    console.log('UI das guildas atualizada!');
+}
+
+// Mostrar mensagem quando não tem guilda
+function showNoGuildMessage() {
+    console.log('Mostrando mensagem de sem guilda...');
+    
+    const guildInfo = document.getElementById('guildInfo');
+    const guildSelect = document.getElementById('campaignGuild');
+    const createBtn = document.getElementById('createCampaignBtn');
+    
+    if (guildInfo) {
+        guildInfo.innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
+            <div>
+                <strong>Atenção:</strong> Você precisa estar em uma Guilda para criar campanhas.
+                <a href="guilda.html" style="color: #f59e0b; margin-left: 10px; text-decoration: underline;">
+                    <i class="fas fa-external-link-alt"></i> Criar ou Entrar em uma Guilda
+                </a>
+            </div>
+        `;
+    }
+    
+    if (guildSelect) {
+        guildSelect.innerHTML = '<option value="">Nenhuma guilda disponível</option>';
+        guildSelect.disabled = true;
+    }
+    
+    if (createBtn) {
+        createBtn.disabled = true;
+        createBtn.style.opacity = '0.5';
+        createBtn.style.cursor = 'not-allowed';
+        createBtn.innerHTML = '<i class="fas fa-ban"></i> Necessita Guilda';
+    }
+}
+
+// Gerar ID da campanha
+function generateCampaignId() {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const campaignId = `CAMP${timestamp}${random}`.toUpperCase();
+    
+    const idField = document.getElementById('campaignId');
+    if (idField) {
+        idField.value = campaignId;
+    }
+    
+    console.log('ID gerado:', campaignId);
+    return campaignId;
+}
+
+// Mostrar subaba
+function showSubaba(subaba) {
+    console.log('Mostrando subaba:', subaba);
+    
+    // Esconder todas as subabas
+    document.querySelectorAll('.subaba-content').forEach(el => {
+        el.classList.remove('active');
+    });
+    
+    // Remover active de todas as tabs
+    document.querySelectorAll('.subaba-tab-top').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Mostrar subaba selecionada
+    const subabaElement = document.getElementById(`subaba-${subaba}`);
+    if (subabaElement) {
+        subabaElement.classList.add('active');
+    }
+    
+    // Ativar tab correspondente
+    const tabButtons = document.querySelectorAll('.subaba-tab-top');
+    tabButtons.forEach(tab => {
+        if (tab.textContent.includes(getSubabaName(subaba))) {
+            tab.classList.add('active');
+        }
+    });
+}
+
+// Obter nome da subaba
+function getSubabaName(subaba) {
+    const names = {
+        'info': 'Informações',
+        'personagens': 'Personagens',
+        'npcs': 'NPCs',
+        'rolagens': 'Rolagens',
+        'chat': 'Chat',
+        'mapas': 'Mapas',
+        'tabelas': 'Tabelas'
+    };
+    return names[subaba] || subaba;
+}
+
+// Mostrar modal
+function showModal(modalId) {
+    console.log('Abrindo modal:', modalId);
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// Fechar modal
+function closeModal(modalId) {
+    console.log('Fechando modal:', modalId);
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Limpar formulários
         if (modalId === 'addCharacterModal') {
             document.getElementById('characterName').value = '';
             document.getElementById('characterClass').value = '';
             document.getElementById('characterLevel').value = '1';
+        } else if (modalId === 'addNPCModal') {
+            document.getElementById('npcName').value = '';
+            document.getElementById('npcRole').value = '';
+            document.getElementById('npcDescription').value = '';
+        } else if (modalId === 'addTableModal') {
+            document.getElementById('tableName').value = '';
+            document.getElementById('tableDescription').value = '';
         }
     }
+}
 
-    // Mostrar modal de personagem
-    function showAddCharacterModal() {
-        showModal('addCharacterModal');
+// Mostrar modal de personagem
+function showAddCharacterModal() {
+    showModal('addCharacterModal');
+}
+
+// Mostrar modal de NPC
+function showAddNPCModal() {
+    showModal('addNPCModal');
+}
+
+// Mostrar modal de tabela
+function showAddTableModal() {
+    showModal('addTableModal');
+}
+
+// Adicionar personagem
+function addCharacter() {
+    const name = document.getElementById('characterName').value.trim();
+    const charClass = document.getElementById('characterClass').value.trim();
+    const level = document.getElementById('characterLevel').value;
+    
+    if (!name) {
+        alert('Por favor, digite o nome do personagem!');
+        return;
     }
+    
+    const character = {
+        id: Date.now(),
+        name: name,
+        class: charClass,
+        level: parseInt(level) || 1,
+        player: currentUser.username,
+        created_at: new Date().toISOString()
+    };
+    
+    campaignData.characters.push(character);
+    
+    const charactersList = document.getElementById('charactersList');
+    const characterCard = document.createElement('div');
+    characterCard.className = 'character-card';
+    characterCard.innerHTML = `
+        <div class="character-name">${name}</div>
+        <div class="character-class">${charClass || 'Sem classe'} - Nível ${level}</div>
+        <div class="character-player">Jogador: ${currentUser.username}</div>
+        <div style="margin-top: 10px;">
+            <button class="btn btn-danger btn-small" onclick="removeCharacter(${character.id})">
+                <i class="fas fa-trash"></i> Remover
+            </button>
+        </div>
+    `;
+    charactersList.appendChild(characterCard);
+    
+    closeModal('addCharacterModal');
+    showNotification('Personagem adicionado com sucesso!', 'success');
+}
 
-    // Mostrar modal de NPC
-    function showAddNPCModal() {
-        showModal('addNPCModal');
+// Remover personagem
+function removeCharacter(characterId) {
+    if (!confirm('Tem certeza que deseja remover este personagem?')) {
+        return;
     }
-
-    // Mostrar modal de tabela
-    function showAddTableModal() {
-        showModal('addTableModal');
-    }
-
-    // Adicionar personagem
-    function addCharacter() {
-        const name = document.getElementById('characterName').value;
-        const charClass = document.getElementById('characterClass').value;
-        const level = document.getElementById('characterLevel').value;
-        
-        if (!name) {
-            alert('Por favor, digite o nome do personagem!');
-            return;
-        }
-        
-        const character = {
-            id: Date.now(),
-            name: name,
-            class: charClass,
-            level: level,
-            player: currentUser.username
-        };
-        
-        campaignData.characters.push(character);
-        
-        const charactersList = document.getElementById('charactersList');
+    
+    campaignData.characters = campaignData.characters.filter(c => c.id !== characterId);
+    
+    const charactersList = document.getElementById('charactersList');
+    charactersList.innerHTML = `
+        <div class="character-card">
+            <div class="character-name">Você (GM)</div>
+            <div class="character-class">Mestre da Campanha</div>
+            <div class="campaign-status status-active">GM</div>
+        </div>
+    `;
+    
+    campaignData.characters.forEach(character => {
         const characterCard = document.createElement('div');
         characterCard.className = 'character-card';
         characterCard.innerHTML = `
-            <div class="character-name">${name}</div>
-            <div class="character-class">${charClass || 'Sem classe'} - Nível ${level}</div>
+            <div class="character-name">${character.name}</div>
+            <div class="character-class">${character.class || 'Sem classe'} - Nível ${character.level}</div>
+            <div class="character-player">Jogador: ${character.player}</div>
             <div style="margin-top: 10px;">
                 <button class="btn btn-danger btn-small" onclick="removeCharacter(${character.id})">
                     <i class="fas fa-trash"></i> Remover
@@ -1278,428 +1542,619 @@
             </div>
         `;
         charactersList.appendChild(characterCard);
-        
-        closeModal('addCharacterModal');
-    }
+    });
+    
+    showNotification('Personagem removido!', 'warning');
+}
 
-    // Remover personagem
-    function removeCharacter(characterId) {
-        if (confirm('Remover este personagem?')) {
-            campaignData.characters = campaignData.characters.filter(c => c.id !== characterId);
-            document.getElementById('charactersList').innerHTML = `
-                <div class="character-card">
-                    <div class="character-name">Você (GM)</div>
-                    <div class="character-class">Mestre da Campanha</div>
-                    <div class="campaign-status status-active">GM</div>
-                </div>
-            `;
-            
-            campaignData.characters.forEach(character => {
-                const charactersList = document.getElementById('charactersList');
-                const characterCard = document.createElement('div');
-                characterCard.className = 'character-card';
-                characterCard.innerHTML = `
-                    <div class="character-name">${character.name}</div>
-                    <div class="character-class">${character.class || 'Sem classe'} - Nível ${character.level}</div>
-                    <div style="margin-top: 10px;">
-                        <button class="btn btn-danger btn-small" onclick="removeCharacter(${character.id})">
-                            <i class="fas fa-trash"></i> Remover
-                        </button>
-                    </div>
-                `;
-                charactersList.appendChild(characterCard);
-            });
-        }
+// Adicionar NPC
+function addNPC() {
+    const name = document.getElementById('npcName').value.trim();
+    const role = document.getElementById('npcRole').value.trim();
+    const description = document.getElementById('npcDescription').value.trim();
+    
+    if (!name) {
+        alert('Por favor, digite o nome do NPC!');
+        return;
     }
+    
+    const npc = {
+        id: Date.now(),
+        name: name,
+        role: role,
+        description: description,
+        created_at: new Date().toISOString()
+    };
+    
+    campaignData.npcs.push(npc);
+    
+    const npcsList = document.getElementById('npcsList');
+    const npcItem = document.createElement('div');
+    npcItem.className = 'npc-item';
+    npcItem.innerHTML = `
+        <div class="npc-info">
+            <h4>${name}</h4>
+            <p><strong>Função:</strong> ${role || 'Não definida'}</p>
+            ${description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${description}</p>` : ''}
+            <small style="color: #64748b; font-size: 12px;">Adicionado agora</small>
+        </div>
+        <button class="btn btn-danger btn-small" onclick="removeNPC(${npc.id})">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    npcsList.appendChild(npcItem);
+    
+    closeModal('addNPCModal');
+    showNotification('NPC adicionado com sucesso!', 'success');
+}
 
-    // Adicionar NPC
-    function addNPC() {
-        const name = document.getElementById('npcName').value;
-        const role = document.getElementById('npcRole').value;
-        const description = document.getElementById('npcDescription').value;
-        
-        if (!name) {
-            alert('Por favor, digite o nome do NPC!');
-            return;
-        }
-        
-        const npc = {
-            id: Date.now(),
-            name: name,
-            role: role,
-            description: description
-        };
-        
-        campaignData.npcs.push(npc);
-        
-        const npcsList = document.getElementById('npcsList');
+// Remover NPC
+function removeNPC(npcId) {
+    if (!confirm('Tem certeza que deseja remover este NPC?')) {
+        return;
+    }
+    
+    campaignData.npcs = campaignData.npcs.filter(npc => npc.id !== npcId);
+    
+    const npcsList = document.getElementById('npcsList');
+    npcsList.innerHTML = '';
+    
+    campaignData.npcs.forEach(npc => {
         const npcItem = document.createElement('div');
         npcItem.className = 'npc-item';
         npcItem.innerHTML = `
             <div class="npc-info">
-                <h4>${name}</h4>
-                <p>${role || 'Sem função definida'}</p>
-                ${description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${description}</p>` : ''}
+                <h4>${npc.name}</h4>
+                <p><strong>Função:</strong> ${npc.role || 'Não definida'}</p>
+                ${npc.description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${npc.description}</p>` : ''}
+                <small style="color: #64748b; font-size: 12px;">Adicionado há alguns instantes</small>
             </div>
             <button class="btn btn-danger btn-small" onclick="removeNPC(${npc.id})">
                 <i class="fas fa-trash"></i>
             </button>
         `;
         npcsList.appendChild(npcItem);
-        
-        closeModal('addNPCModal');
-    }
+    });
+    
+    showNotification('NPC removido!', 'warning');
+}
 
-    // Remover NPC
-    function removeNPC(npcId) {
-        if (confirm('Remover este NPC?')) {
-            campaignData.npcs = campaignData.npcs.filter(npc => npc.id !== npcId);
-            document.getElementById('npcsList').innerHTML = '';
-            
-            campaignData.npcs.forEach(npc => {
-                const npcsList = document.getElementById('npcsList');
-                const npcItem = document.createElement('div');
-                npcItem.className = 'npc-item';
-                npcItem.innerHTML = `
-                    <div class="npc-info">
-                        <h4>${npc.name}</h4>
-                        <p>${npc.role || 'Sem função definida'}</p>
-                        ${npc.description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${npc.description}</p>` : ''}
-                    </div>
-                    <button class="btn btn-danger btn-small" onclick="removeNPC(${npc.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `;
-                npcsList.appendChild(npcItem);
-            });
-        }
+// Adicionar tabela
+function addTable() {
+    const name = document.getElementById('tableName').value.trim();
+    const type = document.getElementById('tableType').value;
+    const description = document.getElementById('tableDescription').value.trim();
+    
+    if (!name) {
+        alert('Por favor, digite o nome da tabela!');
+        return;
     }
+    
+    const table = {
+        id: Date.now(),
+        name: name,
+        type: type,
+        description: description,
+        created_at: new Date().toISOString()
+    };
+    
+    campaignData.tables.push(table);
+    
+    const tablesList = document.getElementById('tablesList');
+    const tableItem = document.createElement('div');
+    tableItem.className = 'npc-item';
+    tableItem.innerHTML = `
+        <div class="npc-info">
+            <h4>${name}</h4>
+            <p><strong>Tipo:</strong> ${getTableTypeName(type)}</p>
+            ${description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${description}</p>` : ''}
+            <small style="color: #64748b; font-size: 12px;">Tabela de referência</small>
+        </div>
+        <button class="btn btn-danger btn-small" onclick="removeTable(${table.id})">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    tablesList.appendChild(tableItem);
+    
+    closeModal('addTableModal');
+    showNotification('Tabela adicionada com sucesso!', 'success');
+}
 
-    // Adicionar tabela
-    function addTable() {
-        const name = document.getElementById('tableName').value;
-        const type = document.getElementById('tableType').value;
-        const description = document.getElementById('tableDescription').value;
-        
-        if (!name) {
-            alert('Por favor, digite o nome da tabela!');
-            return;
-        }
-        
-        const table = {
-            id: Date.now(),
-            name: name,
-            type: type,
-            description: description
-        };
-        
-        campaignData.tables.push(table);
-        
-        const tablesList = document.getElementById('tablesList');
+// Obter nome do tipo de tabela
+function getTableTypeName(type) {
+    const types = {
+        'treasure': 'Tesouro',
+        'encounter': 'Encontro',
+        'loot': 'Saque',
+        'random': 'Aleatória'
+    };
+    return types[type] || type;
+}
+
+// Remover tabela
+function removeTable(tableId) {
+    if (!confirm('Tem certeza que deseja remover esta tabela?')) {
+        return;
+    }
+    
+    campaignData.tables = campaignData.tables.filter(t => t.id !== tableId);
+    
+    const tablesList = document.getElementById('tablesList');
+    tablesList.innerHTML = '';
+    
+    campaignData.tables.forEach(table => {
         const tableItem = document.createElement('div');
         tableItem.className = 'npc-item';
         tableItem.innerHTML = `
             <div class="npc-info">
-                <h4>${name}</h4>
-                <p>Tipo: ${type}</p>
-                ${description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${description}</p>` : ''}
+                <h4>${table.name}</h4>
+                <p><strong>Tipo:</strong> ${getTableTypeName(table.type)}</p>
+                ${table.description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${table.description}</p>` : ''}
+                <small style="color: #64748b; font-size: 12px;">Tabela de referência</small>
             </div>
             <button class="btn btn-danger btn-small" onclick="removeTable(${table.id})">
                 <i class="fas fa-trash"></i>
             </button>
         `;
         tablesList.appendChild(tableItem);
-        
-        closeModal('addTableModal');
-    }
+    });
+    
+    showNotification('Tabela removida!', 'warning');
+}
 
-    // Remover tabela
-    function removeTable(tableId) {
-        if (confirm('Remover esta tabela?')) {
-            campaignData.tables = campaignData.tables.filter(t => t.id !== tableId);
-            document.getElementById('tablesList').innerHTML = '';
-            
-            campaignData.tables.forEach(table => {
-                const tablesList = document.getElementById('tablesList');
-                const tableItem = document.createElement('div');
-                tableItem.className = 'npc-item';
-                tableItem.innerHTML = `
-                    <div class="npc-info">
-                        <h4>${table.name}</h4>
-                        <p>Tipo: ${table.type}</p>
-                        ${table.description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${table.description}</p>` : ''}
-                    </div>
-                    <button class="btn btn-danger btn-small" onclick="removeTable(${table.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `;
-                tablesList.appendChild(tableItem);
-            });
-        }
+// Simular rolagem de dados
+function simulateDiceRoll() {
+    const diceTypes = [
+        { dice: '1d20', name: 'D20' },
+        { dice: '2d6', name: '2D6' },
+        { dice: '1d100', name: 'D100' },
+        { dice: '3d6', name: '3D6' },
+        { dice: '4d10', name: '4D10' }
+    ];
+    
+    const diceActions = [
+        { name: 'Ataque', emoji: '⚔️' },
+        { name: 'Percepção', emoji: '👁️' },
+        { name: 'Resistência', emoji: '🛡️' },
+        { name: 'Iniciativa', emoji: '⚡' },
+        { name: 'Teste de Habilidade', emoji: '🎯' }
+    ];
+    
+    const selectedDice = diceTypes[Math.floor(Math.random() * diceTypes.length)];
+    const selectedAction = diceActions[Math.floor(Math.random() * diceActions.length)];
+    
+    let result = 0;
+    if (selectedDice.dice === '1d20') {
+        result = Math.floor(Math.random() * 20) + 1;
+    } else if (selectedDice.dice === '2d6') {
+        result = Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1);
+    } else if (selectedDice.dice === '1d100') {
+        result = Math.floor(Math.random() * 100) + 1;
+    } else if (selectedDice.dice === '3d6') {
+        result = Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1);
+    } else {
+        result = (Math.floor(Math.random() * 10 + 1)) * 4;
     }
-
-    // Simular rolagem de dados
-    function simulateDiceRoll() {
-        const diceTypes = ['1d20', '2d6', '1d100', '3d6', '4d10'];
-        const diceActions = ['Ataque', 'Percepção', 'Resistência', 'Iniciativa', 'Teste de Habilidade'];
-        const diceType = diceTypes[Math.floor(Math.random() * diceTypes.length)];
-        const diceAction = diceActions[Math.floor(Math.random() * diceActions.length)];
-        
-        let result = 0;
-        if (diceType === '1d20') result = Math.floor(Math.random() * 20) + 1;
-        else if (diceType === '2d6') result = Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1);
-        else if (diceType === '1d100') result = Math.floor(Math.random() * 100) + 1;
-        else if (diceType === '3d6') result = Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1);
-        else result = Math.floor(Math.random() * 10 + 1) * 4;
-        
-        const roll = {
-            id: Date.now(),
-            player: 'GM',
-            dice: diceType,
-            result: result,
-            action: diceAction,
-            time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        };
-        
-        campaignData.diceRolls.unshift(roll);
-        
-        const diceHistory = document.getElementById('diceHistory');
-        const diceRoll = document.createElement('div');
-        diceRoll.className = 'dice-roll';
-        diceRoll.innerHTML = `
-            <strong>${roll.player}</strong> rolou ${roll.dice}: <strong>${roll.result}</strong> (${roll.action})
-            <small style="color: #94a3b8; display: block;">${roll.time}</small>
-        `;
-        
-        if (diceHistory.firstChild) {
-            diceHistory.insertBefore(diceRoll, diceHistory.firstChild);
-        } else {
-            diceHistory.appendChild(diceRoll);
-        }
+    
+    const roll = {
+        id: Date.now(),
+        player: currentUser.username,
+        dice: selectedDice.dice,
+        diceName: selectedDice.name,
+        result: result,
+        action: selectedAction.name,
+        emoji: selectedAction.emoji,
+        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date().toISOString()
+    };
+    
+    campaignData.diceRolls.unshift(roll);
+    
+    const diceHistory = document.getElementById('diceHistory');
+    const diceRoll = document.createElement('div');
+    diceRoll.className = 'dice-roll';
+    diceRoll.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+            <span style="font-size: 18px;">${roll.emoji}</span>
+            <strong>${roll.player}</strong>
+        </div>
+        <div>
+            Rolou <strong>${roll.dice}</strong>: 
+            <span style="font-size: 20px; color: #fbbf24; font-weight: bold;">${roll.result}</span>
+        </div>
+        <div style="color: #94a3b8; font-size: 13px;">
+            ${roll.action} • ${roll.time}
+        </div>
+    `;
+    
+    if (diceHistory.firstChild) {
+        diceHistory.insertBefore(diceRoll, diceHistory.firstChild);
+    } else {
+        diceHistory.appendChild(diceRoll);
     }
+    
+    // Limitar histórico a 10 rolagens
+    if (diceHistory.children.length > 10) {
+        diceHistory.removeChild(diceHistory.lastChild);
+    }
+}
 
-    // Criar campanha - FUNÇÃO PRINCIPAL
-    async function createCampaign() {
-        console.log('Iniciando criação de campanha...');
-        
-        // 1. VERIFICAR SE TEM GUILDA
-        if (userGuilds.length === 0) {
-            alert('❌ Você precisa estar em uma Guilda para criar campanhas!');
+// CRIAR CAMPANHA - FUNÇÃO PRINCIPAL CORRIGIDA
+async function createCampaign() {
+    console.log('=== INICIANDO CRIAÇÃO DE CAMPANHA ===');
+    
+    try {
+        // 1. VALIDAÇÕES INICIAIS
+        if (!currentUser) {
+            alert('❌ Erro: Usuário não autenticado!');
             return;
         }
         
-        // 2. PEGAR VALORES
+        if (userGuilds.length === 0) {
+            alert('❌ Você precisa estar em pelo menos uma Guilda para criar campanhas!\n\nVá para a página de Guildas primeiro.');
+            window.location.href = 'guilda.html';
+            return;
+        }
+        
+        // 2. COLETAR DADOS DO FORMULÁRIO
         const campaignId = document.getElementById('campaignId').value.trim();
         const campaignName = document.getElementById('campaignName').value.trim();
         const guildId = document.getElementById('campaignGuild').value;
         const status = document.getElementById('campaignStatus').value;
-        const scenario = document.getElementById('campaignScenario').value;
-        const chapter = document.getElementById('campaignChapter').value;
-        const description = document.getElementById('campaignDescription').value;
+        const scenario = document.getElementById('campaignScenario').value.trim();
+        const chapter = document.getElementById('campaignChapter').value.trim();
+        const description = document.getElementById('campaignDescription').value.trim();
         
         console.log('Dados coletados:', {
-            campaignId, campaignName, guildId, status
+            campaignId,
+            campaignName,
+            guildId,
+            status,
+            scenario,
+            chapter,
+            description
         });
         
-        // 3. VALIDAÇÕES BÁSICAS
+        // 3. VALIDAÇÕES DE DADOS
         if (!campaignName) {
-            alert('Por favor, digite o nome da campanha!');
+            alert('❌ Por favor, digite o nome da campanha!');
+            document.getElementById('campaignName').focus();
+            return;
+        }
+        
+        if (!campaignId) {
+            alert('❌ O ID da campanha é obrigatório!');
+            document.getElementById('campaignId').focus();
             return;
         }
         
         if (!guildId) {
-            alert('Por favor, selecione uma Guilda!');
+            alert('❌ Por favor, selecione uma Guilda!');
+            document.getElementById('campaignGuild').focus();
             return;
         }
         
-        // 4. VERIFICAR SE PERTENCE À GUILDA SELECIONADA
+        // 4. VERIFICAR SE É MEMBRO DA GUILDA (VERIFICAÇÃO SEGURA)
         const selectedGuild = userGuilds.find(g => g.id === guildId);
         if (!selectedGuild) {
-            alert('Erro: Você não pertence a esta Guilda!');
+            alert('❌ Erro: Você não pertence a esta Guilda!');
             return;
         }
         
-        // 5. CONFIRMAÇÃO
+        // Verificação adicional no banco
+        const { data: guildMember, error: memberError } = await supabase
+            .from('guild_members')
+            .select('*')
+            .eq('guild_id', guildId)
+            .eq('user_id', currentUser.id)
+            .eq('status', 'accepted')
+            .single();
+        
+        if (memberError || !guildMember) {
+            alert('❌ Você não é um membro ativo desta Guilda!');
+            return;
+        }
+        
+        // 5. CONFIRMAÇÃO FINAL
         const confirmation = confirm(
-            `Criar campanha "${campaignName}"?\n\n` +
+            `🎲 CRIAR CAMPANHA 🎲\n\n` +
+            `Nome: ${campaignName}\n` +
             `ID: ${campaignId}\n` +
             `Guilda: ${selectedGuild.name}\n` +
-            `Status: ${status === 'active' ? 'Ativa' : 'Pausada'}`
+            `Status: ${status === 'active' ? '🏃 Ativa' : '⏸️ Pausada'}\n` +
+            `GM: ${currentUser.username}\n\n` +
+            `Deseja criar esta campanha?`
         );
         
-        if (!confirmation) return;
-        
-        try {
-            // Mudar texto do botão
-            const createBtn = document.getElementById('createCampaignBtn');
-            createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
-            createBtn.disabled = true;
-            
-            // 6. VERIFICAR SE O CAMPAIGN_ID JÁ EXISTE
-            const { data: existing } = await supabase
-                .from('campaigns')
-                .select('campaign_id')
-                .eq('campaign_id', campaignId)
-                .single();
-            
-            if (existing) {
-                alert('Este ID de campanha já está em uso! Clique em "Gerar" para um novo.');
-                createBtn.innerHTML = '<i class="fas fa-save"></i> Criar Campanha';
-                createBtn.disabled = false;
-                return;
-            }
-
-            // 7. CRIAR CAMPANHA (PRECISA CRIAR A TABELA campaigns PRIMEIRO)
-            const { data: campaign, error } = await supabase
-                .from('campaigns')
-                .insert([{
-                    campaign_id: campaignId,
-                    name: campaignName,
-                    description: description,
-                    scenario: scenario,
-                    chapter: chapter,
-                    status: status,
-                    guild_id: guildId,
-                    gm_id: currentUser.id,
-                    created_at: new Date().toISOString()
-                }])
-                .select()
-                .single();
-            
-            if (error) {
-                console.error('Erro ao criar campanha:', error);
-                
-                // Se a tabela não existe, criar ela primeiro
-                if (error.message.includes('relation "campaigns" does not exist')) {
-                    await createCampaignsTable();
-                    alert('Tabela de campanhas criada. Tente novamente.');
-                } else {
-                    alert('Erro ao criar campanha: ' + error.message);
-                }
-                
-                createBtn.innerHTML = '<i class="fas fa-save"></i> Criar Campanha';
-                createBtn.disabled = false;
-                return;
-            }
-
-            // 8. ADICIONAR GM COMO PARTICIPANTE (PRECISA CRIAR A TABELA campaign_participants)
-            const { error: participantError } = await supabase
-                .from('campaign_participants')
-                .insert([{
-                    campaign_id: campaignId,
-                    user_id: currentUser.id,
-                    role: 'gm',
-                    joined_at: new Date().toISOString()
-                }]);
-            
-            if (participantError) {
-                console.error('Erro ao adicionar GM:', participantError);
-                // Continuar mesmo se der erro
-            }
-
-            // 9. SALVAR NPCs SE HOUVER (PRECISA CRIAR A TABELA campaign_npcs)
-            if (campaignData.npcs.length > 0) {
-                const npcInserts = campaignData.npcs.map(npc => ({
-                    campaign_id: campaignId,
-                    name: npc.name,
-                    role: npc.role,
-                    description: npc.description,
-                    created_at: new Date().toISOString()
-                }));
-                
-                await supabase
-                    .from('campaign_npcs')
-                    .insert(npcInserts);
-            }
-
-            console.log('✅ Campanha criada com sucesso!');
-            
-            alert(`✅ Campanha criada com sucesso!\n\nNome: ${campaignName}\nID: ${campaignId}`);
-            
-            // 10. REDIRECIONAR
-            setTimeout(() => {
-                window.location.href = `campanha-detalhes.html?id=${campaignId}`;
-            }, 1500);
-
-        } catch (error) {
-            console.error('Erro inesperado:', error);
-            
-            const createBtn = document.getElementById('createCampaignBtn');
-            createBtn.innerHTML = '<i class="fas fa-save"></i> Criar Campanha';
-            createBtn.disabled = false;
-            
-            alert('Erro: ' + error.message);
+        if (!confirmation) {
+            console.log('Criação cancelada pelo usuário');
+            return;
         }
-    }
-
-    // Função para criar tabela de campanhas se não existir
-    async function createCampaignsTable() {
-        console.log('Criando tabela campaigns...');
         
-        // Primeiro, execute este SQL no Supabase:
-        const sql = `
-            CREATE TABLE IF NOT EXISTS campaigns (
-                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                campaign_id TEXT UNIQUE NOT NULL,
-                name TEXT NOT NULL,
-                description TEXT,
-                scenario TEXT,
-                chapter TEXT,
-                status TEXT DEFAULT 'active',
-                guild_id UUID REFERENCES guilds(id) NOT NULL,
-                gm_id UUID REFERENCES auth.users(id) NOT NULL,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-            );
-            
-            CREATE TABLE IF NOT EXISTS campaign_participants (
-                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                campaign_id TEXT REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
-                user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-                role TEXT DEFAULT 'player',
-                joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                UNIQUE(campaign_id, user_id)
-            );
-            
-            CREATE TABLE IF NOT EXISTS campaign_npcs (
-                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                campaign_id TEXT REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
-                name TEXT NOT NULL,
-                role TEXT,
-                description TEXT,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-            );
-        `;
-        
-        console.log('Execute este SQL no Supabase SQL Editor:');
-        console.log(sql);
-        
-        alert('Copie e execute o SQL no Supabase para criar as tabelas necessárias.');
-    }
-
-    // Configurar eventos
-    function setupEventListeners() {
-        console.log('Configurando eventos...');
-        
-        // Botão criar campanha
+        // 6. PREPARAR BOTÃO (FEEDBACK VISUAL)
         const createBtn = document.getElementById('createCampaignBtn');
-        if (createBtn) {
-            console.log('Botão encontrado, adicionando listener...');
-            createBtn.addEventListener('click', createCampaign);
-        } else {
-            console.error('Botão não encontrado!');
+        const originalText = createBtn.innerHTML;
+        createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+        createBtn.disabled = true;
+        
+        // 7. VERIFICAR SE O CAMPAIGN_ID JÁ EXISTE
+        const { data: existingCampaign, error: checkError } = await supabase
+            .from('campaigns')
+            .select('campaign_id')
+            .eq('campaign_id', campaignId)
+            .single();
+        
+        if (existingCampaign) {
+            alert('❌ Este ID de campanha já está em uso!\n\nClique em "Gerar" para criar um novo ID único.');
+            createBtn.innerHTML = originalText;
+            createBtn.disabled = false;
+            return;
         }
         
-        // Botão gerar ID
-        document.querySelector('.generate-id-btn')?.addEventListener('click', generateCampaignId);
+        // 8. CRIAR CAMPANHA NO BANCO
+        console.log('Inserindo campanha no banco...');
+        const { data: campaign, error: insertError } = await supabase
+            .from('campaigns')
+            .insert([{
+                campaign_id: campaignId,
+                name: campaignName,
+                description: description || null,
+                scenario: scenario || null,
+                chapter: chapter || null,
+                status: status,
+                guild_id: guildId,
+                gm_id: currentUser.id,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
         
-        // Fechar modal ao clicar fora
-        window.addEventListener('click', (event) => {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
+        if (insertError) {
+            console.error('Erro ao criar campanha:', insertError);
+            
+            if (insertError.code === '42501') {
+                alert('❌ Permissão negada!\n\nVocê não tem permissão para criar campanhas nesta guilda.');
+            } else if (insertError.message.includes('campaigns')) {
+                alert('❌ Erro no banco de dados!\n\nA tabela de campanhas pode não estar configurada corretamente.\n\nErro: ' + insertError.message);
+            } else {
+                alert('❌ Erro ao criar campanha:\n\n' + insertError.message);
+            }
+            
+            createBtn.innerHTML = originalText;
+            createBtn.disabled = false;
+            return;
+        }
+        
+        console.log('✅ Campanha criada:', campaign);
+        
+        // 9. ADICIONAR GM COMO PARTICIPANTE
+        const { error: participantError } = await supabase
+            .from('campaign_participants')
+            .insert([{
+                campaign_id: campaignId,
+                user_id: currentUser.id,
+                role: 'gm',
+                joined_at: new Date().toISOString()
+            }]);
+        
+        if (participantError) {
+            console.warn('Aviso ao adicionar GM:', participantError);
+            // Continuar mesmo com erro
+        }
+        
+        // 10. SALVAR NPCs SE HOUVER
+        if (campaignData.npcs.length > 0) {
+            const npcInserts = campaignData.npcs.map(npc => ({
+                campaign_id: campaignId,
+                name: npc.name,
+                role: npc.role || null,
+                description: npc.description || null,
+                created_at: new Date().toISOString()
+            }));
+            
+            const { error: npcError } = await supabase
+                .from('campaign_npcs')
+                .insert(npcInserts);
+            
+            if (npcError) {
+                console.warn('Aviso ao salvar NPCs:', npcError);
+            }
+        }
+        
+        // 11. SUCESSO!
+        console.log('✅ Campanha criada com sucesso!');
+        
+        // Mostrar mensagem de sucesso
+        showNotification('🎉 Campanha criada com sucesso!', 'success');
+        
+        // Aguardar 1.5 segundos e redirecionar
+        setTimeout(() => {
+            window.location.href = `campanha-detalhes.html?id=${campaignId}`;
+        }, 1500);
+        
+    } catch (error) {
+        console.error('❌ Erro inesperado na criação:', error);
+        
+        // Restaurar botão
+        const createBtn = document.getElementById('createCampaignBtn');
+        createBtn.innerHTML = '<i class="fas fa-save"></i> Criar Campanha';
+        createBtn.disabled = false;
+        
+        // Mostrar erro amigável
+        showNotification('❌ Erro ao criar campanha!', 'error');
+        
+        alert('❌ Ocorreu um erro inesperado:\n\n' + error.message + '\n\nVerifique o console para mais detalhes.');
+    }
+}
+
+// Mostrar notificação
+function showNotification(message, type = 'info') {
+    // Criar elemento de notificação
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    
+    // Definir cor baseado no tipo
+    if (type === 'success') {
+        notification.style.backgroundColor = '#10b981';
+        notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+    } else if (type === 'error') {
+        notification.style.backgroundColor = '#ef4444';
+        notification.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    } else if (type === 'warning') {
+        notification.style.backgroundColor = '#f59e0b';
+        notification.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+    } else {
+        notification.style.backgroundColor = '#3b82f6';
+        notification.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+    }
+    
+    // Adicionar ao body
+    document.body.appendChild(notification);
+    
+    // Remover após 5 segundos
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 5000);
+    
+    // Adicionar animação CSS se não existir
+    if (!document.getElementById('notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// Configurar event listeners
+function setupEventListeners() {
+    console.log('Configurando event listeners...');
+    
+    // Botão criar campanha
+    const createBtn = document.getElementById('createCampaignBtn');
+    if (createBtn) {
+        createBtn.addEventListener('click', createCampaign);
+        console.log('Listener do botão criar adicionado');
+    }
+    
+    // Botão gerar ID
+    const generateBtn = document.querySelector('.generate-id-btn');
+    if (generateBtn) {
+        generateBtn.addEventListener('click', generateCampaignId);
+    }
+    
+    // Campo do ID - gerar automaticamente se vazio
+    const idField = document.getElementById('campaignId');
+    if (idField) {
+        idField.addEventListener('focus', function() {
+            if (!this.value.trim()) {
+                generateCampaignId();
             }
         });
     }
+    
+    // Fechar modais com ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal[style*="display: flex"]');
+            modals.forEach(modal => {
+                closeModal(modal.id);
+            });
+        }
+    });
+    
+    // Fechar modais ao clicar fora
+    window.addEventListener('click', function(event) {
+        if (event.target.classList.contains('modal')) {
+            closeModal(event.target.id);
+        }
+    });
+    
+    // Mudança de guilda no select
+    const guildSelect = document.getElementById('campaignGuild');
+    if (guildSelect) {
+        guildSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const guildName = selectedOption.getAttribute('data-guild-name');
+            const guildId = selectedOption.value;
+            
+            if (guildId && guildName) {
+                const guildInfo = document.getElementById('currentGuildName');
+                if (guildInfo) {
+                    guildInfo.textContent = `${guildName} (${selectedOption.textContent.includes('👑') ? 'Dono' : 
+                        selectedOption.textContent.includes('⭐') ? 'Admin' : 'Membro'})`;
+                }
+            }
+        });
+    }
+    
+    console.log('Event listeners configurados com sucesso!');
+}
+
+// Função auxiliar para fazer logout (se necessário)
+async function logout() {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+}
+
+// Exportar funções para o escopo global (se necessário)
+window.showSubaba = showSubaba;
+window.showAddCharacterModal = showAddCharacterModal;
+window.showAddNPCModal = showAddNPCModal;
+window.showAddTableModal = showAddTableModal;
+window.closeModal = closeModal;
+window.addCharacter = addCharacter;
+window.addNPC = addNPC;
+window.addTable = addTable;
+window.removeCharacter = removeCharacter;
+window.removeNPC = removeNPC;
+window.removeTable = removeTable;
+window.simulateDiceRoll = simulateDiceRoll;
+window.generateCampaignId = generateCampaignId;
+window.createCampaign = createCampaign;
+
+console.log('Script carregado com sucesso!');
 </script>
 </body>
 </html>
