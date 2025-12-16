@@ -1189,10 +1189,15 @@
 
     async function initGuild() {
       try {
+        console.log('Iniciando carregamento da guilda...');
         await checkAuth();
+        console.log('Autenticação OK');
         await loadUserData();
+        console.log('Dados do usuário carregados');
         await loadUserGuild();
+        console.log('Guilda carregada');
         setupEventListeners();
+        console.log('Event listeners configurados');
       } catch (error) {
         console.error('Erro na inicialização:', error);
         showError('Erro ao carregar a página. Tente recarregar.');
@@ -1201,59 +1206,83 @@
 
     async function checkAuth() {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('Sessão:', session);
+      
       if (!session) {
+        console.log('Nenhuma sessão encontrada, redirecionando para login...');
         window.location.href = 'login.html';
         return;
       }
       currentUser = session.user;
+      console.log('Usuário atual:', currentUser.id);
     }
 
     async function loadUserData() {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('username, player_id')
-        .eq('id', currentUser.id)
-        .single();
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('username, player_id')
+          .eq('id', currentUser.id)
+          .single();
 
-      if (!error && profile) {
-        const initials = profile.username?.charAt(0).toUpperCase() || 'U';
-        document.getElementById('userAvatar').textContent = initials;
-        document.getElementById('userName').textContent = profile.username || 'Usuário';
+        if (error) {
+          console.error('Erro ao carregar perfil:', error);
+          return;
+        }
+
+        if (profile) {
+          const initials = profile.username?.charAt(0).toUpperCase() || 'U';
+          document.getElementById('userAvatar').textContent = initials;
+          document.getElementById('userName').textContent = profile.username || 'Usuário';
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
       }
     }
 
     async function loadUserGuild() {
       try {
+        console.log('Carregando guilda do usuário:', currentUser.id);
+        
         // Primeiro verifica se é dono de alguma guilda
+        console.log('Verificando se é dono de guilda...');
         const { data: ownedGuild, error: ownerError } = await supabase
           .from('guilds')
           .select('*')
           .eq('owner_id', currentUser.id)
-          .single();
+          .maybeSingle(); // Usa maybeSingle em vez de single para evitar erro se não encontrar
+
+        console.log('Resultado da busca por guilda como dono:', ownedGuild, ownerError);
 
         if (!ownerError && ownedGuild) {
+          console.log('Usuário é dono da guilda:', ownedGuild);
           userGuild = ownedGuild;
           renderGuildPage();
           return;
         }
 
         // Se não for dono, verifica se é membro
+        console.log('Verificando se é membro de alguma guilda...');
         const { data: memberships, error: memberError } = await supabase
           .from('guild_members')
           .select(`
             guild_id,
             role,
             status,
-            guilds:guild_id(*)
+            guilds (*)
           `)
           .eq('user_id', currentUser.id)
           .eq('status', 'accepted')
           .limit(1);
 
+        console.log('Resultado da busca por membro:', memberships, memberError);
+
         if (!memberError && memberships && memberships.length > 0) {
           userGuild = memberships[0].guilds;
+          console.log('Usuário é membro da guilda:', userGuild);
           renderGuildPage();
         } else {
+          console.log('Usuário não tem guilda');
           renderNoGuildPage();
         }
       } catch (error) {
@@ -1263,6 +1292,7 @@
     }
 
     function renderNoGuildPage() {
+      console.log('Renderizando página sem guilda');
       const content = `
         <div class="no-guild-container">
           <div class="no-guild-icon">
@@ -1284,6 +1314,7 @@
     }
 
     function renderGuildPage() {
+      console.log('Renderizando página da guilda:', userGuild);
       const isOwner = userGuild.owner_id === currentUser.id;
       
       const content = `
@@ -1495,15 +1526,37 @@
         const membersGrid = document.getElementById('membersGrid');
         if (!membersGrid) return;
         
+        console.log('Carregando membros da guilda:', userGuild.id);
+        
         const { data: members, error } = await supabase
-          .from('guild_members_with_profiles')
-          .select('*')
+          .from('guild_members')
+          .select(`
+            *,
+            profiles:user_id (
+              username,
+              player_id
+            )
+          `)
           .eq('guild_id', userGuild.id)
           .eq('status', 'accepted')
           .order('role', { ascending: false })
           .order('joined_at', { ascending: true });
 
-        if (error) throw error;
+        console.log('Membros carregados:', members, error);
+
+        if (error) {
+          console.error('Erro ao carregar membros:', error);
+          membersGrid.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <p>Erro ao carregar membros</p>
+              <button class="btn mt-20" onclick="loadMembers()">
+                <i class="fas fa-redo"></i> Tentar novamente
+              </button>
+            </div>
+          `;
+          return;
+        }
         
         guildMembers = members || [];
         
@@ -1519,16 +1572,18 @@
             const isOwner = member.role === 'owner';
             const isCurrentUser = member.user_id === currentUser.id;
             const canManage = userGuild.owner_id === currentUser.id && !isOwner && !isCurrentUser;
+            const username = member.profiles?.username || 'Usuário';
+            const playerId = member.profiles?.player_id || '';
             
             return `
               <div class="member-card">
                 <div class="member-header">
                   <div class="member-avatar">
-                    ${member.username?.charAt(0).toUpperCase() || '?'}
+                    ${username.charAt(0).toUpperCase() || '?'}
                   </div>
                   <div class="member-info">
-                    <div class="member-name">${escapeHtml(member.username || 'Usuário')}</div>
-                    <div class="member-player-id">#${escapeHtml(member.player_id || '')}</div>
+                    <div class="member-name">${escapeHtml(username)}</div>
+                    <div class="member-player-id">#${escapeHtml(playerId)}</div>
                     <div class="member-role role-${member.role}">
                       ${member.role === 'owner' ? 'Dono' : member.role === 'admin' ? 'Administrador' : 'Membro'}
                     </div>
@@ -1546,7 +1601,7 @@
                         <i class="fas fa-arrow-down"></i> Rebaixar
                       </button>
                     ` : ''}
-                    <button class="btn btn-sm btn-danger kick-btn" data-id="${member.id}" data-username="${escapeHtml(member.username || 'Usuário')}">
+                    <button class="btn btn-sm btn-danger kick-btn" data-id="${member.id}" data-username="${escapeHtml(username)}">
                       <i class="fas fa-user-slash"></i> Expulsar
                     </button>
                   </div>
@@ -1598,14 +1653,33 @@
         const invitesList = document.getElementById('invitesList');
         if (!invitesList) return;
         
+        console.log('Carregando convites da guilda:', userGuild.id);
+        
         const { data: invites, error } = await supabase
-          .from('guild_invitations_with_details')
-          .select('*')
+          .from('guild_invitations')
+          .select(`
+            *,
+            profiles:receiver_id (
+              username,
+              player_id
+            )
+          `)
           .eq('guild_id', userGuild.id)
           .eq('status', 'pending')
           .order('sent_at', { ascending: false });
 
-        if (error) throw error;
+        console.log('Convites carregados:', invites, error);
+
+        if (error) {
+          console.error('Erro ao carregar convites:', error);
+          invitesList.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <p>Erro ao carregar convites</p>
+            </div>
+          `;
+          return;
+        }
         
         guildInvites = invites || [];
         
@@ -1617,20 +1691,25 @@
             </div>
           `;
         } else {
-          invitesList.innerHTML = guildInvites.map(invite => `
-            <div class="invite-card">
-              <div class="invite-info">
-                <h4>Para: ${escapeHtml(invite.receiver_username || 'Usuário')}</h4>
-                <p>ID: #${escapeHtml(invite.receiver_player_id || '')}</p>
-                <p class="text-muted">Enviado em: ${formatDate(invite.sent_at)}</p>
+          invitesList.innerHTML = guildInvites.map(invite => {
+            const username = invite.profiles?.username || 'Usuário';
+            const playerId = invite.profiles?.player_id || '';
+            
+            return `
+              <div class="invite-card">
+                <div class="invite-info">
+                  <h4>Para: ${escapeHtml(username)}</h4>
+                  <p>ID: #${escapeHtml(playerId)}</p>
+                  <p class="text-muted">Enviado em: ${formatDate(invite.sent_at)}</p>
+                </div>
+                <div class="invite-actions">
+                  <button class="btn btn-sm btn-danger cancel-invite-btn" data-id="${invite.id}" data-username="${escapeHtml(username)}">
+                    <i class="fas fa-times"></i> Cancelar
+                  </button>
+                </div>
               </div>
-              <div class="invite-actions">
-                <button class="btn btn-sm btn-danger cancel-invite-btn" data-id="${invite.id}" data-username="${escapeHtml(invite.receiver_username || 'Usuário')}">
-                  <i class="fas fa-times"></i> Cancelar
-                </button>
-              </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
           
           // Adicionar event listeners
           setTimeout(() => {
@@ -1654,13 +1733,29 @@
         const campaignsList = document.getElementById('campaignsList');
         if (!campaignsList) return;
         
+        console.log('Carregando campanhas da guilda:', userGuild.id);
+        
         const { data: campaigns, error } = await supabase
           .from('campaigns')
           .select('*')
           .eq('guild_id', userGuild.id)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        console.log('Campanhas carregadas:', campaigns, error);
+
+        if (error) {
+          console.error('Erro ao carregar campanhas:', error);
+          campaignsList.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <p>Erro ao carregar campanhas</p>
+              <button class="btn mt-20" onclick="loadCampaigns()">
+                <i class="fas fa-redo"></i> Tentar novamente
+              </button>
+            </div>
+          `;
+          return;
+        }
         
         guildCampaigns = campaigns || [];
         
@@ -1685,18 +1780,20 @@
             }
           }, 100);
         } else {
-          campaignsList.innerHTML = guildCampaigns.map(campaign => `
-            <div class="campaign-card" data-id="${campaign.id}" style="cursor: pointer;">
-              <div class="campaign-avatar">
-                <i class="fas fa-map"></i>
+          campaignsList.innerHTML = guildCampaigns.map(campaign => {
+            return `
+              <div class="campaign-card" data-id="${campaign.id}" style="cursor: pointer;">
+                <div class="campaign-avatar">
+                  <i class="fas fa-map"></i>
+                </div>
+                <h4 class="member-name">${escapeHtml(campaign.name)}</h4>
+                <p class="text-muted mb-20">${escapeHtml(campaign.description || 'Sem descrição')}</p>
+                <div class="member-role ${campaign.status === 'active' ? 'role-owner' : 'role-member'}">
+                  ${campaign.status === 'active' ? 'Ativa' : 'Inativa'}
+                </div>
               </div>
-              <h4 class="member-name">${escapeHtml(campaign.name)}</h4>
-              <p class="text-muted mb-20">${escapeHtml(campaign.description || 'Sem descrição')}</p>
-              <div class="member-role ${campaign.status === 'active' ? 'role-owner' : 'role-member'}">
-                ${campaign.status === 'active' ? 'Ativa' : 'Inativa'}
-              </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
           
           // Adicionar event listeners
           setTimeout(() => {
@@ -1715,6 +1812,8 @@
     }
 
     function setupEventListeners() {
+      console.log('Configurando event listeners globais...');
+      
       // Botão logout
       const logoutBtn = document.getElementById('logoutBtn');
       if (logoutBtn) {
@@ -1729,9 +1828,9 @@
         });
       }
       
-      // Botão criar guilda
+      // Botão criar guilda (delegado)
       document.addEventListener('click', (e) => {
-        if (e.target && e.target.id === 'createGuildBtn') {
+        if (e.target && (e.target.id === 'createGuildBtn' || e.target.closest('#createGuildBtn'))) {
           const modal = document.getElementById('createGuildModal');
           if (modal) modal.classList.add('active');
         }
@@ -1836,22 +1935,52 @@
           .select('id')
           .eq('user_id', currentUser.id)
           .eq('status', 'accepted')
-          .single();
+          .maybeSingle();
         
         if (existingMembership) {
           showError('Você já faz parte de uma guilda');
           return;
         }
         
-        // Criar guilda usando a função do banco
-        const { data: newGuild, error } = await supabase.rpc('create_guild_with_owner', {
-          p_custom_id: customId,
-          p_name: name,
-          p_description: description || null,
-          p_max_members: 10 // Limite máximo de 10 membros
-        });
+        console.log('Criando guilda:', { name, customId, description });
         
-        if (error) throw error;
+        // Criar guilda
+        const { data: newGuild, error } = await supabase
+          .from('guilds')
+          .insert({
+            name: name,
+            custom_id: customId,
+            description: description || null,
+            max_members: 10,
+            owner_id: currentUser.id
+          })
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('Erro ao criar guilda:', error);
+          if (error.code === '23505') {
+            showError('Este ID da guilda já está em uso');
+          } else {
+            showError('Erro ao criar guilda: ' + error.message);
+          }
+          return;
+        }
+        
+        // Adicionar dono como membro
+        const { error: memberError } = await supabase
+          .from('guild_members')
+          .insert({
+            guild_id: newGuild.id,
+            user_id: currentUser.id,
+            role: 'owner',
+            status: 'accepted',
+            joined_at: new Date().toISOString()
+          });
+        
+        if (memberError) {
+          console.error('Erro ao adicionar dono como membro:', memberError);
+        }
         
         // Fechar modal
         document.getElementById('createGuildModal').classList.remove('active');
@@ -1866,7 +1995,7 @@
         
       } catch (error) {
         console.error('Erro ao criar guilda:', error);
-        showError(error.message || 'Erro ao criar guilda');
+        showError('Erro: ' + error.message);
       }
     }
 
@@ -1916,10 +2045,15 @@
         }
         
         // Enviar convite
-        const { error } = await supabase.rpc('invite_to_guild', {
-          p_guild_id: userGuild.id,
-          p_receiver_player_id: playerId
-        });
+        const { error } = await supabase
+          .from('guild_invitations')
+          .insert({
+            guild_id: userGuild.id,
+            sender_id: currentUser.id,
+            receiver_id: receiverProfile.id,
+            status: 'pending',
+            sent_at: new Date().toISOString()
+          });
         
         if (error) throw error;
         
@@ -1968,10 +2102,11 @@
       }
       
       try {
-        const { error } = await supabase.rpc('update_guild_member_role', {
-          p_membership_id: membershipId,
-          p_new_role: newRole
-        });
+        const { error } = await supabase
+          .from('guild_members')
+          .update({ role: newRole })
+          .eq('id', membershipId)
+          .eq('guild_id', userGuild.id);
         
         if (error) throw error;
         
@@ -1990,9 +2125,11 @@
       }
       
       try {
-        const { error } = await supabase.rpc('expel_guild_member', {
-          p_membership_id: membershipId
-        });
+        const { error } = await supabase
+          .from('guild_members')
+          .update({ status: 'kicked' })
+          .eq('id', membershipId)
+          .eq('guild_id', userGuild.id);
         
         if (error) throw error;
         
@@ -2016,11 +2153,15 @@
       const description = document.getElementById('editGuildDescription').value.trim();
       
       try {
-        const { error } = await supabase.rpc('update_guild_info', {
-          p_guild_id: userGuild.id,
-          p_name: name,
-          p_description: description || null
-        });
+        const { error } = await supabase
+          .from('guilds')
+          .update({
+            name: name,
+            description: description || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userGuild.id)
+          .eq('owner_id', currentUser.id);
         
         if (error) throw error;
         
@@ -2057,11 +2198,14 @@
       
       const modalContent = `
         <div class="modal-actions">
-          ${eligibleMembers.map(member => `
-            <button class="btn transfer-member-btn" data-id="${member.id}" data-username="${escapeHtml(member.username || 'Usuário')}">
-              <i class="fas fa-user-crown"></i> Transferir para ${escapeHtml(member.username || 'Usuário')}
-            </button>
-          `).join('')}
+          ${eligibleMembers.map(member => {
+            const username = member.profiles?.username || 'Usuário';
+            return `
+              <button class="btn transfer-member-btn" data-id="${member.id}" data-username="${escapeHtml(username)}">
+                <i class="fas fa-user-crown"></i> Transferir para ${escapeHtml(username)}
+              </button>
+            `;
+          }).join('')}
         </div>
       `;
       
@@ -2086,12 +2230,47 @@
       }
       
       try {
-        const { error } = await supabase.rpc('transfer_guild_ownership', {
-          p_guild_id: userGuild.id,
-          p_new_owner_membership_id: membershipId
-        });
+        // Primeiro, encontrar o ID do usuário que será o novo dono
+        const { data: member, error: memberError } = await supabase
+          .from('guild_members')
+          .select('user_id')
+          .eq('id', membershipId)
+          .single();
         
-        if (error) throw error;
+        if (memberError || !member) {
+          showError('Membro não encontrado');
+          return;
+        }
+        
+        const newOwnerId = member.user_id;
+        
+        // Atualiza o cargo do dono atual para admin
+        const { error: updateOldOwnerError } = await supabase
+          .from('guild_members')
+          .update({ role: 'admin' })
+          .eq('guild_id', userGuild.id)
+          .eq('user_id', currentUser.id);
+        
+        if (updateOldOwnerError) throw updateOldOwnerError;
+        
+        // Atualiza o cargo do novo owner
+        const { error: updateNewOwnerError } = await supabase
+          .from('guild_members')
+          .update({ role: 'owner' })
+          .eq('id', membershipId);
+        
+        if (updateNewOwnerError) throw updateNewOwnerError;
+        
+        // Atualiza a tabela guilds
+        const { error: updateGuildError } = await supabase
+          .from('guilds')
+          .update({ 
+            owner_id: newOwnerId,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userGuild.id);
+        
+        if (updateGuildError) throw updateGuildError;
         
         document.getElementById('transferGuildModal').classList.remove('active');
         showSuccess('Guilda transferida com sucesso!');
@@ -2140,9 +2319,17 @@
       }
       
       try {
-        const { error } = await supabase.rpc('leave_guild', {
-          p_guild_id: userGuild.id
-        });
+        // Se for o dono, não pode sair (deve transferir ou deletar)
+        if (userGuild.owner_id === currentUser.id) {
+          showError('Você é o dono da guilda! Transfira a posse ou delete a guilda antes de sair.');
+          return;
+        }
+        
+        const { error } = await supabase
+          .from('guild_members')
+          .update({ status: 'left' })
+          .eq('user_id', currentUser.id)
+          .eq('guild_id', userGuild.id);
         
         if (error) throw error;
         
