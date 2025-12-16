@@ -7,544 +7,886 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+   <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
+    body {
+        font-family: 'Roboto', sans-serif;
+        background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 100%);
+        color: #fff;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #ffd700;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .back-btn {
+        background: none;
+        border: 2px solid #ffd700;
+        color: #ffd700;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .back-btn:hover {
+        background: #ffd700;
+        color: #0a0a2a;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: #ffd700;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0a0a2a;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .logout-btn {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .logout-btn:hover {
+        background: #c0392b;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* No Guild State */
+    .no-guild-container {
+        text-align: center;
+        padding: 60px 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .no-guild-icon {
+        font-size: 80px;
+        color: #ffd700;
+        margin-bottom: 30px;
+    }
+
+    .no-guild-title {
+        font-family: 'MedievalSharp', cursive;
+        font-size: 2.5rem;
+        color: #ffd700;
+        margin-bottom: 20px;
+    }
+
+    .no-guild-text {
+        color: #aaa;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 40px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Guild Header */
+    .guild-header {
+        display: flex;
+        align-items: center;
+        gap: 40px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .guild-avatar {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 60px;
+        color: #0a0a2a;
+    }
+
+    .guild-info {
+        flex: 1;
+    }
+
+    .guild-name {
+        font-family: 'MedievalSharp', cursive;
+        font-size: 2.5rem;
+        color: #ffd700;
+        margin-bottom: 10px;
+    }
+
+    .guild-id {
+        font-size: 1.1rem;
+        color: #aaa;
+        margin-bottom: 15px;
+        font-family: monospace;
+    }
+
+    .guild-description {
+        color: #ccc;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .guild-stats {
+        display: flex;
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    .guild-stat {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #aaa;
+    }
+
+    .guild-stat i {
+        color: #ffd700;
+        font-size: 1.2rem;
+    }
+
+    /* Tabs */
+    .guild-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        border-bottom: 2px solid rgba(255, 215, 0, 0.2);
+        padding-bottom: 10px;
+    }
+
+    .guild-tab {
+        background: rgba(255, 255, 255, 0.05);
+        border: none;
+        color: #aaa;
+        padding: 15px 30px;
+        border-radius: 10px 10px 0 0;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .guild-tab:hover {
+        background: rgba(255, 215, 0, 0.1);
+        color: #ffd700;
+    }
+
+    .guild-tab.active {
+        background: rgba(255, 215, 0, 0.2);
+        color: #ffd700;
+        border-bottom: 3px solid #ffd700;
+    }
+
+    /* Tab Content */
+    .tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Members Grid */
+    .members-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 30px;
+        border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .members-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .members-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .member-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        transition: all 0.3s;
+    }
+
+    .member-card:hover {
+        transform: translateY(-5px);
+        border-color: #ffd700;
+        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.1);
+    }
+
+    .member-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .member-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .member-name {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .member-player-id {
+        font-size: 0.9rem;
+        color: #aaa;
+        font-family: monospace;
+    }
+
+    .member-role {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .member-role.role-owner {
+        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+        color: #0a0a2a;
+    }
+
+    .member-role.role-admin {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+    }
+
+    .member-role.role-member {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: white;
+    }
+
+    .member-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 15px;
+    }
+
+    /* Invites List */
+    .invites-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 30px;
+        border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .invite-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .invite-info h4 {
+        color: #ffd700;
+        margin-bottom: 5px;
+    }
+
+    .invite-info p {
+        color: #aaa;
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+    }
+
+    /* Buttons */
+    .btn {
+        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+        color: #0a0a2a;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal {
+        background: linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%);
+        border-radius: 20px;
+        padding: 40px;
+        width: 90%;
+        max-width: 500px;
+        border: 3px solid #ffd700;
+        position: relative;
+    }
+
+    .modal h2 {
+        color: #ffd700;
+        margin-bottom: 30px;
+        font-family: 'MedievalSharp', cursive;
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #ffd700;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 215, 0, 0.3);
+        border-radius: 10px;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #ffd700;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .modal-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    /* Loading */
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #ffd700;
+        font-size: 1.2rem;
+    }
+
+    .loading i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    /* ============================================
+       AJUSTES ESPECÍFICOS PARA MOBILE (max-width: 768px)
+       O desktop continua exatamente igual
+       ============================================ */
+    @media (max-width: 768px) {
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 100%);
-            color: #fff;
-            min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
-
+        
+        /* HEADER MOBILE */
         .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #ffd700;
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            text-align: center;
         }
-
+        
         .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .back-btn {
-            background: none;
-            border: 2px solid #ffd700;
-            color: #ffd700;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .back-btn:hover {
-            background: #ffd700;
-            color: #0a0a2a;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
+            width: 100%;
         }
-
+        
+        .back-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            align-self: flex-start;
+        }
+        
+        .header-left h1 {
+            font-size: 1.5rem;
+            align-self: center;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .header-right {
+            width: 100%;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+        
         .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: #ffd700;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #0a0a2a;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
+            width: 35px;
+            height: 35px;
             font-size: 1rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
-
-        .logout-btn:hover {
-            background: #c0392b;
+        
+        .logout-btn {
+            padding: 8px 15px;
+            font-size: 14px;
         }
-
-        .container {
-            max-width: 1200px;
+        
+        /* NO GUILD STATE MOBILE */
+        .no-guild-container {
+            padding: 30px 15px;
+            margin-top: 10px;
+        }
+        
+        .no-guild-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        
+        .no-guild-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .no-guild-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+        
+        /* GUILD HEADER MOBILE */
+        .guild-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+            padding: 20px 15px;
+            margin-bottom: 20px;
+        }
+        
+        .guild-avatar {
+            width: 80px;
+            height: 80px;
+            font-size: 40px;
             margin: 0 auto;
         }
-
-        /* No Guild State */
-        .no-guild-container {
-            text-align: center;
-            padding: 60px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-        }
-
-        .no-guild-icon {
-            font-size: 80px;
-            color: #ffd700;
-            margin-bottom: 30px;
-        }
-
-        .no-guild-title {
-            font-family: 'MedievalSharp', cursive;
-            font-size: 2.5rem;
-            color: #ffd700;
-            margin-bottom: 20px;
-        }
-
-        .no-guild-text {
-            color: #aaa;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 40px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Guild Header */
-        .guild-header {
-            display: flex;
-            align-items: center;
-            gap: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-        }
-
-        .guild-avatar {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            color: #0a0a2a;
-        }
-
-        .guild-info {
-            flex: 1;
-        }
-
+        
         .guild-name {
-            font-family: 'MedievalSharp', cursive;
-            font-size: 2.5rem;
-            color: #ffd700;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
         }
-
+        
         .guild-id {
-            font-size: 1.1rem;
-            color: #aaa;
-            margin-bottom: 15px;
-            font-family: monospace;
+            font-size: 1rem;
+            margin-bottom: 12px;
         }
-
+        
         .guild-description {
-            color: #ccc;
-            font-size: 1.1rem;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .guild-stats {
-            display: flex;
-            gap: 30px;
-            margin-top: 20px;
-        }
-
-        .guild-stat {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #aaa;
-        }
-
-        .guild-stat i {
-            color: #ffd700;
-            font-size: 1.2rem;
-        }
-
-        /* Tabs */
-        .guild-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid rgba(255, 215, 0, 0.2);
-            padding-bottom: 10px;
-        }
-
-        .guild-tab {
-            background: rgba(255, 255, 255, 0.05);
-            border: none;
-            color: #aaa;
-            padding: 15px 30px;
-            border-radius: 10px 10px 0 0;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .guild-tab:hover {
-            background: rgba(255, 215, 0, 0.1);
-            color: #ffd700;
-        }
-
-        .guild-tab.active {
-            background: rgba(255, 215, 0, 0.2);
-            color: #ffd700;
-            border-bottom: 3px solid #ffd700;
-        }
-
-        /* Tab Content */
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Members Grid */
-        .members-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 30px;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-        }
-
-        .members-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .members-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .member-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            transition: all 0.3s;
-        }
-
-        .member-card:hover {
-            transform: translateY(-5px);
-            border-color: #ffd700;
-            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.1);
-        }
-
-        .member-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            font-size: 1rem;
+            line-height: 1.4;
             margin-bottom: 15px;
         }
-
-        .member-avatar {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .member-name {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .member-player-id {
-            font-size: 0.9rem;
-            color: #aaa;
-            font-family: monospace;
-        }
-
-        .member-role {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        .member-role.role-owner {
-            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-            color: #0a0a2a;
-        }
-
-        .member-role.role-admin {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            color: white;
-        }
-
-        .member-role.role-member {
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-            color: white;
-        }
-
-        .member-actions {
-            display: flex;
+        
+        .guild-stats {
+            flex-direction: column;
             gap: 10px;
             margin-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 15px;
         }
-
-        /* Invites List */
-        .invites-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 30px;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-        }
-
-        .invite-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .invite-info h4 {
-            color: #ffd700;
-            margin-bottom: 5px;
-        }
-
-        .invite-info p {
-            color: #aaa;
+        
+        .guild-stat {
+            justify-content: center;
             font-size: 0.9rem;
-            margin-bottom: 2px;
         }
-
-        /* Buttons */
-        .btn {
-            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-            color: #0a0a2a;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%);
-            border-radius: 20px;
-            padding: 40px;
-            width: 90%;
-            max-width: 500px;
-            border: 3px solid #ffd700;
-            position: relative;
-        }
-
-        .modal h2 {
-            color: #ffd700;
-            margin-bottom: 30px;
-            font-family: 'MedievalSharp', cursive;
-            font-size: 2rem;
-            text-align: center;
-        }
-
-        .form-group {
+        
+        /* TABS MOBILE */
+        .guild-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
             margin-bottom: 20px;
+            padding-bottom: 5px;
+            gap: 5px;
+            -webkit-overflow-scrolling: touch;
         }
-
-        .form-group label {
-            display: block;
-            color: #ffd700;
-            margin-bottom: 8px;
-            font-weight: bold;
+        
+        .guild-tab {
+            padding: 12px 15px;
+            font-size: 14px;
+            white-space: nowrap;
+            min-width: fit-content;
+            gap: 5px;
         }
-
-        .form-control {
-            width: 100%;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            border-radius: 10px;
-            color: white;
-            font-size: 1rem;
+        
+        .guild-tab span {
+            display: inline-block;
         }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #ffd700;
+        
+        /* MEMBERS CONTAINER MOBILE */
+        .members-container {
+            padding: 20px 15px;
+            border-radius: 15px;
         }
-
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .modal-actions {
-            display: flex;
+        
+        .members-header {
+            flex-direction: column;
             gap: 15px;
-            margin-top: 30px;
-        }
-
-        .modal-actions .btn {
-            flex: 1;
-            justify-content: center;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .guild-header {
-                flex-direction: column;
-                text-align: center;
-                gap: 20px;
-            }
-
-            .guild-stats {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .guild-tabs {
-                flex-wrap: wrap;
-            }
-
-            .members-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .members-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .modal {
-                padding: 20px;
-                width: 95%;
-            }
-        }
-
-        /* Loading */
-        .loading {
+            margin-bottom: 20px;
             text-align: center;
-            padding: 40px;
-            color: #ffd700;
+        }
+        
+        .members-header h3 {
+            font-size: 1.3rem;
+            width: 100%;
+        }
+        
+        .members-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .member-card {
+            padding: 15px;
+        }
+        
+        .member-header {
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .member-avatar {
+            width: 45px;
+            height: 45px;
             font-size: 1.2rem;
         }
-
-        .loading i {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            display: block;
+        
+        .member-name {
+            font-size: 1.1rem;
         }
-    </style>
+        
+        .member-player-id {
+            font-size: 0.85rem;
+        }
+        
+        .member-actions {
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+        }
+        
+        .member-actions .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 10px;
+        }
+        
+        /* INVITES CONTAINER MOBILE */
+        .invites-container {
+            padding: 20px 15px;
+        }
+        
+        .invite-card {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .invite-info {
+            width: 100%;
+        }
+        
+        .invite-actions {
+            width: 100%;
+        }
+        
+        .invite-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        /* SETTINGS MOBILE */
+        #tab-settings .members-container {
+            padding: 20px 15px;
+        }
+        
+        #editGuildBtn, #transferGuildBtn, #deleteGuildBtn, #leaveGuildBtn {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 12px;
+            font-size: 14px;
+        }
+        
+        /* MODAL MOBILE */
+        .modal {
+            padding: 20px 15px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 10px;
+        }
+        
+        .modal h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-control {
+            padding: 12px;
+            font-size: 14px;
+        }
+        
+        .modal-actions {
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-actions .btn {
+            width: 100%;
+            padding: 12px;
+        }
+        
+        /* BOTÕES GERAIS MOBILE */
+        .btn {
+            padding: 10px 16px;
+            font-size: 14px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        /* CAMPOS DE FORMULÁRIO MOBILE */
+        input.form-control, 
+        select.form-control, 
+        textarea.form-control {
+            font-size: 14px;
+            padding: 12px;
+        }
+        
+        textarea.form-control {
+            min-height: 80px;
+        }
+    }
+    
+    /* ============================================
+       AJUSTES PARA TELAS MUITO PEQUENAS (max-width: 480px)
+       ============================================ */
+    @media (max-width: 480px) {
+        .guild-tab span {
+            font-size: 12px;
+        }
+        
+        .guild-tab i {
+            font-size: 14px;
+        }
+        
+        .back-btn span {
+            display: none;
+        }
+        
+        .back-btn i {
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .logout-btn span {
+            display: none;
+        }
+        
+        .logout-btn i {
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .user-info span {
+            display: none;
+        }
+        
+        .no-guild-icon {
+            font-size: 40px;
+        }
+        
+        .no-guild-title {
+            font-size: 1.5rem;
+        }
+        
+        .no-guild-text {
+            font-size: 0.9rem;
+            padding: 0 5px;
+        }
+        
+        .guild-name {
+            font-size: 1.5rem;
+        }
+        
+        .guild-description {
+            font-size: 0.9rem;
+        }
+        
+        .member-card {
+            padding: 12px;
+        }
+        
+        .modal {
+            padding: 15px 10px;
+            width: 98%;
+        }
+    }
+    
+    /* ============================================
+       AJUSTES PARA TABLETS (769px - 1024px)
+       ============================================ */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .members-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+        
+        .guild-header {
+            padding: 25px;
+        }
+        
+        .modal {
+            width: 80%;
+        }
+    }
+</style>
 </head>
 <body>
     <div class="container">
