@@ -785,8 +785,7 @@ async function createCampaign() {
     submitBtn.disabled = true;
     
     try {
-        // CHAMAR FUNÇÃO DO BANCO create_campaign
-        const { data, error } = await supabase.rpc('create_campaign', {
+        console.log('Enviando dados para criação:', {
             p_guild_id: userGuild.id,
             p_name: name,
             p_campaign_id: campaignId,
@@ -798,26 +797,78 @@ async function createCampaign() {
             p_status: status
         });
         
-        if (error) {
-            console.error('Erro ao criar campanha:', error);
-            showMessage('Erro: ' + error.message, 'error', 'gm-create-content');
-            return;
+        // TESTE: Primeiro tente criar manualmente para ver o erro
+        const { data: manualData, error: manualError } = await supabase
+            .from('campaigns')
+            .insert({
+                campaign_id: campaignId,
+                guild_id: userGuild.id,
+                name: name,
+                description: description || null,
+                setting: setting || null,
+                starting_points: startingPoints,
+                max_players: maxPlayers,
+                status: status,
+                created_by: currentUser.id,
+                game_system: 'GURPS'
+            })
+            .select()
+            .single();
+        
+        if (manualError) {
+            console.error('Erro manual:', manualError);
+            showMessage('Erro: ' + manualError.message, 'error', 'gm-create-content');
+            
+            // Tenta usar a função RPC também
+            console.log('Tentando função RPC...');
+            const { data: rpcData, error: rpcError } = await supabase.rpc('create_campaign', {
+                p_guild_id: userGuild.id,
+                p_name: name,
+                p_campaign_id: campaignId,
+                p_created_by: currentUser.id,
+                p_description: description || null,
+                p_setting: setting || null,
+                p_starting_points: startingPoints,
+                p_max_players: maxPlayers,
+                p_status: status
+            });
+            
+            if (rpcError) {
+                console.error('Erro RPC:', rpcError);
+                throw rpcError;
+            }
+            
+            console.log('RPC sucesso:', rpcData);
+            showMessage(`✅ Campanha "${name}" criada! Código: ${campaignId}`, 'success', 'gm-create-content');
+            
+        } else {
+            console.log('Manual sucesso:', manualData);
+            
+            // Adiciona criador como co-gm manualmente
+            await supabase
+                .from('campaign_players')
+                .insert({
+                    campaign_id: manualData.id,
+                    user_id: currentUser.id,
+                    role: 'co-gm',
+                    status: 'active'
+                });
+            
+            showMessage(`✅ Campanha "${name}" criada! Código: ${campaignId}`, 'success', 'gm-create-content');
         }
         
-        if (data && data.success) {
-            showMessage(`✅ Campanha "${name}" criada com sucesso! Código: ${campaignId}`, 'success', 'gm-create-content');
-            
-            // Limpar formulário
-            document.getElementById('campaignName').value = '';
-            document.getElementById('campaignId').value = '';
-            document.getElementById('campaignDescription').value = '';
-            document.getElementById('campaignSetting').value = '';
-            document.getElementById('startingPoints').value = '100';
-            document.getElementById('maxPlayers').value = '6';
-            document.getElementById('campaignStatus').value = 'preparation';
-            
-            // Atualizar lista de campanhas do mestre
-            await loadGMCampaigns();
+        // Limpar formulário
+        document.getElementById('campaignName').value = '';
+        document.getElementById('campaignId').value = '';
+        document.getElementById('campaignDescription').value = '';
+        document.getElementById('campaignSetting').value = '';
+        document.getElementById('startingPoints').value = '100';
+        document.getElementById('maxPlayers').value = '6';
+        document.getElementById('campaignStatus').value = 'preparation';
+        
+        // Atualizar lista de campanhas
+        setTimeout(() => {
+            loadGMCampaigns();
             
             // Mudar para aba "Minhas Campanhas" do mestre
             const gmTabBtn = document.querySelector('.main-tab[data-main-tab="gm"]');
@@ -827,22 +878,20 @@ async function createCampaign() {
                 gmTabBtn.click();
                 setTimeout(() => {
                     gmCampaignsTab.click();
-                }, 100);
+                }, 300);
             }
-        } else {
-            showMessage('Erro ao criar campanha. Tente novamente.', 'error', 'gm-create-content');
-        }
+        }, 1500);
         
     } catch (error) {
-        console.error('Erro:', error);
-        showMessage('Erro: ' + error.message, 'error', 'gm-create-content');
+        console.error('Erro completo:', error);
+        showMessage('Erro ao criar campanha: ' + (error.message || 'Tente novamente'), 'error', 'gm-create-content');
     } finally {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     }
 }
 
-// CARREGAR CAMPANHAS DO MESTRE - FUNÇÃO CORRIGIDA
+// CARREGAR CAMPANHAS DO MESTRE - FUNÇÃO SIMPLIFICADA
 async function loadGMCampaigns() {
     const container = document.getElementById('gm-campaigns-list');
     if (!container) return;
@@ -850,14 +899,64 @@ async function loadGMCampaigns() {
     container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando suas campanhas...</p>';
     
     try {
-        // CHAMAR FUNÇÃO DO BANCO get_user_gm_campaigns
-        const { data: campaigns, error } = await supabase.rpc('get_user_gm_campaigns', {
-            p_user_id: currentUser.id
-        });
+        // Tenta primeiro a função RPC
+        let campaigns = null;
+        let error = null;
+        
+        try {
+            const { data, error: rpcError } = await supabase.rpc('get_user_gm_campaigns', {
+                p_user_id: currentUser.id
+            });
+            
+            if (!rpcError) {
+                campaigns = data;
+            } else {
+                error = rpcError;
+                console.log('RPC falhou, tentando query direta...');
+            }
+        } catch (rpcError) {
+            error = rpcError;
+        }
+        
+        // Se RPC falhar, tenta query direta
+        if (!campaigns) {
+            const { data: directData, error: directError } = await supabase
+                .from('campaigns')
+                .select(`
+                    *,
+                    campaign_players!inner(*)
+                `)
+                .eq('created_by', currentUser.id)
+                .order('created_at', { ascending: false });
+            
+            if (!directError && directData) {
+                campaigns = directData.map(campaign => ({
+                    id: campaign.id,
+                    campaign_id: campaign.campaign_id,
+                    name: campaign.name,
+                    description: campaign.description,
+                    setting: campaign.setting,
+                    starting_points: campaign.starting_points,
+                    max_players: campaign.max_players,
+                    status: campaign.status,
+                    player_count: campaign.campaign_players?.length || 0,
+                    created_at: campaign.created_at
+                }));
+            } else {
+                error = directError;
+            }
+        }
         
         if (error) {
             console.error('Erro ao carregar campanhas:', error);
-            container.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 40px;">Erro ao carregar campanhas</p>';
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <p style="color: #e74c3c; margin-bottom: 20px;">Erro ao carregar campanhas</p>
+                    <button class="btn" onclick="loadGMCampaigns()">
+                        <i class="fas fa-redo"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
             return;
         }
         
@@ -888,10 +987,13 @@ async function loadGMCampaigns() {
                             <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; 
                                 ${campaign.status === 'active' ? 'background: rgba(46, 204, 113, 0.2); color: #2ecc71;' : 
                                   campaign.status === 'preparation' ? 'background: rgba(52, 152, 219, 0.2); color: #3498db;' :
-                                  'background: rgba(241, 196, 15, 0.2); color: #f1c40f;'}">
+                                  campaign.status === 'paused' ? 'background: rgba(241, 196, 15, 0.2); color: #f1c40f;' :
+                                  'background: rgba(155, 155, 155, 0.2); color: #aaa;'}">
                                 ${campaign.status === 'active' ? 'Ativa' : 
                                   campaign.status === 'preparation' ? 'Preparação' : 
-                                  campaign.status === 'paused' ? 'Pausada' : campaign.status}
+                                  campaign.status === 'paused' ? 'Pausada' : 
+                                  campaign.status === 'completed' ? 'Concluída' : 
+                                  campaign.status === 'archived' ? 'Arquivada' : campaign.status}
                             </span>
                         </div>
                     </div>
@@ -907,16 +1009,16 @@ async function loadGMCampaigns() {
                 <div style="display: flex; gap: 20px; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
                     <div style="display: flex; align-items: center; gap: 5px; color: #aaa; font-size: 0.85rem;">
                         <i class="fas fa-users" style="color: #ff8c00;"></i>
-                        <span>${campaign.player_count || 0}/${campaign.max_players} jogadores</span>
+                        <span>${campaign.player_count || 0}/${campaign.max_players || 6} jogadores</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 5px; color: #aaa; font-size: 0.85rem;">
                         <i class="fas fa-star" style="color: #ff8c00;"></i>
-                        <span>${campaign.starting_points} pontos</span>
+                        <span>${campaign.starting_points || 100} pontos</span>
                     </div>
                 </div>
                 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="btn" style="flex: 1; padding: 8px;" onclick="viewCampaignDetails('${campaign.id}')">
+                    <button class="btn" style="flex: 1; padding: 8px;" onclick="viewCampaignDetails('${campaign.id}', ${campaign.campaign_id})">
                         <i class="fas fa-eye"></i> Ver Detalhes
                     </button>
                     <button class="btn" style="flex: 1; padding: 8px; background: rgba(52, 152, 219, 0.8);" onclick="manageCampaignPlayers('${campaign.id}')">
@@ -927,12 +1029,20 @@ async function loadGMCampaigns() {
         `).join('');
         
     } catch (error) {
-        console.error('Erro ao carregar campanhas:', error);
-        container.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 40px;">Erro ao carregar campanhas</p>';
+        console.error('Erro completo ao carregar campanhas:', error);
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <p style="color: #e74c3c; margin-bottom: 20px;">Erro ao carregar campanhas</p>
+                <p style="color: #aaa; margin-bottom: 20px;">${error.message || 'Tente novamente'}</p>
+                <button class="btn" onclick="loadGMCampaigns()">
+                    <i class="fas fa-redo"></i> Tentar Novamente
+                </button>
+            </div>
+        `;
     }
 }
 
-// CARREGAR CAMPANHAS DO JOGADOR
+// CARREGAR CAMPANHAS DO JOGADOR - FUNÇÃO SIMPLIFICADA
 async function loadPlayerCampaigns() {
     const container = document.getElementById('player-campaigns-list');
     if (!container) return;
@@ -940,14 +1050,69 @@ async function loadPlayerCampaigns() {
     container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando suas campanhas...</p>';
     
     try {
-        // CHAMAR FUNÇÃO DO BANCO get_user_player_campaigns
-        const { data: campaigns, error } = await supabase.rpc('get_user_player_campaigns', {
-            p_user_id: currentUser.id
-        });
+        // Tenta primeiro a função RPC
+        let campaigns = null;
+        let error = null;
+        
+        try {
+            const { data, error: rpcError } = await supabase.rpc('get_user_player_campaigns', {
+                p_user_id: currentUser.id
+            });
+            
+            if (!rpcError) {
+                campaigns = data;
+            } else {
+                error = rpcError;
+                console.log('RPC falhou, tentando query direta...');
+            }
+        } catch (rpcError) {
+            error = rpcError;
+        }
+        
+        // Se RPC falhar, tenta query direta
+        if (!campaigns) {
+            const { data: directData, error: directError } = await supabase
+                .from('campaign_players')
+                .select(`
+                    *,
+                    campaigns!inner(*,
+                        profiles!campaigns_created_by_fkey(username, player_id)
+                    )
+                `)
+                .eq('user_id', currentUser.id)
+                .eq('role', 'player')
+                .eq('status', 'active')
+                .neq('campaigns.created_by', currentUser.id)
+                .order('joined_at', { ascending: false });
+            
+            if (!directError && directData) {
+                campaigns = directData.map(membership => ({
+                    id: membership.campaigns.id,
+                    campaign_id: membership.campaigns.campaign_id,
+                    name: membership.campaigns.name,
+                    description: membership.campaigns.description,
+                    setting: membership.campaigns.setting,
+                    starting_points: membership.campaigns.starting_points,
+                    status: membership.campaigns.status,
+                    gm_username: membership.campaigns.profiles?.username,
+                    player_count: 0, // Precisaria de outra query
+                    joined_at: membership.joined_at
+                }));
+            } else {
+                error = directError;
+            }
+        }
         
         if (error) {
             console.error('Erro ao carregar campanhas:', error);
-            container.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 40px;">Erro ao carregar campanhas</p>';
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <p style="color: #e74c3c; margin-bottom: 20px;">Erro ao carregar campanhas</p>
+                    <button class="btn" onclick="loadPlayerCampaigns()">
+                        <i class="fas fa-redo"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
             return;
         }
         
@@ -976,10 +1141,13 @@ async function loadPlayerCampaigns() {
                             <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; 
                                 ${campaign.status === 'active' ? 'background: rgba(46, 204, 113, 0.2); color: #2ecc71;' : 
                                   campaign.status === 'preparation' ? 'background: rgba(52, 152, 219, 0.2); color: #3498db;' :
-                                  'background: rgba(241, 196, 15, 0.2); color: #f1c40f;'}">
+                                  campaign.status === 'paused' ? 'background: rgba(241, 196, 15, 0.2); color: #f1c40f;' :
+                                  'background: rgba(155, 155, 155, 0.2); color: #aaa;'}">
                                 ${campaign.status === 'active' ? 'Ativa' : 
                                   campaign.status === 'preparation' ? 'Preparação' : 
-                                  campaign.status === 'paused' ? 'Pausada' : campaign.status}
+                                  campaign.status === 'paused' ? 'Pausada' : 
+                                  campaign.status === 'completed' ? 'Concluída' : 
+                                  campaign.status === 'archived' ? 'Arquivada' : campaign.status}
                             </span>
                         </div>
                     </div>
@@ -994,19 +1162,17 @@ async function loadPlayerCampaigns() {
                     <strong>Mestre:</strong> ${escapeHtml(campaign.gm_username || 'Desconhecido')}
                 </p>
                 
+                ${campaign.setting ? `<p style="color: #aaa; margin-bottom: 10px; font-size: 0.9rem;"><strong>Cenário:</strong> ${escapeHtml(campaign.setting)}</p>` : ''}
+                
                 <div style="display: flex; gap: 20px; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
                     <div style="display: flex; align-items: center; gap: 5px; color: #aaa; font-size: 0.85rem;">
-                        <i class="fas fa-users" style="color: #3498db;"></i>
-                        <span>${campaign.player_count || 0} jogadores</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 5px; color: #aaa; font-size: 0.85rem;">
                         <i class="fas fa-star" style="color: #3498db;"></i>
-                        <span>${campaign.starting_points} pontos</span>
+                        <span>${campaign.starting_points || 100} pontos</span>
                     </div>
                 </div>
                 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="btn" style="flex: 1; padding: 8px;" onclick="viewCampaignDetails('${campaign.id}')">
+                    <button class="btn" style="flex: 1; padding: 8px;" onclick="viewCampaignDetails('${campaign.id}', ${campaign.campaign_id})">
                         <i class="fas fa-eye"></i> Ver Campanha
                     </button>
                     <button class="btn" style="flex: 1; padding: 8px; background: rgba(46, 204, 113, 0.8);" onclick="viewCharacterSheet('${campaign.id}')">
@@ -1017,8 +1183,16 @@ async function loadPlayerCampaigns() {
         `).join('');
         
     } catch (error) {
-        console.error('Erro ao carregar campanhas:', error);
-        container.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 40px;">Erro ao carregar campanhas</p>';
+        console.error('Erro completo ao carregar campanhas:', error);
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <p style="color: #e74c3c; margin-bottom: 20px;">Erro ao carregar campanhas</p>
+                <p style="color: #aaa; margin-bottom: 20px;">${error.message || 'Tente novamente'}</p>
+                <button class="btn" onclick="loadPlayerCampaigns()">
+                    <i class="fas fa-redo"></i> Tentar Novamente
+                </button>
+            </div>
+        `;
     }
 }
 
@@ -1075,9 +1249,9 @@ function showMessage(text, type = 'info', containerId = null) {
 }
 
 // Funções placeholder para ações
-function viewCampaignDetails(campaignId) {
-    showMessage('Funcionalidade em desenvolvimento: Ver detalhes da campanha', 'info');
-    console.log('Ver campanha:', campaignId);
+function viewCampaignDetails(campaignId, campaignCode) {
+    showMessage(`Funcionalidade em desenvolvimento: Ver detalhes da campanha ${campaignCode}`, 'info');
+    console.log('Ver campanha:', campaignId, campaignCode);
 }
 
 function manageCampaignPlayers(campaignId) {
