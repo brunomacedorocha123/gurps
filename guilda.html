@@ -127,6 +127,88 @@
             width: 100%;
         }
 
+        /* BOTÃO CRIAR CAMPANHA - NOVO! */
+        .campaign-action {
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+        
+        .campaign-action.visible {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .btn-criar-campanha {
+            display: inline-block;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-criar-campanha button {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            min-width: 280px;
+        }
+        
+        .btn-criar-campanha button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s ease;
+        }
+        
+        .btn-criar-campanha button:hover::before {
+            left: 100%;
+        }
+        
+        .btn-criar-campanha button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #34495e 0%, #5a7ab8 100%);
+        }
+        
+        .btn-criar-campanha button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-icon {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .btn-subtext {
+            font-size: 12px;
+            font-weight: normal;
+            opacity: 0.8;
+            margin-left: 8px;
+            font-style: italic;
+        }
+
         /* QUANDO NÃO TEM GUILDA */
         .no-guild-container {
             text-align: center;
@@ -808,6 +890,12 @@
                 justify-content: center;
             }
             
+            .btn-criar-campanha button {
+                min-width: 250px;
+                padding: 14px 24px;
+                font-size: 16px;
+            }
+            
             .modal {
                 padding: 15px;
                 max-height: 90vh;
@@ -865,6 +953,26 @@
                 flex-direction: column;
             }
             
+            .btn-criar-campanha button {
+                min-width: 220px;
+                padding: 12px 20px;
+                font-size: 15px;
+                gap: 8px;
+            }
+            
+            .btn-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+            }
+            
+            .btn-subtext {
+                font-size: 10px;
+                display: block;
+                margin-top: 4px;
+                margin-left: 0;
+            }
+            
             .modal {
                 max-height: 95vh;
                 margin: 0;
@@ -889,6 +997,12 @@
             .btn {
                 padding: 8px 12px;
                 font-size: 0.8rem;
+            }
+            
+            .btn-criar-campanha button {
+                min-width: 200px;
+                padding: 10px 16px;
+                font-size: 14px;
             }
         }
 
@@ -1171,6 +1285,17 @@ function renderGuildPage() {
             </div>
         </div>
 
+        <!-- BOTÃO CRIAR CAMPANHA - APARECE APENAS QUANDO TEM GUILDA -->
+        <div class="campaign-action visible" id="campaignAction">
+            <a href="campanhas.html" class="btn-criar-campanha">
+                <button type="button" class="btn-criar-campanha">
+                    <span class="btn-icon">⚔️</span>
+                    Criar Nova Campanha
+                    <span class="btn-subtext">(Ir para página de campanhas)</span>
+                </button>
+            </a>
+        </div>
+
         <div class="guild-tabs" role="tablist">
             <button class="guild-tab active" data-tab="members" role="tab" aria-selected="true" aria-controls="tab-members" id="tab-members-btn">
                 <i class="fas fa-users"></i> <span class="tab-text">Membros</span>
@@ -1447,6 +1572,24 @@ function setupEventListeners() {
         } catch (error) {
             console.error('Erro ao sair:', error);
             showMessage('Erro ao sair. Tente novamente.', 'error');
+        }
+    });
+    
+    // Botão Criar Campanha
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-criar-campanha button')) {
+            // O link já está no href do <a>, então não precisa de ação adicional
+            // Mas podemos adicionar um loading se necessário
+            const button = e.target.closest('.btn-criar-campanha button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="loading"></span> Redirecionando...';
+            button.disabled = true;
+            
+            // Remove o loading após 1.5 segundos se não redirecionar
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 1500);
         }
     });
     
