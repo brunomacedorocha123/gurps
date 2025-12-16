@@ -572,7 +572,7 @@
         <p>RPG System GURPS &copy; 2024</p>
     </footer>
 
-    <script>
+   <script>
 // Configuração
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
@@ -754,7 +754,7 @@ function generateCampaignId() {
     idInput.value = newId;
 }
 
-// Criar campanha
+// CRIAR CAMPANHA - FUNÇÃO CORRIGIDA
 async function createCampaign() {
     if (!userGuild) {
         showMessage('Você precisa estar em uma guilda.', 'error', 'gm-create-content');
@@ -762,7 +762,7 @@ async function createCampaign() {
     }
     
     const name = document.getElementById('campaignName').value.trim();
-    const campaignId = document.getElementById('campaignId').value;
+    const campaignId = parseInt(document.getElementById('campaignId').value);
     const description = document.getElementById('campaignDescription').value.trim();
     const setting = document.getElementById('campaignSetting').value.trim();
     const startingPoints = parseInt(document.getElementById('startingPoints').value) || 100;
@@ -775,8 +775,8 @@ async function createCampaign() {
         return;
     }
     
-    if (campaignId.length !== 7) {
-        showMessage('Código deve ter 7 dígitos', 'error', 'gm-create-content');
+    if (campaignId < 1000000 || campaignId > 9999999) {
+        showMessage('Código deve ter 7 dígitos (entre 1000000 e 9999999)', 'error', 'gm-create-content');
         return;
     }
     
@@ -785,22 +785,56 @@ async function createCampaign() {
     submitBtn.disabled = true;
     
     try {
-        // TODO: Chamar função do banco
-        showMessage(`Campanha "${name}" criada! Código: ${campaignId}`, 'success', 'gm-create-content');
+        // CHAMAR FUNÇÃO DO BANCO create_campaign
+        const { data, error } = await supabase.rpc('create_campaign', {
+            p_guild_id: userGuild.id,
+            p_name: name,
+            p_campaign_id: campaignId,
+            p_created_by: currentUser.id,
+            p_description: description || null,
+            p_setting: setting || null,
+            p_starting_points: startingPoints,
+            p_max_players: maxPlayers,
+            p_status: status
+        });
         
-        // Limpar formulário
-        document.getElementById('campaignName').value = '';
-        document.getElementById('campaignId').value = '';
-        document.getElementById('campaignDescription').value = '';
-        document.getElementById('campaignSetting').value = '';
-        document.getElementById('startingPoints').value = '100';
-        document.getElementById('maxPlayers').value = '6';
-        document.getElementById('campaignStatus').value = 'preparation';
+        if (error) {
+            console.error('Erro ao criar campanha:', error);
+            showMessage('Erro: ' + error.message, 'error', 'gm-create-content');
+            return;
+        }
         
-        // Atualizar lista
-        loadGMCampaigns();
+        if (data && data.success) {
+            showMessage(`✅ Campanha "${name}" criada com sucesso! Código: ${campaignId}`, 'success', 'gm-create-content');
+            
+            // Limpar formulário
+            document.getElementById('campaignName').value = '';
+            document.getElementById('campaignId').value = '';
+            document.getElementById('campaignDescription').value = '';
+            document.getElementById('campaignSetting').value = '';
+            document.getElementById('startingPoints').value = '100';
+            document.getElementById('maxPlayers').value = '6';
+            document.getElementById('campaignStatus').value = 'preparation';
+            
+            // Atualizar lista de campanhas do mestre
+            await loadGMCampaigns();
+            
+            // Mudar para aba "Minhas Campanhas" do mestre
+            const gmTabBtn = document.querySelector('.main-tab[data-main-tab="gm"]');
+            const gmCampaignsTab = document.querySelector('.sub-tab[data-sub-tab="gm-campaigns"]');
+            
+            if (gmTabBtn && gmCampaignsTab) {
+                gmTabBtn.click();
+                setTimeout(() => {
+                    gmCampaignsTab.click();
+                }, 100);
+            }
+        } else {
+            showMessage('Erro ao criar campanha. Tente novamente.', 'error', 'gm-create-content');
+        }
         
     } catch (error) {
+        console.error('Erro:', error);
         showMessage('Erro: ' + error.message, 'error', 'gm-create-content');
     } finally {
         submitBtn.innerHTML = originalText;
@@ -808,44 +842,252 @@ async function createCampaign() {
     }
 }
 
+// CARREGAR CAMPANHAS DO MESTRE - FUNÇÃO CORRIGIDA
+async function loadGMCampaigns() {
+    const container = document.getElementById('gm-campaigns-list');
+    if (!container) return;
+    
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando suas campanhas...</p>';
+    
+    try {
+        // CHAMAR FUNÇÃO DO BANCO get_user_gm_campaigns
+        const { data: campaigns, error } = await supabase.rpc('get_user_gm_campaigns', {
+            p_user_id: currentUser.id
+        });
+        
+        if (error) {
+            console.error('Erro ao carregar campanhas:', error);
+            container.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 40px;">Erro ao carregar campanhas</p>';
+            return;
+        }
+        
+        if (!campaigns || campaigns.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-hat-wizard" style="font-size: 3rem; color: rgba(255, 140, 0, 0.3); margin-bottom: 20px;"></i>
+                    <h3 style="color: #aaa; margin-bottom: 10px;">Nenhuma campanha encontrada</h3>
+                    <p style="color: #777; margin-bottom: 20px;">Você ainda não criou nenhuma campanha como mestre.</p>
+                    <button class="btn" onclick="document.querySelector('.sub-tab[data-sub-tab=\"gm-create\"]').click()">
+                        <i class="fas fa-plus-circle"></i> Criar Primeira Campanha
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        // Renderizar campanhas
+        container.innerHTML = campaigns.map(campaign => `
+            <div class="campaign-card" style="background: rgba(45, 45, 55, 0.7); border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255, 140, 0, 0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                    <div>
+                        <h3 style="color: #ffd700; margin-bottom: 5px;">${escapeHtml(campaign.name)}</h3>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="background: rgba(255, 140, 0, 0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; color: #ffd700; font-family: monospace;">
+                                Código: ${campaign.campaign_id}
+                            </span>
+                            <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; 
+                                ${campaign.status === 'active' ? 'background: rgba(46, 204, 113, 0.2); color: #2ecc71;' : 
+                                  campaign.status === 'preparation' ? 'background: rgba(52, 152, 219, 0.2); color: #3498db;' :
+                                  'background: rgba(241, 196, 15, 0.2); color: #f1c40f;'}">
+                                ${campaign.status === 'active' ? 'Ativa' : 
+                                  campaign.status === 'preparation' ? 'Preparação' : 
+                                  campaign.status === 'paused' ? 'Pausada' : campaign.status}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <small style="color: #aaa; font-size: 0.8rem;">Criada em ${formatDate(campaign.created_at)}</small>
+                    </div>
+                </div>
+                
+                ${campaign.description ? `<p style="color: #bbb; margin-bottom: 15px; line-height: 1.5;">${escapeHtml(campaign.description)}</p>` : ''}
+                
+                ${campaign.setting ? `<p style="color: #aaa; margin-bottom: 10px; font-size: 0.9rem;"><strong>Cenário:</strong> ${escapeHtml(campaign.setting)}</p>` : ''}
+                
+                <div style="display: flex; gap: 20px; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 5px; color: #aaa; font-size: 0.85rem;">
+                        <i class="fas fa-users" style="color: #ff8c00;"></i>
+                        <span>${campaign.player_count || 0}/${campaign.max_players} jogadores</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px; color: #aaa; font-size: 0.85rem;">
+                        <i class="fas fa-star" style="color: #ff8c00;"></i>
+                        <span>${campaign.starting_points} pontos</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn" style="flex: 1; padding: 8px;" onclick="viewCampaignDetails('${campaign.id}')">
+                        <i class="fas fa-eye"></i> Ver Detalhes
+                    </button>
+                    <button class="btn" style="flex: 1; padding: 8px; background: rgba(52, 152, 219, 0.8);" onclick="manageCampaignPlayers('${campaign.id}')">
+                        <i class="fas fa-user-plus"></i> Gerenciar Jogadores
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Erro ao carregar campanhas:', error);
+        container.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 40px;">Erro ao carregar campanhas</p>';
+    }
+}
+
+// CARREGAR CAMPANHAS DO JOGADOR
+async function loadPlayerCampaigns() {
+    const container = document.getElementById('player-campaigns-list');
+    if (!container) return;
+    
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando suas campanhas...</p>';
+    
+    try {
+        // CHAMAR FUNÇÃO DO BANCO get_user_player_campaigns
+        const { data: campaigns, error } = await supabase.rpc('get_user_player_campaigns', {
+            p_user_id: currentUser.id
+        });
+        
+        if (error) {
+            console.error('Erro ao carregar campanhas:', error);
+            container.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 40px;">Erro ao carregar campanhas</p>';
+            return;
+        }
+        
+        if (!campaigns || campaigns.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-users" style="font-size: 3rem; color: rgba(255, 140, 0, 0.3); margin-bottom: 20px;"></i>
+                    <h3 style="color: #aaa; margin-bottom: 10px;">Nenhuma campanha encontrada</h3>
+                    <p style="color: #777; margin-bottom: 20px;">Você ainda não está em nenhuma campanha como jogador.</p>
+                    <p style="color: #666; font-size: 0.9rem;">Peça ao mestre da campanha para te convidar usando o código da campanha.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Renderizar campanhas
+        container.innerHTML = campaigns.map(campaign => `
+            <div class="campaign-card" style="background: rgba(45, 45, 55, 0.7); border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(52, 152, 219, 0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                    <div>
+                        <h3 style="color: #3498db; margin-bottom: 5px;">${escapeHtml(campaign.name)}</h3>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="background: rgba(52, 152, 219, 0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; color: #3498db; font-family: monospace;">
+                                Código: ${campaign.campaign_id}
+                            </span>
+                            <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; 
+                                ${campaign.status === 'active' ? 'background: rgba(46, 204, 113, 0.2); color: #2ecc71;' : 
+                                  campaign.status === 'preparation' ? 'background: rgba(52, 152, 219, 0.2); color: #3498db;' :
+                                  'background: rgba(241, 196, 15, 0.2); color: #f1c40f;'}">
+                                ${campaign.status === 'active' ? 'Ativa' : 
+                                  campaign.status === 'preparation' ? 'Preparação' : 
+                                  campaign.status === 'paused' ? 'Pausada' : campaign.status}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <small style="color: #aaa; font-size: 0.8rem;">Entrou em ${formatDate(campaign.joined_at)}</small>
+                    </div>
+                </div>
+                
+                ${campaign.description ? `<p style="color: #bbb; margin-bottom: 15px; line-height: 1.5;">${escapeHtml(campaign.description)}</p>` : ''}
+                
+                <p style="color: #aaa; margin-bottom: 10px; font-size: 0.9rem;">
+                    <strong>Mestre:</strong> ${escapeHtml(campaign.gm_username || 'Desconhecido')}
+                </p>
+                
+                <div style="display: flex; gap: 20px; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 5px; color: #aaa; font-size: 0.85rem;">
+                        <i class="fas fa-users" style="color: #3498db;"></i>
+                        <span>${campaign.player_count || 0} jogadores</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px; color: #aaa; font-size: 0.85rem;">
+                        <i class="fas fa-star" style="color: #3498db;"></i>
+                        <span>${campaign.starting_points} pontos</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn" style="flex: 1; padding: 8px;" onclick="viewCampaignDetails('${campaign.id}')">
+                        <i class="fas fa-eye"></i> Ver Campanha
+                    </button>
+                    <button class="btn" style="flex: 1; padding: 8px; background: rgba(46, 204, 113, 0.8);" onclick="viewCharacterSheet('${campaign.id}')">
+                        <i class="fas fa-scroll"></i> Minha Ficha
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Erro ao carregar campanhas:', error);
+        container.innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 40px;">Erro ao carregar campanhas</p>';
+    }
+}
+
 // Funções auxiliares
-function showMessage(text, type, containerId) {
-    const container = document.getElementById(containerId) || document.querySelector('.main-content');
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'Data desconhecida';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    } catch (error) {
+        return 'Data inválida';
+    }
+}
+
+function showMessage(text, type = 'info', containerId = null) {
+    // Remove mensagens anteriores
+    const oldMessages = document.querySelectorAll('.message');
+    oldMessages.forEach(msg => msg.remove());
+    
+    // Cria nova mensagem
     const messageEl = document.createElement('div');
     messageEl.className = `message ${type}`;
     messageEl.textContent = text;
+    messageEl.setAttribute('role', 'alert');
     
-    const oldMsg = container.querySelector('.message');
-    if (oldMsg) oldMsg.remove();
-    
+    // Adiciona ao container apropriado
     if (containerId) {
-        const form = document.getElementById('createCampaignForm');
-        if (form) form.prepend(messageEl);
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.prepend(messageEl);
+        }
     } else {
-        container.prepend(messageEl);
+        document.querySelector('.main-content').prepend(messageEl);
     }
     
-    setTimeout(() => messageEl.remove(), 5000);
+    // Remove automaticamente após 5 segundos
+    setTimeout(() => {
+        if (messageEl.parentNode) {
+            messageEl.style.opacity = '0';
+            setTimeout(() => messageEl.remove(), 300);
+        }
+    }, 5000);
 }
 
-async function loadPlayerCampaigns() {
-    const container = document.getElementById('player-campaigns-list');
-    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando...</p>';
-    
-    // TODO: Carregar do banco
-    setTimeout(() => {
-        container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Nenhuma campanha encontrada.</p>';
-    }, 1000);
+// Funções placeholder para ações
+function viewCampaignDetails(campaignId) {
+    showMessage('Funcionalidade em desenvolvimento: Ver detalhes da campanha', 'info');
+    console.log('Ver campanha:', campaignId);
 }
 
-async function loadGMCampaigns() {
-    const container = document.getElementById('gm-campaigns-list');
-    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando...</p>';
-    
-    // TODO: Carregar do banco
-    setTimeout(() => {
-        container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Nenhuma campanha encontrada.</p>';
-    }, 1000);
+function manageCampaignPlayers(campaignId) {
+    showMessage('Funcionalidade em desenvolvimento: Gerenciar jogadores', 'info');
+    console.log('Gerenciar jogadores da campanha:', campaignId);
+}
+
+function viewCharacterSheet(campaignId) {
+    showMessage('Funcionalidade em desenvolvimento: Ver ficha de personagem', 'info');
+    console.log('Ver ficha da campanha:', campaignId);
 }
 
 // Iniciar
@@ -854,6 +1096,6 @@ if (document.readyState === 'loading') {
 } else {
     initCampaigns();
 }
-    </script>
+</script>
 </body>
 </html>
