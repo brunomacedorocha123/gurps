@@ -14,7 +14,6 @@
     box-sizing: border-box;
   }
 
-
   body {
     font-family: 'Roboto', sans-serif;
     background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 100%);
@@ -22,7 +21,6 @@
     min-height: 100vh;
     padding: 20px;
   }
-
 
   .app-header {
     display: flex;
@@ -33,13 +31,11 @@
     border-bottom: 2px solid #ffd700;
   }
 
-
   .header-left {
     display: flex;
     align-items: center;
     gap: 20px;
   }
-
 
   .back-btn {
     background: none;
@@ -55,12 +51,10 @@
     gap: 8px;
   }
 
-
   .back-btn:hover {
     background: #ffd700;
     color: #0a0a2a;
   }
-
 
   .header-right {
     display: flex;
@@ -68,13 +62,11 @@
     gap: 20px;
   }
 
-
   .user-info {
     display: flex;
     align-items: center;
     gap: 10px;
   }
-
 
   .user-avatar {
     width: 40px;
@@ -88,7 +80,6 @@
     font-weight: bold;
     font-size: 1.2rem;
   }
-
 
   .logout-btn {
     background: #e74c3c;
@@ -104,17 +95,14 @@
     gap: 8px;
   }
 
-
   .logout-btn:hover {
     background: #c0392b;
   }
-
 
   .container {
     max-width: 1200px;
     margin: 0 auto;
   }
-
 
   /* No Guild State */
   .no-guild-container {
@@ -125,13 +113,11 @@
     border: 2px solid rgba(255, 215, 0, 0.3);
   }
 
-
   .no-guild-icon {
     font-size: 80px;
     color: #ffd700;
     margin-bottom: 30px;
   }
-
 
   .no-guild-title {
     font-family: 'MedievalSharp', cursive;
@@ -139,7 +125,6 @@
     color: #ffd700;
     margin-bottom: 20px;
   }
-
 
   .no-guild-text {
     color: #aaa;
@@ -150,7 +135,6 @@
     margin-left: auto;
     margin-right: auto;
   }
-
 
   /* Guild Header */
   .guild-header {
@@ -164,7 +148,6 @@
     border: 2px solid rgba(255, 215, 0, 0.3);
   }
 
-
   .guild-avatar {
     width: 120px;
     height: 120px;
@@ -177,11 +160,9 @@
     color: #0a0a2a;
   }
 
-
   .guild-info {
     flex: 1;
   }
-
 
   .guild-name {
     font-family: 'MedievalSharp', cursive;
@@ -190,14 +171,12 @@
     margin-bottom: 10px;
   }
 
-
   .guild-id {
     font-size: 1.1rem;
     color: #aaa;
     margin-bottom: 15px;
     font-family: monospace;
   }
-
 
   .guild-description {
     color: #ccc;
@@ -206,13 +185,11 @@
     margin-bottom: 20px;
   }
 
-
   .guild-stats {
     display: flex;
     gap: 30px;
     margin-top: 20px;
   }
-
 
   .guild-stat {
     display: flex;
@@ -221,12 +198,10 @@
     color: #aaa;
   }
 
-
   .guild-stat i {
     color: #ffd700;
     font-size: 1.2rem;
   }
-
 
   /* Tabs */
   .guild-tabs {
@@ -236,7 +211,6 @@
     border-bottom: 2px solid rgba(255, 215, 0, 0.2);
     padding-bottom: 10px;
   }
-
 
   .guild-tab {
     background: rgba(255, 255, 255, 0.05);
@@ -252,12 +226,10 @@
     gap: 10px;
   }
 
-
   .guild-tab:hover {
     background: rgba(255, 215, 0, 0.1);
     color: #ffd700;
   }
-
 
   .guild-tab.active {
     background: rgba(255, 215, 0, 0.2);
@@ -265,24 +237,20 @@
     border-bottom: 3px solid #ffd700;
   }
 
-
   /* Tab Content */
   .tab-content {
     display: none;
     animation: fadeIn 0.3s ease;
   }
 
-
   .tab-content.active {
     display: block;
   }
-
 
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
 
   /* Members Grid */
   .members-container {
@@ -292,7 +260,6 @@
     border: 2px solid rgba(255, 215, 0, 0.3);
   }
 
-
   .members-header {
     display: flex;
     justify-content: space-between;
@@ -300,13 +267,11 @@
     margin-bottom: 30px;
   }
 
-
   .members-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
   }
-
 
   .member-card {
     background: rgba(255, 255, 255, 0.05);
@@ -316,13 +281,11 @@
     transition: all 0.3s;
   }
 
-
   .member-card:hover {
     transform: translateY(-5px);
     border-color: #ffd700;
     box-shadow: 0 10px 20px rgba(255, 215, 0, 0.1);
   }
-
 
   .member-header {
     display: flex;
@@ -330,7 +293,6 @@
     gap: 15px;
     margin-bottom: 15px;
   }
-
 
   .member-avatar {
     width: 50px;
@@ -345,20 +307,17 @@
     color: white;
   }
 
-
   .member-name {
     font-size: 1.3rem;
     font-weight: bold;
     color: #fff;
   }
 
-
   .member-player-id {
     font-size: 0.9rem;
     color: #aaa;
     font-family: monospace;
   }
-
 
   .member-role {
     display: inline-block;
@@ -369,24 +328,20 @@
     margin-top: 5px;
   }
 
-
   .member-role.role-owner {
     background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
     color: #0a0a2a;
   }
-
 
   .member-role.role-admin {
     background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
   }
 
-
   .member-role.role-member {
     background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
     color: white;
   }
-
 
   .member-actions {
     display: flex;
@@ -396,7 +351,6 @@
     padding-top: 15px;
   }
 
-
   /* Invites List */
   .invites-container {
     background: rgba(255, 255, 255, 0.05);
@@ -404,7 +358,6 @@
     padding: 30px;
     border: 2px solid rgba(255, 215, 0, 0.3);
   }
-
 
   .invite-card {
     background: rgba(255, 255, 255, 0.05);
@@ -417,19 +370,16 @@
     align-items: center;
   }
 
-
   .invite-info h4 {
     color: #ffd700;
     margin-bottom: 5px;
   }
-
 
   .invite-info p {
     color: #aaa;
     font-size: 0.9rem;
     margin-bottom: 2px;
   }
-
 
   /* Buttons */
   .btn {
@@ -447,34 +397,28 @@
     gap: 8px;
   }
 
-
   .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
   }
-
 
   .btn-primary {
     background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
   }
 
-
   .btn-primary:hover {
     box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
   }
-
 
   .btn-danger {
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: white;
   }
 
-
   .btn-danger:hover {
     box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
   }
-
 
   /* Modal */
   .modal-overlay {
@@ -490,11 +434,9 @@
     justify-content: center;
   }
 
-
   .modal-overlay.active {
     display: flex;
   }
-
 
   .modal {
     background: linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%);
@@ -506,7 +448,6 @@
     position: relative;
   }
 
-
   .modal h2 {
     color: #ffd700;
     margin-bottom: 30px;
@@ -515,11 +456,9 @@
     text-align: center;
   }
 
-
   .form-group {
     margin-bottom: 20px;
   }
-
 
   .form-group label {
     display: block;
@@ -527,7 +466,6 @@
     margin-bottom: 8px;
     font-weight: bold;
   }
-
 
   .form-control {
     width: 100%;
@@ -539,18 +477,15 @@
     font-size: 1rem;
   }
 
-
   .form-control:focus {
     outline: none;
     border-color: #ffd700;
   }
 
-
   textarea.form-control {
     min-height: 100px;
     resize: vertical;
   }
-
 
   .modal-actions {
     display: flex;
@@ -558,12 +493,10 @@
     margin-top: 30px;
   }
 
-
   .modal-actions .btn {
     flex: 1;
     justify-content: center;
   }
-
 
   /* Loading */
   .loading {
@@ -573,13 +506,11 @@
     font-size: 1.2rem;
   }
 
-
   .loading i {
     font-size: 2rem;
     margin-bottom: 10px;
     display: block;
   }
-
 
   /* ============================================
     AJUSTES ESPECÍFICOS PARA MOBILE (max-width: 768px)
@@ -977,7 +908,6 @@
       </div>
     </header>
 
-
     <!-- Main Content -->
     <main id="guild-content">
       <div class="loading">
@@ -985,7 +915,6 @@
         <p>Carregando guilda...</p>
       </div>
     </main>
-
 
     <!-- Create Guild Modal -->
     <div class="modal-overlay" id="createGuildModal">
@@ -1033,7 +962,6 @@
       </div>
     </div>
 
-
     <!-- Invite Member Modal -->
     <div class="modal-overlay" id="inviteModal">
       <div class="modal">
@@ -1059,8 +987,9 @@
       </div>
     </div>
   </div>
+
 <script>
- // Configuração do Supabase
+// Configuração do Supabase
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
@@ -1101,6 +1030,8 @@ async function loadUserData() {
 }
 
 async function loadUserGuild() {
+  console.log('Carregando guilda do usuário...');
+  
   try {
     // Primeiro, verificar se é dono de alguma guilda
     const { data: ownedGuild, error: ownerError } = await supabase
@@ -1114,12 +1045,14 @@ async function loadUserGuild() {
     }
 
     if (ownedGuild) {
+      console.log('Usuário é dono da guilda:', ownedGuild);
       userGuild = ownedGuild;
       renderGuildPage();
       return;
     }
 
     // Se não for dono, verificar se é membro
+    console.log('Buscando membros do usuário...');
     const { data: memberships, error: memberError } = await supabase
       .from('guild_members')
       .select('guild_id, role, status, guilds(*)')
@@ -1132,10 +1065,14 @@ async function loadUserGuild() {
       return;
     }
 
+    console.log('Memberships encontradas:', memberships);
+
     if (memberships && memberships.length > 0) {
       userGuild = memberships[0].guilds;
+      console.log('Guilda carregada:', userGuild);
       renderGuildPage();
     } else {
+      console.log('Usuário não tem guilda');
       renderNoGuildPage();
     }
   } catch (error) {
@@ -1145,6 +1082,7 @@ async function loadUserGuild() {
 }
 
 function renderNoGuildPage() {
+  console.log('Renderizando página sem guilda');
   const content = `
     <div class="no-guild-container">
       <div class="no-guild-icon">
@@ -1166,20 +1104,10 @@ function renderNoGuildPage() {
   if (guildContent) {
     guildContent.innerHTML = content;
   }
-  
-  // Adicionar event listener depois que o conteúdo foi renderizado
-  setTimeout(() => {
-    const createGuildBtn = document.getElementById('createGuildBtn');
-    if (createGuildBtn) {
-      createGuildBtn.addEventListener('click', () => {
-        const modal = document.getElementById('createGuildModal');
-        if (modal) modal.classList.add('active');
-      });
-    }
-  }, 100);
 }
 
 function renderGuildPage() {
+  console.log('Renderizando página da guilda:', userGuild);
   const content = `
     <div class="guild-header">
       <div class="guild-avatar">
@@ -1213,6 +1141,9 @@ function renderGuildPage() {
       <button class="guild-tab" data-tab="invites">
         <i class="fas fa-user-plus"></i> Convites
       </button>
+      <button class="guild-tab" data-tab="campaigns">
+        <i class="fas fa-map"></i> Campanhas
+      </button>
       <button class="guild-tab" data-tab="settings">
         <i class="fas fa-cog"></i> Configurações
       </button>
@@ -1244,6 +1175,23 @@ function renderGuildPage() {
         </div>
       </div>
 
+      <div class="tab-content" id="tab-campaigns">
+        <div class="members-container">
+          <div class="members-header">
+            <h3 style="color: #ffd700;">Campanhas da Guilda</h3>
+            <button class="btn" id="createCampaignBtnInGuild">
+              <i class="fas fa-plus"></i> Nova Campanha
+            </button>
+          </div>
+          <div id="campaignsList">
+            <p style="color: #888; text-align: center; padding: 40px;">
+              <i class="fas fa-map fa-2x" style="margin-bottom: 15px;"></i><br>
+              Carregando campanhas...
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div class="tab-content" id="tab-settings">
         <div class="members-container">
           <h3 style="color: #ffd700; margin-bottom: 20px;">Configurações da Guilda</h3>
@@ -1257,18 +1205,19 @@ function renderGuildPage() {
   if (guildContent) {
     guildContent.innerHTML = content;
     
-    // Configurar tabs imediatamente
+    // Configurar tabs
     setupTabs();
     
-    // Carregar membros e convites
+    // Carregar dados da guilda
     loadMembers().then(() => {
-      // Atualizar contagem de membros após carregar
       updateMemberCount();
     });
     loadInvites();
+    loadCampaigns();
     
-    // Configurar event listeners para elementos recém-criados
+    // Configurar event listeners específicos
     setTimeout(() => {
+      // Botão convidar membro
       const inviteMemberBtn = document.getElementById('inviteMemberBtn');
       if (inviteMemberBtn) {
         inviteMemberBtn.addEventListener('click', () => {
@@ -1277,24 +1226,24 @@ function renderGuildPage() {
         });
       }
       
-      // Configurar botões de configurações
+      // Botão criar campanha
+      const createCampaignBtnInGuild = document.getElementById('createCampaignBtnInGuild');
+      if (createCampaignBtnInGuild) {
+        createCampaignBtnInGuild.addEventListener('click', () => {
+          window.location.href = 'criar-campanha.html?guild=' + userGuild.id;
+        });
+      }
+      
+      // Botões de configurações
       const editGuildBtn = document.getElementById('editGuildBtn');
       const transferGuildBtn = document.getElementById('transferGuildBtn');
       const deleteGuildBtn = document.getElementById('deleteGuildBtn');
       const leaveGuildBtn = document.getElementById('leaveGuildBtn');
       
-      if (editGuildBtn) {
-        editGuildBtn.addEventListener('click', editGuild);
-      }
-      if (transferGuildBtn) {
-        transferGuildBtn.addEventListener('click', transferGuild);
-      }
-      if (deleteGuildBtn) {
-        deleteGuildBtn.addEventListener('click', deleteGuild);
-      }
-      if (leaveGuildBtn) {
-        leaveGuildBtn.addEventListener('click', leaveGuild);
-      }
+      if (editGuildBtn) editGuildBtn.addEventListener('click', editGuild);
+      if (transferGuildBtn) transferGuildBtn.addEventListener('click', transferGuild);
+      if (deleteGuildBtn) deleteGuildBtn.addEventListener('click', deleteGuild);
+      if (leaveGuildBtn) leaveGuildBtn.addEventListener('click', leaveGuild);
     }, 100);
   }
 }
@@ -1357,11 +1306,20 @@ function setupTabs() {
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const tabId = tab.getAttribute('data-tab');
+      
+      // Remover active de todas
       tabs.forEach(t => t.classList.remove('active'));
       contents.forEach(c => c.classList.remove('active'));
+      
+      // Adicionar active aos selecionados
       tab.classList.add('active');
       const contentElement = document.getElementById(`tab-${tabId}`);
       if (contentElement) contentElement.classList.add('active');
+      
+      // Carregar conteúdo específico se necessário
+      if (tabId === 'campaigns') {
+        loadCampaigns();
+      }
     });
   });
 }
@@ -1431,7 +1389,7 @@ async function loadMembers() {
         `;
       }).join('');
       
-      // Adicionar event listeners aos botões dos membros
+      // Adicionar event listeners aos botões
       setTimeout(() => {
         document.querySelectorAll('.promote-btn').forEach(btn => {
           btn.addEventListener('click', (e) => {
@@ -1508,7 +1466,7 @@ async function loadInvites() {
           </div>
         `).join('');
         
-        // Adicionar event listeners aos botões de cancelar
+        // Adicionar event listeners
         setTimeout(() => {
           document.querySelectorAll('.cancel-invite-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -1525,7 +1483,91 @@ async function loadInvites() {
   }
 }
 
+async function loadCampaigns() {
+  try {
+    const campaignsList = document.getElementById('campaignsList');
+    if (!campaignsList) return;
+    
+    console.log('Carregando campanhas para a guilda:', userGuild.id);
+    
+    const { data: campaigns, error } = await supabase
+      .from('campaigns')
+      .select('*')
+      .eq('guild_id', userGuild.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Erro ao carregar campanhas:', error);
+      campaignsList.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px;">
+          <p style="color: #e74c3c;">Erro ao carregar campanhas</p>
+          <button class="btn" onclick="loadCampaigns()">
+            <i class="fas fa-redo"></i> Tentar Novamente
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    console.log('Campanhas encontradas:', campaigns);
+
+    if (campaigns && campaigns.length > 0) {
+      campaignsList.innerHTML = campaigns.map(campaign => `
+        <div class="member-card" style="cursor: pointer;" onclick="openCampaign('${campaign.campaign_id}')">
+          <div class="member-header">
+            <div class="member-avatar" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+              <i class="fas fa-map"></i>
+            </div>
+            <div>
+              <div class="member-name">${escapeHtml(campaign.name)}</div>
+              <div class="member-player-id">ID: ${escapeHtml(campaign.campaign_id)}</div>
+              <div class="member-role ${campaign.status === 'active' ? 'role-owner' : 'role-member'}">
+                ${campaign.status === 'active' ? 'Ativa' : 'Pausada'}
+              </div>
+            </div>
+          </div>
+          <p style="color: #aaa; font-size: 0.9rem; margin-top: 10px;">
+            ${escapeHtml(campaign.description || 'Sem descrição')}
+          </p>
+          <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 5px;">
+            Mestre: ${campaign.gm_id === currentUser.id ? 'Você' : 'Outro'}
+          </p>
+        </div>
+      `).join('');
+    } else {
+      campaignsList.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px;">
+          <i class="fas fa-map fa-3x" style="color: #475569; margin-bottom: 15px;"></i>
+          <p style="color: #888; margin-bottom: 20px;">Nenhuma campanha criada ainda</p>
+          <button class="btn" id="createFirstCampaignBtn">
+            <i class="fas fa-plus"></i> Criar Primeira Campanha
+          </button>
+        </div>
+      `;
+      
+      // Adicionar event listener
+      setTimeout(() => {
+        const createFirstCampaignBtn = document.getElementById('createFirstCampaignBtn');
+        if (createFirstCampaignBtn) {
+          createFirstCampaignBtn.addEventListener('click', () => {
+            window.location.href = 'criar-campanha.html?guild=' + userGuild.id;
+          });
+        }
+      }, 100);
+    }
+    
+  } catch (error) {
+    console.error('Erro ao carregar campanhas:', error);
+  }
+}
+
+function openCampaign(campaignId) {
+  window.location.href = `campanha-detalhes.html?id=${campaignId}`;
+}
+
 function setupEventListeners() {
+  console.log('Configurando event listeners...');
+  
   // Botão voltar
   const backBtn = document.getElementById('backBtn');
   if (backBtn) {
@@ -1586,6 +1628,14 @@ function setupEventListeners() {
       if (invitePlayerId) invitePlayerId.value = '';
     });
   }
+  
+  // Botão criar guilda (na página sem guilda)
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'createGuildBtn') {
+      const modal = document.getElementById('createGuildModal');
+      if (modal) modal.classList.add('active');
+    }
+  });
   
   // Fechar modais ao clicar fora
   document.querySelectorAll('.modal-overlay').forEach(modal => {
