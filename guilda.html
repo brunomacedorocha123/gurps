@@ -1,1021 +1,1069 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guilda - RPG Manager</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guilda - RPG Manager</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
+
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 100%);
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #ffd700;
+  }
+
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+
+  .back-btn {
+    background: none;
+    border: 2px solid #ffd700;
+    color: #ffd700;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+
+  .back-btn:hover {
+    background: #ffd700;
+    color: #0a0a2a;
+  }
+
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    background: #ffd700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a2a;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+
+  .logout-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+
+  .logout-btn:hover {
+    background: #c0392b;
+  }
+
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+
+  /* No Guild State */
+  .no-guild-container {
+    text-align: center;
+    padding: 60px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+  }
+
+
+  .no-guild-icon {
+    font-size: 80px;
+    color: #ffd700;
+    margin-bottom: 30px;
+  }
+
+
+  .no-guild-title {
+    font-family: 'MedievalSharp', cursive;
+    font-size: 2.5rem;
+    color: #ffd700;
+    margin-bottom: 20px;
+  }
+
+
+  .no-guild-text {
+    color: #aaa;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+
+  /* Guild Header */
+  .guild-header {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+  }
+
+
+  .guild-avatar {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    color: #0a0a2a;
+  }
+
+
+  .guild-info {
+    flex: 1;
+  }
+
+
+  .guild-name {
+    font-family: 'MedievalSharp', cursive;
+    font-size: 2.5rem;
+    color: #ffd700;
+    margin-bottom: 10px;
+  }
+
+
+  .guild-id {
+    font-size: 1.1rem;
+    color: #aaa;
+    margin-bottom: 15px;
+    font-family: monospace;
+  }
+
+
+  .guild-description {
+    color: #ccc;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+
+  .guild-stats {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+  }
+
+
+  .guild-stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #aaa;
+  }
+
+
+  .guild-stat i {
+    color: #ffd700;
+    font-size: 1.2rem;
+  }
+
+
+  /* Tabs */
+  .guild-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.2);
+    padding-bottom: 10px;
+  }
+
+
+  .guild-tab {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: #aaa;
+    padding: 15px 30px;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+
+  .guild-tab:hover {
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+  }
+
+
+  .guild-tab.active {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+    border-bottom: 3px solid #ffd700;
+  }
+
+
+  /* Tab Content */
+  .tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+
+  .tab-content.active {
+    display: block;
+  }
+
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+
+  /* Members Grid */
+  .members-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 30px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+  }
+
+
+  .members-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+
+  .members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+
+  .member-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    transition: all 0.3s;
+  }
+
+
+  .member-card:hover {
+    transform: translateY(-5px);
+    border-color: #ffd700;
+    box-shadow: 0 10px 20px rgba(255, 215, 0, 0.1);
+  }
+
+
+  .member-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+
+  .member-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+
+  .member-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #fff;
+  }
+
+
+  .member-player-id {
+    font-size: 0.9rem;
+    color: #aaa;
+    font-family: monospace;
+  }
+
+
+  .member-role {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-top: 5px;
+  }
+
+
+  .member-role.role-owner {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+    color: #0a0a2a;
+  }
+
+
+  .member-role.role-admin {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+  }
+
+
+  .member-role.role-member {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: white;
+  }
+
+
+  .member-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+  }
+
+
+  /* Invites List */
+  .invites-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 30px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+  }
+
+
+  .invite-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+
+  .invite-info h4 {
+    color: #ffd700;
+    margin-bottom: 5px;
+  }
+
+
+  .invite-info p {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+  }
+
+
+  /* Buttons */
+  .btn {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+    color: #0a0a2a;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+  }
+
+
+  .btn-primary {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+  }
+
+
+  .btn-primary:hover {
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+  }
+
+
+  .btn-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+  }
+
+
+  .btn-danger:hover {
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+  }
+
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+
+  .modal {
+    background: linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%);
+    border-radius: 20px;
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    border: 3px solid #ffd700;
+    position: relative;
+  }
+
+
+  .modal h2 {
+    color: #ffd700;
+    margin-bottom: 30px;
+    font-family: 'MedievalSharp', cursive;
+    font-size: 2rem;
+    text-align: center;
+  }
+
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+
+  .form-group label {
+    display: block;
+    color: #ffd700;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+
+  .form-control {
+    width: 100%;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+  }
+
+
+  .form-control:focus {
+    outline: none;
+    border-color: #ffd700;
+  }
+
+
+  textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+
+  .modal-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+  }
+
+
+  .modal-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #ffd700;
+    font-size: 1.2rem;
+  }
+
+
+  .loading i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+
+  /* ============================================
+    AJUSTES ESPECÍFICOS PARA MOBILE (max-width: 768px)
+    O desktop continua exatamente igual
+    ============================================ */
+  @media (max-width: 768px) {
     body {
-        font-family: 'Roboto', sans-serif;
-        background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 100%);
-        color: #fff;
-        min-height: 100vh;
-        padding: 20px;
-    }
-
-    .app-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px 0;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #ffd700;
-    }
-
-    .header-left {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .back-btn {
-        background: none;
-        border: 2px solid #ffd700;
-        color: #ffd700;
-        padding: 10px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-    }
-
-    .back-btn:hover {
-        background: #ffd700;
-        color: #0a0a2a;
-    }
-
-    .header-right {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        background: #ffd700;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #0a0a2a;
-        font-weight: bold;
-        font-size: 1.2rem;
-    }
-
-    .logout-btn {
-        background: #e74c3c;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .logout-btn:hover {
-        background: #c0392b;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    /* No Guild State */
-    .no-guild-container {
-        text-align: center;
-        padding: 60px 20px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 20px;
-        border: 2px solid rgba(255, 215, 0, 0.3);
-    }
-
-    .no-guild-icon {
-        font-size: 80px;
-        color: #ffd700;
-        margin-bottom: 30px;
-    }
-
-    .no-guild-title {
-        font-family: 'MedievalSharp', cursive;
-        font-size: 2.5rem;
-        color: #ffd700;
-        margin-bottom: 20px;
-    }
-
-    .no-guild-text {
-        color: #aaa;
-        font-size: 1.1rem;
-        line-height: 1.6;
-        margin-bottom: 40px;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    /* Guild Header */
-    .guild-header {
-        display: flex;
-        align-items: center;
-        gap: 40px;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 30px;
-        border-radius: 20px;
-        margin-bottom: 30px;
-        border: 2px solid rgba(255, 215, 0, 0.3);
-    }
-
-    .guild-avatar {
-        width: 120px;
-        height: 120px;
-        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 60px;
-        color: #0a0a2a;
-    }
-
-    .guild-info {
-        flex: 1;
-    }
-
-    .guild-name {
-        font-family: 'MedievalSharp', cursive;
-        font-size: 2.5rem;
-        color: #ffd700;
-        margin-bottom: 10px;
-    }
-
-    .guild-id {
-        font-size: 1.1rem;
-        color: #aaa;
-        margin-bottom: 15px;
-        font-family: monospace;
-    }
-
-    .guild-description {
-        color: #ccc;
-        font-size: 1.1rem;
-        line-height: 1.5;
-        margin-bottom: 20px;
-    }
-
-    .guild-stats {
-        display: flex;
-        gap: 30px;
-        margin-top: 20px;
-    }
-
-    .guild-stat {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: #aaa;
-    }
-
-    .guild-stat i {
-        color: #ffd700;
-        font-size: 1.2rem;
-    }
-
-    /* Tabs */
-    .guild-tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 30px;
-        border-bottom: 2px solid rgba(255, 215, 0, 0.2);
-        padding-bottom: 10px;
-    }
-
-    .guild-tab {
-        background: rgba(255, 255, 255, 0.05);
-        border: none;
-        color: #aaa;
-        padding: 15px 30px;
-        border-radius: 10px 10px 0 0;
-        cursor: pointer;
-        font-size: 1.1rem;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .guild-tab:hover {
-        background: rgba(255, 215, 0, 0.1);
-        color: #ffd700;
-    }
-
-    .guild-tab.active {
-        background: rgba(255, 215, 0, 0.2);
-        color: #ffd700;
-        border-bottom: 3px solid #ffd700;
-    }
-
-    /* Tab Content */
-    .tab-content {
-        display: none;
-        animation: fadeIn 0.3s ease;
-    }
-
-    .tab-content.active {
-        display: block;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Members Grid */
-    .members-container {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 20px;
-        padding: 30px;
-        border: 2px solid rgba(255, 215, 0, 0.3);
-    }
-
-    .members-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-    }
-
-    .members-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
-    }
-
-    .member-card {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        padding: 20px;
-        border: 1px solid rgba(255, 215, 0, 0.2);
-        transition: all 0.3s;
-    }
-
-    .member-card:hover {
-        transform: translateY(-5px);
-        border-color: #ffd700;
-        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.1);
-    }
-
-    .member-header {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-
-    .member-avatar {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 1.5rem;
-        color: white;
-    }
-
-    .member-name {
-        font-size: 1.3rem;
-        font-weight: bold;
-        color: #fff;
-    }
-
-    .member-player-id {
-        font-size: 0.9rem;
-        color: #aaa;
-        font-family: monospace;
-    }
-
-    .member-role {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: bold;
-        margin-top: 5px;
-    }
-
-    .member-role.role-owner {
-        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-        color: #0a0a2a;
-    }
-
-    .member-role.role-admin {
-        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-        color: white;
-    }
-
-    .member-role.role-member {
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        color: white;
-    }
-
-    .member-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding-top: 15px;
-    }
-
-    /* Invites List */
-    .invites-container {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 20px;
-        padding: 30px;
-        border: 2px solid rgba(255, 215, 0, 0.3);
-    }
-
-    .invite-card {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        padding: 20px;
-        margin-bottom: 15px;
-        border: 1px solid rgba(255, 215, 0, 0.2);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .invite-info h4 {
-        color: #ffd700;
-        margin-bottom: 5px;
-    }
-
-    .invite-info p {
-        color: #aaa;
-        font-size: 0.9rem;
-        margin-bottom: 2px;
-    }
-
-    /* Buttons */
-    .btn {
-        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-        color: #0a0a2a;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: bold;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-    }
-
-    .btn-danger {
-        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-        color: white;
-    }
-
-    .btn-danger:hover {
-        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
-    }
-
-    /* Campaigns Section */
-    .campaigns-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-    }
-
-    .campaigns-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
-    }
-
-    .campaign-card {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        padding: 20px;
-        border: 1px solid rgba(255, 215, 0, 0.2);
-        transition: all 0.3s;
-        cursor: pointer;
-    }
-
-    .campaign-card:hover {
-        transform: translateY(-5px);
-        border-color: #ffd700;
-        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.1);
-    }
-
-    .campaign-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 15px;
-    }
-
-    .campaign-name {
-        color: #ffd700;
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-
-    .campaign-id {
-        color: #aaa;
-        font-size: 0.85rem;
-        font-family: monospace;
-    }
-
-    .campaign-description {
-        color: #ccc;
-        font-size: 0.95rem;
-        line-height: 1.4;
-        margin-bottom: 15px;
-    }
-
-    .campaign-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .campaign-status {
-        padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 0.8rem;
-        font-weight: bold;
-    }
-
-    .status-active {
-        background: rgba(34, 197, 94, 0.2);
-        color: #22c55e;
-    }
-
-    .status-paused {
-        background: rgba(234, 179, 8, 0.2);
-        color: #eab308;
-    }
-
-    /* Modal */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-overlay.active {
-        display: flex;
-    }
-
-    .modal {
-        background: linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%);
-        border-radius: 20px;
-        padding: 40px;
-        width: 90%;
-        max-width: 500px;
-        border: 3px solid #ffd700;
-        position: relative;
-    }
-
-    .modal h2 {
-        color: #ffd700;
-        margin-bottom: 30px;
-        font-family: 'MedievalSharp', cursive;
-        font-size: 2rem;
-        text-align: center;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        color: #ffd700;
-        margin-bottom: 8px;
-        font-weight: bold;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 215, 0, 0.3);
-        border-radius: 10px;
-        color: white;
-        font-size: 1rem;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #ffd700;
-    }
-
-    textarea.form-control {
-        min-height: 100px;
-        resize: vertical;
-    }
-
-    .modal-actions {
-        display: flex;
-        gap: 15px;
-        margin-top: 30px;
-    }
-
-    .modal-actions .btn {
-        flex: 1;
-        justify-content: center;
-    }
-
-    /* Loading */
-    .loading {
-        text-align: center;
-        padding: 40px;
-        color: #ffd700;
-        font-size: 1.2rem;
-    }
-
-    .loading i {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        display: block;
-    }
-
-    /* ============================================
-       AJUSTES ESPECÍFICOS PARA MOBILE (max-width: 768px)
-       ============================================ */
-    @media (max-width: 768px) {
-        body {
-            padding: 10px;
-        }
-        
-        .app-header {
-            flex-direction: column;
-            gap: 15px;
-            padding: 15px 0;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .header-left {
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-        
-        .back-btn {
-            padding: 8px 15px;
-            font-size: 14px;
-            align-self: flex-start;
-        }
-        
-        .header-left h1 {
-            font-size: 1.5rem;
-            align-self: center;
-            width: 100%;
-            text-align: center;
-        }
-        
-        .header-right {
-            width: 100%;
-            justify-content: space-between;
-            padding: 10px 0;
-        }
-        
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            font-size: 1rem;
-        }
-        
-        .logout-btn {
-            padding: 8px 15px;
-            font-size: 14px;
-        }
-        
-        .no-guild-container {
-            padding: 30px 15px;
-            margin-top: 10px;
-        }
-        
-        .no-guild-icon {
-            font-size: 50px;
-            margin-bottom: 20px;
-        }
-        
-        .no-guild-title {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-        }
-        
-        .no-guild-text {
-            font-size: 1rem;
-            line-height: 1.5;
-            margin-bottom: 30px;
-            padding: 0 10px;
-        }
-        
-        .guild-header {
-            flex-direction: column;
-            text-align: center;
-            gap: 20px;
-            padding: 20px 15px;
-            margin-bottom: 20px;
-        }
-        
-        .guild-avatar {
-            width: 80px;
-            height: 80px;
-            font-size: 40px;
-            margin: 0 auto;
-        }
-        
-        .guild-name {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-        }
-        
-        .guild-id {
-            font-size: 1rem;
-            margin-bottom: 12px;
-        }
-        
-        .guild-description {
-            font-size: 1rem;
-            line-height: 1.4;
-            margin-bottom: 15px;
-        }
-        
-        .guild-stats {
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .guild-stat {
-            justify-content: center;
-            font-size: 0.9rem;
-        }
-        
-        .guild-tabs {
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            margin-bottom: 20px;
-            padding-bottom: 5px;
-            gap: 5px;
-        }
-        
-        .guild-tab {
-            padding: 12px 15px;
-            font-size: 14px;
-            white-space: nowrap;
-            min-width: fit-content;
-            gap: 5px;
-        }
-        
-        .guild-tab span {
-            display: inline-block;
-        }
-        
-        .members-container, .invites-container {
-            padding: 20px 15px;
-            border-radius: 15px;
-        }
-        
-        .members-header, .campaigns-header {
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .members-grid, .campaigns-grid {
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        
-        .member-card, .campaign-card {
-            padding: 15px;
-        }
-        
-        .member-header {
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-        
-        .member-avatar {
-            width: 45px;
-            height: 45px;
-            font-size: 1.2rem;
-        }
-        
-        .member-name {
-            font-size: 1.1rem;
-        }
-        
-        .member-player-id {
-            font-size: 0.85rem;
-        }
-        
-        .member-actions {
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 12px;
-            padding-top: 12px;
-        }
-        
-        .member-actions .btn {
-            width: 100%;
-            justify-content: center;
-            padding: 10px;
-        }
-        
-        .invite-card {
-            flex-direction: column;
-            gap: 15px;
-            text-align: center;
-            padding: 15px;
-        }
-        
-        .invite-actions {
-            width: 100%;
-        }
-        
-        .invite-actions .btn {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        .campaign-header {
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .modal {
-            padding: 20px 15px;
-            width: 95%;
-            max-height: 90vh;
-            overflow-y: auto;
-            margin: 10px;
-        }
-        
-        .modal h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-control {
-            padding: 12px;
-            font-size: 14px;
-        }
-        
-        .modal-actions {
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .modal-actions .btn {
-            width: 100%;
-            padding: 12px;
-        }
-        
-        .btn {
-            padding: 10px 16px;
-            font-size: 14px;
-            width: 100%;
-            justify-content: center;
-        }
+      padding: 10px;
     }
     
-    @media (max-width: 480px) {
-        .guild-tab span {
-            font-size: 12px;
-        }
-        
-        .guild-tab i {
-            font-size: 14px;
-        }
-        
-        .back-btn span {
-            display: none;
-        }
-        
-        .back-btn i {
-            margin: 0;
-            font-size: 16px;
-        }
-        
-        .logout-btn span {
-            display: none;
-        }
-        
-        .logout-btn i {
-            margin: 0;
-            font-size: 16px;
-        }
-        
-        .user-info span {
-            display: none;
-        }
-        
-        .no-guild-icon {
-            font-size: 40px;
-        }
-        
-        .no-guild-title {
-            font-size: 1.5rem;
-        }
-        
-        .no-guild-text {
-            font-size: 0.9rem;
-            padding: 0 5px;
-        }
-        
-        .guild-name {
-            font-size: 1.5rem;
-        }
-        
-        .guild-description {
-            font-size: 0.9rem;
-        }
-        
-        .member-card, .campaign-card {
-            padding: 12px;
-        }
-        
-        .modal {
-            padding: 15px 10px;
-            width: 98%;
-        }
+    /* HEADER MOBILE */
+    .app-header {
+      flex-direction: column;
+      gap: 15px;
+      padding: 15px 0;
+      margin-bottom: 20px;
+      text-align: center;
     }
+    
+    .header-left {
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+    
+    .back-btn {
+      padding: 8px 15px;
+      font-size: 14px;
+      align-self: flex-start;
+    }
+    
+    .header-left h1 {
+      font-size: 1.5rem;
+      align-self: center;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .header-right {
+      width: 100%;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+    
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      font-size: 1rem;
+    }
+    
+    .logout-btn {
+      padding: 8px 15px;
+      font-size: 14px;
+    }
+    
+    /* NO GUILD STATE MOBILE */
+    .no-guild-container {
+      padding: 30px 15px;
+      margin-top: 10px;
+    }
+    
+    .no-guild-icon {
+      font-size: 50px;
+      margin-bottom: 20px;
+    }
+    
+    .no-guild-title {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+    
+    .no-guild-text {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 30px;
+      padding: 0 10px;
+    }
+    
+    /* GUILD HEADER MOBILE */
+    .guild-header {
+      flex-direction: column;
+      text-align: center;
+      gap: 20px;
+      padding: 20px 15px;
+      margin-bottom: 20px;
+    }
+    
+    .guild-avatar {
+      width: 80px;
+      height: 80px;
+      font-size: 40px;
+      margin: 0 auto;
+    }
+    
+    .guild-name {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    
+    .guild-id {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+    
+    .guild-description {
+      font-size: 1rem;
+      line-height: 1.4;
+      margin-bottom: 15px;
+    }
+    
+    .guild-stats {
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .guild-stat {
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    
+    /* TABS MOBILE */
+    .guild-tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      padding-bottom: 5px;
+      gap: 5px;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .guild-tab {
+      padding: 12px 15px;
+      font-size: 14px;
+      white-space: nowrap;
+      min-width: fit-content;
+      gap: 5px;
+    }
+    
+    .guild-tab span {
+      display: inline-block;
+    }
+    
+    /* MEMBERS CONTAINER MOBILE */
+    .members-container {
+      padding: 20px 15px;
+      border-radius: 15px;
+    }
+    
+    .members-header {
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .members-header h3 {
+      font-size: 1.3rem;
+      width: 100%;
+    }
+    
+    .members-grid {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+    
+    .member-card {
+      padding: 15px;
+    }
+    
+    .member-header {
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .member-avatar {
+      width: 45px;
+      height: 45px;
+      font-size: 1.2rem;
+    }
+    
+    .member-name {
+      font-size: 1.1rem;
+    }
+    
+    .member-player-id {
+      font-size: 0.85rem;
+    }
+    
+    .member-actions {
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+    }
+    
+    .member-actions .btn {
+      width: 100%;
+      justify-content: center;
+      padding: 10px;
+    }
+    
+    /* INVITES CONTAINER MOBILE */
+    .invites-container {
+      padding: 20px 15px;
+    }
+    
+    .invite-card {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+      padding: 15px;
+    }
+    
+    .invite-info {
+      width: 100%;
+    }
+    
+    .invite-actions {
+      width: 100%;
+    }
+    
+    .invite-actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    /* SETTINGS MOBILE */
+    #tab-settings .members-container {
+      padding: 20px 15px;
+    }
+    
+    #editGuildBtn, #transferGuildBtn, #deleteGuildBtn, #leaveGuildBtn {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 12px;
+      font-size: 14px;
+    }
+    
+    /* MODAL MOBILE */
+    .modal {
+      padding: 20px 15px;
+      width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      margin: 10px;
+    }
+    
+    .modal h2 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-control {
+      padding: 12px;
+      font-size: 14px;
+    }
+    
+    .modal-actions {
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .modal-actions .btn {
+      width: 100%;
+      padding: 12px;
+    }
+    
+    /* BOTÕES GERAIS MOBILE */
+    .btn {
+      padding: 10px 16px;
+      font-size: 14px;
+      width: 100%;
+      justify-content: center;
+    }
+    
+    /* CAMPOS DE FORMULÁRIO MOBILE */
+    input.form-control,
+    select.form-control,
+    textarea.form-control {
+      font-size: 14px;
+      padding: 12px;
+    }
+    
+    textarea.form-control {
+      min-height: 80px;
+    }
+  }
+  
+  /* ============================================
+    AJUSTES PARA TELAS MUITO PEQUENAS (max-width: 480px)
+    ============================================ */
+  @media (max-width: 480px) {
+    .guild-tab span {
+      font-size: 12px;
+    }
+    
+    .guild-tab i {
+      font-size: 14px;
+    }
+    
+    .back-btn span {
+      display: none;
+    }
+    
+    .back-btn i {
+      margin: 0;
+      font-size: 16px;
+    }
+    
+    .logout-btn span {
+      display: none;
+    }
+    
+    .logout-btn i {
+      margin: 0;
+      font-size: 16px;
+    }
+    
+    .user-info span {
+      display: none;
+    }
+    
+    .no-guild-icon {
+      font-size: 40px;
+    }
+    
+    .no-guild-title {
+      font-size: 1.5rem;
+    }
+    
+    .no-guild-text {
+      font-size: 0.9rem;
+      padding: 0 5px;
+    }
+    
+    .guild-name {
+      font-size: 1.5rem;
+    }
+    
+    .guild-description {
+      font-size: 0.9rem;
+    }
+    
+    .member-card {
+      padding: 12px;
+    }
+    
+    .modal {
+      padding: 15px 10px;
+      width: 98%;
+    }
+  }
+  
+  /* ============================================
+    AJUSTES PARA TABLETS (769px - 1024px)
+    ============================================ */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .members-grid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    .guild-header {
+      padding: 25px;
+    }
+    
+    .modal {
+      width: 80%;
+    }
+  }
 </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-left">
-                <a href="home.html" class="back-btn">
-                    <i class="fas fa-arrow-left"></i> Voltar
-                </a>
-                <h1 style="font-family: 'MedievalSharp', cursive; color: #ffd700;">Guilda</h1>
-            </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <span id="playerId"></span>
-                </div>
-                <button class="logout-btn" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </button>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main id="guild-content">
-            <div class="loading">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Carregando guilda...</p>
-            </div>
-        </main>
-
-        <!-- Create Guild Modal -->
-        <div class="modal-overlay" id="createGuildModal">
-            <div class="modal">
-                <h2><i class="fas fa-plus-circle"></i> Criar Guilda</h2>
-                <form id="createGuildForm">
-                    <div class="form-group">
-                        <label for="guildName"><i class="fas fa-flag"></i> Nome da Guilda</label>
-                        <input type="text" id="guildName" class="form-control" placeholder="Ex: Dragões de Ébano" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="guildId"><i class="fas fa-hashtag"></i> ID da Guilda</label>
-                        <input type="text" id="guildId" class="form-control" placeholder="Ex: dragoes-ebano" required>
-                        <small style="color: #aaa; display: block; margin-top: 5px;">
-                            Apenas letras minúsculas, números, hífen (-) e underscore (_). Mínimo 3 caracteres.
-                        </small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="guildDescription"><i class="fas fa-scroll"></i> Descrição</label>
-                        <textarea id="guildDescription" class="form-control" placeholder="Descreva sua guilda..."></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="maxMembers"><i class="fas fa-users"></i> Limite de Membros</label>
-                        <select id="maxMembers" class="form-control">
-                            <option value="10">10 membros</option>
-                            <option value="20">20 membros</option>
-                            <option value="30">30 membros</option>
-                            <option value="50">50 membros</option>
-                            <option value="100">100 membros</option>
-                        </select>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="submit" class="btn">
-                            <i class="fas fa-check"></i> Criar Guilda
-                        </button>
-                        <button type="button" class="btn btn-danger" id="cancelCreate">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
-                </form>
-            </div>
+  <div class="container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <button class="back-btn" id="backBtn">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </button>
+        <h1 style="font-family: 'MedievalSharp', cursive; color: #ffd700;">Guilda</h1>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">U</div>
         </div>
+        <button class="logout-btn" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i> Sair
+        </button>
+      </div>
+    </header>
 
-        <!-- Invite Member Modal -->
-        <div class="modal-overlay" id="inviteModal">
-            <div class="modal">
-                <h2><i class="fas fa-user-plus"></i> Convidar Membro</h2>
-                <form id="inviteForm">
-                    <div class="form-group">
-                        <label for="invitePlayerId"><i class="fas fa-id-card"></i> ID do Jogador</label>
-                        <input type="text" id="invitePlayerId" class="form-control" placeholder="Ex: 123456" required>
-                        <small style="color: #aaa; display: block; margin-top: 5px;">
-                            Digite o ID do jogador (apenas números)
-                        </small>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="submit" class="btn">
-                            <i class="fas fa-paper-plane"></i> Enviar Convite
-                        </button>
-                        <button type="button" class="btn btn-danger" id="cancelInvite">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+
+    <!-- Main Content -->
+    <main id="guild-content">
+      <div class="loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Carregando guilda...</p>
+      </div>
+    </main>
+
+
+    <!-- Create Guild Modal -->
+    <div class="modal-overlay" id="createGuildModal">
+      <div class="modal">
+        <h2><i class="fas fa-plus-circle"></i> Criar Guilda</h2>
+        <form id="createGuildForm">
+          <div class="form-group">
+            <label for="guildName"><i class="fas fa-flag"></i> Nome da Guilda</label>
+            <input type="text" id="guildName" class="form-control" placeholder="Ex: Dragões de Ébano" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="guildId"><i class="fas fa-hashtag"></i> ID da Guilda</label>
+            <input type="text" id="guildId" class="form-control" placeholder="Ex: dragoes-ebano" required>
+            <small style="color: #aaa; display: block; margin-top: 5px;">
+              Apenas letras minúsculas, números, hífen (-) e underscore (_). Mínimo 3 caracteres.
+            </small>
+          </div>
+          
+          <div class="form-group">
+            <label for="guildDescription"><i class="fas fa-scroll"></i> Descrição</label>
+            <textarea id="guildDescription" class="form-control" placeholder="Descreva sua guilda..."></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="maxMembers"><i class="fas fa-users"></i> Limite de Membros</label>
+            <select id="maxMembers" class="form-control">
+              <option value="10">10 membros</option>
+              <option value="20">20 membros</option>
+              <option value="30">30 membros</option>
+              <option value="50">50 membros</option>
+              <option value="100">100 membros</option>
+            </select>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="submit" class="btn">
+              <i class="fas fa-check"></i> Criar Guilda
+            </button>
+            <button type="button" class="btn btn-danger" id="cancelCreate">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <script>
-// Configuração do Supabase
+
+    <!-- Invite Member Modal -->
+    <div class="modal-overlay" id="inviteModal">
+      <div class="modal">
+        <h2><i class="fas fa-user-plus"></i> Convidar Membro</h2>
+        <form id="inviteForm">
+          <div class="form-group">
+            <label for="invitePlayerId"><i class="fas fa-id-card"></i> ID do Jogador</label>
+            <input type="text" id="invitePlayerId" class="form-control" placeholder="Ex: 123456" required>
+            <small style="color: #aaa; display: block; margin-top: 5px;">
+              Digite o ID do jogador (apenas números)
+            </small>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="submit" class="btn">
+              <i class="fas fa-paper-plane"></i> Enviar Convite
+            </button>
+            <button type="button" class="btn btn-danger" id="cancelInvite">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<script>
+  // Configuração do Supabase
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
+
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
@@ -1023,946 +1071,900 @@ let userGuild = null;
 let guildMembers = [];
 let guildInvites = [];
 
+
 // Funções principais
 async function initGuild() {
-    await checkAuth();
-    await loadUserData();
-    await loadUserGuild();
-    setupEventListeners();
+  await checkAuth();
+  await loadUserData();
+  await loadUserGuild();
+  setupEventListeners();
 }
+
 
 async function checkAuth() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-        window.location.href = 'login.html';
-        return;
-    }
-    currentUser = session.user;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+  currentUser = session.user;
 }
+
 
 async function loadUserData() {
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', currentUser.id)
+    .single();
 
-    if (profile) {
-        const initials = profile.username?.charAt(0).toUpperCase() || 'U';
-        document.getElementById('userAvatar').innerHTML = initials;
-        if (profile.player_id) {
-            document.getElementById('playerId').textContent = '#' + profile.player_id;
-        }
-    }
+
+  if (profile) {
+    const initials = profile.username?.charAt(0).toUpperCase() || 'U';
+    document.getElementById('userAvatar').innerHTML = initials;
+  }
 }
+
 
 async function loadUserGuild() {
-    try {
-        // Primeiro, verificar se é dono de alguma guilda
-        const { data: ownedGuild, error: ownerError } = await supabase
-            .from('guilds')
-            .select('*')
-            .eq('owner_id', currentUser.id)
-            .single();
+  try {
+    // Primeiro, verificar se é dono de alguma guilda
+    const { data: ownedGuild, error: ownerError } = await supabase
+      .from('guilds')
+      .select('*')
+      .eq('owner_id', currentUser.id)
+      .single();
 
-        if (ownerError && ownerError.code !== 'PGRST116') {
-            console.error('Erro ao buscar guilda do dono:', ownerError);
-        }
 
-        if (ownedGuild) {
-            userGuild = ownedGuild;
-            renderGuildPage();
-            return;
-        }
-
-        // Se não for dono, verificar se é membro
-        const { data: memberships, error: memberError } = await supabase
-            .from('guild_members')
-            .select('guild_id, role, status, guilds(*)')
-            .eq('user_id', currentUser.id)
-            .eq('status', 'accepted');
-
-        if (memberError) {
-            console.error('Erro ao buscar membros:', memberError);
-            renderNoGuildPage();
-            return;
-        }
-
-        if (memberships && memberships.length > 0) {
-            userGuild = memberships[0].guilds;
-            renderGuildPage();
-        } else {
-            renderNoGuildPage();
-        }
-    } catch (error) {
-        console.error('Erro ao carregar guilda:', error);
-        renderNoGuildPage();
+    if (ownerError && ownerError.code !== 'PGRST116') {
+      console.error('Erro ao buscar guilda do dono:', ownerError);
     }
+
+
+    if (ownedGuild) {
+      userGuild = ownedGuild;
+      renderGuildPage();
+      return;
+    }
+
+
+    // Se não for dono, verificar se é membro
+    const { data: memberships, error: memberError } = await supabase
+      .from('guild_members')
+      .select('guild_id, role, status, guilds(*)')
+      .eq('user_id', currentUser.id)
+      .eq('status', 'accepted');
+
+
+    if (memberError) {
+      console.error('Erro ao buscar membros:', memberError);
+      renderNoGuildPage();
+      return;
+    }
+
+
+    if (memberships && memberships.length > 0) {
+      userGuild = memberships[0].guilds;
+      renderGuildPage();
+    } else {
+      renderNoGuildPage();
+    }
+  } catch (error) {
+    console.error('Erro ao carregar guilda:', error);
+    renderNoGuildPage();
+  }
 }
+
 
 function renderNoGuildPage() {
-    const content = `
-        <div class="no-guild-container">
-            <div class="no-guild-icon">
-                <i class="fas fa-users"></i>
-            </div>
-            <h2 class="no-guild-title">Você não possui uma guilda</h2>
-            <p class="no-guild-text">
-                Crie sua própria guilda para reunir seus amigos e jogadores.<br>
-                Como dono da guilda, você poderá convidar outros jogadores, 
-                gerenciar membros e organizar campanhas.
-            </p>
-            <button class="btn btn-primary" id="createGuildBtn">
-                <i class="fas fa-plus"></i> Criar Guilda
-            </button>
-        </div>
-    `;
-    
-    document.getElementById('guild-content').innerHTML = content;
-    
-    document.getElementById('createGuildBtn')?.addEventListener('click', () => {
-        document.getElementById('createGuildModal').classList.add('active');
-    });
+  const content = `
+    <div class="no-guild-container">
+      <div class="no-guild-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <h2 class="no-guild-title">Você não possui uma guilda</h2>
+      <p class="no-guild-text">
+        Crie sua própria guilda para reunir seus amigos e jogadores.<br>
+        Como dono da guilda, você poderá convidar outros jogadores,
+        gerenciar membros e organizar campanhas.
+      </p>
+      <button class="btn btn-primary" id="createGuildBtn">
+        <i class="fas fa-plus"></i> Criar Guilda
+      </button>
+    </div>
+  `;
+  
+  document.getElementById('guild-content').innerHTML = content;
+  
+  document.getElementById('createGuildBtn')?.addEventListener('click', () => {
+    document.getElementById('createGuildModal').classList.add('active');
+  });
 }
+
 
 function renderGuildPage() {
-    const content = `
-        <div class="guild-header">
-            <div class="guild-avatar">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="guild-info">
-                <h2 class="guild-name">${escapeHtml(userGuild.name)}</h2>
-                <div class="guild-id">ID: ${escapeHtml(userGuild.custom_id)}</div>
-                <p class="guild-description">${escapeHtml(userGuild.description || 'Sem descrição')}</p>
-                <div class="guild-stats">
-                    <div class="guild-stat">
-                        <i class="fas fa-users"></i>
-                        <span>Membros: <span id="memberCount">0</span>/${userGuild.max_members}</span>
-                    </div>
-                    <div class="guild-stat">
-                        <i class="fas fa-crown"></i>
-                        <span>Dono: ${userGuild.owner_id === currentUser.id ? 'Você' : 'Outro'}</span>
-                    </div>
-                    <div class="guild-stat">
-                        <i class="fas fa-calendar"></i>
-                        <span>Criada: ${formatDate(userGuild.created_at)}</span>
-                    </div>
-                </div>
-            </div>
+  const content = `
+    <div class="guild-header">
+      <div class="guild-avatar">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="guild-info">
+        <h2 class="guild-name">${escapeHtml(userGuild.name)}</h2>
+        <div class="guild-id">ID: ${escapeHtml(userGuild.custom_id)}</div>
+        <p class="guild-description">${escapeHtml(userGuild.description || 'Sem descrição')}</p>
+        <div class="guild-stats">
+          <div class="guild-stat">
+            <i class="fas fa-users"></i>
+            <span>Membros: <span id="memberCount">0</span>/${userGuild.max_members}</span>
+          </div>
+          <div class="guild-stat">
+            <i class="fas fa-crown"></i>
+            <span>Dono: ${userGuild.owner_id === currentUser.id ? 'Você' : 'Outro'}</span>
+          </div>
+          <div class="guild-stat">
+            <i class="fas fa-calendar"></i>
+            <span>Criada: ${formatDate(userGuild.created_at)}</span>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <div class="guild-tabs">
-            <button class="guild-tab active" data-tab="members">
-                <i class="fas fa-users"></i> Membros
-            </button>
-            <button class="guild-tab" data-tab="campaigns">
-                <i class="fas fa-map"></i> Campanhas
-            </button>
-            <button class="guild-tab" data-tab="invites">
-                <i class="fas fa-user-plus"></i> Convites
-            </button>
-            <button class="guild-tab" data-tab="settings">
-                <i class="fas fa-cog"></i> Configurações
-            </button>
+
+    <div class="guild-tabs">
+      <button class="guild-tab active" data-tab="members">
+        <i class="fas fa-users"></i> Membros
+      </button>
+      <button class="guild-tab" data-tab="invites">
+        <i class="fas fa-user-plus"></i> Convites
+      </button>
+      <button class="guild-tab" data-tab="settings">
+        <i class="fas fa-cog"></i> Configurações
+      </button>
+    </div>
+
+
+    <div id="tab-contents">
+      <div class="tab-content active" id="tab-members">
+        <div class="members-container">
+          <div class="members-header">
+            <h3 style="color: #ffd700;">Membros da Guilda</h3>
+            ${userGuild.owner_id === currentUser.id ?
+              `<button class="btn" id="inviteMemberBtn">
+                <i class="fas fa-user-plus"></i> Convidar
+              </button>` : ''
+            }
+          </div>
+          <div class="members-grid" id="membersGrid">
+            <p style="color: #888; text-align: center;">Carregando membros...</p>
+          </div>
         </div>
+      </div>
 
-        <div id="tab-contents">
-            <div class="tab-content active" id="tab-members">
-                <div class="members-container">
-                    <div class="members-header">
-                        <h3 style="color: #ffd700;">Membros da Guilda</h3>
-                        ${userGuild.owner_id === currentUser.id ? 
-                            `<button class="btn" id="inviteMemberBtn">
-                                <i class="fas fa-user-plus"></i> Convidar
-                            </button>` : ''
-                        }
-                    </div>
-                    <div class="members-grid" id="membersGrid">
-                        <p style="color: #888; text-align: center;">Carregando membros...</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="tab-content" id="tab-campaigns">
-                <div class="members-container">
-                    <div class="campaigns-header">
-                        <h3 style="color: #ffd700;">Campanhas da Guilda</h3>
-                        <a href="campanhas.html" class="btn">
-                            <i class="fas fa-plus"></i> Nova Campanha
-                        </a>
-                    </div>
-                    <div id="campaignsList">
-                        <div class="loading" style="text-align: center; padding: 40px;">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <p>Carregando campanhas...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tab-content" id="tab-invites">
-                <div class="invites-container">
-                    <h3 style="color: #ffd700; margin-bottom: 20px;">Convites Enviados</h3>
-                    <div id="invitesList">
-                        <p style="color: #888; text-align: center;">Carregando convites...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tab-content" id="tab-settings">
-                <div class="members-container">
-                    <h3 style="color: #ffd700; margin-bottom: 20px;">Configurações da Guilda</h3>
-                    ${userGuild.owner_id === currentUser.id ? renderOwnerSettings() : renderMemberSettings()}
-                </div>
-            </div>
+      <div class="tab-content" id="tab-invites">
+        <div class="invites-container">
+          <h3 style="color: #ffd700; margin-bottom: 20px;">Convites Enviados</h3>
+          <div id="invitesList">
+            <p style="color: #888; text-align: center;">Carregando convites...</p>
+          </div>
         </div>
-    `;
-    
-    document.getElementById('guild-content').innerHTML = content;
-    setupTabs();
-    loadMembers();
-    loadCampaigns();
-    loadInvites();
+      </div>
+
+
+      <div class="tab-content" id="tab-settings">
+        <div class="members-container">
+          <h3 style="color: #ffd700; margin-bottom: 20px;">Configurações da Guilda</h3>
+          ${userGuild.owner_id === currentUser.id ? renderOwnerSettings() : renderMemberSettings()}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('guild-content').innerHTML = content;
+  setupTabs();
+  loadMembers();
+  loadInvites();
 }
+
 
 function renderOwnerSettings() {
-    return `
-        <div style="display: grid; gap: 20px;">
-            <div>
-                <button class="btn" id="editGuildBtn" style="width: 100%; margin-bottom: 10px;">
-                    <i class="fas fa-edit"></i> Editar Guilda
-                </button>
-                <button class="btn" id="transferGuildBtn" style="width: 100%; margin-bottom: 10px;">
-                    <i class="fas fa-exchange-alt"></i> Transferir Guilda
-                </button>
-                <button class="btn btn-danger" id="deleteGuildBtn" style="width: 100%;">
-                    <i class="fas fa-trash"></i> Excluir Guilda
-                </button>
-            </div>
-            
-            <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;">
-                <h4 style="color: #ff8c00; margin-bottom: 15px;">Informações da Guilda</h4>
-                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 5px;">
-                    <strong>ID:</strong> ${userGuild.custom_id}
-                </p>
-                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 5px;">
-                    <strong>Código de Convite:</strong> ${userGuild.invite_code || 'Gerando...'}
-                </p>
-                <p style="color: #aaa; font-size: 0.9rem;">
-                    <strong>Criada em:</strong> ${formatDate(userGuild.created_at)}
-                </p>
-            </div>
-        </div>
-    `;
+  return `
+    <div style="display: grid; gap: 20px;">
+      <div>
+        <button class="btn" id="editGuildBtn" style="width: 100%; margin-bottom: 10px;">
+          <i class="fas fa-edit"></i> Editar Guilda
+        </button>
+        <button class="btn" id="transferGuildBtn" style="width: 100%; margin-bottom: 10px;">
+          <i class="fas fa-exchange-alt"></i> Transferir Guilda
+        </button>
+        <button class="btn btn-danger" id="deleteGuildBtn" style="width: 100%;">
+          <i class="fas fa-trash"></i> Excluir Guilda
+        </button>
+      </div>
+      
+      <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;">
+        <h4 style="color: #ff8c00; margin-bottom: 15px;">Informações da Guilda</h4>
+        <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 5px;">
+          <strong>ID:</strong> ${userGuild.custom_id}
+        </p>
+        <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 5px;">
+          <strong>Código de Convite:</strong> ${userGuild.invite_code || 'Gerando...'}
+        </p>
+        <p style="color: #aaa; font-size: 0.9rem;">
+          <strong>Criada em:</strong> ${formatDate(userGuild.created_at)}
+        </p>
+      </div>
+    </div>
+  `;
 }
+
 
 function renderMemberSettings() {
-    return `
-        <div style="text-align: center; padding: 40px 20px;">
-            <p style="color: #aaa; margin-bottom: 20px;">
-                Apenas o dono da guilda pode alterar as configurações.
-            </p>
-            <button class="btn btn-danger" id="leaveGuildBtn">
-                <i class="fas fa-sign-out-alt"></i> Sair da Guilda
-            </button>
-        </div>
-    `;
+  return `
+    <div style="text-align: center; padding: 40px 20px;">
+      <p style="color: #aaa; margin-bottom: 20px;">
+        Apenas o dono da guilda pode alterar as configurações.
+      </p>
+      <button class="btn btn-danger" id="leaveGuildBtn">
+        <i class="fas fa-sign-out-alt"></i> Sair da Guilda
+      </button>
+    </div>
+  `;
 }
+
 
 function setupTabs() {
-    const tabs = document.querySelectorAll('.guild-tab');
-    const contents = document.querySelectorAll('.tab-content');
-    
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const tabId = tab.getAttribute('data-tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            contents.forEach(c => c.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-        });
+  const tabs = document.querySelectorAll('.guild-tab');
+  const contents = document.querySelectorAll('.tab-content');
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabId = tab.getAttribute('data-tab');
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
     });
+  });
 }
+
 
 async function loadMembers() {
-    try {
-        const membersGrid = document.getElementById('membersGrid');
-        
-        const { data: members, error } = await supabase
-            .from('guild_members_with_profiles')
-            .select('*')
-            .eq('guild_id', userGuild.id)
-            .eq('status', 'accepted');
+  try {
+    const membersGrid = document.getElementById('membersGrid');
+    
+    const { data: members, error } = await supabase
+      .from('guild_members_with_profiles')
+      .select('*')
+      .eq('guild_id', userGuild.id)
+      .eq('status', 'accepted');
 
-        if (error) {
-            console.error('Erro ao carregar membros:', error);
-            membersGrid.innerHTML = '<p style="color: #e74c3c;">Erro ao carregar membros</p>';
-            return;
-        }
 
-        guildMembers = members || [];
-
-        if (membersGrid) {
-            if (guildMembers.length === 0) {
-                membersGrid.innerHTML = '<p style="color: #888; text-align: center;">Nenhum membro na guilda</p>';
-            } else {
-                membersGrid.innerHTML = guildMembers.map(member => {
-                    const username = member.username || 'Usuário';
-                    const playerId = member.player_id || '';
-                    const membershipId = member.id;
-                    
-                    return `
-                        <div class="member-card">
-                            <div class="member-header">
-                                <div class="member-avatar">${username.charAt(0).toUpperCase() || '?'}</div>
-                                <div>
-                                    <div class="member-name">${escapeHtml(username)}</div>
-                                    <div class="member-player-id">#${escapeHtml(playerId)}</div>
-                                    <div class="member-role ${'role-' + member.role}">
-                                        ${member.role === 'owner' ? 'Dono' : member.role === 'admin' ? 'Administrador' : 'Membro'}
-                                    </div>
-                                </div>
-                            </div>
-                            ${userGuild.owner_id === currentUser.id && member.role !== 'owner' ? `
-                                <div class="member-actions">
-                                    ${member.role === 'member' ? `
-                                        <button class="btn" onclick="promoteToAdmin('${membershipId}')">
-                                            <i class="fas fa-star"></i> Promover a Admin
-                                        </button>
-                                    ` : member.role === 'admin' ? `
-                                        <button class="btn" onclick="demoteToMember('${membershipId}')">
-                                            <i class="fas fa-arrow-down"></i> Rebaixar a Membro
-                                        </button>
-                                    ` : ''}
-                                    <button class="btn btn-danger" onclick="kickMember('${membershipId}', '${escapeHtml(username)}')">
-                                        <i class="fas fa-user-slash"></i> Expulsar
-                                    </button>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }).join('');
-            }
-            
-            document.getElementById('memberCount').textContent = guildMembers.length;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar membros:', error);
+    if (error) {
+      console.error('Erro ao carregar membros:', error);
+      membersGrid.innerHTML = '<p style="color: #e74c3c;">Erro ao carregar membros</p>';
+      return;
     }
-}
 
-async function loadCampaigns() {
-    try {
-        const campaignsList = document.getElementById('campaignsList');
-        
-        if (!campaignsList) return;
-        
-        // Buscar campanhas da guilda
-        const { data: campaigns, error } = await supabase
-            .from('campaigns')
-            .select('*')
-            .eq('guild_id', userGuild.id)
-            .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Erro ao carregar campanhas:', error);
-            campaignsList.innerHTML = `
-                <div style="text-align: center; padding: 40px 20px;">
-                    <i class="fas fa-map-marked-alt fa-3x" style="color: #475569; margin-bottom: 15px;"></i>
-                    <p style="color: #94a3b8;">Nenhuma campanha encontrada</p>
-                    <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
-                        Clique em "Nova Campanha" para criar sua primeira campanha!
-                    </p>
+    guildMembers = members || [];
+
+
+    if (membersGrid) {
+      if (guildMembers.length === 0) {
+        membersGrid.innerHTML = '<p style="color: #888; text-align: center;">Nenhum membro na guilda</p>';
+      } else {
+        membersGrid.innerHTML = guildMembers.map(member => {
+          const username = member.username || 'Usuário';
+          const playerId = member.player_id || '';
+          const membershipId = member.id;
+          
+          return `
+            <div class="member-card">
+              <div class="member-header">
+                <div class="member-avatar">${username.charAt(0).toUpperCase() || '?'}</div>
+                <div>
+                  <div class="member-name">${escapeHtml(username)}</div>
+                  <div class="member-player-id">#${escapeHtml(playerId)}</div>
+                  <div class="member-role ${'role-' + member.role}">
+                    ${member.role === 'owner' ? 'Dono' : member.role === 'admin' ? 'Administrador' : 'Membro'}
+                  </div>
                 </div>
-            `;
-            return;
-        }
-
-        if (!campaigns || campaigns.length === 0) {
-            campaignsList.innerHTML = `
-                <div style="text-align: center; padding: 40px 20px;">
-                    <i class="fas fa-map-marked-alt fa-3x" style="color: #475569; margin-bottom: 15px;"></i>
-                    <p style="color: #94a3b8;">Nenhuma campanha encontrada</p>
-                    <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
-                        Clique em "Nova Campanha" para criar sua primeira campanha!
-                    </p>
+              </div>
+              ${userGuild.owner_id === currentUser.id && member.role !== 'owner' ? `
+                <div class="member-actions">
+                  ${member.role === 'member' ? `
+                    <button class="btn" onclick="promoteToAdmin('${membershipId}')">
+                      <i class="fas fa-star"></i> Promover a Admin
+                    </button>
+                  ` : member.role === 'admin' ? `
+                    <button class="btn" onclick="demoteToMember('${membershipId}')">
+                      <i class="fas fa-arrow-down"></i> Rebaixar a Membro
+                    </button>
+                  ` : ''}
+                  <button class="btn btn-danger" onclick="kickMember('${membershipId}', '${escapeHtml(username)}')">
+                    <i class="fas fa-user-slash"></i> Expulsar
+                  </button>
                 </div>
-            `;
-            return;
-        }
-
-        campaignsList.innerHTML = `
-            <div class="campaigns-grid">
-                ${campaigns.map(campaign => `
-                    <div class="campaign-card" onclick="window.location.href='campanha-detalhes.html?id=${campaign.campaign_id}'">
-                        <div class="campaign-header">
-                            <div>
-                                <div class="campaign-name">${escapeHtml(campaign.name)}</div>
-                                <div class="campaign-id">ID: ${escapeHtml(campaign.campaign_id)}</div>
-                            </div>
-                            <div class="campaign-status ${campaign.status === 'active' ? 'status-active' : 'status-paused'}">
-                                ${campaign.status === 'active' ? 'Ativa' : 'Pausada'}
-                            </div>
-                        </div>
-                        ${campaign.description ? `
-                            <div class="campaign-description">
-                                ${escapeHtml(campaign.description.length > 100 ? campaign.description.substring(0, 100) + '...' : campaign.description)}
-                            </div>
-                        ` : ''}
-                        <div class="campaign-footer">
-                            <div style="color: #aaa; font-size: 0.85rem;">
-                                ${campaign.scenario ? `<i class="fas fa-mountain"></i> ${escapeHtml(campaign.scenario)}` : 'Sem cenário'}
-                            </div>
-                            <div style="color: #888; font-size: 0.8rem;">
-                                <i class="fas fa-calendar"></i> ${formatDate(campaign.created_at)}
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
+              ` : ''}
             </div>
-        `;
-
-    } catch (error) {
-        console.error('Erro ao carregar campanhas:', error);
-        campaignsList.innerHTML = '<p style="color: #e74c3c; text-align: center;">Erro ao carregar campanhas</p>';
+          `;
+        }).join('');
+      }
+      
+      document.getElementById('memberCount').textContent = guildMembers.length;
     }
+  } catch (error) {
+    console.error('Erro ao carregar membros:', error);
+  }
 }
+
 
 async function loadInvites() {
-    try {
-        const invitesList = document.getElementById('invitesList');
-        
-        const { data: invites, error } = await supabase
-            .from('guild_invitations_with_details')
-            .select('*')
-            .eq('guild_id', userGuild.id)
-            .eq('status', 'pending');
+  try {
+    const invitesList = document.getElementById('invitesList');
+    
+    const { data: invites, error } = await supabase
+      .from('guild_invitations_with_details')
+      .select('*')
+      .eq('guild_id', userGuild.id)
+      .eq('status', 'pending');
 
-        if (error) {
-            console.error('Erro ao carregar convites:', error);
-            invitesList.innerHTML = '<p style="color: #e74c3c;">Erro ao carregar convites</p>';
-            return;
-        }
 
-        guildInvites = invites || [];
-
-        if (invitesList) {
-            if (guildInvites.length === 0) {
-                invitesList.innerHTML = '<p style="color: #888; text-align: center;">Nenhum convite pendente</p>';
-            } else {
-                invitesList.innerHTML = guildInvites.map(invite => `
-                    <div class="invite-card">
-                        <div class="invite-info">
-                            <h4>Para: ${escapeHtml(invite.receiver_username || 'Usuário')}</h4>
-                            <p>ID: #${escapeHtml(invite.receiver_player_id || '')}</p>
-                            <p>Enviado em: ${formatDate(invite.sent_at)}</p>
-                        </div>
-                        <div class="invite-actions">
-                            <button class="btn btn-danger" onclick="cancelInvite('${invite.id}', '${escapeHtml(invite.receiver_username)}')">
-                                <i class="fas fa-times"></i> Cancelar
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-    } catch (error) {
-        console.error('Erro ao carregar convites:', error);
+    if (error) {
+      console.error('Erro ao carregar convites:', error);
+      invitesList.innerHTML = '<p style="color: #e74c3c;">Erro ao carregar convites</p>';
+      return;
     }
+
+
+    guildInvites = invites || [];
+
+
+    if (invitesList) {
+      if (guildInvites.length === 0) {
+        invitesList.innerHTML = '<p style="color: #888; text-align: center;">Nenhum convite pendente</p>';
+      } else {
+        invitesList.innerHTML = guildInvites.map(invite => `
+          <div class="invite-card">
+            <div class="invite-info">
+              <h4>Para: ${escapeHtml(invite.receiver_username || 'Usuário')}</h4>
+              <p>ID: #${escapeHtml(invite.receiver_player_id || '')}</p>
+              <p>Enviado em: ${formatDate(invite.sent_at)}</p>
+            </div>
+            <div class="invite-actions">
+              <button class="btn btn-danger" onclick="cancelInvite('${invite.id}', '${escapeHtml(invite.receiver_username)}')">
+                <i class="fas fa-times"></i> Cancelar
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar convites:', error);
+  }
 }
+
 
 function setupEventListeners() {
-    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-        try {
-            await supabase.auth.signOut();
-            window.location.href = 'login.html';
-        } catch (error) {
-            console.error('Erro ao sair:', error);
-            alert('Erro ao sair. Tente novamente.');
+  document.getElementById('backBtn')?.addEventListener('click', () => {
+    window.location.href = 'home.html';
+  });
+  
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+      await supabase.auth.signOut();
+      window.location.href = 'login.html';
+    } catch (error) {
+      console.error('Erro ao sair:', error);
+      alert('Erro ao sair. Tente novamente.');
+    }
+  });
+  
+  document.getElementById('createGuildForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await createGuild();
+  });
+  
+  document.getElementById('cancelCreate')?.addEventListener('click', () => {
+    document.getElementById('createGuildModal').classList.remove('active');
+    clearCreateForm();
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'inviteMemberBtn' || e.target.closest('#inviteMemberBtn')) {
+      document.getElementById('inviteModal').classList.add('active');
+    }
+  });
+  
+  document.getElementById('inviteForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await sendInvite();
+  });
+  
+  document.getElementById('cancelInvite')?.addEventListener('click', () => {
+    document.getElementById('inviteModal').classList.remove('active');
+    document.getElementById('invitePlayerId').value = '';
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'editGuildBtn' || e.target.closest('#editGuildBtn')) {
+      editGuild();
+    }
+    if (e.target.id === 'transferGuildBtn' || e.target.closest('#transferGuildBtn')) {
+      transferGuild();
+    }
+    if (e.target.id === 'deleteGuildBtn' || e.target.closest('#deleteGuildBtn')) {
+      deleteGuild();
+    }
+    if (e.target.id === 'leaveGuildBtn' || e.target.closest('#leaveGuildBtn')) {
+      leaveGuild();
+    }
+  });
+  
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+        if (modal.id === 'createGuildModal') {
+          clearCreateForm();
         }
+      }
     });
-    
-    document.getElementById('createGuildForm')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await createGuild();
-    });
-    
-    document.getElementById('cancelCreate')?.addEventListener('click', () => {
-        document.getElementById('createGuildModal').classList.remove('active');
-        clearCreateForm();
-    });
-    
-    document.addEventListener('click', (e) => {
-        if (e.target.id === 'inviteMemberBtn' || e.target.closest('#inviteMemberBtn')) {
-            document.getElementById('inviteModal').classList.add('active');
-        }
-    });
-    
-    document.getElementById('inviteForm')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await sendInvite();
-    });
-    
-    document.getElementById('cancelInvite')?.addEventListener('click', () => {
-        document.getElementById('inviteModal').classList.remove('active');
-        document.getElementById('invitePlayerId').value = '';
-    });
-    
-    document.addEventListener('click', (e) => {
-        if (e.target.id === 'editGuildBtn' || e.target.closest('#editGuildBtn')) {
-            editGuild();
-        }
-        if (e.target.id === 'transferGuildBtn' || e.target.closest('#transferGuildBtn')) {
-            transferGuild();
-        }
-        if (e.target.id === 'deleteGuildBtn' || e.target.closest('#deleteGuildBtn')) {
-            deleteGuild();
-        }
-        if (e.target.id === 'leaveGuildBtn' || e.target.closest('#leaveGuildBtn')) {
-            leaveGuild();
-        }
-    });
-    
-    document.querySelectorAll('.modal-overlay').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-                if (modal.id === 'createGuildModal') {
-                    clearCreateForm();
-                }
-            }
-        });
-    });
+  });
 }
+
 
 async function createGuild() {
-    const name = document.getElementById('guildName').value.trim();
-    const customId = document.getElementById('guildId').value.trim().toLowerCase();
-    const description = document.getElementById('guildDescription').value.trim();
-    const maxMembers = parseInt(document.getElementById('maxMembers').value) || 10;
-    
-    try {
-        if (!name || !customId) {
-            alert('Nome e ID da guilda são obrigatórios');
-            return;
-        }
-        
-        if (customId.length < 3) {
-            alert('ID da guilda deve ter pelo menos 3 caracteres');
-            return;
-        }
-        
-        if (!/^[a-z0-9][a-z0-9_-]*$/.test(customId)) {
-            alert('ID da guilda só pode conter letras, números, hífen (-) e underscore (_)');
-            return;
-        }
-        
-        const { data, error } = await supabase.rpc('create_guild_with_owner', {
-            p_custom_id: customId,
-            p_name: name,
-            p_description: description || null,
-            p_max_members: maxMembers,
-            p_image_url: null
-        });
-        
-        if (error) {
-            console.error('Erro ao criar guilda:', error);
-            alert('Erro ao criar guilda: ' + error.message);
-            return;
-        }
-        
-        document.getElementById('createGuildModal').classList.remove('active');
-        clearCreateForm();
-        
-        setTimeout(() => location.reload(), 1000);
-        
-    } catch (error) {
-        console.error('Erro ao criar guilda:', error);
-        alert('Erro: ' + error.message);
+  const name = document.getElementById('guildName').value.trim();
+  const customId = document.getElementById('guildId').value.trim().toLowerCase();
+  const description = document.getElementById('guildDescription').value.trim();
+  const maxMembers = parseInt(document.getElementById('maxMembers').value) || 10;
+  
+  try {
+    if (!name || !customId) {
+      alert('Nome e ID da guilda são obrigatórios');
+      return;
     }
+    
+    if (customId.length < 3) {
+      alert('ID da guilda deve ter pelo menos 3 caracteres');
+      return;
+    }
+    
+    if (!/^[a-z0-9][a-z0-9_-]*$/.test(customId)) {
+      alert('ID da guilda só pode conter letras, números, hífen (-) e underscore (_)');
+      return;
+    }
+    
+    const { data, error } = await supabase.rpc('create_guild_with_owner', {
+      p_custom_id: customId,
+      p_name: name,
+      p_description: description || null,
+      p_max_members: maxMembers,
+      p_image_url: null
+    });
+    
+    if (error) {
+      console.error('Erro ao criar guilda:', error);
+      alert('Erro ao criar guilda: ' + error.message);
+      return;
+    }
+    
+    document.getElementById('createGuildModal').classList.remove('active');
+    clearCreateForm();
+    
+    setTimeout(() => location.reload(), 1000);
+    
+  } catch (error) {
+    console.error('Erro ao criar guilda:', error);
+    alert('Erro: ' + error.message);
+  }
 }
+
 
 async function sendInvite() {
-    const playerId = document.getElementById('invitePlayerId').value.trim();
-    
-    try {
-        if (!playerId) {
-            alert('Digite o ID do jogador');
-            return;
-        }
-        
-        const { data, error } = await supabase.rpc('invite_to_guild', {
-            p_guild_id: userGuild.id,
-            p_receiver_player_id: playerId
-        });
-        
-        if (error) {
-            console.error('Erro ao enviar convite:', error);
-            alert('Erro: ' + error.message);
-            return;
-        }
-        
-        document.getElementById('inviteModal').classList.remove('active');
-        document.getElementById('invitePlayerId').value = '';
-        
-        await loadInvites();
-        alert('Convite enviado com sucesso!');
-        
-    } catch (error) {
-        console.error('Erro ao enviar convite:', error);
-        alert('Erro: ' + error.message);
+  const playerId = document.getElementById('invitePlayerId').value.trim();
+  
+  try {
+    if (!playerId) {
+      alert('Digite o ID do jogador');
+      return;
     }
+    
+    const { data, error } = await supabase.rpc('invite_to_guild', {
+      p_guild_id: userGuild.id,
+      p_receiver_player_id: playerId
+    });
+    
+    if (error) {
+      console.error('Erro ao enviar convite:', error);
+      alert('Erro: ' + error.message);
+      return;
+    }
+    
+    document.getElementById('inviteModal').classList.remove('active');
+    document.getElementById('invitePlayerId').value = '';
+    
+    await loadInvites();
+    alert('Convite enviado com sucesso!');
+    
+  } catch (error) {
+    console.error('Erro ao enviar convite:', error);
+    alert('Erro: ' + error.message);
+  }
 }
+
 
 async function cancelInvite(invitationId, receiverName) {
-    if (!confirm(`Cancelar convite para ${receiverName}?`)) {
-        return;
+  if (!confirm(`Cancelar convite para ${receiverName}?`)) {
+    return;
+  }
+  
+  try {
+    const { error } = await supabase
+      .from('guild_invitations')
+      .update({ status: 'cancelled' })
+      .eq('id', invitationId);
+    
+    if (error) {
+      console.error('Erro ao cancelar convite:', error);
+      alert('Erro ao cancelar convite');
+      return;
     }
     
-    try {
-        const { error } = await supabase
-            .from('guild_invitations')
-            .update({ status: 'cancelled' })
-            .eq('id', invitationId);
-        
-        if (error) {
-            console.error('Erro ao cancelar convite:', error);
-            alert('Erro ao cancelar convite');
-            return;
-        }
-        
-        await loadInvites();
-        alert('Convite cancelado com sucesso!');
-        
-    } catch (error) {
-        console.error('Erro ao cancelar convite:', error);
-        alert('Erro: ' + error.message);
-    }
+    await loadInvites();
+    alert('Convite cancelado com sucesso!');
+    
+  } catch (error) {
+    console.error('Erro ao cancelar convite:', error);
+    alert('Erro: ' + error.message);
+  }
 }
 
+
+// FUNÇÕES DE GERENCIAMENTO DE MEMBROS - USANDO FUNÇÕES RPC DO SQL
 async function promoteToAdmin(membershipId) {
-    if (!confirm('Promover este membro a Administrador?')) {
-        return;
+  if (!confirm('Promover este membro a Administrador?')) {
+    return;
+  }
+  
+  try {
+    const { error } = await supabase.rpc('update_guild_member_role', {
+      p_membership_id: membershipId,
+      p_new_role: 'admin'
+    });
+    
+    if (error) {
+      console.error('Erro ao promover membro:', error);
+      alert('Erro ao promover membro: ' + error.message);
+      return;
     }
     
-    try {
-        const { error } = await supabase.rpc('update_guild_member_role', {
-            p_membership_id: membershipId,
-            p_new_role: 'admin'
-        });
-        
-        if (error) {
-            console.error('Erro ao promover membro:', error);
-            alert('Erro ao promover membro: ' + error.message);
-            return;
-        }
-        
-        await loadMembers();
-        alert('Membro promovido a Administrador!');
-        
-    } catch (error) {
-        console.error('Erro ao promover membro:', error);
-        alert('Erro: ' + error.message);
-    }
+    await loadMembers();
+    alert('Membro promovido a Administrador!');
+    
+  } catch (error) {
+    console.error('Erro ao promover membro:', error);
+    alert('Erro: ' + error.message);
+  }
 }
+
 
 async function demoteToMember(membershipId) {
-    if (!confirm('Rebaixar este administrador a Membro?')) {
-        return;
+  if (!confirm('Rebaixar este administrador a Membro?')) {
+    return;
+  }
+  
+  try {
+    const { error } = await supabase.rpc('update_guild_member_role', {
+      p_membership_id: membershipId,
+      p_new_role: 'member'
+    });
+    
+    if (error) {
+      console.error('Erro ao rebaixar membro:', error);
+      alert('Erro ao rebaixar membro: ' + error.message);
+      return;
     }
     
-    try {
-        const { error } = await supabase.rpc('update_guild_member_role', {
-            p_membership_id: membershipId,
-            p_new_role: 'member'
-        });
-        
-        if (error) {
-            console.error('Erro ao rebaixar membro:', error);
-            alert('Erro ao rebaixar membro: ' + error.message);
-            return;
-        }
-        
-        await loadMembers();
-        alert('Administrador rebaixado a Membro!');
-        
-    } catch (error) {
-        console.error('Erro ao rebaixar membro:', error);
-        alert('Erro: ' + error.message);
-    }
+    await loadMembers();
+    alert('Administrador rebaixado a Membro!');
+    
+  } catch (error) {
+    console.error('Erro ao rebaixar membro:', error);
+    alert('Erro: ' + error.message);
+  }
 }
 
+
+// FUNÇÃO DE EXPULSAR MEMBRO - USANDO FUNÇÃO RPC DO SQL
 async function kickMember(membershipId, memberName) {
-    if (!confirm(`Expulsar ${memberName} da guilda?\n\nEsta ação não pode ser desfeita.`)) {
-        return;
+  if (!confirm(`Expulsar ${memberName} da guilda?\n\nEsta ação não pode ser desfeita.`)) {
+    return;
+  }
+  
+  try {
+    const { error } = await supabase.rpc('expel_guild_member', {
+      p_membership_id: membershipId
+    });
+    
+    if (error) {
+      console.error('Erro ao expulsar membro:', error);
+      alert('Erro ao expulsar membro: ' + error.message);
+      return;
     }
     
-    try {
-        const { error } = await supabase.rpc('expel_guild_member', {
-            p_membership_id: membershipId
-        });
-        
-        if (error) {
-            console.error('Erro ao expulsar membro:', error);
-            alert('Erro ao expulsar membro: ' + error.message);
-            return;
-        }
-        
-        alert(`${memberName} foi expulso da guilda!`);
-        await loadMembers();
-        
-    } catch (error) {
-        console.error('Erro ao expulsar membro:', error);
-        alert('Erro: ' + error.message);
-    }
+    alert(`${memberName} foi expulso da guilda!`);
+    await loadMembers();
+    
+  } catch (error) {
+    console.error('Erro ao expulsar membro:', error);
+    alert('Erro: ' + error.message);
+  }
 }
+
 
 async function editGuild() {
-    const modalContent = `
-        <div class="modal-header">
-            <h3>Editar Guilda</h3>
-        </div>
-        <form id="editGuildForm">
-            <div class="form-group">
-                <label for="editGuildName">Nome da Guilda</label>
-                <input type="text" id="editGuildName" value="${escapeHtml(userGuild.name)}" required>
-            </div>
-            <div class="form-group">
-                <label for="editGuildDescription">Descrição</label>
-                <textarea id="editGuildDescription" rows="3">${escapeHtml(userGuild.description || '')}</textarea>
-            </div>
-            <div class="form-group">
-                <label for="editMaxMembers">Máximo de Membros (${userGuild.max_members})</label>
-                <select id="editMaxMembers">
-                    <option value="10" ${userGuild.max_members === 10 ? 'selected' : ''}>10</option>
-                    <option value="20" ${userGuild.max_members === 20 ? 'selected' : ''}>20</option>
-                    <option value="30" ${userGuild.max_members === 30 ? 'selected' : ''}>30</option>
-                    <option value="50" ${userGuild.max_members === 50 ? 'selected' : ''}>50</option>
-                    <option value="100" ${userGuild.max_members === 100 ? 'selected' : ''}>100</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn" id="cancelEdit">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Salvar</button>
-            </div>
-        </form>
-    `;
-    
-    showCustomModal(modalContent);
-    
-    document.getElementById('editGuildForm')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await updateGuild();
-    });
-    
-    document.getElementById('cancelEdit')?.addEventListener('click', () => {
-        document.querySelector('.modal-overlay.active')?.classList.remove('active');
-    });
+  // Criar modal para edição
+  const modalContent = `
+    <div class="modal-header">
+      <h3>Editar Guilda</h3>
+    </div>
+    <form id="editGuildForm">
+      <div class="form-group">
+        <label for="editGuildName">Nome da Guilda</label>
+        <input type="text" id="editGuildName" value="${escapeHtml(userGuild.name)}" required>
+      </div>
+      <div class="form-group">
+        <label for="editGuildDescription">Descrição</label>
+        <textarea id="editGuildDescription" rows="3">${escapeHtml(userGuild.description || '')}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="editMaxMembers">Máximo de Membros (${userGuild.max_members})</label>
+        <select id="editMaxMembers">
+          <option value="10" ${userGuild.max_members === 10 ? 'selected' : ''}>10</option>
+          <option value="20" ${userGuild.max_members === 20 ? 'selected' : ''}>20</option>
+          <option value="30" ${userGuild.max_members === 30 ? 'selected' : ''}>30</option>
+          <option value="50" ${userGuild.max_members === 50 ? 'selected' : ''}>50</option>
+          <option value="100" ${userGuild.max_members === 100 ? 'selected' : ''}>100</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" id="cancelEdit">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  `;
+  
+  showCustomModal(modalContent);
+  
+  document.getElementById('editGuildForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await updateGuild();
+  });
+  
+  document.getElementById('cancelEdit')?.addEventListener('click', () => {
+    document.querySelector('.modal-overlay.active')?.classList.remove('active');
+  });
 }
+
 
 async function updateGuild() {
-    const name = document.getElementById('editGuildName').value.trim();
-    const description = document.getElementById('editGuildDescription').value.trim();
-    const maxMembers = parseInt(document.getElementById('editMaxMembers').value) || 10;
+  const name = document.getElementById('editGuildName').value.trim();
+  const description = document.getElementById('editGuildDescription').value.trim();
+  const maxMembers = parseInt(document.getElementById('editMaxMembers').value) || 10;
+  
+  try {
+    const { error } = await supabase.rpc('update_guild_info', {
+      p_guild_id: userGuild.id,
+      p_name: name,
+      p_description: description || null,
+      p_max_members: maxMembers,
+      p_image_url: null
+    });
     
-    try {
-        const { error } = await supabase.rpc('update_guild_info', {
-            p_guild_id: userGuild.id,
-            p_name: name,
-            p_description: description || null,
-            p_max_members: maxMembers,
-            p_image_url: null
-        });
-        
-        if (error) {
-            console.error('Erro ao atualizar guilda:', error);
-            alert('Erro ao atualizar guilda: ' + error.message);
-            return;
-        }
-        
-        document.querySelector('.modal-overlay.active')?.classList.remove('active');
-        alert('Guilda atualizada com sucesso!');
-        setTimeout(() => location.reload(), 500);
-        
-    } catch (error) {
-        console.error('Erro ao atualizar guilda:', error);
-        alert('Erro: ' + error.message);
+    if (error) {
+      console.error('Erro ao atualizar guilda:', error);
+      alert('Erro ao atualizar guilda: ' + error.message);
+      return;
     }
+    
+    document.querySelector('.modal-overlay.active')?.classList.remove('active');
+    alert('Guilda atualizada com sucesso!');
+    setTimeout(() => location.reload(), 500);
+    
+  } catch (error) {
+    console.error('Erro ao atualizar guilda:', error);
+    alert('Erro: ' + error.message);
+  }
 }
+
 
 async function transferGuild() {
-    const eligibleMembers = guildMembers.filter(member => 
-        member.role !== 'owner' && 
-        member.status === 'accepted'
-    );
+  // Filtrar membros que podem ser promovidos (não owner, status accepted)
+  const eligibleMembers = guildMembers.filter(member =>
+    member.role !== 'owner' &&
+    member.status === 'accepted'
+  );
+  
+  if (eligibleMembers.length === 0) {
+    alert('Não há membros elegíveis para transferir a guilda');
+    return;
+  }
+  
+  const options = eligibleMembers.map(member =>
+    `<option value="${member.id}">${escapeHtml(member.username || 'Usuário')} (${member.role})</option>`
+  ).join('');
+  
+  const modalContent = `
+    <div class="modal-header">
+      <h3>Transferir Guilda</h3>
+    </div>
+    <div style="padding: 20px;">
+      <p style="color: #ff8c00; margin-bottom: 20px;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Atenção:</strong> Ao transferir a guilda, você deixará de ser o dono e se tornará um administrador.
+      </p>
+      <div class="form-group">
+        <label for="newOwnerSelect">Selecione o novo dono:</label>
+        <select id="newOwnerSelect" class="form-control">
+          ${options}
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" id="cancelTransfer">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmTransfer">Transferir</button>
+      </div>
+    </div>
+  `;
+  
+  showCustomModal(modalContent);
+  
+  document.getElementById('confirmTransfer')?.addEventListener('click', async () => {
+    const newOwnerMembershipId = document.getElementById('newOwnerSelect').value;
+    const selectedMember = eligibleMembers.find(m => m.id === newOwnerMembershipId);
     
-    if (eligibleMembers.length === 0) {
-        alert('Não há membros elegíveis para transferir a guilda');
-        return;
+    if (!confirm(`Tem certeza que deseja transferir a guilda para ${selectedMember?.username || 'este membro'}?\n\nEsta ação é irreversível.`)) {
+      return;
     }
     
-    const options = eligibleMembers.map(member => 
-        `<option value="${member.id}">${escapeHtml(member.username || 'Usuário')} (${member.role})</option>`
-    ).join('');
-    
-    const modalContent = `
-        <div class="modal-header">
-            <h3>Transferir Guilda</h3>
-        </div>
-        <div style="padding: 20px;">
-            <p style="color: #ff8c00; margin-bottom: 20px;">
-                <i class="fas fa-exclamation-triangle"></i> 
-                <strong>Atenção:</strong> Ao transferir a guilda, você deixará de ser o dono e se tornará um administrador.
-            </p>
-            <div class="form-group">
-                <label for="newOwnerSelect">Selecione o novo dono:</label>
-                <select id="newOwnerSelect" class="form-control">
-                    ${options}
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn" id="cancelTransfer">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="confirmTransfer">Transferir</button>
-            </div>
-        </div>
-    `;
-    
-    showCustomModal(modalContent);
-    
-    document.getElementById('confirmTransfer')?.addEventListener('click', async () => {
-        const newOwnerMembershipId = document.getElementById('newOwnerSelect').value;
-        const selectedMember = eligibleMembers.find(m => m.id === newOwnerMembershipId);
-        
-        if (!confirm(`Tem certeza que deseja transferir a guilda para ${selectedMember?.username || 'este membro'}?\n\nEsta ação é irreversível.`)) {
-            return;
-        }
-        
-        try {
-            const { error } = await supabase.rpc('transfer_guild_ownership', {
-                p_guild_id: userGuild.id,
-                p_new_owner_membership_id: newOwnerMembershipId
-            });
-            
-            if (error) {
-                console.error('Erro ao transferir guilda:', error);
-                alert('Erro ao transferir guilda: ' + error.message);
-                return;
-            }
-            
-            document.querySelector('.modal-overlay.active')?.classList.remove('active');
-            alert('Guilda transferida com sucesso!');
-            setTimeout(() => location.reload(), 500);
-            
-        } catch (error) {
-            console.error('Erro ao transferir guilda:', error);
-            alert('Erro: ' + error.message);
-        }
-    });
-    
-    document.getElementById('cancelTransfer')?.addEventListener('click', () => {
-        document.querySelector('.modal-overlay.active')?.classList.remove('active');
-    });
+    try {
+      const { error } = await supabase.rpc('transfer_guild_ownership', {
+        p_guild_id: userGuild.id,
+        p_new_owner_membership_id: newOwnerMembershipId
+      });
+      
+      if (error) {
+        console.error('Erro ao transferir guilda:', error);
+        alert('Erro ao transferir guilda: ' + error.message);
+        return;
+      }
+      
+      document.querySelector('.modal-overlay.active')?.classList.remove('active');
+      alert('Guilda transferida com sucesso!');
+      setTimeout(() => location.reload(), 500);
+      
+    } catch (error) {
+      console.error('Erro ao transferir guilda:', error);
+      alert('Erro: ' + error.message);
+    }
+  });
+  
+  document.getElementById('cancelTransfer')?.addEventListener('click', () => {
+    document.querySelector('.modal-overlay.active')?.classList.remove('active');
+  });
 }
+
 
 async function deleteGuild() {
-    if (!confirm('Tem certeza que deseja EXCLUIR esta guilda?\n\nEsta ação é PERMANENTE e não pode ser desfeita!\n\nTodos os membros serão removidos e a guilda será apagada.')) {
-        return;
+  if (!confirm('Tem certeza que deseja EXCLUIR esta guilda?\n\nEsta ação é PERMANENTE e não pode ser desfeita!\n\nTodos os membros serão removidos e a guilda será apagada.')) {
+    return;
+  }
+  
+  try {
+    const { error } = await supabase
+      .from('guilds')
+      .delete()
+      .eq('id', userGuild.id)
+      .eq('owner_id', currentUser.id);
+    
+    if (error) {
+      console.error('Erro ao excluir guilda:', error);
+      alert('Erro ao excluir guilda: ' + error.message);
+      return;
     }
     
-    try {
-        const { error } = await supabase
-            .from('guilds')
-            .delete()
-            .eq('id', userGuild.id)
-            .eq('owner_id', currentUser.id);
-        
-        if (error) {
-            console.error('Erro ao excluir guilda:', error);
-            alert('Erro ao excluir guilda: ' + error.message);
-            return;
-        }
-        
-        alert('Guilda excluída com sucesso!');
-        setTimeout(() => location.reload(), 1000);
-        
-    } catch (error) {
-        console.error('Erro ao excluir guilda:', error);
-        alert('Erro: ' + error.message);
-    }
+    alert('Guilda excluída com sucesso!');
+    setTimeout(() => location.reload(), 1000);
+    
+  } catch (error) {
+    console.error('Erro ao excluir guilda:', error);
+    alert('Erro: ' + error.message);
+  }
 }
+
 
 async function leaveGuild() {
-    if (!confirm('Tem certeza que deseja sair desta guilda?')) {
-        return;
+  if (!confirm('Tem certeza que deseja sair desta guilda?')) {
+    return;
+  }
+  
+  try {
+    // Usar a função RPC do SQL
+    const { error } = await supabase.rpc('leave_guild', {
+      p_guild_id: userGuild.id
+    });
+    
+    if (error) {
+      console.error('Erro ao sair da guilda:', error);
+      alert('Erro ao sair da guilda: ' + error.message);
+      return;
     }
     
-    try {
-        const { error } = await supabase.rpc('leave_guild', {
-            p_guild_id: userGuild.id
-        });
-        
-        if (error) {
-            console.error('Erro ao sair da guilda:', error);
-            alert('Erro ao sair da guilda: ' + error.message);
-            return;
-        }
-        
-        alert('Você saiu da guilda!');
-        setTimeout(() => location.reload(), 1000);
-        
-    } catch (error) {
-        console.error('Erro ao sair da guilda:', error);
-        alert('Erro: ' + error.message);
-    }
+    alert('Você saiu da guilda!');
+    setTimeout(() => location.reload(), 1000);
+    
+  } catch (error) {
+    console.error('Erro ao sair da guilda:', error);
+    alert('Erro: ' + error.message);
+  }
 }
+
 
 function clearCreateForm() {
-    document.getElementById('guildName').value = '';
-    document.getElementById('guildId').value = '';
-    document.getElementById('guildDescription').value = '';
-    document.getElementById('maxMembers').value = '10';
+  document.getElementById('guildName').value = '';
+  document.getElementById('guildId').value = '';
+  document.getElementById('guildDescription').value = '';
+  document.getElementById('maxMembers').value = '10';
 }
+
 
 function showCustomModal(content) {
-    const existingModal = document.querySelector('.custom-modal-overlay');
-    if (existingModal) {
-        existingModal.remove();
+  // Remover modais customizados existentes
+  const existingModal = document.querySelector('.custom-modal-overlay');
+  if (existingModal) {
+    existingModal.remove();
+  }
+  
+  const modalHTML = `
+    <div class="modal-overlay custom-modal-overlay active">
+      <div class="modal">
+        ${content}
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // Fechar ao clicar fora
+  document.querySelector('.custom-modal-overlay')?.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-overlay')) {
+      e.target.classList.remove('active');
     }
-    
-    const modalHTML = `
-        <div class="modal-overlay custom-modal-overlay active">
-            <div class="modal">
-                ${content}
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    document.querySelector('.custom-modal-overlay')?.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal-overlay')) {
-            e.target.classList.remove('active');
-        }
-    });
+  });
 }
+
 
 function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
+
 function formatDate(dateString) {
-    if (!dateString) return 'Data desconhecida';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('pt-BR');
-    } catch (error) {
-        return 'Data inválida';
-    }
+  if (!dateString) return 'Data desconhecida';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  } catch (error) {
+    return 'Data inválida';
+  }
 }
+
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', initGuild);
