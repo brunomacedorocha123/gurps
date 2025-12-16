@@ -30,22 +30,25 @@
             border: 1px solid #334155;
         }
 
-        /* HEADER */
+        /* HEADER SIMPLES */
         .header {
             background: #111827;
             padding: 20px 30px;
             border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .header h1 {
+        .header-left h1 {
             color: #fbbf24;
             display: flex;
             align-items: center;
             gap: 15px;
+            font-size: 24px;
         }
 
         .user-info {
-            float: right;
             display: flex;
             align-items: center;
             gap: 15px;
@@ -65,31 +68,127 @@
 
         /* BOTÃO VOLTAR */
         .back-btn {
-            display: inline-block;
-            margin-top: 15px;
-            color: #94a3b8;
-            text-decoration: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: rgba(148, 163, 184, 0.1);
         }
 
-        /* FORMULÁRIO DE CRIAÇÃO */
-        .form-container {
+        .back-btn:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        /* BOTÃO CRIAR NO TOPO */
+        .top-create-btn {
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            margin-right: 20px;
+        }
+
+        /* SUBABAS NO TOPO */
+        .subabas-top {
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            overflow-x: auto;
+            padding: 0 10px;
+        }
+
+        .subaba-tab-top {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .subaba-tab-top:hover {
+            background: rgba(148, 163, 184, 0.1);
+        }
+
+        .subaba-tab-top.active {
+            color: #fbbf24;
+            border-bottom: 3px solid #fbbf24;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        /* CONTEÚDO PRINCIPAL */
+        .main-content {
             padding: 30px;
+        }
+
+        /* GUILDA INFO */
+        .guild-info {
+            background: rgba(245, 158, 11, 0.1);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #f59e0b;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .guild-info i {
+            color: #fbbf24;
+            font-size: 20px;
+        }
+
+        /* FORMULÁRIO */
+        .form-section {
             background: #1e293b;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #334155;
+        }
+
+        .form-title {
+            color: #fbbf24;
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .form-label {
             display: block;
-            color: #fbbf24;
-            margin-bottom: 10px;
-            font-weight: 600;
-            font-size: 1.1rem;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
 
         .form-control {
@@ -99,7 +198,7 @@
             border: 1px solid #475569;
             border-radius: 8px;
             color: white;
-            font-size: 1rem;
+            font-size: 15px;
         }
 
         textarea.form-control {
@@ -107,65 +206,33 @@
             resize: vertical;
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .form-full {
+            grid-column: 1 / -1;
         }
 
-        /* SUBABAS DA CAMPANHA */
-        .subabas-container {
-            margin-top: 40px;
-            background: #111827;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .subabas-tabs {
-            display: flex;
-            background: #0f172a;
-            border-bottom: 1px solid #334155;
-            overflow-x: auto;
-        }
-
-        .subaba-tab {
-            padding: 15px 25px;
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            white-space: nowrap;
-            border-right: 1px solid #334155;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
-        }
-
-        .subaba-tab:hover {
-            background: #1e293b;
-        }
-
-        .subaba-tab.active {
-            background: #1e293b;
-            color: #fbbf24;
-            border-bottom: 3px solid #fbbf24;
-        }
-
+        /* CONTEÚDO DAS SUBABAS */
         .subaba-content {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid #334155;
             display: none;
-            padding: 30px;
-            min-height: 300px;
         }
 
         .subaba-content.active {
             display: block;
         }
 
-        /* CONTEÚDO DAS SUBABAS */
-        .subaba-title {
+        .subaba-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .subaba-header h3 {
             color: #fbbf24;
-            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -189,11 +256,12 @@
             color: #fbbf24;
             font-weight: 600;
             margin-bottom: 5px;
+            font-size: 16px;
         }
 
         .character-class {
             color: #94a3b8;
-            font-size: 0.9rem;
+            font-size: 14px;
         }
 
         /* NPCs */
@@ -216,6 +284,12 @@
         .npc-info h4 {
             color: #fbbf24;
             margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .npc-info p {
+            color: #94a3b8;
+            font-size: 14px;
         }
 
         /* ROLAGENS */
@@ -232,63 +306,21 @@
             border-left: 4px solid #f59e0b;
         }
 
-        /* CHAT */
-        .chat-container {
-            background: #0f172a;
-            border-radius: 8px;
-            padding: 20px;
-            height: 300px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-        }
-
-        /* MAPAS */
-        .maps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .map-preview {
-            background: #334155;
-            height: 200px;
-            border-radius: 8px;
-            border: 1px solid #475569;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #94a3b8;
-        }
-
-        /* TABELAS */
-        .tables-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .table-item {
-            background: #334155;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #475569;
-        }
-
         /* BOTÕES */
         .btn {
-            padding: 12px 25px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1rem;
+            gap: 8px;
+            font-size: 14px;
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #f59e0b, #d97706);
+            background: #f59e0b;
             color: white;
         }
 
@@ -299,28 +331,16 @@
         }
 
         .btn-small {
-            padding: 8px 15px;
-            font-size: 0.9rem;
+            padding: 6px 12px;
+            font-size: 13px;
         }
 
-        .action-buttons {
-            margin-top: 30px;
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
+        .btn-danger {
+            background: #dc2626;
+            color: white;
         }
 
-        /* VALIDAÇÃO DE GUILDA */
-        .guild-warning {
-            background: #7c2d12;
-            color: #fbbf24;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            border: 1px solid #f59e0b;
-        }
-
-        /* MODAL DE BUSCA */
+        /* MODAL DE ADICIONAR */
         .modal {
             display: none;
             position: fixed;
@@ -332,13 +352,14 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .modal-content {
             background: #1e293b;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
             border: 2px solid #f59e0b;
         }
 
@@ -350,28 +371,72 @@
             align-items: center;
         }
 
-        .modal-body {
-            padding: 20px;
-            max-height: 70vh;
-            overflow-y: auto;
+        .modal-header h3 {
+            color: #fbbf24;
         }
 
-        .campaigns-search-results {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .search-result-item {
-            background: #334155;
-            padding: 15px;
-            border-radius: 8px;
+        .modal-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 20px;
             cursor: pointer;
         }
 
-        .search-result-item:hover {
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* STATUS DA CAMPANHA */
+        .campaign-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-paused {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+        }
+
+        /* CAMPO ID */
+        .campaign-id-field {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .campaign-id-field input {
+            flex: 1;
+        }
+
+        .generate-id-btn {
             background: #475569;
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -379,10 +444,16 @@
     <div class="container">
         <!-- HEADER -->
         <div class="header">
-            <h1>
-                <i class="fas fa-map"></i>
-                Criar Nova Campanha
-            </h1>
+            <div class="header-left">
+                <h1>
+                    <i class="fas fa-map"></i>
+                    Criar Nova Campanha
+                </h1>
+            </div>
+            <button class="top-create-btn" id="createCampaignBtn">
+                <i class="fas fa-save"></i>
+                Criar Campanha
+            </button>
             <div class="user-info">
                 <div class="avatar" id="userAvatar">
                     <i class="fas fa-user"></i>
@@ -391,206 +462,298 @@
             </div>
         </div>
 
-        <!-- LINK VOLTAR -->
-        <div class="form-container">
+        <!-- SUBABAS NO TOPO -->
+        <div class="subabas-top">
+            <button class="subaba-tab-top active" onclick="showSubaba('info')">
+                <i class="fas fa-info-circle"></i>
+                Informações
+            </button>
+            <button class="subaba-tab-top" onclick="showSubaba('personagens')">
+                <i class="fas fa-users"></i>
+                Personagens
+            </button>
+            <button class="subaba-tab-top" onclick="showSubaba('npcs')">
+                <i class="fas fa-robot"></i>
+                NPCs
+            </button>
+            <button class="subaba-tab-top" onclick="showSubaba('rolagens')">
+                <i class="fas fa-dice"></i>
+                Rolagens
+            </button>
+            <button class="subaba-tab-top" onclick="showSubaba('chat')">
+                <i class="fas fa-comments"></i>
+                Chat
+            </button>
+            <button class="subaba-tab-top" onclick="showSubaba('mapas')">
+                <i class="fas fa-map"></i>
+                Mapas
+            </button>
+            <button class="subaba-tab-top" onclick="showSubaba('tabelas')">
+                <i class="fas fa-table"></i>
+                Tabelas
+            </button>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="main-content">
             <a href="campanhas.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
                 Voltar para Campanhas
             </a>
 
-            <!-- AVISO SE NÃO TEM GUILDA -->
-            <div id="guildWarning" class="guild-warning" style="display: none;">
-                <h3><i class="fas fa-exclamation-triangle"></i> Aviso Importante!</h3>
-                <p>Você precisa estar em uma Guilda para criar uma campanha.</p>
-                <a href="guilda.html" class="btn btn-primary" style="margin-top: 10px;">
-                    <i class="fas fa-users"></i>
-                    Ir para Guilda
-                </a>
+            <!-- INFO DA GUILDA -->
+            <div id="guildInfo" class="guild-info">
+                <i class="fas fa-users"></i>
+                <div>
+                    <strong>Guilda:</strong> 
+                    <span id="currentGuildName">Carregando...</span>
+                </div>
             </div>
 
-            <!-- FORMULÁRIO DE CRIAÇÃO -->
-            <form id="createCampaignForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Nome da Campanha *</label>
-                        <input type="text" id="campaignName" class="form-control" required
-                               placeholder="Ex: A Jornada dos Heróis">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">ID da Campanha *</label>
-                        <input type="text" id="campaignId" class="form-control" required
-                               placeholder="Ex: CAMP001">
-                        <small style="color: #94a3b8; display: block; margin-top: 5px;">
-                            ID único (será gerado automaticamente se deixar em branco)
-                        </small>
-                    </div>
-                </div>
+            <!-- SUBABA: INFORMAÇÕES -->
+            <div id="subaba-info" class="subaba-content active">
+                <div class="form-section">
+                    <h3 class="form-title"><i class="fas fa-edit"></i> Informações da Campanha</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nome da Campanha *</label>
+                            <input type="text" id="campaignName" class="form-control" required
+                                   placeholder="Ex: A Jornada dos Heróis">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">ID da Campanha *</label>
+                            <div class="campaign-id-field">
+                                <input type="text" id="campaignId" class="form-control" required
+                                       placeholder="Será gerado automaticamente">
+                                <button type="button" class="generate-id-btn" onclick="generateCampaignId()">
+                                    <i class="fas fa-sync-alt"></i> Gerar
+                                </button>
+                            </div>
+                        </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Guilda *</label>
-                        <select id="campaignGuild" class="form-control" required>
-                            <option value="">Selecione uma Guilda</option>
-                            <!-- Guildas serão preenchidas aqui -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Status *</label>
-                        <select id="campaignStatus" class="form-control" required>
-                            <option value="active">Ativa</option>
-                            <option value="paused">Pausada</option>
-                        </select>
-                    </div>
-                </div>
+                        <div class="form-group">
+                            <label class="form-label">Status *</label>
+                            <select id="campaignStatus" class="form-control" required>
+                                <option value="active">Ativa</option>
+                                <option value="paused">Pausada</option>
+                            </select>
+                        </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Cenário</label>
-                        <input type="text" id="campaignScenario" class="form-control"
-                               placeholder="Ex: Reinos de Ferro, Cyberpunk, etc.">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Capítulo Atual</label>
-                        <input type="text" id="campaignChapter" class="form-control"
-                               placeholder="Ex: 1 - O Início">
-                    </div>
-                </div>
+                        <div class="form-group">
+                            <label class="form-label">Capítulo Atual</label>
+                            <input type="text" id="campaignChapter" class="form-control"
+                                   placeholder="Ex: Capítulo 1 - O Início">
+                        </div>
 
-                <div class="form-group">
-                    <label class="form-label">Descrição / História</label>
-                    <textarea id="campaignDescription" class="form-control" rows="5"
-                              placeholder="Descreva a história da campanha..."></textarea>
-                </div>
-            </form>
+                        <div class="form-group">
+                            <label class="form-label">Cenário</label>
+                            <input type="text" id="campaignScenario" class="form-control"
+                                   placeholder="Ex: Reinos de Ferro, Cyberpunk, etc.">
+                        </div>
 
-            <!-- SUBABAS DA CAMPANHA -->
-            <div class="subabas-container">
-                <div class="subabas-tabs">
-                    <button class="subaba-tab active" onclick="showSubaba('personagens')">
-                        <i class="fas fa-users"></i>
-                        Personagens
-                    </button>
-                    <button class="subaba-tab" onclick="showSubaba('npcs')">
-                        <i class="fas fa-robot"></i>
-                        NPCs
-                    </button>
-                    <button class="subaba-tab" onclick="showSubaba('rolagens')">
-                        <i class="fas fa-dice"></i>
-                        Rolagens
-                    </button>
-                    <button class="subaba-tab" onclick="showSubaba('chat')">
-                        <i class="fas fa-comments"></i>
-                        Chat
-                    </button>
-                    <button class="subaba-tab" onclick="showSubaba('mapas')">
-                        <i class="fas fa-map"></i>
-                        Mapas
-                    </button>
-                    <button class="subaba-tab" onclick="showSubaba('tabelas')">
-                        <i class="fas fa-table"></i>
-                        Tabelas
-                    </button>
-                </div>
+                        <div class="form-group">
+                            <label class="form-label">Guilda Vinculada *</label>
+                            <select id="campaignGuild" class="form-control" required>
+                                <option value="">Selecione uma Guilda</option>
+                            </select>
+                        </div>
 
-                <!-- SUBABA PERSONAGENS -->
-                <div id="subaba-personagens" class="subaba-content active">
-                    <h3 class="subaba-title"><i class="fas fa-users"></i> Personagens da Campanha</h3>
-                    <div class="characters-grid" id="charactersList">
-                        <!-- Personagens serão carregados aqui -->
-                        <div class="character-card">
-                            <div class="character-name">Você (GM)</div>
-                            <div class="character-class">Mestre</div>
+                        <div class="form-group form-full">
+                            <label class="form-label">Descrição / História</label>
+                            <textarea id="campaignDescription" class="form-control" rows="5"
+                                      placeholder="Descreva a história da campanha..."></textarea>
                         </div>
                     </div>
-                    <button class="btn btn-secondary btn-small" onclick="addCharacter()">
+                </div>
+            </div>
+
+            <!-- SUBABA: PERSONAGENS -->
+            <div id="subaba-personagens" class="subaba-content">
+                <div class="subaba-header">
+                    <h3><i class="fas fa-users"></i> Personagens da Campanha</h3>
+                    <button class="btn btn-primary" onclick="showAddCharacterModal()">
                         <i class="fas fa-plus"></i>
                         Adicionar Personagem
                     </button>
                 </div>
-
-                <!-- SUBABA NPCs -->
-                <div id="subaba-npcs" class="subaba-content">
-                    <h3 class="subaba-title"><i class="fas fa-robot"></i> NPCs da Campanha</h3>
-                    <div class="npcs-list" id="npcsList">
-                        <!-- NPCs serão carregados aqui -->
+                
+                <div class="characters-grid" id="charactersList">
+                    <div class="character-card">
+                        <div class="character-name">Você (GM)</div>
+                        <div class="character-class">Mestre da Campanha</div>
+                        <div class="campaign-status status-active">GM</div>
                     </div>
-                    <button class="btn btn-secondary btn-small" onclick="addNPC()">
+                </div>
+            </div>
+
+            <!-- SUBABA: NPCs -->
+            <div id="subaba-npcs" class="subaba-content">
+                <div class="subaba-header">
+                    <h3><i class="fas fa-robot"></i> NPCs da Campanha</h3>
+                    <button class="btn btn-primary" onclick="showAddNPCModal()">
                         <i class="fas fa-plus"></i>
                         Adicionar NPC
                     </button>
                 </div>
+                
+                <div class="npcs-list" id="npcsList">
+                    <!-- NPCs serão adicionados aqui -->
+                </div>
+            </div>
 
-                <!-- SUBABA ROLAGENS -->
-                <div id="subaba-rolagens" class="subaba-content">
-                    <h3 class="subaba-title"><i class="fas fa-dice"></i> Histórico de Rolagens</h3>
-                    <div class="dice-history" id="diceHistory">
-                        <!-- Histórico de rolagens -->
-                        <div class="dice-roll">
-                            <strong>GM</strong> rolou 1d20: <strong>15</strong> (Percepção)
-                            <small style="color: #94a3b8; display: block;">há 5 minutos</small>
-                        </div>
+            <!-- SUBABA: ROLAGENS -->
+            <div id="subaba-rolagens" class="subaba-content">
+                <div class="subaba-header">
+                    <h3><i class="fas fa-dice"></i> Histórico de Rolagens</h3>
+                    <button class="btn btn-primary" onclick="simulateDiceRoll()">
+                        <i class="fas fa-dice-d20"></i>
+                        Simular Rolagem
+                    </button>
+                </div>
+                
+                <div class="dice-history" id="diceHistory">
+                    <div class="dice-roll">
+                        <strong>GM</strong> rolou 1d20: <strong>15</strong> (Percepção)
+                        <small style="color: #94a3b8; display: block;">há 5 minutos</small>
                     </div>
                 </div>
+            </div>
 
-                <!-- SUBABA CHAT -->
-                <div id="subaba-chat" class="subaba-content">
-                    <h3 class="subaba-title"><i class="fas fa-comments"></i> Chat da Campanha</h3>
-                    <div class="chat-container" id="chatBox">
-                        <!-- Mensagens do chat -->
-                        <div style="color: #94a3b8; text-align: center; margin-top: 50px;">
-                            <i class="fas fa-comments fa-2x"></i>
-                            <p>Chat da campanha será exibido aqui</p>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" class="form-control" placeholder="Digite uma mensagem...">
-                        <button class="btn btn-primary">Enviar</button>
+            <!-- SUBABA: CHAT -->
+            <div id="subaba-chat" class="subaba-content">
+                <div class="subaba-header">
+                    <h3><i class="fas fa-comments"></i> Chat da Campanha</h3>
+                    <div style="color: #94a3b8; font-size: 14px;">
+                        Chat será ativado após criar a campanha
                     </div>
                 </div>
-
-                <!-- SUBABA MAPAS -->
-                <div id="subaba-mapas" class="subaba-content">
-                    <h3 class="subaba-title"><i class="fas fa-map"></i> Mapas da Campanha</h3>
-                    <div class="maps-grid" id="mapsList">
-                        <!-- Mapas serão carregados aqui -->
-                        <div class="map-preview">
-                            <i class="fas fa-plus fa-2x"></i>
-                            <p>Adicionar Mapa</p>
-                        </div>
-                    </div>
+                
+                <div style="background: #0f172a; border-radius: 8px; padding: 20px; text-align: center; margin-top: 20px;">
+                    <i class="fas fa-comments fa-3x" style="color: #475569; margin-bottom: 15px;"></i>
+                    <p style="color: #94a3b8;">O chat ficará disponível após a criação da campanha</p>
                 </div>
+            </div>
 
-                <!-- SUBABA TABELAS -->
-                <div id="subaba-tabelas" class="subaba-content">
-                    <h3 class="subaba-title"><i class="fas fa-table"></i> Tabelas da Campanha</h3>
-                    <div class="tables-list" id="tablesList">
-                        <!-- Tabelas serão carregadas aqui -->
-                        <div class="table-item">
-                            <h4>Tabela de Tesouros</h4>
-                            <p>Itens mágicos e riquezas</p>
-                        </div>
-                        <div class="table-item">
-                            <h4>Tabela de Encontros</h4>
-                            <p>Inimigos por nível</p>
-                        </div>
-                    </div>
-                    <button class="btn btn-secondary btn-small" onclick="addTable()">
+            <!-- SUBABA: MAPAS -->
+            <div id="subaba-mapas" class="subaba-content">
+                <div class="subaba-header">
+                    <h3><i class="fas fa-map"></i> Mapas da Campanha</h3>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-upload"></i>
+                        Adicionar Mapa
+                    </button>
+                </div>
+                
+                <div style="background: #0f172a; border-radius: 8px; padding: 30px; text-align: center; margin-top: 20px;">
+                    <i class="fas fa-map-marked-alt fa-3x" style="color: #475569; margin-bottom: 15px;"></i>
+                    <p style="color: #94a3b8;">Adicione mapas para sua campanha</p>
+                </div>
+            </div>
+
+            <!-- SUBABA: TABELAS -->
+            <div id="subaba-tabelas" class="subaba-content">
+                <div class="subaba-header">
+                    <h3><i class="fas fa-table"></i> Tabelas da Campanha</h3>
+                    <button class="btn btn-primary" onclick="showAddTableModal()">
                         <i class="fas fa-plus"></i>
                         Adicionar Tabela
                     </button>
                 </div>
+                
+                <div id="tablesList">
+                    <!-- Tabelas serão adicionadas aqui -->
+                </div>
             </div>
+        </div>
+    </div>
 
-            <!-- BOTÕES DE AÇÃO -->
-            <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="cancelCreation()">
-                    <i class="fas fa-times"></i>
-                    Cancelar
-                </button>
-                <button class="btn btn-primary" onclick="createCampaign()" id="createBtn">
-                    <i class="fas fa-save"></i>
-                    Criar Campanha
-                </button>
+    <!-- MODAL ADICIONAR PERSONAGEM -->
+    <div id="addCharacterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Adicionar Personagem</h3>
+                <button class="modal-close" onclick="closeModal('addCharacterModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Nome do Personagem *</label>
+                    <input type="text" id="characterName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Classe/Arquétipo</label>
+                    <input type="text" id="characterClass" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nível</label>
+                    <input type="number" id="characterLevel" class="form-control" value="1" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addCharacterModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="addCharacter()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADICIONAR NPC -->
+    <div id="addNPCModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-robot"></i> Adicionar NPC</h3>
+                <button class="modal-close" onclick="closeModal('addNPCModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Nome do NPC *</label>
+                    <input type="text" id="npcName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Função/Role</label>
+                    <input type="text" id="npcRole" class="form-control" placeholder="Ex: Mercador, Guarda, etc">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrição</label>
+                    <textarea id="npcDescription" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addNPCModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="addNPC()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADICIONAR TABELA -->
+    <div id="addTableModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-table"></i> Adicionar Tabela</h3>
+                <button class="modal-close" onclick="closeModal('addTableModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Nome da Tabela *</label>
+                    <input type="text" id="tableName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tipo</label>
+                    <select id="tableType" class="form-control">
+                        <option value="treasure">Tesouro</option>
+                        <option value="encounter">Encontro</option>
+                        <option value="loot">Saque</option>
+                        <option value="random">Aleatória</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrição</label>
+                    <textarea id="tableDescription" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addTableModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="addTable()">Adicionar</button>
             </div>
         </div>
     </div>
@@ -609,7 +772,6 @@
             characters: [],
             npcs: [],
             diceRolls: [],
-            maps: [],
             tables: []
         };
 
@@ -619,6 +781,7 @@
             await loadUserData();
             await loadUserGuilds();
             setupEventListeners();
+            generateCampaignId(); // Gerar ID automaticamente
         });
 
         // Verificar autenticação
@@ -673,20 +836,30 @@
                     guildSelect.appendChild(option);
                 });
                 
-                // Esconder aviso se tiver guilda
-                document.getElementById('guildWarning').style.display = 'none';
+                // Mostrar info da primeira guilda
+                if (userGuilds[0]) {
+                    document.getElementById('currentGuildName').textContent = userGuilds[0].name;
+                }
             } else {
-                // Mostrar aviso se NÃO tiver guilda
-                document.getElementById('guildWarning').style.display = 'block';
-                document.getElementById('createBtn').disabled = true;
+                // Se não tem guilda, mostrar aviso
+                document.getElementById('guildInfo').innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Atenção:</strong> Você precisa estar em uma Guilda para criar campanhas.
+                        <a href="guilda.html" style="color: #f59e0b; margin-left: 10px;">Ir para Guilda</a>
+                    </div>
+                `;
+                document.getElementById('createCampaignBtn').disabled = true;
             }
         }
 
-        // Gerar ID automático
+        // Gerar ID da campanha
         function generateCampaignId() {
             const timestamp = Date.now().toString().slice(-4);
             const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-            return `CAMP${timestamp}${random}`;
+            const campaignId = `CAMP${timestamp}${random}`;
+            document.getElementById('campaignId').value = campaignId;
+            return campaignId;
         }
 
         // Mostrar subaba
@@ -695,119 +868,293 @@
             document.querySelectorAll('.subaba-content').forEach(el => {
                 el.classList.remove('active');
             });
-            document.querySelectorAll('.subaba-tab').forEach(tab => {
+            document.querySelectorAll('.subaba-tab-top').forEach(tab => {
                 tab.classList.remove('active');
             });
             
             // Mostrar subaba selecionada
             document.getElementById(`subaba-${subaba}`).classList.add('active');
-            document.querySelector(`.subaba-tab[onclick="showSubaba('${subaba}')"]`).classList.add('active');
+            document.querySelector(`.subaba-tab-top[onclick="showSubaba('${subaba}')"]`).classList.add('active');
+        }
+
+        // Mostrar modal
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        // Fechar modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Limpar campos
+            if (modalId === 'addCharacterModal') {
+                document.getElementById('characterName').value = '';
+                document.getElementById('characterClass').value = '';
+                document.getElementById('characterLevel').value = '1';
+            }
+        }
+
+        // Mostrar modal de personagem
+        function showAddCharacterModal() {
+            showModal('addCharacterModal');
+        }
+
+        // Mostrar modal de NPC
+        function showAddNPCModal() {
+            showModal('addNPCModal');
+        }
+
+        // Mostrar modal de tabela
+        function showAddTableModal() {
+            showModal('addTableModal');
         }
 
         // Adicionar personagem
         function addCharacter() {
-            const name = prompt("Nome do personagem:");
-            if (name) {
-                const character = {
-                    id: Date.now(),
-                    name: name,
-                    player: currentUser.username,
-                    isGM: true
-                };
-                campaignData.characters.push(character);
-                
-                const charactersList = document.getElementById('charactersList');
-                const characterCard = document.createElement('div');
-                characterCard.className = 'character-card';
-                characterCard.innerHTML = `
-                    <div class="character-name">${name}</div>
-                    <div class="character-class">${currentUser.username}</div>
+            const name = document.getElementById('characterName').value;
+            const charClass = document.getElementById('characterClass').value;
+            const level = document.getElementById('characterLevel').value;
+            
+            if (!name) {
+                alert('Por favor, digite o nome do personagem!');
+                return;
+            }
+            
+            const character = {
+                id: Date.now(),
+                name: name,
+                class: charClass,
+                level: level,
+                player: currentUser.username
+            };
+            
+            campaignData.characters.push(character);
+            
+            // Adicionar ao grid
+            const charactersList = document.getElementById('charactersList');
+            const characterCard = document.createElement('div');
+            characterCard.className = 'character-card';
+            characterCard.innerHTML = `
+                <div class="character-name">${name}</div>
+                <div class="character-class">${charClass || 'Sem classe'} - Nível ${level}</div>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-danger btn-small" onclick="removeCharacter(${character.id})">
+                        <i class="fas fa-trash"></i> Remover
+                    </button>
+                </div>
+            `;
+            charactersList.appendChild(characterCard);
+            
+            closeModal('addCharacterModal');
+        }
+
+        // Remover personagem
+        function removeCharacter(characterId) {
+            if (confirm('Remover este personagem?')) {
+                campaignData.characters = campaignData.characters.filter(c => c.id !== characterId);
+                document.getElementById('charactersList').innerHTML = `
+                    <div class="character-card">
+                        <div class="character-name">Você (GM)</div>
+                        <div class="character-class">Mestre da Campanha</div>
+                        <div class="campaign-status status-active">GM</div>
+                    </div>
                 `;
-                charactersList.appendChild(characterCard);
+                
+                campaignData.characters.forEach(character => {
+                    const charactersList = document.getElementById('charactersList');
+                    const characterCard = document.createElement('div');
+                    characterCard.className = 'character-card';
+                    characterCard.innerHTML = `
+                        <div class="character-name">${character.name}</div>
+                        <div class="character-class">${character.class || 'Sem classe'} - Nível ${character.level}</div>
+                        <div style="margin-top: 10px;">
+                            <button class="btn btn-danger btn-small" onclick="removeCharacter(${character.id})">
+                                <i class="fas fa-trash"></i> Remover
+                            </button>
+                        </div>
+                    `;
+                    charactersList.appendChild(characterCard);
+                });
             }
         }
 
         // Adicionar NPC
         function addNPC() {
-            const name = prompt("Nome do NPC:");
-            const role = prompt("Função do NPC:");
-            if (name && role) {
-                const npc = {
-                    id: Date.now(),
-                    name: name,
-                    role: role,
-                    description: ""
-                };
-                campaignData.npcs.push(npc);
-                
-                const npcsList = document.getElementById('npcsList');
-                const npcItem = document.createElement('div');
-                npcItem.className = 'npc-item';
-                npcItem.innerHTML = `
-                    <div class="npc-info">
-                        <h4>${name}</h4>
-                        <p>${role}</p>
-                    </div>
-                    <button class="btn btn-secondary btn-small" onclick="removeNPC(${npc.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `;
-                npcsList.appendChild(npcItem);
+            const name = document.getElementById('npcName').value;
+            const role = document.getElementById('npcRole').value;
+            const description = document.getElementById('npcDescription').value;
+            
+            if (!name) {
+                alert('Por favor, digite o nome do NPC!');
+                return;
             }
+            
+            const npc = {
+                id: Date.now(),
+                name: name,
+                role: role,
+                description: description
+            };
+            
+            campaignData.npcs.push(npc);
+            
+            // Adicionar à lista
+            const npcsList = document.getElementById('npcsList');
+            const npcItem = document.createElement('div');
+            npcItem.className = 'npc-item';
+            npcItem.innerHTML = `
+                <div class="npc-info">
+                    <h4>${name}</h4>
+                    <p>${role || 'Sem função definida'}</p>
+                    ${description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${description}</p>` : ''}
+                </div>
+                <button class="btn btn-danger btn-small" onclick="removeNPC(${npc.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            npcsList.appendChild(npcItem);
+            
+            closeModal('addNPCModal');
         }
 
         // Remover NPC
         function removeNPC(npcId) {
-            campaignData.npcs = campaignData.npcs.filter(npc => npc.id !== npcId);
-            document.getElementById('npcsList').innerHTML = '';
-            campaignData.npcs.forEach(npc => {
-                const npcsList = document.getElementById('npcsList');
-                const npcItem = document.createElement('div');
-                npcItem.className = 'npc-item';
-                npcItem.innerHTML = `
-                    <div class="npc-info">
-                        <h4>${npc.name}</h4>
-                        <p>${npc.role}</p>
-                    </div>
-                    <button class="btn btn-secondary btn-small" onclick="removeNPC(${npc.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `;
-                npcsList.appendChild(npcItem);
-            });
+            if (confirm('Remover este NPC?')) {
+                campaignData.npcs = campaignData.npcs.filter(npc => npc.id !== npcId);
+                document.getElementById('npcsList').innerHTML = '';
+                
+                campaignData.npcs.forEach(npc => {
+                    const npcsList = document.getElementById('npcsList');
+                    const npcItem = document.createElement('div');
+                    npcItem.className = 'npc-item';
+                    npcItem.innerHTML = `
+                        <div class="npc-info">
+                            <h4>${npc.name}</h4>
+                            <p>${npc.role || 'Sem função definida'}</p>
+                            ${npc.description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${npc.description}</p>` : ''}
+                        </div>
+                        <button class="btn btn-danger btn-small" onclick="removeNPC(${npc.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    npcsList.appendChild(npcItem);
+                });
+            }
         }
 
         // Adicionar tabela
         function addTable() {
-            const name = prompt("Nome da tabela:");
-            const description = prompt("Descrição da tabela:");
-            if (name && description) {
-                const table = {
-                    id: Date.now(),
-                    name: name,
-                    description: description
-                };
-                campaignData.tables.push(table);
-                
-                const tablesList = document.getElementById('tablesList');
-                const tableItem = document.createElement('div');
-                tableItem.className = 'table-item';
-                tableItem.innerHTML = `
+            const name = document.getElementById('tableName').value;
+            const type = document.getElementById('tableType').value;
+            const description = document.getElementById('tableDescription').value;
+            
+            if (!name) {
+                alert('Por favor, digite o nome da tabela!');
+                return;
+            }
+            
+            const table = {
+                id: Date.now(),
+                name: name,
+                type: type,
+                description: description
+            };
+            
+            campaignData.tables.push(table);
+            
+            // Adicionar à lista
+            const tablesList = document.getElementById('tablesList');
+            const tableItem = document.createElement('div');
+            tableItem.className = 'npc-item';
+            tableItem.innerHTML = `
+                <div class="npc-info">
                     <h4>${name}</h4>
-                    <p>${description}</p>
-                `;
-                tablesList.appendChild(tableItem);
+                    <p>Tipo: ${type}</p>
+                    ${description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${description}</p>` : ''}
+                </div>
+                <button class="btn btn-danger btn-small" onclick="removeTable(${table.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            tablesList.appendChild(tableItem);
+            
+            closeModal('addTableModal');
+        }
+
+        // Remover tabela
+        function removeTable(tableId) {
+            if (confirm('Remover esta tabela?')) {
+                campaignData.tables = campaignData.tables.filter(t => t.id !== tableId);
+                document.getElementById('tablesList').innerHTML = '';
+                
+                campaignData.tables.forEach(table => {
+                    const tablesList = document.getElementById('tablesList');
+                    const tableItem = document.createElement('div');
+                    tableItem.className = 'npc-item';
+                    tableItem.innerHTML = `
+                        <div class="npc-info">
+                            <h4>${table.name}</h4>
+                            <p>Tipo: ${table.type}</p>
+                            ${table.description ? `<p style="color: #cbd5e1; font-size: 13px; margin-top: 5px;">${table.description}</p>` : ''}
+                        </div>
+                        <button class="btn btn-danger btn-small" onclick="removeTable(${table.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    tablesList.appendChild(tableItem);
+                });
+            }
+        }
+
+        // Simular rolagem de dados
+        function simulateDiceRoll() {
+            const diceTypes = ['1d20', '2d6', '1d100', '3d6', '4d10'];
+            const diceActions = ['Ataque', 'Percepção', 'Resistência', 'Iniciativa', 'Teste de Habilidade'];
+            const diceType = diceTypes[Math.floor(Math.random() * diceTypes.length)];
+            const diceAction = diceActions[Math.floor(Math.random() * diceActions.length)];
+            
+            // Simular resultado (simples)
+            let result = 0;
+            if (diceType === '1d20') result = Math.floor(Math.random() * 20) + 1;
+            else if (diceType === '2d6') result = Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1);
+            else if (diceType === '1d100') result = Math.floor(Math.random() * 100) + 1;
+            else if (diceType === '3d6') result = Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1);
+            else result = Math.floor(Math.random() * 10 + 1) * 4;
+            
+            const roll = {
+                id: Date.now(),
+                player: 'GM',
+                dice: diceType,
+                result: result,
+                action: diceAction,
+                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            };
+            
+            campaignData.diceRolls.unshift(roll);
+            
+            // Atualizar histórico
+            const diceHistory = document.getElementById('diceHistory');
+            const diceRoll = document.createElement('div');
+            diceRoll.className = 'dice-roll';
+            diceRoll.innerHTML = `
+                <strong>${roll.player}</strong> rolou ${roll.dice}: <strong>${roll.result}</strong> (${roll.action})
+                <small style="color: #94a3b8; display: block;">${roll.time}</small>
+            `;
+            
+            if (diceHistory.firstChild) {
+                diceHistory.insertBefore(diceRoll, diceHistory.firstChild);
+            } else {
+                diceHistory.appendChild(diceRoll);
             }
         }
 
         // Criar campanha
         async function createCampaign() {
-            if (!userGuilds.length) {
+            if (userGuilds.length === 0) {
                 alert('Você precisa estar em uma guilda para criar uma campanha!');
                 return;
             }
 
-            const campaignId = document.getElementById('campaignId').value || generateCampaignId();
+            const campaignId = document.getElementById('campaignId').value;
             const campaignName = document.getElementById('campaignName').value;
             const guildId = document.getElementById('campaignGuild').value;
             
@@ -825,7 +1172,7 @@
                     .single();
                 
                 if (existing) {
-                    alert('Este ID de campanha já está em uso! Por favor, escolha outro.');
+                    alert('Este ID de campanha já está em uso! Por favor, gere um novo ID.');
                     return;
                 }
 
@@ -856,10 +1203,21 @@
                         role: 'gm'
                     }]);
 
-                // Salvar dados extras (NPCs, etc)
-                await saveCampaignData(campaignId);
+                // Salvar NPCs se houver
+                if (campaignData.npcs.length > 0) {
+                    const npcInserts = campaignData.npcs.map(npc => ({
+                        campaign_id: campaignId,
+                        name: npc.name,
+                        role: npc.role,
+                        description: npc.description
+                    }));
+                    
+                    await supabase
+                        .from('campaign_npcs')
+                        .insert(npcInserts);
+                }
 
-                alert(`Campanha "${campaignName}" criada com sucesso!\nID: ${campaignId}`);
+                alert(`✅ Campanha "${campaignName}" criada com sucesso!\nID: ${campaignId}`);
                 window.location.href = `campanha-detalhes.html?id=${campaignId}`;
 
             } catch (error) {
@@ -868,37 +1226,15 @@
             }
         }
 
-        // Salvar dados extras da campanha
-        async function saveCampaignData(campaignId) {
-            // Aqui você pode salvar NPCs, personagens, etc em tabelas separadas
-            console.log('Salvando dados extras para campanha:', campaignId, campaignData);
-            
-            // Exemplo: Salvar NPCs
-            for (const npc of campaignData.npcs) {
-                await supabase
-                    .from('campaign_npcs')
-                    .insert([{
-                        campaign_id: campaignId,
-                        name: npc.name,
-                        role: npc.role,
-                        description: npc.description
-                    }]);
-            }
-        }
-
-        // Cancelar criação
-        function cancelCreation() {
-            if (confirm('Deseja cancelar a criação da campanha? Todas as alterações serão perdidas.')) {
-                window.location.href = 'campanhas.html';
-            }
-        }
-
         // Configurar eventos
         function setupEventListeners() {
-            // Gerar ID automático se campo estiver vazio
-            document.getElementById('campaignId').addEventListener('blur', function() {
-                if (!this.value.trim()) {
-                    this.value = generateCampaignId();
+            // Botão criar campanha
+            document.getElementById('createCampaignBtn').addEventListener('click', createCampaign);
+            
+            // Fechar modal ao clicar fora
+            window.addEventListener('click', (event) => {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
                 }
             });
         }
