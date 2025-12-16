@@ -779,15 +779,9 @@
     document.addEventListener('DOMContentLoaded', async () => {
         await checkAuth();
         await loadUserData();
-        const hasGuild = await loadUserGuilds();
-        
-        if (!hasGuild) {
-            showNoGuildMessage();
-            return;
-        }
-        
+        await loadUserGuilds();
         setupEventListeners();
-        generateCampaignId(); // Gerar ID automaticamente
+        generateCampaignId();
     });
 
     // Verificar autenticação
@@ -820,69 +814,45 @@
         }
     }
 
-    // FUNÇÃO PARA MOSTRAR MENSAGEM DE SEM GUILDA
-    function showNoGuildMessage() {
-        const mainContent = document.querySelector('.main-content');
-        mainContent.innerHTML = `
-            <div style="text-align: center; padding: 50px;">
-                <div style="font-size: 72px; color: #f59e0b; margin-bottom: 20px;">
-                    <i class="fas fa-users-slash"></i>
-                </div>
-                <h2 style="color: #fbbf24; margin-bottom: 15px;">Guilde Necessária</h2>
-                <p style="color: #94a3b8; margin-bottom: 30px; max-width: 500px; margin-left: auto; margin-right: auto;">
-                    Você precisa fazer parte de uma Guilda para criar campanhas.<br>
-                    As campanhas são criadas dentro de guildas para organizar melhor os jogadores.
-                </p>
-                <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
-                    <a href="guilda.html" class="btn btn-primary" style="padding: 15px 30px;">
-                        <i class="fas fa-plus-circle"></i> Criar Guilda
-                    </a>
-                    <a href="minhas-guildas.html" class="btn btn-secondary" style="padding: 15px 30px;">
-                        <i class="fas fa-users"></i> Explorar Guildas
-                    </a>
-                </div>
-                <div style="margin-top: 40px; padding: 20px; background: rgba(148, 163, 184, 0.1); border-radius: 10px; max-width: 600px; margin-left: auto; margin-right: auto;">
-                    <h4 style="color: #fbbf24; margin-bottom: 10px;">Como funciona?</h4>
-                    <ol style="text-align: left; color: #cbd5e1; line-height: 1.8;">
-                        <li>Crie ou entre em uma Guilda primeiro</li>
-                        <li>Dentro da Guilda, você poderá criar campanhas</li>
-                        <li>Convide outros membros da Guilda para sua campanha</li>
-                        <li>A Guilda serve como um "hub" para organizar suas aventuras</li>
-                    </ol>
-                </div>
-            </div>
-        `;
-        
-        // Esconder botão de criação
-        document.getElementById('createCampaignBtn').style.display = 'none';
-        document.querySelector('.subabas-top').style.display = 'none';
-        document.getElementById('guildInfo').style.display = 'none';
-    }
-
-    // Carregar guildas do usuário
+    // Carregar guildas do usuário - CORRIGIDO para sua estrutura
     async function loadUserGuilds() {
-        try {
-            const { data: memberships, error } = await supabase
-                .from('guild_members')
-                .select(`
-                    role,
-                    guilds (id, name, guild_id, description)
-                `)
-                .eq('user_id', currentUser.id);
+        console.log('Carregando guildas do usuário:', currentUser.id);
+        
+        // USANDO SUA VIEW: guild_members_with_profiles
+        const { data: memberships, error } = await supabase
+            .from('guild_members_with_profiles')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .eq('status', 'accepted');
+        
+        if (error) {
+            console.error('Erro ao carregar guildas:', error);
+            showNoGuildMessage();
+            return;
+        }
+        
+        console.log('Guildas encontradas:', memberships);
+        
+        if (memberships && memberships.length > 0) {
+            // Para cada membership, buscar os dados completos da guilda
+            userGuilds = [];
             
-            if (error) {
-                console.error('Erro ao carregar guildas:', error);
-                return false;
+            for (const membership of memberships) {
+                const { data: guildData, error: guildError } = await supabase
+                    .from('guilds')
+                    .select('*')
+                    .eq('id', membership.guild_id)
+                    .single();
+                
+                if (!guildError && guildData) {
+                    userGuilds.push({
+                        ...guildData,
+                        member_role: membership.role
+                    });
+                }
             }
             
-            if (!memberships || memberships.length === 0) {
-                return false;
-            }
-            
-            userGuilds = memberships.map(m => ({
-                ...m.guilds,
-                member_role: m.role
-            }));
+            console.log('Guildas processadas:', userGuilds);
             
             // Preencher select de guildas
             const guildSelect = document.getElementById('campaignGuild');
@@ -891,16 +861,20 @@
             userGuilds.forEach(guild => {
                 const option = document.createElement('option');
                 option.value = guild.id;
-                option.textContent = `${guild.name} (${guild.guild_id})`;
-                if (guild.member_role === 'founder' || guild.member_role === 'officer') {
-                    option.textContent += ' 👑';
-                }
+                option.textContent = `${guild.name} (${guild.custom_id})`;
+                
+                // Adicionar indicador do seu cargo
+                if (guild.member_role === 'owner') option.textContent += ' 👑';
+                if (guild.member_role === 'admin') option.textContent += ' ⭐';
+                if (guild.member_role === 'member') option.textContent += ' 👤';
+                
                 guildSelect.appendChild(option);
             });
             
             // Mostrar info da primeira guilda
             if (userGuilds[0]) {
-                document.getElementById('currentGuildName').textContent = userGuilds[0].name;
+                document.getElementById('currentGuildName').textContent = 
+                    `${userGuilds[0].name} (${userGuilds[0].member_role})`;
                 
                 // Se o usuário só tem uma guilda, selecionar automaticamente
                 if (userGuilds.length === 1) {
@@ -908,10 +882,32 @@
                 }
             }
             
-            return true;
-        } catch (error) {
-            console.error('Erro ao carregar guildas:', error);
-            return false;
+        } else {
+            console.log('Usuário não tem guildas');
+            showNoGuildMessage();
+        }
+    }
+
+    // Mostrar mensagem quando não tem guilda - SIMPLES
+    function showNoGuildMessage() {
+        const guildInfo = document.getElementById('guildInfo');
+        if (guildInfo) {
+            guildInfo.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Atenção:</strong> Você precisa estar em uma Guilda para criar campanhas.
+                    <a href="guilda.html" style="color: #f59e0b; margin-left: 10px;">Ir para Guilda</a>
+                </div>
+            `;
+        }
+        
+        // Desabilitar botão de criar campanha
+        const createBtn = document.getElementById('createCampaignBtn');
+        if (createBtn) {
+            createBtn.disabled = true;
+            createBtn.style.opacity = '0.5';
+            createBtn.style.cursor = 'not-allowed';
+            createBtn.innerHTML = '<i class="fas fa-ban"></i> Necessita Guilda';
         }
     }
 
@@ -926,7 +922,6 @@
 
     // Mostrar subaba
     function showSubaba(subaba) {
-        // Esconder todas as subabas
         document.querySelectorAll('.subaba-content').forEach(el => {
             el.classList.remove('active');
         });
@@ -934,7 +929,6 @@
             tab.classList.remove('active');
         });
         
-        // Mostrar subaba selecionada
         document.getElementById(`subaba-${subaba}`).classList.add('active');
         document.querySelector(`.subaba-tab-top[onclick="showSubaba('${subaba}')"]`).classList.add('active');
     }
@@ -947,7 +941,6 @@
     // Fechar modal
     function closeModal(modalId) {
         document.getElementById(modalId).style.display = 'none';
-        // Limpar campos
         if (modalId === 'addCharacterModal') {
             document.getElementById('characterName').value = '';
             document.getElementById('characterClass').value = '';
@@ -991,7 +984,6 @@
         
         campaignData.characters.push(character);
         
-        // Adicionar ao grid
         const charactersList = document.getElementById('charactersList');
         const characterCard = document.createElement('div');
         characterCard.className = 'character-card';
@@ -1059,7 +1051,6 @@
         
         campaignData.npcs.push(npc);
         
-        // Adicionar à lista
         const npcsList = document.getElementById('npcsList');
         const npcItem = document.createElement('div');
         npcItem.className = 'npc-item';
@@ -1123,7 +1114,6 @@
         
         campaignData.tables.push(table);
         
-        // Adicionar à lista
         const tablesList = document.getElementById('tablesList');
         const tableItem = document.createElement('div');
         tableItem.className = 'npc-item';
@@ -1174,7 +1164,6 @@
         const diceType = diceTypes[Math.floor(Math.random() * diceTypes.length)];
         const diceAction = diceActions[Math.floor(Math.random() * diceActions.length)];
         
-        // Simular resultado (simples)
         let result = 0;
         if (diceType === '1d20') result = Math.floor(Math.random() * 20) + 1;
         else if (diceType === '2d6') result = Math.floor(Math.random() * 6 + 1) + Math.floor(Math.random() * 6 + 1);
@@ -1193,7 +1182,6 @@
         
         campaignData.diceRolls.unshift(roll);
         
-        // Atualizar histórico
         const diceHistory = document.getElementById('diceHistory');
         const diceRoll = document.createElement('div');
         diceRoll.className = 'dice-roll';
@@ -1209,62 +1197,64 @@
         }
     }
 
-    // VALIDAR E CRIAR CAMPANHA
-    async function validateAndCreateCampaign() {
+    // Criar campanha - FUNÇÃO PRINCIPAL
+    async function createCampaign() {
+        console.log('Iniciando criação de campanha...');
+        
+        // 1. VERIFICAR SE TEM GUILDA
         if (userGuilds.length === 0) {
             alert('❌ Você precisa estar em uma Guilda para criar campanhas!');
-            showNoGuildMessage();
             return;
         }
         
+        // 2. PEGAR VALORES
+        const campaignId = document.getElementById('campaignId').value.trim();
+        const campaignName = document.getElementById('campaignName').value.trim();
         const guildId = document.getElementById('campaignGuild').value;
-        if (!guildId) {
-            alert('Por favor, selecione uma Guilda para a campanha!');
-            return;
-        }
+        const status = document.getElementById('campaignStatus').value;
+        const scenario = document.getElementById('campaignScenario').value;
+        const chapter = document.getElementById('campaignChapter').value;
+        const description = document.getElementById('campaignDescription').value;
         
-        // Verificar permissões na guilda selecionada
-        const selectedGuild = userGuilds.find(g => g.id === guildId);
-        if (!selectedGuild) {
-            alert('Erro: Guilda não encontrada!');
-            return;
-        }
+        console.log('Dados coletados:', {
+            campaignId, campaignName, guildId, status
+        });
         
-        // Verificar se o usuário pode criar campanhas nesta guilda
-        // (por exemplo, apenas founders e officers)
-        if (!['founder', 'officer', 'member'].includes(selectedGuild.member_role)) {
-            alert('Você não tem permissão para criar campanhas nesta Guilda!');
-            return;
-        }
-        
-        createCampaign();
-    }
-
-    // Criar campanha
-    async function createCampaign() {
-        const campaignId = document.getElementById('campaignId').value;
-        const campaignName = document.getElementById('campaignName').value;
-        const guildId = document.getElementById('campaignGuild').value;
-        const campaignStatus = document.getElementById('campaignStatus').value;
-        const campaignScenario = document.getElementById('campaignScenario').value;
-        const campaignChapter = document.getElementById('campaignChapter').value;
-        const campaignDescription = document.getElementById('campaignDescription').value;
-        
-        // Validações básicas
+        // 3. VALIDAÇÕES BÁSICAS
         if (!campaignName) {
             alert('Por favor, digite o nome da campanha!');
-            document.getElementById('campaignName').focus();
             return;
         }
         
         if (!guildId) {
             alert('Por favor, selecione uma Guilda!');
-            document.getElementById('campaignGuild').focus();
             return;
         }
-
+        
+        // 4. VERIFICAR SE PERTENCE À GUILDA SELECIONADA
+        const selectedGuild = userGuilds.find(g => g.id === guildId);
+        if (!selectedGuild) {
+            alert('Erro: Você não pertence a esta Guilda!');
+            return;
+        }
+        
+        // 5. CONFIRMAÇÃO
+        const confirmation = confirm(
+            `Criar campanha "${campaignName}"?\n\n` +
+            `ID: ${campaignId}\n` +
+            `Guilda: ${selectedGuild.name}\n` +
+            `Status: ${status === 'active' ? 'Ativa' : 'Pausada'}`
+        );
+        
+        if (!confirmation) return;
+        
         try {
-            // Verificar se o ID já existe
+            // Mudar texto do botão
+            const createBtn = document.getElementById('createCampaignBtn');
+            createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+            createBtn.disabled = true;
+            
+            // 6. VERIFICAR SE O CAMPAIGN_ID JÁ EXISTE
             const { data: existing } = await supabase
                 .from('campaigns')
                 .select('campaign_id')
@@ -1272,21 +1262,22 @@
                 .single();
             
             if (existing) {
-                alert('Este ID de campanha já está em uso! Por favor, gere um novo ID.');
-                generateCampaignId();
+                alert('Este ID de campanha já está em uso! Clique em "Gerar" para um novo.');
+                createBtn.innerHTML = '<i class="fas fa-save"></i> Criar Campanha';
+                createBtn.disabled = false;
                 return;
             }
 
-            // Criar campanha no banco
+            // 7. CRIAR CAMPANHA (PRECISA CRIAR A TABELA campaigns PRIMEIRO)
             const { data: campaign, error } = await supabase
                 .from('campaigns')
                 .insert([{
                     campaign_id: campaignId,
                     name: campaignName,
-                    description: campaignDescription,
-                    scenario: campaignScenario,
-                    chapter: campaignChapter,
-                    status: campaignStatus,
+                    description: description,
+                    scenario: scenario,
+                    chapter: chapter,
+                    status: status,
                     guild_id: guildId,
                     gm_id: currentUser.id,
                     created_at: new Date().toISOString()
@@ -1297,19 +1288,20 @@
             if (error) {
                 console.error('Erro ao criar campanha:', error);
                 
-                // Verificar se é erro de constraint
-                if (error.code === '23505') { // Violação de unicidade
-                    alert('Este ID de campanha já está em uso! Por favor, gere um novo ID.');
-                    generateCampaignId();
-                } else if (error.code === '23503') { // Violação de chave estrangeira
-                    alert('Erro: Guilda não encontrada ou inválida!');
+                // Se a tabela não existe, criar ela primeiro
+                if (error.message.includes('relation "campaigns" does not exist')) {
+                    await createCampaignsTable();
+                    alert('Tabela de campanhas criada. Tente novamente.');
                 } else {
                     alert('Erro ao criar campanha: ' + error.message);
                 }
+                
+                createBtn.innerHTML = '<i class="fas fa-save"></i> Criar Campanha';
+                createBtn.disabled = false;
                 return;
             }
 
-            // Adicionar GM como participante
+            // 8. ADICIONAR GM COMO PARTICIPANTE (PRECISA CRIAR A TABELA campaign_participants)
             const { error: participantError } = await supabase
                 .from('campaign_participants')
                 .insert([{
@@ -1321,10 +1313,10 @@
             
             if (participantError) {
                 console.error('Erro ao adicionar GM:', participantError);
-                // Continuar mesmo com erro, pois a campanha já foi criada
+                // Continuar mesmo se der erro
             }
 
-            // Salvar NPCs se houver
+            // 9. SALVAR NPCs SE HOUVER (PRECISA CRIAR A TABELA campaign_npcs)
             if (campaignData.npcs.length > 0) {
                 const npcInserts = campaignData.npcs.map(npc => ({
                     campaign_id: campaignId,
@@ -1339,72 +1331,91 @@
                     .insert(npcInserts);
             }
 
-            // Salvar personagens se houver
-            if (campaignData.characters.length > 0) {
-                // Adicionar personagens como participantes
-                // Nota: Neste momento, os personagens são apenas locais
-                // Em uma versão completa, você adicionaria outros jogadores aqui
-            }
-
-            // Mostrar mensagem de sucesso
-            alert(`✅ Campanha "${campaignName}" criada com sucesso!\n\nID: ${campaignId}\nGuilda: ${userGuilds.find(g => g.id === guildId).name}\nStatus: ${campaignStatus === 'active' ? 'Ativa' : 'Pausada'}`);
+            console.log('✅ Campanha criada com sucesso!');
             
-            // Redirecionar para detalhes da campanha
+            alert(`✅ Campanha criada com sucesso!\n\nNome: ${campaignName}\nID: ${campaignId}`);
+            
+            // 10. REDIRECIONAR
             setTimeout(() => {
                 window.location.href = `campanha-detalhes.html?id=${campaignId}`;
             }, 1500);
 
         } catch (error) {
-            console.error('Erro ao criar campanha:', error);
-            alert('Erro inesperado ao criar campanha: ' + error.message);
+            console.error('Erro inesperado:', error);
+            
+            const createBtn = document.getElementById('createCampaignBtn');
+            createBtn.innerHTML = '<i class="fas fa-save"></i> Criar Campanha';
+            createBtn.disabled = false;
+            
+            alert('Erro: ' + error.message);
         }
+    }
+
+    // Função para criar tabela de campanhas se não existir
+    async function createCampaignsTable() {
+        console.log('Criando tabela campaigns...');
+        
+        // Primeiro, execute este SQL no Supabase:
+        const sql = `
+            CREATE TABLE IF NOT EXISTS campaigns (
+                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                campaign_id TEXT UNIQUE NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                scenario TEXT,
+                chapter TEXT,
+                status TEXT DEFAULT 'active',
+                guild_id UUID REFERENCES guilds(id) NOT NULL,
+                gm_id UUID REFERENCES auth.users(id) NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+            
+            CREATE TABLE IF NOT EXISTS campaign_participants (
+                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                campaign_id TEXT REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+                user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+                role TEXT DEFAULT 'player',
+                joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                UNIQUE(campaign_id, user_id)
+            );
+            
+            CREATE TABLE IF NOT EXISTS campaign_npcs (
+                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                campaign_id TEXT REFERENCES campaigns(campaign_id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                role TEXT,
+                description TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+        `;
+        
+        console.log('Execute este SQL no Supabase SQL Editor:');
+        console.log(sql);
+        
+        alert('Copie e execute o SQL no Supabase para criar as tabelas necessárias.');
     }
 
     // Configurar eventos
     function setupEventListeners() {
+        console.log('Configurando eventos...');
+        
         // Botão criar campanha
-        document.getElementById('createCampaignBtn').addEventListener('click', validateAndCreateCampaign);
+        const createBtn = document.getElementById('createCampaignBtn');
+        if (createBtn) {
+            console.log('Botão encontrado, adicionando listener...');
+            createBtn.addEventListener('click', createCampaign);
+        } else {
+            console.error('Botão não encontrado!');
+        }
         
         // Botão gerar ID
-        document.querySelector('.generate-id-btn').addEventListener('click', generateCampaignId);
+        document.querySelector('.generate-id-btn')?.addEventListener('click', generateCampaignId);
         
         // Fechar modal ao clicar fora
         window.addEventListener('click', (event) => {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
-            }
-        });
-        
-        // Fechar modal com Escape
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.style.display = 'none';
-                });
-            }
-        });
-        
-        // Validação em tempo real do nome da campanha
-        document.getElementById('campaignName').addEventListener('input', function() {
-            if (this.value.length > 0) {
-                this.style.borderColor = '#22c55e';
-            } else {
-                this.style.borderColor = '#475569';
-            }
-        });
-        
-        // Validação em tempo real da guilda
-        document.getElementById('campaignGuild').addEventListener('change', function() {
-            if (this.value) {
-                this.style.borderColor = '#22c55e';
-                
-                // Atualizar nome da guilda no topo
-                const selectedGuild = userGuilds.find(g => g.id === this.value);
-                if (selectedGuild) {
-                    document.getElementById('currentGuildName').textContent = selectedGuild.name;
-                }
-            } else {
-                this.style.borderColor = '#475569';
             }
         });
     }
