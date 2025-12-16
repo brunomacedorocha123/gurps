@@ -7,438 +7,719 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
+    body {
+        background: #0f172a;
+        color: white;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: #1e293b;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid #334155;
+    }
+
+    /* HEADER SIMPLES */
+    .header {
+        background: #111827;
+        padding: 20px 30px;
+        border-bottom: 1px solid #334155;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-left h1 {
+        color: #fbbf24;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 24px;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+        background: #f59e0b;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #111827;
+    }
+
+    /* BOTÃO VOLTAR */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #94a3b8;
+        text-decoration: none;
+        margin-bottom: 20px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        background: rgba(148, 163, 184, 0.1);
+    }
+
+    .back-btn:hover {
+        background: rgba(148, 163, 184, 0.2);
+    }
+
+    /* BOTÃO CRIAR NO TOPO */
+    .top-create-btn {
+        background: linear-gradient(45deg, #f59e0b, #d97706);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
+        margin-right: 20px;
+    }
+
+    /* SUBABAS NO TOPO */
+    .subabas-top {
+        background: #0f172a;
+        border-bottom: 1px solid #334155;
+        display: flex;
+        overflow-x: auto;
+        padding: 0 10px;
+    }
+
+    .subaba-tab-top {
+        padding: 15px 25px;
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        white-space: nowrap;
+        border-bottom: 3px solid transparent;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+        font-size: 15px;
+    }
+
+    .subaba-tab-top:hover {
+        background: rgba(148, 163, 184, 0.1);
+    }
+
+    .subaba-tab-top.active {
+        color: #fbbf24;
+        border-bottom: 3px solid #fbbf24;
+        background: rgba(245, 158, 11, 0.1);
+    }
+
+    /* CONTEÚDO PRINCIPAL */
+    .main-content {
+        padding: 30px;
+    }
+
+    /* GUILDA INFO */
+    .guild-info {
+        background: rgba(245, 158, 11, 0.1);
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        border-left: 4px solid #f59e0b;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .guild-info i {
+        color: #fbbf24;
+        font-size: 20px;
+    }
+
+    /* FORMULÁRIO */
+    .form-section {
+        background: #1e293b;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 1px solid #334155;
+    }
+
+    .form-title {
+        color: #fbbf24;
+        margin-bottom: 20px;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        color: #e2e8f0;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        background: #334155;
+        border: 1px solid #475569;
+        border-radius: 8px;
+        color: white;
+        font-size: 15px;
+    }
+
+    textarea.form-control {
+        min-height: 150px; /* Aumentado para mobile */
+        resize: vertical;
+    }
+
+    .form-full {
+        grid-column: 1 / -1;
+    }
+
+    /* CONTEÚDO DAS SUBABAS */
+    .subaba-content {
+        background: #1e293b;
+        border-radius: 10px;
+        padding: 25px;
+        margin-top: 20px;
+        border: 1px solid #334155;
+        display: none;
+    }
+
+    .subaba-content.active {
+        display: block;
+    }
+
+    .subaba-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .subaba-header h3 {
+        color: #fbbf24;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* PERSONAGENS */
+    .characters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .character-card {
+        background: #334155;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #475569;
+    }
+
+    .character-name {
+        color: #fbbf24;
+        font-weight: 600;
+        margin-bottom: 5px;
+        font-size: 16px;
+    }
+
+    .character-class {
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    /* NPCs */
+    .npcs-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .npc-item {
+        background: #334155;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #475569;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .npc-info h4 {
+        color: #fbbf24;
+        margin-bottom: 5px;
+        font-size: 16px;
+    }
+
+    .npc-info p {
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    /* ROLAGENS */
+    .dice-history {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .dice-roll {
+        background: #334155;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #f59e0b;
+    }
+
+    /* BOTÕES */
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .btn-primary {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #334155;
+        color: white;
+        border: 1px solid #475569;
+    }
+
+    .btn-small {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: white;
+    }
+
+    /* MODAL DE ADICIONAR */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal-content {
+        background: #1e293b;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 500px;
+        border: 2px solid #f59e0b;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #334155;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        background: #1e293b;
+        z-index: 1;
+    }
+
+    .modal-header h3 {
+        color: #fbbf24;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #334155;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        position: sticky;
+        bottom: 0;
+        background: #1e293b;
+    }
+
+    /* STATUS DA CAMPANHA */
+    .campaign-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .status-active {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-paused {
+        background: rgba(234, 179, 8, 0.2);
+        color: #eab308;
+        border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+
+    /* CAMPO ID */
+    .campaign-id-field {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .campaign-id-field input {
+        flex: 1;
+    }
+
+    .generate-id-btn {
+        background: #475569;
+        color: white;
+        border: none;
+        padding: 12px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    /* ============================================
+       AJUSTES ESPECÍFICOS PARA MOBILE (max-width: 768px)
+       ============================================ */
+    @media (max-width: 768px) {
         body {
-            background: #0f172a;
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
+            padding: 0;
         }
-
+        
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #1e293b;
-            border-radius: 15px;
-            overflow: hidden;
-            border: 1px solid #334155;
+            border-radius: 0;
+            border: none;
+            min-height: 100vh;
         }
-
-        /* HEADER SIMPLES */
+        
+        /* HEADER MOBILE */
         .header {
-            background: #111827;
-            padding: 20px 30px;
-            border-bottom: 1px solid #334155;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 12px 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-
+        
+        .header-left {
+            order: 1;
+            flex: 1 1 100%;
+        }
+        
         .header-left h1 {
-            color: #fbbf24;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 24px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            background: #f59e0b;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #111827;
-        }
-
-        /* BOTÃO VOLTAR */
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
+            font-size: 18px;
             gap: 8px;
-            color: #94a3b8;
-            text-decoration: none;
-            margin-bottom: 20px;
-            padding: 8px 16px;
-            border-radius: 6px;
-            background: rgba(148, 163, 184, 0.1);
         }
-
-        .back-btn:hover {
-            background: rgba(148, 163, 184, 0.2);
-        }
-
-        /* BOTÃO CRIAR NO TOPO */
-        .top-create-btn {
-            background: linear-gradient(45deg, #f59e0b, #d97706);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-left: auto;
-            margin-right: 20px;
-        }
-
-        /* SUBABAS NO TOPO */
-        .subabas-top {
-            background: #0f172a;
-            border-bottom: 1px solid #334155;
-            display: flex;
-            overflow-x: auto;
-            padding: 0 10px;
-        }
-
-        .subaba-tab-top {
-            padding: 15px 25px;
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            white-space: nowrap;
-            border-bottom: 3px solid transparent;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
-            font-size: 15px;
-        }
-
-        .subaba-tab-top:hover {
-            background: rgba(148, 163, 184, 0.1);
-        }
-
-        .subaba-tab-top.active {
-            color: #fbbf24;
-            border-bottom: 3px solid #fbbf24;
-            background: rgba(245, 158, 11, 0.1);
-        }
-
-        /* CONTEÚDO PRINCIPAL */
-        .main-content {
-            padding: 30px;
-        }
-
-        /* GUILDA INFO */
-        .guild-info {
-            background: rgba(245, 158, 11, 0.1);
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            border-left: 4px solid #f59e0b;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .guild-info i {
-            color: #fbbf24;
+        
+        .header-left h1 i {
             font-size: 20px;
         }
-
-        /* FORMULÁRIO */
-        .form-section {
-            background: #1e293b;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid #334155;
+        
+        .top-create-btn {
+            order: 2;
+            margin: 0;
+            padding: 10px 15px;
+            font-size: 14px;
+            flex: 1;
+            justify-content: center;
         }
-
-        .form-title {
-            color: #fbbf24;
-            margin-bottom: 20px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        
+        .user-info {
+            order: 3;
+            margin-left: auto;
         }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
         }
-
-        .form-group {
-            margin-bottom: 20px;
+        
+        /* SUBABAS MOBILE */
+        .subabas-top {
+            padding: 0 5px;
         }
-
-        .form-label {
-            display: block;
-            color: #e2e8f0;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
+        
+        .subaba-tab-top {
             padding: 12px 15px;
-            background: #334155;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            color: white;
-            font-size: 15px;
+            font-size: 13px;
+            gap: 6px;
         }
-
+        
+        .subaba-tab-top i {
+            font-size: 14px;
+        }
+        
+        /* CONTEÚDO PRINCIPAL MOBILE */
+        .main-content {
+            padding: 15px;
+        }
+        
+        .back-btn {
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        /* FORMULÁRIO MOBILE */
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .form-section {
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-title {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
         textarea.form-control {
             min-height: 120px;
-            resize: vertical;
-        }
-
-        .form-full {
-            grid-column: 1 / -1;
-        }
-
-        /* CONTEÚDO DAS SUBABAS */
-        .subaba-content {
-            background: #1e293b;
-            border-radius: 10px;
-            padding: 25px;
-            margin-top: 20px;
-            border: 1px solid #334155;
-            display: none;
-        }
-
-        .subaba-content.active {
-            display: block;
-        }
-
-        .subaba-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .subaba-header h3 {
-            color: #fbbf24;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* PERSONAGENS */
-        .characters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .character-card {
-            background: #334155;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #475569;
-        }
-
-        .character-name {
-            color: #fbbf24;
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-
-        .character-class {
-            color: #94a3b8;
             font-size: 14px;
         }
-
-        /* NPCs */
-        .npcs-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .npc-item {
-            background: #334155;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #475569;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .npc-info h4 {
-            color: #fbbf24;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-
-        .npc-info p {
-            color: #94a3b8;
+        
+        .form-control {
+            padding: 10px 12px;
             font-size: 14px;
         }
-
-        /* ROLAGENS */
-        .dice-history {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .dice-roll {
-            background: #334155;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #f59e0b;
-        }
-
-        /* BOTÕES */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-
-        .btn-primary {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #334155;
-            color: white;
-            border: 1px solid #475569;
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 13px;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            color: white;
-        }
-
-        /* MODAL DE ADICIONAR */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: #1e293b;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 500px;
-            border: 2px solid #f59e0b;
-        }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #334155;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            color: #fbbf24;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-footer {
-            padding: 20px;
-            border-top: 1px solid #334155;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        /* STATUS DA CAMPANHA */
-        .campaign-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .status-active {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-
-        .status-paused {
-            background: rgba(234, 179, 8, 0.2);
-            color: #eab308;
-            border: 1px solid rgba(234, 179, 8, 0.3);
-        }
-
-        /* CAMPO ID */
+        
+        /* CAMPO ID MOBILE */
         .campaign-id-field {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            flex-direction: column;
+            gap: 8px;
+            align-items: stretch;
         }
-
+        
         .campaign-id-field input {
-            flex: 1;
+            width: 100%;
         }
-
+        
         .generate-id-btn {
-            background: #475569;
-            color: white;
-            border: none;
-            padding: 12px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            white-space: nowrap;
+            padding: 10px;
+            width: 100%;
         }
-    </style>
+        
+        /* GUILDA INFO MOBILE */
+        .guild-info {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            gap: 10px;
+        }
+        
+        /* SUBABA CONTENT MOBILE */
+        .subaba-content {
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .subaba-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .subaba-header h3 {
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 12px;
+        }
+        
+        /* PERSONAGENS MOBILE */
+        .characters-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .character-card {
+            padding: 15px;
+        }
+        
+        /* NPCs MOBILE */
+        .npc-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+        }
+        
+        .npc-info {
+            width: 100%;
+        }
+        
+        /* MODAL MOBILE */
+        .modal {
+            padding: 10px;
+            align-items: flex-start;
+            padding-top: 20px;
+        }
+        
+        .modal-content {
+            max-height: 85vh;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+        
+        .modal-body {
+            padding: 15px;
+        }
+        
+        .modal-footer {
+            padding: 15px;
+            flex-direction: column;
+        }
+        
+        .modal-footer .btn {
+            width: 100%;
+        }
+        
+        /* BOTÕES EM GERAL */
+        .btn-small {
+            width: auto;
+            align-self: flex-end;
+        }
+    }
+    
+    /* ============================================
+       AJUSTES PARA TELAS MUITO PEQUENAS (max-width: 480px)
+       ============================================ */
+    @media (max-width: 480px) {
+        .subaba-tab-top {
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+        
+        .subaba-tab-top span {
+            display: none;
+        }
+        
+        .subaba-tab-top i {
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .header-left h1 span {
+            font-size: 16px;
+        }
+        
+        .top-create-btn span {
+            display: none;
+        }
+        
+        .top-create-btn i {
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .user-info span {
+            display: none;
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+        }
+    }
+    
+    /* ============================================
+       AJUSTES PARA TABLETS (769px - 1024px)
+       ============================================ */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .main-content {
+            padding: 20px;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .characters-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+    }
+</style>
 </head>
 <body>
     <div class="container">
@@ -1421,4 +1702,4 @@
     }
 </script>
 </body>
-</html> 
+</html>
