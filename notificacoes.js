@@ -1,7 +1,3 @@
-// ============================================
-// SISTEMA DE NOTIFICAÇÕES - JAVASCRIPT COMPLETO
-// ============================================
-
 // Configuração do Supabase
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
@@ -11,21 +7,11 @@ let currentUser = null;
 let currentFilter = 'all';
 let userInvitations = [];
 
-// ============================================
-// FUNÇÕES PRINCIPAIS
-// ============================================
-
 async function initNotifications() {
-    try {
-        await checkAuth();
-        await loadUserData();
-        setupEventListeners();
-        await loadNotifications();
-        startAutoRefresh();
-    } catch (error) {
-        console.error('Erro na inicialização:', error);
-        renderError('Erro ao iniciar sistema de notificações');
-    }
+    await checkAuth();
+    await loadUserData();
+    setupEventListeners();
+    await loadNotifications();
 }
 
 async function checkAuth() {
@@ -38,132 +24,133 @@ async function checkAuth() {
 }
 
 async function loadUserData() {
-    try {
-        const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('player_id, username')
-            .eq('id', currentUser.id)
-            .single();
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
 
-        if (error) throw error;
-
-        if (profile) {
-            document.getElementById('playerId').textContent = '#' + (profile.player_id || '---');
-            const initials = profile.username?.charAt(0).toUpperCase() || 'U';
-            document.getElementById('userAvatar').innerHTML = initials;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar perfil:', error);
+    if (profile) {
+        document.getElementById('playerId').textContent = '#' + profile.player_id;
+        const initials = profile.username?.charAt(0).toUpperCase() || 'U';
+        document.getElementById('userAvatar').innerHTML = initials;
     }
 }
 
 async function loadNotifications() {
     try {
-        showLoading(true);
-        
-        // Usar a função PostgreSQL para buscar notificações
-        const { data, error } = await supabase.rpc('get_user_notifications');
-        
-        if (error) {
-            console.error('Erro na função get_user_notifications:', error);
-            // Fallback: buscar diretamente da view
-            await loadNotificationsFallback();
-            return;
-        }
-        
-        if (data && data.success) {
-            userInvitations = data.notifications || [];
-            updateNotificationCount(data.total || 0);
-            renderNotifications(userInvitations);
-        } else {
-            renderError(data?.message || 'Erro ao carregar notificações');
-        }
-        
-    } catch (error) {
-        console.error('Erro ao carregar notificações:', error);
-        renderError('Erro de conexão com o servidor');
-    } finally {
-        showLoading(false);
-    }
-}
-
-async function loadNotificationsFallback() {
-    try {
-        // Buscar convites de campanha diretamente
-        const { data: campaignInvites, error: campaignError } = await supabase
-            .from('campaign_invitations_with_details')
-            .select('*')
-            .eq('receiver_id', currentUser.id)
-            .eq('status', 'pending')
-            .order('sent_at', { ascending: false });
-        
-        if (campaignError) {
-            throw campaignError;
-        }
-        
         const notifications = [];
-        
-        // Processar convites de campanha
-        if (campaignInvites && campaignInvites.length > 0) {
-            campaignInvites.forEach(invite => {
-                notifications.push({
-                    id: invite.id,
-                    type: 'campaign_invite',
-                    title: 'Convite para Campanha',
-                    message: invite.message || `${invite.sender_username} convidou você para a campanha "${invite.campaign_name}"`,
-                    campaign_id: invite.campaign_id,
-                    campaign_name: invite.campaign_name,
-                    campaign_code: invite.campaign_code,
-                    sender_username: invite.sender_username,
-                    status: invite.status,
-                    sent_at: invite.sent_at,
-                    is_read: false
-                });
-            });
-        }
-        
-        // Tentar buscar convites de guilda
+
+        // 1. Buscar convites de GUILDA (se a tabela existir)
         try {
-            const { data: guildInvites } = await supabase
+            const { data: guildInvites, error: guildError } = await supabase
                 .from('guild_invitations_with_details')
                 .select('*')
                 .eq('receiver_id', currentUser.id)
                 .eq('status', 'pending')
                 .order('sent_at', { ascending: false });
-            
-            if (guildInvites && guildInvites.length > 0) {
+
+            if (!guildError && guildInvites) {
                 guildInvites.forEach(invite => {
                     notifications.push({
                         id: invite.id,
                         type: 'guild_invite',
                         title: 'Convite para Guilda',
-                        message: `${invite.sender_username} convidou você para a guilda "${invite.guild_name}"`,
+                        message: `${invite.sender_username || 'Alguém'} convidou você para a guilda "${invite.guild_name || 'Guilda'}"`,
                         guild_id: invite.guild_id,
                         guild_name: invite.guild_name,
                         sender_username: invite.sender_username,
                         status: invite.status,
                         sent_at: invite.sent_at,
-                        is_read: false
+                        read: false
                     });
                 });
             }
-        } catch (guildError) {
-            // Ignorar erro de guildas - pode não existir
-            console.log('Sistema de guildas não disponível');
+        } catch (guildErr) {
+            console.log('Tabela de guildas não disponível:', guildErr.message);
         }
-        
+
+        // 2. Buscar convites de CAMPANHA usando a view
+        try {
+            const { data: campaignInvites, error: campaignError } = await supabase
+                .from('campaign_invitations_with_details')
+                .select('*')
+                .eq('receiver_id', currentUser.id)
+                .eq('status', 'pending')
+                .order('sent_at', { ascending: false });
+
+            if (!campaignError && campaignInvites) {
+                campaignInvites.forEach(invite => {
+                    notifications.push({
+                        id: invite.id,
+                        type: 'campaign_invite',
+                        title: 'Convite para Campanha',
+                        message: `${invite.sender_username || 'Alguém'} convidou você para a campanha "${invite.campaign_name || 'Campanha'}"`,
+                        campaign_id: invite.campaign_id,
+                        campaign_name: invite.campaign_name,
+                        campaign_code: invite.campaign_code,
+                        sender_username: invite.sender_username,
+                        status: invite.status,
+                        sent_at: invite.sent_at,
+                        message_text: invite.message,
+                        read: false
+                    });
+                });
+            } else if (campaignError) {
+                console.log('Erro na view de campanha, tentando direto:', campaignError);
+                // Fallback: buscar direto da tabela
+                const { data: directCampaignInvites } = await supabase
+                    .from('campaign_invitations')
+                    .select(`
+                        *,
+                        campaigns (
+                            name,
+                            campaign_id
+                        ),
+                        sender:profiles!campaign_invitations_sender_id_fkey (
+                            username
+                        )
+                    `)
+                    .eq('receiver_id', currentUser.id)
+                    .eq('status', 'pending')
+                    .order('sent_at', { ascending: false });
+
+                if (directCampaignInvites) {
+                    directCampaignInvites.forEach(invite => {
+                        notifications.push({
+                            id: invite.id,
+                            type: 'campaign_invite',
+                            title: 'Convite para Campanha',
+                            message: `${invite.sender?.username || 'Alguém'} convidou você para a campanha "${invite.campaigns?.name || 'Campanha'}"`,
+                            campaign_id: invite.campaign_id,
+                            campaign_name: invite.campaigns?.name,
+                            campaign_code: invite.campaigns?.campaign_id,
+                            sender_username: invite.sender?.username,
+                            status: invite.status,
+                            sent_at: invite.sent_at,
+                            message_text: invite.message,
+                            read: false
+                        });
+                    });
+                }
+            }
+        } catch (campaignErr) {
+            console.log('Erro ao buscar convites de campanha:', campaignErr);
+        }
+
         userInvitations = notifications;
-        updateNotificationCount(notifications.length);
         renderNotifications(notifications);
-        
+
     } catch (error) {
-        console.error('Erro no fallback:', error);
-        renderError('Não foi possível carregar as notificações');
+        console.error('Erro geral:', error);
+        renderError('Erro ao carregar notificações');
     }
 }
 
 function renderNotifications(notifications) {
     const notificationsList = document.getElementById('notificationsList');
+    const totalNotifications = document.getElementById('totalNotifications');
+    const notificationBadge = document.getElementById('notificationBadge');
     
     if (!notifications || notifications.length === 0) {
         notificationsList.innerHTML = `
@@ -175,32 +162,43 @@ function renderNotifications(notifications) {
                 <p class="empty-text">Você não tem convites pendentes no momento</p>
             </div>
         `;
+        totalNotifications.textContent = '0';
+        notificationBadge.style.display = 'none';
         return;
     }
 
-    // Filtrar notificações conforme aba selecionada
+    // Filtrar por tipo
     let filteredNotifications = notifications;
     if (currentFilter !== 'all') {
         filteredNotifications = notifications.filter(notif => {
             if (currentFilter === 'guild') return notif.type === 'guild_invite';
             if (currentFilter === 'campaign') return notif.type === 'campaign_invite';
-            if (currentFilter === 'system') return notif.type === 'system';
             return false;
         });
+    }
+
+    // Atualizar contadores
+    totalNotifications.textContent = filteredNotifications.length;
+    
+    if (filteredNotifications.length > 0) {
+        notificationBadge.textContent = filteredNotifications.length > 99 ? '99+' : filteredNotifications.length;
+        notificationBadge.style.display = 'inline';
+    } else {
+        notificationBadge.style.display = 'none';
     }
 
     // Renderizar notificações
     notificationsList.innerHTML = filteredNotifications.map(notification => {
         const timeAgo = getTimeAgo(notification.sent_at);
-        const iconClass = getIconClass(notification.type);
-        const iconText = getIconText(notification.type);
+        const iconClass = notification.type === 'guild_invite' ? 'icon-guild' : 'icon-campaign';
+        const iconText = notification.type === 'guild_invite' ? 'fas fa-users' : 'fas fa-map';
         
         return `
-            <div class="notification-item ${notification.is_read ? '' : 'unread'}" 
+            <div class="notification-item unread" 
                  data-id="${notification.id}" 
                  data-type="${notification.type}"
-                 data-campaign-id="${notification.campaign_id || ''}"
-                 data-guild-id="${notification.guild_id || ''}">
+                 data-guild-id="${notification.guild_id || ''}"
+                 data-campaign-id="${notification.campaign_id || ''}">
                 <div class="notification-icon ${iconClass}">
                     <i class="${iconText}"></i>
                 </div>
@@ -213,114 +211,23 @@ function renderNotifications(notifications) {
                 </div>
                 <div class="notification-actions">
                     ${notification.status === 'pending' ? `
-                        <button class="notification-btn btn-decline" data-action="decline" title="Recusar">
-                            <i class="fas fa-times"></i>
+                        <button class="notification-btn btn-accept" data-action="accept">
+                            <i class="fas fa-check"></i> Aceitar
                         </button>
-                        <button class="notification-btn btn-accept" data-action="accept" title="Aceitar">
-                            <i class="fas fa-check"></i>
+                        <button class="notification-btn btn-decline" data-action="decline">
+                            <i class="fas fa-times"></i> Recusar
                         </button>
-                    ` : `
-                        <span class="notification-status ${notification.status === 'accepted' ? 'accepted' : 'rejected'}">
-                            ${notification.status === 'accepted' ? '✅ Aceito' : '❌ Recusado'}
-                        </span>
-                    `}
-                    <button class="notification-btn btn-view" data-action="view" title="Detalhes">
-                        <i class="fas fa-eye"></i>
+                    ` : ''}
+                    <button class="notification-btn btn-view" data-action="view">
+                        <i class="fas fa-eye"></i> Detalhes
                     </button>
                 </div>
             </div>
         `;
     }).join('');
 
-    // Adicionar eventos aos botões
     setupNotificationEvents();
 }
-
-// ============================================
-// FUNÇÕES DE AÇÃO
-// ============================================
-
-async function acceptCampaignInvitation(invitationId) {
-    try {
-        showLoading(true);
-        
-        const { data, error } = await supabase.rpc('respond_to_campaign_invitation', {
-            p_invitation_id: invitationId,
-            p_accept: true
-        });
-        
-        if (error) {
-            throw new Error(error.message);
-        }
-        
-        if (!data.success) {
-            throw new Error(data.message);
-        }
-        
-        // Atualizar interface
-        const notificationItem = document.querySelector(`[data-id="${invitationId}"]`);
-        if (notificationItem) {
-            notificationItem.querySelector('.notification-actions').innerHTML = 
-                '<span class="notification-status accepted">✅ Aceito</span>';
-            notificationItem.classList.remove('unread');
-        }
-        
-        // Mostrar mensagem de sucesso
-        showToast(data.message, 'success');
-        
-        // Recarregar notificações após 2 segundos
-        setTimeout(() => loadNotifications(), 2000);
-        
-    } catch (error) {
-        console.error('Erro ao aceitar convite:', error);
-        showToast(error.message || 'Erro ao aceitar convite', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-async function declineCampaignInvitation(invitationId) {
-    try {
-        showLoading(true);
-        
-        const { data, error } = await supabase.rpc('respond_to_campaign_invitation', {
-            p_invitation_id: invitationId,
-            p_accept: false
-        });
-        
-        if (error) {
-            throw new Error(error.message);
-        }
-        
-        if (!data.success) {
-            throw new Error(data.message);
-        }
-        
-        // Atualizar interface
-        const notificationItem = document.querySelector(`[data-id="${invitationId}"]`);
-        if (notificationItem) {
-            notificationItem.querySelector('.notification-actions').innerHTML = 
-                '<span class="notification-status rejected">❌ Recusado</span>';
-            notificationItem.classList.remove('unread');
-        }
-        
-        // Mostrar mensagem
-        showToast('Convite recusado', 'info');
-        
-        // Recarregar notificações após 2 segundos
-        setTimeout(() => loadNotifications(), 2000);
-        
-    } catch (error) {
-        console.error('Erro ao recusar convite:', error);
-        showToast(error.message || 'Erro ao recusar convite', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// ============================================
-// FUNÇÕES AUXILIARES
-// ============================================
 
 function getTimeAgo(timestamp) {
     if (!timestamp) return 'Data desconhecida';
@@ -331,142 +238,16 @@ function getTimeAgo(timestamp) {
     if (isNaN(date.getTime())) return 'Data inválida';
     
     const diffInSeconds = Math.floor((now - date) / 1000);
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    const diffInDays = Math.floor(diffInHours / 24);
     
     if (diffInSeconds < 60) return 'agora há pouco';
-    if (diffInMinutes < 60) return `há ${diffInMinutes} minuto${diffInMinutes > 1 ? 's' : ''}`;
-    if (diffInHours < 24) return `há ${diffInHours} hora${diffInHours > 1 ? 's' : ''}`;
-    if (diffInDays < 7) return `há ${diffInDays} dia${diffInDays > 1 ? 's' : ''}`;
+    if (diffInSeconds < 3600) return `há ${Math.floor(diffInSeconds / 60)} minutos`;
+    if (diffInSeconds < 86400) return `há ${Math.floor(diffInSeconds / 3600)} horas`;
+    if (diffInSeconds < 604800) return `há ${Math.floor(diffInSeconds / 86400)} dias`;
     
-    return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
+    return date.toLocaleDateString('pt-BR');
 }
-
-function getIconClass(type) {
-    switch(type) {
-        case 'guild_invite': return 'icon-guild';
-        case 'campaign_invite': return 'icon-campaign';
-        case 'system': return 'icon-system';
-        default: return 'icon-system';
-    }
-}
-
-function getIconText(type) {
-    switch(type) {
-        case 'guild_invite': return 'fas fa-users';
-        case 'campaign_invite': return 'fas fa-map';
-        case 'system': return 'fas fa-cog';
-        default: return 'fas fa-bell';
-    }
-}
-
-function updateNotificationCount(count) {
-    const totalElement = document.getElementById('totalNotifications');
-    const badgeElement = document.getElementById('notificationBadge');
-    
-    if (totalElement) {
-        totalElement.textContent = count;
-    }
-    
-    if (badgeElement) {
-        if (count > 0) {
-            badgeElement.textContent = count > 99 ? '99+' : count;
-            badgeElement.style.display = 'inline';
-        } else {
-            badgeElement.style.display = 'none';
-        }
-    }
-}
-
-function showLoading(show) {
-    const notificationsList = document.getElementById('notificationsList');
-    if (show) {
-        notificationsList.innerHTML = `
-            <div class="empty-notifications">
-                <div class="empty-icon">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <h3 class="empty-title">Carregando...</h3>
-                <p class="empty-text">Buscando suas notificações</p>
-            </div>
-        `;
-    }
-}
-
-function showToast(message, type = 'info') {
-    // Criar toast se não existir
-    let toast = document.getElementById('notificationToast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'notificationToast';
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            z-index: 10000;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        `;
-        document.body.appendChild(toast);
-    }
-    
-    // Definir cor conforme tipo
-    switch(type) {
-        case 'success':
-            toast.style.backgroundColor = '#27ae60';
-            break;
-        case 'error':
-            toast.style.backgroundColor = '#e74c3c';
-            break;
-        case 'info':
-            toast.style.backgroundColor = '#3498db';
-            break;
-        default:
-            toast.style.backgroundColor = '#34495e';
-    }
-    
-    // Mostrar mensagem
-    toast.textContent = message;
-    toast.style.transform = 'translateX(0)';
-    
-    // Esconder após 3 segundos
-    setTimeout(() => {
-        toast.style.transform = 'translateX(400px)';
-    }, 3000);
-}
-
-function renderError(message) {
-    const notificationsList = document.getElementById('notificationsList');
-    notificationsList.innerHTML = `
-        <div class="empty-notifications">
-            <div class="empty-icon" style="color: #e74c3c;">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 class="empty-title">Erro ao carregar</h3>
-            <p class="empty-text">${message}</p>
-            <button class="btn" onclick="loadNotifications()" style="margin-top: 20px; padding: 10px 20px; background: #ff8c00; border: none; border-radius: 6px; color: white; cursor: pointer;">
-                <i class="fas fa-redo"></i> Tentar novamente
-            </button>
-        </div>
-    `;
-}
-
-// ============================================
-// EVENT LISTENERS
-// ============================================
 
 function setupNotificationEvents() {
-    // Botões de ação nas notificações
     document.querySelectorAll('.notification-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             e.stopPropagation();
@@ -475,72 +256,212 @@ function setupNotificationEvents() {
             const notificationId = notificationItem.getAttribute('data-id');
             const notificationType = notificationItem.getAttribute('data-type');
             
-            switch(action) {
-                case 'accept':
-                    if (notificationType === 'campaign_invite') {
-                        if (confirm('Deseja aceitar este convite e entrar na campanha?')) {
-                            await acceptCampaignInvitation(notificationId);
-                        }
-                    } else if (notificationType === 'guild_invite') {
-                        // Aqui você pode adicionar lógica para guildas
-                        showToast('Sistema de guildas em desenvolvimento', 'info');
-                    }
-                    break;
-                    
-                case 'decline':
-                    if (notificationType === 'campaign_invite') {
-                        if (confirm('Deseja recusar este convite?')) {
-                            await declineCampaignInvitation(notificationId);
-                        }
-                    } else if (notificationType === 'guild_invite') {
-                        // Aqui você pode adicionar lógica para guildas
-                        showToast('Sistema de guildas em desenvolvimento', 'info');
-                    }
-                    break;
-                    
-                case 'view':
-                    viewNotificationDetails(notificationId);
-                    break;
+            if (action === 'accept') {
+                if (notificationType === 'guild_invite') {
+                    const guildId = notificationItem.getAttribute('data-guild-id');
+                    await acceptGuildInvitation(notificationId, guildId);
+                } else if (notificationType === 'campaign_invite') {
+                    const campaignId = notificationItem.getAttribute('data-campaign-id');
+                    await acceptCampaignInvitation(notificationId, campaignId);
+                }
+            } else if (action === 'decline') {
+                if (notificationType === 'guild_invite') {
+                    await declineGuildInvitation(notificationId);
+                } else if (notificationType === 'campaign_invite') {
+                    await declineCampaignInvitation(notificationId);
+                }
+            } else if (action === 'view') {
+                viewNotificationDetails(notificationId);
+            }
+        });
+    });
+    
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            if (!e.target.closest('.notification-actions')) {
+                const notificationId = item.getAttribute('data-id');
+                viewNotificationDetails(notificationId);
             }
         });
     });
 }
 
-function setupEventListeners() {
-    // Logout
-    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        window.location.href = 'login.html';
+// FUNÇÕES PARA GUILDA (JÁ EXISTENTES E FUNCIONANDO)
+async function acceptGuildInvitation(invitationId, guildId) {
+    if (!confirm('Deseja aceitar este convite e entrar na guilda?')) return;
+    
+    const { data, error } = await supabase.rpc('respond_to_invitation', {
+        p_invitation_id: invitationId,
+        p_accept: true
     });
     
-    // Abas de filtro
-    document.querySelectorAll('.notification-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.notification-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            currentFilter = tab.getAttribute('data-tab');
-            renderNotifications(userInvitations);
+    if (error) {
+        alert('Erro: ' + error.message);
+        return;
+    }
+    
+    const notificationItem = document.querySelector(`[data-id="${invitationId}"]`);
+    if (notificationItem) {
+        notificationItem.querySelector('.notification-actions').innerHTML = 
+            '<span style="color: #2ecc71; font-weight: bold;">✅ Aceito</span>';
+    }
+    
+    alert('Convite aceito!');
+    setTimeout(() => loadNotifications(), 2000);
+}
+
+async function declineGuildInvitation(invitationId) {
+    if (!confirm('Deseja recusar este convite?')) return;
+    
+    const { data, error } = await supabase.rpc('respond_to_invitation', {
+        p_invitation_id: invitationId,
+        p_accept: false
+    });
+    
+    if (error) {
+        alert('Erro: ' + error.message);
+        return;
+    }
+    
+    const notificationItem = document.querySelector(`[data-id="${invitationId}"]`);
+    if (notificationItem) {
+        notificationItem.querySelector('.notification-actions').innerHTML = 
+            '<span style="color: #e74c3c; font-weight: bold;">❌ Recusado</span>';
+    }
+    
+    alert('Convite recusado.');
+    setTimeout(() => loadNotifications(), 2000);
+}
+
+// FUNÇÕES PARA CAMPANHA (USANDO A FUNÇÃO QUE VOCÊ CRIOU)
+async function acceptCampaignInvitation(invitationId, campaignId) {
+    if (!confirm('Deseja aceitar este convite e entrar na campanha?')) return;
+    
+    try {
+        // USAR A SUA FUNÇÃO respond_to_campaign_invitation
+        const { data, error } = await supabase.rpc('respond_to_campaign_invitation', {
+            p_invitation_id: invitationId,
+            p_accept: true
         });
-    });
-    
-    // Marcar todas como lidas
-    document.getElementById('markAllReadBtn')?.addEventListener('click', () => {
-        document.querySelectorAll('.notification-item.unread').forEach(item => {
-            item.classList.remove('unread');
-        });
-        showToast('Todas as notificações marcadas como lidas', 'info');
-    });
-    
-    // Modal
-    document.getElementById('closeModalBtn')?.addEventListener('click', () => {
-        document.getElementById('notificationModal').classList.remove('active');
-    });
-    
-    document.getElementById('notificationModal')?.addEventListener('click', (e) => {
-        if (e.target === document.getElementById('notificationModal')) {
-            document.getElementById('notificationModal').classList.remove('active');
+        
+        if (error) {
+            console.error('Erro ao chamar função:', error);
+            // Fallback: fazer manualmente
+            await acceptCampaignManual(invitationId, campaignId);
+            return;
         }
-    });
+        
+        if (data && data.success) {
+            const notificationItem = document.querySelector(`[data-id="${invitationId}"]`);
+            if (notificationItem) {
+                notificationItem.querySelector('.notification-actions').innerHTML = 
+                    '<span style="color: #2ecc71; font-weight: bold;">✅ Aceito</span>';
+            }
+            alert(data.message || 'Convite aceito!');
+            setTimeout(() => loadNotifications(), 2000);
+        } else {
+            alert(data?.message || 'Erro ao aceitar convite');
+        }
+    } catch (err) {
+        console.error('Erro:', err);
+        await acceptCampaignManual(invitationId, campaignId);
+    }
+}
+
+// Fallback manual se a função não funcionar
+async function acceptCampaignManual(invitationId, campaignId) {
+    try {
+        // 1. Atualizar convite
+        const { error: updateError } = await supabase
+            .from('campaign_invitations')
+            .update({ 
+                status: 'accepted',
+                responded_at: new Date().toISOString()
+            })
+            .eq('id', invitationId);
+        
+        if (updateError) throw updateError;
+        
+        // 2. Buscar dados do convite
+        const { data: inviteData } = await supabase
+            .from('campaign_invitations')
+            .select('campaign_id')
+            .eq('id', invitationId)
+            .single();
+        
+        if (!inviteData) throw new Error('Convite não encontrado');
+        
+        // 3. Adicionar à campanha
+        const { error: playerError } = await supabase
+            .from('campaign_players')
+            .upsert({
+                campaign_id: inviteData.campaign_id,
+                user_id: currentUser.id,
+                role: 'player',
+                status: 'active',
+                joined_at: new Date().toISOString()
+            }, {
+                onConflict: 'campaign_id,user_id'
+            });
+        
+        if (playerError) throw playerError;
+        
+        // 4. Atualizar interface
+        const notificationItem = document.querySelector(`[data-id="${invitationId}"]`);
+        if (notificationItem) {
+            notificationItem.querySelector('.notification-actions').innerHTML = 
+                '<span style="color: #2ecc71; font-weight: bold;">✅ Aceito</span>';
+        }
+        
+        alert('Convite aceito! Você entrou na campanha.');
+        setTimeout(() => loadNotifications(), 2000);
+        
+    } catch (error) {
+        console.error('Erro manual:', error);
+        alert('Erro: ' + error.message);
+    }
+}
+
+async function declineCampaignInvitation(invitationId) {
+    if (!confirm('Deseja recusar este convite?')) return;
+    
+    try {
+        // USAR A SUA FUNÇÃO
+        const { data, error } = await supabase.rpc('respond_to_campaign_invitation', {
+            p_invitation_id: invitationId,
+            p_accept: false
+        });
+        
+        if (error) {
+            console.error('Erro ao chamar função:', error);
+            // Fallback manual
+            const { error: updateError } = await supabase
+                .from('campaign_invitations')
+                .update({ 
+                    status: 'rejected',
+                    responded_at: new Date().toISOString()
+                })
+                .eq('id', invitationId);
+            
+            if (updateError) throw updateError;
+        } else if (data && !data.success) {
+            alert(data.message);
+            return;
+        }
+        
+        const notificationItem = document.querySelector(`[data-id="${invitationId}"]`);
+        if (notificationItem) {
+            notificationItem.querySelector('.notification-actions').innerHTML = 
+                '<span style="color: #e74c3c; font-weight: bold;">❌ Recusado</span>';
+        }
+        
+        alert('Convite recusado.');
+        setTimeout(() => loadNotifications(), 2000);
+        
+    } catch (err) {
+        console.error('Erro:', err);
+        alert('Erro ao recusar convite: ' + err.message);
+    }
 }
 
 function viewNotificationDetails(notificationId) {
@@ -552,27 +473,33 @@ function viewNotificationDetails(notificationId) {
     const modalBody = document.getElementById('modalNotificationBody');
     const modalActions = document.getElementById('modalNotificationActions');
     
-    modalTitle.textContent = invitation.title;
-    
-    let detailsHTML = '';
-    if (invitation.type === 'campaign_invite') {
-        detailsHTML = `
-            <p><strong>Campanha:</strong> ${invitation.campaign_name}</p>
-            <p><strong>Código:</strong> ${invitation.campaign_code || 'N/A'}</p>
-            <p><strong>Convidado por:</strong> ${invitation.sender_username}</p>
-            <p><strong>Enviado em:</strong> ${new Date(invitation.sent_at).toLocaleString('pt-BR')}</p>
+    if (invitation.type === 'guild_invite') {
+        modalTitle.textContent = 'Detalhes do Convite para Guilda';
+        modalBody.innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <p><strong>Guilda:</strong> ${invitation.guild_name}</p>
+                <p><strong>Convidado por:</strong> ${invitation.sender_username}</p>
+                <p><strong>Enviado em:</strong> ${new Date(invitation.sent_at).toLocaleDateString('pt-BR')}</p>
+            </div>
         `;
-    } else if (invitation.type === 'guild_invite') {
-        detailsHTML = `
-            <p><strong>Guilda:</strong> ${invitation.guild_name}</p>
-            <p><strong>Convidado por:</strong> ${invitation.sender_username}</p>
-            <p><strong>Enviado em:</strong> ${new Date(invitation.sent_at).toLocaleString('pt-BR')}</p>
+    } else {
+        modalTitle.textContent = 'Detalhes do Convite para Campanha';
+        modalBody.innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <p><strong>Campanha:</strong> ${invitation.campaign_name}</p>
+                <p><strong>Código:</strong> ${invitation.campaign_code}</p>
+                <p><strong>Convidado por:</strong> ${invitation.sender_username}</p>
+                <p><strong>Enviado em:</strong> ${new Date(invitation.sent_at).toLocaleDateString('pt-BR')}</p>
+            </div>
         `;
     }
     
-    modalBody.innerHTML = detailsHTML;
+    modalBody.innerHTML += `
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p><strong>Status:</strong> ${invitation.status === 'pending' ? '🟡 Pendente' : '✅ Processado'}</p>
+        </div>
+    `;
     
-    // Botões de ação no modal
     if (invitation.status === 'pending') {
         modalActions.innerHTML = `
             <button class="notification-btn btn-decline" id="modalDeclineBtn">
@@ -581,89 +508,93 @@ function viewNotificationDetails(notificationId) {
             <button class="notification-btn btn-accept" id="modalAcceptBtn">
                 <i class="fas fa-check"></i> Aceitar
             </button>
+            <button class="notification-btn btn-view" id="modalCloseBtn">
+                <i class="fas fa-times"></i> Fechar
+            </button>
         `;
         
         document.getElementById('modalAcceptBtn').addEventListener('click', () => {
             modal.classList.remove('active');
-            if (invitation.type === 'campaign_invite') {
-                acceptCampaignInvitation(invitation.id);
+            if (invitation.type === 'guild_invite') {
+                acceptGuildInvitation(invitation.id, invitation.guild_id);
             } else {
-                showToast('Sistema de guildas em desenvolvimento', 'info');
+                acceptCampaignInvitation(invitation.id, invitation.campaign_id);
             }
         });
         
         document.getElementById('modalDeclineBtn').addEventListener('click', () => {
             modal.classList.remove('active');
-            if (invitation.type === 'campaign_invite') {
-                declineCampaignInvitation(invitation.id);
+            if (invitation.type === 'guild_invite') {
+                declineGuildInvitation(invitation.id);
             } else {
-                showToast('Sistema de guildas em desenvolvimento', 'info');
+                declineCampaignInvitation(invitation.id);
             }
         });
     } else {
         modalActions.innerHTML = `
-            <button class="notification-btn btn-view" onclick="document.getElementById('notificationModal').classList.remove('active')">
+            <button class="notification-btn btn-view" id="modalCloseBtn" style="flex: 1;">
                 <i class="fas fa-times"></i> Fechar
             </button>
         `;
     }
     
+    document.getElementById('modalCloseBtn').addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+    
     modal.classList.add('active');
 }
 
-function startAutoRefresh() {
-    // Atualizar notificações a cada 30 segundos
-    setInterval(() => {
-        if (document.visibilityState === 'visible') {
-            loadNotifications();
-        }
-    }, 30000);
+function renderError(message) {
+    const notificationsList = document.getElementById('notificationsList');
+    notificationsList.innerHTML = `
+        <div class="empty-notifications">
+            <div class="empty-icon" style="color: #e74c3c;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="empty-title">Erro ao carregar</h3>
+            <p class="empty-text">${message}</p>
+            <button class="btn" onclick="loadNotifications()" style="margin-top: 20px;">
+                <i class="fas fa-redo"></i> Tentar novamente
+            </button>
+        </div>
+    `;
 }
 
-// ============================================
-// INICIALIZAÇÃO
-// ============================================
+function setupEventListeners() {
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
+    });
+    
+    document.querySelectorAll('.notification-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.notification-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentFilter = tab.getAttribute('data-tab');
+            loadNotifications();
+        });
+    });
+    
+    document.getElementById('markAllReadBtn')?.addEventListener('click', () => {
+        document.querySelectorAll('.notification-item.unread').forEach(item => {
+            item.classList.remove('unread');
+        });
+        alert('Todas marcadas como lidas');
+    });
+    
+    document.getElementById('closeModalBtn')?.addEventListener('click', () => {
+        document.getElementById('notificationModal').classList.remove('active');
+    });
+    
+    document.getElementById('notificationModal')?.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('notificationModal')) {
+            document.getElementById('notificationModal').classList.remove('active');
+        }
+    });
+    
+    setInterval(() => loadNotifications(), 30000);
+}
 
+// Inicializar
 document.addEventListener('DOMContentLoaded', initNotifications);
-
-// Adicionar estilos CSS para os novos elementos
-const style = document.createElement('style');
-style.textContent = `
-    .notification-status {
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: bold;
-    }
-    
-    .notification-status.accepted {
-        background: rgba(46, 204, 113, 0.2);
-        color: #2ecc71;
-    }
-    
-    .notification-status.rejected {
-        background: rgba(231, 76, 60, 0.2);
-        color: #e74c3c;
-    }
-    
-    .notification-btn {
-        padding: 8px 12px !important;
-    }
-    
-    .btn {
-        padding: 10px 20px;
-        background: #ff8c00;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    
-    .btn:hover {
-        background: #ff9c20;
-        transform: translateY(-2px);
-    }
-`;
-document.head.appendChild(style);
