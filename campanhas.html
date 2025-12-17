@@ -1001,7 +1001,7 @@
     </footer>
     <script>
 // ============================================
-// SOLUÇÃO 100% JAVASCRIPT - SEM MEXER NO SQL
+// SISTEMA DE ATUALIZAÇÃO DE CAMPANHAS - VERSÃO SEGURA
 // ============================================
 
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
@@ -1011,72 +1011,9 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let currentCampaignId = null;
 let currentCampaignName = null;
-let lastUpdateTime = null;
-let updateInterval = null;
 
 // ============================================
-// SISTEMA DE CONTROLE DE ATUALIZAÇÃO
-// ============================================
-
-// 1. ARMAZENAR QUANDO UM CONVITE FOI ACEITO
-function trackInviteAcceptance(campaignId) {
-    const key = `campaign_${campaignId}_updated`;
-    localStorage.setItem(key, Date.now());
-    console.log(`📝 Invite tracked for campaign ${campaignId}`);
-}
-
-// 2. VERIFICAR SE PRECISA ATUALIZAR
-function checkForUpdates() {
-    const activeSubTab = document.querySelector('.sub-tab.active');
-    if (!activeSubTab) return;
-    
-    const subTabId = activeSubTab.getAttribute('data-sub-tab');
-    
-    // Verificar se há atualizações pendentes
-    const now = Date.now();
-    const lastCheck = localStorage.getItem('last_campaign_check') || 0;
-    
-    // Se passou mais de 30 segundos da última verificação
-    if (now - lastCheck > 30000) {
-        console.log('🔄 Checking for campaign updates...');
-        
-        if (subTabId === 'gm-campaigns') {
-            loadGMCampaigns();
-        } else if (subTabId === 'player-campaigns') {
-            loadPlayerCampaigns();
-        }
-        
-        localStorage.setItem('last_campaign_check', now);
-    }
-}
-
-// 3. SISTEMA DE POLLING (ATUALIZAÇÃO PERIÓDICA)
-function startPollingSystem() {
-    // Parar intervalo anterior se existir
-    if (updateInterval) {
-        clearInterval(updateInterval);
-    }
-    
-    // Atualizar a cada 20 segundos
-    updateInterval = setInterval(() => {
-        checkForUpdates();
-    }, 20000);
-    
-    // Atualizar quando a página fica visível
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            setTimeout(checkForUpdates, 1000);
-        }
-    });
-    
-    // Atualizar quando o usuário volta para a aba
-    window.addEventListener('focus', () => {
-        setTimeout(checkForUpdates, 500);
-    });
-}
-
-// ============================================
-// FUNÇÕES PRINCIPAIS
+// INICIALIZAÇÃO ORIGINAL (NÃO MEXER)
 // ============================================
 
 async function initCampaigns() {
@@ -1087,11 +1024,11 @@ async function initCampaigns() {
         setupTabs();
         setupModalListeners();
         generateCampaignId();
-        startPollingSystem();
         
-        // Verificar se veio de aceitar convite
-        checkUrlForInviteAcceptance();
+        // ADIÇÃO SEGURA: Sistema de atualização
+        setupCampaignUpdateSystem();
         
+        // Carregar campanhas do mestre por padrão
         setTimeout(() => {
             loadGMCampaigns();
         }, 500);
@@ -1124,38 +1061,295 @@ async function loadUserData() {
 }
 
 // ============================================
-// DETECTAR SE ACEITOU CONVITE
+// SISTEMA DE ATUALIZAÇÃO (NOVA FUNÇÃO)
 // ============================================
 
-function checkUrlForInviteAcceptance() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const acceptedCampaign = urlParams.get('accepted_campaign');
+function setupCampaignUpdateSystem() {
+    // 1. Atualizar quando volta para a página
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            refreshCurrentTab();
+        }
+    });
     
-    if (acceptedCampaign) {
-        console.log(`🎉 Campaign ${acceptedCampaign} accepted from URL`);
-        trackInviteAcceptance(acceptedCampaign);
+    // 2. Atualizar quando muda de aba
+    window.addEventListener('focus', function() {
+        setTimeout(refreshCurrentTab, 500);
+    });
+    
+    // 3. Adicionar botões de refresh nas listas
+    addRefreshButtons();
+    
+    // 4. Verificar se tem atualizações pendentes
+    checkForPendingUpdates();
+}
+
+function refreshCurrentTab() {
+    const activeTab = document.querySelector('.sub-tab.active');
+    if (!activeTab) return;
+    
+    const tabId = activeTab.getAttribute('data-sub-tab');
+    
+    if (tabId === 'player-campaigns') {
+        loadPlayerCampaigns();
+    } else if (tabId === 'gm-campaigns') {
+        loadGMCampaigns();
+    }
+}
+
+function addRefreshButtons() {
+    // Adicionar botão na lista do mestre
+    setTimeout(() => {
+        const gmContainer = document.getElementById('gm-campaigns-list');
+        if (gmContainer) {
+            const header = gmContainer.querySelector('div:first-child');
+            if (header && !header.querySelector('.refresh-btn')) {
+                const refreshBtn = document.createElement('button');
+                refreshBtn.className = 'btn btn-small refresh-btn';
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+                refreshBtn.title = 'Atualizar lista';
+                refreshBtn.onclick = () => {
+                    loadGMCampaigns();
+                    showMessage('Lista atualizada!', 'success');
+                };
+                header.appendChild(refreshBtn);
+            }
+        }
         
-        // Limpar parâmetro da URL sem recarregar
-        const newUrl = window.location.pathname;
-        window.history.replaceState({}, '', newUrl);
+        // Adicionar botão na lista do jogador
+        const playerContainer = document.getElementById('player-campaigns-list');
+        if (playerContainer) {
+            const header = playerContainer.querySelector('div:first-child');
+            if (header && !header.querySelector('.refresh-btn')) {
+                const refreshBtn = document.createElement('button');
+                refreshBtn.className = 'btn btn-small refresh-btn';
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+                refreshBtn.title = 'Atualizar lista';
+                refreshBtn.onclick = () => {
+                    loadPlayerCampaigns();
+                    showMessage('Lista atualizada!', 'success');
+                };
+                header.appendChild(refreshBtn);
+            }
+        }
+    }, 1000);
+}
+
+function checkForPendingUpdates() {
+    // Verificar se há atualizações no localStorage
+    const lastUpdate = localStorage.getItem('campaign_last_update');
+    if (lastUpdate) {
+        const now = Date.now();
+        const diff = now - parseInt(lastUpdate);
         
-        // Forçar atualização
-        setTimeout(() => {
-            loadPlayerCampaigns();
-            showToast('Você entrou em uma nova campanha!', 'success');
-        }, 1000);
+        // Se atualizou nos últimos 2 minutos, recarregar
+        if (diff < 120000) {
+            setTimeout(() => {
+                refreshCurrentTab();
+                localStorage.removeItem('campaign_last_update');
+            }, 1000);
+        }
     }
 }
 
 // ============================================
-// CAMPANHAS DO MESTRE (MELHORADA)
+// FUNÇÃO PARA SER CHAMADA QUANDO ACEITA CONVITE
+// ============================================
+
+function notifyCampaignUpdate(campaignId) {
+    // Marcar que houve atualização
+    localStorage.setItem('campaign_last_update', Date.now());
+    localStorage.setItem(`updated_campaign_${campaignId}`, 'true');
+    
+    // Atualizar a tab atual
+    setTimeout(() => {
+        refreshCurrentTab();
+        showMessage('Campanha atualizada! 🎉', 'success');
+    }, 500);
+}
+
+// ============================================
+// FUNÇÕES EXISTENTES (MANTIDAS)
+// ============================================
+
+function setupEventListeners() {
+    document.getElementById('backBtn').addEventListener('click', () => {
+        window.location.href = 'guilda.html';
+    });
+    
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        if (!confirm('Tem certeza que deseja sair?')) return;
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
+    });
+    
+    document.getElementById('generateCodeBtn').addEventListener('click', generateCampaignId);
+    
+    document.getElementById('createCampaignForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await createCampaign();
+    });
+}
+
+function setupTabs() {
+    document.querySelectorAll('.main-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabType = tab.getAttribute('data-main-tab');
+            
+            document.querySelectorAll('.main-tab').forEach(t => {
+                t.classList.toggle('active', t === tab);
+            });
+            
+            const playerSubtabs = document.getElementById('player-subtabs');
+            const gmSubtabs = document.getElementById('gm-subtabs');
+            
+            if (tabType === 'player') {
+                playerSubtabs.style.display = 'flex';
+                gmSubtabs.style.display = 'none';
+                activateFirstSubtab('player');
+            } else {
+                playerSubtabs.style.display = 'none';
+                gmSubtabs.style.display = 'flex';
+                activateFirstSubtab('gm');
+            }
+            
+            updateTabContent();
+        });
+    });
+    
+    document.querySelectorAll('.sub-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const mainTab = tab.getAttribute('data-main-tab');
+            
+            document.querySelectorAll(`.sub-tab[data-main-tab="${mainTab}"]`).forEach(t => {
+                t.classList.toggle('active', t === tab);
+            });
+            
+            updateTabContent();
+        });
+    });
+}
+
+function activateFirstSubtab(mainTab) {
+    const firstTab = document.querySelector(`.sub-tab[data-main-tab="${mainTab}"]`);
+    if (firstTab) {
+        firstTab.classList.add('active');
+        document.querySelectorAll(`.sub-tab[data-main-tab="${mainTab}"]`).forEach(tab => {
+            if (tab !== firstTab) tab.classList.remove('active');
+        });
+    }
+}
+
+function updateTabContent() {
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    const activeSubTab = document.querySelector('.sub-tab.active');
+    
+    if (activeSubTab) {
+        const subTabId = activeSubTab.getAttribute('data-sub-tab');
+        const contentId = `${subTabId}-content`;
+        const contentElement = document.getElementById(contentId);
+        
+        if (contentElement) {
+            contentElement.classList.add('active');
+            
+            if (subTabId === 'player-campaigns') {
+                loadPlayerCampaigns();
+            } else if (subTabId === 'gm-campaigns') {
+                loadGMCampaigns();
+            } else if (subTabId === 'gm-create') {
+                generateCampaignId();
+            }
+        }
+    }
+}
+
+function generateCampaignId() {
+    const idInput = document.getElementById('campaignId');
+    if (!idInput) return;
+    
+    let newId;
+    do {
+        newId = Math.floor(1000000 + Math.random() * 9000000);
+    } while (newId > 9999999);
+    
+    idInput.value = newId.toString();
+}
+
+async function createCampaign() {
+    const submitBtn = document.getElementById('submitCreateCampaign');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+    submitBtn.disabled = true;
+    
+    try {
+        const name = document.getElementById('campaignName').value.trim();
+        const campaignId = document.getElementById('campaignId').value.trim();
+        
+        if (!name || !campaignId || campaignId.length !== 7) {
+            alert('Preencha todos os campos corretamente.');
+            return;
+        }
+        
+        const { data: guild } = await supabase
+            .from('guilds')
+            .select('id')
+            .eq('owner_id', currentUser.id)
+            .maybeSingle();
+        
+        if (!guild) {
+            alert('Você precisa ser dono de uma guilda para criar campanhas.');
+            return;
+        }
+        
+        const { data: newCampaign, error } = await supabase
+            .from('campaigns')
+            .insert({
+                name: name,
+                campaign_id: campaignId,
+                guild_id: guild.id,
+                gm_id: currentUser.id,
+                description: document.getElementById('campaignDescription').value.trim(),
+                setting: document.getElementById('campaignSetting').value.trim(),
+                starting_points: parseInt(document.getElementById('startingPoints').value) || 100,
+                max_players: parseInt(document.getElementById('maxPlayers').value) || 6,
+                status: document.getElementById('campaignStatus').value
+            })
+            .select()
+            .single();
+        
+        if (error) throw error;
+        
+        alert(`Campanha "${name}" criada com sucesso! Código: ${campaignId}`);
+        
+        document.getElementById('createCampaignForm').reset();
+        document.getElementById('startingPoints').value = '100';
+        document.getElementById('maxPlayers').value = '6';
+        document.getElementById('campaignStatus').value = 'preparation';
+        generateCampaignId();
+        
+        await loadGMCampaigns();
+        
+    } catch (error) {
+        alert('Erro ao criar campanha: ' + error.message);
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// ============================================
+// CAMPANHAS DO MESTRE (COM MELHORIA)
 // ============================================
 
 async function loadGMCampaigns() {
     const container = document.getElementById('gm-campaigns-list');
     if (!container) return;
     
-    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Carregando suas campanhas...</p>';
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando suas campanhas...</p>';
     
     try {
         const { data: campaigns, error } = await supabase
@@ -1177,35 +1371,29 @@ async function loadGMCampaigns() {
             return;
         }
         
-        // Verificar se há atualizações pendentes para essas campanhas
-        const campaignsWithUpdates = await Promise.all(
+        const campaignsWithDetails = await Promise.all(
             campaigns.map(async (campaign) => {
-                // Verificar se há atualização pendente
-                const updateKey = `campaign_${campaign.id}_updated`;
-                const lastUpdate = localStorage.getItem(updateKey);
-                const needsUpdate = lastUpdate && (Date.now() - lastUpdate < 60000); // Último minuto
-                
-                // Buscar contagem ATUALIZADA
                 const { count: playerCount } = await supabase
                     .from('campaign_players')
                     .select('*', { count: 'exact', head: true })
                     .eq('campaign_id', campaign.id)
                     .eq('status', 'active');
                 
-                // Se tinha atualização pendente, limpar
-                if (needsUpdate) {
-                    localStorage.removeItem(updateKey);
+                // Verificar se foi atualizada recentemente
+                const wasUpdated = localStorage.getItem(`updated_campaign_${campaign.id}`) === 'true';
+                if (wasUpdated) {
+                    localStorage.removeItem(`updated_campaign_${campaign.id}`);
                 }
                 
                 return {
                     ...campaign,
                     player_count: playerCount || 0,
-                    just_updated: needsUpdate
+                    updated: wasUpdated
                 };
             })
         );
         
-        renderGMCampaigns(campaignsWithUpdates, container);
+        renderGMCampaigns(campaignsWithDetails, container);
         
     } catch (error) {
         container.innerHTML = `
@@ -1222,20 +1410,13 @@ function renderGMCampaigns(campaigns, container) {
     container.innerHTML = `
         <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="color: #ffd700;">${campaigns.length} Campanha${campaigns.length !== 1 ? 's' : ''} como Mestre</h3>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-small" onclick="refreshSingleCampaigns('gm')" title="Atualizar campanhas">
-                    <i class="fas fa-sync-alt"></i> Atualizar
-                </button>
-            </div>
         </div>
         <div class="campaigns-grid">
             ${campaigns.map(campaign => `
-                <div class="campaign-card ${campaign.just_updated ? 'pulse-animation' : ''}" id="campaign-${campaign.id}">
-                    ${campaign.just_updated ? `
-                        <div style="position: absolute; top: 10px; right: 10px;">
-                            <span class="status-badge status-active" style="animation: blink 1s infinite;">
-                                <i class="fas fa-bell"></i> NOVO!
-                            </span>
+                <div class="campaign-card ${campaign.updated ? 'updated-card' : ''}">
+                    ${campaign.updated ? `
+                        <div style="position: absolute; top: 10px; right: 10px; background: #27ae60; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">
+                            <i class="fas fa-bell"></i> NOVO
                         </div>
                     ` : ''}
                     
@@ -1257,7 +1438,7 @@ function renderGMCampaigns(campaigns, container) {
                     <div class="campaign-meta">
                         <div class="campaign-stat">
                             <i class="fas fa-users"></i>
-                            <span id="player-count-${campaign.id}">${campaign.player_count}/${campaign.max_players}</span>
+                            <span>${campaign.player_count}/${campaign.max_players}</span>
                         </div>
                         <div class="campaign-stat">
                             <i class="fas fa-star"></i>
@@ -1282,25 +1463,21 @@ function renderGMCampaigns(campaigns, container) {
                 </div>
             `).join('')}
         </div>
-        
-        <div style="text-align: center; margin-top: 20px; color: #666; font-size: 0.8rem;">
-            <i class="fas fa-clock"></i> Última atualização: ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
-        </div>
     `;
     
-    // Adicionar animação CSS
-    addCampaignStyles();
+    // Adicionar estilo para card atualizado
+    addUpdatedCardStyle();
 }
 
 // ============================================
-// CAMPANHAS DO JOGADOR (MELHORADA)
+// CAMPANHAS DO JOGADOR (COM MELHORIA)
 // ============================================
 
 async function loadPlayerCampaigns() {
     const container = document.getElementById('player-campaigns-list');
     if (!container) return;
     
-    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Carregando suas campanhas...</p>';
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">Carregando suas campanhas...</p>';
     
     try {
         const { data: memberships, error } = await supabase
@@ -1338,7 +1515,6 @@ async function loadPlayerCampaigns() {
                             .eq('id', m.campaigns.gm_id)
                             .single();
                         
-                        // Buscar contagem ATUALIZADA
                         const { count: playerCount } = await supabase
                             .from('campaign_players')
                             .select('*', { count: 'exact', head: true })
@@ -1346,9 +1522,9 @@ async function loadPlayerCampaigns() {
                             .eq('status', 'active');
                         
                         // Verificar se é nova campanha
-                        const isNew = localStorage.getItem(`new_campaign_${m.campaigns.id}`) === 'true';
+                        const isNew = localStorage.getItem(`new_player_campaign_${m.campaigns.id}`) === 'true';
                         if (isNew) {
-                            localStorage.removeItem(`new_campaign_${m.campaigns.id}`);
+                            localStorage.removeItem(`new_player_campaign_${m.campaigns.id}`);
                         }
                         
                         return {
@@ -1397,20 +1573,13 @@ function renderPlayerCampaigns(campaigns, container) {
     container.innerHTML = `
         <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="color: #ffd700;">${campaigns.length} Campanha${campaigns.length !== 1 ? 's' : ''} como Jogador</h3>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-small" onclick="refreshSingleCampaigns('player')" title="Atualizar campanhas">
-                    <i class="fas fa-sync-alt"></i> Atualizar
-                </button>
-            </div>
         </div>
         <div class="campaigns-grid">
             ${campaigns.map(campaign => `
-                <div class="campaign-card ${campaign.is_new ? 'pulse-animation' : ''}" id="player-campaign-${campaign.campaign_uuid}">
+                <div class="campaign-card ${campaign.is_new ? 'new-campaign' : ''}">
                     ${campaign.is_new ? `
-                        <div style="position: absolute; top: 10px; right: 10px;">
-                            <span class="status-badge status-active" style="animation: blink 1s infinite;">
-                                <i class="fas fa-star"></i> NOVA!
-                            </span>
+                        <div style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">
+                            <i class="fas fa-star"></i> NOVA!
                         </div>
                     ` : ''}
                     
@@ -1439,7 +1608,7 @@ function renderPlayerCampaigns(campaigns, container) {
                     <div class="campaign-meta">
                         <div class="campaign-stat">
                             <i class="fas fa-users"></i>
-                            <span id="player-count-${campaign.campaign_uuid}">${campaign.player_count} jogadores</span>
+                            <span>${campaign.player_count} jogadores</span>
                         </div>
                         <div class="campaign-stat">
                             <i class="fas fa-star"></i>
@@ -1456,188 +1625,305 @@ function renderPlayerCampaigns(campaigns, container) {
                                 onclick="enterCampaign('${campaign.campaign_uuid}')">
                             <i class="fas fa-door-open"></i> Entrar
                         </button>
-                        <button class="btn btn-info btn-small" style="flex: 1;" 
-                                onclick="markCampaignAsSeen('${campaign.campaign_uuid}')">
-                            <i class="fas fa-check"></i> Vista
-                        </button>
                     </div>
                 </div>
             `).join('')}
         </div>
+    `;
+}
+
+// ============================================
+// FUNÇÕES AUXILIARES
+// ============================================
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         
-        <div style="text-align: center; margin-top: 20px; color: #666; font-size: 0.8rem;">
-            <i class="fas fa-clock"></i> Última atualização: ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+        if (diffDays === 0) return 'Hoje';
+        else if (diffDays === 1) return 'Ontem';
+        else if (diffDays < 7) return `${diffDays} dias atrás`;
+        else return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    } catch {
+        return 'Data inválida';
+    }
+}
+
+function getStatusClass(status) {
+    switch (status) {
+        case 'active': return 'status-active';
+        case 'preparation': return 'status-preparation';
+        case 'paused': return 'status-paused';
+        default: return 'status-preparation';
+    }
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        'active': 'Ativa',
+        'preparation': 'Preparação',
+        'paused': 'Pausada'
+    };
+    return statusMap[status] || status;
+}
+
+function viewCampaignDetails(campaignId) {
+    window.location.href = `campanha-detalhes.html?id=${campaignId}`;
+}
+
+function enterCampaign(campaignId) {
+    window.location.href = `sala-campanha.html?id=${campaignId}`;
+}
+
+// ============================================
+// MODAIS DE CONVITE (MANTIDOS)
+// ============================================
+
+function openInviteModal(campaignId, campaignName) {
+    currentCampaignId = campaignId;
+    currentCampaignName = campaignName;
+    
+    const modal = document.getElementById('campaignInviteModal');
+    const title = document.getElementById('campaignInviteTitle');
+    
+    if (title) {
+        title.textContent = `Convidar para: ${campaignName}`;
+    }
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    document.getElementById('inviteCampaignPlayerId').value = '';
+    document.getElementById('inviteMessage').value = '';
+    document.getElementById('campaignInviteMessage').innerHTML = '';
+    
+    setTimeout(() => {
+        document.getElementById('inviteCampaignPlayerId')?.focus();
+    }, 100);
+}
+
+function closeInviteModal() {
+    const modal = document.getElementById('campaignInviteModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+async function sendCampaignInvite() {
+    const playerId = document.getElementById('inviteCampaignPlayerId').value.trim();
+    const message = document.getElementById('inviteMessage').value.trim();
+    const submitBtn = document.getElementById('submitCampaignInvite');
+    
+    if (!playerId || !/^\d+$/.test(playerId)) {
+        showCampaignInviteMessage('Digite um ID válido (apenas números)', 'error');
+        return;
+    }
+    
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    submitBtn.disabled = true;
+    
+    try {
+        const { data: playerProfile, error: playerError } = await supabase
+            .from('profiles')
+            .select('id, username')
+            .eq('player_id', playerId)
+            .single();
+        
+        if (playerError || !playerProfile) {
+            showCampaignInviteMessage('Jogador não encontrado', 'error');
+            return;
+        }
+        
+        const { data: existingPlayer } = await supabase
+            .from('campaign_players')
+            .select('*')
+            .eq('campaign_id', currentCampaignId)
+            .eq('user_id', playerProfile.id)
+            .eq('status', 'active')
+            .maybeSingle();
+        
+        if (existingPlayer) {
+            showCampaignInviteMessage('Este jogador já está na campanha', 'error');
+            return;
+        }
+        
+        const { data: existingInvite } = await supabase
+            .from('campaign_invitations')
+            .select('*')
+            .eq('campaign_id', currentCampaignId)
+            .eq('receiver_id', playerProfile.id)
+            .eq('status', 'pending')
+            .maybeSingle();
+        
+        if (existingInvite) {
+            showCampaignInviteMessage('Já existe um convite pendente', 'error');
+            return;
+        }
+        
+        const { error: createError } = await supabase
+            .from('campaign_invitations')
+            .insert({
+                campaign_id: currentCampaignId,
+                sender_id: currentUser.id,
+                receiver_id: playerProfile.id,
+                message: message || null,
+                status: 'pending'
+            });
+        
+        if (createError) throw createError;
+        
+        showCampaignInviteMessage(`Convite enviado para ${playerProfile.username}!`, 'success');
+        
+        setTimeout(() => {
+            closeInviteModal();
+        }, 2000);
+        
+    } catch (error) {
+        showCampaignInviteMessage('Erro ao enviar convite', 'error');
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+function showCampaignInviteMessage(text, type = 'info') {
+    const messageDiv = document.getElementById('campaignInviteMessage');
+    if (!messageDiv) return;
+    
+    messageDiv.innerHTML = `
+        <div class="message ${type}" style="margin: 10px 0; padding: 10px;">
+            ${text}
         </div>
     `;
 }
 
-// ============================================
-// FUNÇÕES DE ATUALIZAÇÃO
-// ============================================
-
-async function refreshSingleCampaigns(type) {
-    if (type === 'gm') {
-        await loadGMCampaigns();
-        showToast('Campanhas do mestre atualizadas!', 'success');
-    } else if (type === 'player') {
-        await loadPlayerCampaigns();
-        showToast('Campanhas do jogador atualizadas!', 'success');
-    }
-}
-
-async function updateCampaignPlayerCount(campaignId) {
-    try {
-        const { count: playerCount } = await supabase
-            .from('campaign_players')
-            .select('*', { count: 'exact', head: true })
-            .eq('campaign_id', campaignId)
-            .eq('status', 'active');
-        
-        const countElement = document.getElementById(`player-count-${campaignId}`);
-        if (countElement) {
-            if (countElement.textContent.includes('/')) {
-                // É formato X/6
-                const currentText = countElement.textContent;
-                const maxPlayers = currentText.split('/')[1];
-                countElement.textContent = `${playerCount || 0}/${maxPlayers}`;
-                countElement.style.color = '#ffd700';
-                countElement.style.fontWeight = 'bold';
-                
-                // Animar a mudança
-                countElement.classList.add('count-updated');
-                setTimeout(() => {
-                    countElement.classList.remove('count-updated');
-                }, 1000);
-            } else {
-                // É formato "X jogadores"
-                countElement.textContent = `${playerCount || 0} jogadores`;
-                countElement.style.color = '#2ecc71';
-                countElement.style.fontWeight = 'bold';
-                
-                countElement.classList.add('count-updated');
-                setTimeout(() => {
-                    countElement.classList.remove('count-updated');
-                }, 1000);
+function setupModalListeners() {
+    document.getElementById('campaignInviteForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await sendCampaignInvite();
+    });
+    
+    document.getElementById('cancelCampaignInvite')?.addEventListener('click', closeInviteModal);
+    
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeInviteModal();
             }
+        });
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeInviteModal();
         }
-        
-        return playerCount || 0;
-    } catch (error) {
-        return 0;
-    }
-}
-
-function markCampaignAsSeen(campaignId) {
-    localStorage.removeItem(`new_campaign_${campaignId}`);
-    const card = document.getElementById(`player-campaign-${campaignId}`);
-    if (card) {
-        card.classList.remove('pulse-animation');
-        const badge = card.querySelector('.status-badge');
-        if (badge) badge.remove();
-        showToast('Campanha marcada como vista!', 'info');
-    }
+    });
 }
 
 // ============================================
-// INTEGRAÇÃO COM PÁGINA DE NOTIFICAÇÕES
+// MENSAGENS E ESTILOS
 // ============================================
 
-// Função para ser chamada quando aceita um convite
-function onCampaignInviteAccepted(campaignId, campaignName) {
-    console.log(`✅ Invite accepted for campaign: ${campaignName} (${campaignId})`);
+function showMessage(text, type = 'info') {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 9999;
+        padding: 12px 20px;
+        border-radius: 8px;
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+    `;
+    messageDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            <span>${text}</span>
+        </div>
+    `;
     
-    // Marcar como atualizada
-    trackInviteAcceptance(campaignId);
+    document.body.appendChild(messageDiv);
     
-    // Marcar como nova campanha
-    localStorage.setItem(`new_campaign_${campaignId}`, 'true');
-    
-    // Mostrar toast
-    showToast(`🎉 Você entrou na campanha "${campaignName}"!`, 'success');
-    
-    // Se estiver na tab de jogador, atualizar
-    const activeSubTab = document.querySelector('.sub-tab.active');
-    if (activeSubTab && activeSubTab.getAttribute('data-sub-tab') === 'player-campaigns') {
-        setTimeout(() => {
-            loadPlayerCampaigns();
-        }, 1500);
-    }
-    
-    // Forçar atualização da tab atual
     setTimeout(() => {
-        refreshSingleCampaigns('player');
-    }, 2000);
+        messageDiv.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => messageDiv.remove(), 300);
+    }, 3000);
 }
 
-// Listener para mensagens entre páginas
-window.addEventListener('message', (event) => {
-    if (event.data.type === 'campaign_invite_accepted') {
-        const { campaignId, campaignName } = event.data;
-        onCampaignInviteAccepted(campaignId, campaignName);
-    }
-});
-
-// ============================================
-// STYLES PARA ANIMAÇÕES
-// ============================================
-
-function addCampaignStyles() {
+function addUpdatedCardStyle() {
     const styleId = 'campaign-update-styles';
     if (document.getElementById(styleId)) return;
     
-    const styles = document.createElement('style');
-    styles.id = styleId;
-    styles.textContent = `
-        .pulse-animation {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+        .updated-card {
+            border: 2px solid #27ae60 !important;
             animation: pulse 2s infinite;
-            border-color: #ffd700 !important;
+        }
+        
+        .new-campaign {
+            border: 2px solid #e74c3c !important;
+            animation: pulse 1.5s infinite;
         }
         
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
         }
         
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         
-        .count-updated {
-            animation: countUpdate 0.5s ease;
-        }
-        
-        @keyframes countUpdate {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        
-        .campaign-card {
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .campaign-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
         }
     `;
     
-    document.head.appendChild(styles);
+    document.head.appendChild(style);
 }
 
 // ============================================
-// FUNÇÕES RESTANTES (MANTENHA AS DO SEU CÓDIGO)
+// INTEGRAÇÃO COM NOTIFICAÇÕES
 // ============================================
 
-// [INSIRA AQUI TODAS AS SUAS FUNÇÕES EXISTENTES:
-// setupEventListeners, setupTabs, activateFirstSubtab, updateTabContent,
-// generateCampaignId, createCampaign, escapeHtml, formatDate, getStatusClass,
-// getStatusText, viewCampaignDetails, enterCampaign, openInviteModal,
-// closeInviteModal, sendCampaignInvite, showCampaignInviteMessage,
-// setupModalListeners, showToast, etc.]
+// Quando aceita convite na página de notificações
+window.addEventListener('message', (event) => {
+    if (event.data.type === 'campaign_invite_accepted') {
+        const { campaignId, campaignName } = event.data;
+        
+        // Marcar como nova campanha para jogador
+        localStorage.setItem(`new_player_campaign_${campaignId}`, 'true');
+        
+        // Marcar como atualizada para mestre
+        localStorage.setItem(`updated_campaign_${campaignId}`, 'true');
+        
+        // Forçar atualização
+        setTimeout(() => {
+            refreshCurrentTab();
+            showMessage(`🎉 Você entrou na campanha "${campaignName}"!`, 'success');
+        }, 1000);
+    }
+});
 
 // ============================================
 // INICIALIZAÇÃO
@@ -1646,15 +1932,13 @@ function addCampaignStyles() {
 document.addEventListener('DOMContentLoaded', initCampaigns);
 
 // Exportar funções
-window.refreshSingleCampaigns = refreshSingleCampaigns;
+window.notifyCampaignUpdate = notifyCampaignUpdate;
+window.refreshCurrentTab = refreshCurrentTab;
 window.loadGMCampaigns = loadGMCampaigns;
 window.loadPlayerCampaigns = loadPlayerCampaigns;
 window.openInviteModal = openInviteModal;
 window.enterCampaign = enterCampaign;
 window.viewCampaignDetails = viewCampaignDetails;
-window.updateCampaignPlayerCount = updateCampaignPlayerCount;
-window.onCampaignInviteAccepted = onCampaignInviteAccepted;
-window.markCampaignAsSeen = markCampaignAsSeen;
 </script>
 </body>
 </html>
