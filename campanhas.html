@@ -1001,10 +1001,9 @@
     </footer>
     <script>
 // ============================================
-// SISTEMA COMPLETO DE ATUALIZAÇÃO AUTOMÁTICA
+// SISTEMA COMPLETO COM REALTIME UPDATES - VERSÃO FINAL
 // ============================================
 
-// Configuração do Supabase
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1012,7 +1011,6 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let currentCampaignId = null;
 let currentCampaignName = null;
-let campaignRefreshInterval = null;
 
 // ============================================
 // FUNÇÕES PRINCIPAIS
@@ -1026,11 +1024,8 @@ async function initCampaigns() {
         setupTabs();
         setupModalListeners();
         generateCampaignId();
+        setupRealtimeSubscription();
         
-        // Iniciar atualização automática
-        startAutoRefresh();
-        
-        // Carregar campanhas do mestre por padrão
         setTimeout(() => {
             loadGMCampaigns();
         }, 500);
@@ -1063,49 +1058,60 @@ async function loadUserData() {
 }
 
 // ============================================
-// SISTEMA DE ATUALIZAÇÃO AUTOMÁTICA
+// REALTIME SUBSCRIPTION
 // ============================================
 
-function startAutoRefresh() {
-    // Atualizar a cada 30 segundos
-    campaignRefreshInterval = setInterval(() => {
-        refreshActiveTab();
-    }, 30000);
+function setupRealtimeSubscription() {
+    // Canal para campanhas do GM
+    supabase
+        .channel('gm-campaigns-updates')
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'campaign_players',
+                filter: `campaign_id=in.(${getGMCampaignIds().join(',')})`
+            },
+            () => {
+                if (document.querySelector('.sub-tab.active')?.getAttribute('data-sub-tab') === 'gm-campaigns') {
+                    setTimeout(() => loadGMCampaigns(), 300);
+                }
+            }
+        )
+        .subscribe();
     
-    // Atualizar quando a página fica visível novamente
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            refreshActiveTab();
-        }
-    });
-    
-    // Atualizar quando muda de aba
-    document.addEventListener('focus', () => {
-        setTimeout(refreshActiveTab, 100);
-    });
+    // Canal para campanhas do jogador
+    supabase
+        .channel('player-campaigns-updates')
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'campaign_players',
+                filter: `user_id=eq.${currentUser.id}`
+            },
+            () => {
+                if (document.querySelector('.sub-tab.active')?.getAttribute('data-sub-tab') === 'player-campaigns') {
+                    setTimeout(() => loadPlayerCampaigns(), 300);
+                }
+            }
+        )
+        .subscribe();
 }
 
-function refreshActiveTab() {
-    const activeSubTab = document.querySelector('.sub-tab.active');
-    if (!activeSubTab) return;
+async function getGMCampaignIds() {
+    const { data } = await supabase
+        .from('campaigns')
+        .select('id')
+        .eq('gm_id', currentUser.id);
     
-    const subTabId = activeSubTab.getAttribute('data-sub-tab');
-    
-    if (subTabId === 'gm-campaigns') {
-        loadGMCampaigns();
-    } else if (subTabId === 'player-campaigns') {
-        loadPlayerCampaigns();
-    }
-}
-
-async function refreshAllCampaigns() {
-    await loadGMCampaigns();
-    await loadPlayerCampaigns();
-    showToast('Todas as campanhas foram atualizadas!', 'success');
+    return data?.map(c => c.id) || [];
 }
 
 // ============================================
-// CAMPANHAS DO MESTRE (ATUALIZADO)
+// CAMPANHAS DO MESTRE
 // ============================================
 
 async function loadGMCampaigns() {
@@ -1134,7 +1140,6 @@ async function loadGMCampaigns() {
             return;
         }
         
-        // Buscar contagem atualizada de jogadores para cada campanha
         const campaignsWithDetails = await Promise.all(
             campaigns.map(async (campaign) => {
                 const { count: playerCount } = await supabase
@@ -1167,13 +1172,13 @@ function renderGMCampaigns(campaigns, container) {
     container.innerHTML = `
         <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="color: #ffd700;">${campaigns.length} Campanha${campaigns.length !== 1 ? 's' : ''} como Mestre</h3>
-            <button class="btn btn-small" onclick="loadGMCampaigns()" title="Atualizar lista">
+            <button class="btn btn-small" onclick="forceRefreshGMCampaigns()" title="Atualizar agora">
                 <i class="fas fa-sync-alt"></i> Atualizar
             </button>
         </div>
         <div class="campaigns-grid">
             ${campaigns.map(campaign => `
-                <div class="campaign-card">
+                <div class="campaign-card" id="campaign-${campaign.id}">
                     <h3>${escapeHtml(campaign.name)}</h3>
                     <div class="campaign-code">Código: ${escapeHtml(campaign.campaign_id)}</div>
                     ${campaign.description ? `
@@ -1189,7 +1194,7 @@ function renderGMCampaigns(campaigns, container) {
                     <div class="campaign-meta">
                         <div class="campaign-stat">
                             <i class="fas fa-users"></i>
-                            <span>${campaign.player_count}/${campaign.max_players}</span>
+                            <span id="player-count-${campaign.id}">${campaign.player_count}/${campaign.max_players}</span>
                         </div>
                         <div class="campaign-stat">
                             <i class="fas fa-star"></i>
@@ -1217,7 +1222,7 @@ function renderGMCampaigns(campaigns, container) {
 }
 
 // ============================================
-// CAMPANHAS DO JOGADOR (ATUALIZADO)
+// CAMPANHAS DO JOGADOR
 // ============================================
 
 async function loadPlayerCampaigns() {
@@ -1231,7 +1236,7 @@ async function loadPlayerCampaigns() {
             .from('campaign_players')
             .select(`
                 *,
-                campaigns (
+                campaigns!inner(
                     id,
                     campaign_id,
                     name,
@@ -1313,13 +1318,13 @@ function renderPlayerCampaigns(campaigns, container) {
     container.innerHTML = `
         <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="color: #ffd700;">${campaigns.length} Campanha${campaigns.length !== 1 ? 's' : ''} como Jogador</h3>
-            <button class="btn btn-small" onclick="loadPlayerCampaigns()" title="Atualizar lista">
+            <button class="btn btn-small" onclick="forceRefreshPlayerCampaigns()" title="Atualizar agora">
                 <i class="fas fa-sync-alt"></i> Atualizar
             </button>
         </div>
         <div class="campaigns-grid">
             ${campaigns.map(campaign => `
-                <div class="campaign-card">
+                <div class="campaign-card" id="player-campaign-${campaign.campaign_uuid}">
                     <h3>${escapeHtml(campaign.campaign_name)}</h3>
                     <div class="campaign-code" style="background: rgba(52,152,219,0.2); color: #3498db;">
                         Código: ${escapeHtml(campaign.campaign_id)}
@@ -1341,7 +1346,7 @@ function renderPlayerCampaigns(campaigns, container) {
                     <div class="campaign-meta">
                         <div class="campaign-stat">
                             <i class="fas fa-users"></i>
-                            <span>${campaign.player_count} jogadores</span>
+                            <span id="player-count-${campaign.campaign_uuid}">${campaign.player_count} jogadores</span>
                         </div>
                         <div class="campaign-stat">
                             <i class="fas fa-star"></i>
@@ -1365,26 +1370,67 @@ function renderPlayerCampaigns(campaigns, container) {
 }
 
 // ============================================
-// EVENT LISTENERS
+// FUNÇÕES DE ATUALIZAÇÃO
+// ============================================
+
+async function forceRefreshGMCampaigns() {
+    const container = document.getElementById('gm-campaigns-list');
+    if (!container) return;
+    
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Atualizando...</p>';
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await loadGMCampaigns();
+    showToast('Campanhas atualizadas!', 'success');
+}
+
+async function forceRefreshPlayerCampaigns() {
+    const container = document.getElementById('player-campaigns-list');
+    if (!container) return;
+    
+    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Atualizando...</p>';
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await loadPlayerCampaigns();
+    showToast('Campanhas atualizadas!', 'success');
+}
+
+async function updateSingleCampaign(campaignId) {
+    try {
+        const { count: playerCount } = await supabase
+            .from('campaign_players')
+            .select('*', { count: 'exact', head: true })
+            .eq('campaign_id', campaignId)
+            .eq('status', 'active');
+        
+        const countElement = document.getElementById(`player-count-${campaignId}`);
+        if (countElement) {
+            if (countElement.textContent.includes('/')) {
+                countElement.textContent = `${playerCount || 0}/6`;
+            } else {
+                countElement.textContent = `${playerCount || 0} jogadores`;
+            }
+        }
+    } catch (error) {
+        // Ignora erro
+    }
+}
+
+// ============================================
+// FUNÇÕES DE UI
 // ============================================
 
 function setupEventListeners() {
-    // Botões do header
     document.getElementById('backBtn').addEventListener('click', () => {
         window.location.href = 'guilda.html';
     });
     
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         if (!confirm('Tem certeza que deseja sair?')) return;
-        
         await supabase.auth.signOut();
         window.location.href = 'login.html';
     });
     
-    // Botão gerar código
     document.getElementById('generateCodeBtn').addEventListener('click', generateCampaignId);
     
-    // Formulário criar campanha
     document.getElementById('createCampaignForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         await createCampaign();
@@ -1392,7 +1438,6 @@ function setupEventListeners() {
 }
 
 function setupTabs() {
-    // Tabs principais
     document.querySelectorAll('.main-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const tabType = tab.getAttribute('data-main-tab');
@@ -1418,7 +1463,6 @@ function setupTabs() {
         });
     });
     
-    // Sub-tabs
     document.querySelectorAll('.sub-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const mainTab = tab.getAttribute('data-main-tab');
@@ -1469,7 +1513,7 @@ function updateTabContent() {
 }
 
 // ============================================
-// FUNÇÕES AUXILIARES
+// FUNÇÕES UTILITÁRIAS
 // ============================================
 
 function generateCampaignId() {
@@ -1702,13 +1746,9 @@ async function sendCampaignInvite() {
         
         showCampaignInviteMessage(`Convite enviado para ${playerProfile.username}!`, 'success');
         
-        // Atualizar a lista de campanhas após enviar convite
-        setTimeout(() => {
-            loadGMCampaigns();
-        }, 500);
-        
         setTimeout(() => {
             closeInviteModal();
+            forceRefreshGMCampaigns();
         }, 2000);
         
     } catch (error) {
@@ -1754,7 +1794,7 @@ function setupModalListeners() {
 }
 
 // ============================================
-// NOTIFICAÇÕES E TOAST
+// NOTIFICAÇÕES
 // ============================================
 
 function showToast(message, type = 'info') {
@@ -1785,7 +1825,10 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Adicionar estilos CSS para as animações
+// ============================================
+// ESTILOS PARA TOAST
+// ============================================
+
 const toastStyles = document.createElement('style');
 toastStyles.textContent = `
     @keyframes slideIn {
@@ -1806,10 +1849,9 @@ document.head.appendChild(toastStyles);
 // INTEGRAÇÃO COM NOTIFICAÇÕES
 // ============================================
 
-// Listener para quando um convite é aceito
 window.addEventListener('message', async (event) => {
     if (event.data.type === 'campaign_accepted') {
-        await refreshAllCampaigns();
+        await forceRefreshPlayerCampaigns();
         showToast('Campanha atualizada com sucesso!', 'success');
     }
 });
@@ -1821,12 +1863,20 @@ window.addEventListener('message', async (event) => {
 document.addEventListener('DOMContentLoaded', initCampaigns);
 
 // Exportar funções para uso global
-window.refreshAllCampaigns = refreshAllCampaigns;
+window.refreshAllCampaigns = async () => {
+    await loadGMCampaigns();
+    await loadPlayerCampaigns();
+    showToast('Todas as campanhas atualizadas!', 'success');
+};
+
 window.loadGMCampaigns = loadGMCampaigns;
 window.loadPlayerCampaigns = loadPlayerCampaigns;
 window.openInviteModal = openInviteModal;
 window.enterCampaign = enterCampaign;
 window.viewCampaignDetails = viewCampaignDetails;
+window.forceRefreshGMCampaigns = forceRefreshGMCampaigns;
+window.forceRefreshPlayerCampaigns = forceRefreshPlayerCampaigns;
+window.updateSingleCampaign = updateSingleCampaign;
 </script>
 </body>
 </html>
