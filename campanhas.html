@@ -185,7 +185,7 @@
             generateCampaignId();
             console.log('✅ Sistema iniciado! Guilda:', userGuild);
             
-            // Carrega campanhas do mestre por padrão (já que a aba GM está ativa)
+            // Carrega campanhas do mestre por padrão
             setTimeout(() => {
                 loadGMCampaigns();
             }, 500);
@@ -503,15 +503,12 @@
         container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Carregando suas campanhas...</p>';
         
         try {
-            console.log('🔍 Buscando campanhas DIRETO do banco...');
+            console.log('🔍 Buscando campanhas do usuário...');
             
-            // BUSCA DIRETA SEM RPC (RPC ESTÁ COM PROBLEMA)
+            // BUSCA SIMPLES E SEGURA
             const { data: campaigns, error } = await supabase
                 .from('campaigns')
-                .select(`
-                    *,
-                    guilds(name)
-                `)
+                .select('*')
                 .eq('created_by', currentUser.id)
                 .order('created_at', { ascending: false });
             
@@ -539,38 +536,87 @@
             // CONTA JOGADORES PARA CADA CAMPANHA
             const campaignsWithPlayers = await Promise.all(
                 campaigns.map(async (campaign) => {
-                    const { count: playerCount } = await supabase
-                        .from('campaign_players')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('campaign_id', campaign.id)
-                        .eq('status', 'active');
-                    
-                    return {
-                        id: campaign.id,
-                        campaign_id: campaign.campaign_id,
-                        name: campaign.name,
-                        description: campaign.description,
-                        setting: campaign.setting,
-                        starting_points: campaign.starting_points || 100,
-                        max_players: campaign.max_players || 6,
-                        status: campaign.status || 'preparation',
-                        created_at: campaign.created_at,
-                        player_count: playerCount || 0,
-                        guild_name: campaign.guilds?.name || 'Desconhecida'
-                    };
+                    try {
+                        const { count: playerCount } = await supabase
+                            .from('campaign_players')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('campaign_id', campaign.id)
+                            .eq('status', 'active');
+                        
+                        return {
+                            id: campaign.id,
+                            campaign_id: campaign.campaign_id,
+                            name: campaign.name,
+                            description: campaign.description,
+                            setting: campaign.setting,
+                            starting_points: campaign.starting_points || 100,
+                            max_players: campaign.max_players || 6,
+                            status: campaign.status || 'preparation',
+                            created_at: campaign.created_at,
+                            player_count: playerCount || 0,
+                            guild_id: campaign.guild_id
+                        };
+                    } catch (countError) {
+                        console.warn(`⚠️ Erro ao contar jogadores:`, countError);
+                        return {
+                            id: campaign.id,
+                            campaign_id: campaign.campaign_id,
+                            name: campaign.name,
+                            description: campaign.description,
+                            setting: campaign.setting,
+                            starting_points: campaign.starting_points || 100,
+                            max_players: campaign.max_players || 6,
+                            status: campaign.status || 'preparation',
+                            created_at: campaign.created_at,
+                            player_count: 0,
+                            guild_id: campaign.guild_id
+                        };
+                    }
+                })
+            );
+            
+            // BUSCA NOME DAS GUILDAS SEPARADAMENTE
+            const campaignsWithGuildNames = await Promise.all(
+                campaignsWithPlayers.map(async (campaign) => {
+                    try {
+                        if (campaign.guild_id) {
+                            const { data: guild, error } = await supabase
+                                .from('guilds')
+                                .select('name')
+                                .eq('id', campaign.guild_id)
+                                .single();
+                            
+                            if (!error && guild) {
+                                return {
+                                    ...campaign,
+                                    guild_name: guild.name
+                                };
+                            }
+                        }
+                        return {
+                            ...campaign,
+                            guild_name: 'Desconhecida'
+                        };
+                    } catch (guildError) {
+                        console.warn(`⚠️ Erro ao buscar guilda:`, guildError);
+                        return {
+                            ...campaign,
+                            guild_name: 'Desconhecida'
+                        };
+                    }
                 })
             );
             
             // RENDERIZA AS CAMPANHAS
             container.innerHTML = `
                 <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: #ffd700;">${campaignsWithPlayers.length} Campanha${campaignsWithPlayers.length !== 1 ? 's' : ''} como Mestre</h3>
+                    <h3 style="color: #ffd700;">${campaignsWithGuildNames.length} Campanha${campaignsWithGuildNames.length !== 1 ? 's' : ''} como Mestre</h3>
                     <button class="btn" onclick="document.querySelector('.sub-tab[data-sub-tab=\"gm-create\"]').click()">
                         <i class="fas fa-plus-circle"></i> Nova Campanha
                     </button>
                 </div>
                 <div class="campaigns-grid">
-                    ${campaignsWithPlayers.map(campaign => `
+                    ${campaignsWithGuildNames.map(campaign => `
                         <div class="campaign-card">
                             <h3>${escapeHtml(campaign.name)}</h3>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -630,14 +676,12 @@
             
         } catch (error) {
             console.error('❌ Erro ao carregar campanhas:', error);
+            console.error('❌ Detalhes do erro:', error.message);
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-exclamation-triangle"></i>
                     <h3>Erro ao carregar campanhas</h3>
                     <p>${error.message || 'Tente novamente mais tarde.'}</p>
-                    <p style="color: #777; font-size: 0.9rem; margin-top: 10px;">
-                        Tente recarregar a página ou verifique o console para mais detalhes.
-                    </p>
                     <button class="btn" onclick="loadGMCampaigns()" style="margin-top: 20px;">
                         <i class="fas fa-redo"></i> Tentar Novamente
                     </button>
@@ -655,12 +699,12 @@
         try {
             console.log('🔍 Carregando campanhas como jogador...');
             
-            // SEMPRE USA QUERY DIRETA - IGNORA RPC PROBLEMÁTICA
+            // BUSCA SIMPLES
             const { data: memberships, error: queryError } = await supabase
                 .from('campaign_players')
                 .select(`
                     *,
-                    campaigns!inner(
+                    campaigns (
                         id,
                         campaign_id,
                         name,
@@ -670,9 +714,7 @@
                         status,
                         created_by,
                         created_at,
-                        guild_id,
-                        guilds!inner(name),
-                        profiles!campaigns_created_by_fkey(username)
+                        guild_id
                     )
                 `)
                 .eq('user_id', currentUser.id)
@@ -686,23 +728,45 @@
             
             let campaigns = [];
             if (memberships && memberships.length > 0) {
-                campaigns = memberships
-                    .filter(m => m.campaigns.created_by !== currentUser.id)
-                    .map(m => ({
-                        campaign_id: m.campaigns.campaign_id,
-                        campaign_name: m.campaigns.name,
-                        campaign_uuid: m.campaigns.id,
-                        description: m.campaigns.description,
-                        setting: m.campaigns.setting,
-                        starting_points: m.campaigns.starting_points || 100,
-                        status: m.campaigns.status,
-                        gm_username: m.campaigns.profiles?.username || 'Desconhecido',
-                        joined_at: m.joined_at,
-                        role: m.role,
-                        guild_name: m.campaigns.guilds?.name || 'Desconhecida'
-                    }));
+                campaigns = await Promise.all(
+                    memberships
+                        .filter(m => m.campaigns.created_by !== currentUser.id)
+                        .map(async (m) => {
+                            // Buscar nome do GM
+                            const { data: gmProfile } = await supabase
+                                .from('profiles')
+                                .select('username')
+                                .eq('id', m.campaigns.created_by)
+                                .single();
+                            
+                            // Buscar nome da guilda
+                            let guildName = 'Desconhecida';
+                            if (m.campaigns.guild_id) {
+                                const { data: guild } = await supabase
+                                    .from('guilds')
+                                    .select('name')
+                                    .eq('id', m.campaigns.guild_id)
+                                    .single();
+                                if (guild) guildName = guild.name;
+                            }
+                            
+                            return {
+                                campaign_id: m.campaigns.campaign_id,
+                                campaign_name: m.campaigns.name,
+                                campaign_uuid: m.campaigns.id,
+                                description: m.campaigns.description,
+                                setting: m.campaigns.setting,
+                                starting_points: m.campaigns.starting_points || 100,
+                                status: m.campaigns.status,
+                                gm_username: gmProfile?.username || 'Desconhecido',
+                                joined_at: m.joined_at,
+                                role: m.role,
+                                guild_name: guildName
+                            };
+                        })
+                );
                 
-                console.log(`✅ Query direta retornou ${campaigns.length} campanha(s) como jogador`);
+                console.log(`✅ Encontradas ${campaigns.length} campanha(s) como jogador`);
             }
             
             if (!campaigns || campaigns.length === 0) {
@@ -932,13 +996,12 @@
         window.location.href = `ficha-personagem.html?campaign_id=${campaignId}`;
     }
 
-    // FUNÇÃO DE DEBUG PARA VERIFICAR CAMPANHAS
+    // FUNÇÃO DE DEBUG
     async function debugCampaigns() {
         try {
             console.log('🔍 DEBUG: Verificando campanhas do usuário...');
             console.log('👤 Usuário:', currentUser.id);
             
-            // 1. Verificar campanhas criadas pelo usuário
             const { data: userCampaigns, error: userError } = await supabase
                 .from('campaigns')
                 .select('id, name, campaign_id, created_by, created_at')
