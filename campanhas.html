@@ -167,8 +167,7 @@
     <footer class="footer">
         <p>RPG System GURPS &copy; 2024</p>
     </footer>
-
-    <script>
+<script>
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -504,89 +503,25 @@
         container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Carregando suas campanhas...</p>';
         
         try {
-            console.log('🔍 Buscando campanhas do usuário...');
-            console.log('👤 ID do usuário:', currentUser.id);
+            console.log('🔍 Buscando campanhas DIRETO do banco...');
             
-            // VERIFICAÇÃO DE DEBUG: Verificar campanhas no banco
-            const { data: debugCampaigns, error: debugError } = await supabase
+            // BUSCA DIRETA SEM RPC (RPC ESTÁ COM PROBLEMA)
+            const { data: campaigns, error } = await supabase
                 .from('campaigns')
-                .select('id, name, campaign_id, created_by')
-                .eq('created_by', currentUser.id);
+                .select(`
+                    *,
+                    guilds(name)
+                `)
+                .eq('created_by', currentUser.id)
+                .order('created_at', { ascending: false });
             
-            console.log('🔍 DEBUG - Campanhas no banco:', debugCampaigns);
-            
-            if (debugError) {
-                console.error('❌ Erro ao verificar campanhas:', debugError);
+            if (error) {
+                console.error('❌ Erro ao buscar campanhas:', error);
+                throw error;
             }
             
-            // TENTA USAR A FUNÇÃO RPC PRIMEIRO
-            let campaigns = [];
-            let rpcErrorOccurred = false;
+            console.log(`✅ Encontradas ${campaigns?.length || 0} campanhas`);
             
-            try {
-                console.log('🔄 Tentando carregar via RPC get_user_gm_campaigns...');
-                const { data: rpcCampaigns, error: rpcError } = await supabase.rpc('get_user_gm_campaigns');
-                
-                if (rpcError) {
-                    console.error('❌ Erro RPC:', rpcError);
-                    rpcErrorOccurred = true;
-                } else {
-                    campaigns = rpcCampaigns || [];
-                    console.log(`✅ RPC retornou ${campaigns.length} campanha(s)`);
-                }
-            } catch (rpcException) {
-                console.error('❌ Exceção no RPC:', rpcException);
-                rpcErrorOccurred = true;
-            }
-            
-            // SE RPC FALHOU OU RETORNOU VAZIO, USA QUERY DIRETA
-            if (rpcErrorOccurred || campaigns.length === 0) {
-                console.log('🔄 Usando query direta como fallback...');
-                
-                const { data: directCampaigns, error: directError } = await supabase
-                    .from('campaigns')
-                    .select(`
-                        id,
-                        campaign_id,
-                        name,
-                        description,
-                        setting,
-                        starting_points,
-                        max_players,
-                        status,
-                        created_at,
-                        guild_id,
-                        created_by,
-                        guilds!inner(name)
-                    `)
-                    .eq('created_by', currentUser.id)
-                    .order('created_at', { ascending: false });
-                
-                if (directError) {
-                    console.error('❌ Erro na query direta:', directError);
-                    throw directError;
-                }
-                
-                console.log(`✅ Query direta retornou ${directCampaigns?.length || 0} campanha(s)`);
-                
-                if (directCampaigns && directCampaigns.length > 0) {
-                    campaigns = directCampaigns.map(c => ({
-                        id: c.id,
-                        campaign_id: c.campaign_id,
-                        name: c.name,
-                        description: c.description,
-                        setting: c.setting,
-                        starting_points: c.starting_points || 100,
-                        max_players: c.max_players || 6,
-                        status: c.status || 'preparation',
-                        created_at: c.created_at,
-                        guild_name: c.guilds?.name || 'Desconhecida',
-                        guild_id: c.guild_id
-                    }));
-                }
-            }
-            
-            // VERIFICA SE TEM CAMPANHAS
             if (!campaigns || campaigns.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -601,35 +536,28 @@
                 return;
             }
             
-            console.log(`🎯 Processando ${campaigns.length} campanha(s)...`);
-            
             // CONTA JOGADORES PARA CADA CAMPANHA
             const campaignsWithPlayers = await Promise.all(
                 campaigns.map(async (campaign) => {
-                    try {
-                        const { count: playerCount } = await supabase
-                            .from('campaign_players')
-                            .select('*', { count: 'exact', head: true })
-                            .eq('campaign_id', campaign.id)
-                            .eq('status', 'active');
-                        
-                        return {
-                            ...campaign,
-                            player_count: playerCount || 0,
-                            max_players: campaign.max_players || 6,
-                            starting_points: campaign.starting_points || 100,
-                            guild_name: campaign.guild_name || 'Desconhecida'
-                        };
-                    } catch (countError) {
-                        console.warn(`⚠️ Erro ao contar jogadores da campanha ${campaign.id}:`, countError);
-                        return {
-                            ...campaign,
-                            player_count: 0,
-                            max_players: campaign.max_players || 6,
-                            starting_points: campaign.starting_points || 100,
-                            guild_name: campaign.guild_name || 'Desconhecida'
-                        };
-                    }
+                    const { count: playerCount } = await supabase
+                        .from('campaign_players')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('campaign_id', campaign.id)
+                        .eq('status', 'active');
+                    
+                    return {
+                        id: campaign.id,
+                        campaign_id: campaign.campaign_id,
+                        name: campaign.name,
+                        description: campaign.description,
+                        setting: campaign.setting,
+                        starting_points: campaign.starting_points || 100,
+                        max_players: campaign.max_players || 6,
+                        status: campaign.status || 'preparation',
+                        created_at: campaign.created_at,
+                        player_count: playerCount || 0,
+                        guild_name: campaign.guilds?.name || 'Desconhecida'
+                    };
                 })
             );
             
@@ -727,76 +655,54 @@
         try {
             console.log('🔍 Carregando campanhas como jogador...');
             
-            // TENTA RPC PRIMEIRO
-            let campaigns = [];
-            let useFallback = false;
+            // SEMPRE USA QUERY DIRETA - IGNORA RPC PROBLEMÁTICA
+            const { data: memberships, error: queryError } = await supabase
+                .from('campaign_players')
+                .select(`
+                    *,
+                    campaigns!inner(
+                        id,
+                        campaign_id,
+                        name,
+                        description,
+                        setting,
+                        starting_points,
+                        status,
+                        created_by,
+                        created_at,
+                        guild_id,
+                        guilds!inner(name),
+                        profiles!campaigns_created_by_fkey(username)
+                    )
+                `)
+                .eq('user_id', currentUser.id)
+                .eq('status', 'active')
+                .order('joined_at', { ascending: false });
             
-            try {
-                const { data: rpcCampaigns, error: rpcError } = await supabase.rpc('get_user_player_campaigns');
-                
-                if (rpcError) {
-                    console.error('❌ Erro RPC:', rpcError);
-                    useFallback = true;
-                } else {
-                    campaigns = rpcCampaigns || [];
-                    console.log(`✅ RPC retornou ${campaigns.length} campanha(s) como jogador`);
-                }
-            } catch (rpcException) {
-                console.error('❌ Exceção no RPC:', rpcException);
-                useFallback = true;
+            if (queryError) {
+                console.error('❌ Erro na query:', queryError);
+                throw queryError;
             }
             
-            // FALLBACK PARA QUERY DIRETA
-            if (useFallback || campaigns.length === 0) {
-                console.log('🔄 Usando query direta para campanhas de jogador...');
+            let campaigns = [];
+            if (memberships && memberships.length > 0) {
+                campaigns = memberships
+                    .filter(m => m.campaigns.created_by !== currentUser.id)
+                    .map(m => ({
+                        campaign_id: m.campaigns.campaign_id,
+                        campaign_name: m.campaigns.name,
+                        campaign_uuid: m.campaigns.id,
+                        description: m.campaigns.description,
+                        setting: m.campaigns.setting,
+                        starting_points: m.campaigns.starting_points || 100,
+                        status: m.campaigns.status,
+                        gm_username: m.campaigns.profiles?.username || 'Desconhecido',
+                        joined_at: m.joined_at,
+                        role: m.role,
+                        guild_name: m.campaigns.guilds?.name || 'Desconhecida'
+                    }));
                 
-                const { data: memberships, error: queryError } = await supabase
-                    .from('campaign_players')
-                    .select(`
-                        *,
-                        campaigns!inner(
-                            id,
-                            campaign_id,
-                            name,
-                            description,
-                            setting,
-                            starting_points,
-                            status,
-                            created_by,
-                            created_at,
-                            guild_id,
-                            guilds!inner(name),
-                            profiles!campaigns_created_by_fkey(username)
-                        )
-                    `)
-                    .eq('user_id', currentUser.id)
-                    .eq('status', 'active')
-                    .order('joined_at', { ascending: false });
-                
-                if (queryError) {
-                    console.error('❌ Erro na query:', queryError);
-                    throw queryError;
-                }
-                
-                if (memberships && memberships.length > 0) {
-                    campaigns = memberships
-                        .filter(m => m.campaigns.created_by !== currentUser.id)
-                        .map(m => ({
-                            campaign_id: m.campaigns.campaign_id,
-                            campaign_name: m.campaigns.name,
-                            campaign_uuid: m.campaigns.id,
-                            description: m.campaigns.description,
-                            setting: m.campaigns.setting,
-                            starting_points: m.campaigns.starting_points || 100,
-                            status: m.campaigns.status,
-                            gm_username: m.campaigns.profiles?.username || 'Desconhecido',
-                            joined_at: m.joined_at,
-                            role: m.role,
-                            guild_name: m.campaigns.guilds?.name || 'Desconhecida'
-                        }));
-                    
-                    console.log(`✅ Query direta retornou ${campaigns.length} campanha(s) como jogador`);
-                }
+                console.log(`✅ Query direta retornou ${campaigns.length} campanha(s) como jogador`);
             }
             
             if (!campaigns || campaigns.length === 0) {
@@ -1048,17 +954,7 @@
                 });
             }
             
-            // 2. Testar a função RPC
-            console.log('🔄 Testando função RPC get_user_gm_campaigns...');
-            const { data: rpcResult, error: rpcError } = await supabase.rpc('get_user_gm_campaigns');
-            
-            if (rpcError) {
-                console.error('❌ Erro na RPC:', rpcError);
-            } else {
-                console.log(`✅ RPC retornou: ${rpcResult?.length || 0} campanha(s)`);
-            }
-            
-            return { userCampaigns, rpcResult };
+            return { userCampaigns };
             
         } catch (error) {
             console.error('❌ Erro no debug:', error);
