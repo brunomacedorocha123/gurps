@@ -570,9 +570,9 @@
         <p>RPG System GURPS &copy; 2024</p>
     </footer>
 
-    <script>
+        <script>
         // ============================================
-        // CAMPANHAS DO JOGADOR - VERSÃO SIMPLIFICADA
+        // CAMPANHAS DO JOGADOR - VERSÃO COMPLETA
         // ============================================
 
         const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
@@ -591,39 +591,42 @@
 
         async function initPlayerCampaigns() {
             try {
-                await checkAuth();
+                // 1. Verificar autenticação
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = session.user;
+                console.log('👤 Usuário:', currentUser.id);
+                
+                // 2. Carregar dados do usuário
                 await loadUserData();
+                
+                // 3. Configurar botões
                 setupEventListeners();
+                
+                // 4. Configurar tabs
                 setupTabs();
                 
-                // Carregar campanhas
+                // 5. Carregar campanhas
                 await loadPlayerCampaigns();
                 
             } catch (error) {
                 console.error('Erro ao iniciar:', error);
-                showMessage('Erro ao carregar campanhas. Recarregue a página.', 'error');
+                showMessage('Erro ao carregar. Recarregue a página.', 'error');
             }
-        }
-
-        async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html';
-                return;
-            }
-            currentUser = session.user;
-            console.log('👤 Usuário autenticado:', currentUser.id);
         }
 
         async function loadUserData() {
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('username')
                 .eq('id', currentUser.id)
                 .single();
 
-            if (profile) {
-                const initials = profile.username?.charAt(0).toUpperCase() || 'U';
+            if (profile && profile.username) {
+                const initials = profile.username.charAt(0).toUpperCase();
                 document.getElementById('userAvatar').innerHTML = initials;
             }
         }
@@ -634,11 +637,11 @@
 
         function setupEventListeners() {
             document.getElementById('backBtn').addEventListener('click', () => {
-                window.location.href = 'campanhas.html'; // Volta para a página principal
+                window.location.href = 'campanhas.html';
             });
             
             document.getElementById('logoutBtn').addEventListener('click', async () => {
-                if (!confirm('Tem certeza que deseja sair?')) return;
+                if (!confirm('Sair?')) return;
                 await supabase.auth.signOut();
                 window.location.href = 'login.html';
             });
@@ -649,7 +652,7 @@
         }
 
         // ============================================
-        // SISTEMA DE TABS
+        // TABS
         // ============================================
 
         function setupTabs() {
@@ -657,14 +660,18 @@
                 tab.addEventListener('click', () => {
                     const tabId = tab.getAttribute('data-tab');
                     
-                    // Atualizar tabs
+                    // Atualizar tabs ativas
                     document.querySelectorAll('.sub-tab').forEach(t => {
-                        t.classList.toggle('active', t === tab);
+                        t.classList.remove('active');
                     });
+                    tab.classList.add('active');
                     
                     // Atualizar conteúdo
                     document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.toggle('active', content.id === `${tabId}-content`);
+                        content.classList.remove('active');
+                        if (content.id === `${tabId}-content`) {
+                            content.classList.add('active');
+                        }
                     });
                 });
             });
@@ -678,6 +685,7 @@
             const container = document.getElementById('campaigns-list');
             if (!container) return;
             
+            // Mostrar loading
             container.innerHTML = `
                 <div style="text-align: center; padding: 40px;">
                     <div class="loading" style="margin: 0 auto 20px; width: 40px; height: 40px;"></div>
@@ -686,51 +694,62 @@
             `;
             
             try {
-                // TENTAR USAR A FUNÇÃO SQL PRIMEIRO
-                const { data: campaignsData, error: sqlError } = await supabase
-                    .rpc('get_player_campaigns_counts', { p_user_id: currentUser.id });
-                
                 let campaigns = [];
                 
-                if (!sqlError && campaignsData && campaignsData.length > 0) {
-                    // Usar dados da função SQL
-                    campaigns = campaignsData.map(campaign => ({
-                        campaign_id: campaign.campaign_id,
-                        campaign_name: campaign.campaign_name,
-                        campaign_code: campaign.campaign_code,
-                        player_count: campaign.player_count || 0,
-                        gm_username: campaign.gm_username || 'Desconhecido',
-                        joined_at: campaign.joined_at,
-                        status: campaign.status
-                    }));
-                } else {
-                    // FALLBACK: Buscar manualmente
+                // TENTAR FUNÇÃO SQL PRIMEIRO
+                try {
+                    const { data: campaignsData, error: sqlError } = await supabase
+                        .rpc('get_player_campaigns_counts', { p_user_id: currentUser.id });
+                    
+                    if (!sqlError && campaignsData) {
+                        campaigns = campaignsData;
+                    }
+                } catch (sqlError) {
+                    console.log('SQL não funcionou, usando fallback:', sqlError);
+                }
+                
+                // SE NÃO FUNCIONOU, USAR FALLBACK
+                if (campaigns.length === 0) {
                     campaigns = await loadPlayerCampaignsFallback();
                 }
                 
+                // SE AINDA VAZIO, MOSTRAR ESTADO VAZIO
                 if (campaigns.length === 0) {
-                    renderEmptyState(container);
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>Nenhuma campanha encontrada</h3>
+                            <p>Você não está em nenhuma campanha como jogador.</p>
+                            <p style="color: #aaa; font-size: 0.9rem; margin-top: 10px;">
+                                Peça ao mestre para te convidar usando seu ID.
+                            </p>
+                        </div>
+                    `;
                     return;
                 }
                 
-                // Buscar detalhes adicionais (descrição e setting) para cada campanha
+                // BUSCAR DETALHES COMPLETOS
                 const campaignsWithDetails = await Promise.all(
                     campaigns.map(async (campaign) => {
                         const { data: campaignDetails } = await supabase
                             .from('campaigns')
                             .select('description, setting, starting_points')
-                            .eq('id', campaign.campaign_id)
+                            .eq('id', campaign.campaign_id || campaign.id)
                             .single();
                         
                         return {
                             ...campaign,
                             description: campaignDetails?.description || '',
                             setting: campaignDetails?.setting || 'Não definido',
-                            starting_points: campaignDetails?.starting_points || 100
+                            starting_points: campaignDetails?.starting_points || 100,
+                            campaign_id: campaign.campaign_id || campaign.id,
+                            campaign_name: campaign.campaign_name || campaign.name,
+                            campaign_code: campaign.campaign_code || campaign.campaign_id
                         };
                     })
                 );
                 
+                // RENDERIZAR CAMPANHAS
                 renderCampaigns(campaignsWithDetails, container);
                 
             } catch (error) {
@@ -738,9 +757,9 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Erro ao carregar campanhas</h3>
-                        <p>${error.message || 'Tente novamente mais tarde.'}</p>
-                        <button class="btn btn-secondary" onclick="loadPlayerCampaigns()" style="margin-top: 20px;">
+                        <h3>Erro ao carregar</h3>
+                        <p>${error.message || 'Tente novamente.'}</p>
+                        <button class="btn" onclick="loadPlayerCampaigns()" style="margin-top: 20px;">
                             <i class="fas fa-redo"></i> Tentar Novamente
                         </button>
                     </div>
@@ -750,11 +769,12 @@
 
         async function loadPlayerCampaignsFallback() {
             try {
+                // Buscar campanhas onde o usuário é jogador
                 const { data: memberships, error } = await supabase
                     .from('campaign_players')
                     .select(`
                         *,
-                        campaigns!inner(
+                        campaigns (
                             id,
                             campaign_id,
                             name,
@@ -762,50 +782,49 @@
                             setting,
                             starting_points,
                             status,
-                            gm_id,
-                            created_at
+                            gm_id
                         )
                     `)
                     .eq('user_id', currentUser.id)
-                    .eq('status', 'active')
-                    .order('joined_at', { ascending: false });
+                    .eq('status', 'active');
                 
                 if (error) throw error;
                 
-                if (!memberships || memberships.length === 0) {
-                    return [];
-                }
+                if (!memberships || memberships.length === 0) return [];
                 
-                const campaigns = await Promise.all(
-                    memberships
-                        .filter(m => m.campaigns.gm_id !== currentUser.id) // Não incluir onde é GM
-                        .map(async (m) => {
-                            const { data: gmProfile } = await supabase
-                                .from('profiles')
-                                .select('username')
-                                .eq('id', m.campaigns.gm_id)
-                                .single();
-                            
-                            const { count: playerCount } = await supabase
-                                .from('campaign_players')
-                                .select('*', { count: 'exact', head: true })
-                                .eq('campaign_id', m.campaigns.id)
-                                .eq('status', 'active');
-                            
-                            return {
-                                campaign_id: m.campaigns.id,
-                                campaign_name: m.campaigns.name,
-                                campaign_code: m.campaigns.campaign_id,
-                                player_count: playerCount || 0,
-                                gm_username: gmProfile?.username || 'Desconhecido',
-                                joined_at: m.joined_at,
-                                status: m.campaigns.status,
-                                description: m.campaigns.description || '',
-                                setting: m.campaigns.setting || 'Não definido',
-                                starting_points: m.campaigns.starting_points || 100
-                            };
-                        })
-                );
+                // Processar dados
+                const campaigns = [];
+                
+                for (const membership of memberships) {
+                    if (!membership.campaigns) continue;
+                    
+                    // Buscar nome do GM
+                    const { data: gmProfile } = await supabase
+                        .from('profiles')
+                        .select('username')
+                        .eq('id', membership.campaigns.gm_id)
+                        .single();
+                    
+                    // Contar jogadores
+                    const { count: playerCount } = await supabase
+                        .from('campaign_players')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('campaign_id', membership.campaigns.id)
+                        .eq('status', 'active');
+                    
+                    campaigns.push({
+                        campaign_id: membership.campaigns.id,
+                        campaign_name: membership.campaigns.name,
+                        campaign_code: membership.campaigns.campaign_id,
+                        player_count: playerCount || 0,
+                        gm_username: gmProfile?.username || 'Desconhecido',
+                        joined_at: membership.joined_at,
+                        status: membership.campaigns.status,
+                        description: membership.campaigns.description || '',
+                        setting: membership.campaigns.setting || 'Não definido',
+                        starting_points: membership.campaigns.starting_points || 100
+                    });
+                }
                 
                 return campaigns;
                 
@@ -828,18 +847,14 @@
                             <div class="campaign-code">Código: ${escapeHtml(campaign.campaign_code)}</div>
                             
                             <div class="campaign-info">
-                                <!-- DESCRIÇÃO -->
                                 ${campaign.description ? `
-                                    <p><i class="fas fa-file-alt"></i> ${escapeHtml(campaign.description)}</p>
+                                    <p><i class="fas fa-file-alt"></i> ${escapeHtml(campaign.description.substring(0, 100))}${campaign.description.length > 100 ? '...' : ''}</p>
                                 ` : ''}
                                 
-                                <!-- CENÁRIO (SEMPRE MOSTRA) -->
                                 <p><i class="fas fa-globe"></i> <strong>Cenário:</strong> ${escapeHtml(campaign.setting)}</p>
                                 
-                                <!-- MESTRE -->
-                                <p><i class="fas fa-crown"></i> <strong>Mestre:</strong> ${escapeHtml(campaign.gm_username)}</p>
+                                <p><i class="fas fa-crown"></i> <strong>Mestre:</strong> ${escapeHtml(campaign.gm_username || 'Desconhecido')}</p>
                                 
-                                <!-- STATUS -->
                                 <div>
                                     <span class="status-badge ${getStatusClass(campaign.status)}">
                                         ${getStatusText(campaign.status)}
@@ -866,10 +881,6 @@
                                 <button class="btn" onclick="enterCampaign('${campaign.campaign_id}')">
                                     <i class="fas fa-door-open"></i> Entrar na Campanha
                                 </button>
-                                <!-- FUTURO: BOTÃO PARA VINCULAR PERSONAGEM -->
-                                <!-- <button class="btn btn-info" onclick="manageCharacter('${campaign.campaign_id}')">
-                                    <i class="fas fa-user-circle"></i> Personagem
-                                </button> -->
                             </div>
                         </div>
                     `).join('')}
@@ -877,21 +888,8 @@
             `;
         }
 
-        function renderEmptyState(container) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <h3>Nenhuma campanha encontrada</h3>
-                    <p>Você ainda não está em nenhuma campanha como jogador.</p>
-                    <p style="color: #aaa; font-size: 0.9rem; margin-top: 10px;">
-                        Peça ao mestre para te convidar usando seu ID de jogador.
-                    </p>
-                </div>
-            `;
-        }
-
         // ============================================
-        // FUNÇÕES AUXILIARES
+        // FUNÇÕES UTILITÁRIAS
         // ============================================
 
         function escapeHtml(text) {
@@ -906,49 +904,59 @@
             try {
                 const date = new Date(dateString);
                 const now = new Date();
-                const diffTime = Math.abs(now - date);
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
                 
                 if (diffDays === 0) return 'Hoje';
-                else if (diffDays === 1) return 'Ontem';
-                else if (diffDays < 7) return `${diffDays} dias atrás`;
-                else if (diffDays < 30) return `${Math.floor(diffDays/7)} semanas atrás`;
-                else return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                if (diffDays === 1) return 'Ontem';
+                if (diffDays < 7) return `${diffDays} dias atrás`;
+                if (diffDays < 30) return `${Math.floor(diffDays/7)} semanas atrás`;
+                return date.toLocaleDateString('pt-BR');
             } catch {
                 return 'Data inválida';
             }
         }
 
         function getStatusClass(status) {
-            switch (status) {
-                case 'active': return 'status-active';
-                case 'preparation': return 'status-preparation';
-                case 'paused': return 'status-paused';
-                default: return 'status-preparation';
-            }
+            const classes = {
+                'active': 'status-active',
+                'preparation': 'status-preparation',
+                'paused': 'status-paused',
+                'completed': 'status-completed'
+            };
+            return classes[status] || 'status-preparation';
         }
 
         function getStatusText(status) {
-            const statusMap = {
+            const texts = {
                 'active': 'Ativa',
                 'preparation': 'Preparação',
                 'paused': 'Pausada',
                 'completed': 'Concluída'
             };
-            return statusMap[status] || status;
+            return texts[status] || status;
         }
 
         function showMessage(text, type = 'info') {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            messageDiv.textContent = text;
+            // Remove mensagem anterior
+            const oldMsg = document.querySelector('.temp-message');
+            if (oldMsg) oldMsg.remove();
             
+            // Cria nova mensagem
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type} temp-message`;
+            messageDiv.textContent = text;
+            messageDiv.style.margin = '10px 0';
+            
+            // Insere no início do conteúdo principal
             const mainContent = document.querySelector('.main-content');
             if (mainContent) {
                 mainContent.insertBefore(messageDiv, mainContent.firstChild);
                 
+                // Remove após 5 segundos
                 setTimeout(() => {
-                    messageDiv.remove();
+                    if (messageDiv.parentNode) {
+                        messageDiv.remove();
+                    }
                 }, 5000);
             }
         }
@@ -961,19 +969,12 @@
             window.location.href = `sala-campanha.html?id=${campaignId}`;
         }
 
-        // FUTURO: Vincular personagem
-        function manageCharacter(campaignId) {
-            showMessage('Funcionalidade de personagem em desenvolvimento!', 'info');
-            // window.location.href = `personagem.html?campaign=${campaignId}`;
-        }
-
         // ============================================
-        // EXPORTAR FUNÇÕES GLOBAIS
+        // EXPORTAR PARA USO GLOBAL
         // ============================================
 
         window.loadPlayerCampaigns = loadPlayerCampaigns;
         window.enterCampaign = enterCampaign;
-        window.manageCharacter = manageCharacter;
 
     </script>
 </body>
