@@ -999,6 +999,782 @@
         }
     </style>
 </head>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Campanhas - RPG System GURPS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* ESTILOS GERAIS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('Cris2.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .header {
+            background: rgba(30, 30, 40, 0.95);
+            padding: 12px 15px;
+            border-bottom: 2px solid rgba(255, 140, 0, 0.4);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo p {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn {
+            background: rgba(52, 152, 219, 0.8);
+            color: white;
+        }
+
+        .back-btn:hover {
+            background: rgba(52, 152, 219, 1);
+        }
+
+        .logout-btn {
+            background: rgba(231, 76, 60, 0.8);
+            color: white;
+        }
+
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 1);
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff8c00, #ff4500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* CONTEÚDO PRINCIPAL */
+        .main-content {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* TABS PRINCIPAIS */
+        .main-tabs {
+            display: flex;
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .main-tab {
+            flex: 1;
+            padding: 16px 10px;
+            text-align: center;
+            background: none;
+            border: none;
+            color: #ccc;
+            font-weight: 600;
+            cursor: pointer;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none; /* PARA O LINK DO JOGADOR */
+        }
+
+        .main-tab:last-child {
+            border-right: none;
+        }
+
+        .main-tab:hover {
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+        }
+
+        .main-tab.active {
+            background: rgba(255, 140, 0, 0.2);
+            color: #ffd700;
+            border-bottom: 3px solid #ff8c00;
+        }
+
+        /* SUB-TABS */
+        .sub-tabs {
+            display: flex;
+            background: rgba(40, 40, 50, 0.7);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 140, 0, 0.15);
+            overflow-x: auto;
+        }
+
+        .sub-tab {
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-weight: 500;
+            cursor: pointer;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .sub-tab:last-child {
+            border-right: none;
+        }
+
+        .sub-tab:hover {
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+        }
+
+        .sub-tab.active {
+            background: rgba(255, 140, 0, 0.15);
+            color: #ffd700;
+            border-bottom: 2px solid #ff8c00;
+        }
+
+        /* CONTEÚDO DAS TABS */
+        .tab-content {
+            display: none;
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            margin-bottom: 25px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* HEADER DO CONTEÚDO */
+        .content-header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .content-header h2 {
+            color: #ffd700;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .content-header p {
+            color: #aaa;
+            font-size: 0.95rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        /* FORMULÁRIO CRIAR CAMPANHA */
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(40, 40, 50, 0.5);
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            border-radius: 6px;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #ff8c00;
+            box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2);
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            border-radius: 6px;
+            color: white;
+            min-height: 100px;
+            resize: vertical;
+            font-size: 0.95rem;
+        }
+
+        .form-note {
+            color: #888;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* GRADE DE CAMPANHAS */
+        .campaigns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .campaign-card {
+            background: rgba(40, 40, 50, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .campaign-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 140, 0, 0.5);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .campaign-card h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            word-break: break-word;
+        }
+
+        .campaign-code {
+            background: rgba(255, 140, 0, 0.2);
+            color: #ffd700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 10px;
+            align-self: flex-start;
+        }
+
+        .campaign-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .campaign-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .campaign-stat i {
+            color: #ff8c00;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .campaign-stat span {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        /* ESTADO VAZIO */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: rgba(255, 140, 0, 0.3);
+        }
+
+        .empty-state h3 {
+            color: #aaa;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .empty-state p {
+            color: #777;
+            margin-bottom: 20px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* BOTÕES */
+        .btn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #ff8c00, #ff4500);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+            padding: 14px;
+            font-size: 1rem;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-success {
+            background: rgba(46, 204, 113, 0.8);
+        }
+
+        .btn-success:hover {
+            background: rgba(46, 204, 113, 1);
+        }
+
+        .btn-info {
+            background: rgba(52, 152, 219, 0.8);
+        }
+
+        .btn-info:hover {
+            background: rgba(52, 152, 219, 1);
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        .generate-btn {
+            padding: 12px 18px;
+            background: rgba(52, 152, 219, 0.8);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            background: rgba(52, 152, 219, 1);
+        }
+
+        /* MENSAGENS */
+        .message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            color: #2ecc71;
+            display: block;
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+            display: block;
+        }
+
+        .message.info {
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            color: #3498db;
+            display: block;
+        }
+
+        .message.warning {
+            background: rgba(241, 196, 15, 0.2);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            color: #f1c40f;
+            display: block;
+        }
+
+        /* MODAIS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: rgba(30, 30, 40, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            color: #ffd700;
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+
+        .modal-subtitle {
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            padding: 10px;
+        }
+
+        /* LOADING */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ff8c00;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* BADGES DE STATUS */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .status-active {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+
+        .status-preparation {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+
+        .status-paused {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
+        .status-completed {
+            background: rgba(155, 89, 182, 0.2);
+            color: #9b59b6;
+        }
+
+        .status-archived {
+            background: rgba(149, 165, 166, 0.2);
+            color: #95a5a6;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: rgba(20, 20, 30, 0.9);
+            padding: 12px 0;
+            text-align: center;
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 140, 0, 0.2);
+        }
+
+        .footer p {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 768px) {
+            html {
+                font-size: 15px;
+            }
+            
+            .header-content {
+                flex-direction: row;
+            }
+            
+            .logo h1 {
+                font-size: 1.3rem;
+            }
+            
+            .main-tabs {
+                flex-direction: row;
+            }
+            
+            .main-tab {
+                padding: 12px 8px;
+                font-size: 0.9rem;
+            }
+            
+            .sub-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+            
+            .sub-tab {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .campaigns-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            html {
+                font-size: 14px;
+            }
+            
+            .header {
+                padding: 10px;
+            }
+            
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+            
+            .user-menu {
+                gap: 5px;
+            }
+            
+            .header-btn {
+                padding: 6px 8px;
+                font-size: 0.8rem;
+            }
+            
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+            
+            .main-tab {
+                padding: 10px 6px;
+                font-size: 0.85rem;
+            }
+            
+            .sub-tab {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+            
+            .tab-content {
+                padding: 15px;
+            }
+            
+            .content-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .modal {
+                padding: 15px;
+                max-height: 90vh;
+                border-radius: 10px;
+            }
+            
+            .modal-overlay {
+                padding: 10px;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .main-tab {
+                font-size: 0.75rem;
+            }
+            
+            .sub-tab {
+                font-size: 0.75rem;
+                padding: 6px 8px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
 <body>
     <!-- ============================================
          HEADER
@@ -1031,23 +1807,17 @@
     <main class="main-content">
         <!-- TABS PRINCIPAIS -->
         <div class="main-tabs" role="tablist">
-            <button class="main-tab" data-main-tab="player" role="tab" aria-selected="false" aria-controls="player-tab">
+            <!-- LINK PARA PÁGINA DO JOGADOR -->
+            <a href="campanhas-jogador.html" class="main-tab">
                 <i class="fas fa-user"></i> <span class="tab-text">JOGADOR</span>
-            </button>
+            </a>
+            <!-- ABA DO MESTRE (MANTÉM LOCAL) -->
             <button class="main-tab active" data-main-tab="gm" role="tab" aria-selected="true" aria-controls="gm-tab">
                 <i class="fas fa-crown"></i> <span class="tab-text">MESTRE</span>
             </button>
         </div>
 
-        <!-- SUB-TABS JOGADOR -->
-        <div class="sub-tabs player-subtabs" id="player-subtabs" style="display: none;" role="tablist">
-            <button class="sub-tab" data-sub-tab="player-campaigns" data-main-tab="player" role="tab" aria-selected="false" aria-controls="player-campaigns-content">
-                <i class="fas fa-book"></i> <span class="tab-text">Minhas Campanhas</span>
-            </button>
-            <button class="sub-tab" data-sub-tab="player-sheets" data-main-tab="player" role="tab" aria-selected="false" aria-controls="player-sheets-content">
-                <i class="fas fa-scroll"></i> <span class="tab-text">Fichas</span>
-            </button>
-        </div>
+        <!-- REMOVI AS SUB-TABS DO JOGADOR POIS AGORA É PÁGINA SEPARADA -->
 
         <!-- SUB-TABS MESTRE -->
         <div class="sub-tabs gm-subtabs" id="gm-subtabs" role="tablist">
@@ -1057,38 +1827,6 @@
             <button class="sub-tab active" data-sub-tab="gm-create" data-main-tab="gm" role="tab" aria-selected="true" aria-controls="gm-create-content">
                 <i class="fas fa-plus-circle"></i> <span class="tab-text">Criar Campanha</span>
             </button>
-        </div>
-
-        <!-- ============================================
-             CONTEÚDO JOGADOR - CAMPANHAS
-             ============================================ -->
-        <div class="tab-content" id="player-campaigns-content" role="tabpanel" aria-labelledby="player-campaigns-tab" hidden>
-            <div class="content-header">
-                <h2>Minhas Campanhas como Jogador</h2>
-                <p>Campanhas GURPS onde você está participando como jogador.</p>
-                <button class="btn btn-small" onclick="refreshPlayerCampaigns()" style="margin-top: 10px;">
-                    <i class="fas fa-sync-alt"></i> Atualizar
-                </button>
-            </div>
-            
-            <div id="player-campaigns-message"></div>
-            
-            <div id="player-campaigns-container">
-                <!-- Cards serão renderizados aqui pelo JavaScript -->
-            </div>
-        </div>
-
-        <!-- ============================================
-             CONTEÚDO JOGADOR - FICHAS
-             ============================================ -->
-        <div class="tab-content" id="player-sheets-content" role="tabpanel" aria-labelledby="player-sheets-tab" hidden>
-            <div class="content-header">
-                <h2>Fichas de Personagem GURPS</h2>
-                <p>Gerencie suas fichas de personagem para campanhas GURPS.</p>
-            </div>
-            <div style="text-align: center; padding: 40px;">
-                <p style="color: #888;">Em desenvolvimento</p>
-            </div>
         </div>
 
         <!-- ============================================
@@ -1104,6 +1842,10 @@
             </div>
             <div id="gm-campaigns-container">
                 <!-- Cards serão renderizados aqui pelo JavaScript -->
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading" style="margin: 0 auto 20px; width: 40px; height: 40px;"></div>
+                    <p style="color: #888;">Carregando campanhas...</p>
+                </div>
             </div>
         </div>
 
