@@ -358,6 +358,10 @@ async function acceptCampaignInvitation(invitationId, campaignId) {
                     '<span style="color: #2ecc71; font-weight: bold;">✅ Aceito</span>';
             }
             alert(data.message || 'Convite aceito!');
+            
+            // ⭐⭐ ADICIONAR ESTA LINHA - Notificar campanhas.html ⭐⭐
+            window.parent.postMessage({ type: 'campaign_accepted' }, '*');
+            
             setTimeout(() => loadNotifications(), 2000);
         } else {
             alert(data?.message || 'Erro ao aceitar convite');
@@ -414,6 +418,10 @@ async function acceptCampaignManual(invitationId, campaignId) {
         }
         
         alert('Convite aceito! Você entrou na campanha.');
+        
+        // ⭐⭐ ADICIONAR TAMBÉM AQUI ⭐⭐
+        window.parent.postMessage({ type: 'campaign_accepted' }, '*');
+        
         setTimeout(() => loadNotifications(), 2000);
         
     } catch (error) {
