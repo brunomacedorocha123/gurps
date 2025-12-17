@@ -354,7 +354,7 @@
         do {
             newId = Math.floor(1000000 + Math.random() * 9000000);
         } while (newId > 9999999);
-        idInput.value = newId;
+        idInput.value = newId.toString(); // CONVERTE PARA STRING
     }
 
     async function createCampaign() {
@@ -367,7 +367,7 @@
         }
         
         const name = document.getElementById('campaignName').value.trim();
-        const campaignId = parseInt(document.getElementById('campaignId').value);
+        const campaignId = document.getElementById('campaignId').value.trim(); // AGORA É STRING
         const description = document.getElementById('campaignDescription').value.trim();
         const setting = document.getElementById('campaignSetting').value.trim();
         const startingPoints = parseInt(document.getElementById('startingPoints').value) || 100;
@@ -380,13 +380,21 @@
             return;
         }
         
-        if (!campaignId || isNaN(campaignId)) {
-            showMessage('❌ O código da campanha é obrigatório e deve ser numérico.', 'error', 'gm-create-content');
+        if (!campaignId) {
+            showMessage('❌ O código da campanha é obrigatório.', 'error', 'gm-create-content');
             return;
         }
         
-        if (campaignId < 1000000 || campaignId > 9999999) {
+        // VALIDAÇÃO PARA STRING (agora campaign_id é TEXT)
+        const campaignIdNum = parseInt(campaignId);
+        if (isNaN(campaignIdNum) || campaignIdNum < 1000000 || campaignIdNum > 9999999) {
             showMessage('❌ O código deve ter exatamente 7 dígitos (entre 1000000 e 9999999).', 'error', 'gm-create-content');
+            return;
+        }
+        
+        if (campaignId.length !== 7 || !/^\d{7}$/.test(campaignId)) {
+            showMessage('❌ O código deve ter exatamente 7 dígitos numéricos.', 'error', 'gm-create-content');
+            generateCampaignId();
             return;
         }
         
@@ -397,7 +405,8 @@
         try {
             console.log('📦 Dados da campanha:', {
                 nome: name,
-                codigo: campaignId,
+                codigo: campaignId, // JÁ É STRING
+                codigo_tipo: typeof campaignId,
                 guilda_id: userGuild.id,
                 guilda_nome: userGuild.name,
                 usuario: currentUser.id
@@ -405,10 +414,11 @@
             
             console.log('🚀 Chamando função RPC create_campaign...');
             
+            // IMPORTANTE: Agora enviamos como STRING
             const { data: result, error } = await supabase.rpc('create_campaign', {
                 p_guild_id: userGuild.id,
                 p_name: name,
-                p_campaign_id: campaignId,
+                p_campaign_id: campaignId, // JÁ É STRING
                 p_description: description || null,
                 p_setting: setting || null,
                 p_starting_points: startingPoints,
@@ -422,6 +432,7 @@
             }
             
             console.log('📨 Resposta RPC:', result);
+            console.log('📨 Tipo da resposta:', typeof result);
             
             // Verifica se result é uma string (JSON stringified)
             let parsedResult;
@@ -458,8 +469,11 @@
             setTimeout(() => {
                 loadGMCampaigns();
                 const gmCampaignsTab = document.querySelector('.sub-tab[data-sub-tab="gm-campaigns"]');
-                if (gmCampaignsTab) gmCampaignsTab.click();
-            }, 2000);
+                if (gmCampaignsTab) {
+                    gmCampaignsTab.click();
+                    showMessage('✅ Lista de campanhas atualizada!', 'success', 'gm-campaigns-content');
+                }
+            }, 1500);
             
         } catch (error) {
             console.error('❌ Erro ao criar campanha:', error);
@@ -477,6 +491,9 @@
                 generateCampaignId();
             } else if (error.message.includes('autenticado')) {
                 errorMessage += 'Usuário não autenticado. Faça login novamente.';
+            } else if (error.message.includes('formato') || error.message.includes('formato')) {
+                errorMessage += error.message;
+                generateCampaignId();
             } else {
                 errorMessage += error.message || 'Tente novamente.';
             }
@@ -500,7 +517,7 @@
                 const { data: rpcCampaigns, error: rpcError } = await supabase.rpc('get_user_gm_campaigns');
                 if (!rpcError && rpcCampaigns) {
                     campaigns = rpcCampaigns;
-                    console.log('✅ Campanhas carregadas via RPC');
+                    console.log('✅ Campanhas carregadas via RPC:', campaigns.length);
                 } else {
                     throw rpcError;
                 }
@@ -523,6 +540,7 @@
                     ...c,
                     guild_name: c.guilds?.name || 'Desconhecida'
                 }));
+                console.log('✅ Campanhas carregadas via query direta:', campaigns.length);
             }
             
             if (!campaigns || campaigns.length === 0) {
@@ -555,6 +573,7 @@
                             guild_name: campaign.guild_name || 'Desconhecida'
                         };
                     } catch (countError) {
+                        console.warn('⚠️ Erro ao contar jogadores:', countError);
                         return {
                             ...campaign,
                             player_count: 0,
@@ -578,9 +597,9 @@
                         <div class="campaign-card">
                             <h3>${escapeHtml(campaign.name)}</h3>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <div class="campaign-code">Código: ${campaign.campaign_id}</div>
+                                <div class="campaign-code">Código: ${escapeHtml(campaign.campaign_id)}</div>
                                 <span style="font-size: 0.8rem; color: #aaa;">
-                                    <i class="fas fa-landmark"></i> ${escapeHtml(campaign.guild_name)}
+                                    <i class="fas fa-landmark"></i> ${escapeHtml(campaign.guild_name || 'Desconhecida')}
                                 </span>
                             </div>
                             ${campaign.description ? `
@@ -656,7 +675,7 @@
                 const { data: rpcCampaigns, error: rpcError } = await supabase.rpc('get_user_player_campaigns');
                 if (!rpcError && rpcCampaigns) {
                     campaigns = rpcCampaigns;
-                    console.log('✅ Campanhas de jogador carregadas via RPC');
+                    console.log('✅ Campanhas de jogador carregadas via RPC:', campaigns.length);
                 } else {
                     throw rpcError;
                 }
@@ -695,6 +714,7 @@
                             role: m.role,
                             guild_name: m.campaigns.guilds?.name || 'Desconhecida'
                         }));
+                    console.log('✅ Campanhas de jogador carregadas via query direta:', campaigns.length);
                 }
             }
             
@@ -726,6 +746,7 @@
                             player_count: playerCount || 0
                         };
                     } catch (countError) {
+                        console.warn('⚠️ Erro ao contar jogadores:', countError);
                         return {
                             ...campaign,
                             player_count: 0
@@ -744,10 +765,10 @@
                             <h3>${escapeHtml(campaign.campaign_name)}</h3>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <div class="campaign-code" style="background: rgba(52,152,219,0.2); color: #3498db;">
-                                    Código: ${campaign.campaign_id}
+                                    Código: ${escapeHtml(campaign.campaign_id)}
                                 </div>
                                 <span style="font-size: 0.8rem; color: #aaa;">
-                                    <i class="fas fa-landmark"></i> ${escapeHtml(campaign.guild_name)}
+                                    <i class="fas fa-landmark"></i> ${escapeHtml(campaign.guild_name || 'Desconhecida')}
                                 </span>
                             </div>
                             ${campaign.description ? `
@@ -757,7 +778,7 @@
                             ` : ''}
                             <p style="color: #aaa; margin-bottom: 10px; font-size: 0.85rem;">
                                 <i class="fas fa-crown" style="color: #ffd700;"></i> 
-                                Mestre: ${escapeHtml(campaign.gm_username)}
+                                Mestre: ${escapeHtml(campaign.gm_username || 'Desconhecido')}
                             </p>
                             <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
                                 <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; 
@@ -960,7 +981,7 @@
         }
     }
 
-    // Função para testar a criação de campanha
+    // Função para testar a criação de campanha (CORRIGIDA)
     async function testCreateCampaign() {
         try {
             console.log('🧪 TESTANDO CRIAÇÃO DE CAMPANHA...');
@@ -970,12 +991,12 @@
                 return;
             }
             
-            // Teste direto da função RPC
+            // Teste direto da função RPC - AGORA COM STRING
             const testResult = await supabase.rpc('create_campaign', {
                 p_guild_id: userGuild.id,
-                p_name: 'Campanha de Teste',
-                p_campaign_id: 1111111,
-                p_description: 'Esta é uma campanha de teste',
+                p_name: 'Campanha de Teste Automático',
+                p_campaign_id: '8888888', // AGORA É STRING!
+                p_description: 'Esta é uma campanha de teste automático',
                 p_starting_points: 100,
                 p_max_players: 6,
                 p_status: 'preparation'
@@ -988,7 +1009,20 @@
                 showMessage(`❌ Teste falhou: ${testResult.error.message}`, 'error');
             } else {
                 console.log('✅ Teste bem-sucedido:', testResult.data);
-                showMessage('✅ Função RPC está funcionando corretamente!', 'success');
+                
+                // Parse do resultado
+                let parsedResult;
+                if (typeof testResult.data === 'string') {
+                    parsedResult = JSON.parse(testResult.data);
+                } else {
+                    parsedResult = testResult.data;
+                }
+                
+                if (parsedResult.success) {
+                    showMessage(`✅ ${parsedResult.message} | Código: ${parsedResult.campaign_id}`, 'success');
+                } else {
+                    showMessage(`⚠️ ${parsedResult.message}`, 'error');
+                }
             }
         } catch (error) {
             console.error('❌ Erro no teste:', error);
@@ -996,9 +1030,51 @@
         }
     }
 
+    // Função para verificar estrutura do banco
+    async function checkDatabaseStructure() {
+        try {
+            console.log('🔍 Verificando estrutura do banco de dados...');
+            
+            // Verificar tabela campaigns
+            const { data: campaignsColumns, error: campaignsError } = await supabase
+                .from('information_schema.columns')
+                .select('column_name, data_type')
+                .eq('table_name', 'campaigns')
+                .order('column_name');
+            
+            if (campaignsError) throw campaignsError;
+            
+            console.log('📊 Estrutura da tabela campaigns:');
+            campaignsColumns.forEach(col => {
+                console.log(`  ${col.column_name}: ${col.data_type}`);
+            });
+            
+            // Verificar se campaign_id é TEXT
+            const campaignIdColumn = campaignsColumns.find(col => col.column_name === 'campaign_id');
+            if (campaignIdColumn) {
+                console.log(`✅ campaign_id é do tipo: ${campaignIdColumn.data_type}`);
+                if (campaignIdColumn.data_type !== 'text') {
+                    console.warn('⚠️ ATENÇÃO: campaign_id não é TEXT! Pode causar problemas.');
+                }
+            }
+            
+            return campaignsColumns;
+        } catch (error) {
+            console.error('❌ Erro ao verificar estrutura:', error);
+            return null;
+        }
+    }
+
     // Para testar, você pode chamar essa função no console do navegador:
     window.debugCampaigns = debugConnection;
     window.testCreateCampaign = testCreateCampaign;
+    window.checkDatabaseStructure = checkDatabaseStructure;
+    
+    // Adicionar botão de teste no console
+    console.log('🔧 Funções disponíveis no console:');
+    console.log('  • debugCampaigns() - Testa conexão com Supabase');
+    console.log('  • testCreateCampaign() - Testa criação de campanha');
+    console.log('  • checkDatabaseStructure() - Verifica estrutura do banco');
 </script>
 </body>
 </html>
