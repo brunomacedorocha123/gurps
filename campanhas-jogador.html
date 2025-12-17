@@ -1,601 +1,911 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minhas Campanhas como Jogador - RPG System GURPS</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        /* ESTILOS GERAIS - IGUAL AO ORIGINAL */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Minhas Campanhas como Jogador - RPG System GURPS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ESTILOS GERAIS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        html {
-            font-size: 16px;
-        }
+    html {
+      font-size: 16px;
+    }
 
-        body {
-            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('Cris2.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    body {
+      background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('Cris2.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        /* HEADER - IGUAL */
-        .header {
-            background: rgba(30, 30, 40, 0.95);
-            padding: 12px 15px;
-            border-bottom: 2px solid rgba(255, 140, 0, 0.4);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+    /* HEADER */
+    .header {
+      background: rgba(30, 30, 40, 0.95);
+      padding: 12px 15px;
+      border-bottom: 2px solid rgba(255, 140, 0, 0.4);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
 
-        .logo h1 {
-            font-size: 1.5rem;
-            background: linear-gradient(45deg, #ffd700, #ff8c00);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    .logo h1 {
+      font-size: 1.5rem;
+      background: linear-gradient(45deg, #ffd700, #ff8c00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-        .logo p {
-            font-size: 0.8rem;
-            color: #ccc;
-        }
+    .logo p {
+      font-size: 0.8rem;
+      color: #ccc;
+    }
 
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .header-btn {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
+    .header-btn {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
 
-        .back-btn {
-            background: rgba(52, 152, 219, 0.8);
-            color: white;
-        }
+    .back-btn {
+      background: rgba(52, 152, 219, 0.8);
+      color: white;
+    }
 
-        .back-btn:hover {
-            background: rgba(52, 152, 219, 1);
-        }
+    .back-btn:hover {
+      background: rgba(52, 152, 219, 1);
+    }
 
-        .logout-btn {
-            background: rgba(231, 76, 60, 0.8);
-            color: white;
-        }
+    .logout-btn {
+      background: rgba(231, 76, 60, 0.8);
+      color: white;
+    }
 
-        .logout-btn:hover {
-            background: rgba(231, 76, 60, 1);
-        }
+    .logout-btn:hover {
+      background: rgba(231, 76, 60, 1);
+    }
 
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #ff8c00, #ff4500);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-        }
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #ff8c00, #ff4500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
 
-        /* CONTEÚDO PRINCIPAL */
-        .main-content {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 15px;
-            flex: 1;
-            width: 100%;
-        }
+    /* CONTEÚDO PRINCIPAL */
+    .main-content {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 15px;
+      flex: 1;
+      width: 100%;
+    }
 
-        /* TITULO DA PÁGINA */
-        .page-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(30, 30, 40, 0.7);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 140, 0, 0.2);
-        }
+    /* TITULO DA PÁGINA */
+    .page-header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(30, 30, 40, 0.7);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 140, 0, 0.2);
+    }
 
-        .page-header h1 {
-            color: #ffd700;
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-        }
+    .page-header h1 {
+      color: #ffd700;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
 
-        .page-header p {
-            color: #aaa;
-            font-size: 1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+    .page-header p {
+      color: #aaa;
+      font-size: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
 
-        /* SUB-TABS (Fichas vs Campanhas) */
-        .sub-tabs {
-            display: flex;
-            background: rgba(40, 40, 50, 0.7);
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255, 140, 0, 0.15);
-            overflow-x: auto;
-        }
+    /* SUB-TABS (Fichas vs Campanhas) */
+    .sub-tabs {
+      display: flex;
+      background: rgba(40, 40, 50, 0.7);
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255, 140, 0, 0.15);
+      overflow-x: auto;
+    }
 
-        .sub-tab {
-            padding: 12px 20px;
-            background: none;
-            border: none;
-            color: #aaa;
-            font-weight: 500;
-            cursor: pointer;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            flex: 1;
-            justify-content: center;
-        }
+    .sub-tab {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      color: #aaa;
+      font-weight: 500;
+      cursor: pointer;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      flex: 1;
+      justify-content: center;
+    }
 
-        .sub-tab:last-child {
-            border-right: none;
-        }
+    .sub-tab:last-child {
+      border-right: none;
+    }
 
-        .sub-tab:hover {
-            background: rgba(255, 140, 0, 0.1);
-            color: #ff8c00;
-        }
+    .sub-tab:hover {
+      background: rgba(255, 140, 0, 0.1);
+      color: #ff8c00;
+    }
 
-        .sub-tab.active {
-            background: rgba(255, 140, 0, 0.15);
-            color: #ffd700;
-            border-bottom: 2px solid #ff8c00;
-        }
+    .sub-tab.active {
+      background: rgba(255, 140, 0, 0.15);
+      color: #ffd700;
+      border-bottom: 2px solid #ff8c00;
+    }
 
-        /* CONTEÚDO DAS TABS */
-        .tab-content {
-            display: none;
-            background: rgba(30, 30, 40, 0.7);
-            border-radius: 12px;
-            padding: 25px;
-            border: 1px solid rgba(255, 140, 0, 0.2);
-            margin-bottom: 25px;
-            animation: fadeIn 0.3s ease;
-        }
+    /* CONTEÚDO DAS TABS */
+    .tab-content {
+      display: none;
+      background: rgba(30, 30, 40, 0.7);
+      border-radius: 12px;
+      padding: 25px;
+      border: 1px solid rgba(255, 140, 0, 0.2);
+      margin-bottom: 25px;
+      animation: fadeIn 0.3s ease;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        .tab-content.active {
-            display: block;
-        }
+    .tab-content.active {
+      display: block;
+    }
 
-        /* GRADE DE CAMPANHAS - IGUAL AO MESTRE */
-        .campaigns-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
+    /* GRADE DE CAMPANHAS */
+    .campaigns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
 
-        .campaign-card {
-            background: rgba(40, 40, 50, 0.7);
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
+    .campaign-card {
+      background: rgba(40, 40, 50, 0.7);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid rgba(255, 140, 0, 0.3);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .campaign-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255, 140, 0, 0.5);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
+    .campaign-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 140, 0, 0.5);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
 
-        .campaign-card h3 {
-            color: #ffd700;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-            word-break: break-word;
-        }
+    .campaign-card h3 {
+      color: #ffd700;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      word-break: break-word;
+    }
 
-        .campaign-code {
-            background: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-bottom: 10px;
-            align-self: flex-start;
-        }
+    .campaign-code {
+      background: rgba(52, 152, 219, 0.2);
+      color: #3498db;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-bottom: 10px;
+      align-self: flex-start;
+    }
 
-        /* INFO DA CAMPANHA */
-        .campaign-info {
-            margin-bottom: 15px;
-        }
+    /* BADGE DE STATUS DO PERSONAGEM */
+    .character-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
 
-        .campaign-info p {
-            color: #bbb;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+    .character-status-badge.has-character {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+      border: 1px solid rgba(46, 204, 113, 0.3);
+    }
 
-        .campaign-info i {
-            color: #4ecdc4;
-            width: 16px;
-        }
+    .character-status-badge.no-character {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
 
-        .campaign-meta {
-            display: flex;
-            justify-content: space-between;
-            margin-top: auto;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    /* INFO DA CAMPANHA */
+    .campaign-info {
+      margin-bottom: 15px;
+    }
 
-        .campaign-stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .campaign-info p {
+      color: #bbb;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-        .campaign-stat i {
-            color: #ff8c00;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
+    .campaign-info i {
+      color: #4ecdc4;
+      width: 16px;
+    }
 
-        .campaign-stat span {
-            font-size: 0.8rem;
-            color: #aaa;
-        }
+    .campaign-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        /* BOTÕES */
-        .campaign-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
+    .campaign-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        .btn {
-            padding: 10px 16px;
-            background: linear-gradient(45deg, #ff8c00, #ff4500);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            flex: 1;
-            justify-content: center;
-        }
+    .campaign-stat i {
+      color: #ff8c00;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
-        }
+    .campaign-stat span {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
 
-        .btn:active {
-            transform: translateY(0);
-        }
+    /* BOTÕES */
+    .campaign-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ccc;
-        }
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      flex: 1;
+      justify-content: center;
+    }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
 
-        .btn-info {
-            background: rgba(52, 152, 219, 0.8);
-        }
+    .btn:active {
+      transform: translateY(0);
+    }
 
-        .btn-info:hover {
-            background: rgba(52, 152, 219, 1);
-        }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ccc;
+    }
 
-        /* ESTADO VAZIO */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #888;
-        }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
 
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: rgba(255, 140, 0, 0.3);
-        }
+    .btn-info {
+      background: rgba(52, 152, 219, 0.8);
+    }
 
-        .empty-state h3 {
-            color: #aaa;
-            margin-bottom: 10px;
-            font-size: 1.3rem;
-        }
+    .btn-info:hover {
+      background: rgba(52, 152, 219, 1);
+    }
 
-        .empty-state p {
-            color: #777;
-            margin-bottom: 20px;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    .btn-vincular {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+    }
 
-        /* MENSAGENS */
-        .message {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
+    .btn-vincular:hover {
+      background: linear-gradient(45deg, #2980b9, #3498db);
+    }
 
-        .message.success {
-            background: rgba(46, 204, 113, 0.2);
-            border: 1px solid rgba(46, 204, 113, 0.3);
-            color: #2ecc71;
-            display: block;
-        }
+    .btn-entrar {
+      background: linear-gradient(45deg, #27ae60, #229954);
+    }
 
-        .message.error {
-            background: rgba(231, 76, 60, 0.2);
-            border: 1px solid rgba(231, 76, 60, 0.3);
-            color: #e74c3c;
-            display: block;
-        }
+    .btn-entrar:hover {
+      background: linear-gradient(45deg, #229954, #27ae60);
+    }
 
-        /* LOADING */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #ff8c00;
-            animation: spin 1s ease-in-out infinite;
-        }
+    /* ESTADO VAZIO */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #888;
+    }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: rgba(255, 140, 0, 0.3);
+    }
 
-        /* BADGE DE STATUS */
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
+    .empty-state h3 {
+      color: #aaa;
+      margin-bottom: 10px;
+      font-size: 1.3rem;
+    }
 
-        .status-active {
-            background: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
-        }
+    .empty-state p {
+      color: #777;
+      margin-bottom: 20px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
-        .status-preparation {
-            background: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-        }
+    /* MENSAGENS */
+    .message {
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
 
-        .status-paused {
-            background: rgba(241, 196, 15, 0.2);
-            color: #f1c40f;
-        }
+    .message.success {
+      background: rgba(46, 204, 113, 0.2);
+      border: 1px solid rgba(46, 204, 113, 0.3);
+      color: #2ecc71;
+      display: block;
+    }
 
-        /* FOOTER */
-        .footer {
-            background: rgba(20, 20, 30, 0.9);
-            padding: 12px 0;
-            text-align: center;
-            margin-top: auto;
-            border-top: 1px solid rgba(255, 140, 0, 0.2);
-        }
+    .message.error {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      color: #e74c3c;
+      display: block;
+    }
 
-        .footer p {
-            color: #888;
-            font-size: 0.8rem;
-        }
+    /* LOADING */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #ff8c00;
+      animation: spin 1s ease-in-out infinite;
+    }
 
-        /* RESPONSIVIDADE */
-        @media (max-width: 768px) {
-            html {
-                font-size: 15px;
-            }
-            
-            .campaigns-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .sub-tab {
-                padding: 10px 12px;
-                font-size: 0.85rem;
-            }
-        }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
 
-        @media (max-width: 480px) {
-            html {
-                font-size: 14px;
-            }
-            
-            .header {
-                padding: 10px;
-            }
-            
-            .logo h1 {
-                font-size: 1.2rem;
-            }
-            
-            .user-avatar {
-                width: 32px;
-                height: 32px;
-                font-size: 0.8rem;
-            }
-            
-            .page-header h1 {
-                font-size: 1.3rem;
-            }
-            
-            .campaign-actions {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-        }
-    </style>
+    /* BADGE DE STATUS */
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .status-active {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+    }
+
+    .status-preparation {
+      background: rgba(52, 152, 219, 0.2);
+      color: #3498db;
+    }
+
+    .status-paused {
+      background: rgba(241, 196, 15, 0.2);
+      color: #f1c40f;
+    }
+
+    /* MODAL DE PERSONAGEM */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .personagem-modal {
+      background: rgba(30, 30, 40, 0.95);
+      border-radius: 15px;
+      padding: 25px;
+      width: 100%;
+      max-width: 600px;
+      border: 2px solid rgba(255, 140, 0, 0.3);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .modal-header h3 {
+      color: #ffd700;
+      font-size: 1.4rem;
+      margin-bottom: 5px;
+    }
+
+    .modal-header p {
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    .personagens-lista-modal {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px 0 25px;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+
+    .personagem-opcao {
+      background: rgba(40, 40, 50, 0.7);
+      border: 1px solid rgba(255, 140, 0, 0.2);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .personagem-opcao:hover {
+      background: rgba(255, 140, 0, 0.1);
+      border-color: rgba(255, 140, 0, 0.4);
+    }
+
+    .personagem-opcao.selected {
+      background: rgba(46, 204, 113, 0.15);
+      border-color: rgba(46, 204, 113, 0.5);
+    }
+
+    .personagem-foto-modal {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 140, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .foto-placeholder-modal {
+      width: 100%;
+      height: 100%;
+      background: rgba(20, 20, 30, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff8c00;
+    }
+
+    .personagem-info-modal {
+      flex: 1;
+    }
+
+    .personagem-nome-modal {
+      color: #ffd700;
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 1rem;
+    }
+
+    .personagem-detalhes-modal {
+      color: #aaa;
+      font-size: 0.85rem;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .personagem-detalhes-modal span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      padding: 10px;
+    }
+
+    .btn-modal-vincular {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+    }
+
+    .btn-modal-cancelar {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ccc;
+    }
+
+    .btn-modal-criar {
+      background: linear-gradient(45deg, #ff8c00, #ff4500);
+    }
+
+    .loading-modal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: #888;
+    }
+
+    .loading-spinner-modal {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #ff8c00;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 15px;
+    }
+
+    .empty-personagens {
+      text-align: center;
+      padding: 30px 20px;
+      color: #888;
+      border: 2px dashed rgba(255, 140, 0, 0.2);
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+
+    .empty-personagens i {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      color: rgba(255, 140, 0, 0.3);
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #27ae60;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      z-index: 3000;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .toast.error {
+      background: #e74c3c;
+    }
+
+    .toast.info {
+      background: #3498db;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* FOOTER */
+    .footer {
+      background: rgba(20, 20, 30, 0.9);
+      padding: 12px 0;
+      text-align: center;
+      margin-top: auto;
+      border-top: 1px solid rgba(255, 140, 0, 0.2);
+    }
+
+    .footer p {
+      color: #888;
+      font-size: 0.8rem;
+    }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 768px) {
+      html {
+        font-size: 15px;
+      }
+      
+      .campaigns-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .sub-tab {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+      }
+      
+      .personagem-modal {
+        padding: 20px;
+        max-height: 85vh;
+      }
+      
+      .modal-actions {
+        flex-direction: column;
+      }
+      
+      .campaign-actions {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 480px) {
+      html {
+        font-size: 14px;
+      }
+      
+      .header {
+        padding: 10px;
+      }
+      
+      .logo h1 {
+        font-size: 1.2rem;
+      }
+      
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+      }
+      
+      .page-header h1 {
+        font-size: 1.3rem;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+      
+      .personagem-opcao {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+      
+      .personagem-foto-modal {
+        width: 70px;
+        height: 70px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- HEADER -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <h1>RPG SYSTEM GURPS</h1>
-                <p>Campanhas como Jogador</p>
-            </div>
-            <div class="user-menu">
-                <button class="header-btn back-btn" id="backBtn" aria-label="Voltar">
-                    <i class="fas fa-arrow-left"></i>
-                    <span class="text">Voltar</span>
-                </button>
-                <button class="header-btn logout-btn" id="logoutBtn" aria-label="Sair">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span class="text">Sair</span>
-                </button>
-                <div class="user-avatar" id="userAvatar" aria-label="Avatar do usuário">
-                    <i class="fas fa-user"></i>
-                </div>
-            </div>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <h1>RPG SYSTEM GURPS</h1>
+        <p>Campanhas como Jogador</p>
+      </div>
+      <div class="user-menu">
+        <button class="header-btn back-btn" id="backBtn" aria-label="Voltar">
+          <i class="fas fa-arrow-left"></i>
+          <span class="text">Voltar</span>
+        </button>
+        <button class="header-btn logout-btn" id="logoutBtn" aria-label="Sair">
+          <i class="fas fa-sign-out-alt"></i>
+          <span class="text">Sair</span>
+        </button>
+        <div class="user-avatar" id="userAvatar" aria-label="Avatar do usuário">
+          <i class="fas fa-user"></i>
         </div>
-    </header>
+      </div>
+    </div>
+  </header>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="main-content">
-        <!-- CABEÇALHO DA PÁGINA -->
-        <div class="page-header">
-            <h1>Minhas Campanhas como Jogador</h1>
-            <p>Campanhas GURPS onde você está participando como jogador. Gerencie suas fichas e acesse as salas de campanha.</p>
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="main-content">
+    <!-- CABEÇALHO DA PÁGINA -->
+    <div class="page-header">
+      <h1>Minhas Campanhas como Jogador</h1>
+      <p>Campanhas GURPS onde você está participando como jogador. Vincule seu personagem para entrar na campanha.</p>
+    </div>
+
+    <!-- SUB-TABS -->
+    <div class="sub-tabs">
+      <button class="sub-tab active" id="tab-campaigns" data-tab="campaigns">
+        <i class="fas fa-book"></i> Minhas Campanhas
+      </button>
+      <button class="sub-tab" id="tab-sheets" data-tab="sheets">
+        <i class="fas fa-scroll"></i> Fichas
+      </button>
+    </div>
+
+    <!-- CONTEÚDO: CAMPANHAS -->
+    <div class="tab-content active" id="campaigns-content">
+      <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="color: #ffd700;">Suas Campanhas</h3>
+        <button class="btn btn-secondary btn-small" id="refreshCampaigns" title="Atualizar lista">
+          <i class="fas fa-sync-alt"></i> Atualizar
+        </button>
+      </div>
+
+      <div id="campaigns-list">
+        <div style="text-align: center; padding: 40px;">
+          <div class="loading" style="margin: 0 auto 20px; width: 40px; height: 40px;"></div>
+          <p style="color: #888;">Carregando suas campanhas...</p>
         </div>
+      </div>
+    </div>
 
-        <!-- SUB-TABS -->
-        <div class="sub-tabs">
-            <button class="sub-tab active" id="tab-campaigns" data-tab="campaigns">
-                <i class="fas fa-book"></i> Minhas Campanhas
-            </button>
-            <button class="sub-tab" id="tab-sheets" data-tab="sheets">
-                <i class="fas fa-scroll"></i> Fichas
-            </button>
+    <!-- CONTEÚDO: FICHAS -->
+    <div class="tab-content" id="sheets-content">
+      <div class="empty-state">
+        <i class="fas fa-scroll"></i>
+        <h3>Fichas de Personagem</h3>
+        <p>Gerencie suas fichas de personagem para as campanhas GURPS.</p>
+        <p style="color: #ff8c00; margin-top: 20px;"><i class="fas fa-tools"></i> Em desenvolvimento</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL DE PERSONAGEM -->
+  <div class="modal-overlay" id="personagemModal" role="dialog" aria-labelledby="personagemModalTitle" aria-hidden="true">
+    <div class="personagem-modal">
+      <div class="modal-header">
+        <h3 id="personagemModalTitle">Vincular Personagem à Campanha</h3>
+        <p id="personagemModalSubtitle">Escolha um personagem para participar desta campanha</p>
+      </div>
+      
+      <div id="personagemModalContent">
+        <div class="loading-modal" id="modalLoading">
+          <div class="loading-spinner-modal"></div>
+          <p>Carregando seus personagens...</p>
         </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn btn-modal-cancelar" id="cancelarModalPersonagem">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-modal-criar" id="criarNovoPersonagemModal">
+          <i class="fas fa-plus-circle"></i> Criar Novo
+        </button>
+        <button type="button" class="btn btn-modal-vincular" id="vincularPersonagemBtn" disabled>
+          <i class="fas fa-link"></i> Vincular Personagem
+        </button>
+      </div>
+    </div>
+  </div>
 
-        <!-- CONTEÚDO: CAMPANHAS -->
-        <div class="tab-content active" id="campaigns-content">
-            <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="color: #ffd700;">Suas Campanhas</h3>
-                <button class="btn btn-secondary btn-small" id="refreshCampaigns" title="Atualizar lista">
-                    <i class="fas fa-sync-alt"></i> Atualizar
-                </button>
-            </div>
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>RPG System GURPS &copy; 2024</p>
+  </footer>
 
-            <div id="campaigns-list">
-                <div style="text-align: center; padding: 40px;">
-                    <div class="loading" style="margin: 0 auto 20px; width: 40px; height: 40px;"></div>
-                    <p style="color: #888;">Carregando suas campanhas...</p>
-                </div>
-            </div>
-        </div>
+    <script>
+    // ============================================
+    // CAMPANHAS DO JOGADOR - VERSÃO COMPLETA
+    // ============================================
 
-        <!-- CONTEÚDO: FICHAS -->
-        <div class="tab-content" id="sheets-content">
-            <div class="empty-state">
-                <i class="fas fa-scroll"></i>
-                <h3>Fichas de Personagem</h3>
-                <p>Gerencie suas fichas de personagem para as campanhas GURPS.</p>
-                <p style="color: #ff8c00; margin-top: 20px;"><i class="fas fa-tools"></i> Em desenvolvimento</p>
-            </div>
-        </div>
-    </main>
+    const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <p>RPG System GURPS &copy; 2024</p>
-    </footer>
+    // Estado global
+    let currentUser = null;
+    let selectedCampaignId = null;
+    let selectedCharacterId = null;
 
-        <script>
-       // ============================================
-// CAMPANHAS DO JOGADOR - VERSÃO FUNCIONAL
-// ============================================
+    // ============================================
+    // INICIALIZAÇÃO
+    // ============================================
 
-const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    document.addEventListener('DOMContentLoaded', async function() {
+      await initPlayerCampaigns();
+    });
 
-let currentUser = null;
-
-// ============================================
-// INICIALIZAÇÃO
-// ============================================
-
-document.addEventListener('DOMContentLoaded', async function() {
-    await initPlayerCampaigns();
-});
-
-async function initPlayerCampaigns() {
-    try {
+    async function initPlayerCampaigns() {
+      try {
         // 1. Verificar autenticação
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-            window.location.href = 'login.html';
-            return;
+          window.location.href = 'login.html';
+          return;
         }
         currentUser = session.user;
         console.log('👤 Usuário autenticado:', currentUser.id);
@@ -612,328 +922,639 @@ async function initPlayerCampaigns() {
         // 5. Carregar campanhas
         await loadPlayerCampaigns();
         
-    } catch (error) {
+      } catch (error) {
         console.error('Erro ao iniciar:', error);
-        showMessage('Erro ao carregar. Recarregue a página.', 'error');
+        showToast('Erro ao carregar. Recarregue a página.', 'error');
+      }
     }
-}
 
-async function loadUserData() {
-    const { data: profile } = await supabase
+    async function loadUserData() {
+      const { data: profile } = await supabase
         .from('profiles')
         .select('username, player_id')
         .eq('id', currentUser.id)
         .single();
 
-    if (profile) {
+      if (profile) {
         const initials = profile.username?.charAt(0).toUpperCase() || 'J';
         document.getElementById('userAvatar').innerHTML = initials;
-        console.log('📝 Perfil carregado:', profile.username || 'Sem nome');
+      }
     }
-}
 
-// ============================================
-// EVENT LISTENERS
-// ============================================
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
 
-function setupEventListeners() {
-    document.getElementById('backBtn').addEventListener('click', () => {
+    function setupEventListeners() {
+      // Botões do header
+      document.getElementById('backBtn').addEventListener('click', () => {
         window.location.href = 'campanhas.html';
-    });
-    
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      });
+      
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
         if (!confirm('Tem certeza que deseja sair?')) return;
         await supabase.auth.signOut();
         window.location.href = 'login.html';
-    });
-    
-    document.getElementById('refreshCampaigns').addEventListener('click', async () => {
+      });
+      
+      // Botão refresh
+      document.getElementById('refreshCampaigns').addEventListener('click', async () => {
         await loadPlayerCampaigns();
-    });
-}
+      });
+      
+      // Modal de personagens
+      document.getElementById('cancelarModalPersonagem').addEventListener('click', closePersonagemModal);
+      document.getElementById('criarNovoPersonagemModal').addEventListener('click', criarNovoPersonagem);
+      document.getElementById('vincularPersonagemBtn').addEventListener('click', vincularPersonagem);
+      
+      // Fechar modal ao clicar fora
+      document.getElementById('personagemModal').addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+          closePersonagemModal();
+        }
+      });
+      
+      // Fechar modal com ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closePersonagemModal();
+        }
+      });
+    }
 
-// ============================================
-// TABS
-// ============================================
+    // ============================================
+    // TABS
+    // ============================================
 
-function setupTabs() {
-    document.querySelectorAll('.sub-tab').forEach(tab => {
+    function setupTabs() {
+      document.querySelectorAll('.sub-tab').forEach(tab => {
         tab.addEventListener('click', () => {
-            const tabId = tab.getAttribute('data-tab');
-            
-            document.querySelectorAll('.sub-tab').forEach(t => {
-                t.classList.remove('active');
-            });
-            tab.classList.add('active');
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-                if (content.id === `${tabId}-content`) {
-                    content.classList.add('active');
-                }
-            });
-            
-            if (tabId === 'campaigns') {
-                loadPlayerCampaigns();
+          const tabId = tab.getAttribute('data-tab');
+          
+          document.querySelectorAll('.sub-tab').forEach(t => {
+            t.classList.remove('active');
+          });
+          tab.classList.add('active');
+          
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+            if (content.id === `${tabId}-content`) {
+              content.classList.add('active');
             }
+          });
+          
+          if (tabId === 'campaigns') {
+            loadPlayerCampaigns();
+          }
         });
-    });
-}
+      });
+    }
 
-// ============================================
-// CARREGAR CAMPANHAS DO JOGADOR (USANDO NOVA SQL)
-// ============================================
+    // ============================================
+    // CARREGAR CAMPANHAS DO JOGADOR
+    // ============================================
 
-async function loadPlayerCampaigns() {
-    const container = document.getElementById('campaigns-list');
-    if (!container) return;
-    
-    // Mostrar loading
-    container.innerHTML = `
+    async function loadPlayerCampaigns() {
+      const container = document.getElementById('campaigns-list');
+      if (!container) return;
+      
+      // Mostrar loading
+      container.innerHTML = `
         <div style="text-align: center; padding: 40px;">
-            <div class="loading" style="margin: 0 auto 20px; width: 40px; height: 40px;"></div>
-            <p style="color: #888;">Carregando suas campanhas...</p>
+          <div class="loading" style="margin: 0 auto 20px; width: 40px; height: 40px;"></div>
+          <p style="color: #888;">Carregando suas campanhas...</p>
         </div>
-    `;
-    
-    try {
+      `;
+      
+      try {
         console.log('🔄 Buscando campanhas do jogador...');
         
-        // USAR A NOVA FUNÇÃO SQL get_player_active_campaigns
+        // USAR A FUNÇÃO SQL get_player_active_campaigns
         const { data: campaigns, error } = await supabase
-            .rpc('get_player_active_campaigns', {
-                p_user_id: currentUser.id
-            });
+          .rpc('get_player_active_campaigns', {
+            p_user_id: currentUser.id
+          });
         
         if (error) {
-            console.error('Erro na função SQL:', error);
-            
-            // Tentar método alternativo
-            return await loadPlayerCampaignsFallback();
+          console.error('Erro na função SQL:', error);
+          return await loadPlayerCampaignsFallback();
         }
         
         console.log('📊 Campanhas encontradas:', campaigns?.length || 0);
         
         if (!campaigns || campaigns.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <h3>Nenhuma campanha encontrada</h3>
-                    <p>Você não está participando de nenhuma campanha como jogador.</p>
-                    <div style="margin-top: 20px; color: #777; font-size: 0.9rem;">
-                        <p><i class="fas fa-info-circle"></i> Você pode:</p>
-                        <ul style="text-align: left; margin: 10px 20px;">
-                            <li>Aceitar convites de mestres</li>
-                            <li>Pedir para um mestre te convidar</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-            return;
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-users"></i>
+              <h3>Nenhuma campanha encontrada</h3>
+              <p>Você não está participando de nenhuma campanha como jogador.</p>
+              <div style="margin-top: 20px; color: #777; font-size: 0.9rem;">
+                <p><i class="fas fa-info-circle"></i> Você pode:</p>
+                <ul style="text-align: left; margin: 10px 20px;">
+                  <li>Aceitar convites de mestres</li>
+                  <li>Pedir para um mestre te convidar</li>
+                </ul>
+              </div>
+            </div>
+          `;
+          return;
         }
         
+        // Para cada campanha, verificar se tem personagem vinculado
+        const campanhasComInfo = await Promise.all(
+          campaigns.map(async (campaign) => {
+            const hasCharacter = await verificarPersonagemVinculado(campaign.campaign_uuid);
+            return {
+              ...campaign,
+              has_character: hasCharacter
+            };
+          })
+        );
+        
         // Renderizar campanhas
-        renderCampaigns(campaigns, container);
+        renderCampaigns(campanhasComInfo, container);
         
-        showMessage(`✅ ${campaigns.length} campanha${campaigns.length !== 1 ? 's' : ''} carregada${campaigns.length !== 1 ? 's' : ''}`, 'success');
+        showToast(`✅ ${campaigns.length} campanha${campaigns.length !== 1 ? 's' : ''} carregada${campaigns.length !== 1 ? 's' : ''}`, 'success');
         
-    } catch (error) {
+      } catch (error) {
         console.error('Erro ao carregar campanhas:', error);
         container.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Erro ao carregar</h3>
-                <p>${error.message || 'Tente novamente mais tarde.'}</p>
-                <button class="btn" onclick="loadPlayerCampaigns()" style="margin-top: 20px;">
-                    <i class="fas fa-redo"></i> Tentar Novamente
-                </button>
-            </div>
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Erro ao carregar</h3>
+            <p>${error.message || 'Tente novamente mais tarde.'}</p>
+            <button class="btn" onclick="loadPlayerCampaigns()" style="margin-top: 20px;">
+              <i class="fas fa-redo"></i> Tentar Novamente
+            </button>
+          </div>
         `;
+      }
     }
-}
 
-// Método alternativo (fallback)
-async function loadPlayerCampaignsFallback() {
-    const container = document.getElementById('campaigns-list');
-    
-    try {
-        // Método direto com joins
+    // Verificar se tem personagem vinculado à campanha
+    async function verificarPersonagemVinculado(campaignId) {
+      try {
+        const { data, error } = await supabase
+          .from('campaign_characters')
+          .select('character_id')
+          .eq('campaign_id', campaignId)
+          .eq('user_id', currentUser.id)
+          .single();
+        
+        if (error) {
+          if (error.code === 'PGRST116') { // Nenhum resultado encontrado
+            return false;
+          }
+          throw error;
+        }
+        
+        return !!data; // Retorna true se encontrou vínculo
+      } catch (error) {
+        console.error('Erro ao verificar personagem vinculado:', error);
+        return false;
+      }
+    }
+
+    // Método alternativo (fallback)
+    async function loadPlayerCampaignsFallback() {
+      const container = document.getElementById('campaigns-list');
+      
+      try {
         const { data: memberships, error } = await supabase
-            .from('campaign_players')
-            .select(`
-                campaign_id,
-                joined_at,
-                role,
-                campaigns (
-                    id,
-                    campaign_id,
-                    name,
-                    description,
-                    setting,
-                    starting_points,
-                    status,
-                    gm_id
-                )
-            `)
-            .eq('user_id', currentUser.id)
-            .eq('status', 'active')
-            .order('joined_at', { ascending: false });
+          .from('campaign_players')
+          .select(`
+            campaign_id,
+            joined_at,
+            role,
+            campaigns (
+              id,
+              campaign_id,
+              name,
+              description,
+              setting,
+              starting_points,
+              status,
+              gm_id
+            )
+          `)
+          .eq('user_id', currentUser.id)
+          .eq('status', 'active')
+          .order('joined_at', { ascending: false });
         
         if (error) throw error;
         
         if (!memberships || memberships.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <h3>Nenhuma campanha</h3>
-                    <p>Você não está em nenhuma campanha.</p>
-                </div>
-            `;
-            return;
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-users"></i>
+              <h3>Nenhuma campanha</h3>
+              <p>Você não está em nenhuma campanha.</p>
+            </div>
+          `;
+          return;
         }
         
-        // Processar dados manualmente
         const campaignsWithDetails = await Promise.all(
-            memberships.map(async (membership) => {
-                if (!membership.campaigns) return null;
-                
-                const campaign = membership.campaigns;
-                
-                // Buscar nome do GM
-                const { data: gmProfile } = await supabase
-                    .from('profiles')
-                    .select('username')
-                    .eq('id', campaign.gm_id)
-                    .single();
-                
-                // Contar jogadores
-                const { count: playerCount } = await supabase
-                    .from('campaign_players')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('campaign_id', campaign.id)
-                    .eq('status', 'active');
-                
-                return {
-                    campaign_uuid: campaign.id,
-                    campaign_name: campaign.name,
-                    campaign_code: campaign.campaign_id,
-                    description: campaign.description,
-                    setting: campaign.setting,
-                    starting_points: campaign.starting_points || 100,
-                    status: campaign.status,
-                    gm_username: gmProfile?.username || 'Mestre',
-                    player_count: playerCount || 0,
-                    joined_at: membership.joined_at,
-                    role: membership.role
-                };
-            })
+          memberships.map(async (membership) => {
+            if (!membership.campaigns) return null;
+            
+            const campaign = membership.campaigns;
+            
+            const { data: gmProfile } = await supabase
+              .from('profiles')
+              .select('username')
+              .eq('id', campaign.gm_id)
+              .single();
+            
+            const { count: playerCount } = await supabase
+              .from('campaign_players')
+              .select('*', { count: 'exact', head: true })
+              .eq('campaign_id', campaign.id)
+              .eq('status', 'active');
+            
+            // Verificar personagem vinculado
+            const hasCharacter = await verificarPersonagemVinculado(campaign.id);
+            
+            return {
+              campaign_uuid: campaign.id,
+              campaign_name: campaign.name,
+              campaign_code: campaign.campaign_id,
+              description: campaign.description,
+              setting: campaign.setting,
+              starting_points: campaign.starting_points || 100,
+              status: campaign.status,
+              gm_username: gmProfile?.username || 'Mestre',
+              player_count: playerCount || 0,
+              joined_at: membership.joined_at,
+              role: membership.role,
+              has_character: hasCharacter
+            };
+          })
         );
         
-        // Filtrar nulos
         const validCampaigns = campaignsWithDetails.filter(c => c !== null);
         
         if (validCampaigns.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <h3>Nenhuma campanha válida</h3>
-                    <p>Não foi possível carregar os dados das campanhas.</p>
-                </div>
-            `;
-            return;
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-users"></i>
+              <h3>Nenhuma campanha válida</h3>
+              <p>Não foi possível carregar os dados das campanhas.</p>
+            </div>
+          `;
+          return;
         }
         
         renderCampaigns(validCampaigns, container);
         
-    } catch (error) {
+      } catch (error) {
         console.error('Erro no fallback:', error);
         container.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Erro no sistema</h3>
-                <p>Contate o administrador.</p>
-            </div>
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Erro no sistema</h3>
+            <p>Contate o administrador.</p>
+          </div>
         `;
+      }
     }
-}
 
-// ============================================
-// RENDERIZAR CAMPANHAS
-// ============================================
+    // ============================================
+    // RENDERIZAR CAMPANHAS COM VÍNCULO
+    // ============================================
 
-function renderCampaigns(campaigns, container) {
-    container.innerHTML = `
+    function renderCampaigns(campaigns, container) {
+      container.innerHTML = `
         <div class="campaigns-grid">
-            ${campaigns.map(campaign => `
-                <div class="campaign-card" data-campaign-id="${campaign.campaign_uuid}">
-                    <h3>${escapeHtml(campaign.campaign_name)}</h3>
-                    <div class="campaign-code">
-                        <i class="fas fa-hashtag"></i> Código: ${escapeHtml(campaign.campaign_code)}
-                    </div>
-                    
-                    ${campaign.description ? `
-                        <div class="campaign-info">
-                            <p><i class="fas fa-file-alt"></i> ${escapeHtml(truncateText(campaign.description, 100))}</p>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="campaign-info">
-                        <p><i class="fas fa-globe-americas"></i> <strong>Cenário:</strong> ${escapeHtml(campaign.setting || 'Não definido')}</p>
-                        <p><i class="fas fa-crown"></i> <strong>Mestre:</strong> ${escapeHtml(campaign.gm_username || 'Mestre')}</p>
-                        <p><i class="fas fa-star"></i> <strong>Pontos Iniciais:</strong> ${campaign.starting_points || 100} pts</p>
-                    </div>
-                    
-                    <div style="margin: 10px 0;">
-                        <span class="status-badge ${getStatusClass(campaign.status)}">
-                            ${getStatusText(campaign.status)}
-                        </span>
-                        <span style="color: #aaa; font-size: 0.8rem; margin-left: 10px;">
-                            <i class="fas fa-user-friends"></i> ${campaign.player_count} jogador${campaign.player_count !== 1 ? 'es' : ''}
-                        </span>
-                    </div>
-                    
-                    <div class="campaign-meta">
-                        <div class="campaign-stat">
-                            <i class="fas fa-sign-in-alt"></i>
-                            <span>${formatDate(campaign.joined_at)}</span>
-                        </div>
-                        <div class="campaign-stat">
-                            <i class="fas fa-user-tag"></i>
-                            <span>${campaign.role === 'co-gm' ? 'Co-Mestre' : 'Jogador'}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="campaign-actions">
-                        <button class="btn" onclick="enterCampaign('${campaign.campaign_uuid}')">
-                            <i class="fas fa-door-open"></i> Entrar na Campanha
-                        </button>
-                    </div>
+          ${campaigns.map(campaign => `
+            <div class="campaign-card" data-campaign-id="${campaign.campaign_uuid}">
+              <h3>${escapeHtml(campaign.campaign_name)}</h3>
+              <div class="campaign-code">
+                <i class="fas fa-hashtag"></i> Código: ${escapeHtml(campaign.campaign_code)}
+              </div>
+              
+              <!-- Badge de status do personagem -->
+              <div class="character-status-badge ${campaign.has_character ? 'has-character' : 'no-character'}">
+                <i class="fas fa-${campaign.has_character ? 'check-circle' : 'exclamation-triangle'}"></i>
+                ${campaign.has_character ? 'Personagem Vinculado' : 'Sem Personagem'}
+              </div>
+              
+              ${campaign.description ? `
+                <div class="campaign-info">
+                  <p><i class="fas fa-file-alt"></i> ${escapeHtml(truncateText(campaign.description, 100))}</p>
                 </div>
-            `).join('')}
+              ` : ''}
+              
+              <div class="campaign-info">
+                <p><i class="fas fa-globe-americas"></i> <strong>Cenário:</strong> ${escapeHtml(campaign.setting || 'Não definido')}</p>
+                <p><i class="fas fa-crown"></i> <strong>Mestre:</strong> ${escapeHtml(campaign.gm_username || 'Mestre')}</p>
+                <p><i class="fas fa-star"></i> <strong>Pontos:</strong> ${campaign.starting_points || 100} pts</p>
+              </div>
+              
+              <div style="margin: 10px 0;">
+                <span class="status-badge ${getStatusClass(campaign.status)}">
+                  ${getStatusText(campaign.status)}
+                </span>
+                <span style="color: #aaa; font-size: 0.8rem; margin-left: 10px;">
+                  <i class="fas fa-user-friends"></i> ${campaign.player_count} jogador${campaign.player_count !== 1 ? 'es' : ''}
+                </span>
+              </div>
+              
+              <div class="campaign-meta">
+                <div class="campaign-stat">
+                  <i class="fas fa-sign-in-alt"></i>
+                  <span>${formatDate(campaign.joined_at)}</span>
+                </div>
+                <div class="campaign-stat">
+                  <i class="fas fa-user-tag"></i>
+                  <span>${campaign.role === 'co-gm' ? 'Co-Mestre' : 'Jogador'}</span>
+                </div>
+              </div>
+              
+              <!-- AÇÕES DA CAMPANHA -->
+              <div class="campaign-actions">
+                ${campaign.has_character ? `
+                  <button class="btn btn-entrar" onclick="entrarCampanha('${campaign.campaign_uuid}')">
+                    <i class="fas fa-door-open"></i> Entrar na Campanha
+                  </button>
+                ` : `
+                  <button class="btn btn-vincular" onclick="openPersonagemModal('${campaign.campaign_uuid}', '${escapeHtml(campaign.campaign_name)}')">
+                    <i class="fas fa-user-plus"></i> Vincular Personagem
+                  </button>
+                `}
+              </div>
+            </div>
+          `).join('')}
         </div>
-    `;
-}
+      `;
+    }
 
-// ============================================
-// FUNÇÕES UTILITÁRIAS
-// ============================================
+    // ============================================
+    // SISTEMA DE VÍNCULO DE PERSONAGEM
+    // ============================================
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+    async function openPersonagemModal(campaignId, campaignName) {
+      selectedCampaignId = campaignId;
+      selectedCharacterId = null;
+      
+      const modal = document.getElementById('personagemModal');
+      const title = document.getElementById('personagemModalTitle');
+      const subtitle = document.getElementById('personagemModalSubtitle');
+      const content = document.getElementById('personagemModalContent');
+      const vincularBtn = document.getElementById('vincularPersonagemBtn');
+      
+      // Atualizar título
+      title.textContent = `Vincular Personagem`;
+      subtitle.textContent = `Escolha um personagem para: ${campaignName}`;
+      
+      // Mostrar loading
+      content.innerHTML = `
+        <div class="loading-modal">
+          <div class="loading-spinner-modal"></div>
+          <p>Carregando seus personagens...</p>
+        </div>
+      `;
+      
+      // Desabilitar botão de vincular
+      vincularBtn.disabled = true;
+      vincularBtn.innerHTML = '<i class="fas fa-link"></i> Vincular Personagem';
+      
+      // Mostrar modal
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      try {
+        // Buscar personagens do usuário
+        const { data: personagens, error } = await supabase
+          .from('characters')
+          .select('id, nome, classe, raca, nivel, avatar_url, pontos_gastos, pontos_totais, status')
+          .eq('user_id', currentUser.id)
+          .eq('status', 'Ativo')
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        // Verificar se algum já está vinculado a esta campanha
+        const { data: vinculado } = await supabase
+          .from('campaign_characters')
+          .select('character_id')
+          .eq('campaign_id', campaignId)
+          .eq('user_id', currentUser.id)
+          .single();
+        
+        if (vinculado) {
+          selectedCharacterId = vinculado.character_id;
+        }
+        
+        if (!personagens || personagens.length === 0) {
+          content.innerHTML = `
+            <div class="empty-personagens">
+              <i class="fas fa-user-circle"></i>
+              <h4>Nenhum personagem encontrado</h4>
+              <p>Você precisa criar um personagem antes de entrar na campanha.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Renderizar lista de personagens
+        let html = `
+          <div style="margin-bottom: 15px;">
+            <p style="color: #ccc; font-size: 0.9rem;">Selecione um personagem para vincular:</p>
+          </div>
+          <div class="personagens-lista-modal">
+        `;
+        
+        personagens.forEach(personagem => {
+          const isSelected = personagem.id === selectedCharacterId;
+          const pontosInfo = `${personagem.pontos_gastos || 0}/${personagem.pontos_totais || 150} pts`;
+          
+          html += `
+            <div class="personagem-opcao ${isSelected ? 'selected' : ''}" 
+                 onclick="selectPersonagemModal('${personagem.id}')"
+                 data-character-id="${personagem.id}">
+              
+              <!-- Foto -->
+              <div class="personagem-foto-modal">
+                ${personagem.avatar_url ? 
+                  `<img src="${personagem.avatar_url}" alt="${personagem.nome}" style="width: 100%; height: 100%; object-fit: cover;">` :
+                  `<div class="foto-placeholder-modal">
+                    <i class="fas fa-user"></i>
+                  </div>`
+                }
+              </div>
+              
+              <!-- Informações -->
+              <div class="personagem-info-modal">
+                <div class="personagem-nome-modal">
+                  ${escapeHtml(personagem.nome || 'Sem nome')}
+                  ${isSelected ? '<span style="color: #2ecc71; font-size: 0.8rem;">(Vinculado)</span>' : ''}
+                </div>
+                <div class="personagem-detalhes-modal">
+                  <span>
+                    <i class="fas fa-shield-alt"></i>
+                    ${escapeHtml(personagem.classe || 'Sem classe')}
+                  </span>
+                  <span>
+                    <i class="fas fa-dna"></i>
+                    ${escapeHtml(personagem.raca || 'Sem raça')}
+                  </span>
+                  <span>
+                    <i class="fas fa-chart-line"></i>
+                    ${pontosInfo}
+                  </span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += '</div>';
+        content.innerHTML = html;
+        
+        // Se já tem personagem selecionado, habilitar botão
+        if (selectedCharacterId) {
+          vincularBtn.disabled = false;
+          vincularBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Alterar Personagem';
+        }
+        
+      } catch (error) {
+        console.error('Erro ao carregar personagens:', error);
+        content.innerHTML = `
+          <div class="empty-personagens">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h4>Erro ao carregar personagens</h4>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
 
-function truncateText(text, maxLength) {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-}
+    // Selecionar personagem no modal
+    function selectPersonagemModal(characterId) {
+      selectedCharacterId = characterId;
+      
+      // Remover seleção anterior
+      document.querySelectorAll('.personagem-opcao').forEach(option => {
+        option.classList.remove('selected');
+      });
+      
+      // Adicionar seleção nova
+      const selectedOption = document.querySelector(`.personagem-opcao[data-character-id="${characterId}"]`);
+      if (selectedOption) {
+        selectedOption.classList.add('selected');
+      }
+      
+      // Habilitar botão de vincular
+      const vincularBtn = document.getElementById('vincularPersonagemBtn');
+      vincularBtn.disabled = false;
+      vincularBtn.innerHTML = '<i class="fas fa-link"></i> Vincular Personagem';
+    }
 
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    try {
+    // Vincular personagem à campanha
+    async function vincularPersonagem() {
+      if (!selectedCampaignId || !selectedCharacterId) {
+        showToast('Selecione um personagem primeiro', 'error');
+        return;
+      }
+      
+      const vincularBtn = document.getElementById('vincularPersonagemBtn');
+      const originalText = vincularBtn.innerHTML;
+      
+      vincularBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+      vincularBtn.disabled = true;
+      
+      try {
+        // Primeiro, verificar se já existe vínculo
+        const { data: existingLink } = await supabase
+          .from('campaign_characters')
+          .select('id')
+          .eq('campaign_id', selectedCampaignId)
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+        
+        let result;
+        
+        if (existingLink) {
+          // Atualizar vínculo existente
+          result = await supabase
+            .from('campaign_characters')
+            .update({ 
+              character_id: selectedCharacterId,
+              created_at: new Date()
+            })
+            .eq('id', existingLink.id);
+        } else {
+          // Criar novo vínculo
+          result = await supabase
+            .from('campaign_characters')
+            .insert({
+              campaign_id: selectedCampaignId,
+              character_id: selectedCharacterId,
+              user_id: currentUser.id
+            });
+        }
+        
+        if (result.error) throw result.error;
+        
+        showToast('✅ Personagem vinculado com sucesso!', 'success');
+        
+        // Fechar modal
+        closePersonagemModal();
+        
+        // Atualizar a lista de campanhas
+        setTimeout(() => {
+          loadPlayerCampaigns();
+        }, 500);
+        
+      } catch (error) {
+        console.error('Erro ao vincular personagem:', error);
+        showToast('❌ Erro ao vincular personagem: ' + error.message, 'error');
+      } finally {
+        vincularBtn.innerHTML = originalText;
+        vincularBtn.disabled = false;
+      }
+    }
+
+    // Fechar modal
+    function closePersonagemModal() {
+      const modal = document.getElementById('personagemModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      selectedCampaignId = null;
+      selectedCharacterId = null;
+    }
+
+    // Criar novo personagem
+    function criarNovoPersonagem() {
+      window.location.href = 'criar-personagens.html';
+    }
+
+    // Entrar na campanha (só se tiver personagem)
+    function entrarCampanha(campaignId) {
+      window.location.href = `sala-campanha.html?id=${campaignId}`;
+    }
+
+    // ============================================
+    // FUNÇÕES UTILITÁRIAS
+    // ============================================
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function truncateText(text, maxLength) {
+      if (!text) return '';
+      if (text.length <= maxLength) return text;
+      return text.substring(0, maxLength) + '...';
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      try {
         const date = new Date(dateString);
         const now = new Date();
         const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
@@ -943,81 +1564,80 @@ function formatDate(dateString) {
         if (diffDays < 7) return `${diffDays} dias atrás`;
         if (diffDays < 30) return `${Math.floor(diffDays/7)} semana${Math.floor(diffDays/7) !== 1 ? 's' : ''} atrás`;
         return date.toLocaleDateString('pt-BR');
-    } catch {
+      } catch {
         return 'Data inválida';
+      }
     }
-}
 
-function getStatusClass(status) {
-    const classes = {
+    function getStatusClass(status) {
+      const classes = {
         'active': 'status-active',
         'preparation': 'status-preparation',
         'paused': 'status-paused',
         'completed': 'status-completed'
-    };
-    return classes[status] || 'status-preparation';
-}
+      };
+      return classes[status] || 'status-preparation';
+    }
 
-function getStatusText(status) {
-    const texts = {
+    function getStatusText(status) {
+      const texts = {
         'active': 'Ativa',
         'preparation': 'Preparação',
         'paused': 'Pausada',
         'completed': 'Concluída'
-    };
-    return texts[status] || status;
-}
-
-function showMessage(text, type = 'info') {
-    // Remover mensagem anterior
-    const oldMsg = document.querySelector('.temp-message');
-    if (oldMsg) oldMsg.remove();
-    
-    // Criar nova mensagem
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type} temp-message`;
-    messageDiv.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-        ${text}
-    `;
-    
-    // Inserir no início do conteúdo
-    const campaignsContent = document.getElementById('campaigns-content');
-    if (campaignsContent) {
-        campaignsContent.insertBefore(messageDiv, campaignsContent.firstChild);
-        
-        // Remover após 5 segundos
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.remove();
-            }
-        }, 5000);
+      };
+      return texts[status] || status;
     }
-}
 
-// ============================================
-// FUNÇÕES DE AÇÃO
-// ============================================
+    function showToast(message, type = 'info') {
+      // Remover toast anterior
+      const oldToast = document.querySelector('.toast');
+      if (oldToast) oldToast.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
 
-function enterCampaign(campaignId) {
-    window.location.href = `sala-campanha.html?id=${campaignId}`;
-}
+    // ============================================
+    // FUNÇÕES DE TESTE E DEBUG
+    // ============================================
 
-// ============================================
-// EXPORTAR PARA USO GLOBAL
-// ============================================
+    // Testar vínculos
+    window.testarVinculos = async function() {
+      console.log('🧪 Testando vínculos...');
+      
+      const { data: vínculos, error } = await supabase
+        .from('campaign_characters')
+        .select('*');
+      
+      if (error) {
+        console.error('Erro:', error);
+      } else {
+        console.log('Vínculos encontrados:', vínculos);
+      }
+    };
 
-window.loadPlayerCampaigns = loadPlayerCampaigns;
-window.enterCampaign = enterCampaign;
+    // ============================================
+    // EXPORTAR FUNÇÕES PARA USO GLOBAL
+    // ============================================
 
-// Testar a função SQL (descomente para testar)
-// window.testCampaignsFunction = async function() {
-//     const { data: testResult, error } = await supabase
-//         .rpc('test_player_campaigns', { p_user_id: currentUser.id });
-//     
-//     console.log('🧪 Resultado do teste:', testResult);
-//     if (error) console.error('Erro no teste:', error);
-// };
-    </script>
+    window.loadPlayerCampaigns = loadPlayerCampaigns;
+    window.openPersonagemModal = openPersonagemModal;
+    window.selectPersonagemModal = selectPersonagemModal;
+    window.entrarCampanha = entrarCampanha;
+    window.criarNovoPersonagem = criarNovoPersonagem;
+
+  </script>
 </body>
 </html>
