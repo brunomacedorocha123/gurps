@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escudo do Mestre - Gerenciar Campanha</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* ESTILOS GERAIS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('Cris2.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: rgba(30, 30, 40, 0.95);
+            padding: 15px 20px;
+            border-bottom: 3px solid #ff8c00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-voltar {
+            background: rgba(52, 152, 219, 0.8);
+            color: white;
+        }
+
+        .btn-voltar:hover {
+            background: rgba(52, 152, 219, 1);
+        }
+
+        .btn-sair {
+            background: rgba(231, 76, 60, 0.8);
+            color: white;
+        }
+
+        .btn-sair:hover {
+            background: rgba(231, 76, 60, 1);
+        }
+
+        /* CONTEÚDO PRINCIPAL */
+        .main-content {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* INFO DA CAMPANHA */
+        .campaign-info {
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        /* TABS */
+        .gm-tabs {
+            display: flex;
+            background: rgba(40, 40, 50, 0.7);
+            border-radius: 8px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .gm-tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-weight: 500;
+            cursor: pointer;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .gm-tab:last-child {
+            border-right: none;
+        }
+
+        .gm-tab:hover {
+            background: rgba(255, 140, 0, 0.1);
+            color: #ff8c00;
+        }
+
+        .gm-tab.active {
+            background: rgba(255, 140, 0, 0.15);
+            color: #ffd700;
+            border-bottom: 2px solid #ff8c00;
+        }
+
+        /* CONTEÚDO DAS TABS */
+        .tab-content {
+            display: none;
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* LISTA DE JOGADORES */
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .player-card {
+            background: rgba(40, 40, 50, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .player-card:hover {
+            border-color: rgba(255, 140, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        .player-role {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .player-role.co-gm {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
+        .character-info {
+            background: rgba(20, 20, 30, 0.6);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .character-info.has-character {
+            border-left: 3px solid #2ecc71;
+        }
+
+        .character-info.no-character {
+            border-left: 3px solid #e74c3c;
+        }
+
+        .character-name {
+            color: #2ecc71;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .character-details {
+            display: flex;
+            gap: 15px;
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .character-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        .btn-ver {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-ver:hover {
+            background: rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-expulsar {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-expulsar:hover {
+            background: rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-promover {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+
+        .btn-promover:hover {
+            background: rgba(241, 196, 15, 0.3);
+        }
+
+        /* ESTADO VAZIO */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: rgba(255, 140, 0, 0.3);
+        }
+
+        /* LOADING */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 140, 0, 0.3);
+            border-left: 4px solid #ff8c00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .gm-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .gm-tab {
+                flex: 1;
+                min-width: 120px;
+                justify-content: center;
+            }
+            
+            .campaign-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .character-details {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title h1 {
+                font-size: 1.4rem;
+            }
+            
+            .gm-tab {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .character-actions {
+                flex-wrap: wrap;
+            }
+            
+            .btn-small {
+                flex: 1;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-title">
+            <h1><i class="fas fa-shield-alt"></i> Escudo do Mestre</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-voltar" id="btnVoltar">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </button>
+            <button class="btn btn-sair" id="btnSair">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+        <!-- INFO DA CAMPANHA -->
+        <div class="campaign-info" id="campaignInfo">
+            <div class="info-item">
+                <span class="info-label">Nome da Campanha</span>
+                <span class="info-value" id="campaignName">Carregando...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Código</span>
+                <span class="info-value" id="campaignCode">0000000</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Status</span>
+                <span class="info-value" id="campaignStatus">Carregando...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Jogadores</span>
+                <span class="info-value" id="playerCount">0/6</span>
+            </div>
+        </div>
+
+        <!-- TABS DO MESTRE -->
+        <div class="gm-tabs">
+            <button class="gm-tab active" data-tab="jogadores">
+                <i class="fas fa-users"></i> Jogadores
+            </button>
+            <button class="gm-tab" data-tab="npcs">
+                <i class="fas fa-ghost"></i> NPCs
+            </button>
+            <button class="gm-tab" data-tab="tabelas">
+                <i class="fas fa-table"></i> Tabelas
+            </button>
+            <button class="gm-tab" data-tab="config">
+                <i class="fas fa-cog"></i> Configurações
+            </button>
+        </div>
+
+        <!-- CONTEÚDO: JOGADORES -->
+        <div class="tab-content active" id="jogadores-tab">
+            <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: #ffd700;">Jogadores da Campanha</h3>
+                <button class="btn btn-small" id="btnConvidar">
+                    <i class="fas fa-user-plus"></i> Convidar Jogador
+                </button>
+            </div>
+
+            <div class="players-list" id="playersList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando jogadores...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO: NPCS -->
+        <div class="tab-content" id="npcs-tab">
+            <div class="empty-state">
+                <i class="fas fa-ghost"></i>
+                <h3>Sistema de NPCs</h3>
+                <p>Em desenvolvimento. Aqui você poderá gerenciar todos os NPCs da campanha.</p>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO: TABELAS -->
+        <div class="tab-content" id="tabelas-tab">
+            <div class="empty-state">
+                <i class="fas fa-table"></i>
+                <h3>Tabelas GURPS</h3>
+                <p>Em desenvolvimento. Tabelas de combate, perícias, equipamentos e magias.</p>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO: CONFIGURAÇÕES -->
+        <div class="tab-content" id="config-tab">
+            <div class="empty-state">
+                <i class="fas fa-cog"></i>
+                <h3>Configurações da Campanha</h3>
+                <p>Em desenvolvimento. Configure pontos iniciais, regras da casa e status.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ============================================
+        // ESCUDO DO MESTRE - GERENCIAMENTO DE CAMPANHA
+        // ============================================
+
+        const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let currentCampaignId = null;
+        let currentCampaign = null;
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initEscudoMestre();
+        });
+
+        async function initEscudoMestre() {
+            try {
+                // 1. Verificar autenticação
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = session.user;
+                
+                // 2. Obter ID da campanha da URL
+                const urlParams = new URLSearchParams(window.location.search);
+                currentCampaignId = urlParams.get('id');
+                
+                if (!currentCampaignId) {
+                    alert('Campanha não especificada!');
+                    window.location.href = 'campanhas.html';
+                    return;
+                }
+                
+                // 3. Configurar botões
+                setupEventListeners();
+                
+                // 4. Configurar tabs
+                setupTabs();
+                
+                // 5. Carregar dados da campanha
+                await loadCampaignData();
+                
+                // 6. Verificar se é o mestre
+                await verificarPermissoes();
+                
+                // 7. Carregar jogadores
+                await loadJogadores();
+                
+            } catch (error) {
+                console.error('Erro ao iniciar:', error);
+                alert('Erro ao carregar. Recarregue a página.');
+            }
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        function setupEventListeners() {
+            // Botões do header
+            document.getElementById('btnVoltar').addEventListener('click', () => {
+                window.location.href = 'campanhas.html';
+            });
+            
+            document.getElementById('btnSair').addEventListener('click', () => {
+                if (!confirm('Tem certeza que deseja sair?')) return;
+                window.location.href = 'campanhas.html';
+            });
+            
+            // Botão convidar
+            document.getElementById('btnConvidar').addEventListener('click', () => {
+                convidarJogador();
+            });
+        }
+
+        // ============================================
+        // TABS
+        // ============================================
+
+        function setupTabs() {
+            document.querySelectorAll('.gm-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Atualizar tabs ativas
+                    document.querySelectorAll('.gm-tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    tab.classList.add('active');
+                    
+                    // Atualizar conteúdo
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabId}-tab`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+        }
+
+        // ============================================
+        // CARREGAR DADOS DA CAMPANHA
+        // ============================================
+
+        async function loadCampaignData() {
+            try {
+                const { data: campaign, error } = await supabase
+                    .from('campaigns')
+                    .select('*')
+                    .eq('id', currentCampaignId)
+                    .single();
+                
+                if (error) throw error;
+                
+                currentCampaign = campaign;
+                
+                // Atualizar informações na tela
+                document.getElementById('campaignName').textContent = campaign.name || 'Sem nome';
+                document.getElementById('campaignCode').textContent = campaign.campaign_id || '0000000';
+                document.getElementById('campaignStatus').textContent = formatStatus(campaign.status);
+                
+                // Atualizar título da página
+                document.title = `Escudo do Mestre - ${campaign.name}`;
+                
+            } catch (error) {
+                console.error('Erro ao carregar campanha:', error);
+                alert('Erro ao carregar dados da campanha.');
+            }
+        }
+
+        // ============================================
+        // VERIFICAR PERMISSÕES
+        // ============================================
+
+        async function verificarPermissoes() {
+            if (!currentCampaign) return false;
+            
+            const isGM = currentCampaign.gm_id === currentUser.id;
+            
+            if (!isGM) {
+                alert('Apenas o mestre da campanha pode acessar esta página!');
+                window.location.href = 'campanhas.html';
+                return false;
+            }
+            
+            return true;
+        }
+
+        // ============================================
+        // CARREGAR JOGADORES
+        // ============================================
+
+        async function loadJogadores() {
+            const container = document.getElementById('playersList');
+            if (!container) return;
+            
+            try {
+                // Buscar jogadores da campanha
+                const { data: players, error } = await supabase
+                    .from('campaign_players')
+                    .select(`
+                        *,
+                        profiles:user_id (
+                            id,
+                            username,
+                            player_id
+                        )
+                    `)
+                    .eq('campaign_id', currentCampaignId)
+                    .eq('status', 'active')
+                    .order('joined_at', { ascending: true });
+                
+                if (error) throw error;
+                
+                // Atualizar contador
+                const playerCount = players?.length || 0;
+                const maxPlayers = currentCampaign?.max_players || 6;
+                document.getElementById('playerCount').textContent = `${playerCount}/${maxPlayers}`;
+                
+                if (!players || players.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>Nenhum jogador encontrado</h3>
+                            <p>Convide jogadores para participar da campanha.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Para cada jogador, buscar personagem vinculado
+                const playersWithCharacters = await Promise.all(
+                    players.map(async (player) => {
+                        // Buscar personagem vinculado
+                        const { data: character } = await supabase
+                            .from('campaign_characters')
+                            .select(`
+                                character_id,
+                                characters:character_id (
+                                    id,
+                                    nome,
+                                    classe,
+                                    raca,
+                                    pontos_totais,
+                                    pontos_gastos
+                                )
+                            `)
+                            .eq('campaign_id', currentCampaignId)
+                            .eq('user_id', player.user_id)
+                            .single();
+                        
+                        return {
+                            ...player,
+                            character: character?.characters || null
+                        };
+                    })
+                );
+                
+                // Renderizar lista
+                renderJogadores(playersWithCharacters, container);
+                
+            } catch (error) {
+                console.error('Erro ao carregar jogadores:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar jogadores</h3>
+                        <p>Tente novamente mais tarde.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
+        // RENDERIZAR JOGADORES
+        // ============================================
+
+        function renderJogadores(players, container) {
+            container.innerHTML = players.map(player => {
+                const profile = player.profiles;
+                const character = player.character;
+                const isCoGM = player.role === 'co-gm';
+                
+                return `
+                    <div class="player-card">
+                        <div class="player-header">
+                            <div>
+                                <div class="player-name">${escapeHtml(profile?.username || 'Jogador')}</div>
+                                <div style="color: #aaa; font-size: 0.8rem; margin-top: 2px;">
+                                    ID: ${profile?.player_id || 'N/A'}
+                                </div>
+                            </div>
+                            <span class="player-role ${isCoGM ? 'co-gm' : ''}">
+                                ${isCoGM ? 'Co-Mestre' : 'Jogador'}
+                            </span>
+                        </div>
+                        
+                        <div class="character-info ${character ? 'has-character' : 'no-character'}">
+                            ${character ? `
+                                <div class="character-name">
+                                    <i class="fas fa-user"></i> ${escapeHtml(character.nome || 'Sem nome')}
+                                </div>
+                                <div class="character-details">
+                                    <span><i class="fas fa-shield-alt"></i> ${escapeHtml(character.classe || 'Sem classe')}</span>
+                                    <span><i class="fas fa-dna"></i> ${escapeHtml(character.raca || 'Sem raça')}</span>
+                                    <span><i class="fas fa-chart-line"></i> ${character.pontos_gastos || 0}/${character.pontos_totais || 150} pts</span>
+                                </div>
+                                <div class="character-actions">
+                                    <button class="btn btn-small btn-ver" onclick="verFichaPersonagem('${character.id}')">
+                                        <i class="fas fa-eye"></i> Ver Ficha
+                                    </button>
+                                    ${!isCoGM ? `
+                                        <button class="btn btn-small btn-promover" onclick="promoverParaCoGM('${player.user_id}')">
+                                            <i class="fas fa-crown"></i> Promover
+                                        </button>
+                                    ` : ''}
+                                    <button class="btn btn-small btn-expulsar" onclick="expulsarJogador('${player.user_id}', '${escapeHtml(profile?.username || 'Jogador')}')">
+                                        <i class="fas fa-user-slash"></i> Expulsar
+                                    </button>
+                                </div>
+                            ` : `
+                                <div style="color: #e74c3c; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>Nenhum personagem vinculado</span>
+                                </div>
+                                <div class="character-actions">
+                                    <button class="btn btn-small" onclick="lembrarVincularPersonagem('${player.user_id}')">
+                                        <i class="fas fa-bell"></i> Lembrar
+                                    </button>
+                                    <button class="btn btn-small btn-expulsar" onclick="expulsarJogador('${player.user_id}', '${escapeHtml(profile?.username || 'Jogador')}')">
+                                        <i class="fas fa-user-slash"></i> Expulsar
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // FUNÇÕES DE AÇÃO
+        // ============================================
+
+        function convidarJogador() {
+            const playerId = prompt('Digite o ID do jogador para convidar:');
+            if (!playerId) return;
+            
+            // Aqui você pode implementar a lógica de convite
+            alert(`Convite enviado para o jogador com ID: ${playerId}`);
+        }
+
+        function verFichaPersonagem(characterId) {
+            // Abrir modal ou nova página com a ficha
+            alert(`Abrindo ficha do personagem ID: ${characterId}`);
+            // window.open(`ver-ficha.html?id=${characterId}`, '_blank');
+        }
+
+        function promoverParaCoGM(userId) {
+            if (!confirm('Promover este jogador a Co-Mestre?\nEle terá acesso a alguns controles do mestre.')) return;
+            
+            // Implementar lógica de promoção
+            alert('Jogador promovido a Co-Mestre!');
+        }
+
+        function expulsarJogador(userId, username) {
+            if (!confirm(`Tem certeza que deseja expulsar "${username}" da campanha?\nEsta ação não pode ser desfeita.`)) return;
+            
+            // Implementar lógica de expulsão
+            alert(`Jogador "${username}" expulsado da campanha.`);
+            loadJogadores(); // Recarregar lista
+        }
+
+        function lembrarVincularPersonagem(userId) {
+            // Implementar notificação para o jogador
+            alert('Lembrete enviado para o jogador vincular um personagem.');
+        }
+
+        // ============================================
+        // FUNÇÕES UTILITÁRIAS
+        // ============================================
+
+        function formatStatus(status) {
+            const statusMap = {
+                'active': 'Ativa',
+                'preparation': 'Preparação',
+                'paused': 'Pausada',
+                'completed': 'Concluída'
+            };
+            return statusMap[status] || status;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============================================
+        // EXPORTAR FUNÇÕES
+        // ============================================
+
+        window.verFichaPersonagem = verFichaPersonagem;
+        window.promoverParaCoGM = promoverParaCoGM;
+        window.expulsarJogador = expulsarJogador;
+        window.lembrarVincularPersonagem = lembrarVincularPersonagem;
+
+    </script>
+</body>
+</html>

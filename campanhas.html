@@ -1773,6 +1773,32 @@
                 font-size: 0.8rem;
             }
         }
+
+        .sub-tabs.gm-subtabs .sub-tab {
+    /* Estilos comuns para todos os botões/sub-tabs */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background-color: #2a2a4a;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+    text-decoration: none; /* Para o link não ter sublinhado */
+}
+
+.sub-tabs.gm-subtabs .sub-tab:hover {
+    background-color: #3a3a6a;
+}
+
+.sub-tabs.gm-subtabs .sub-tab.active {
+    background-color: #4a4a8a;
+    color: white;
+}
     </style>
 </head>
 <body>
@@ -1821,14 +1847,17 @@
 
         <!-- SUB-TABS MESTRE -->
         <div class="sub-tabs gm-subtabs" id="gm-subtabs" role="tablist">
-            <button class="sub-tab" data-sub-tab="gm-campaigns" data-main-tab="gm" role="tab" aria-selected="false" aria-controls="gm-campaigns-content">
-                <i class="fas fa-book"></i> <span class="tab-text">Minhas Campanhas</span>
-            </button>
-            <button class="sub-tab active" data-sub-tab="gm-create" data-main-tab="gm" role="tab" aria-selected="true" aria-controls="gm-create-content">
-                <i class="fas fa-plus-circle"></i> <span class="tab-text">Criar Campanha</span>
-            </button>
-        </div>
-
+    <button class="sub-tab" data-sub-tab="gm-campaigns" data-main-tab="gm" role="tab" aria-selected="false" aria-controls="gm-campaigns-content">
+        <i class="fas fa-book"></i> <span class="tab-text">Minhas Campanhas</span>
+    </button>
+    <button class="sub-tab active" data-sub-tab="gm-create" data-main-tab="gm" role="tab" aria-selected="true" aria-controls="gm-create-content">
+        <i class="fas fa-plus-circle"></i> <span class="tab-text">Criar Campanha</span>
+    </button>
+    <!-- BOTÃO ESCUDO GM ADICIONADO AQUI -->
+    <a href="escudo-mestre.html" class="sub-tab escudo-gm-btn" role="tab">
+        <i class="fas fa-shield-alt"></i> <span class="tab-text">Escudo GM</span>
+    </a>
+</div>
         <!-- ============================================
              CONTEÚDO MESTRE - CAMPANHAS
              ============================================ -->
