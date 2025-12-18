@@ -526,7 +526,6 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // Verificar autenticação
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
         window.location.href = 'login.html';
@@ -536,7 +535,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     console.log('Usuário logado:', currentUser.email);
     
-    // Configurar botões
     document.getElementById('btnVoltar').addEventListener('click', () => {
         window.location.href = 'campanhas.html';
     });
@@ -548,28 +546,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
     
-    // Configurar tabs
     setupTabs();
-    
-    // Carregar dashboard inicial
     await loadDashboard();
 });
 
-// CONFIGURAR TABS
 function setupTabs() {
     document.querySelectorAll('.gm-tab').forEach(tab => {
         tab.addEventListener('click', function() {
             const tabId = this.getAttribute('data-tab');
             
-            // Remover active de todas
             document.querySelectorAll('.gm-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            // Adicionar active na selecionada
             this.classList.add('active');
             document.getElementById(tabId + '-tab').classList.add('active');
             
-            // Se for a tab de PCs, carregar campanhas no seletor
             if (tabId === 'pcs') {
                 loadCampaignsToSelector();
             }
@@ -577,24 +568,15 @@ function setupTabs() {
     });
 }
 
-// CARREGAR DASHBOARD
 async function loadDashboard() {
     try {
-        console.log('Carregando campanhas do GM...');
-        
-        // Buscar campanhas onde o usuário é GM
         const { data: campaigns, error } = await supabase
             .from('campaigns')
             .select('*')
             .eq('gm_id', currentUser.id)
             .order('created_at', { ascending: false });
         
-        if (error) {
-            console.error('Erro ao buscar campanhas:', error);
-            throw error;
-        }
-        
-        console.log('Campanhas encontradas:', campaigns);
+        if (error) throw error;
         
         const campaignsList = document.getElementById('campaignsList');
         
@@ -612,7 +594,6 @@ async function loadDashboard() {
             return;
         }
         
-        // Mostrar campanhas
         campaignsList.innerHTML = `
             <div class="campaigns-list">
                 ${campaigns.map(camp => `
@@ -640,7 +621,6 @@ async function loadDashboard() {
             </div>
         `;
         
-        // Salvar campanhas para usar no seletor
         window.campaignsData = campaigns;
         
     } catch (error) {
@@ -658,7 +638,6 @@ async function loadDashboard() {
     }
 }
 
-// CARREGAR CAMPANHAS NO SELECTOR
 function loadCampaignsToSelector() {
     const selector = document.getElementById('selectedCampaign');
     
@@ -675,7 +654,6 @@ function loadCampaignsToSelector() {
         selector.appendChild(option);
     });
     
-    // Configurar evento de mudança
     selector.onchange = function() {
         if (this.value) {
             const campaign = window.campaignsData.find(c => c.id === this.value);
@@ -688,29 +666,22 @@ function loadCampaignsToSelector() {
     };
 }
 
-// SELECIONAR CAMPANHA PARA GERENCIAMENTO
 function selectCampaignForManagement(campaignId, campaignName) {
-    // Ir para tab de PCs
     document.querySelector('[data-tab="dashboard"]').classList.remove('active');
     document.querySelector('[data-tab="pcs"]').classList.add('active');
-    
     document.getElementById('dashboard-tab').classList.remove('active');
     document.getElementById('pcs-tab').classList.add('active');
     
-    // Selecionar no dropdown
     const selector = document.getElementById('selectedCampaign');
     selector.value = campaignId;
     
-    // Carregar personagens
     loadCharactersForCampaign(campaignId, campaignName);
 }
 
-// FUNÇÃO PRINCIPAL - CARREGAR PERSONAGENS DA CAMPANHA
 async function loadCharactersForCampaign(campaignId, campaignName) {
     console.log(`🎯 Buscando personagens da campanha: ${campaignName}`);
     
     try {
-        // Mostrar loading
         document.getElementById('pendingList').innerHTML = `
             <div style="text-align: center; padding: 30px;">
                 <div class="spinner"></div>
@@ -725,35 +696,26 @@ async function loadCharactersForCampaign(campaignId, campaignName) {
             </div>
         `;
         
-        // 1. BUSCAR VÍNCULOS DA TABELA campaign_characters
-        console.log('🔍 Buscando em campaign_characters...');
+        // 1. BUSCAR VÍNCULOS DA CAMPANHA
         const { data: vinculos, error: errorVinculos } = await supabase
             .from('campaign_characters')
             .select('*')
             .eq('campaign_id', campaignId);
         
-        if (errorVinculos) {
-            console.error('Erro ao buscar vínculos:', errorVinculos);
-            throw errorVinculos;
-        }
-        
-        console.log('✅ Vínculos encontrados:', vinculos);
+        if (errorVinculos) throw errorVinculos;
         
         if (!vinculos || vinculos.length === 0) {
             showNoCharactersFound(campaignId);
             return;
         }
         
-        // 2. SEPARAR PENDENTES E ATIVOS
         const pendentes = vinculos.filter(v => !v.user_id);
         const ativos = vinculos.filter(v => v.user_id);
         
-        console.log(`📊 Pendentes: ${pendentes.length}, Ativos: ${ativos.length}`);
-        
-        // 3. MOSTRAR VÍNCULOS PENDENTES
+        // 2. MOSTRAR PENDENTES
         showPendingLinks(pendentes);
         
-        // 4. BUSCAR E MOSTRAR PERSONAGENS VINCULADOS
+        // 3. BUSCAR PERSONAGENS VINCULADOS
         if (ativos.length > 0) {
             await showLinkedCharacters(ativos);
         } else {
@@ -769,12 +731,11 @@ async function loadCharactersForCampaign(campaignId, campaignName) {
         }
         
     } catch (error) {
-        console.error('💥 Erro ao carregar personagens:', error);
+        console.error('Erro ao carregar personagens:', error);
         showError(error);
     }
 }
 
-// MOSTRAR VÍNCULOS PENDENTES
 function showPendingLinks(pendentes) {
     if (pendentes.length > 0) {
         document.getElementById('pendingList').innerHTML = `
@@ -814,216 +775,184 @@ function showPendingLinks(pendentes) {
     }
 }
 
-// BUSCAR E MOSTRAR PERSONAGENS VINCULADOS - VERSÃO ATUALIZADA
 async function showLinkedCharacters(vinculosAtivos) {
-    // Pegar IDs dos personagens
     const characterIds = vinculosAtivos.map(v => v.character_id).filter(id => id);
     
-    console.log('🔍 IDs dos personagens:', characterIds);
-    
-    // BUSCAR NA TABELA CHARACTERS (baseado no seu SQL)
-    let charactersFound = [];
+    console.log('🔍 IDs dos personagens para buscar:', characterIds);
     
     try {
-        console.log('🔎 Buscando na tabela characters...');
-        const { data, error } = await supabase
+        // BUSCAR NA TABELA CHARACTERS (igual ao personagens.html)
+        const { data: characters, error } = await supabase
             .from('characters')
             .select('*')
             .in('id', characterIds);
         
         if (error) {
             console.error('Erro ao buscar personagens:', error);
-            // Tentar tabela alternativa
-            const { data: data2, error: error2 } = await supabase
-                .from('player_characters')
-                .select('*')
-                .in('id', characterIds);
-            
-            if (error2) {
-                throw new Error('Não foi possível encontrar os personagens');
-            }
-            charactersFound = data2 || [];
-        } else {
-            charactersFound = data || [];
+            throw error;
         }
         
-        console.log(`✅ Encontrados ${charactersFound.length} personagens:`, charactersFound);
+        if (!characters || characters.length === 0) {
+            document.getElementById('charactersList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <p>Personagens encontrados nos vínculos, mas não na tabela 'characters'.</p>
+                    <button class="btn btn-small" onclick="verificarTabela()" style="margin-top: 10px;">
+                        <i class="fas fa-database"></i> Verificar Tabela
+                    </button>
+                </div>
+            `;
+            return;
+        }
         
-    } catch (err) {
-        console.error('💥 Erro ao buscar personagens:', err);
-        charactersFound = [];
-    }
-    
-    // SE NÃO ENCONTRAR, CRIAR DADOS DE EXEMPLO (temporário)
-    if (charactersFound.length === 0) {
-        console.log('⚠️ Nenhum personagem encontrado nas tabelas. Criando dados de exemplo...');
+        console.log('✅ Personagens encontrados:', characters);
         
-        charactersFound = characterIds.map((id, index) => ({
-            id: id,
-            nome: `Personagem ${index + 1}`,
-            classe: index % 3 === 0 ? 'Guerreiro' : index % 3 === 1 ? 'Mago' : 'Ladino',
-            raca: index % 2 === 0 ? 'Humano' : 'Elfo',
-            forca: 10 + index,
-            destreza: 10 + index,
-            inteligencia: 10 + index,
-            saude: 10 + index,
-            pontos_totais: 150,
-            pontos_gastos: Math.floor(Math.random() * 80) + 20,
-            pontos_disponiveis: 150 - (Math.floor(Math.random() * 80) + 20),
-            status: 'Ativo'
-        }));
-    }
-    
-    // BUSCAR NICKNAMES DOS JOGADORES
-    const userIds = vinculosAtivos.map(v => v.user_id).filter(id => id);
-    let userNicknames = {};
-    
-    if (userIds.length > 0) {
-        try {
-            console.log('🔍 Buscando nicknames dos jogadores...');
-            
-            // Tentar várias tabelas possíveis
-            const tablesToTry = ['profiles', 'users', 'auth.users'];
-            
-            for (const tableName of tablesToTry) {
-                try {
-                    const { data: users, error } = await supabase
-                        .from(tableName)
-                        .select('id, username, nickname, display_name, email')
-                        .in('id', userIds);
-                    
-                    if (!error && users && users.length > 0) {
-                        console.log(`✅ Nicknames encontrados na tabela ${tableName}:`, users);
-                        
-                        users.forEach(user => {
-                            // Prioridade: nickname > username > display_name > email > ID
-                            const nickname = 
-                                user.nickname || 
-                                user.username || 
-                                user.display_name || 
-                                user.email?.split('@')[0] || 
-                                user.id.substring(0, 6);
-                            userNicknames[user.id] = nickname;
-                        });
-                        break;
-                    }
-                } catch (err) {
-                    console.log(`❌ Tabela ${tableName} não acessível:`, err.message);
+        // Buscar nicknames dos jogadores
+        const userIds = vinculosAtivos.map(v => v.user_id).filter(id => id);
+        let userNicknames = {};
+        
+        if (userIds.length > 0) {
+            try {
+                const { data: profiles, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('id, username, full_name, email')
+                    .in('id', userIds);
+                
+                if (!profilesError && profiles) {
+                    profiles.forEach(profile => {
+                        userNicknames[profile.id] = 
+                            profile.username || 
+                            profile.full_name || 
+                            profile.email?.split('@')[0] || 
+                            profile.id.substring(0, 6);
+                    });
                 }
+            } catch (err) {
+                console.log('Não foi possível buscar nicknames:', err.message);
             }
-            
-            // Se não encontrou nicknames, usar 6 dígitos do ID
-            userIds.forEach(userId => {
-                if (!userNicknames[userId]) {
-                    userNicknames[userId] = userId.substring(0, 6);
-                }
-            });
-            
-        } catch (error) {
-            console.error('Erro ao buscar nicknames:', error);
-            // Fallback: usar 6 dígitos do ID
-            userIds.forEach(userId => {
+        }
+        
+        // Usar 6 dígitos do ID para os que não tem nickname
+        userIds.forEach(userId => {
+            if (!userNicknames[userId]) {
                 userNicknames[userId] = userId.substring(0, 6);
-            });
-        }
+            }
+        });
+        
+        // RENDERIZAR PERSONAGENS - CARD COMPACTO
+        renderCompactCharacters(characters, vinculosAtivos, userNicknames);
+        
+    } catch (error) {
+        console.error('Erro ao buscar personagens:', error);
+        document.getElementById('charactersList').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Erro ao Carregar Personagens</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
     }
-    
-    // Mostrar personagens NO FORMATO DOS SEUS CARDS
+}
+
+// FUNÇÃO RENDERIZAR PERSONAGENS COMPACTOS
+function renderCompactCharacters(characters, vinculosAtivos, userNicknames) {
     document.getElementById('charactersList').innerHTML = `
-        <div class="characters-list">
-            ${charactersFound.map(char => {
-                // Encontrar o vínculo correspondente
+        <div class="characters-list-compact">
+            ${characters.map(char => {
                 const vinculo = vinculosAtivos.find(v => v.character_id === char.id);
                 const jogadorNickname = vinculo && vinculo.user_id ? userNicknames[vinculo.user_id] : 'Desconhecido';
                 
-                // Dados do personagem (com fallbacks)
-                const nome = escapeHtml(char.nome || `Personagem ${char.id.substring(0, 8)}`);
+                // DADOS REAIS (igual ao personagens.html)
+                const nome = escapeHtml(char.nome || 'Personagem Sem Nome');
+                const nomeDisplay = nome.length > 25 ? nome.substring(0, 23) + '...' : nome;
                 const raca = escapeHtml(char.raca || 'Sem Raça');
                 const classe = escapeHtml(char.classe || 'Sem Classe');
                 
-                // Atributos (com fallbacks)
+                // ATRIBUTOS REAIS
                 const forca = char.forca || 10;
                 const destreza = char.destreza || 10;
                 const inteligencia = char.inteligencia || 10;
                 const saude = char.saude || 10;
                 
-                // Pontos (com fallbacks)
-                const pontosGastos = char.pontos_gastos || 0;
+                // PONTOS REAIS
                 const pontosTotais = char.pontos_totais || 150;
+                const pontosGastos = char.pontos_gastos || 0;
                 const pontosDisponiveis = char.pontos_disponiveis || (pontosTotais - pontosGastos);
                 
+                // Data formatada
+                const dataCriacao = formatarData(char.created_at);
+                
                 return `
-                    <div class="character-item">
-                        <div class="item-header">
-                            <div class="character-name">
-                                <i class="fas fa-user"></i> ${nome}
-                            </div>
-                            <!-- REMOVIDO: Nvl ${char.nivel || 1} -->
+                <div class="character-card-compact">
+                    <!-- CABEÇALHO -->
+                    <div class="compact-header">
+                        <h4 class="compact-title" title="${nome}">
+                            <i class="fas fa-user"></i> ${nomeDisplay}
+                        </h4>
+                    </div>
+                    
+                    <!-- RAÇA E CLASSE -->
+                    <div class="compact-subtitle">
+                        <span class="compact-raca">${raca}</span>
+                        <span class="compact-separator">•</span>
+                        <span class="compact-classe">${classe}</span>
+                    </div>
+                    
+                    <!-- ATRIBUTOS EM LINHA -->
+                    <div class="compact-atributos">
+                        <div class="attr-item">
+                            <span class="attr-label">FOR</span>
+                            <span class="attr-value">${forca}</span>
                         </div>
-                        
-                        <!-- RAÇA E CLASSE -->
-                        <div style="margin: 8px 0; color: #ff8c00; font-size: 0.9rem;">
-                            <i class="fas fa-dna"></i> ${raca} • ${classe}
+                        <div class="attr-item">
+                            <span class="attr-label">DES</span>
+                            <span class="attr-value">${destreza}</span>
                         </div>
-                        
-                        <!-- ATRIBUTOS - FORMATO DOS SEUS CARDS -->
-                        <div class="character-attributes-gurps">
-                            <div class="attr-gurps">
-                                <span class="attr-label-gurps">FOR</span>
-                                <span class="attr-value-gurps">${forca}</span>
-                            </div>
-                            <div class="attr-gurps">
-                                <span class="attr-label-gurps">DES</span>
-                                <span class="attr-value-gurps">${destreza}</span>
-                            </div>
-                            <div class="attr-gurps">
-                                <span class="attr-label-gurps">INT</span>
-                                <span class="attr-value-gurps">${inteligencia}</span>
-                            </div>
-                            <div class="attr-gurps">
-                                <span class="attr-label-gurps">SAÚ</span>
-                                <span class="attr-value-gurps">${saude}</span>
-                            </div>
+                        <div class="attr-item">
+                            <span class="attr-label">INT</span>
+                            <span class="attr-value">${inteligencia}</span>
                         </div>
-                        
-                        <!-- PONTOS -->
-                        <div style="margin: 10px 0; padding: 8px; background: rgba(255, 140, 0, 0.1); border-radius: 4px; font-size: 0.9rem;">
-                            <i class="fas fa-coins"></i> Pontos: <strong>${pontosDisponiveis}/${pontosTotais}</strong>
-                            ${pontosGastos > 0 ? ` (Gastos: ${pontosGastos})` : ''}
-                        </div>
-                        
-                        <!-- VINCULADO AO JOGADOR -->
-                        ${vinculo ? `
-                        <div style="margin: 10px 0; padding: 8px; background: rgba(52, 152, 219, 0.1); border-radius: 4px; font-size: 0.85rem;">
-                            <i class="fas fa-link"></i> Vinculado ao jogador: 
-                            <strong>${jogadorNickname}</strong>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- AÇÕES - SEM BOTÃO EDITAR -->
-                        <div class="character-actions">
-                            <button class="btn btn-small btn-ver" onclick="viewCharacterSheet('${char.id}')">
-                                <i class="fas fa-scroll"></i> Ver Ficha
-                            </button>
-                            <!-- REMOVIDO: Botão Editar -->
-                            <button class="btn btn-small btn-recusar" onclick="removeFromCampaign('${vinculo ? vinculo.id : char.id}', '${escapeHtml(nome)}')">
-                                <i class="fas fa-user-minus"></i> Remover
-                            </button>
+                        <div class="attr-item">
+                            <span class="attr-label">SAÚ</span>
+                            <span class="attr-value">${saude}</span>
                         </div>
                     </div>
+                    
+                    <!-- PONTOS -->
+                    <div class="compact-pontos">
+                        <i class="fas fa-coins"></i>
+                        <span class="pontos-texto">${pontosDisponiveis}/${pontosTotais}</span>
+                        ${pontosGastos > 0 ? `<small class="pontos-gastos">(${pontosGastos} gastos)</small>` : ''}
+                    </div>
+                    
+                    <!-- JOGADOR -->
+                    <div class="compact-jogador">
+                        <i class="fas fa-user-tag"></i>
+                        <span>${jogadorNickname}</span>
+                    </div>
+                    
+                    <!-- AÇÕES -->
+                    <div class="compact-actions">
+                        <button class="btn-compact-ver" onclick="viewCharacterSheet('${char.id}')">
+                            <i class="fas fa-scroll"></i> Ver Ficha
+                        </button>
+                        <button class="btn-compact-remover" onclick="removeFromCampaign('${vinculo ? vinculo.id : char.id}', '${escapeHtml(nome)}')">
+                            <i class="fas fa-user-minus"></i> Remover
+                        </button>
+                    </div>
+                </div>
                 `;
             }).join('')}
         </div>
     `;
 }
 
-// FUNÇÕES DE AÇÃO
+// FUNÇÕES DE AÇÃO (mantidas iguais)
 async function assignPlayerToLink(linkId) {
     const playerEmail = prompt('Digite o email do jogador para vincular:');
     if (!playerEmail) return;
     
     try {
-        // Buscar ID do usuário pelo email
         const { data: users, error } = await supabase
             .from('profiles')
             .select('id')
@@ -1035,7 +964,6 @@ async function assignPlayerToLink(linkId) {
             return;
         }
         
-        // Atualizar vínculo
         const { error: updateError } = await supabase
             .from('campaign_characters')
             .update({ 
@@ -1049,7 +977,6 @@ async function assignPlayerToLink(linkId) {
         alert('Jogador vinculado com sucesso!');
         location.reload();
     } catch (error) {
-        console.error('Erro ao vincular jogador:', error);
         alert('Erro: ' + error.message);
     }
 }
@@ -1090,13 +1017,9 @@ async function removeFromCampaign(linkId, charName) {
     }
 }
 
-// VER FICHA - ABRE A ABA RESUMO DO PERSONAGEM
 function viewCharacterSheet(characterId) {
-    // Abre criar-personagens.html na aba de resumo
     window.open(`criar-personagens.html?id=${characterId}`, '_blank');
 }
-
-// REMOVIDA: function editCharacter() - Não tem mais botão Editar
 
 function viewCampaignDetails(campaignId) {
     window.open(`campanha.html?id=${campaignId}`, '_blank');
@@ -1116,7 +1039,6 @@ function generateInviteLink(campaignId) {
     }
 }
 
-// FUNÇÕES AUXILIARES
 function showNoCharactersFound(campaignId) {
     document.getElementById('pendingList').innerHTML = `
         <div class="empty-state">
@@ -1152,14 +1074,9 @@ function showError(error) {
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Erro</h3>
             <p>${error.message}</p>
-            <div style="margin-top: 20px;">
-                <button class="btn btn-small" onclick="checkDatabaseStructure()">
-                    <i class="fas fa-database"></i> Verificar Banco
-                </button>
-                <button class="btn btn-small" onclick="loadDashboard()" style="margin-left: 10px;">
-                    <i class="fas fa-redo"></i> Recarregar
-                </button>
-            </div>
+            <button class="btn btn-small" onclick="loadDashboard()">
+                <i class="fas fa-redo"></i> Recarregar
+            </button>
         </div>
     `;
 }
@@ -1180,27 +1097,19 @@ function resetCharacterLists() {
     `;
 }
 
-async function checkDatabaseStructure() {
+function formatarData(dataString) {
     try {
-        alert('Verificando tabelas...\n\n1. campaign_characters - OK\n2. characters - Verificando...\n\nOs vínculos existem, mas os personagens podem estar na tabela characters ou player_characters.');
-        
-        // Verificar tabela characters
-        const { data, error } = await supabase
-            .from('characters')
-            .select('id, nome')
-            .limit(2);
-        
-        if (error) {
-            alert(`Tabela characters: ${error.message}\n\nOs personagens podem estar na tabela "player_characters".`);
-        } else {
-            alert(`Tabela characters existe com ${data ? data.length : 0} registros.\n\nExemplo: ${data.length > 0 ? data[0].nome : 'Nenhum'}`);
-        }
-    } catch (err) {
-        alert('Erro na verificação: ' + err.message);
+        const data = new Date(dataString);
+        return data.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    } catch {
+        return 'Data inválida';
     }
 }
 
-// FUNÇÃO PARA ESCAPAR HTML
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -1208,121 +1117,237 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ADICIONAR ESTILOS PARA O NOVO FORMATO
-const extraStyles = document.createElement('style');
-extraStyles.textContent = `
-/* NOVOS ESTILOS PARA O FORMATO DOS CARDS */
-.character-attributes-gurps {
-    display: flex;
-    justify-content: space-around;
-    margin: 15px 0;
-    padding: 12px;
-    background: rgba(30, 30, 40, 0.7);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 140, 0, 0.2);
+async function verificarTabela() {
+    try {
+        alert('🔍 Verificando tabela characters...');
+        
+        const { data: exemplos, error } = await supabase
+            .from('characters')
+            .select('id, nome, forca, destreza')
+            .limit(3);
+        
+        if (error) {
+            alert(`❌ Erro: ${error.message}\n\nTabela 'characters' não encontrada ou com problemas.`);
+        } else if (exemplos && exemplos.length > 0) {
+            alert(`✅ Tabela characters encontrada!\n\nExemplos:\n${exemplos.map(c => `${c.nome} (FOR: ${c.forca}, DES: ${c.destreza})`).join('\n')}`);
+        } else {
+            alert('⚠️ Tabela characters existe mas está vazia.');
+        }
+    } catch (err) {
+        alert('Erro: ' + err.message);
+    }
 }
 
-.attr-gurps {
+// ESTILOS PARA CARDS COMPACTOS
+const compactCardStyles = document.createElement('style');
+compactCardStyles.textContent = `
+/* CONTAINER PARA CARDS COMPACTOS - GRID RESPONSIVO */
+.characters-list-compact {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+/* CARD COMPACTO */
+.character-card-compact {
+    background: rgba(30, 30, 40, 0.85);
+    border-radius: 10px;
+    padding: 18px;
+    border: 1px solid rgba(255, 140, 0, 0.25);
+    transition: all 0.3s ease;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+}
+
+.character-card-compact:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 140, 0, 0.5);
+    box-shadow: 0 5px 15px rgba(255, 140, 0, 0.15);
+}
+
+/* CABEÇALHO */
+.compact-header {
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.compact-title {
+    color: #ffd700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.compact-title i {
+    color: #ff8c00;
+}
+
+/* SUBTÍTULO (RAÇA E CLASSE) */
+.compact-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.compact-raca {
+    color: #ff8c00;
+    font-weight: 500;
+}
+
+.compact-separator {
+    color: #666;
+}
+
+.compact-classe {
+    color: #3498db;
+    font-weight: 500;
+}
+
+/* ATRIBUTOS EM LINHA HORIZONTAL */
+.compact-atributos {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+    padding: 12px;
+    background: rgba(20, 20, 30, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.attr-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 10px;
+    min-width: 50px;
 }
 
-.attr-label-gurps {
-    font-size: 0.75rem;
+.attr-label {
+    font-size: 0.7rem;
     color: #ccc;
     text-transform: uppercase;
     margin-bottom: 4px;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
-.attr-value-gurps {
-    font-size: 1.4rem;
+.attr-value {
+    font-size: 1.3rem;
     font-weight: bold;
     color: #ffd700;
-    background: rgba(0, 0, 0, 0.3);
-    width: 40px;
-    height: 40px;
+    min-width: 35px;
+    height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 2px solid rgba(255, 140, 0, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 140, 0, 0.3);
 }
 
-/* AÇÕES - APENAS 2 BOTÕES */
-.character-actions {
+/* PONTOS */
+.compact-pontos {
     display: flex;
+    align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    margin: 10px 0;
+    padding: 8px 12px;
+    background: rgba(255, 140, 0, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 140, 0, 0.2);
+    font-size: 0.95rem;
 }
 
-.btn-small {
-    padding: 8px 15px;
+.compact-pontos i {
+    color: #ffd700;
+}
+
+.pontos-texto {
+    font-weight: 600;
+    color: #fff;
+}
+
+.pontos-gastos {
+    color: #ccc;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+/* JOGADOR */
+.compact-jogador {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    padding: 6px 10px;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(52, 152, 219, 0.2);
     font-size: 0.85rem;
-    min-width: 100px;
+    color: #aaa;
 }
 
-.btn-ver {
+.compact-jogador i {
+    color: #3498db;
+}
+
+/* AÇÕES */
+.compact-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-compact-ver, .btn-compact-remover {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+.btn-compact-ver {
     background: rgba(52, 152, 219, 0.2);
     color: #3498db;
     border: 1px solid rgba(52, 152, 219, 0.3);
 }
 
-.btn-ver:hover {
+.btn-compact-ver:hover {
     background: rgba(52, 152, 219, 0.3);
 }
 
-.btn-recusar {
+.btn-compact-remover {
     background: rgba(231, 76, 60, 0.2);
     color: #e74c3c;
     border: 1px solid rgba(231, 76, 60, 0.3);
 }
 
-.btn-recusar:hover {
+.btn-compact-remover:hover {
     background: rgba(231, 76, 60, 0.3);
 }
 
-/* STATUS BADGES */
-.status-badge {
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    display: inline-block;
-}
-
-.status-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
-.status-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
-.status-inactive { background: rgba(149, 165, 166, 0.2); color: #95a5a6; }
-
-/* RESPONSIVIDADE */
-@media (max-width: 768px) {
-    .character-attributes-gurps {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .attr-gurps {
-        padding: 5px;
-        min-width: 60px;
-    }
-    
-    .character-actions {
-        flex-direction: column;
-    }
-    
-    .btn-small {
-        width: 100%;
-    }
-}
-
-/* ANIMAÇÃO PARA NOVOS ITENS */
-@keyframes fadeInUp {
+/* ANIMAÇÃO */
+@keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
@@ -1330,11 +1355,38 @@ extraStyles.textContent = `
     }
 }
 
-.character-item {
-    animation: fadeInUp 0.3s ease;
+.character-card-compact {
+    animation: fadeIn 0.3s ease;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+    .characters-list-compact {
+        grid-template-columns: 1fr;
+    }
+    
+    .compact-atributos {
+        padding: 8px;
+    }
+    
+    .attr-item {
+        min-width: 40px;
+    }
+    
+    .attr-value {
+        font-size: 1.1rem;
+        min-width: 30px;
+        height: 30px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .characters-list-compact {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 `;
-document.head.appendChild(extraStyles);
+document.head.appendChild(compactCardStyles);
 </script>
 </body>
 </html>
