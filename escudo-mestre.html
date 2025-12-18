@@ -519,8 +519,7 @@
             </div>
         </div>
     </main>
-
- <script>
+<script>
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -697,12 +696,18 @@ async function loadCharactersForCampaign(campaignId, campaignName) {
             </div>
         `;
         
+        // 1. BUSCAR VÍNCULOS DA CAMPANHA
         const { data: vinculos, error: errorVinculos } = await supabase
             .from('campaign_characters')
             .select('*')
             .eq('campaign_id', campaignId);
         
-        if (errorVinculos) throw errorVinculos;
+        if (errorVinculos) {
+            console.error('Erro ao buscar vínculos:', errorVinculos);
+            throw errorVinculos;
+        }
+        
+        console.log('✅ Vínculos encontrados:', vinculos);
         
         if (!vinculos || vinculos.length === 0) {
             showNoCharactersFound(campaignId);
@@ -712,8 +717,12 @@ async function loadCharactersForCampaign(campaignId, campaignName) {
         const pendentes = vinculos.filter(v => !v.user_id);
         const ativos = vinculos.filter(v => v.user_id);
         
+        console.log(`📊 Pendentes: ${pendentes.length}, Ativos: ${ativos.length}`);
+        
+        // 2. MOSTRAR PENDENTES
         showPendingLinks(pendentes);
         
+        // 3. BUSCAR E MOSTRAR PERSONAGENS VINCULADOS
         if (ativos.length > 0) {
             await showLinkedCharacters(ativos);
         } else {
@@ -774,63 +783,108 @@ function showPendingLinks(pendentes) {
 }
 
 async function showLinkedCharacters(vinculosAtivos) {
+    // Pegar IDs dos personagens dos vínculos
     const characterIds = vinculosAtivos.map(v => v.character_id).filter(id => id);
+    
+    console.log('🔍 IDs dos personagens para buscar:', characterIds);
     
     if (characterIds.length === 0) {
         document.getElementById('charactersList').innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-users-slash"></i>
-                <p>Nenhum personagem encontrado.</p>
+                <p>Nenhum ID de personagem encontrado nos vínculos.</p>
             </div>
         `;
         return;
     }
     
     try {
-        console.log('🔍 Buscando personagens na tabela characters...');
+        // PRIMEIRO: Verificar se existe tabela 'characters'
+        console.log('🔍 Verificando estrutura do banco...');
         
+        // TENTAR BUSCAR NA TABELA 'characters' (baseado no seu SQL)
         const { data: characters, error } = await supabase
             .from('characters')
             .select('*')
             .in('id', characterIds);
         
-        if (error) throw error;
-        
-        if (!characters || characters.length === 0) {
-            document.getElementById('charactersList').innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-search"></i>
-                    <p>Personagens não encontrados na base de dados.</p>
-                </div>
-            `;
-            return;
+        if (error) {
+            console.error('Erro ao buscar na tabela characters:', error);
+            
+            // TENTAR TABELA ALTERNATIVA 'player_characters'
+            console.log('🔄 Tentando tabela player_characters...');
+            const { data: characters2, error: error2 } = await supabase
+                .from('player_characters')
+                .select('*')
+                .in('id', characterIds);
+            
+            if (error2) {
+                console.error('Erro ao buscar na tabela player_characters:', error2);
+                throw new Error('Não foi possível encontrar os personagens');
+            }
+            
+            console.log('✅ Personagens encontrados na tabela player_characters:', characters2);
+            await renderCharacters(characters2 || [], vinculosAtivos);
+        } else {
+            console.log('✅ Personagens encontrados na tabela characters:', characters);
+            await renderCharacters(characters || [], vinculosAtivos);
         }
         
-        console.log('✅ Personagens encontrados:', characters);
-        
-        // Buscar nicknames dos jogadores
-        const userIds = vinculosAtivos.map(v => v.user_id).filter(id => id);
-        let userNicknames = {};
-        
-        if (userIds.length > 0) {
-            try {
-                const { data: profiles, error: profilesError } = await supabase
-                    .from('profiles')
-                    .select('id, username, full_name, email')
-                    .in('id', userIds);
-                
-                if (!profilesError && profiles) {
-                    profiles.forEach(profile => {
-                        userNicknames[profile.id] = 
-                            profile.username || 
-                            profile.full_name || 
-                            profile.email?.split('@')[0] || 
-                            profile.id.substring(0, 6);
-                    });
-                }
-            } catch (err) {
-                console.log('⚠️ Não foi possível buscar nicknames:', err.message);
+    } catch (error) {
+        console.error('💥 Erro ao buscar personagens:', error);
+        document.getElementById('charactersList').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Erro ao Carregar Personagens</h3>
+                <p>${error.message}</p>
+                <button class="btn btn-small" onclick="debugDatabaseStructure()">
+                    <i class="fas fa-bug"></i> Debug Banco de Dados
+                </button>
+            </div>
+        `;
+    }
+}
+
+async function renderCharacters(characters, vinculosAtivos) {
+    if (!characters || characters.length === 0) {
+        document.getElementById('charactersList').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>Personagens Não Encontrados</h3>
+                <p>IDs encontrados nos vínculos, mas não na tabela de personagens.</p>
+                <div style="margin-top: 15px;">
+                    <p><small>IDs buscados: ${vinculosAtivos.map(v => v.character_id?.substring(0, 8) + '...').join(', ')}</small></p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    console.log(`🎨 Renderizando ${characters.length} personagens com dados REAIS`);
+    
+    // BUSCAR NICKNAMES DOS JOGADORES
+    const userIds = vinculosAtivos.map(v => v.user_id).filter(id => id);
+    let userNicknames = {};
+    
+    if (userIds.length > 0) {
+        try {
+            // Tentar buscar perfis
+            const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, username, full_name, email')
+                .in('id', userIds);
+            
+            if (!profilesError && profiles) {
+                profiles.forEach(profile => {
+                    userNicknames[profile.id] = 
+                        profile.username || 
+                        profile.full_name || 
+                        profile.email?.split('@')[0] || 
+                        profile.id.substring(0, 6);
+                });
             }
+        } catch (err) {
+            console.log('⚠️ Não foi possível buscar nicknames:', err.message);
         }
         
         // Usar 6 dígitos do ID para os que não tem nickname
@@ -839,44 +893,30 @@ async function showLinkedCharacters(vinculosAtivos) {
                 userNicknames[userId] = userId.substring(0, 6);
             }
         });
-        
-        // Renderizar personagens compactos
-        renderCompactCharacters(characters, vinculosAtivos, userNicknames);
-        
-    } catch (error) {
-        console.error('Erro ao buscar personagens:', error);
-        document.getElementById('charactersList').innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Erro ao Carregar Personagens</h3>
-                <p>${error.message}</p>
-            </div>
-        `;
     }
-}
-
-function renderCompactCharacters(characters, vinculosAtivos, userNicknames) {
+    
+    // RENDERIZAR PERSONAGENS COM LAYOUT COMPACTO
     document.getElementById('charactersList').innerHTML = `
-        <div class="characters-compact-grid" id="charactersCompactGrid">
+        <div class="characters-compact-grid">
             ${characters.map(char => {
                 const vinculo = vinculosAtivos.find(v => v.character_id === char.id);
                 const jogadorNickname = vinculo && vinculo.user_id ? userNicknames[vinculo.user_id] : 'Desconhecido';
                 
-                // Dados reais do personagem (igual ao personagens.html)
+                // DADOS REAIS DO PERSONAGEM (igual ao personagens.html)
                 const nome = escapeHtml(char.nome || 'Personagem Sem Nome');
                 const raca = escapeHtml(char.raca || 'Sem Raça');
                 const classe = escapeHtml(char.classe || 'Sem Classe');
                 
-                // Atributos REAIS (nomes dos campos da sua tabela)
-                const forca = char.forca || 10;
-                const destreza = char.destreza || 10;
-                const inteligencia = char.inteligencia || 10;
-                const saude = char.saude || 10;
+                // ATRIBUTOS REAIS (verificar nomes dos campos)
+                const forca = char.forca || char.ST || 10;
+                const destreza = char.destreza || char.DX || 10;
+                const inteligencia = char.inteligencia || char.IQ || 10;
+                const saude = char.saude || char.HT || 10;
                 
-                // Pontos REAIS
-                const pontosTotais = char.pontos_totais || 150;
-                const pontosGastos = char.pontos_gastos || 0;
-                const pontosDisponiveis = char.pontos_disponiveis || (pontosTotais - pontosGastos);
+                // PONTOS REAIS
+                const pontosTotais = char.pontos_totais || char.pontosTotais || 150;
+                const pontosGastos = char.pontos_gastos || char.pontosGastos || 0;
+                const pontosDisponiveis = char.pontos_disponiveis || char.pontosDisponiveis || (pontosTotais - pontosGastos);
                 
                 // Data formatada
                 const dataCriacao = formatarData(char.created_at);
@@ -887,9 +927,9 @@ function renderCompactCharacters(characters, vinculosAtivos, userNicknames) {
                 return `
                 <div class="character-compact-card">
                     <div class="compact-header">
-                        <div class="compact-name">
+                        <div class="compact-name" title="${nome}">
                             <i class="fas fa-user"></i>
-                            <span title="${nome}">${nome.length > 20 ? nome.substring(0, 18) + '...' : nome}</span>
+                            <span>${nome.length > 20 ? nome.substring(0, 18) + '...' : nome}</span>
                         </div>
                         <div class="compact-status ${status.toLowerCase()}">${status}</div>
                     </div>
@@ -953,7 +993,6 @@ function renderCompactCharacters(characters, vinculosAtivos, userNicknames) {
         </div>
     `;
 }
-
 async function assignPlayerToLink(linkId) {
     const playerEmail = prompt('Digite o email do jogador para vincular:');
     if (!playerEmail) return;
@@ -1083,7 +1122,10 @@ function showError(error) {
             <h3>Erro</h3>
             <p>${error.message}</p>
             <div style="margin-top: 20px;">
-                <button class="btn btn-small" onclick="loadDashboard()">
+                <button class="btn btn-small" onclick="debugDatabaseStructure()">
+                    <i class="fas fa-bug"></i> Debug
+                </button>
+                <button class="btn btn-small" onclick="loadDashboard()" style="margin-left: 10px;">
                     <i class="fas fa-redo"></i> Recarregar
                 </button>
             </div>
@@ -1105,6 +1147,56 @@ function resetCharacterLists() {
             <p>Selecione uma campanha para ver personagens vinculados</p>
         </div>
     `;
+}
+
+async function debugDatabaseStructure() {
+    try {
+        alert('🔍 INICIANDO DEBUG DO BANCO DE DADOS...\n\nVerificando tabelas e estruturas...');
+        
+        // 1. Verificar tabela campaign_characters
+        const { data: vinculos, error: error1 } = await supabase
+            .from('campaign_characters')
+            .select('campaign_id, character_id, user_id')
+            .limit(5);
+        
+        console.log('📊 Tabela campaign_characters (primeiros 5):', vinculos);
+        
+        if (error1) {
+            alert(`❌ ERRO na tabela campaign_characters:\n${error1.message}`);
+            return;
+        }
+        
+        // 2. Verificar tabelas de personagens
+        const tables = ['characters', 'player_characters', 'fichas', 'personagens'];
+        let tabelaEncontrada = null;
+        let dadosExemplo = null;
+        
+        for (const table of tables) {
+            try {
+                const { data, error } = await supabase
+                    .from(table)
+                    .select('id, nome, forca, destreza, pontos_gastos')
+                    .limit(2);
+                
+                if (!error && data && data.length > 0) {
+                    tabelaEncontrada = table;
+                    dadosExemplo = data;
+                    break;
+                }
+            } catch (err) {
+                console.log(`Tabela ${table} não encontrada ou erro:`, err.message);
+            }
+        }
+        
+        if (tabelaEncontrada) {
+            alert(`✅ TABELA ENCONTRADA: ${tabelaEncontrada}\n\nExemplo de dados:\n${JSON.stringify(dadosExemplo, null, 2)}\n\nOs personagens estão nesta tabela!`);
+        } else {
+            alert('❌ NENHUMA TABELA DE PERSONAGENS ENCONTRADA!\n\nTentou: characters, player_characters, fichas, personagens');
+        }
+        
+    } catch (error) {
+        alert(`💥 ERRO NO DEBUG: ${error.message}`);
+    }
 }
 
 function formatarData(dataString) {
