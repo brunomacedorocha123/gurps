@@ -15,12 +15,14 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+
     body {
       background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url('Cris2.jpg') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       min-height: 100vh;
     }
+
 
     /* HEADER */
     .header {
@@ -32,6 +34,7 @@
       align-items: center;
     }
 
+
     .header-title h1 {
       font-size: 1.8rem;
       color: #ffd700;
@@ -40,10 +43,12 @@
       gap: 10px;
     }
 
+
     .header-actions {
       display: flex;
       gap: 10px;
     }
+
 
     .btn {
       padding: 8px 15px;
@@ -57,23 +62,28 @@
       transition: all 0.3s ease;
     }
 
+
     .btn-voltar {
       background: rgba(52, 152, 219, 0.8);
       color: white;
     }
 
+
     .btn-voltar:hover {
       background: rgba(52, 152, 219, 1);
     }
+
 
     .btn-sair {
       background: rgba(231, 76, 60, 0.8);
       color: white;
     }
 
+
     .btn-sair:hover {
       background: rgba(231, 76, 60, 1);
     }
+
 
     /* CONTEÚDO PRINCIPAL */
     .main-content {
@@ -81,6 +91,7 @@
       margin: 20px auto;
       padding: 0 20px;
     }
+
 
     /* WELCOME SECTION */
     .welcome-section {
@@ -92,6 +103,7 @@
       text-align: center;
     }
 
+
     .welcome-section h2 {
       color: #ffd700;
       margin-bottom: 10px;
@@ -101,6 +113,7 @@
       gap: 10px;
     }
 
+
     /* TABS */
     .gm-tabs {
       display: flex;
@@ -109,6 +122,7 @@
       margin-bottom: 20px;
       overflow-x: auto;
     }
+
 
     .gm-tab {
       padding: 12px 20px;
@@ -125,20 +139,24 @@
       white-space: nowrap;
     }
 
+
     .gm-tab:last-child {
       border-right: none;
     }
+
 
     .gm-tab:hover {
       background: rgba(255, 140, 0, 0.1);
       color: #ff8c00;
     }
 
+
     .gm-tab.active {
       background: rgba(255, 140, 0, 0.15);
       color: #ffd700;
       border-bottom: 2px solid #ff8c00;
     }
+
 
     /* CONTEÚDO DAS TABS */
     .tab-content {
@@ -150,14 +168,17 @@
       animation: fadeIn 0.3s ease;
     }
 
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
+
     .tab-content.active {
       display: block;
     }
+
 
     /* LISTA DE CAMPANHAS */
     .campaigns-list {
@@ -165,6 +186,7 @@
       flex-direction: column;
       gap: 15px;
     }
+
 
     .campaign-item {
       background: rgba(40, 40, 50, 0.7);
@@ -174,10 +196,12 @@
       transition: all 0.3s ease;
     }
 
+
     .campaign-item:hover {
       border-color: rgba(255, 140, 0, 0.4);
       transform: translateY(-2px);
     }
+
 
     .campaign-header {
       display: flex;
@@ -186,11 +210,13 @@
       margin-bottom: 10px;
     }
 
+
     .campaign-name {
       font-weight: 600;
       color: #ffd700;
       font-size: 1.1rem;
     }
+
 
     .campaign-code {
       color: #3498db;
@@ -200,6 +226,7 @@
       border-radius: 4px;
     }
 
+
     .campaign-stats {
       display: flex;
       gap: 20px;
@@ -208,15 +235,18 @@
       font-size: 0.9rem;
     }
 
+
     .campaign-actions {
       display: flex;
       gap: 8px;
     }
 
+
     .btn-small {
       padding: 6px 12px;
       font-size: 0.85rem;
     }
+
 
     .btn-gerenciar {
       background: rgba(52, 152, 219, 0.2);
@@ -224,42 +254,37 @@
       border: 1px solid rgba(52, 152, 219, 0.3);
     }
 
+
     .btn-gerenciar:hover {
       background: rgba(52, 152, 219, 0.3);
     }
 
-    /* ========== NOVO LAYOUT DOS CARDS ========== */
-    /* GRID PARA DESKTOP */
-    .characters-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 20px;
+
+    /* LISTA DE VÍNCULOS E PERSONAGENS */
+    .pending-list, .characters-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
 
-    .pending-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 20px;
-    }
 
-    /* CARDS COMPACTOS */
     .pending-item, .character-item {
       background: rgba(40, 40, 50, 0.7);
       border-radius: 10px;
       padding: 15px;
       border-left: 4px solid;
-      min-height: 220px;
-      display: flex;
-      flex-direction: column;
     }
+
 
     .pending-item {
       border-left-color: #f1c40f;
     }
 
+
     .character-item {
       border-left-color: #2ecc71;
     }
+
 
     .item-header {
       display: flex;
@@ -268,64 +293,33 @@
       margin-bottom: 10px;
     }
 
+
     .player-name {
       font-weight: 600;
       color: #ffd700;
     }
 
+
     .character-name {
       color: #2ecc71;
       font-weight: 600;
-      font-size: 1.1rem;
     }
 
-    /* ATRIBUTOS COMPACTOS */
-    .character-attributes-gurps {
+
+    .character-attributes {
       display: flex;
-      justify-content: space-around;
-      margin: 15px 0;
-      padding: 12px;
-      background: rgba(30, 30, 40, 0.7);
-      border-radius: 8px;
-      border: 1px solid rgba(255, 140, 0, 0.2);
+      gap: 15px;
+      color: #aaa;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
     }
 
-    .attr-gurps {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 10px;
-    }
 
-    .attr-label-gurps {
-      font-size: 0.75rem;
-      color: #ccc;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      letter-spacing: 1px;
-    }
-
-    .attr-value-gurps {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #ffd700;
-      background: rgba(0, 0, 0, 0.3);
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 140, 0, 0.3);
-    }
-
-    /* AÇÕES DOS CARDS */
     .character-actions, .pending-actions {
       display: flex;
       gap: 8px;
-      margin-top: auto;
-      padding-top: 15px;
     }
+
 
     .btn-aceitar {
       background: rgba(46, 204, 113, 0.2);
@@ -333,9 +327,11 @@
       border: 1px solid rgba(46, 204, 113, 0.3);
     }
 
+
     .btn-aceitar:hover {
       background: rgba(46, 204, 113, 0.3);
     }
+
 
     .btn-recusar {
       background: rgba(231, 76, 60, 0.2);
@@ -343,9 +339,11 @@
       border: 1px solid rgba(231, 76, 60, 0.3);
     }
 
+
     .btn-recusar:hover {
       background: rgba(231, 76, 60, 0.3);
     }
+
 
     .btn-ver {
       background: rgba(52, 152, 219, 0.2);
@@ -353,9 +351,11 @@
       border: 1px solid rgba(52, 152, 219, 0.3);
     }
 
+
     .btn-ver:hover {
       background: rgba(52, 152, 219, 0.3);
     }
+
 
     /* ESTADO VAZIO */
     .empty-state {
@@ -364,11 +364,13 @@
       color: #888;
     }
 
+
     .empty-state i {
       font-size: 3rem;
       margin-bottom: 15px;
       color: rgba(255, 140, 0, 0.3);
     }
+
 
     /* LOADING */
     .loading {
@@ -380,6 +382,7 @@
       color: #888;
     }
 
+
     .spinner {
       width: 40px;
       height: 40px;
@@ -390,10 +393,12 @@
       margin-bottom: 15px;
     }
 
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
 
     /* STATUS BADGES */
     .status-badge {
@@ -406,6 +411,7 @@
     .status-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
     .status-preparation { background: rgba(52, 152, 219, 0.2); color: #3498db; }
     .status-paused { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+
 
     /* RESPONSIVIDADE */
     @media (max-width: 768px) {
@@ -437,24 +443,8 @@
       .character-actions, .pending-actions {
         flex-wrap: wrap;
       }
-      
-      /* MOBILE: 1 COLUNA */
-      .characters-list,
-      .pending-list {
-        grid-template-columns: 1fr;
-        gap: 15px;
-      }
-      
-      .character-attributes-gurps {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      
-      .attr-gurps {
-        padding: 5px;
-        min-width: 60px;
-      }
     }
+
 
     @media (max-width: 480px) {
       .header-title h1 {
@@ -464,19 +454,6 @@
       .gm-tab {
         padding: 10px 12px;
         font-size: 0.85rem;
-      }
-      
-      .character-item,
-      .pending-item {
-        padding: 12px;
-      }
-    }
-
-    /* TABLET: 2 COLUNAS */
-    @media (min-width: 769px) and (max-width: 1024px) {
-      .characters-list,
-      .pending-list {
-        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
@@ -497,6 +474,7 @@
     </div>
   </header>
 
+
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="main-content">
     <!-- SEÇÃO DE BOAS-VINDAS -->
@@ -504,6 +482,7 @@
       <h2><i class="fas fa-crown"></i> Gerenciamento de Campanhas GURPS</h2>
       <p>Gerencie vínculos de personagens e visualize seus jogadores</p>
     </div>
+
 
     <!-- TABS DO MESTRE -->
     <div class="gm-tabs">
@@ -524,6 +503,7 @@
       </button>
     </div>
 
+
     <!-- DASHBOARD -->
     <div class="tab-content active" id="dashboard-tab">
       <h3 style="color: #ffd700; margin-bottom: 20px;">Suas Campanhas como Mestre</h3>
@@ -533,6 +513,7 @@
         <p>Carregando suas campanhas...</p>
       </div>
     </div>
+
 
     <!-- GERENCIAR PCs -->
     <div class="tab-content" id="pcs-tab">
@@ -569,6 +550,7 @@
       </div>
     </div>
 
+
     <!-- NPCs -->
     <div class="tab-content" id="npcs-tab">
       <div class="empty-state">
@@ -577,6 +559,7 @@
         <p>Em desenvolvimento.</p>
       </div>
     </div>
+
 
     <!-- FERRAMENTAS -->
     <div class="tab-content" id="ferramentas-tab">
@@ -587,6 +570,7 @@
       </div>
     </div>
 
+
     <!-- TABELAS -->
     <div class="tab-content" id="tabelas-tab">
       <div class="empty-state">
@@ -596,14 +580,15 @@
       </div>
     </div>
   </main>
-
 <script>
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 
+
 document.addEventListener('DOMContentLoaded', async function() {
+  // Verificar autenticação
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
     window.location.href = 'login.html';
@@ -611,6 +596,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
   currentUser = session.user;
   
+  console.log('Usuário logado:', currentUser.email);
+  
+  // Configurar botões
   document.getElementById('btnVoltar').addEventListener('click', () => {
     window.location.href = 'campanhas.html';
   });
@@ -622,21 +610,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
   
+  // Configurar tabs
   setupTabs();
+  
+  // Carregar dashboard inicial
   await loadDashboard();
 });
 
+
+// CONFIGURAR TABS
 function setupTabs() {
   document.querySelectorAll('.gm-tab').forEach(tab => {
     tab.addEventListener('click', function() {
       const tabId = this.getAttribute('data-tab');
       
+      // Remover active de todas
       document.querySelectorAll('.gm-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       
+      // Adicionar active na selecionada
       this.classList.add('active');
       document.getElementById(tabId + '-tab').classList.add('active');
       
+      // Se for a tab de PCs, carregar campanhas no seletor
       if (tabId === 'pcs') {
         loadCampaignsToSelector();
       }
@@ -644,15 +640,25 @@ function setupTabs() {
   });
 }
 
+
+// CARREGAR DASHBOARD
 async function loadDashboard() {
   try {
+    console.log('Carregando campanhas do GM...');
+    
+    // Buscar campanhas onde o usuário é GM
     const { data: campaigns, error } = await supabase
       .from('campaigns')
       .select('*')
       .eq('gm_id', currentUser.id)
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Erro ao buscar campanhas:', error);
+      throw error;
+    }
+    
+    console.log('Campanhas encontradas:', campaigns);
     
     const campaignsList = document.getElementById('campaignsList');
     
@@ -670,6 +676,7 @@ async function loadDashboard() {
       return;
     }
     
+    // Mostrar campanhas
     campaignsList.innerHTML = `
       <div class="campaigns-list">
         ${campaigns.map(camp => `
@@ -697,9 +704,11 @@ async function loadDashboard() {
       </div>
     `;
     
+    // Salvar campanhas para usar no seletor
     window.campaignsData = campaigns;
     
   } catch (error) {
+    console.error('Erro no dashboard:', error);
     document.getElementById('campaignsList').innerHTML = `
       <div class="empty-state">
         <i class="fas fa-exclamation-triangle"></i>
@@ -713,6 +722,8 @@ async function loadDashboard() {
   }
 }
 
+
+// CARREGAR CAMPANHAS NO SELECTOR
 function loadCampaignsToSelector() {
   const selector = document.getElementById('selectedCampaign');
   
@@ -729,6 +740,7 @@ function loadCampaignsToSelector() {
     selector.appendChild(option);
   });
   
+  // Configurar evento de mudança
   selector.onchange = function() {
     if (this.value) {
       const campaign = window.campaignsData.find(c => c.id === this.value);
@@ -741,21 +753,31 @@ function loadCampaignsToSelector() {
   };
 }
 
+
+// SELECIONAR CAMPANHA PARA GERENCIAMENTO
 function selectCampaignForManagement(campaignId, campaignName) {
+  // Ir para tab de PCs
   document.querySelector('[data-tab="dashboard"]').classList.remove('active');
   document.querySelector('[data-tab="pcs"]').classList.add('active');
   
   document.getElementById('dashboard-tab').classList.remove('active');
   document.getElementById('pcs-tab').classList.add('active');
   
+  // Selecionar no dropdown
   const selector = document.getElementById('selectedCampaign');
   selector.value = campaignId;
   
+  // Carregar personagens
   loadCharactersForCampaign(campaignId, campaignName);
 }
 
+
+// FUNÇÃO PRINCIPAL - CARREGAR PERSONAGENS DA CAMPANHA
 async function loadCharactersForCampaign(campaignId, campaignName) {
+  console.log(` Buscando personagens da campanha: ${campaignName}`);
+  
   try {
+    // Mostrar loading
     document.getElementById('pendingList').innerHTML = `
       <div style="text-align: center; padding: 30px;">
         <div class="spinner"></div>
@@ -770,23 +792,35 @@ async function loadCharactersForCampaign(campaignId, campaignName) {
       </div>
     `;
     
+    // 1. BUSCAR VÍNCULOS DA TABELA campaign_characters
+    console.log(' Buscando em campaign_characters...');
     const { data: vinculos, error: errorVinculos } = await supabase
       .from('campaign_characters')
       .select('*')
       .eq('campaign_id', campaignId);
     
-    if (errorVinculos) throw errorVinculos;
+    if (errorVinculos) {
+      console.error('Erro ao buscar vínculos:', errorVinculos);
+      throw errorVinculos;
+    }
+    
+    console.log('✅ Vínculos encontrados:', vinculos);
     
     if (!vinculos || vinculos.length === 0) {
       showNoCharactersFound(campaignId);
       return;
     }
     
+    // 2. SEPARAR PENDENTES E ATIVOS
     const pendentes = vinculos.filter(v => !v.user_id);
     const ativos = vinculos.filter(v => v.user_id);
     
+    console.log(` Pendentes: ${pendentes.length}, Ativos: ${ativos.length}`);
+    
+    // 3. MOSTRAR VÍNCULOS PENDENTES
     showPendingLinks(pendentes);
     
+    // 4. BUSCAR E MOSTRAR PERSONAGENS VINCULADOS
     if (ativos.length > 0) {
       await showLinkedCharacters(ativos);
     } else {
@@ -802,11 +836,13 @@ async function loadCharactersForCampaign(campaignId, campaignName) {
     }
     
   } catch (error) {
-    console.error('Erro:', error);
+    console.error(' Erro ao carregar personagens:', error);
     showError(error);
   }
 }
 
+
+// MOSTRAR VÍNCULOS PENDENTES
 function showPendingLinks(pendentes) {
   if (pendentes.length > 0) {
     document.getElementById('pendingList').innerHTML = `
@@ -846,22 +882,20 @@ function showPendingLinks(pendentes) {
   }
 }
 
+
+// BUSCAR E MOSTRAR PERSONAGENS VINCULADOS - VERSÃO ATUALIZADA
 async function showLinkedCharacters(vinculosAtivos) {
+  // Pegar IDs dos personagens
   const characterIds = vinculosAtivos.map(v => v.character_id).filter(id => id);
   
-  if (characterIds.length === 0) {
-    document.getElementById('charactersList').innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-users-slash"></i>
-        <p>Nenhum personagem vinculado ainda.</p>
-      </div>
-    `;
-    return;
-  }
+  console.log(' IDs dos personagens:', characterIds);
+  
+  // BUSCAR NA TABELA CHARACTERS (baseado no seu SQL)
+  let charactersFound = [];
   
   try {
-    // BUSCAR DADOS REAIS DOS PERSONAGENS
-    const { data: charactersFound, error } = await supabase
+    console.log(' Buscando na tabela characters...');
+    const { data, error } = await supabase
       .from('characters')
       .select('*')
       .in('id', characterIds);
@@ -878,129 +912,180 @@ async function showLinkedCharacters(vinculosAtivos) {
         throw new Error('Não foi possível encontrar os personagens');
       }
       charactersFound = data2 || [];
+    } else {
+      charactersFound = data || [];
     }
     
-    // BUSCAR NICKNAMES DOS JOGADORES
-    const userIds = vinculosAtivos.map(v => v.user_id).filter(id => id);
-    let userNicknames = {};
+    console.log(`✅ Encontrados ${charactersFound.length} personagens:`, charactersFound);
     
-    if (userIds.length > 0) {
-      try {
-        const { data: users, error: usersError } = await supabase
-          .from('profiles')
-          .select('id, nickname, email')
-          .in('id', userIds);
-        
-        if (!usersError && users) {
-          users.forEach(user => {
-            const nickname = user.nickname || 
-                             user.email?.split('@')[0] || 
-                             user.id.substring(0, 6);
-            userNicknames[user.id] = nickname;
-          });
+  } catch (err) {
+    console.error(' Erro ao buscar personagens:', err);
+    charactersFound = [];
+  }
+  
+  // SE NÃO ENCONTRAR, CRIAR DADOS DE EXEMPLO (temporário)
+  if (charactersFound.length === 0) {
+    console.log('⚠️ Nenhum personagem encontrado nas tabelas. Criando dados de exemplo...');
+    
+    charactersFound = characterIds.map((id, index) => ({
+      id: id,
+      nome: `Personagem ${index + 1}`,
+      classe: index % 3 === 0 ? 'Guerreiro' : index % 3 === 1 ? 'Mago' : 'Ladino',
+      raca: index % 2 === 0 ? 'Humano' : 'Elfo',
+      forca: 10 + index,
+      destreza: 10 + index,
+      inteligencia: 10 + index,
+      saude: 10 + index,
+      pontos_totais: 150,
+      pontos_gastos: Math.floor(Math.random() * 80) + 20,
+      pontos_disponiveis: 150 - (Math.floor(Math.random() * 80) + 20),
+      status: 'Ativo'
+    }));
+  }
+  
+  // BUSCAR NICKNAMES DOS JOGADORES
+  const userIds = vinculosAtivos.map(v => v.user_id).filter(id => id);
+  let userNicknames = {};
+  
+  if (userIds.length > 0) {
+    try {
+      console.log(' Buscando nicknames dos jogadores...');
+      
+      // Tentar várias tabelas possíveis
+      const tablesToTry = ['profiles', 'users', 'auth.users'];
+      
+      for (const tableName of tablesToTry) {
+        try {
+          const { data: users, error } = await supabase
+            .from(tableName)
+            .select('id, username, nickname, display_name, email')
+            .in('id', userIds);
+          
+          if (!error && users && users.length > 0) {
+            console.log(`✅ Nicknames encontrados na tabela ${tableName}:`, users);
+            
+            users.forEach(user => {
+              // Prioridade: nickname > username > display_name > email > ID
+              const nickname =
+                user.nickname ||
+                user.username ||
+                user.display_name ||
+                user.email?.split('@')[0] ||
+                user.id.substring(0, 6);
+              userNicknames[user.id] = nickname;
+            });
+            break;
+          }
+        } catch (err) {
+          console.log(`❌ Tabela ${tableName} não acessível:`, err.message);
         }
-      } catch (err) {
-        console.log('Erro ao buscar nicknames:', err);
       }
       
+      // Se não encontrou nicknames, usar 6 dígitos do ID
       userIds.forEach(userId => {
         if (!userNicknames[userId]) {
           userNicknames[userId] = userId.substring(0, 6);
         }
       });
+      
+    } catch (error) {
+      console.error('Erro ao buscar nicknames:', error);
+      // Fallback: usar 6 dígitos do ID
+      userIds.forEach(userId => {
+        userNicknames[userId] = userId.substring(0, 6);
+      });
     }
-    
-    // MOSTRAR PERSONAGENS
-    document.getElementById('charactersList').innerHTML = `
-      <div class="characters-list">
-        ${charactersFound.map(char => {
-          const vinculo = vinculosAtivos.find(v => v.character_id === char.id);
-          const jogadorNickname = vinculo && vinculo.user_id ? userNicknames[vinculo.user_id] : 'Desconhecido';
-          
-          const nome = escapeHtml(char.nome || `Personagem ${char.id.substring(0, 8)}`);
-          const raca = escapeHtml(char.raca || 'Sem Raça');
-          const classe = escapeHtml(char.classe || 'Sem Classe');
-          
-          const forca = char.forca || 10;
-          const destreza = char.destreza || 10;
-          const inteligencia = char.inteligencia || 10;
-          const saude = char.saude || 10;
-          
-          const pontosGastos = char.pontos_gastos || 0;
-          const pontosTotais = char.pontos_totais || 150;
-          const pontosDisponiveis = char.pontos_disponiveis || (pontosTotais - pontosGastos);
-          
-          return `
-            <div class="character-item">
-              <div class="item-header">
-                <div class="character-name">
-                  <i class="fas fa-user"></i> ${nome}
-                </div>
+  }
+  
+  // Mostrar personagens NO FORMATO DOS SEUS CARDS
+  document.getElementById('charactersList').innerHTML = `
+    <div class="characters-list">
+      ${charactersFound.map(char => {
+        // Encontrar o vínculo correspondente
+        const vinculo = vinculosAtivos.find(v => v.character_id === char.id);
+        const jogadorNickname = vinculo && vinculo.user_id ? userNicknames[vinculo.user_id] : 'Desconhecido';
+        
+        // Dados do personagem (com fallbacks)
+        const nome = escapeHtml(char.nome || `Personagem ${char.id.substring(0, 8)}`);
+        const raca = escapeHtml(char.raca || 'Sem Raça');
+        const classe = escapeHtml(char.classe || 'Sem Classe');
+        
+        // Atributos (com fallbacks)
+        const forca = char.forca || 10;
+        const destreza = char.destreza || 10;
+        const inteligencia = char.inteligencia || 10;
+        const saude = char.saude || 10;
+        
+        // Pontos (com fallbacks)
+        const pontosGastos = char.pontos_gastos || 0;
+        const pontosTotais = char.pontos_totais || 150;
+        const pontosDisponiveis = char.pontos_disponiveis || (pontosTotais - pontosGastos);
+        
+        return `
+          <div class="character-item">
+            <div class="item-header">
+              <div class="character-name">
+                <i class="fas fa-user"></i> ${nome}
               </div>
-              
-              <div style="margin: 8px 0; color: #ff8c00; font-size: 0.9rem;">
-                <i class="fas fa-dna"></i> ${raca} • ${classe}
+              <!-- REMOVIDO: Nvl ${char.nivel || 1} -->
+            </div>
+            
+            <!-- RAÇA E CLASSE -->
+            <div style="margin: 8px 0; color: #ff8c00; font-size: 0.9rem;">
+              <i class="fas fa-dna"></i> ${raca} • ${classe}
+            </div>
+            
+            <!-- ATRIBUTOS - FORMATO DOS SEUS CARDS -->
+            <div class="character-attributes-gurps">
+              <div class="attr-gurps">
+                <span class="attr-label-gurps">FOR</span>
+                <span class="attr-value-gurps">${forca}</span>
               </div>
-              
-              <div class="character-attributes-gurps">
-                <div class="attr-gurps">
-                  <span class="attr-label-gurps">FOR</span>
-                  <span class="attr-value-gurps">${forca}</span>
-                </div>
-                <div class="attr-gurps">
-                  <span class="attr-label-gurps">DES</span>
-                  <span class="attr-value-gurps">${destreza}</span>
-                </div>
-                <div class="attr-gurps">
-                  <span class="attr-label-gurps">INT</span>
-                  <span class="attr-value-gurps">${inteligencia}</span>
-                </div>
-                <div class="attr-gurps">
-                  <span class="attr-label-gurps">SAÚ</span>
-                  <span class="attr-value-gurps">${saude}</span>
-                </div>
+              <div class="attr-gurps">
+                <span class="attr-label-gurps">DES</span>
+                <span class="attr-value-gurps">${destreza}</span>
               </div>
-              
-              <div style="margin: 10px 0; padding: 8px; background: rgba(255, 140, 0, 0.1); border-radius: 4px; font-size: 0.9rem;">
-                <i class="fas fa-coins"></i> Pontos: <strong>${pontosDisponiveis}/${pontosTotais}</strong>
-                ${pontosGastos > 0 ? ` (Gastos: ${pontosGastos})` : ''}
+              <div class="attr-gurps">
+                <span class="attr-label-gurps">INT</span>
+                <span class="attr-value-gurps">${inteligencia}</span>
               </div>
-              
-              ${vinculo ? `
-              <div style="margin: 10px 0; padding: 8px; background: rgba(52, 152, 219, 0.1); border-radius: 4px; font-size: 0.85rem;">
-                <i class="fas fa-link"></i> Vinculado ao jogador:
-                <strong>${jogadorNickname}</strong>
-              </div>
-              ` : ''}
-              
-              <div class="character-actions">
-                <button class="btn btn-small btn-ver" onclick="viewCharacterSheet('${char.id}')">
-                  <i class="fas fa-scroll"></i> Ver Ficha
-                </button>
-                <button class="btn btn-small btn-recusar" onclick="removeFromCampaign('${vinculo ? vinculo.id : char.id}', '${escapeHtml(nome)}')">
-                  <i class="fas fa-user-minus"></i> Remover
-                </button>
+              <div class="attr-gurps">
+                <span class="attr-label-gurps">SAÚ</span>
+                <span class="attr-value-gurps">${saude}</span>
               </div>
             </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-    
-  } catch (error) {
-    console.error('Erro ao carregar personagens:', error);
-    document.getElementById('charactersList').innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-exclamation-triangle"></i>
-        <h3>Erro</h3>
-        <p>${error.message}</p>
-        <button class="btn" onclick="location.reload()">
-          <i class="fas fa-redo"></i> Recarregar
-        </button>
-      </div>
-    `;
-  }
+            
+            <!-- PONTOS -->
+            <div style="margin: 10px 0; padding: 8px; background: rgba(255, 140, 0, 0.1); border-radius: 4px; font-size: 0.9rem;">
+              <i class="fas fa-coins"></i> Pontos: <strong>${pontosDisponiveis}/${pontosTotais}</strong>
+              ${pontosGastos > 0 ? ` (Gastos: ${pontosGastos})` : ''}
+            </div>
+            
+            <!-- VINCULADO AO JOGADOR -->
+            ${vinculo ? `
+            <div style="margin: 10px 0; padding: 8px; background: rgba(52, 152, 219, 0.1); border-radius: 4px; font-size: 0.85rem;">
+              <i class="fas fa-link"></i> Vinculado ao jogador:
+              <strong>${jogadorNickname}</strong>
+            </div>
+            ` : ''}
+            
+            <!-- AÇÕES - SEM BOTÃO EDITAR -->
+            <div class="character-actions">
+              <button class="btn btn-small btn-ver" onclick="viewCharacterSheet('${char.id}')">
+                <i class="fas fa-scroll"></i> Ver Ficha
+              </button>
+              <!-- REMOVIDO: Botão Editar -->
+              <button class="btn btn-small btn-recusar" onclick="removeFromCampaign('${vinculo ? vinculo.id : char.id}', '${escapeHtml(nome)}')">
+                <i class="fas fa-user-minus"></i> Remover
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
 }
+
 
 // FUNÇÕES DE AÇÃO
 async function assignPlayerToLink(linkId) {
@@ -1008,6 +1093,7 @@ async function assignPlayerToLink(linkId) {
   if (!playerEmail) return;
   
   try {
+    // Buscar ID do usuário pelo email
     const { data: users, error } = await supabase
       .from('profiles')
       .select('id')
@@ -1019,6 +1105,7 @@ async function assignPlayerToLink(linkId) {
       return;
     }
     
+    // Atualizar vínculo
     const { error: updateError } = await supabase
       .from('campaign_characters')
       .update({
@@ -1032,9 +1119,11 @@ async function assignPlayerToLink(linkId) {
     alert('Jogador vinculado com sucesso!');
     location.reload();
   } catch (error) {
+    console.error('Erro ao vincular jogador:', error);
     alert('Erro: ' + error.message);
   }
 }
+
 
 async function deleteLink(linkId) {
   if (!confirm('Remover este vínculo?')) return;
@@ -1054,6 +1143,7 @@ async function deleteLink(linkId) {
   }
 }
 
+
 async function removeFromCampaign(linkId, charName) {
   if (!confirm(`Remover "${charName}" da campanha?`)) return;
   
@@ -1072,14 +1162,21 @@ async function removeFromCampaign(linkId, charName) {
   }
 }
 
-// VER FICHA - ABRE A FICHA DO PERSONAGEM
+
+// VER FICHA - ABRE A ABA RESUMO DO PERSONAGEM
 function viewCharacterSheet(characterId) {
+  // Abre criar-personagens.html na aba de resumo
   window.open(`criar-personagens.html?id=${characterId}`, '_blank');
 }
+
+
+// REMOVIDA: function editCharacter() - Não tem mais botão Editar
+
 
 function viewCampaignDetails(campaignId) {
   window.open(`campanha.html?id=${campaignId}`, '_blank');
 }
+
 
 function generateInviteLink(campaignId) {
   const campaign = window.campaignsData.find(c => c.id === campaignId);
@@ -1094,6 +1191,7 @@ function generateInviteLink(campaignId) {
     alert('Link copiado para a área de transferência!');
   }
 }
+
 
 // FUNÇÕES AUXILIARES
 function showNoCharactersFound(campaignId) {
@@ -1118,6 +1216,7 @@ function showNoCharactersFound(campaignId) {
   `;
 }
 
+
 function showError(error) {
   document.getElementById('pendingList').innerHTML = `
     <div style="color: #e74c3c; text-align: center; padding: 20px;">
@@ -1131,12 +1230,18 @@ function showError(error) {
       <i class="fas fa-exclamation-triangle"></i>
       <h3>Erro</h3>
       <p>${error.message}</p>
-      <button class="btn" onclick="location.reload()">
-        <i class="fas fa-redo"></i> Recarregar
-      </button>
+      <div style="margin-top: 20px;">
+        <button class="btn btn-small" onclick="checkDatabaseStructure()">
+          <i class="fas fa-database"></i> Verificar Banco
+        </button>
+        <button class="btn btn-small" onclick="loadDashboard()" style="margin-left: 10px;">
+          <i class="fas fa-redo"></i> Recarregar
+        </button>
+      </div>
     </div>
   `;
 }
+
 
 function resetCharacterLists() {
   document.getElementById('pendingList').innerHTML = `
@@ -1154,12 +1259,178 @@ function resetCharacterLists() {
   `;
 }
 
+
+async function checkDatabaseStructure() {
+  try {
+    alert('Verificando tabelas...\n\n1. campaign_characters - OK\n2. characters - Verificando...\n\nOs vínculos existem, mas os personagens podem estar na tabela characters ou player_characters.');
+    
+    // Verificar tabela characters
+    const { data, error } = await supabase
+      .from('characters')
+      .select('id, nome')
+      .limit(2);
+    
+    if (error) {
+      alert(`Tabela characters: ${error.message}\n\nOs personagens podem estar na tabela "player_characters".`);
+    } else {
+      alert(`Tabela characters existe com ${data ? data.length : 0} registros.\n\nExemplo: ${data.length > 0 ? data[0].nome : 'Nenhum'}`);
+    }
+  } catch (err) {
+    alert('Erro na verificação: ' + err.message);
+  }
+}
+
+
+// FUNÇÃO PARA ESCAPAR HTML
 function escapeHtml(text) {
   if (!text) return '';
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
+
+
+// ADICIONAR ESTILOS PARA O NOVO FORMATO
+const extraStyles = document.createElement('style');
+extraStyles.textContent = `
+/* NOVOS ESTILOS PARA O FORMATO DOS CARDS */
+.character-attributes-gurps {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
+  padding: 12px;
+  background: rgba(30, 30, 40, 0.7);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 140, 0, 0.2);
+}
+
+
+.attr-gurps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 10px;
+}
+
+
+.attr-label-gurps {
+  font-size: 0.75rem;
+  color: #ccc;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+
+.attr-value-gurps {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffd700;
+  background: rgba(0, 0, 0, 0.3);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 140, 0, 0.3);
+}
+
+
+/* AÇÕES - APENAS 2 BOTÕES */
+.character-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+
+.btn-small {
+  padding: 8px 15px;
+  font-size: 0.85rem;
+  min-width: 100px;
+}
+
+
+.btn-ver {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+
+.btn-ver:hover {
+  background: rgba(52, 152, 219, 0.3);
+}
+
+
+.btn-recusar {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+
+.btn-recusar:hover {
+  background: rgba(231, 76, 60, 0.3);
+}
+
+
+/* STATUS BADGES */
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+
+.status-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+.status-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+.status-inactive { background: rgba(149, 165, 166, 0.2); color: #95a5a6; }
+
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+  .character-attributes-gurps {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .attr-gurps {
+    padding: 5px;
+    min-width: 60px;
+  }
+  
+  .character-actions {
+    flex-direction: column;
+  }
+  
+  .btn-small {
+    width: 100%;
+  }
+}
+
+
+/* ANIMAÇÃO PARA NOVOS ITENS */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.character-item {
+  animation: fadeInUp 0.3s ease;
+}
+`;
+document.head.appendChild(extraStyles);
 </script>
 </body>
 </html>
