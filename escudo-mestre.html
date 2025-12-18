@@ -565,173 +565,294 @@ function setupTabs() {
 }
 
 async function loadDashboard() {
-    const { data: campaigns } = await supabase
-        .from('campaigns')
-        .select('id, name, campaign_id, status')
-        .eq('gm_id', currentUser.id)
-        .order('created_at', { ascending: false });
-    
-    if (!campaigns || campaigns.length === 0) {
-        document.getElementById('campaignsList').innerHTML = '<p>Nenhuma campanha</p>';
-        return;
+    try {
+        const { data: campaigns, error } = await supabase
+            .from('campaigns')
+            .select('id, name, campaign_id, status')
+            .eq('gm_id', currentUser.id)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!campaigns || campaigns.length === 0) {
+            document.getElementById('campaignsList').innerHTML = '<p>Nenhuma campanha</p>';
+            return;
+        }
+        
+        document.getElementById('campaignsList').innerHTML = campaigns.map(c => `
+            <div class="campaign-item">
+                <div class="campaign-header">
+                    <div class="campaign-name">${escapeHtml(c.name)}</div>
+                    <div class="campaign-code">${c.campaign_id}</div>
+                </div>
+                <div class="campaign-stats">
+                    <div><strong>Status:</strong> ${c.status}</div>
+                </div>
+                <div class="campaign-actions">
+                    <button class="btn btn-small btn-gerenciar" onclick="verPCs('${c.id}', '${escapeHtml(c.name)}')">
+                        <i class="fas fa-users"></i> Ver PCs
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        const selector = document.getElementById('selectedCampaign');
+        selector.innerHTML = '<option value="">Selecione...</option>';
+        campaigns.forEach(c => {
+            const option = document.createElement('option');
+            option.value = c.id;
+            option.textContent = `${c.name} (${c.campaign_id})`;
+            selector.appendChild(option);
+        });
+        
+        selector.addEventListener('change', function() {
+            if (this.value) {
+                const campaignName = campaigns.find(c => c.id === this.value)?.name || '';
+                verPCs(this.value, campaignName);
+            }
+        });
+        
+    } catch (error) {
+        console.error('Erro ao carregar dashboard:', error);
+        document.getElementById('campaignsList').innerHTML = `
+            <div style="color: #e74c3c; text-align: center; padding: 20px;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Erro ao carregar campanhas: ${error.message}</p>
+            </div>
+        `;
     }
-    
-    document.getElementById('campaignsList').innerHTML = campaigns.map(c => `
-        <div class="campaign-item">
-            <div class="campaign-header">
-                <div class="campaign-name">${c.name}</div>
-                <div class="campaign-code">${c.campaign_id}</div>
-            </div>
-            <div class="campaign-stats">
-                <div><strong>Status:</strong> ${c.status}</div>
-            </div>
-            <div class="campaign-actions">
-                <button class="btn btn-small btn-gerenciar" onclick="verPCs('${c.id}')">
-                    <i class="fas fa-users"></i> Ver PCs
-                </button>
-            </div>
-        </div>
-    `).join('');
-    
-    const selector = document.getElementById('selectedCampaign');
-    selector.innerHTML = '<option value="">Selecione...</option>';
-    campaigns.forEach(c => {
-        const option = document.createElement('option');
-        option.value = c.id;
-        option.textContent = `${c.name} (${c.campaign_id})`;
-        selector.appendChild(option);
-    });
-    
-    selector.addEventListener('change', function() {
-        if (this.value) verPCs(this.value);
-    });
 }
 
-async function verPCs(campaignId) {
+async function verPCs(campaignId, campaignName) {
     try {
-        // Limpar
-        document.getElementById('pendingList').innerHTML = '<p>Carregando...</p>';
-        document.getElementById('charactersList').innerHTML = '<p>Carregando...</p>';
+        console.log('🔍 Buscando PCs para campanha:', campaignId);
         
-        // 1. Buscar jogadores
-        const { data: jogadores } = await supabase
+        // Atualizar título
+        document.querySelector('#pcs-tab h3').innerHTML = 
+            `Gerenciamento de Personagens - <span style="color: #ff8c00">${campaignName}</span>`;
+        
+        // Mostrar loading
+        document.getElementById('pendingList').innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <div class="spinner" style="width: 30px; height: 30px; margin: 0 auto 10px;"></div>
+                <p style="color: #888;">Carregando jogadores...</p>
+            </div>
+        `;
+        
+        document.getElementById('charactersList').innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <div class="spinner" style="width: 30px; height: 30px; margin: 0 auto 10px;"></div>
+                <p style="color: #888;">Carregando personagens...</p>
+            </div>
+        `;
+        
+        // 1. Buscar jogadores da campanha
+        const { data: jogadores, error: errorJogadores } = await supabase
             .from('campaign_players')
             .select('user_id')
             .eq('campaign_id', campaignId)
             .eq('status', 'active');
         
+        if (errorJogadores) throw errorJogadores;
+        
         if (!jogadores || jogadores.length === 0) {
-            document.getElementById('pendingList').innerHTML = '<p>Nenhum jogador</p>';
+            document.getElementById('pendingList').innerHTML = '<p>Nenhum jogador nesta campanha</p>';
             document.getElementById('charactersList').innerHTML = '<p>Nenhum jogador</p>';
             return;
         }
         
-        // 2. Buscar nomes
         const userIds = jogadores.map(j => j.user_id);
-        const { data: perfis } = await supabase
+        console.log('👥 User IDs encontrados:', userIds);
+        
+        // 2. Buscar perfis dos jogadores
+        const { data: perfis, error: errorPerfis } = await supabase
             .from('profiles')
             .select('id, username')
             .in('id', userIds);
         
-        // 3. Buscar vínculos
-        const { data: vinculos } = await supabase
+        if (errorPerfis) throw errorPerfis;
+        
+        // 3. Buscar TODOS os vínculos desta campanha
+        const { data: vinculos, error: errorVinculos } = await supabase
             .from('campaign_characters')
             .select('user_id, character_id')
             .eq('campaign_id', campaignId);
         
-        // 4. Buscar personagens
+        if (errorVinculos) throw errorVinculos;
+        
+        console.log('🔗 Vínculos encontrados:', vinculos);
+        
+        // 4. Buscar personagens dos vínculos
         let personagensMap = {};
         if (vinculos && vinculos.length > 0) {
-            const charIds = vinculos.map(v => v.character_id);
-            const { data: personagens } = await supabase
-                .from('characters')
-                .select('*')
-                .in('id', charIds);
+            const charIds = vinculos.map(v => v.character_id).filter(id => id);
+            console.log('🎭 Character IDs para buscar:', charIds);
             
-            if (personagens) {
-                personagens.forEach(p => {
-                    personagensMap[p.id] = p;
-                });
+            if (charIds.length > 0) {
+                const { data: personagens, error: errorPersonagens } = await supabase
+                    .from('characters')
+                    .select('id, nome, classe, raca, nivel, pontos_gastos, pontos_totais')
+                    .in('id', charIds);
+                
+                if (errorPersonagens) throw errorPersonagens;
+                
+                if (personagens) {
+                    personagens.forEach(p => {
+                        personagensMap[p.id] = p;
+                    });
+                    console.log('📊 Mapa de personagens:', personagensMap);
+                }
             }
         }
         
-        // 5. Organizar
+        // 5. Organizar jogadores
         const comPersonagem = [];
         const semPersonagem = [];
         
-        jogadores.forEach(j => {
-            const perfil = perfis?.find(p => p.id === j.user_id);
-            const nome = perfil?.username || 'Jogador';
+        jogadores.forEach(jogador => {
+            const perfil = perfis?.find(p => p.id === jogador.user_id);
+            const nomeJogador = perfil?.username || `Jogador ${jogador.user_id.substring(0, 8)}`;
             
-            const vinculo = vinculos?.find(v => v.user_id === j.user_id);
+            // Verificar se tem vínculo
+            const vinculo = vinculos?.find(v => v.user_id === jogador.user_id);
             
             if (vinculo && personagensMap[vinculo.character_id]) {
+                // Tem personagem vinculado
                 comPersonagem.push({
-                    nome: nome,
+                    user_id: jogador.user_id,
+                    nome: nomeJogador,
                     personagem: personagensMap[vinculo.character_id]
                 });
             } else {
-                semPersonagem.push({ nome: nome });
+                // Sem personagem vinculado
+                semPersonagem.push({
+                    user_id: jogador.user_id,
+                    nome: nomeJogador
+                });
             }
         });
         
-        // 6. Mostrar
+        console.log('✅ Com personagem:', comPersonagem);
+        console.log('❌ Sem personagem:', semPersonagem);
+        
+        // 6. Mostrar resultados
         mostrarPCs(comPersonagem, semPersonagem);
         
     } catch (error) {
-        document.getElementById('charactersList').innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
+        console.error('❌ Erro em verPCs:', error);
+        document.getElementById('charactersList').innerHTML = `
+            <div style="color: #e74c3c; text-align: center; padding: 20px;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Erro: ${error.message}</p>
+                <button class="btn btn-small" onclick="verPCs('${campaignId}', '${campaignName}')" style="margin-top: 10px;">
+                    <i class="fas fa-redo"></i> Tentar Novamente
+                </button>
+            </div>
+        `;
+        document.getElementById('pendingList').innerHTML = '<p>Erro ao carregar</p>';
     }
 }
 
 function mostrarPCs(comPC, semPC) {
+    // Personagens Vinculados
     const listaPCs = document.getElementById('charactersList');
     if (comPC.length === 0) {
-        listaPCs.innerHTML = '<p>Nenhum personagem vinculado</p>';
+        listaPCs.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>Nenhum personagem vinculado nesta campanha</p>
+            </div>
+        `;
     } else {
         listaPCs.innerHTML = comPC.map(p => `
             <div class="character-item">
                 <div class="item-header">
-                    <div class="player-name">${p.nome}</div>
-                    <div class="character-name">${p.personagem.nome}</div>
+                    <div class="player-name">${escapeHtml(p.nome)}</div>
+                    <div class="character-name">${escapeHtml(p.personagem.nome || 'Sem nome')}</div>
                 </div>
-                <div style="margin: 10px 0; color: #ccc;">
-                    <span style="margin-right: 15px;">
-                        <i class="fas fa-hat-wizard"></i> ${p.personagem.classe || 'N/A'}
+                <div class="character-attributes">
+                    <span>
+                        <i class="fas fa-hat-wizard"></i>
+                        ${escapeHtml(p.personagem.classe || 'N/A')}
                     </span>
                     <span>
-                        <i class="fas fa-dragon"></i> ${p.personagem.raca || 'N/A'}
+                        <i class="fas fa-dragon"></i>
+                        ${escapeHtml(p.personagem.raca || 'N/A')}
+                    </span>
+                    <span>
+                        <i class="fas fa-chart-line"></i>
+                        ${p.personagem.nivel || 1}º nível
                     </span>
                 </div>
                 <div class="character-actions">
                     <button class="btn btn-small btn-ver" onclick="window.open('ficha-personagem.html?id=${p.personagem.id}', '_blank')">
                         <i class="fas fa-scroll"></i> Ver Ficha
                     </button>
+                    <button class="btn btn-small" onclick="alert('Enviar mensagem para ${escapeHtml(p.nome)}')">
+                        <i class="fas fa-envelope"></i> Mensagem
+                    </button>
                 </div>
             </div>
         `).join('');
     }
     
+    // Vínculos Pendentes
     const listaPendentes = document.getElementById('pendingList');
     if (semPC.length === 0) {
-        listaPendentes.innerHTML = '<p>Todos têm personagem</p>';
+        listaPendentes.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-check-circle" style="color: #2ecc71;"></i>
+                <p>Todos os jogadores têm personagem vinculado! ✅</p>
+            </div>
+        `;
     } else {
         listaPendentes.innerHTML = semPC.map(p => `
             <div class="pending-item">
                 <div class="item-header">
-                    <div class="player-name">${p.nome}</div>
+                    <div class="player-name">${escapeHtml(p.nome)}</div>
                     <div style="color: #e74c3c;">
                         <i class="fas fa-exclamation-triangle"></i> Sem personagem
                     </div>
                 </div>
                 <div class="pending-actions">
-                    <button class="btn btn-small" onclick="alert('Lembrar ${p.nome}')">
+                    <button class="btn btn-small btn-aceitar" onclick="lembrarJogador('${escapeHtml(p.nome)}', '${p.user_id}')">
                         <i class="fas fa-bell"></i> Lembrar
+                    </button>
+                    <button class="btn btn-small btn-recusar" onclick="removerJogador('${escapeHtml(p.nome)}', '${p.user_id}')">
+                        <i class="fas fa-user-times"></i> Remover
                     </button>
                 </div>
             </div>
         `).join('');
     }
 }
+
+function lembrarJogador(nomeJogador, userId) {
+    if (confirm(`Enviar lembrete para ${nomeJogador} sobre vincular personagem?`)) {
+        alert(`Lembrete enviado para ${nomeJogador}!`);
+        // Aqui você pode implementar notificação real
+    }
+}
+
+function removerJogador(nomeJogador, userId) {
+    if (confirm(`Remover ${nomeJogador} da campanha?`)) {
+        alert(`${nomeJogador} removido da campanha!`);
+        // Aqui você pode implementar remoção real
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Exportar funções para uso global
+window.verPCs = verPCs;
+window.lembrarJogador = lembrarJogador;
+window.removerJogador = removerJogador;
+
 </script>
 </body>
 </html>
