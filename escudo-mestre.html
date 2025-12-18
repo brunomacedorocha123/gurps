@@ -609,11 +609,11 @@ async function loadDashboard() {
 
 async function verPCs(campaignId) {
     try {
-        // LIMPAR
+        // Limpar
         document.getElementById('pendingList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando...</p></div>';
         document.getElementById('charactersList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando...</p></div>';
         
-        // 1. BUSCAR JOGADORES
+        // 1. Buscar jogadores
         const { data: jogadores } = await supabase
             .from('campaign_players')
             .select(`
@@ -629,7 +629,7 @@ async function verPCs(campaignId) {
             return;
         }
         
-        // 2. BUSCAR VÍNCULOS
+        // 2. Buscar vínculos DA TABELA CORRETA
         const { data: vinculos } = await supabase
             .from('campaign_characters')
             .select(`
@@ -646,7 +646,7 @@ async function verPCs(campaignId) {
             `)
             .eq('campaign_id', campaignId);
         
-        // 3. ORGANIZAR
+        // 3. Organizar
         const comPersonagem = [];
         const semPersonagem = [];
         
@@ -667,7 +667,7 @@ async function verPCs(campaignId) {
             }
         });
         
-        // 4. MOSTRAR
+        // 4. Mostrar
         mostrarPCs(comPersonagem, semPersonagem);
         
     } catch (error) {
@@ -676,7 +676,7 @@ async function verPCs(campaignId) {
 }
 
 function mostrarPCs(comPC, semPC) {
-    // PERSONAGENS VINCULADOS
+    // Personagens vinculados
     const listaPCs = document.getElementById('charactersList');
     if (comPC.length === 0) {
         listaPCs.innerHTML = '<p>Nenhum personagem vinculado</p>';
@@ -704,7 +704,7 @@ function mostrarPCs(comPC, semPC) {
         `).join('');
     }
     
-    // SEM PERSONAGEM
+    // Sem personagem
     const listaPendentes = document.getElementById('pendingList');
     if (semPC.length === 0) {
         listaPendentes.innerHTML = '<p>Todos têm personagem</p>';
@@ -720,9 +720,6 @@ function mostrarPCs(comPC, semPC) {
                 <div class="pending-actions">
                     <button class="btn btn-small" onclick="alert('Lembrar ${p.nome}')">
                         <i class="fas fa-bell"></i> Lembrar
-                    </button>
-                    <button class="btn btn-small btn-ver" onclick="alert('Ver personagens de ${p.nome}')">
-                        <i class="fas fa-search"></i> Ver Personagens
                     </button>
                 </div>
             </div>
