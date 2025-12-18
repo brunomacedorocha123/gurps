@@ -520,9 +520,9 @@
         </div>
     </main>
 
-  <script>
+ <script>
     // ============================================
-    // ESCUDO DO MESTRE - VERSÃO FINAL CORRIGIDA
+    // ESCUDO DO MESTRE - VERSÃO DEFINITIVA
     // ============================================
 
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
@@ -537,6 +537,7 @@
     // ============================================
 
     document.addEventListener('DOMContentLoaded', async function() {
+        console.log('🚀 Iniciando Escudo do Mestre...');
         await initEscudoMestre();
     });
 
@@ -549,7 +550,7 @@
                 return;
             }
             currentUser = session.user;
-            console.log('✅ Usuário logado:', currentUser.email);
+            console.log('✅ Usuário logado:', currentUser.email, 'ID:', currentUser.id);
             
             // 2. Configurar botões
             setupEventListeners();
@@ -562,7 +563,7 @@
             
         } catch (error) {
             console.error('Erro ao iniciar:', error);
-            showError('Erro ao carregar. Recarregue a página.');
+            showMessage('Erro ao carregar. Recarregue a página.', 'error');
         }
     }
 
@@ -585,6 +586,7 @@
         // Seletor de campanha na aba PCs
         document.getElementById('selectedCampaign').addEventListener('change', function() {
             const campaignId = this.value;
+            console.log('🎯 Campanha selecionada:', campaignId);
             if (campaignId) {
                 loadCampaignPCs(campaignId);
             } else {
@@ -620,17 +622,20 @@
     }
 
     // ============================================
-    // CARREGAR CAMPANHAS DO USUÁRIO (MESTRE)
+    // CARREGAR CAMPANHAS DO MESTRE
     // ============================================
 
     async function loadUserCampaigns() {
         try {
-            console.log('📋 Carregando campanhas do mestre...');
+            console.log('📋 Buscando campanhas do mestre...');
             
-            // Buscar campanhas onde o usuário é MESTRE (gm_id)
+            const container = document.getElementById('campaignsList');
+            container.innerHTML = '<div class="loading">Carregando campanhas...</div>';
+            
+            // Buscar campanhas onde o usuário é MESTRE
             const { data: campaigns, error } = await supabase
                 .from('campaigns')
-                .select('id, name, campaign_id, status, max_players, description, setting')
+                .select('id, name, campaign_id, status, max_players')
                 .eq('gm_id', currentUser.id)
                 .order('created_at', { ascending: false });
             
@@ -638,10 +643,23 @@
             
             console.log(`✅ ${campaigns?.length || 0} campanhas encontradas`);
             
-            // Para cada campanha, contar jogadores ativos
+            if (!campaigns || campaigns.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book"></i>
+                        <h3>Nenhuma campanha encontrada</h3>
+                        <p>Crie sua primeira campanha para começar!</p>
+                        <button class="btn" onclick="window.location.href='campanhas.html'">
+                            <i class="fas fa-plus-circle"></i> Criar Campanha
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Para cada campanha, contar jogadores
             const processedCampaigns = await Promise.all(
-                (campaigns || []).map(async (campaign) => {
-                    // Contar jogadores ativos
+                campaigns.map(async (campaign) => {
                     const { count: playerCount } = await supabase
                         .from('campaign_players')
                         .select('*', { count: 'exact', head: true })
@@ -654,19 +672,13 @@
                         campaign_code: campaign.campaign_id,
                         player_count: playerCount || 0,
                         max_players: campaign.max_players || 6,
-                        status: campaign.status,
-                        description: campaign.description,
-                        setting: campaign.setting
+                        status: campaign.status
                     };
                 })
             );
             
             userCampaigns = processedCampaigns;
-            
-            // Renderizar lista no dashboard
             renderCampaignsList(processedCampaigns);
-            
-            // Popular seletor na aba PCs
             populateCampaignSelector(processedCampaigns);
             
         } catch (error) {
@@ -689,20 +701,6 @@
         const container = document.getElementById('campaignsList');
         if (!container) return;
         
-        if (!campaigns || campaigns.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-book"></i>
-                    <h3>Nenhuma campanha encontrada</h3>
-                    <p>Crie sua primeira campanha para começar!</p>
-                    <button class="btn" style="margin-top: 15px; background: rgba(255, 140, 0, 0.8);" onclick="window.location.href='campanhas.html'">
-                        <i class="fas fa-plus-circle"></i> Criar Campanha
-                    </button>
-                </div>
-            `;
-            return;
-        }
-        
         container.innerHTML = `
             <div class="campaigns-list">
                 ${campaigns.map(campaign => `
@@ -712,20 +710,16 @@
                             <div class="campaign-code">${campaign.campaign_code || 'N/A'}</div>
                         </div>
                         
-                        ${campaign.description ? `
-                            <div style="color: #aaa; font-size: 0.9rem; margin: 8px 0;">
-                                ${escapeHtml(truncateText(campaign.description, 100))}
-                            </div>
-                        ` : ''}
-                        
                         <div class="campaign-stats">
                             <div>
-                                <strong style="color: #3498db;">Jogadores:</strong> 
+                                <strong>Jogadores:</strong> 
                                 ${campaign.player_count || 0}/${campaign.max_players || 6}
                             </div>
                             <div>
-                                <strong style="color: #ff8c00;">Status:</strong> 
-                                <span class="status-badge status-${campaign.status}">${formatStatus(campaign.status)}</span>
+                                <strong>Status:</strong> 
+                                <span class="status-badge status-${campaign.status}">
+                                    ${formatStatus(campaign.status)}
+                                </span>
                             </div>
                         </div>
                         
@@ -761,127 +755,138 @@
     }
 
     // ============================================
-    // CARREGAR PCs DA CAMPANHA - VERSÃO CORRIGIDA
+    // CARREGAR PCs DA CAMPANHA - VERSÃO DEFINITIVA
     // ============================================
 
     async function loadCampaignPCs(campaignId) {
         try {
-            console.log('🎮 Carregando PCs da campanha:', campaignId);
+            console.log('🎮 [INICIANDO] Carregando PCs da campanha:', campaignId);
             
             // Mostrar loading
             showLoading();
             
-            // 1. BUSCAR JOGADORES DA CAMPANHA (ativos)
+            // PASSO 1: Buscar TODOS os jogadores ativos da campanha
             const { data: players, error: playersError } = await supabase
                 .from('campaign_players')
-                .select('id, user_id, joined_at, status')
+                .select('id, user_id, joined_at')
                 .eq('campaign_id', campaignId)
                 .eq('status', 'active');
             
-            if (playersError) {
-                console.error('Erro ao buscar jogadores:', playersError);
-                throw playersError;
+            if (playersError) throw playersError;
+            
+            console.log(`👥 [PASSO 1] ${players?.length || 0} jogadores encontrados`);
+            
+            // Se não há jogadores, mostrar estado vazio
+            if (!players || players.length === 0) {
+                renderNoPlayers();
+                return;
             }
             
-            console.log(`✅ ${players?.length || 0} jogadores ativos`);
-            
-            // 2. BUSCAR VÍNCULOS DE PERSONAGENS
+            // PASSO 2: Buscar TODOS os vínculos de personagens desta campanha
             const { data: characterLinks, error: linksError } = await supabase
                 .from('campaign_characters')
                 .select('user_id, character_id')
                 .eq('campaign_id', campaignId);
             
-            if (linksError) {
-                console.error('Erro ao buscar vínculos:', linksError);
-                throw linksError;
+            if (linksError) throw linksError;
+            
+            console.log(`🔗 [PASSO 2] ${characterLinks?.length || 0} vínculos encontrados`);
+            
+            // PASSO 3: Criar mapa de user_id -> character_id (quem TEM personagem)
+            const playersWithCharacterMap = {};
+            if (characterLinks && characterLinks.length > 0) {
+                characterLinks.forEach(link => {
+                    if (link.user_id && link.character_id) {
+                        playersWithCharacterMap[link.user_id] = link.character_id;
+                    }
+                });
             }
             
-            console.log(`🔗 ${characterLinks?.length || 0} vínculos encontrados`);
+            console.log(`📊 [PASSO 3] Mapa de vínculos:`, playersWithCharacterMap);
             
-            // 3. BUSCAR PERFIS DOS JOGADORES
-            const userIds = players?.map(p => p.user_id) || [];
-            let profilesMap = {};
+            // PASSO 4: Separar jogadores COM e SEM personagem
+            const playersWithCharacterIds = Object.keys(playersWithCharacterMap);
+            const playersWithoutCharacter = [];
+            const playersWithCharacter = [];
             
-            if (userIds.length > 0) {
-                const { data: profiles, error: profilesError } = await supabase
-                    .from('profiles')
-                    .select('id, username, player_id')
-                    .in('id', userIds);
-                
-                if (profilesError) {
-                    console.error('Erro ao buscar perfis:', profilesError);
-                } else if (profiles) {
-                    profiles.forEach(profile => {
-                        profilesMap[profile.id] = profile;
-                    });
+            players.forEach(player => {
+                if (playersWithCharacterMap[player.user_id]) {
+                    playersWithCharacter.push(player);
+                } else {
+                    playersWithoutCharacter.push(player);
                 }
+            });
+            
+            console.log(`🎯 [PASSO 4] Separação: ${playersWithCharacter.length} COM personagem, ${playersWithoutCharacter.length} SEM personagem`);
+            
+            // PASSO 5: Buscar detalhes dos perfis (todos os jogadores)
+            const allUserIds = players.map(p => p.user_id);
+            const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, username, player_id')
+                .in('id', allUserIds);
+            
+            if (profilesError) {
+                console.warn('⚠️ Erro ao buscar perfis:', profilesError);
             }
             
-            // 4. BUSCAR DETALHES DOS PERSONAGENS (se houver vínculos)
-            const characterIds = characterLinks?.map(l => l.character_id) || [];
-            let charactersMap = {};
+            // Criar mapa de user_id -> profile
+            const profileMap = {};
+            if (profiles && profiles.length > 0) {
+                profiles.forEach(profile => {
+                    profileMap[profile.id] = profile;
+                });
+            }
             
-            if (characterIds.length > 0) {
+            // PASSO 6: Buscar detalhes dos personagens (apenas para quem TEM)
+            let charactersMap = {};
+            if (playersWithCharacter.length > 0) {
+                const characterIds = Object.values(playersWithCharacterMap);
                 const { data: characters, error: charsError } = await supabase
                     .from('characters')
                     .select('id, nome, classe, raca, pontos_gastos, pontos_totais, atributos, created_at')
                     .in('id', characterIds);
                 
                 if (charsError) {
-                    console.error('Erro ao buscar personagens:', charsError);
+                    console.warn('⚠️ Erro ao buscar personagens:', charsError);
                 } else if (characters) {
-                    characters.forEach(character => {
-                        charactersMap[character.id] = character;
+                    characters.forEach(char => {
+                        charactersMap[char.id] = char;
                     });
                 }
             }
             
-            // 5. CRIAR MAPA DE userId -> personagem
-            const userCharacterMap = {};
-            if (characterLinks && characterLinks.length > 0) {
-                characterLinks.forEach(link => {
-                    if (link.user_id && link.character_id && charactersMap[link.character_id]) {
-                        userCharacterMap[link.user_id] = charactersMap[link.character_id];
-                    }
-                });
-            }
+            console.log(`📖 [PASSO 6] ${Object.keys(charactersMap).length} personagens carregados`);
             
-            // 6. COMBINAR DADOS
-            const playersWithPCs = [];
-            const playersWithoutPCs = [];
+            // PASSO 7: Preparar dados para renderização
+            const playersWithoutPCsData = playersWithoutCharacter.map(player => ({
+                player: {
+                    ...player,
+                    profiles: profileMap[player.user_id]
+                },
+                character: null
+            }));
             
-            if (players && players.length > 0) {
-                players.forEach(player => {
-                    const profile = profilesMap[player.user_id];
-                    const character = userCharacterMap[player.user_id];
-                    
-                    const playerData = {
-                        player: {
-                            ...player,
-                            profiles: profile
-                        },
-                        character: character
-                    };
-                    
-                    if (character) {
-                        playersWithPCs.push(playerData);
-                        console.log(`✅ ${profile?.username || player.user_id} tem personagem: ${character.nome}`);
-                    } else {
-                        playersWithoutPCs.push(playerData);
-                        console.log(`⚠️ ${profile?.username || player.user_id} NÃO tem personagem`);
-                    }
-                });
-            }
+            const playersWithPCsData = playersWithCharacter.map(player => {
+                const characterId = playersWithCharacterMap[player.user_id];
+                return {
+                    player: {
+                        ...player,
+                        profiles: profileMap[player.user_id]
+                    },
+                    character: charactersMap[characterId] || null
+                };
+            });
             
-            console.log(`🎯 Resultado: ${playersWithPCs.length} com personagem, ${playersWithoutPCs.length} sem personagem`);
+            console.log(`✅ [FINAL] Dados preparados: ${playersWithPCsData.length} com PC, ${playersWithoutPCsData.length} sem PC`);
             
-            // 7. RENDERIZAR
-            renderPlayersWithoutPCs(playersWithoutPCs);
-            renderPlayersWithPCs(playersWithPCs, campaignId);
+            // PASSO 8: Renderizar
+            renderPlayersWithoutPCs(playersWithoutPCsData);
+            renderPlayersWithPCs(playersWithPCsData, campaignId);
             
         } catch (error) {
-            console.error('Erro ao carregar PCs:', error);
-            showError('Erro ao carregar jogadores e personagens: ' + error.message);
+            console.error('❌ Erro ao carregar PCs:', error);
+            showMessage('Erro ao carregar jogadores e personagens', 'error');
             showErrorState();
         }
     }
@@ -896,7 +901,7 @@
         
         if (!playersData || playersData.length === 0) {
             container.innerHTML = `
-                <div class="empty-state" style="padding: 20px;">
+                <div class="empty-state">
                     <i class="fas fa-check-circle"></i>
                     <p>Todos os jogadores têm personagem vinculado!</p>
                 </div>
@@ -905,37 +910,34 @@
         }
         
         container.innerHTML = `
+            <h4 style="color: #f1c40f; margin-bottom: 15px;">
+                <i class="fas fa-clock"></i> Aguardando Vínculo (${playersData.length})
+            </h4>
             <div class="pending-list">
                 ${playersData.map(item => {
                     const player = item.player;
                     const profile = player.profiles;
+                    const username = profile?.username || `Jogador ${player.user_id.substring(0, 8)}`;
                     
                     return `
                         <div class="pending-item">
                             <div class="item-header">
-                                <div>
-                                    <div class="player-name">${escapeHtml(profile?.username || 'Jogador ' + player.user_id.slice(0, 8))}</div>
-                                    ${profile?.player_id ? `
-                                        <div style="color: #aaa; font-size: 0.8rem; margin-top: 2px;">
-                                            ID: ${profile.player_id}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <div style="color: #e74c3c; font-size: 0.9rem;">
+                                <div class="player-name">${escapeHtml(username)}</div>
+                                <div style="color: #e74c3c;">
                                     <i class="fas fa-exclamation-triangle"></i> Sem personagem
                                 </div>
                             </div>
                             
-                            <div style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;">
+                            <div style="color: #aaa; font-size: 0.9rem; margin: 10px 0;">
                                 <i class="fas fa-calendar-alt"></i> Entrou em: ${formatDate(player.joined_at)}
                             </div>
                             
                             <div class="pending-actions">
-                                <button class="btn btn-small" onclick="remindPlayerToLinkPC('${player.user_id}', '${escapeHtml(profile?.username || 'Jogador')}')">
+                                <button class="btn btn-small" onclick="remindPlayer('${player.user_id}', '${escapeHtml(username)}')">
                                     <i class="fas fa-bell"></i> Lembrar
                                 </button>
-                                <button class="btn btn-small btn-recusar" onclick="removePlayerFromCampaign('${player.id}', '${escapeHtml(profile?.username || 'Jogador')}')">
-                                    <i class="fas fa-user-slash"></i> Remover Jogador
+                                <button class="btn btn-small btn-recusar" onclick="removePlayer('${player.id}', '${escapeHtml(username)}')">
+                                    <i class="fas fa-user-slash"></i> Remover
                                 </button>
                             </div>
                         </div>
@@ -955,59 +957,41 @@
         
         if (!playersData || playersData.length === 0) {
             container.innerHTML = `
-                <div class="empty-state" style="padding: 20px;">
+                <div class="empty-state">
                     <i class="fas fa-user-friends"></i>
-                    <p>Nenhum personagem vinculado nesta campanha</p>
+                    <p>Nenhum personagem vinculado</p>
                 </div>
             `;
             return;
         }
         
         container.innerHTML = `
+            <h4 style="color: #2ecc71; margin-bottom: 15px;">
+                <i class="fas fa-check-circle"></i> Personagens Vinculados (${playersData.length})
+            </h4>
             <div class="characters-list">
                 ${playersData.map(item => {
                     const player = item.player;
                     const profile = player.profiles;
                     const character = item.character;
+                    const username = profile?.username || `Jogador ${player.user_id.substring(0, 8)}`;
                     
                     // Processar atributos
                     let atributos = null;
-                    let atributosStr = '';
-                    
                     try {
-                        if (character?.atributos) {
-                            if (typeof character.atributos === 'string') {
-                                atributos = JSON.parse(character.atributos);
-                            } else if (typeof character.atributos === 'object') {
-                                atributos = character.atributos;
-                            }
-                            
-                            if (atributos) {
-                                atributosStr = `
-                                    <div class="character-attributes">
-                                        <span><strong>ST:</strong> ${atributos.ST || 10}</span>
-                                        <span><strong>DX:</strong> ${atributos.DX || 10}</span>
-                                        <span><strong>IQ:</strong> ${atributos.IQ || 10}</span>
-                                        <span><strong>HT:</strong> ${atributos.HT || 10}</span>
-                                        <span><i class="fas fa-chart-line"></i> ${character.pontos_gastos || 0}/${character.pontos_totais || 150} pts</span>
-                                    </div>
-                                `;
-                            }
+                        if (character?.atributos && typeof character.atributos === 'string') {
+                            atributos = JSON.parse(character.atributos);
                         }
-                    } catch (e) {
-                        console.warn('Erro ao parsear atributos:', e);
-                    }
+                    } catch (e) {}
                     
                     return `
                         <div class="character-item">
                             <div class="item-header">
                                 <div>
-                                    <div class="player-name">${escapeHtml(profile?.username || 'Jogador ' + player.user_id.slice(0, 8))}</div>
-                                    ${profile?.player_id ? `
-                                        <div style="color: #aaa; font-size: 0.8rem; margin-top: 2px;">
-                                            ID: ${profile.player_id}
-                                        </div>
-                                    ` : ''}
+                                    <div class="player-name">${escapeHtml(username)}</div>
+                                    <div style="color: #aaa; font-size: 0.8rem;">
+                                        Jogador
+                                    </div>
                                 </div>
                                 <div class="character-name">${escapeHtml(character?.nome || 'Sem nome')}</div>
                             </div>
@@ -1021,23 +1005,29 @@
                                 </span>
                             </div>
                             
-                            ${atributosStr}
+                            ${atributos ? `
+                                <div class="character-attributes">
+                                    <span><strong>ST:</strong> ${atributos.ST || 10}</span>
+                                    <span><strong>DX:</strong> ${atributos.DX || 10}</span>
+                                    <span><strong>IQ:</strong> ${atributos.IQ || 10}</span>
+                                    <span><strong>HT:</strong> ${atributos.HT || 10}</span>
+                                    <span><i class="fas fa-chart-line"></i> ${character.pontos_gastos || 0}/${character.pontos_totais || 150} pts</span>
+                                </div>
+                            ` : ''}
                             
-                            <div style="color: #aaa; font-size: 0.85rem; margin-bottom: 10px;">
-                                <i class="fas fa-calendar-alt"></i> Vinculado: ${formatDate(character?.created_at)}
+                            <div style="color: #aaa; font-size: 0.85rem; margin: 10px 0;">
+                                <i class="fas fa-calendar-alt"></i> Vinculado em: ${formatDate(character?.created_at)}
                             </div>
                             
                             <div class="character-actions">
-                                ${character?.id ? `
-                                    <button class="btn btn-small btn-ver" onclick="viewCharacterFullSheet('${character.id}')">
-                                        <i class="fas fa-scroll"></i> Ver Ficha
-                                    </button>
-                                    <button class="btn btn-small btn-recusar" onclick="removeCharacterLink('${character.id}', '${escapeHtml(profile?.username || 'Jogador')}', '${escapeHtml(character?.nome || 'Personagem')}', '${campaignId}')">
-                                        <i class="fas fa-unlink"></i> Remover Vínculo
-                                    </button>
-                                ` : ''}
-                                <button class="btn btn-small btn-recusar" onclick="removePlayerFromCampaign('${player.id}', '${escapeHtml(profile?.username || 'Jogador')}')">
-                                    <i class="fas fa-user-slash"></i> Remover Jogador
+                                <button class="btn btn-small btn-ver" onclick="viewCharacterSheet('${character?.id}')">
+                                    <i class="fas fa-scroll"></i> Ver Ficha
+                                </button>
+                                <button class="btn btn-small btn-recusar" onclick="unlinkCharacter('${character?.id}', '${escapeHtml(username)}', '${escapeHtml(character?.nome || 'Personagem')}', '${campaignId}')">
+                                    <i class="fas fa-unlink"></i> Desvincular
+                                </button>
+                                <button class="btn btn-small btn-recusar" onclick="removePlayer('${player.id}', '${escapeHtml(username)}')">
+                                    <i class="fas fa-user-slash"></i> Remover
                                 </button>
                             </div>
                         </div>
@@ -1048,21 +1038,37 @@
     }
 
     // ============================================
-    // FUNÇÕES AUXILIARES DE UI
+    // FUNÇÕES AUXILIARES
     // ============================================
 
     function showLoading() {
         document.getElementById('pendingList').innerHTML = `
-            <div class="loading" style="padding: 20px;">
-                <div class="spinner" style="width: 30px; height: 30px;"></div>
+            <div style="text-align: center; padding: 40px;">
+                <div class="spinner"></div>
                 <p>Carregando jogadores...</p>
             </div>
         `;
         
         document.getElementById('charactersList').innerHTML = `
-            <div class="loading" style="padding: 20px;">
-                <div class="spinner" style="width: 30px; height: 30px;"></div>
+            <div style="text-align: center; padding: 40px;">
+                <div class="spinner"></div>
                 <p>Carregando personagens...</p>
+            </div>
+        `;
+    }
+
+    function renderNoPlayers() {
+        document.getElementById('pendingList').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>Nenhum jogador nesta campanha</p>
+            </div>
+        `;
+        
+        document.getElementById('charactersList').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-user-friends"></i>
+                <p>Nenhum personagem vinculado</p>
             </div>
         `;
     }
@@ -1071,14 +1077,14 @@
         document.getElementById('pendingList').innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>Erro ao carregar jogadores</p>
+                <p>Erro ao carregar</p>
             </div>
         `;
         
         document.getElementById('charactersList').innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>Erro ao carregar personagens</p>
+                <p>Erro ao carregar</p>
             </div>
         `;
     }
@@ -1087,14 +1093,14 @@
         document.getElementById('pendingList').innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-clock"></i>
-                <p>Selecione uma campanha para ver jogadores</p>
+                <p>Selecione uma campanha</p>
             </div>
         `;
         
         document.getElementById('charactersList').innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-users"></i>
-                <p>Selecione uma campanha para ver personagens</p>
+                <p>Selecione uma campanha</p>
             </div>
         `;
     }
@@ -1105,73 +1111,48 @@
 
     function viewCampaignPCs(campaignId) {
         console.log('📊 Visualizando PCs da campanha:', campaignId);
-        
-        // Mudar para aba PCs e selecionar campanha
-        const pcsTab = document.querySelector('[data-tab="pcs"]');
-        if (pcsTab) pcsTab.click();
-        
-        const selector = document.getElementById('selectedCampaign');
-        if (selector) {
-            selector.value = campaignId;
-            loadCampaignPCs(campaignId);
-        }
+        document.querySelector('[data-tab="pcs"]').click();
+        document.getElementById('selectedCampaign').value = campaignId;
+        loadCampaignPCs(campaignId);
     }
 
-    function viewCharacterFullSheet(characterId) {
-        if (!characterId) {
-            alert('ID do personagem não encontrado');
-            return;
-        }
-        console.log('📄 Abrindo ficha do personagem:', characterId);
+    function viewCharacterSheet(characterId) {
+        if (!characterId) return;
         window.open(`ficha-personagem.html?id=${characterId}`, '_blank');
     }
 
-    function remindPlayerToLinkPC(userId, playerName) {
-        alert(`Lembrete enviado para ${playerName} vincular um personagem.`);
-        console.log('🔔 Lembrando jogador:', playerName);
+    function remindPlayer(userId, playerName) {
+        alert(`Lembrete enviado para ${playerName}`);
     }
 
-    async function removePlayerFromCampaign(playerMembershipId, playerName) {
-        if (!confirm(`Remover "${playerName}" da campanha?\nEle perderá acesso a todos os conteúdos.`)) return;
+    async function removePlayer(playerId, playerName) {
+        if (!confirm(`Remover ${playerName} da campanha?`)) return;
         
         try {
-            console.log('🗑️ Removendo jogador:', playerName);
-            
             const { error } = await supabase
                 .from('campaign_players')
                 .update({ status: 'removed' })
-                .eq('id', playerMembershipId);
+                .eq('id', playerId);
             
             if (error) throw error;
             
-            alert(`Jogador "${playerName}" removido da campanha.`);
+            alert(`${playerName} removido(a)`);
             
-            // Recarregar lista
             const campaignId = document.getElementById('selectedCampaign').value;
-            if (campaignId) {
-                loadCampaignPCs(campaignId);
-            }
+            if (campaignId) loadCampaignPCs(campaignId);
             
         } catch (error) {
-            console.error('Erro ao remover jogador:', error);
-            alert('Erro ao remover jogador: ' + error.message);
+            console.error('Erro:', error);
+            alert('Erro ao remover jogador');
         }
     }
 
-    async function removeCharacterLink(characterId, playerName, characterName, campaignId) {
-        if (!confirm(`Remover vínculo de "${characterName}" de ${playerName}?\nO jogador ainda ficará na campanha, mas sem personagem.`)) return;
+    async function unlinkCharacter(characterId, playerName, characterName, campaignId) {
+        if (!confirm(`Desvincular ${characterName} de ${playerName}?`)) return;
         
         try {
-            console.log('🔗 Removendo vínculo:', characterName);
-            
-            // Se campaignId não foi passada, pegar do seletor
             if (!campaignId) {
                 campaignId = document.getElementById('selectedCampaign').value;
-            }
-            
-            if (!campaignId) {
-                alert('Campanha não selecionada');
-                return;
             }
             
             const { error } = await supabase
@@ -1182,29 +1163,28 @@
             
             if (error) throw error;
             
-            alert(`Vínculo de "${characterName}" removido.`);
+            alert(`${characterName} desvinculado(a)`);
             
-            // Recarregar lista
-            loadCampaignPCs(campaignId);
+            if (campaignId) loadCampaignPCs(campaignId);
             
         } catch (error) {
-            console.error('Erro ao remover vínculo:', error);
-            alert('Erro ao remover vínculo: ' + error.message);
+            console.error('Erro:', error);
+            alert('Erro ao desvincular');
         }
     }
 
     // ============================================
-    // FUNÇÕES UTILITÁRIAS
+    // UTILITÁRIOS
     // ============================================
 
     function formatStatus(status) {
-        const statusMap = {
+        const map = {
             'active': 'Ativa',
             'preparation': 'Preparação',
             'paused': 'Pausada',
             'completed': 'Concluída'
         };
-        return statusMap[status] || status;
+        return map[status] || status;
     }
 
     function escapeHtml(text) {
@@ -1214,103 +1194,64 @@
         return div.innerHTML;
     }
 
-    function truncateText(text, maxLength) {
-        if (!text) return '';
-        if (text.length <= maxLength) return text;
-        return text.substring(0, maxLength) + '...';
-    }
-
     function formatDate(dateString) {
         if (!dateString) return 'N/A';
         try {
             const date = new Date(dateString);
-            return date.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            return date.toLocaleDateString('pt-BR');
         } catch {
             return 'Data inválida';
         }
     }
 
-    function showError(message) {
-        console.error('❌ Erro:', message);
-        alert(message);
+    function showMessage(message, type = 'info') {
+        console.log(`${type.toUpperCase()}: ${message}`);
     }
 
     // ============================================
-    // FUNÇÃO DE TESTE PARA DEBUG
+    // FUNÇÃO DE DEBUG
     // ============================================
 
-    window.testarConexao = async function() {
-        console.log('🧪 TESTANDO CONEXÃO E DADOS');
-        console.log('===========================');
+    window.debugCampaign = async function(campaignId) {
+        if (!campaignId) campaignId = prompt('ID da campanha:');
+        if (!campaignId) return;
         
-        try {
-            // Teste 1: Verificar usuário atual
-            const { data: { session } } = await supabase.auth.getSession();
-            console.log('1️⃣ Usuário atual:', session?.user?.email || 'Ninguém logado');
-            
-            // Teste 2: Verificar campanhas como mestre
-            const { data: campanhas } = await supabase
-                .from('campaigns')
-                .select('id, name, campaign_id')
-                .eq('gm_id', currentUser.id);
-            
-            console.log(`2️⃣ Campanhas como mestre: ${campanhas?.length || 0}`);
-            campanhas?.forEach(c => {
-                console.log(`   - ${c.name} (${c.campaign_id}): ${c.id}`);
-            });
-            
-            // Teste 3: Verificar vínculos
-            if (campanhas && campanhas.length > 0) {
-                const primeiraCampanha = campanhas[0];
-                console.log(`3️⃣ Testando vínculos da campanha: ${primeiraCampanha.name}`);
+        console.log('🔍 DEBUG DA CAMPANHA:', campaignId);
+        
+        // Testar cada passo individualmente
+        const steps = [
+            { name: 'Jogadores', query: `campaign_players?campaign_id=eq.${campaignId}&status=eq.active` },
+            { name: 'Vínculos', query: `campaign_characters?campaign_id=eq.${campaignId}` },
+            { name: 'Campanha', query: `campaigns?id=eq.${campaignId}` }
+        ];
+        
+        for (const step of steps) {
+            try {
+                const { data, error } = await supabase
+                    .from(step.query.split('?')[0])
+                    .select('*')
+                    .eq('campaign_id', campaignId)
+                    .eq('status', 'active');
                 
-                const { data: vinculos } = await supabase
-                    .from('campaign_characters')
-                    .select('user_id, character_id')
-                    .eq('campaign_id', primeiraCampanha.id);
-                
-                console.log(`   Vínculos encontrados: ${vinculos?.length || 0}`);
-                
-                if (vinculos && vinculos.length > 0) {
-                    // Buscar detalhes
-                    const characterIds = vinculos.map(v => v.character_id);
-                    const { data: personagens } = await supabase
-                        .from('characters')
-                        .select('id, nome, classe, raca')
-                        .in('id', characterIds);
-                    
-                    console.log('   Personagens vinculados:');
-                    personagens?.forEach(p => {
-                        console.log(`   - ${p.nome} (${p.classe} ${p.raca})`);
-                    });
-                }
+                console.log(`${step.name}:`, error ? `ERRO: ${error.message}` : data);
+            } catch (e) {
+                console.error(`Erro em ${step.name}:`, e);
             }
-            
-            console.log('✅ Teste concluído com sucesso!');
-            
-        } catch (error) {
-            console.error('❌ Erro no teste:', error);
         }
     };
 
     // ============================================
-    // EXPORTAR FUNÇÕES PARA O HTML
+    // EXPORTAR FUNÇÕES
     // ============================================
 
     window.viewCampaignPCs = viewCampaignPCs;
-    window.viewCharacterFullSheet = viewCharacterFullSheet;
-    window.remindPlayerToLinkPC = remindPlayerToLinkPC;
-    window.removePlayerFromCampaign = removePlayerFromCampaign;
-    window.removeCharacterLink = removeCharacterLink;
-    window.testarConexao = testarConexao;
+    window.viewCharacterSheet = viewCharacterSheet;
+    window.remindPlayer = remindPlayer;
+    window.removePlayer = removePlayer;
+    window.unlinkCharacter = unlinkCharacter;
+    window.debugCampaign = debugCampaign;
 
-    console.log('🚀 Script do Escudo do Mestre carregado e pronto!');
+    console.log('✅ Escudo do Mestre carregado com sucesso!');
 
 </script>
 </body>
