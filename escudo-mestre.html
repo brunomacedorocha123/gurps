@@ -642,11 +642,11 @@ async function verPCs(campaignId, campaignName) {
             </div>
         `;
         
-        // 1. PRIMEIRO: Buscar TODOS os jogadores da campanha
+        // 1. Buscar jogadores da campanha (status active)
         console.log('1. Buscando jogadores da campanha...');
         const { data: jogadores, error: errorJogadores } = await supabase
             .from('campaign_players')
-            .select('user_id')
+            .select('user_id, status')
             .eq('campaign_id', campaignId)
             .eq('status', 'active');
         
@@ -729,12 +729,12 @@ async function verPCs(campaignId, campaignName) {
         
         jogadores.forEach(jogador => {
             const perfil = perfis?.find(p => p.id === jogador.user_id);
-            const nomeJogador = perfil?.username || `Jogador`;
+            const nomeJogador = perfil?.username || `Jogador ${jogador.user_id.substring(0, 4)}`;
             
             // Verificar se tem vínculo
             const vinculo = vinculos?.find(v => v.user_id === jogador.user_id);
             
-            if (vinculo && personagensMap[vinculo.character_id]) {
+            if (vinculo && vinculo.character_id && personagensMap[vinculo.character_id]) {
                 // TEM personagem vinculado
                 comPersonagem.push({
                     user_id: jogador.user_id,
@@ -754,7 +754,7 @@ async function verPCs(campaignId, campaignName) {
         console.log('❌ Sem personagem:', semPersonagem);
         
         // 6. Mostrar resultados
-        mostrarPCs(comPersonagem, semPC);
+        mostrarPCs(comPersonagem, semPersonagem);
         
     } catch (error) {
         console.error('💥 ERRO em verPCs:', error);
@@ -777,10 +777,12 @@ async function verPCs(campaignId, campaignName) {
 }
 
 function mostrarPCs(comPC, semPC) {
+    console.log('📊 Mostrando PCs:', { comPC, semPC });
+    
     // 1. Personagens Vinculados
     const listaPCs = document.getElementById('charactersList');
     
-    if (comPC.length === 0) {
+    if (!comPC || comPC.length === 0) {
         listaPCs.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-users"></i>
@@ -838,7 +840,7 @@ function mostrarPCs(comPC, semPC) {
     // 2. Vínculos Pendentes (sem personagem)
     const listaPendentes = document.getElementById('pendingList');
     
-    if (semPC.length === 0) {
+    if (!semPC || semPC.length === 0) {
         listaPendentes.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-check-circle" style="color: #2ecc71; font-size: 2.5rem;"></i>
@@ -895,35 +897,77 @@ function editarPersonagem(characterId) {
     }
 }
 
-function lembrarJogador(nomeJogador, userId) {
+async function lembrarJogador(nomeJogador, userId) {
     if (confirm(`Enviar lembrete para ${nomeJogador} sobre vincular personagem?`)) {
-        // Implementar notificação real aqui
-        const notificacao = {
-            type: 'lembrete',
-            user_id: userId,
-            message: `Lembrete: Por favor, vincule um personagem à campanha.`,
-            created_at: new Date().toISOString()
-        };
+        // Buscar a campanha selecionada
+        const select = document.getElementById('selectedCampaign');
+        const campaignId = select.value;
         
-        alert(`✅ Lembrete enviado para ${nomeJogador}!`);
-        console.log('Notificação enviada:', notificacao);
+        if (!campaignId) {
+            alert('Erro: Nenhuma campanha selecionada!');
+            return;
+        }
+        
+        try {
+            // Criar notificação no banco de dados
+            const { error } = await supabase
+                .from('notifications')
+                .insert({
+                    user_id: userId,
+                    type: 'lembrete_personagem',
+                    message: `Lembrete: Por favor, vincule um personagem à campanha.`,
+                    metadata: { 
+                        from_gm: currentUser.id,
+                        campaign_id: campaignId
+                    },
+                    created_at: new Date().toISOString()
+                });
+            
+            if (error) throw error;
+            
+            alert(`✅ Lembrete enviado para ${nomeJogador}!`);
+            
+        } catch (error) {
+            console.error('Erro ao enviar lembrete:', error);
+            alert(`Erro ao enviar lembrete: ${error.message}`);
+        }
     }
 }
 
-function removerJogador(nomeJogador, userId) {
+async function removerJogador(nomeJogador, userId) {
     if (confirm(`Tem certeza que deseja remover ${nomeJogador} da campanha?\n\nEsta ação não pode ser desfeita.`)) {
-        // Implementar remoção real aqui
-        alert(`🗑️ ${nomeJogador} removido da campanha!`);
-        console.log('Jogador removido:', { nome: nomeJogador, user_id: userId });
+        const select = document.getElementById('selectedCampaign');
+        const campaignId = select.value;
         
-        // Recarregar a lista
-        setTimeout(() => {
-            const select = document.getElementById('selectedCampaign');
-            if (select.value) {
-                const campaignName = select.options[select.selectedIndex].text.split(' (')[0];
-                verPCs(select.value, campaignName);
-            }
-        }, 1000);
+        if (!campaignId) {
+            alert('Erro: Nenhuma campanha selecionada!');
+            return;
+        }
+        
+        try {
+            // Remover jogador da campanha
+            const { error } = await supabase
+                .from('campaign_players')
+                .delete()
+                .eq('campaign_id', campaignId)
+                .eq('user_id', userId);
+            
+            if (error) throw error;
+            
+            alert(`🗑️ ${nomeJogador} removido da campanha!`);
+            
+            // Recarregar a lista
+            setTimeout(() => {
+                if (select.value) {
+                    const campaignName = select.options[select.selectedIndex].text.split(' (')[0];
+                    verPCs(select.value, campaignName);
+                }
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Erro ao remover jogador:', error);
+            alert(`Erro ao remover jogador: ${error.message}`);
+        }
     }
 }
 
@@ -940,6 +984,7 @@ window.lembrarJogador = lembrarJogador;
 window.removerJogador = removerJogador;
 window.abrirFicha = abrirFicha;
 window.enviarMensagem = enviarMensagem;
+window.editarPersonagem = editarPersonagem;
 
 </script>
 </body>
