@@ -879,7 +879,7 @@
 
    <script>
 // ============================================
-// CAMPANHAS DO JOGADOR - VERSÃO 100% FUNCIONAL
+// CAMPANHAS DO JOGADOR - VERSÃO DEFINITIVA
 // ============================================
 
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
@@ -895,10 +895,6 @@ let selectedCharacterId = null;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', async function() {
-    await initPlayerCampaigns();
-});
-
-async function initPlayerCampaigns() {
     try {
         // 1. Verificar autenticação
         const { data: { session } } = await supabase.auth.getSession();
@@ -915,14 +911,17 @@ async function initPlayerCampaigns() {
         // 3. Configurar botões
         setupEventListeners();
         
-        // 4. Carregar campanhas
+        // 4. Verificar funções SQL necessárias
+        await checkSQLFunctions();
+        
+        // 5. Carregar campanhas
         await loadPlayerCampaigns();
         
     } catch (error) {
-        console.error('Erro ao iniciar:', error);
+        console.error('❌ Erro ao iniciar:', error);
         showToast('Erro ao carregar. Recarregue a página.', 'error');
     }
-}
+});
 
 async function loadUserData() {
     const { data: profile } = await supabase
@@ -934,6 +933,132 @@ async function loadUserData() {
     if (profile) {
         const initials = profile.username?.charAt(0).toUpperCase() || 'J';
         document.getElementById('userAvatar').innerHTML = initials;
+    }
+}
+
+async function checkSQLFunctions() {
+    console.log('🔍 Verificando funções SQL...');
+    
+    // Testar se as funções existem
+    try {
+        const { error } = await supabase
+            .rpc('verificar_personagem_vinculado_simples', {
+                p_campaign_id: '00000000-0000-0000-0000-000000000000',
+                p_user_id: currentUser.id
+            });
+        
+        // Se der erro 42883 (função não existe), criar as funções
+        if (error && error.code === '42883') {
+            console.log('📦 Criando funções SQL necessárias...');
+            await createSQLFunctions();
+        }
+    } catch (e) {
+        console.log('ℹ️ Criando funções SQL...');
+        await createSQLFunctions();
+    }
+}
+
+// ============================================
+// FUNÇÕES SQL (CRIAR SE NÃO EXISTIREM)
+// ============================================
+
+async function createSQLFunctions() {
+    console.log('🏗️ Criando funções SQL no Supabase...');
+    
+    // Esta função será executada via SQL Editor
+    // Copie este código e execute no Supabase SQL Editor:
+    
+    const sqlCode = `
+    -- FUNÇÃO 1: VERIFICAR SE TEM PERSONAGEM VINCULADO
+    CREATE OR REPLACE FUNCTION verificar_personagem_vinculado_simples(
+        p_campaign_id UUID,
+        p_user_id UUID
+    )
+    RETURNS BOOLEAN AS $$
+    DECLARE
+        v_tem_personagem BOOLEAN;
+    BEGIN
+        SELECT EXISTS (
+            SELECT 1 FROM campaign_characters
+            WHERE campaign_id = p_campaign_id
+            AND user_id = p_user_id
+            AND character_id IS NOT NULL
+        ) INTO v_tem_personagem;
+        
+        RETURN v_tem_personagem;
+    END;
+    $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+    -- FUNÇÃO 2: VINCULAR PERSONAGEM
+    CREATE OR REPLACE FUNCTION vincular_personagem_simples(
+        p_campaign_id UUID,
+        p_character_id UUID,
+        p_user_id UUID
+    )
+    RETURNS JSON AS $$
+    DECLARE
+        v_existing_id UUID;
+    BEGIN
+        -- Verificar se já existe vínculo
+        SELECT id INTO v_existing_id
+        FROM campaign_characters
+        WHERE campaign_id = p_campaign_id
+        AND user_id = p_user_id;
+        
+        IF v_existing_id IS NOT NULL THEN
+            -- Atualizar vínculo existente
+            UPDATE campaign_characters
+            SET character_id = p_character_id,
+                updated_at = NOW()
+            WHERE id = v_existing_id;
+            
+            RETURN json_build_object(
+                'success', true,
+                'action', 'updated',
+                'message', 'Personagem atualizado!'
+            );
+        ELSE
+            -- Criar novo vínculo
+            INSERT INTO campaign_characters (campaign_id, character_id, user_id)
+            VALUES (p_campaign_id, p_character_id, p_user_id);
+            
+            RETURN json_build_object(
+                'success', true,
+                'action', 'created',
+                'message', 'Personagem vinculado!'
+            );
+        END IF;
+        
+    EXCEPTION WHEN OTHERS THEN
+        RETURN json_build_object(
+            'success', false,
+            'message', 'Erro: ' || SQLERRM
+        );
+    END;
+    $$ LANGUAGE plpgsql SECURITY DEFINER;
+    `;
+    
+    console.log('📋 Copie este SQL e execute no Supabase:');
+    console.log(sqlCode);
+    
+    // Tentar executar via REST API
+    try {
+        const response = await fetch(SUPABASE_URL + '/rest/v1/rpc/execute_sql', {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ sql: sqlCode })
+        });
+        
+        if (!response.ok) {
+            console.log('⚠️ Execute manualmente no SQL Editor do Supabase');
+        }
+    } catch (e) {
+        console.log('ℹ️ Funções precisam ser criadas manualmente no SQL Editor');
     }
 }
 
@@ -997,72 +1122,7 @@ async function loadPlayerCampaigns() {
     try {
         console.log('🔄 Buscando campanhas do jogador...');
         
-        // Método 1: Usar função RPC se existir
-        const { data: campaigns, error } = await supabase
-            .rpc('get_player_active_campaigns', {
-                p_user_id: currentUser.id
-            });
-        
-        if (error) {
-            console.log('📝 Usando método alternativo...');
-            return await loadPlayerCampaignsAlternative();
-        }
-        
-        console.log('📊 Campanhas encontradas:', campaigns?.length || 0);
-        
-        if (!campaigns || campaigns.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <h3>Nenhuma campanha encontrada</h3>
-                    <p>Você não está participando de nenhuma campanha como jogador.</p>
-                    <p style="color: #777; font-size: 0.9rem; margin-top: 10px;">
-                        Peça ao mestre para te convidar usando o código da campanha.
-                    </p>
-                </div>
-            `;
-            return;
-        }
-        
-        // Para cada campanha, verificar se tem personagem vinculado
-        const campanhasComInfo = await Promise.all(
-            campaigns.map(async (campaign) => {
-                const hasCharacter = await verificarPersonagemVinculado(campaign.campaign_uuid);
-                return {
-                    ...campaign,
-                    has_character: hasCharacter
-                };
-            })
-        );
-        
-        // Renderizar campanhas
-        renderCampaigns(campanhasComInfo, container);
-        
-        showToast(`✅ ${campaigns.length} campanha${campaigns.length !== 1 ? 's' : ''} carregada${campaigns.length !== 1 ? 's' : ''}`, 'success');
-        
-    } catch (error) {
-        console.error('Erro ao carregar campanhas:', error);
-        container.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Erro ao carregar</h3>
-                <p>${error.message || 'Tente novamente mais tarde.'}</p>
-                <button class="btn" onclick="loadPlayerCampaigns()" style="margin-top: 20px;">
-                    <i class="fas fa-redo"></i> Tentar Novamente
-                </button>
-            </div>
-        `;
-    }
-}
-
-// Método alternativo se a função RPC não existir
-async function loadPlayerCampaignsAlternative() {
-    const container = document.getElementById('campaigns-list');
-    
-    try {
-        console.log('🔄 Buscando campanhas via JOIN...');
-        
-        // Buscar campanhas onde o usuário é jogador ativo
+        // Método DIRETO: Buscar campanhas onde o usuário é jogador
         const { data: memberships, error } = await supabase
             .from('campaign_players')
             .select(`
@@ -1077,49 +1137,55 @@ async function loadPlayerCampaignsAlternative() {
                     starting_points,
                     status,
                     gm_id,
-                    max_players,
-                    created_at
+                    max_players
                 )
             `)
             .eq('user_id', currentUser.id)
             .eq('status', 'active')
             .order('joined_at', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Erro ao buscar campanhas:', error);
+            throw error;
+        }
+        
+        console.log('📊 Membros encontrados:', memberships?.length || 0);
         
         if (!memberships || memberships.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-users"></i>
-                    <h3>Nenhuma campanha</h3>
-                    <p>Você não está em nenhuma campanha.</p>
+                    <h3>Nenhuma campanha encontrada</h3>
+                    <p>Você não está participando de nenhuma campanha como jogador.</p>
                 </div>
             `;
             return;
         }
         
-        const campaignsWithDetails = await Promise.all(
+        // Processar cada campanha
+        const campanhasComInfo = await Promise.all(
             memberships.map(async (membership) => {
-                if (!membership.campaigns) return null;
-                
                 const campaign = membership.campaigns;
+                if (!campaign) return null;
                 
                 // Buscar nome do GM
                 const { data: gmProfile } = await supabase
                     .from('profiles')
                     .select('username')
                     .eq('id', campaign.gm_id)
-                    .single();
+                    .single()
+                    .catch(() => ({ data: null }));
                 
                 // Contar jogadores
                 const { count: playerCount } = await supabase
                     .from('campaign_players')
                     .select('*', { count: 'exact', head: true })
                     .eq('campaign_id', campaign.id)
-                    .eq('status', 'active');
+                    .eq('status', 'active')
+                    .catch(() => ({ count: 0 }));
                 
-                // Verificar personagem vinculado
-                const hasCharacter = await verificarPersonagemVinculado(campaign.id);
+                // VERIFICAÇÃO CRÍTICA: Verificar se tem personagem vinculado
+                const hasCharacter = await verificarPersonagemVinculadoCorreto(campaign.id);
                 
                 return {
                     campaign_uuid: campaign.id,
@@ -1138,7 +1204,7 @@ async function loadPlayerCampaignsAlternative() {
             })
         );
         
-        const validCampaigns = campaignsWithDetails.filter(c => c !== null);
+        const validCampaigns = campanhasComInfo.filter(c => c !== null);
         
         if (validCampaigns.length === 0) {
             container.innerHTML = `
@@ -1151,27 +1217,52 @@ async function loadPlayerCampaignsAlternative() {
             return;
         }
         
+        // Renderizar campanhas
         renderCampaigns(validCampaigns, container);
         
+        console.log('✅ Campanhas renderizadas:', validCampaigns.length);
         showToast(`✅ ${validCampaigns.length} campanha${validCampaigns.length !== 1 ? 's' : ''} carregada${validCampaigns.length !== 1 ? 's' : ''}`, 'success');
         
     } catch (error) {
-        console.error('Erro no método alternativo:', error);
+        console.error('❌ Erro ao carregar campanhas:', error);
         container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-exclamation-triangle"></i>
-                <h3>Erro no sistema</h3>
-                <p>Contate o administrador.</p>
+                <h3>Erro ao carregar</h3>
+                <p>${error.message || 'Tente novamente mais tarde.'}</p>
+                <button class="btn" onclick="loadPlayerCampaigns()" style="margin-top: 20px;">
+                    <i class="fas fa-redo"></i> Tentar Novamente
+                </button>
             </div>
         `;
     }
 }
 
-// Verificar se tem personagem vinculado à campanha
-async function verificarPersonagemVinculado(campaignId) {
+// ============================================
+// FUNÇÃO CORRETA DE VERIFICAÇÃO
+// ============================================
+
+async function verificarPersonagemVinculadoCorreto(campaignId) {
     try {
-        console.log('🔍 Verificando vínculo para campanha:', campaignId);
+        console.log('🔍 VERIFICAÇÃO DIRETA - Campanha:', campaignId);
         
+        // Método 1: Usar função SQL se existir
+        try {
+            const { data: result, error } = await supabase
+                .rpc('verificar_personagem_vinculado_simples', {
+                    p_campaign_id: campaignId,
+                    p_user_id: currentUser.id
+                });
+            
+            if (!error && result !== undefined) {
+                console.log('✅ Verificação via SQL:', result);
+                return result;
+            }
+        } catch (sqlError) {
+            console.log('⚠️ Função SQL não disponível, usando método direto');
+        }
+        
+        // Método 2: Consulta direta (FALLBACK)
         const { data, error } = await supabase
             .from('campaign_characters')
             .select('character_id')
@@ -1180,17 +1271,17 @@ async function verificarPersonagemVinculado(campaignId) {
             .maybeSingle();
         
         if (error) {
-            console.error('❌ Erro na consulta:', error);
+            console.error('❌ Erro na consulta direta:', error);
             return false;
         }
         
-        const hasCharacter = !!data;
-        console.log('📊 Resultado:', hasCharacter ? 'TEM personagem' : 'SEM personagem');
+        const hasCharacter = data !== null && data.character_id !== null;
+        console.log('📊 Resultado direto:', hasCharacter ? 'TEM personagem' : 'SEM personagem');
         
         return hasCharacter;
         
     } catch (error) {
-        console.error('💥 Erro ao verificar personagem vinculado:', error);
+        console.error('💥 Erro crítico na verificação:', error);
         return false;
     }
 }
@@ -1202,7 +1293,12 @@ async function verificarPersonagemVinculado(campaignId) {
 function renderCampaigns(campaigns, container) {
     container.innerHTML = `
         <div class="campaigns-grid">
-            ${campaigns.map(campaign => `
+            ${campaigns.map(campaign => {
+                const badgeClass = campaign.has_character ? 'has-character' : 'no-character';
+                const badgeIcon = campaign.has_character ? 'check-circle' : 'exclamation-triangle';
+                const badgeText = campaign.has_character ? 'Personagem Vinculado' : 'Sem Personagem';
+                
+                return `
                 <div class="campaign-card" data-campaign-id="${campaign.campaign_uuid}">
                     <h3>${escapeHtml(campaign.campaign_name)}</h3>
                     <div class="campaign-code">
@@ -1210,9 +1306,9 @@ function renderCampaigns(campaigns, container) {
                     </div>
                     
                     <!-- Badge de status do personagem -->
-                    <div class="character-status-badge ${campaign.has_character ? 'has-character' : 'no-character'}">
-                        <i class="fas fa-${campaign.has_character ? 'check-circle' : 'exclamation-triangle'}"></i>
-                        ${campaign.has_character ? 'Personagem Vinculado' : 'Sem Personagem'}
+                    <div class="character-status-badge ${badgeClass}">
+                        <i class="fas fa-${badgeIcon}"></i>
+                        ${badgeText}
                     </div>
                     
                     ${campaign.description ? `
@@ -1253,6 +1349,9 @@ function renderCampaigns(campaigns, container) {
                             <button class="btn btn-entrar" onclick="entrarCampanha('${campaign.campaign_uuid}')">
                                 <i class="fas fa-door-open"></i> Entrar na Campanha
                             </button>
+                            <button class="btn btn-vincular" onclick="openPersonagemModal('${campaign.campaign_uuid}', '${escapeHtml(campaign.campaign_name)}', true)">
+                                <i class="fas fa-user-edit"></i> Alterar Personagem
+                            </button>
                         ` : `
                             <button class="btn btn-vincular" onclick="openPersonagemModal('${campaign.campaign_uuid}', '${escapeHtml(campaign.campaign_name)}')">
                                 <i class="fas fa-user-plus"></i> Vincular Personagem
@@ -1260,7 +1359,8 @@ function renderCampaigns(campaigns, container) {
                         `}
                     </div>
                 </div>
-            `).join('')}
+                `;
+            }).join('')}
         </div>
     `;
 }
@@ -1269,7 +1369,7 @@ function renderCampaigns(campaigns, container) {
 // SISTEMA DE VÍNCULO DE PERSONAGEM
 // ============================================
 
-async function openPersonagemModal(campaignId, campaignName) {
+async function openPersonagemModal(campaignId, campaignName, isUpdating = false) {
     selectedCampaignId = campaignId;
     selectedCharacterId = null;
     
@@ -1280,8 +1380,10 @@ async function openPersonagemModal(campaignId, campaignName) {
     const vincularBtn = document.getElementById('vincularPersonagemBtn');
     
     // Atualizar título
-    title.textContent = `Vincular Personagem`;
-    subtitle.textContent = `Escolha um personagem para: ${campaignName}`;
+    title.textContent = isUpdating ? 'Alterar Personagem' : 'Vincular Personagem';
+    subtitle.textContent = isUpdating ? 
+        `Altere o personagem para: ${campaignName}` : 
+        `Escolha um personagem para: ${campaignName}`;
     
     // Mostrar loading
     content.innerHTML = `
@@ -1293,7 +1395,9 @@ async function openPersonagemModal(campaignId, campaignName) {
     
     // Desabilitar botão de vincular
     vincularBtn.disabled = true;
-    vincularBtn.innerHTML = '<i class="fas fa-link"></i> Vincular Personagem';
+    vincularBtn.innerHTML = isUpdating ? 
+        '<i class="fas fa-sync-alt"></i> Alterar Personagem' : 
+        '<i class="fas fa-link"></i> Vincular Personagem';
     
     // Mostrar modal
     modal.classList.add('active');
@@ -1308,9 +1412,12 @@ async function openPersonagemModal(campaignId, campaignName) {
             .eq('status', 'Ativo')
             .order('created_at', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Erro ao buscar personagens:', error);
+            throw error;
+        }
         
-        // Verificar se algum já está vinculado a esta campanha
+        // Buscar personagem atualmente vinculado
         const { data: vinculado } = await supabase
             .from('campaign_characters')
             .select('character_id')
@@ -1339,7 +1446,9 @@ async function openPersonagemModal(campaignId, campaignName) {
         // Renderizar lista de personagens
         let html = `
             <div style="margin-bottom: 15px;">
-                <p style="color: #ccc; font-size: 0.9rem;">Selecione um personagem para vincular:</p>
+                <p style="color: #ccc; font-size: 0.9rem;">
+                    ${isUpdating ? 'Selecione um novo personagem:' : 'Selecione um personagem para vincular:'}
+                </p>
             </div>
             <div class="personagens-lista-modal">
         `;
@@ -1367,7 +1476,7 @@ async function openPersonagemModal(campaignId, campaignName) {
                     <div class="personagem-info-modal">
                         <div class="personagem-nome-modal">
                             ${escapeHtml(personagem.nome || 'Sem nome')}
-                            ${isSelected ? '<span style="color: #2ecc71; font-size: 0.8rem; margin-left: 8px;">(Vinculado)</span>' : ''}
+                            ${isSelected ? '<span style="color: #2ecc71; font-size: 0.8rem; margin-left: 8px;">(Atualmente vinculado)</span>' : ''}
                         </div>
                         <div class="personagem-detalhes-modal">
                             <span>
@@ -1384,7 +1493,7 @@ async function openPersonagemModal(campaignId, campaignName) {
                             </span>
                         </div>
                         <div style="color: #777; font-size: 0.8rem; margin-top: 5px;">
-                            Criado: ${formatDate(personagem.created_at)}
+                            Nível ${personagem.nivel || 1} • Criado: ${formatDate(personagem.created_at)}
                         </div>
                     </div>
                 </div>
@@ -1397,11 +1506,10 @@ async function openPersonagemModal(campaignId, campaignName) {
         // Se já tem personagem selecionado, habilitar botão
         if (selectedCharacterId) {
             vincularBtn.disabled = false;
-            vincularBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Alterar Personagem';
         }
         
     } catch (error) {
-        console.error('Erro ao carregar personagens:', error);
+        console.error('❌ Erro ao carregar personagens:', error);
         content.innerHTML = `
             <div class="empty-personagens">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -1430,7 +1538,12 @@ function selectPersonagemModal(characterId) {
     // Habilitar botão de vincular
     const vincularBtn = document.getElementById('vincularPersonagemBtn');
     vincularBtn.disabled = false;
-    vincularBtn.innerHTML = '<i class="fas fa-link"></i> Vincular Personagem';
+    
+    // Verificar se está atualizando ou criando novo
+    const isUpdating = vincularBtn.innerHTML.includes('Alterar');
+    vincularBtn.innerHTML = isUpdating ? 
+        '<i class="fas fa-sync-alt"></i> Alterar Personagem' : 
+        '<i class="fas fa-link"></i> Vincular Personagem';
 }
 
 // Vincular personagem à campanha
@@ -1440,7 +1553,7 @@ async function vincularPersonagem() {
         return;
     }
     
-    console.log('🔗 Iniciando vínculo:', {
+    console.log('🔗 INICIANDO VÍNCULO:', {
         campaignId: selectedCampaignId,
         characterId: selectedCharacterId,
         userId: currentUser.id
@@ -1453,56 +1566,75 @@ async function vincularPersonagem() {
     vincularBtn.disabled = true;
     
     try {
-        // Primeiro, verificar se já existe vínculo
-        const { data: existingLink } = await supabase
-            .from('campaign_characters')
-            .select('id')
-            .eq('campaign_id', selectedCampaignId)
-            .eq('user_id', currentUser.id)
-            .maybeSingle();
-        
+        // Método 1: Usar função SQL se existir
         let result;
-        
-        if (existingLink) {
-            // Atualizar vínculo existente
-            console.log('🔄 Atualizando vínculo existente');
-            result = await supabase
-                .from('campaign_characters')
-                .update({ 
-                    character_id: selectedCharacterId,
-                    updated_at: new Date()
-                })
-                .eq('id', existingLink.id);
-        } else {
-            // Criar novo vínculo
-            console.log('➕ Criando novo vínculo');
-            result = await supabase
-                .from('campaign_characters')
-                .insert({
-                    campaign_id: selectedCampaignId,
-                    character_id: selectedCharacterId,
-                    user_id: currentUser.id
+        try {
+            const { data: sqlResult, error: sqlError } = await supabase
+                .rpc('vincular_personagem_simples', {
+                    p_campaign_id: selectedCampaignId,
+                    p_character_id: selectedCharacterId,
+                    p_user_id: currentUser.id
                 });
+            
+            if (sqlError) throw sqlError;
+            result = sqlResult;
+        } catch (sqlError) {
+            console.log('⚠️ Função SQL não disponível, usando método direto');
+            
+            // Método 2: Consulta direta
+            const { data: existingLink } = await supabase
+                .from('campaign_characters')
+                .select('id')
+                .eq('campaign_id', selectedCampaignId)
+                .eq('user_id', currentUser.id)
+                .maybeSingle();
+            
+            if (existingLink) {
+                // Atualizar vínculo existente
+                console.log('🔄 Atualizando vínculo existente');
+                const { error: updateError } = await supabase
+                    .from('campaign_characters')
+                    .update({ 
+                        character_id: selectedCharacterId,
+                        updated_at: new Date()
+                    })
+                    .eq('id', existingLink.id);
+                
+                if (updateError) throw updateError;
+                result = { success: true, action: 'updated' };
+            } else {
+                // Criar novo vínculo
+                console.log('➕ Criando novo vínculo');
+                const { error: insertError } = await supabase
+                    .from('campaign_characters')
+                    .insert({
+                        campaign_id: selectedCampaignId,
+                        character_id: selectedCharacterId,
+                        user_id: currentUser.id
+                    });
+                
+                if (insertError) throw insertError;
+                result = { success: true, action: 'created' };
+            }
         }
         
-        if (result.error) {
-            console.error('❌ Erro no Supabase:', result.error);
-            throw result.error;
+        if (!result || !result.success) {
+            throw new Error(result?.message || 'Erro desconhecido');
         }
         
-        console.log('✅ Vínculo realizado com sucesso!');
+        console.log('✅ VÍNCULO REALIZADO COM SUCESSO!', result);
         showToast('✅ Personagem vinculado com sucesso!', 'success');
         
         // Fechar modal
         closePersonagemModal();
         
-        // Atualizar a lista de campanhas
+        // Atualizar a lista de campanhas após 1 segundo
         setTimeout(() => {
             loadPlayerCampaigns();
-        }, 500);
+        }, 1000);
         
     } catch (error) {
-        console.error('❌ Erro ao vincular personagem:', error);
+        console.error('❌ ERRO AO VINCULAR PERSONAGEM:', error);
         showToast('❌ Erro ao vincular personagem: ' + error.message, 'error');
     } finally {
         vincularBtn.innerHTML = originalText;
@@ -1557,7 +1689,7 @@ function formatDate(dateString) {
         if (diffDays === 1) return 'Ontem';
         if (diffDays < 7) return `${diffDays} dias atrás`;
         if (diffDays < 30) return `${Math.floor(diffDays/7)} semana${Math.floor(diffDays/7) !== 1 ? 's' : ''} atrás`;
-        return date.toLocaleDateString('pt-BR');
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
     } catch {
         return 'Data inválida';
     }
@@ -1604,31 +1736,33 @@ function showToast(message, type = 'info') {
 }
 
 // ============================================
-// FUNÇÕES DE DEBUG
+// FUNÇÕES DE TESTE E DEBUG
 // ============================================
 
-// Testar vínculos
+// Testar todos os vínculos
 window.testarVinculos = async function() {
-    console.log('🧪 Testando vínculos...');
+    console.log('🧪 TESTANDO VÍNCULOS...');
     
     const { data: vínculos, error } = await supabase
         .from('campaign_characters')
         .select(`
             *,
             campaigns(name),
-            characters(nome)
+            characters(nome),
+            profiles(username)
         `);
     
     if (error) {
-        console.error('Erro:', error);
+        console.error('❌ Erro:', error);
     } else {
-        console.log('Vínculos encontrados:', vínculos);
+        console.log('📋 Vínculos encontrados:', vínculos);
+        alert(`Encontrados ${vínculos?.length || 0} vínculos. Veja o console.`);
     }
 };
 
-// Testar campanhas
-window.testarCampanhas = async function() {
-    console.log('🧪 Testando campanhas...');
+// Verificar minhas campanhas
+window.minhasCampanhas = async function() {
+    console.log('🧪 MINHAS CAMPANHAS...');
     
     const { data: campanhas, error } = await supabase
         .from('campaign_players')
@@ -1639,9 +1773,9 @@ window.testarCampanhas = async function() {
         .eq('user_id', currentUser.id);
     
     if (error) {
-        console.error('Erro:', error);
+        console.error('❌ Erro:', error);
     } else {
-        console.log('Campanhas encontradas:', campanhas);
+        console.log('📋 Minhas campanhas:', campanhas);
     }
 };
 
@@ -1655,7 +1789,7 @@ window.selectPersonagemModal = selectPersonagemModal;
 window.entrarCampanha = entrarCampanha;
 window.criarNovoPersonagem = criarNovoPersonagem;
 window.testarVinculos = testarVinculos;
-window.testarCampanhas = testarCampanhas;
+window.minhasCampanhas = minhasCampanhas;
 
 </script>
 </body>
