@@ -679,7 +679,7 @@ function selectCampaignForManagement(campaignId, campaignName) {
 }
 
 async function loadCharactersForCampaign(campaignId, campaignName) {
-    console.log(`🎯 Buscando personagens da campanha: ${campaignName}`);
+    console.log(`Buscando personagens da campanha: ${campaignName}`);
     
     try {
         document.getElementById('pendingList').innerHTML = `
@@ -696,7 +696,6 @@ async function loadCharactersForCampaign(campaignId, campaignName) {
             </div>
         `;
         
-        // 1. BUSCAR VÍNCULOS DA CAMPANHA
         const { data: vinculos, error: errorVinculos } = await supabase
             .from('campaign_characters')
             .select('*')
@@ -712,10 +711,8 @@ async function loadCharactersForCampaign(campaignId, campaignName) {
         const pendentes = vinculos.filter(v => !v.user_id);
         const ativos = vinculos.filter(v => v.user_id);
         
-        // 2. MOSTRAR PENDENTES
         showPendingLinks(pendentes);
         
-        // 3. BUSCAR PERSONAGENS VINCULADOS
         if (ativos.length > 0) {
             await showLinkedCharacters(ativos);
         } else {
@@ -778,34 +775,27 @@ function showPendingLinks(pendentes) {
 async function showLinkedCharacters(vinculosAtivos) {
     const characterIds = vinculosAtivos.map(v => v.character_id).filter(id => id);
     
-    console.log('🔍 IDs dos personagens para buscar:', characterIds);
+    console.log('IDs dos personagens para buscar:', characterIds);
     
     try {
-        // BUSCAR NA TABELA CHARACTERS (igual ao personagens.html)
         const { data: characters, error } = await supabase
             .from('characters')
             .select('*')
             .in('id', characterIds);
         
-        if (error) {
-            console.error('Erro ao buscar personagens:', error);
-            throw error;
-        }
+        if (error) throw error;
         
         if (!characters || characters.length === 0) {
             document.getElementById('charactersList').innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-search"></i>
-                    <p>Personagens encontrados nos vínculos, mas não na tabela 'characters'.</p>
-                    <button class="btn btn-small" onclick="verificarTabela()" style="margin-top: 10px;">
-                        <i class="fas fa-database"></i> Verificar Tabela
-                    </button>
+                    <p>Personagens não encontrados na tabela 'characters'.</p>
                 </div>
             `;
             return;
         }
         
-        console.log('✅ Personagens encontrados:', characters);
+        console.log('Personagens encontrados:', characters);
         
         // Buscar nicknames dos jogadores
         const userIds = vinculosAtivos.map(v => v.user_id).filter(id => id);
@@ -839,8 +829,8 @@ async function showLinkedCharacters(vinculosAtivos) {
             }
         });
         
-        // RENDERIZAR PERSONAGENS - CARD COMPACTO
-        renderCompactCharacters(characters, vinculosAtivos, userNicknames);
+        // RENDERIZAR PERSONAGENS COM CARDS PEQUENOS
+        renderSmallCards(characters, vinculosAtivos, userNicknames);
         
     } catch (error) {
         console.error('Erro ao buscar personagens:', error);
@@ -854,89 +844,86 @@ async function showLinkedCharacters(vinculosAtivos) {
     }
 }
 
-// FUNÇÃO RENDERIZAR PERSONAGENS COMPACTOS
-function renderCompactCharacters(characters, vinculosAtivos, userNicknames) {
+// FUNÇÃO PARA RENDERIZAR CARDS PEQUENOS
+function renderSmallCards(characters, vinculosAtivos, userNicknames) {
     document.getElementById('charactersList').innerHTML = `
-        <div class="characters-list-compact">
+        <div class="characters-small-grid">
             ${characters.map(char => {
                 const vinculo = vinculosAtivos.find(v => v.character_id === char.id);
                 const jogadorNickname = vinculo && vinculo.user_id ? userNicknames[vinculo.user_id] : 'Desconhecido';
                 
-                // DADOS REAIS (igual ao personagens.html)
+                // Dados reais
                 const nome = escapeHtml(char.nome || 'Personagem Sem Nome');
-                const nomeDisplay = nome.length > 25 ? nome.substring(0, 23) + '...' : nome;
+                const nomeDisplay = nome.length > 20 ? nome.substring(0, 18) + '...' : nome;
                 const raca = escapeHtml(char.raca || 'Sem Raça');
                 const classe = escapeHtml(char.classe || 'Sem Classe');
                 
-                // ATRIBUTOS REAIS
+                // Atributos reais
                 const forca = char.forca || 10;
                 const destreza = char.destreza || 10;
                 const inteligencia = char.inteligencia || 10;
                 const saude = char.saude || 10;
                 
-                // PONTOS REAIS
+                // Pontos reais
                 const pontosTotais = char.pontos_totais || 150;
                 const pontosGastos = char.pontos_gastos || 0;
                 const pontosDisponiveis = char.pontos_disponiveis || (pontosTotais - pontosGastos);
                 
-                // Data formatada
-                const dataCriacao = formatarData(char.created_at);
-                
                 return `
-                <div class="character-card-compact">
+                <div class="character-small-card">
                     <!-- CABEÇALHO -->
-                    <div class="compact-header">
-                        <h4 class="compact-title" title="${nome}">
+                    <div class="small-header">
+                        <h4 class="small-title" title="${nome}">
                             <i class="fas fa-user"></i> ${nomeDisplay}
                         </h4>
                     </div>
                     
                     <!-- RAÇA E CLASSE -->
-                    <div class="compact-subtitle">
-                        <span class="compact-raca">${raca}</span>
-                        <span class="compact-separator">•</span>
-                        <span class="compact-classe">${classe}</span>
+                    <div class="small-subtitle">
+                        <span class="small-raca">${raca}</span>
+                        <span class="small-separator">•</span>
+                        <span class="small-classe">${classe}</span>
                     </div>
                     
-                    <!-- ATRIBUTOS EM LINHA -->
-                    <div class="compact-atributos">
-                        <div class="attr-item">
-                            <span class="attr-label">FOR</span>
-                            <span class="attr-value">${forca}</span>
+                    <!-- ATRIBUTOS -->
+                    <div class="small-atributos">
+                        <div class="small-attr">
+                            <span class="small-attr-label">FOR</span>
+                            <span class="small-attr-value">${forca}</span>
                         </div>
-                        <div class="attr-item">
-                            <span class="attr-label">DES</span>
-                            <span class="attr-value">${destreza}</span>
+                        <div class="small-attr">
+                            <span class="small-attr-label">DES</span>
+                            <span class="small-attr-value">${destreza}</span>
                         </div>
-                        <div class="attr-item">
-                            <span class="attr-label">INT</span>
-                            <span class="attr-value">${inteligencia}</span>
+                        <div class="small-attr">
+                            <span class="small-attr-label">INT</span>
+                            <span class="small-attr-value">${inteligencia}</span>
                         </div>
-                        <div class="attr-item">
-                            <span class="attr-label">SAÚ</span>
-                            <span class="attr-value">${saude}</span>
+                        <div class="small-attr">
+                            <span class="small-attr-label">SAÚ</span>
+                            <span class="small-attr-value">${saude}</span>
                         </div>
                     </div>
                     
                     <!-- PONTOS -->
-                    <div class="compact-pontos">
+                    <div class="small-pontos">
                         <i class="fas fa-coins"></i>
-                        <span class="pontos-texto">${pontosDisponiveis}/${pontosTotais}</span>
-                        ${pontosGastos > 0 ? `<small class="pontos-gastos">(${pontosGastos} gastos)</small>` : ''}
+                        <span>${pontosDisponiveis}/${pontosTotais}</span>
+                        ${pontosGastos > 0 ? `<small>(${pontosGastos})</small>` : ''}
                     </div>
                     
                     <!-- JOGADOR -->
-                    <div class="compact-jogador">
+                    <div class="small-jogador">
                         <i class="fas fa-user-tag"></i>
                         <span>${jogadorNickname}</span>
                     </div>
                     
                     <!-- AÇÕES -->
-                    <div class="compact-actions">
-                        <button class="btn-compact-ver" onclick="viewCharacterSheet('${char.id}')">
+                    <div class="small-actions">
+                        <button class="btn-small-ver" onclick="viewCharacterSheet('${char.id}')">
                             <i class="fas fa-scroll"></i> Ver Ficha
                         </button>
-                        <button class="btn-compact-remover" onclick="removeFromCampaign('${vinculo ? vinculo.id : char.id}', '${escapeHtml(nome)}')">
+                        <button class="btn-small-remover" onclick="removeFromCampaign('${vinculo ? vinculo.id : char.id}', '${escapeHtml(nome)}')">
                             <i class="fas fa-user-minus"></i> Remover
                         </button>
                     </div>
@@ -947,7 +934,6 @@ function renderCompactCharacters(characters, vinculosAtivos, userNicknames) {
     `;
 }
 
-// FUNÇÕES DE AÇÃO (mantidas iguais)
 async function assignPlayerToLink(linkId) {
     const playerEmail = prompt('Digite o email do jogador para vincular:');
     if (!playerEmail) return;
@@ -1074,9 +1060,11 @@ function showError(error) {
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Erro</h3>
             <p>${error.message}</p>
-            <button class="btn btn-small" onclick="loadDashboard()">
-                <i class="fas fa-redo"></i> Recarregar
-            </button>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-small" onclick="loadDashboard()">
+                    <i class="fas fa-redo"></i> Recarregar
+                </button>
+            </div>
         </div>
     `;
 }
@@ -1097,19 +1085,6 @@ function resetCharacterLists() {
     `;
 }
 
-function formatarData(dataString) {
-    try {
-        const data = new Date(dataString);
-        return data.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    } catch {
-        return 'Data inválida';
-    }
-}
-
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -1117,134 +1092,125 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-async function verificarTabela() {
-    try {
-        alert('🔍 Verificando tabela characters...');
-        
-        const { data: exemplos, error } = await supabase
-            .from('characters')
-            .select('id, nome, forca, destreza')
-            .limit(3);
-        
-        if (error) {
-            alert(`❌ Erro: ${error.message}\n\nTabela 'characters' não encontrada ou com problemas.`);
-        } else if (exemplos && exemplos.length > 0) {
-            alert(`✅ Tabela characters encontrada!\n\nExemplos:\n${exemplos.map(c => `${c.nome} (FOR: ${c.forca}, DES: ${c.destreza})`).join('\n')}`);
-        } else {
-            alert('⚠️ Tabela characters existe mas está vazia.');
-        }
-    } catch (err) {
-        alert('Erro: ' + err.message);
-    }
-}
-
-// ESTILOS PARA CARDS COMPACTOS
-const compactCardStyles = document.createElement('style');
-compactCardStyles.textContent = `
-/* CONTAINER PARA CARDS COMPACTOS - GRID RESPONSIVO */
-.characters-list-compact {
+// ESTILOS PARA CARDS PEQUENOS
+const smallCardsStyle = document.createElement('style');
+smallCardsStyle.textContent = `
+/* GRID DE CARDS PEQUENOS - 3 POR LINHA */
+.characters-small-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
     margin-top: 15px;
 }
 
-/* CARD COMPACTO */
-.character-card-compact {
+@media (max-width: 1024px) {
+    .characters-small-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .characters-small-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* CARD PEQUENO */
+.character-small-card {
     background: rgba(30, 30, 40, 0.85);
     border-radius: 10px;
-    padding: 18px;
+    padding: 15px;
     border: 1px solid rgba(255, 140, 0, 0.25);
     transition: all 0.3s ease;
-    min-height: 240px;
+    min-height: 260px;
     display: flex;
     flex-direction: column;
     backdrop-filter: blur(10px);
 }
 
-.character-card-compact:hover {
+.character-small-card:hover {
     transform: translateY(-3px);
     border-color: rgba(255, 140, 0, 0.5);
     box-shadow: 0 5px 15px rgba(255, 140, 0, 0.15);
 }
 
 /* CABEÇALHO */
-.compact-header {
-    margin-bottom: 10px;
+.small-header {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 10px;
 }
 
-.compact-title {
+.small-title {
     color: #ffd700;
-    font-size: 1.1rem;
+    font-size: 1rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     margin: 0;
     font-weight: 600;
 }
 
-.compact-title i {
+.small-title i {
     color: #ff8c00;
+    font-size: 0.9rem;
 }
 
-/* SUBTÍTULO (RAÇA E CLASSE) */
-.compact-subtitle {
+/* SUBTÍTULO */
+.small-subtitle {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
+    gap: 5px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
     flex-wrap: wrap;
 }
 
-.compact-raca {
+.small-raca {
     color: #ff8c00;
     font-weight: 500;
 }
 
-.compact-separator {
+.small-separator {
     color: #666;
 }
 
-.compact-classe {
+.small-classe {
     color: #3498db;
     font-weight: 500;
 }
 
-/* ATRIBUTOS EM LINHA HORIZONTAL */
-.compact-atributos {
+/* ATRIBUTOS */
+.small-atributos {
     display: flex;
     justify-content: space-between;
-    margin: 15px 0;
-    padding: 12px;
+    margin: 10px 0;
+    padding: 8px;
     background: rgba(20, 20, 30, 0.6);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
 }
 
-.attr-item {
+.small-attr {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 50px;
+    min-width: 40px;
 }
 
-.attr-label {
-    font-size: 0.7rem;
+.small-attr-label {
+    font-size: 0.65rem;
     color: #ccc;
     text-transform: uppercase;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     letter-spacing: 0.5px;
 }
 
-.attr-value {
-    font-size: 1.3rem;
+.small-attr-value {
+    font-size: 1.1rem;
     font-weight: bold;
     color: #ffd700;
-    min-width: 35px;
-    height: 35px;
+    min-width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1254,92 +1220,92 @@ compactCardStyles.textContent = `
 }
 
 /* PONTOS */
-.compact-pontos {
+.small-pontos {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 10px 0;
-    padding: 8px 12px;
+    gap: 6px;
+    margin: 8px 0;
+    padding: 6px 10px;
     background: rgba(255, 140, 0, 0.1);
     border-radius: 6px;
     border: 1px solid rgba(255, 140, 0, 0.2);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
-.compact-pontos i {
+.small-pontos i {
     color: #ffd700;
 }
 
-.pontos-texto {
+.small-pontos span {
     font-weight: 600;
     color: #fff;
 }
 
-.pontos-gastos {
+.small-pontos small {
     color: #ccc;
-    font-size: 0.8rem;
-    margin-left: 5px;
+    font-size: 0.75rem;
+    margin-left: 4px;
 }
 
 /* JOGADOR */
-.compact-jogador {
+.small-jogador {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 8px 0;
-    padding: 6px 10px;
+    gap: 6px;
+    margin: 6px 0;
+    padding: 5px 8px;
     background: rgba(52, 152, 219, 0.1);
     border-radius: 6px;
     border: 1px solid rgba(52, 152, 219, 0.2);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #aaa;
 }
 
-.compact-jogador i {
+.small-jogador i {
     color: #3498db;
 }
 
 /* AÇÕES */
-.compact-actions {
+.small-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     margin-top: auto;
-    padding-top: 15px;
+    padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.btn-compact-ver, .btn-compact-remover {
+.btn-small-ver, .btn-small-remover {
     flex: 1;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border: none;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    font-size: 0.85rem;
+    gap: 5px;
+    font-size: 0.8rem;
 }
 
-.btn-compact-ver {
+.btn-small-ver {
     background: rgba(52, 152, 219, 0.2);
     color: #3498db;
     border: 1px solid rgba(52, 152, 219, 0.3);
 }
 
-.btn-compact-ver:hover {
+.btn-small-ver:hover {
     background: rgba(52, 152, 219, 0.3);
 }
 
-.btn-compact-remover {
+.btn-small-remover {
     background: rgba(231, 76, 60, 0.2);
     color: #e74c3c;
     border: 1px solid rgba(231, 76, 60, 0.3);
 }
 
-.btn-compact-remover:hover {
+.btn-small-remover:hover {
     background: rgba(231, 76, 60, 0.3);
 }
 
@@ -1355,38 +1321,11 @@ compactCardStyles.textContent = `
     }
 }
 
-.character-card-compact {
+.character-small-card {
     animation: fadeIn 0.3s ease;
 }
-
-/* RESPONSIVIDADE */
-@media (max-width: 768px) {
-    .characters-list-compact {
-        grid-template-columns: 1fr;
-    }
-    
-    .compact-atributos {
-        padding: 8px;
-    }
-    
-    .attr-item {
-        min-width: 40px;
-    }
-    
-    .attr-value {
-        font-size: 1.1rem;
-        min-width: 30px;
-        height: 30px;
-    }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-    .characters-list-compact {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
 `;
-document.head.appendChild(compactCardStyles);
+document.head.appendChild(smallCardsStyle);
 </script>
 </body>
 </html>
