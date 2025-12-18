@@ -741,7 +741,7 @@ async function loadCharactersForCampaign(campaignId, campaignName) {
         console.log('✅ Vínculos encontrados:', vinculos);
         
         if (!vinculos || vinculos.length === 0) {
-            showNoCharactersFound();
+            showNoCharactersFound(campaignId);
             return;
         }
         
@@ -815,47 +815,47 @@ function showPendingLinks(pendentes) {
     }
 }
 
-// BUSCAR E MOSTRAR PERSONAGENS VINCULADOS
+// BUSCAR E MOSTRAR PERSONAGENS VINCULADOS - VERSÃO ATUALIZADA
 async function showLinkedCharacters(vinculosAtivos) {
     // Pegar IDs dos personagens
     const characterIds = vinculosAtivos.map(v => v.character_id).filter(id => id);
     
     console.log('🔍 IDs dos personagens:', characterIds);
     
-    // LISTA DE TABELAS POSSÍVEIS (baseado no seu sistema)
-    const possibleTables = [
-        'player_characters',  // Mais provável
-        'characters',
-        'fichas',
-        'personagens',
-        'pcs'
-    ];
-    
+    // BUSCAR NA TABELA CHARACTERS (baseado no seu SQL)
     let charactersFound = [];
-    let foundTable = '';
     
-    // Tentar cada tabela
-    for (const tableName of possibleTables) {
-        try {
-            console.log(`🔎 Tentando tabela: ${tableName}`);
-            
-            const { data, error } = await supabase
-                .from(tableName)
+    try {
+        console.log('🔎 Buscando na tabela characters...');
+        const { data, error } = await supabase
+            .from('characters')
+            .select('*')
+            .in('id', characterIds);
+        
+        if (error) {
+            console.error('Erro ao buscar personagens:', error);
+            // Tentar tabela alternativa
+            const { data: data2, error: error2 } = await supabase
+                .from('player_characters')
                 .select('*')
                 .in('id', characterIds);
             
-            if (!error && data && data.length > 0) {
-                console.log(`✅ Encontrado na tabela ${tableName}:`, data);
-                charactersFound = data;
-                foundTable = tableName;
-                break;
+            if (error2) {
+                throw new Error('Não foi possível encontrar os personagens');
             }
-        } catch (err) {
-            console.log(`❌ Erro na tabela ${tableName}:`, err.message);
+            charactersFound = data2 || [];
+        } else {
+            charactersFound = data || [];
         }
+        
+        console.log(`✅ Encontrados ${charactersFound.length} personagens:`, charactersFound);
+        
+    } catch (err) {
+        console.error('💥 Erro ao buscar personagens:', err);
+        charactersFound = [];
     }
     
-    // SE NÃO ENCONTRAR NAS TABELAS, CRIAR DADOS SIMULADOS (para teste)
+    // SE NÃO ENCONTRAR, CRIAR DADOS DE EXEMPLO (temporário)
     if (charactersFound.length === 0) {
         console.log('⚠️ Nenhum personagem encontrado nas tabelas. Criando dados de exemplo...');
         
@@ -864,53 +864,150 @@ async function showLinkedCharacters(vinculosAtivos) {
             nome: `Personagem ${index + 1}`,
             classe: index % 3 === 0 ? 'Guerreiro' : index % 3 === 1 ? 'Mago' : 'Ladino',
             raca: index % 2 === 0 ? 'Humano' : 'Elfo',
-            nivel: Math.floor(Math.random() * 10) + 1,
-            pontos_totais: 100,
+            forca: 10 + index,
+            destreza: 10 + index,
+            inteligencia: 10 + index,
+            saude: 10 + index,
+            pontos_totais: 150,
             pontos_gastos: Math.floor(Math.random() * 80) + 20,
+            pontos_disponiveis: 150 - (Math.floor(Math.random() * 80) + 20),
             status: 'Ativo'
         }));
     }
     
-    console.log(`🎨 Mostrando ${charactersFound.length} personagens`);
+    // BUSCAR NICKNAMES DOS JOGADORES
+    const userIds = vinculosAtivos.map(v => v.user_id).filter(id => id);
+    let userNicknames = {};
     
-    // Mostrar personagens
+    if (userIds.length > 0) {
+        try {
+            console.log('🔍 Buscando nicknames dos jogadores...');
+            
+            // Tentar várias tabelas possíveis
+            const tablesToTry = ['profiles', 'users', 'auth.users'];
+            
+            for (const tableName of tablesToTry) {
+                try {
+                    const { data: users, error } = await supabase
+                        .from(tableName)
+                        .select('id, username, nickname, display_name, email')
+                        .in('id', userIds);
+                    
+                    if (!error && users && users.length > 0) {
+                        console.log(`✅ Nicknames encontrados na tabela ${tableName}:`, users);
+                        
+                        users.forEach(user => {
+                            // Prioridade: nickname > username > display_name > email > ID
+                            const nickname = 
+                                user.nickname || 
+                                user.username || 
+                                user.display_name || 
+                                user.email?.split('@')[0] || 
+                                user.id.substring(0, 6);
+                            userNicknames[user.id] = nickname;
+                        });
+                        break;
+                    }
+                } catch (err) {
+                    console.log(`❌ Tabela ${tableName} não acessível:`, err.message);
+                }
+            }
+            
+            // Se não encontrou nicknames, usar 6 dígitos do ID
+            userIds.forEach(userId => {
+                if (!userNicknames[userId]) {
+                    userNicknames[userId] = userId.substring(0, 6);
+                }
+            });
+            
+        } catch (error) {
+            console.error('Erro ao buscar nicknames:', error);
+            // Fallback: usar 6 dígitos do ID
+            userIds.forEach(userId => {
+                userNicknames[userId] = userId.substring(0, 6);
+            });
+        }
+    }
+    
+    // Mostrar personagens NO FORMATO DOS SEUS CARDS
     document.getElementById('charactersList').innerHTML = `
         <div class="characters-list">
             ${charactersFound.map(char => {
                 // Encontrar o vínculo correspondente
                 const vinculo = vinculosAtivos.find(v => v.character_id === char.id);
+                const jogadorNickname = vinculo && vinculo.user_id ? userNicknames[vinculo.user_id] : 'Desconhecido';
+                
+                // Dados do personagem (com fallbacks)
+                const nome = escapeHtml(char.nome || `Personagem ${char.id.substring(0, 8)}`);
+                const raca = escapeHtml(char.raca || 'Sem Raça');
+                const classe = escapeHtml(char.classe || 'Sem Classe');
+                
+                // Atributos (com fallbacks)
+                const forca = char.forca || 10;
+                const destreza = char.destreza || 10;
+                const inteligencia = char.inteligencia || 10;
+                const saude = char.saude || 10;
+                
+                // Pontos (com fallbacks)
+                const pontosGastos = char.pontos_gastos || 0;
+                const pontosTotais = char.pontos_totais || 150;
+                const pontosDisponiveis = char.pontos_disponiveis || (pontosTotais - pontosGastos);
                 
                 return `
                     <div class="character-item">
                         <div class="item-header">
                             <div class="character-name">
-                                <i class="fas fa-user"></i> ${escapeHtml(char.nome || `Personagem ${char.id.substring(0, 8)}`)}
+                                <i class="fas fa-user"></i> ${nome}
                             </div>
-                            <div class="campaign-code">
-                                Nvl ${char.nivel || 1}
+                            <!-- REMOVIDO: Nvl ${char.nivel || 1} -->
+                        </div>
+                        
+                        <!-- RAÇA E CLASSE -->
+                        <div style="margin: 8px 0; color: #ff8c00; font-size: 0.9rem;">
+                            <i class="fas fa-dna"></i> ${raca} • ${classe}
+                        </div>
+                        
+                        <!-- ATRIBUTOS - FORMATO DOS SEUS CARDS -->
+                        <div class="character-attributes-gurps">
+                            <div class="attr-gurps">
+                                <span class="attr-label-gurps">FOR</span>
+                                <span class="attr-value-gurps">${forca}</span>
+                            </div>
+                            <div class="attr-gurps">
+                                <span class="attr-label-gurps">DES</span>
+                                <span class="attr-value-gurps">${destreza}</span>
+                            </div>
+                            <div class="attr-gurps">
+                                <span class="attr-label-gurps">INT</span>
+                                <span class="attr-value-gurps">${inteligencia}</span>
+                            </div>
+                            <div class="attr-gurps">
+                                <span class="attr-label-gurps">SAÚ</span>
+                                <span class="attr-value-gurps">${saude}</span>
                             </div>
                         </div>
                         
-                        <div class="character-attributes">
-                            ${char.classe ? `<div><i class="fas fa-hat-wizard"></i> ${escapeHtml(char.classe)}</div>` : ''}
-                            ${char.raca ? `<div><i class="fas fa-dragon"></i> ${escapeHtml(char.raca)}</div>` : ''}
-                            ${char.pontos_gastos ? `<div><i class="fas fa-bolt"></i> ${char.pontos_gastos}/${char.pontos_totais || 100} pts</div>` : ''}
+                        <!-- PONTOS -->
+                        <div style="margin: 10px 0; padding: 8px; background: rgba(255, 140, 0, 0.1); border-radius: 4px; font-size: 0.9rem;">
+                            <i class="fas fa-coins"></i> Pontos: <strong>${pontosDisponiveis}/${pontosTotais}</strong>
+                            ${pontosGastos > 0 ? ` (Gastos: ${pontosGastos})` : ''}
                         </div>
                         
+                        <!-- VINCULADO AO JOGADOR -->
                         ${vinculo ? `
                         <div style="margin: 10px 0; padding: 8px; background: rgba(52, 152, 219, 0.1); border-radius: 4px; font-size: 0.85rem;">
-                            <i class="fas fa-link"></i> Vinculado ao jogador: ${vinculo.user_id ? vinculo.user_id.substring(0, 8) + '...' : 'Desconhecido'}
+                            <i class="fas fa-link"></i> Vinculado ao jogador: 
+                            <strong>${jogadorNickname}</strong>
                         </div>
                         ` : ''}
                         
+                        <!-- AÇÕES - SEM BOTÃO EDITAR -->
                         <div class="character-actions">
                             <button class="btn btn-small btn-ver" onclick="viewCharacterSheet('${char.id}')">
                                 <i class="fas fa-scroll"></i> Ver Ficha
                             </button>
-                            <button class="btn btn-small" onclick="editCharacter('${char.id}')">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-small btn-recusar" onclick="removeFromCampaign('${vinculo ? vinculo.id : char.id}', '${escapeHtml(char.nome)}')">
+                            <!-- REMOVIDO: Botão Editar -->
+                            <button class="btn btn-small btn-recusar" onclick="removeFromCampaign('${vinculo ? vinculo.id : char.id}', '${escapeHtml(nome)}')">
                                 <i class="fas fa-user-minus"></i> Remover
                             </button>
                         </div>
@@ -918,10 +1015,6 @@ async function showLinkedCharacters(vinculosAtivos) {
                 `;
             }).join('')}
         </div>
-        
-        ${foundTable ? `<div style="text-align: center; margin-top: 10px; color: #7f8c8d; font-size: 0.8rem;">
-            <i class="fas fa-database"></i> Dados da tabela: ${foundTable}
-        </div>` : ''}
     `;
 }
 
@@ -998,13 +1091,13 @@ async function removeFromCampaign(linkId, charName) {
     }
 }
 
+// VER FICHA - ABRE A ABA RESUMO DO PERSONAGEM
 function viewCharacterSheet(characterId) {
-    window.open(`ficha.html?id=${characterId}`, '_blank');
+    // Abre criar-personagens.html na aba de resumo
+    window.open(`criar-personagens.html?id=${characterId}`, '_blank');
 }
 
-function editCharacter(characterId) {
-    window.open(`editar-personagem.html?id=${characterId}`, '_blank');
-}
+// REMOVIDA: function editCharacter() - Não tem mais botão Editar
 
 function viewCampaignDetails(campaignId) {
     window.open(`campanha.html?id=${campaignId}`, '_blank');
@@ -1025,7 +1118,7 @@ function generateInviteLink(campaignId) {
 }
 
 // FUNÇÕES AUXILIARES
-function showNoCharactersFound() {
+function showNoCharactersFound(campaignId) {
     document.getElementById('pendingList').innerHTML = `
         <div class="empty-state">
             <i class="fas fa-search"></i>
@@ -1041,9 +1134,6 @@ function showNoCharactersFound() {
             <div style="margin-top: 20px;">
                 <button class="btn" onclick="generateInviteLink('${campaignId}')">
                     <i class="fas fa-user-plus"></i> Convidar Jogadores
-                </button>
-                <button class="btn" onclick="createTestCharacter('${campaignId}')" style="margin-left: 10px;">
-                    <i class="fas fa-magic"></i> Criar Personagem Teste
                 </button>
             </div>
         </div>
@@ -1093,70 +1183,21 @@ function resetCharacterLists() {
 
 async function checkDatabaseStructure() {
     try {
-        alert('Verificando tabelas...\n\n1. campaign_characters - OK\n2. player_characters - Verificando...\n\nOs vínculos existem, mas os personagens podem estar em outra tabela.');
+        alert('Verificando tabelas...\n\n1. campaign_characters - OK\n2. characters - Verificando...\n\nOs vínculos existem, mas os personagens podem estar na tabela characters ou player_characters.');
         
-        // Tentar ver todas as tabelas disponíveis
+        // Verificar tabela characters
         const { data, error } = await supabase
-            .from('player_characters')
-            .select('*')
-            .limit(1);
+            .from('characters')
+            .select('id, nome')
+            .limit(2);
         
         if (error) {
-            alert(`Tabela player_characters: ${error.message}\n\nOs personagens podem estar na tabela "characters" ou "fichas".`);
+            alert(`Tabela characters: ${error.message}\n\nOs personagens podem estar na tabela "player_characters".`);
         } else {
-            alert(`Tabela player_characters existe com ${data ? data.length : 0} registros.`);
+            alert(`Tabela characters existe com ${data ? data.length : 0} registros.\n\nExemplo: ${data.length > 0 ? data[0].nome : 'Nenhum'}`);
         }
     } catch (err) {
         alert('Erro na verificação: ' + err.message);
-    }
-}
-
-async function createTestCharacter(campaignId) {
-    if (!confirm('Criar um personagem de teste para esta campanha?')) return;
-    
-    try {
-        // Criar personagem teste
-        const testChar = {
-            nome: 'Personagem Teste',
-            classe: 'Guerreiro',
-            raca: 'Humano',
-            nivel: 1,
-            pontos_totais: 100,
-            pontos_gastos: 50,
-            campaign_id: campaignId,
-            user_id: currentUser.id,
-            status: 'Ativo'
-        };
-        
-        // Tentar inserir na tabela player_characters
-        const { data, error } = await supabase
-            .from('player_characters')
-            .insert([testChar])
-            .select();
-        
-        if (error) {
-            console.error('Erro ao criar personagem:', error);
-            alert('Erro: ' + error.message + '\n\nTentando outra tabela...');
-            
-            // Tentar tabela characters
-            const { data: data2, error: error2 } = await supabase
-                .from('characters')
-                .insert([testChar])
-                .select();
-            
-            if (error2) {
-                alert('Não foi possível criar personagem em nenhuma tabela.');
-                return;
-            }
-            
-            alert('Personagem teste criado na tabela "characters"!');
-        } else {
-            alert('Personagem teste criado na tabela "player_characters"!');
-        }
-        
-        location.reload();
-    } catch (err) {
-        alert('Erro: ' + err.message);
     }
 }
 
@@ -1168,26 +1209,50 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Adicionar estilos extras se necessário
+// ADICIONAR ESTILOS PARA O NOVO FORMATO
 const extraStyles = document.createElement('style');
 extraStyles.textContent = `
-.character-attributes {
+/* NOVOS ESTILOS PARA O FORMATO DOS CARDS */
+.character-attributes-gurps {
     display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
+    justify-content: space-around;
     margin: 15px 0;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
+    padding: 12px;
+    background: rgba(30, 30, 40, 0.7);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 140, 0, 0.2);
 }
 
-.character-attributes div {
+.attr-gurps {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.attr-label-gurps {
+    font-size: 0.75rem;
+    color: #ccc;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+.attr-value-gurps {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ffd700;
+    background: rgba(0, 0, 0, 0.3);
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: #ddd;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 140, 0, 0.3);
 }
 
+/* AÇÕES - APENAS 2 BOTÕES */
 .character-actions {
     display: flex;
     gap: 8px;
@@ -1195,20 +1260,80 @@ extraStyles.textContent = `
 }
 
 .btn-small {
-    padding: 6px 12px;
+    padding: 8px 15px;
     font-size: 0.85rem;
+    min-width: 100px;
 }
 
+.btn-ver {
+    background: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.btn-ver:hover {
+    background: rgba(52, 152, 219, 0.3);
+}
+
+.btn-recusar {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.btn-recusar:hover {
+    background: rgba(231, 76, 60, 0.3);
+}
+
+/* STATUS BADGES */
 .status-badge {
     padding: 3px 10px;
     border-radius: 12px;
     font-size: 0.8rem;
     font-weight: 600;
+    display: inline-block;
 }
 
 .status-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
 .status-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
 .status-inactive { background: rgba(149, 165, 166, 0.2); color: #95a5a6; }
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+    .character-attributes-gurps {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .attr-gurps {
+        padding: 5px;
+        min-width: 60px;
+    }
+    
+    .character-actions {
+        flex-direction: column;
+    }
+    
+    .btn-small {
+        width: 100%;
+    }
+}
+
+/* ANIMAÇÃO PARA NOVOS ITENS */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.character-item {
+    animation: fadeInUp 0.3s ease;
+}
 `;
 document.head.appendChild(extraStyles);
 </script>
