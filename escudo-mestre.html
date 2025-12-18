@@ -550,13 +550,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 function setupTabs() {
     document.querySelectorAll('.gm-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            const tabId = tab.getAttribute('data-tab');
+        tab.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
             document.querySelectorAll('.gm-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
+            this.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
-                if (content.id === `${tabId}-tab`) content.classList.add('active');
+                if (content.id === tabId + '-tab') {
+                    content.classList.add('active');
+                }
             });
         });
     });
@@ -574,17 +576,17 @@ async function loadDashboard() {
         return;
     }
     
-    document.getElementById('campaignsList').innerHTML = campaigns.map(campaign => `
+    document.getElementById('campaignsList').innerHTML = campaigns.map(c => `
         <div class="campaign-item">
             <div class="campaign-header">
-                <div class="campaign-name">${campaign.name}</div>
-                <div class="campaign-code">${campaign.campaign_id}</div>
+                <div class="campaign-name">${c.name}</div>
+                <div class="campaign-code">${c.campaign_id}</div>
             </div>
             <div class="campaign-stats">
-                <div><strong>Status:</strong> ${campaign.status === 'active' ? 'Ativa' : 'Inativa'}</div>
+                <div><strong>Status:</strong> ${c.status}</div>
             </div>
             <div class="campaign-actions">
-                <button class="btn btn-small btn-gerenciar" onclick="verPCs('${campaign.id}')">
+                <button class="btn btn-small btn-gerenciar" onclick="verPCs('${c.id}')">
                     <i class="fas fa-users"></i> Ver PCs
                 </button>
             </div>
@@ -605,93 +607,71 @@ async function loadDashboard() {
     });
 }
 
-// FUNÇÃO PRINCIPAL CORRIGIDA
 async function verPCs(campaignId) {
     try {
-        console.log('🔍 Buscando dados da campanha:', campaignId);
+        // LIMPAR
+        document.getElementById('pendingList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando...</p></div>';
+        document.getElementById('charactersList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando...</p></div>';
         
-        // 1. BUSCAR JOGADORES E SEUS character_id (da tabela campaign_players)
-        const { data: jogadores, error: erroJogadores } = await supabase
+        // 1. BUSCAR JOGADORES
+        const { data: jogadores } = await supabase
             .from('campaign_players')
-            .select('user_id, character_id')
+            .select(`
+                user_id,
+                profiles (username)
+            `)
             .eq('campaign_id', campaignId)
             .eq('status', 'active');
         
-        if (erroJogadores) throw erroJogadores;
-        
         if (!jogadores || jogadores.length === 0) {
-            document.getElementById('pendingList').innerHTML = '<p>Sem jogadores</p>';
-            document.getElementById('charactersList').innerHTML = '<p>Sem jogadores</p>';
+            document.getElementById('pendingList').innerHTML = '<p>Nenhum jogador</p>';
+            document.getElementById('charactersList').innerHTML = '<p>Nenhum jogador</p>';
             return;
         }
         
-        console.log('Jogadores encontrados:', jogadores);
+        // 2. BUSCAR VÍNCULOS
+        const { data: vinculos } = await supabase
+            .from('campaign_characters')
+            .select(`
+                user_id,
+                character_id,
+                characters (
+                    id,
+                    nome,
+                    classe,
+                    raca,
+                    pontos_gastos,
+                    pontos_totais
+                )
+            `)
+            .eq('campaign_id', campaignId);
         
-        // 2. BUSCAR NOMES DOS JOGADORES
-        const userIds = jogadores.map(j => j.user_id);
-        const { data: perfis } = await supabase
-            .from('profiles')
-            .select('id, username')
-            .in('id', userIds);
-        
-        console.log('Perfis encontrados:', perfis);
-        
-        // 3. FILTRAR QUEM TEM character_id
-        const jogadoresComPersonagem = jogadores.filter(j => j.character_id);
-        const jogadoresSemPersonagem = jogadores.filter(j => !j.character_id);
-        
-        console.log('Com personagem:', jogadoresComPersonagem);
-        console.log('Sem personagem:', jogadoresSemPersonagem);
-        
-        // 4. BUSCAR DADOS DOS PERSONAGENS (apenas dos que têm character_id)
-        let personagensMap = {};
-        if (jogadoresComPersonagem.length > 0) {
-            const charIds = jogadoresComPersonagem.map(j => j.character_id);
-            const { data: personagens } = await supabase
-                .from('characters')
-                .select('*')
-                .in('id', charIds);
-            
-            if (personagens) {
-                personagens.forEach(p => {
-                    personagensMap[p.id] = p;
-                });
-            }
-            console.log('Personagens encontrados:', personagens);
-        }
-        
-        // 5. ORGANIZAR PARA MOSTRAR
+        // 3. ORGANIZAR
         const comPersonagem = [];
         const semPersonagem = [];
         
-        jogadores.forEach(jogador => {
-            const perfil = perfis?.find(p => p.id === jogador.user_id);
-            const nome = perfil?.username || 'Jogador';
+        jogadores.forEach(j => {
+            const nome = j.profiles?.username || 'Jogador';
+            const vinculo = vinculos?.find(v => v.user_id === j.user_id);
             
-            if (jogador.character_id && personagensMap[jogador.character_id]) {
+            if (vinculo && vinculo.characters) {
                 comPersonagem.push({
                     nome: nome,
-                    personagem: personagensMap[jogador.character_id]
+                    personagem: vinculo.characters
                 });
             } else {
-                semPersonagem.push({ 
+                semPersonagem.push({
                     nome: nome,
-                    userId: jogador.user_id,
-                    characterId: jogador.character_id 
+                    userId: j.user_id
                 });
             }
         });
         
-        console.log('Resultado final - Com personagem:', comPersonagem);
-        console.log('Resultado final - Sem personagem:', semPersonagem);
-        
-        // 6. MOSTRAR NA TELA
+        // 4. MOSTRAR
         mostrarPCs(comPersonagem, semPersonagem);
         
     } catch (error) {
-        console.error('Erro:', error);
-        document.getElementById('charactersList').innerHTML = 
-            `<p style="color: #e74c3c;">Erro: ${error.message}</p>`;
+        document.getElementById('charactersList').innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
     }
 }
 
@@ -714,12 +694,9 @@ function mostrarPCs(comPC, semPC) {
                     <span>
                         <i class="fas fa-dragon"></i> ${p.personagem.raca || 'N/A'}
                     </span>
-                    <span style="margin-left: 15px;">
-                        <i class="fas fa-star"></i> ${p.personagem.pontos_gastos || 0}/${p.personagem.pontos_totais || 0}
-                    </span>
                 </div>
                 <div class="character-actions">
-                    <button class="btn btn-small btn-ver" onclick="verFicha('${p.personagem.id}')">
+                    <button class="btn btn-small btn-ver" onclick="window.open('ficha-personagem.html?id=${p.personagem.id}', '_blank')">
                         <i class="fas fa-scroll"></i> Ver Ficha
                     </button>
                 </div>
@@ -730,7 +707,7 @@ function mostrarPCs(comPC, semPC) {
     // SEM PERSONAGEM
     const listaPendentes = document.getElementById('pendingList');
     if (semPC.length === 0) {
-        listaPendentes.innerHTML = '<p>Todos têm personagem vinculado</p>';
+        listaPendentes.innerHTML = '<p>Todos têm personagem</p>';
     } else {
         listaPendentes.innerHTML = semPC.map(p => `
             <div class="pending-item">
@@ -741,10 +718,10 @@ function mostrarPCs(comPC, semPC) {
                     </div>
                 </div>
                 <div class="pending-actions">
-                    <button class="btn btn-small" onclick="lembrarJogador('${p.nome}')">
+                    <button class="btn btn-small" onclick="alert('Lembrar ${p.nome}')">
                         <i class="fas fa-bell"></i> Lembrar
                     </button>
-                    <button class="btn btn-small btn-ver" onclick="verPersonagensJogador('${p.userId}', '${p.nome}')">
+                    <button class="btn btn-small btn-ver" onclick="alert('Ver personagens de ${p.nome}')">
                         <i class="fas fa-search"></i> Ver Personagens
                     </button>
                 </div>
@@ -752,44 +729,6 @@ function mostrarPCs(comPC, semPC) {
         `).join('');
     }
 }
-
-function verFicha(characterId) {
-    window.open(`ficha-personagem.html?id=${characterId}`, '_blank');
-}
-
-function lembrarJogador(nome) {
-    alert(`Lembrete enviado para ${nome}`);
-}
-
-async function verPersonagensJogador(userId, nomeJogador) {
-    try {
-        const { data: personagens } = await supabase
-            .from('characters')
-            .select('id, nome, classe, raca')
-            .eq('user_id', userId);
-        
-        if (!personagens || personagens.length === 0) {
-            alert(`${nomeJogador} não tem personagens criados`);
-            return;
-        }
-        
-        let mensagem = `Personagens de ${nomeJogador}:\n\n`;
-        personagens.forEach((p, i) => {
-            mensagem += `${i+1}. ${p.nome} (${p.classe || 'Sem classe'}, ${p.raca || 'Sem raça'})\n`;
-        });
-        
-        alert(mensagem);
-        
-    } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao buscar personagens');
-    }
-}
-
-// TESTE DIRETO
-window.debugCampanha = function() {
-    verPCs('13da5327-3b7e-4f7a-8cf2-c0c153a018bd');
-};
 </script>
 </body>
 </html>
