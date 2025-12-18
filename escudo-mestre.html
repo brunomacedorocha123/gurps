@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escudo do Mestre - Ferramentas GURPS</title>
+    <title>Escudo do Mestre - GURPS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -16,7 +16,7 @@
         }
 
         body {
-            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('Cris2.jpg') no-repeat center center fixed;
+            background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url('Cris2.jpg') no-repeat center center fixed;
             background-size: cover;
             color: #fff;
             min-height: 100vh;
@@ -86,8 +86,8 @@
         .welcome-section {
             background: rgba(30, 30, 40, 0.7);
             border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 30px;
+            padding: 20px;
+            margin-bottom: 20px;
             border: 1px solid rgba(255, 140, 0, 0.3);
             text-align: center;
         }
@@ -101,64 +101,12 @@
             gap: 10px;
         }
 
-        .welcome-section p {
-            color: #ccc;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-
-        /* STATS CARDS */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(30, 30, 40, 0.7);
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid rgba(255, 140, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 140, 0, 0.5);
-        }
-
-        .stat-icon {
-            font-size: 2rem;
-            color: #ff8c00;
-            margin-bottom: 15px;
-        }
-
-        .stat-title {
-            color: #ffd700;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 5px;
-        }
-
-        .stat-description {
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-
         /* TABS */
         .gm-tabs {
             display: flex;
             background: rgba(40, 40, 50, 0.7);
             border-radius: 8px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             overflow-x: auto;
         }
 
@@ -211,106 +159,155 @@
             display: block;
         }
 
-        /* TOOLS GRID */
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .tool-card {
-            background: rgba(40, 40, 50, 0.7);
-            border-radius: 10px;
-            padding: 20px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        /* LISTA DE CAMPANHAS */
+        .campaigns-list {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
-            height: 100%;
+            gap: 15px;
         }
 
-        .tool-card:hover {
-            border-color: rgba(255, 140, 0, 0.5);
-            transform: translateY(-5px);
-            background: rgba(40, 40, 50, 0.9);
-        }
-
-        .tool-icon {
-            font-size: 2.5rem;
-            color: #ff8c00;
-            margin-bottom: 15px;
-        }
-
-        .tool-title {
-            color: #ffd700;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .tool-description {
-            color: #ccc;
-            font-size: 0.85rem;
-            flex-grow: 1;
-        }
-
-        /* QUICK ACTIONS */
-        .quick-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .quick-action-btn {
-            padding: 10px 15px;
-            background: rgba(255, 140, 0, 0.15);
-            color: #ffd700;
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .campaign-item {
+            background: rgba(40, 40, 50, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
             transition: all 0.3s ease;
         }
 
-        .quick-action-btn:hover {
-            background: rgba(255, 140, 0, 0.25);
-            transform: scale(1.05);
+        .campaign-item:hover {
+            border-color: rgba(255, 140, 0, 0.4);
+            transform: translateY(-2px);
         }
 
-        /* TABELAS RÁPIDAS */
-        .table-container {
-            overflow-x: auto;
-            margin-top: 20px;
+        .campaign-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(40, 40, 50, 0.7);
-        }
-
-        .data-table th {
-            background: rgba(255, 140, 0, 0.2);
+        .campaign-name {
+            font-weight: 600;
             color: #ffd700;
-            padding: 12px;
-            text-align: left;
-            border-bottom: 2px solid rgba(255, 140, 0, 0.5);
+            font-size: 1.1rem;
         }
 
-        .data-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        .campaign-code {
+            color: #3498db;
+            font-size: 0.9rem;
+            background: rgba(52, 152, 219, 0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .campaign-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
             color: #ccc;
+            font-size: 0.9rem;
         }
 
-        .data-table tr:hover {
-            background: rgba(255, 140, 0, 0.1);
+        .campaign-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn-gerenciar {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-gerenciar:hover {
+            background: rgba(52, 152, 219, 0.3);
+        }
+
+        /* LISTA DE VÍNCULOS E PERSONAGENS */
+        .pending-list, .characters-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .pending-item, .character-item {
+            background: rgba(40, 40, 50, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid;
+        }
+
+        .pending-item {
+            border-left-color: #f1c40f;
+        }
+
+        .character-item {
+            border-left-color: #2ecc71;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: #ffd700;
+        }
+
+        .character-name {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        .character-attributes {
+            display: flex;
+            gap: 15px;
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .character-actions, .pending-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-aceitar {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-aceitar:hover {
+            background: rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-recusar {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-recusar:hover {
+            background: rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-ver {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-ver:hover {
+            background: rgba(52, 152, 219, 0.3);
         }
 
         /* ESTADO VAZIO */
@@ -351,6 +348,18 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* STATUS BADGES */
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .status-preparation { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        .status-paused { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+
         /* RESPONSIVIDADE */
         @media (max-width: 768px) {
             .header {
@@ -369,12 +378,17 @@
                 justify-content: center;
             }
             
-            .stats-container {
-                grid-template-columns: 1fr;
+            .campaign-stats {
+                flex-direction: column;
+                gap: 5px;
             }
             
-            .tools-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            .campaign-actions {
+                flex-wrap: wrap;
+            }
+            
+            .character-actions, .pending-actions {
+                flex-wrap: wrap;
             }
         }
 
@@ -386,10 +400,6 @@
             .gm-tab {
                 padding: 10px 12px;
                 font-size: 0.85rem;
-            }
-            
-            .tool-card {
-                padding: 15px;
             }
         }
     </style>
@@ -414,39 +424,8 @@
     <main class="main-content">
         <!-- SEÇÃO DE BOAS-VINDAS -->
         <div class="welcome-section">
-            <h2><i class="fas fa-crown"></i> Bem-vindo ao Escudo do Mestre</h2>
-            <p>Ferramentas essenciais para gerenciar suas sessões de GURPS. Acesse tabelas rápidas, geradores, calculadoras e muito mais!</p>
-        </div>
-
-        <!-- ESTATÍSTICAS RÁPIDAS -->
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-book"></i></div>
-                <h3 class="stat-title">Suas Campanhas</h3>
-                <div class="stat-value" id="campaignsCount">0</div>
-                <p class="stat-description">Campanhas ativas como mestre</p>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-users"></i></div>
-                <h3 class="stat-title">Jogadores</h3>
-                <div class="stat-value" id="playersCount">0</div>
-                <p class="stat-description">Total de jogadores ativos</p>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-user-ninja"></i></div>
-                <h3 class="stat-title">Personagens</h3>
-                <div class="stat-value" id="charactersCount">0</div>
-                <p class="stat-description">Personagens criados</p>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-dice-d20"></i></div>
-                <h3 class="stat-title">Sessões</h3>
-                <div class="stat-value" id="sessionsCount">0</div>
-                <p class="stat-description">Sessões realizadas</p>
-            </div>
+            <h2><i class="fas fa-crown"></i> Gerenciamento de Campanhas GURPS</h2>
+            <p>Gerencie vínculos de personagens e visualize seus jogadores</p>
         </div>
 
         <!-- TABS DO MESTRE -->
@@ -454,35 +433,23 @@
             <button class="gm-tab active" data-tab="dashboard">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </button>
+            <button class="gm-tab" data-tab="pcs">
+                <i class="fas fa-users"></i> Gerenciar PCs
+            </button>
+            <button class="gm-tab" data-tab="npcs">
+                <i class="fas fa-ghost"></i> NPCs
+            </button>
             <button class="gm-tab" data-tab="ferramentas">
                 <i class="fas fa-tools"></i> Ferramentas
             </button>
             <button class="gm-tab" data-tab="tabelas">
                 <i class="fas fa-table"></i> Tabelas
             </button>
-            <button class="gm-tab" data-tab="npcs">
-                <i class="fas fa-ghost"></i> Gerador NPCs
-            </button>
-            <button class="gm-tab" data-tab="calculadoras">
-                <i class="fas fa-calculator"></i> Calculadoras
-            </button>
         </div>
 
         <!-- DASHBOARD -->
         <div class="tab-content active" id="dashboard-tab">
-            <h3 style="color: #ffd700; margin-bottom: 20px;">Suas Campanhas</h3>
-            
-            <div class="quick-actions">
-                <button class="quick-action-btn" onclick="window.location.href='campanhas.html'">
-                    <i class="fas fa-plus-circle"></i> Nova Campanha
-                </button>
-                <button class="quick-action-btn" onclick="window.location.href='campanhas.html'">
-                    <i class="fas fa-book"></i> Gerenciar Campanhas
-                </button>
-                <button class="quick-action-btn" onclick="loadCampaignStats()">
-                    <i class="fas fa-sync-alt"></i> Atualizar Dados
-                </button>
-            </div>
+            <h3 style="color: #ffd700; margin-bottom: 20px;">Suas Campanhas como Mestre</h3>
             
             <div id="campaignsList" class="loading">
                 <div class="spinner"></div>
@@ -490,182 +457,72 @@
             </div>
         </div>
 
+        <!-- GERENCIAR PCs -->
+        <div class="tab-content" id="pcs-tab">
+            <h3 style="color: #ffd700; margin-bottom: 20px;">Gerenciamento de Personagens</h3>
+            
+            <!-- CAMPANHA SELECIONADA -->
+            <div id="campaignSelector" style="margin-bottom: 25px; background: rgba(40, 40, 50, 0.7); padding: 15px; border-radius: 8px;">
+                <label style="display: block; margin-bottom: 8px; color: #ccc;">Selecione a campanha:</label>
+                <select id="selectedCampaign" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(30, 30, 40, 0.8); color: white; border: 1px solid rgba(255, 140, 0, 0.3);">
+                    <option value="">Selecione uma campanha...</option>
+                </select>
+            </div>
+            
+            <!-- VÍNCULOS PENDENTES -->
+            <div style="margin-bottom: 30px;">
+                <h4 style="color: #f1c40f; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-clock"></i> Vínculos Pendentes
+                </h4>
+                <div id="pendingList" class="empty-state">
+                    <i class="fas fa-clock"></i>
+                    <p>Selecione uma campanha para ver vínculos pendentes</p>
+                </div>
+            </div>
+            
+            <!-- PERSONAGENS VINCULADOS -->
+            <div>
+                <h4 style="color: #2ecc71; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle"></i> Personagens Vinculados
+                </h4>
+                <div id="charactersList" class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <p>Selecione uma campanha para ver personagens vinculados</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NPCs -->
+        <div class="tab-content" id="npcs-tab">
+            <div class="empty-state">
+                <i class="fas fa-ghost"></i>
+                <h3>Sistema de NPCs</h3>
+                <p>Em desenvolvimento.</p>
+            </div>
+        </div>
+
         <!-- FERRAMENTAS -->
         <div class="tab-content" id="ferramentas-tab">
-            <h3 style="color: #ffd700; margin-bottom: 20px;">Ferramentas do Mestre</h3>
-            
-            <div class="tools-grid">
-                <div class="tool-card" onclick="openDiceRoller()">
-                    <div class="tool-icon"><i class="fas fa-dice-d20"></i></div>
-                    <h4 class="tool-title">Rolador de Dados</h4>
-                    <p class="tool-description">Rolador avançado com histórico e macros</p>
-                </div>
-                
-                <div class="tool-card" onclick="openInitiativeTracker()">
-                    <div class="tool-icon"><i class="fas fa-running"></i></div>
-                    <h4 class="tool-title">Tracker de Iniciativa</h4>
-                    <p class="tool-description">Controle de turnos e iniciativa</p>
-                </div>
-                
-                <div class="tool-card" onclick="openCombatTracker()">
-                    <div class="tool-icon"><i class="fas fa-fist-raised"></i></div>
-                    <h4 class="tool-title">Tracker de Combate</h4>
-                    <p class="tool-description">Acompanhe HP, condições e efeitos</p>
-                </div>
-                
-                <div class="tool-card" onclick="openNoteTaker()">
-                    <div class="tool-icon"><i class="fas fa-sticky-note"></i></div>
-                    <h4 class="tool-title">Bloco de Notas</h4>
-                    <p class="tool-description">Anotações organizadas por sessão</p>
-                </div>
-                
-                <div class="tool-card" onclick="openTimer()">
-                    <div class="tool-icon"><i class="fas fa-hourglass-half"></i></div>
-                    <h4 class="tool-title">Timer da Sessão</h4>
-                    <p class="tool-description">Cronômetro e temporizador</p>
-                </div>
-                
-                <div class="tool-card" onclick="openWeatherGenerator()">
-                    <div class="tool-icon"><i class="fas fa-cloud-sun"></i></div>
-                    <h4 class="tool-title">Gerador de Clima</h4>
-                    <p class="tool-description">Condições climáticas aleatórias</p>
-                </div>
-                
-                <div class="tool-card" onclick="openNameGenerator()">
-                    <div class="tool-icon"><i class="fas fa-id-card"></i></div>
-                    <h4 class="tool-title">Gerador de Nomes</h4>
-                    <p class="tool-description">Nomes para NPCs e locais</p>
-                </div>
-                
-                <div class="tool-card" onclick="openEncounterGenerator()">
-                    <div class="tool-icon"><i class="fas fa-dragon"></i></div>
-                    <h4 class="tool-title">Gerador de Encontros</h4>
-                    <p class="tool-description">Encontros balanceados</p>
-                </div>
+            <div class="empty-state">
+                <i class="fas fa-tools"></i>
+                <h3>Ferramentas do Mestre</h3>
+                <p>Em desenvolvimento.</p>
             </div>
         </div>
 
         <!-- TABELAS -->
         <div class="tab-content" id="tabelas-tab">
-            <h3 style="color: #ffd700; margin-bottom: 20px;">Tabelas GURPS Rápidas</h3>
-            
-            <div class="quick-actions">
-                <button class="quick-action-btn" onclick="showTable('combat')">
-                    <i class="fas fa-crosshairs"></i> Combate
-                </button>
-                <button class="quick-action-btn" onclick="showTable('skills')">
-                    <i class="fas fa-graduation-cap"></i> Perícias
-                </button>
-                <button class="quick-action-btn" onclick="showTable('damage')">
-                    <i class="fas fa-skull"></i> Dano
-                </button>
-                <button class="quick-action-btn" onclick="showTable('status')">
-                    <i class="fas fa-heartbeat"></i> Condições
-                </button>
-                <button class="quick-action-btn" onclick="showTable('criticals')">
-                    <i class="fas fa-bolt"></i> Críticos/Falhas
-                </button>
-            </div>
-            
-            <div id="tableContent">
-                <div class="empty-state">
-                    <i class="fas fa-table"></i>
-                    <h3>Selecione uma tabela</h3>
-                    <p>Escolha uma tabela acima para visualizar</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- GERADOR NPCs -->
-        <div class="tab-content" id="npcs-tab">
-            <h3 style="color: #ffd700; margin-bottom: 20px;">Gerador de NPCs</h3>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <h4 style="color: #ffd700; margin-bottom: 15px;">Configurações</h4>
-                    <div class="form-group">
-                        <label style="display: block; margin-bottom: 8px; color: #ccc;">Nível do NPC</label>
-                        <select id="npcLevel" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(40, 40, 50, 0.8); color: white; border: 1px solid rgba(255, 140, 0, 0.3);">
-                            <option value="weak">Fraco (50-75 pontos)</option>
-                            <option value="average" selected>Médio (100-150 pontos)</option>
-                            <option value="strong">Forte (200-250 pontos)</option>
-                            <option value="boss">Chefe (300+ pontos)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label style="display: block; margin-bottom: 8px; color: #ccc;">Tipo</label>
-                        <select id="npcType" style="width: 100%; padding: 10px; border-radius: 6px; background: rgba(40, 40, 50, 0.8); color: white; border: 1px solid rgba(255, 140, 0, 0.3);">
-                            <option value="combat">Combate</option>
-                            <option value="social">Social</option>
-                            <option value="stealth">Furtividade</option>
-                            <option value="magic">Magia</option>
-                            <option value="balanced">Balanceado</option>
-                        </select>
-                    </div>
-                    
-                    <button class="btn" style="margin-top: 20px; width: 100%; background: rgba(255, 140, 0, 0.8);" onclick="generateNPC()">
-                        <i class="fas fa-magic"></i> Gerar NPC
-                    </button>
-                </div>
-                
-                <div id="npcResult">
-                    <h4 style="color: #ffd700; margin-bottom: 15px;">NPC Gerado</h4>
-                    <div class="empty-state" style="padding: 20px;">
-                        <i class="fas fa-user"></i>
-                        <p>Clique em "Gerar NPC" para criar um personagem</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- CALCULADORAS -->
-        <div class="tab-content" id="calculadoras-tab">
-            <h3 style="color: #ffd700; margin-bottom: 20px;">Calculadoras GURPS</h3>
-            
-            <div class="tools-grid">
-                <div class="tool-card" onclick="openDamageCalculator()">
-                    <div class="tool-icon"><i class="fas fa-skull"></i></div>
-                    <h4 class="tool-title">Calculadora de Dano</h4>
-                    <p class="tool-description">Calcule dano e DR</p>
-                </div>
-                
-                <div class="tool-card" onclick="openMovementCalculator()">
-                    <div class="tool-icon"><i class="fas fa-running"></i></div>
-                    <h4 class="tool-title">Calculadora de Movimento</h4>
-                    <p class="tool-description">Distâncias e alcances</p>
-                </div>
-                
-                <div class="tool-card" onclick="openEncumbranceCalculator()">
-                    <div class="tool-icon"><i class="fas fa-weight-hanging"></i></div>
-                    <h4 class="tool-title">Calculadora de Carga</h4>
-                    <p class="tool-description">Peso e sobrecarga</p>
-                </div>
-                
-                <div class="tool-card" onclick="openVisionCalculator()">
-                    <div class="tool-icon"><i class="fas fa-eye"></i></div>
-                    <h4 class="tool-title">Calculadora de Visão</h4>
-                    <p class="tool-description">Alcance visual e penalidades</p>
-                </div>
-                
-                <div class="tool-card" onclick="openRangeCalculator()">
-                    <div class="tool-icon"><i class="fas fa-bullseye"></i></div>
-                    <h4 class="tool-title">Calculadora de Alcance</h4>
-                    <p class="tool-description">Acerto à distância</p>
-                </div>
-                
-                <div class="tool-card" onclick="openCostCalculator()">
-                    <div class="tool-icon"><i class="fas fa-coins"></i></div>
-                    <h4 class="tool-title">Calculadora de Custo</h4>
-                    <p class="tool-description">Custos de equipamentos</p>
-                </div>
+            <div class="empty-state">
+                <i class="fas fa-table"></i>
+                <h3>Tabelas GURPS</h3>
+                <p>Em desenvolvimento.</p>
             </div>
         </div>
     </main>
 
     <script>
         // ============================================
-        // ESCUDO DO MESTRE - FERRAMENTAS GERAIS
+        // ESCUDO DO MESTRE - VERSÃO LIMPA
         // ============================================
 
         const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
@@ -673,6 +530,7 @@
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
+        let userCampaigns = [];
 
         // ============================================
         // INICIALIZAÇÃO
@@ -698,12 +556,12 @@
                 // 3. Configurar tabs
                 setupTabs();
                 
-                // 4. Carregar estatísticas
-                await loadDashboardStats();
+                // 4. Carregar campanhas do mestre
+                await loadUserCampaigns();
                 
             } catch (error) {
                 console.error('Erro ao iniciar:', error);
-                alert('Erro ao carregar. Recarregue a página.');
+                showError('Erro ao carregar. Recarregue a página.');
             }
         }
 
@@ -717,9 +575,20 @@
                 window.location.href = 'campanhas.html';
             });
             
-            document.getElementById('btnSair').addEventListener('click', () => {
+            document.getElementById('btnSair').addEventListener('click', async () => {
                 if (!confirm('Tem certeza que deseja sair?')) return;
+                await supabase.auth.signOut();
                 window.location.href = 'login.html';
+            });
+            
+            // Seletor de campanha na aba PCs
+            document.getElementById('selectedCampaign').addEventListener('change', function() {
+                const campaignId = this.value;
+                if (campaignId) {
+                    loadCampaignPCs(campaignId);
+                } else {
+                    clearPCsLists();
+                }
             });
         }
 
@@ -750,55 +619,36 @@
         }
 
         // ============================================
-        // CARREGAR ESTATÍSTICAS
+        // CARREGAR CAMPANHAS DO USUÁRIO
         // ============================================
 
-        async function loadDashboardStats() {
+        async function loadUserCampaigns() {
             try {
-                // 1. Contar campanhas do mestre
-                const { data: campaigns, error: campaignsError } = await supabase
-                    .from('campaigns')
-                    .select('*')
-                    .eq('gm_id', currentUser.id);
+                // Usar sua função SQL para contagem REAL
+                const { data, error } = await supabase.rpc(
+                    'get_user_campaigns_counts',
+                    { p_user_id: currentUser.id }
+                );
                 
-                if (!campaignsError) {
-                    const activeCampaigns = campaigns?.filter(c => c.status === 'active' || c.status === 'preparation') || [];
-                    document.getElementById('campaignsCount').textContent = activeCampaigns.length;
-                    
-                    // Carregar lista de campanhas
-                    renderCampaignsList(activeCampaigns);
-                }
+                if (error) throw error;
                 
-                // 2. Contar jogadores totais (em todas as campanhas)
-                if (campaigns && campaigns.length > 0) {
-                    const campaignIds = campaigns.map(c => c.id);
-                    const { data: players, error: playersError } = await supabase
-                        .from('campaign_players')
-                        .select('user_id')
-                        .in('campaign_id', campaignIds)
-                        .eq('status', 'active');
-                    
-                    if (!playersError) {
-                        const uniquePlayers = [...new Set(players?.map(p => p.user_id) || [])];
-                        document.getElementById('playersCount').textContent = uniquePlayers.length;
-                    }
-                }
+                userCampaigns = data || [];
                 
-                // 3. Contar personagens totais
-                const { data: characters, error: charactersError } = await supabase
-                    .from('characters')
-                    .select('*')
-                    .eq('user_id', currentUser.id);
+                // Renderizar lista no dashboard
+                renderCampaignsList(data);
                 
-                if (!charactersError) {
-                    document.getElementById('charactersCount').textContent = characters?.length || 0;
-                }
-                
-                // 4. Contar sessões (placeholder - você pode ajustar)
-                document.getElementById('sessionsCount').textContent = '0';
+                // Popular seletor na aba PCs
+                populateCampaignSelector(data);
                 
             } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
+                console.error('Erro ao carregar campanhas:', error);
+                document.getElementById('campaignsList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar campanhas</h3>
+                        <p>Tente novamente mais tarde.</p>
+                    </div>
+                `;
             }
         }
 
@@ -825,341 +675,356 @@
             }
             
             container.innerHTML = `
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Código</th>
-                                <th>Status</th>
-                                <th>Jogadores</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${campaigns.map(campaign => `
-                                <tr>
-                                    <td><strong>${escapeHtml(campaign.name || 'Sem nome')}</strong></td>
-                                    <td>${campaign.campaign_id || '0000000'}</td>
-                                    <td><span class="status-badge status-${campaign.status}">${formatStatus(campaign.status)}</span></td>
-                                    <td>${campaign.current_players || 0}/${campaign.max_players || 6}</td>
-                                    <td>
-                                        <button class="btn btn-small" onclick="manageCampaign('${campaign.id}')" style="padding: 5px 10px; font-size: 0.8rem; background: rgba(52, 152, 219, 0.2);">
-                                            <i class="fas fa-cog"></i> Gerenciar
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                <div class="campaigns-list">
+                    ${campaigns.map(campaign => `
+                        <div class="campaign-item">
+                            <div class="campaign-header">
+                                <div class="campaign-name">${escapeHtml(campaign.campaign_name)}</div>
+                                <div class="campaign-code">${campaign.campaign_code}</div>
+                            </div>
+                            
+                            <div class="campaign-stats">
+                                <div>
+                                    <strong style="color: #3498db;">Jogadores:</strong> 
+                                    ${campaign.player_count}/${campaign.max_players}
+                                </div>
+                                <div>
+                                    <strong style="color: #ff8c00;">Status:</strong> 
+                                    <span class="status-badge status-${campaign.status}">${formatStatus(campaign.status)}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="campaign-actions">
+                                <button class="btn btn-small btn-gerenciar" onclick="manageCampaign('${campaign.campaign_id}')">
+                                    <i class="fas fa-cog"></i> Gerenciar
+                                </button>
+                                <button class="btn btn-small" onclick="viewCampaignPCs('${campaign.campaign_id}')" 
+                                        style="background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3);">
+                                    <i class="fas fa-users"></i> Ver PCs
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
-            
-            // Adicionar estilos para os badges de status
-            const style = document.createElement('style');
-            style.textContent = `
-                .status-badge {
-                    padding: 3px 8px;
-                    border-radius: 12px;
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    display: inline-block;
-                }
-                .status-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
-                .status-preparation { background: rgba(52, 152, 219, 0.2); color: #3498db; }
-                .status-paused { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
-                .status-completed { background: rgba(149, 165, 166, 0.2); color: #95a5a6; }
-            `;
-            document.head.appendChild(style);
         }
 
         // ============================================
-        // FUNÇÕES DE ATUALIZAÇÃO
+        // POPULAR SELETOR DE CAMPANHAS
         // ============================================
 
-        function loadCampaignStats() {
-            const container = document.getElementById('campaignsList');
-            if (container) {
-                container.innerHTML = `
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Atualizando dados...</p>
+        function populateCampaignSelector(campaigns) {
+            const selector = document.getElementById('selectedCampaign');
+            if (!selector) return;
+            
+            selector.innerHTML = '<option value="">Selecione uma campanha...</option>';
+            
+            if (campaigns && campaigns.length > 0) {
+                campaigns.forEach(campaign => {
+                    const option = document.createElement('option');
+                    option.value = campaign.campaign_id;
+                    option.textContent = `${campaign.campaign_name} (${campaign.player_count}/${campaign.max_players} jogadores)`;
+                    selector.appendChild(option);
+                });
+            }
+        }
+
+        // ============================================
+        // CARREGAR PCs DA CAMPANHA
+        // ============================================
+
+        async function loadCampaignPCs(campaignId) {
+            try {
+                // Mostrar loading
+                document.getElementById('pendingList').innerHTML = `
+                    <div class="loading" style="padding: 20px;">
+                        <div class="spinner" style="width: 30px; height: 30px;"></div>
+                        <p>Carregando vínculos...</p>
                     </div>
                 `;
+                
+                document.getElementById('charactersList').innerHTML = `
+                    <div class="loading" style="padding: 20px;">
+                        <div class="spinner" style="width: 30px; height: 30px;"></div>
+                        <p>Carregando personagens...</p>
+                    </div>
+                `;
+                
+                // Buscar campanha completa
+                const { data: campaign, error: campaignError } = await supabase
+                    .from('campaigns')
+                    .select('*')
+                    .eq('id', campaignId)
+                    .single();
+                
+                if (campaignError) throw campaignError;
+                
+                // 1. Buscar vínculos pendentes (você precisa criar essa tabela)
+                // Supondo: tabela 'campaign_character_requests'
+                const { data: pendingRequests, error: pendingError } = await supabase
+                    .from('campaign_character_requests')
+                    .select(`
+                        *,
+                        profiles:user_id (username, player_id),
+                        characters:character_id (id, nome, classe, raca, pontos_gastos, pontos_totais)
+                    `)
+                    .eq('campaign_id', campaignId)
+                    .eq('status', 'pending');
+                
+                // 2. Buscar personagens já vinculados
+                const { data: linkedCharacters, error: linkedError } = await supabase
+                    .from('campaign_characters')
+                    .select(`
+                        *,
+                        profiles:user_id (username, player_id),
+                        characters:character_id (id, nome, classe, raca, pontos_gastos, pontos_totais, atributos)
+                    `)
+                    .eq('campaign_id', campaignId)
+                    .eq('status', 'active');
+                
+                // Renderizar resultados
+                renderPendingRequests(pendingRequests || [], campaign);
+                renderLinkedCharacters(linkedCharacters || [], campaign);
+                
+            } catch (error) {
+                console.error('Erro ao carregar PCs:', error);
+                showError('Erro ao carregar personagens da campanha');
+            }
+        }
+
+        // ============================================
+        // RENDERIZAR VÍNCULOS PENDENTES
+        // ============================================
+
+        function renderPendingRequests(requests, campaign) {
+            const container = document.getElementById('pendingList');
+            if (!container) return;
+            
+            if (!requests || requests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding: 20px;">
+                        <i class="fas fa-check-circle"></i>
+                        <p>Nenhum vínculo pendente para esta campanha</p>
+                    </div>
+                `;
+                return;
             }
             
-            setTimeout(async () => {
-                await loadDashboardStats();
-                alert('Dados atualizados com sucesso!');
-            }, 500);
+            container.innerHTML = `
+                <div class="pending-list">
+                    ${requests.map(request => {
+                        const profile = request.profiles;
+                        const character = request.characters;
+                        
+                        return `
+                            <div class="pending-item">
+                                <div class="item-header">
+                                    <div>
+                                        <div class="player-name">${escapeHtml(profile?.username || 'Jogador')}</div>
+                                        <div style="color: #aaa; font-size: 0.8rem; margin-top: 2px;">
+                                            ID: ${profile?.player_id || 'N/A'}
+                                        </div>
+                                    </div>
+                                    <div class="character-name">${escapeHtml(character?.nome || 'Sem nome')}</div>
+                                </div>
+                                
+                                <div class="character-attributes">
+                                    ${character ? `
+                                        <span><i class="fas fa-shield-alt"></i> ${escapeHtml(character.classe || 'Sem classe')}</span>
+                                        <span><i class="fas fa-dna"></i> ${escapeHtml(character.raca || 'Sem raça')}</span>
+                                        <span><i class="fas fa-chart-line"></i> ${character.pontos_gastos || 0}/${character.pontos_totais || 150} pts</span>
+                                    ` : '<span style="color: #e74c3c;">Dados do personagem não encontrados</span>'}
+                                </div>
+                                
+                                <div class="pending-actions">
+                                    <button class="btn btn-small btn-ver" onclick="viewCharacterSummary('${character?.id || ''}')">
+                                        <i class="fas fa-eye"></i> Ver Resumo
+                                    </button>
+                                    <button class="btn btn-small btn-aceitar" onclick="acceptCharacterRequest('${request.id}', '${campaign.id}')">
+                                        <i class="fas fa-check"></i> Aceitar
+                                    </button>
+                                    <button class="btn btn-small btn-recusar" onclick="rejectCharacterRequest('${request.id}')">
+                                        <i class="fas fa-times"></i> Recusar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
         }
 
         // ============================================
-        // FUNÇÕES DAS FERRAMENTAS
+        // RENDERIZAR PERSONAGENS VINCULADOS
         // ============================================
 
-        function openDiceRoller() {
-            alert('Rolador de dados aberto! (Em desenvolvimento)');
-            // Implemente aqui a funcionalidade
-        }
-
-        function openInitiativeTracker() {
-            alert('Tracker de iniciativa aberto! (Em desenvolvimento)');
-        }
-
-        function openCombatTracker() {
-            alert('Tracker de combate aberto! (Em desenvolvimento)');
-        }
-
-        function openNoteTaker() {
-            alert('Bloco de notas aberto! (Em desenvolvimento)');
-        }
-
-        function openTimer() {
-            alert('Timer da sessão aberto! (Em desenvolvimento)');
-        }
-
-        function openWeatherGenerator() {
-            alert('Gerador de clima aberto! (Em desenvolvimento)');
-        }
-
-        function openNameGenerator() {
-            alert('Gerador de nomes aberto! (Em desenvolvimento)');
-        }
-
-        function openEncounterGenerator() {
-            alert('Gerador de encontros aberto! (Em desenvolvimento)');
-        }
-
-        function openDamageCalculator() {
-            alert('Calculadora de dano aberta! (Em desenvolvimento)');
-        }
-
-        function openMovementCalculator() {
-            alert('Calculadora de movimento aberta! (Em desenvolvimento)');
-        }
-
-        function openEncumbranceCalculator() {
-            alert('Calculadora de carga aberta! (Em desenvolvimento)');
-        }
-
-        function openVisionCalculator() {
-            alert('Calculadora de visão aberta! (Em desenvolvimento)');
-        }
-
-        function openRangeCalculator() {
-            alert('Calculadora de alcance aberta! (Em desenvolvimento)');
-        }
-
-        function openCostCalculator() {
-            alert('Calculadora de custo aberta! (Em desenvolvimento)');
-        }
-
-        // ============================================
-        // TABELAS GURPS
-        // ============================================
-
-        function showTable(tableType) {
-            const container = document.getElementById('tableContent');
+        function renderLinkedCharacters(characters, campaign) {
+            const container = document.getElementById('charactersList');
+            if (!container) return;
             
-            const tables = {
-                combat: {
-                    title: 'Tabela de Combate - Modificadores',
-                    headers: ['Situação', 'Modificador'],
-                    rows: [
-                        ['Ataque em alcance', '+0'],
-                        ['Alvo parado', '+4'],
-                        ['Alvo em movimento', '+2'],
-                        ['Alvo muito rápido', '-2'],
-                        ['Ataque cego', '-6'],
-                        ['Ataque pelas costas', '+2'],
-                        ['Ataque em disparo rápido', '-6 por tiro adicional'],
-                        ['Mira por 1 turno', '+Acc da arma'],
-                        ['Mira por 2+ turnos', '+Acc da arma +1'],
-                        ['Ataque desprevenido', '+4']
-                    ]
-                },
-                skills: {
-                    title: 'Tabela de Dificuldade de Perícias',
-                    headers: ['Dificuldade', 'Modificador'],
-                    rows: [
-                        ['Fácil', '+4'],
-                        ['Rotina', '+2'],
-                        ['Média', '+0'],
-                        ['Difícil', '-2'],
-                        ['Muito difícil', '-4'],
-                        ['Insana', '-6 ou mais'],
-                        ['Familiaridade', '-2 a -4'],
-                        ['Pressão de tempo', '-2 a -4'],
-                        ['Equipamento inadequado', '-2 a -5']
-                    ]
-                },
-                damage: {
-                    title: 'Tabela de Dano por Tipo',
-                    headers: ['Tipo de Dano', 'Efeito'],
-                    rows: [
-                        ['Cortante', 'Multiplica dano após DR'],
-                        ['Perfurante', 'Ignora 50% do DR'],
-                        ['Perf. Pequeno', 'Multiplica dano após DR'],
-                        ['Contundente', 'Penalidade -1 por 10% HP perdido'],
-                        ['Explosivo', 'Dano em área'],
-                        ['Incendiário', 'Causa queimaduras contínuas'],
-                        ['Corrosivo', 'Reduz DR permanentemente'],
-                        ['Tóxico', 'Efeitos variados (veneno)'],
-                        ['Fadiga', 'Drena FP em vez de HP'],
-                        ['Choque', 'Penalidade temporária']
-                    ]
-                },
-                status: {
-                    title: 'Tabela de Condições',
-                    headers: ['Condição', 'Efeito'],
-                    rows: [
-                        ['Atordoado', 'Não age, defesa -4'],
-                        ['Cego', '-6 em todas as ações visuais'],
-                        ['Enjoado', '-2 em todas as ações'],
-                        ['Enraizado', 'Não pode se mover'],
-                        ['Sangrando', 'Perde 1 HP por turno'],
-                        ['Queimando', 'Dano contínuo de fogo'],
-                        ['Intoxicado', '-1 a -3 em atributos'],
-                        ['Fadigado', '-1 por 1/3 FP perdidos'],
-                        ['Ferido', '-1 por 1/3 HP perdidos'],
-                        ['Morrendo', 'Teste de HT para não morrer']
-                    ]
-                },
-                criticals: {
-                    title: 'Tabela de Críticos e Falhas',
-                    headers: ['Resultado', 'Efeito'],
-                    rows: [
-                        ['Crítico (3-4)', 'Sucesso automático'],
-                        ['Crítico (5)', 'Sucesso + efeito especial'],
-                        ['Falha (18)', 'Falha automática'],
-                        ['Falha (17)', 'Falha + consequência'],
-                        ['Falha por 10+', 'Falha desastrosa'],
-                        ['Crítico na defesa', 'Pode contra-atacar'],
-                        ['Falha na defesa', 'Exposto ao ataque'],
-                        ['Crítico em ataque', 'Dano máximo ou dobrado'],
-                        ['Falha em ataque', 'Arma quebra/dropa']
-                    ]
-                }
-            };
-            
-            const table = tables[tableType] || tables.combat;
+            if (!characters || characters.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding: 20px;">
+                        <i class="fas fa-user-friends"></i>
+                        <p>Nenhum personagem vinculado nesta campanha</p>
+                    </div>
+                `;
+                return;
+            }
             
             container.innerHTML = `
-                <h4 style="color: #ffd700; margin-bottom: 15px;">${table.title}</h4>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                ${table.headers.map(header => `<th>${header}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${table.rows.map(row => `
-                                <tr>
-                                    ${row.map(cell => `<td>${cell}</td>`).join('')}
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                <div class="characters-list">
+                    ${characters.map(item => {
+                        const profile = item.profiles;
+                        const character = item.characters;
+                        const atributos = character?.atributos ? JSON.parse(character.atributos) : null;
+                        
+                        return `
+                            <div class="character-item">
+                                <div class="item-header">
+                                    <div>
+                                        <div class="player-name">${escapeHtml(profile?.username || 'Jogador')}</div>
+                                        <div style="color: #aaa; font-size: 0.8rem; margin-top: 2px;">
+                                            ID: ${profile?.player_id || 'N/A'}
+                                        </div>
+                                    </div>
+                                    <div class="character-name">${escapeHtml(character?.nome || 'Sem nome')}</div>
+                                </div>
+                                
+                                ${atributos ? `
+                                    <div class="character-attributes">
+                                        <span><strong>ST:</strong> ${atributos.ST || 10}</span>
+                                        <span><strong>DX:</strong> ${atributos.DX || 10}</span>
+                                        <span><strong>IQ:</strong> ${atributos.IQ || 10}</span>
+                                        <span><strong>HT:</strong> ${atributos.HT || 10}</span>
+                                        <span><i class="fas fa-chart-line"></i> ${character.pontos_gastos || 0}/${character.pontos_totais || 150} pts</span>
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="character-actions">
+                                    <button class="btn btn-small btn-ver" onclick="viewCharacterFullSheet('${character?.id || ''}')">
+                                        <i class="fas fa-scroll"></i> Ver Ficha Completa
+                                    </button>
+                                    <button class="btn btn-small btn-recusar" onclick="removeCharacterLink('${item.id}', '${escapeHtml(character?.nome || 'Personagem')}')">
+                                        <i class="fas fa-unlink"></i> Remover Vínculo
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             `;
         }
 
         // ============================================
-        // GERADOR DE NPCs
+        // LIMPAR LISTAS DE PCs
         // ============================================
 
-        function generateNPC() {
-            const level = document.getElementById('npcLevel').value;
-            const type = document.getElementById('npcType').value;
-            
-            const names = [
-                'Arkon', 'Balthazar', 'Cedric', 'Draven', 'Eldric',
-                'Fiona', 'Gwendolyn', 'Hrothgar', 'Isolde', 'Jareth',
-                'Kaelen', 'Lysandra', 'Morgrim', 'Nymeria', 'Orion'
-            ];
-            
-            const templates = {
-                combat: {
-                    attributes: { ST: 12, DX: 11, IQ: 9, HT: 12 },
-                    skills: ['Espada', 'Escudo', 'Esquiva', 'Táticas'],
-                    advantages: ['Resistência a Dano', 'Vontade de Ferro'],
-                    disadvantages: ['Code of Honor', 'Bad Temper']
-                },
-                social: {
-                    attributes: { ST: 9, DX: 10, IQ: 13, HT: 10 },
-                    skills: ['Diplomacia', 'Enganação', 'Persuasão', 'Etiqueta'],
-                    advantages: ['Carisma', 'Voz Aveludada'],
-                    disadvantages: ['Vaidoso', 'Curioso']
-                },
-                stealth: {
-                    attributes: { ST: 10, DX: 13, IQ: 11, HT: 10 },
-                    skills: ['Furtividade', 'Arrombamento', 'Armadilhas', 'Observação'],
-                    advantages: ['Movimento Silencioso', 'Sentidos Aguçados'],
-                    disadvantages: ['Fobia de Confinamento', 'Ganância']
-                },
-                magic: {
-                    attributes: { ST: 8, DX: 10, IQ: 14, HT: 11 },
-                    skills: ['Magia de Fogo', 'Alquimia', 'Conhecimento Arcano', 'Meditação'],
-                    advantages: ['Magia', 'Resistência Mágica'],
-                    disadvantages: ['Vunerabilidade à Ferro', 'Maníaco por Conhecimento']
-                },
-                balanced: {
-                    attributes: { ST: 11, DX: 11, IQ: 11, HT: 11 },
-                    skills: ['Sobrevivência', 'Primeiros Socorros', 'Natação', 'Cavalgar'],
-                    advantages: ['Versátil', 'Adaptável'],
-                    disadvantages: ['Sem desvantagens marcantes']
-                }
-            };
-            
-            const template = templates[type] || templates.balanced;
-            const name = names[Math.floor(Math.random() * names.length)];
-            
-            const npcResult = document.getElementById('npcResult');
-            npcResult.innerHTML = `
-                <div style="background: rgba(40, 40, 50, 0.7); border-radius: 10px; padding: 20px; border-left: 4px solid #ff8c00;">
-                    <h4 style="color: #ffd700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-user-circle"></i> ${name}
-                    </h4>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div>
-                            <strong style="color: #ccc;">Atributos:</strong>
-                            <div style="margin-top: 5px;">
-                                <div>ST: ${template.attributes.ST}</div>
-                                <div>DX: ${template.attributes.DX}</div>
-                                <div>IQ: ${template.attributes.IQ}</div>
-                                <div>HT: ${template.attributes.HT}</div>
-                            </div>
-                        </div>
-                        <div>
-                            <strong style="color: #ccc;">Perícias:</strong>
-                            <div style="margin-top: 5px;">
-                                ${template.skills.map(skill => `<div>• ${skill}</div>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <strong style="color: #ccc;">Vantagens:</strong>
-                        <div style="margin-top: 5px;">
-                            ${template.advantages.map(adv => `<span style="background: rgba(46, 204, 113, 0.2); color: #2ecc71; padding: 2px 6px; border-radius: 4px; margin-right: 5px; font-size: 0.85rem;">${adv}</span>`).join('')}
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <strong style="color: #ccc;">Desvantagens:</strong>
-                        <div style="margin-top: 5px;">
-                            ${template.disadvantages.map(dis => `<span style="background: rgba(231, 76, 60, 0.2); color: #e74c3c; padding: 2px 6px; border-radius: 4px; margin-right: 5px; font-size: 0.85rem;">${dis}</span>`).join('')}
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.8rem; color: #888;">
-                        <i class="fas fa-info-circle"></i> NPC ${level === 'weak' ? 'Fraco' : level === 'average' ? 'Médio' : level === 'strong' ? 'Forte' : 'Chefe'} - ${type === 'combat' ? 'Combate' : type === 'social' ? 'Social' : type === 'stealth' ? 'Furtivo' : type === 'magic' ? 'Mágico' : 'Balanceado'}
-                    </div>
+        function clearPCsLists() {
+            document.getElementById('pendingList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-clock"></i>
+                    <p>Selecione uma campanha para ver vínculos pendentes</p>
                 </div>
             `;
+            
+            document.getElementById('charactersList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <p>Selecione uma campanha para ver personagens vinculados</p>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // FUNÇÕES DE AÇÃO
+        // ============================================
+
+        function manageCampaign(campaignId) {
+            // Redirecionar para página de gerenciamento específica
+            alert(`Abrir gerenciamento da campanha: ${campaignId}`);
+            // window.location.href = `gerenciamento-campanha.html?id=${campaignId}`;
+        }
+
+        function viewCampaignPCs(campaignId) {
+            // Mudar para aba PCs e selecionar campanha
+            document.querySelector('[data-tab="pcs"]').click();
+            document.getElementById('selectedCampaign').value = campaignId;
+            loadCampaignPCs(campaignId);
+        }
+
+        function viewCharacterSummary(characterId) {
+            if (!characterId) {
+                alert('ID do personagem não encontrado');
+                return;
+            }
+            // Abrir modal com resumo do personagem
+            alert(`Abrir resumo do personagem ID: ${characterId}`);
+            // window.open(`resumo-personagem.html?id=${characterId}`, '_blank');
+        }
+
+        function viewCharacterFullSheet(characterId) {
+            if (!characterId) {
+                alert('ID do personagem não encontrado');
+                return;
+            }
+            // Abrir ficha completa
+            alert(`Abrir ficha completa do personagem ID: ${characterId}`);
+            // window.open(`ficha-personagem.html?id=${characterId}`, '_blank');
+        }
+
+        async function acceptCharacterRequest(requestId, campaignId) {
+            if (!confirm('Aceitar este personagem na campanha?')) return;
+            
+            try {
+                // Aqui você implementa a lógica de aceitação
+                alert('Personagem aceito na campanha!');
+                
+                // Recarregar lista
+                loadCampaignPCs(campaignId);
+                
+            } catch (error) {
+                console.error('Erro ao aceitar personagem:', error);
+                alert('Erro ao aceitar personagem');
+            }
+        }
+
+        async function rejectCharacterRequest(requestId) {
+            if (!confirm('Recusar este vínculo?')) return;
+            
+            try {
+                // Aqui você implementa a lógica de recusa
+                alert('Vínculo recusado!');
+                
+                // Recarregar lista
+                const campaignId = document.getElementById('selectedCampaign').value;
+                if (campaignId) {
+                    loadCampaignPCs(campaignId);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao recusar vínculo:', error);
+                alert('Erro ao recusar vínculo');
+            }
+        }
+
+        async function removeCharacterLink(linkId, characterName) {
+            if (!confirm(`Remover "${characterName}" da campanha?\nO jogador perderá acesso.`)) return;
+            
+            try {
+                // Aqui você implementa a lógica de remoção
+                alert('Personagem removido da campanha!');
+                
+                // Recarregar lista
+                const campaignId = document.getElementById('selectedCampaign').value;
+                if (campaignId) {
+                    loadCampaignPCs(campaignId);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao remover personagem:', error);
+                alert('Erro ao remover personagem');
+            }
         }
 
         // ============================================
@@ -1183,10 +1048,8 @@
             return div.innerHTML;
         }
 
-        function manageCampaign(campaignId) {
-            // Redirecionar para a página de gerenciamento específica da campanha
-            // window.location.href = `gerenciar-campanha.html?id=${campaignId}`;
-            alert(`Gerenciar campanha ID: ${campaignId}`);
+        function showError(message) {
+            alert(message);
         }
 
     </script>
