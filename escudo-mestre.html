@@ -619,6 +619,136 @@ window.testeReal = function() {
     // ID da campanha "Mundo das trevas"
     loadCampaignPCs('13da5327-3b7e-4f7a-8cf2-c0c153a018bd');
 };
+
+// ============================================
+// CORREÇÃO SOMENTE DO loadCampaignPCs
+// ============================================
+
+// Primeiro, salve a função original (se existir)
+const originalLoadCampaignPCs = window.loadCampaignPCs;
+
+// Agora substitua APENAS essa função
+async function loadCampaignPCs(campaignId) {
+    console.log('🔧 [CORRIGIDO] Carregando campanha:', campaignId);
+    
+    try {
+        // Limpar displays
+        document.getElementById('pendingList').innerHTML = '<p>Carregando...</p>';
+        document.getElementById('charactersList').innerHTML = '<p>Carregando...</p>';
+        
+        // PASSO 1: Buscar jogadores ativos
+        const { data: jogadores, error: err1 } = await supabase
+            .from('campaign_players')
+            .select('user_id, id')
+            .eq('campaign_id', campaignId)
+            .eq('status', 'active');
+        
+        if (err1) throw err1;
+        
+        // PASSO 2: Buscar vínculos
+        const { data: vinculos, error: err2 } = await supabase
+            .from('campaign_characters')
+            .select('user_id, character_id')
+            .eq('campaign_id', campaignId);
+        
+        if (err2) throw err2;
+        
+        // PASSO 3: Buscar NOMES dos jogadores
+        const idsJogadores = jogadores.map(j => j.user_id);
+        const { data: perfis } = await supabase
+            .from('profiles')
+            .select('id, username')
+            .in('id', idsJogadores);
+        
+        // Criar mapa de nomes
+        const mapaNomes = {};
+        perfis?.forEach(p => mapaNomes[p.id] = p.username);
+        
+        // PASSO 4: Buscar personagens (se houver vínculos)
+        let personagensMap = {};
+        if (vinculos?.length > 0) {
+            const idsPersonagens = vinculos.map(v => v.character_id);
+            const { data: chars } = await supabase
+                .from('characters')
+                .select('id, nome, classe, raca')
+                .in('id', idsPersonagens);
+            
+            chars?.forEach(c => personagensMap[c.id] = c);
+        }
+        
+        // PASSO 5: Separar quem TEM e NÃO TEM personagem
+        const comPersonagem = [];
+        const semPersonagem = [];
+        
+        jogadores.forEach(jogador => {
+            const nome = mapaNomes[jogador.user_id] || 'Jogador';
+            const vinculo = vinculos?.find(v => v.user_id === jogador.user_id);
+            
+            if (vinculo && personagensMap[vinculo.character_id]) {
+                comPersonagem.push({
+                    nomeJogador: nome,
+                    personagem: personagensMap[vinculo.character_id]
+                });
+            } else {
+                semPersonagem.push({
+                    nomeJogador: nome
+                });
+            }
+        });
+        
+        console.log('✅ Resultado:', {
+            comPersonagem: comPersonagem.length,
+            semPersonagem: semPersonagem.length,
+            detalhes: comPersonagem
+        });
+        
+        // PASSO 6: Mostrar resultados
+        mostrarResultados(comPersonagem, semPersonagem);
+        
+    } catch (error) {
+        console.error('❌ Erro:', error);
+        document.getElementById('charactersList').innerHTML = '<p style="color:red">Erro: ' + error.message + '</p>';
+    }
+}
+
+function mostrarResultados(comPC, semPC) {
+    // Lista de personagens vinculados
+    const listaPCs = document.getElementById('charactersList');
+    if (listaPCs) {
+        if (comPC.length === 0) {
+            listaPCs.innerHTML = '<p>Nenhum personagem vinculado</p>';
+        } else {
+            listaPCs.innerHTML = comPC.map(p => `
+                <div style="background:#2e2e3a;padding:10px;margin:5px;border-left:4px solid green">
+                    <strong>${p.nomeJogador}</strong><br>
+                    Personagem: ${p.personagem.nome}<br>
+                    ${p.personagem.classe} ${p.personagem.raca}
+                </div>
+            `).join('');
+        }
+    }
+    
+    // Lista sem personagem
+    const listaPendentes = document.getElementById('pendingList');
+    if (listaPendentes) {
+        if (semPC.length === 0) {
+            listaPendentes.innerHTML = '<p>Todos têm personagem!</p>';
+        } else {
+            listaPendentes.innerHTML = semPC.map(p => `
+                <div style="background:#3a2e2e;padding:10px;margin:5px;border-left:4px solid orange">
+                    <strong>${p.nomeJogador}</strong><br>
+                    ⏳ Aguardando vínculo
+                </div>
+            `).join('');
+        }
+    }
+}
+
+// Teste RÁPIDO
+window.testeSimples = function() {
+    console.log('🧪 Testando com ID real...');
+    loadCampaignPCs('13da5327-3b7e-4f7a-8cf2-c0c153a018bd');
+};
 </script>
 </body>
 </html>
