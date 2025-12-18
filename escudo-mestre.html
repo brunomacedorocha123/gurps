@@ -521,19 +521,11 @@
     </main>
 
  <script>
-// ============================================
-// ESCUDO DO MESTRE - VERSÃO FUNCIONAL COMPLETA
-// ============================================
-
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
-
-// ============================================
-// 1. INICIALIZAÇÃO (JÁ FUNCIONA)
-// ============================================
 
 document.addEventListener('DOMContentLoaded', async function() {
     try {
@@ -544,7 +536,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         currentUser = session.user;
         
-        // Configurar botões (JÁ FUNCIONAM)
         document.getElementById('btnVoltar').addEventListener('click', () => {
             window.location.href = 'campanhas.html';
         });
@@ -555,10 +546,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             window.location.href = 'login.html';
         });
         
-        // Configurar tabs
         setupTabs();
-        
-        // Carregar dashboard
         await loadDashboard();
         
     } catch (error) {
@@ -572,24 +560,16 @@ function setupTabs() {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
             
-            document.querySelectorAll('.gm-tab').forEach(t => {
-                t.classList.remove('active');
-            });
+            document.querySelectorAll('.gm-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
-                if (content.id === `${tabId}-tab`) {
-                    content.classList.add('active');
-                }
+                if (content.id === `${tabId}-tab`) content.classList.add('active');
             });
         });
     });
 }
-
-// ============================================
-// 2. DASHBOARD (JÁ FUNCIONA)
-// ============================================
 
 async function loadDashboard() {
     try {
@@ -632,7 +612,6 @@ async function loadDashboard() {
         
         document.getElementById('campaignsList').innerHTML = html;
         
-        // Popular seletor
         const selector = document.getElementById('selectedCampaign');
         selector.innerHTML = '<option value="">Selecione...</option>';
         campaigns.forEach(c => {
@@ -643,9 +622,7 @@ async function loadDashboard() {
         });
         
         selector.addEventListener('change', function() {
-            if (this.value) {
-                verPCs(this.value);
-            }
+            if (this.value) verPCs(this.value);
         });
         
     } catch (error) {
@@ -653,55 +630,36 @@ async function loadDashboard() {
     }
 }
 
-// ============================================
-// 3. VER PCs - FUNÇÃO PRINCIPAL CORRIGIDA
-// ============================================
-
+// FUNÇÃO PRINCIPAL - VERSÃO QUE FUNCIONA
 async function verPCs(campaignId) {
-    console.log('Buscando PCs da campanha:', campaignId);
-    
     try {
         // 1. Buscar jogadores
         const { data: jogadores } = await supabase
             .from('campaign_players')
-            .select('user_id, id')
+            .select('user_id')
             .eq('campaign_id', campaignId)
             .eq('status', 'active');
         
         if (!jogadores || jogadores.length === 0) {
             document.getElementById('pendingList').innerHTML = '<p>Sem jogadores</p>';
-            document.getElementById('charactersList').innerHTML = '<p>Sem personagens</p>';
+            document.getElementById('charactersList').innerHTML = '<p>Sem jogadores</p>';
             return;
         }
         
-        // 2. Buscar vínculos
-        const { data: vinculos } = await supabase
-            .from('campaign_characters')
-            .select('user_id, character_id')
-            .eq('campaign_id', campaignId);
-        
-        // 3. Buscar NOMES dos jogadores
-        const ids = jogadores.map(j => j.user_id);
+        // 2. Buscar nomes
+        const userIds = jogadores.map(j => j.user_id);
         const { data: perfis } = await supabase
             .from('profiles')
             .select('id, username')
-            .in('id', ids);
+            .in('id', userIds);
         
-        // 4. Buscar personagens
-        let personagens = {};
-        if (vinculos && vinculos.length > 0) {
-            const charIds = vinculos.map(v => v.character_id);
-            const { data: chars } = await supabase
-                .from('characters')
-                .select('id, nome, classe, raca, pontos_gastos, pontos_totais')
-                .in('id', charIds);
-            
-            if (chars) {
-                chars.forEach(c => personagens[c.id] = c);
-            }
-        }
+        // 3. Buscar personagens
+        const { data: personagens } = await supabase
+            .from('characters')
+            .select('*')
+            .in('user_id', userIds);
         
-        // 5. Separar
+        // 4. Separar
         const comPersonagem = [];
         const semPersonagem = [];
         
@@ -709,24 +667,24 @@ async function verPCs(campaignId) {
             const perfil = perfis?.find(p => p.id === jogador.user_id);
             const nome = perfil?.username || 'Jogador';
             
-            const vinculo = vinculos?.find(v => v.user_id === jogador.user_id);
+            const personagem = personagens?.find(p => p.user_id === jogador.user_id);
             
-            if (vinculo && personagens[vinculo.character_id]) {
+            if (personagem) {
                 comPersonagem.push({
                     nome: nome,
-                    personagem: personagens[vinculo.character_id]
+                    personagem: personagem
                 });
             } else {
                 semPersonagem.push({ nome: nome });
             }
         });
         
-        // 6. Mostrar
+        // 5. Mostrar
         mostrarPCs(comPersonagem, semPersonagem);
         
     } catch (error) {
         console.error('Erro verPCs:', error);
-        alert('Erro: ' + error.message);
+        document.getElementById('charactersList').innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
     }
 }
 
@@ -786,10 +744,6 @@ function mostrarPCs(comPC, semPC) {
     }
 }
 
-// ============================================
-// 4. FUNÇÕES SIMPLES
-// ============================================
-
 function verFicha(characterId) {
     window.open(`ficha-personagem.html?id=${characterId}`, '_blank');
 }
@@ -797,20 +751,6 @@ function verFicha(characterId) {
 function lembrarJogador(nome) {
     alert(`Lembrete enviado para ${nome}`);
 }
-
-// ============================================
-// 5. TESTE DIRETO
-// ============================================
-
-window.testeDireto = function() {
-    console.log('=== TESTE DIRETO ===');
-    
-    // ID da campanha "Mundo das trevas" onde bruno66633 está
-    verPCs('13da5327-3b7e-4f7a-8cf2-c0c153a018bd');
-};
-
-console.log('✅ Escudo do Mestre carregado. Use testeDireto() para testar.');
-
 </script>
 </body>
 </html>
