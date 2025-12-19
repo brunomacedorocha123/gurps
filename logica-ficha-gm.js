@@ -10,6 +10,7 @@ let dadosCampanha = null;
 let personagemId = null;
 let campanhaId = null;
 let vinculoId = null;
+let intervaloAtualizacao = null;
 
 // ====== CLASSE PRINCIPAL ======
 class FichaGM {
@@ -20,16 +21,9 @@ class FichaGM {
     async init() {
         try {
             this.mostrarLoading();
-            console.log('🚀 Iniciando Ficha GM...');
             
-            // 1. Pegar parâmetros da URL (COM OS NOMES CORRETOS!)
+            // 1. Pegar parâmetros da URL
             this.extrairParametrosURLCorretos();
-            
-            console.log('🔗 IDs extraídos:', {
-                personagemId,
-                campanhaId,
-                vinculoId
-            });
             
             // 2. Carregar dados do personagem
             await this.carregarDadosPersonagem();
@@ -47,16 +41,16 @@ class FichaGM {
             this.iniciarSincronizacao();
             
             this.esconderLoading();
-            console.log('✅ Ficha GM carregada com sucesso!');
+            this.mostrarMensagem('Ficha carregada!', 'sucesso');
             
         } catch (error) {
-            console.error('❌ Erro na inicialização:', error);
-            this.mostrarMensagem(`Erro: ${error.message}`, 'erro');
+            console.error('❌ Erro:', error);
+            this.mostrarMensagem('Erro ao carregar ficha', 'erro');
             this.esconderLoading();
         }
     }
 
-    // ====== EXTRAIR PARÂMETROS CORRETOS ======
+    // ====== EXTRAIR PARÂMETROS DA URL ======
     extrairParametrosURLCorretos() {
         const params = new URLSearchParams(window.location.search);
         
@@ -72,8 +66,7 @@ class FichaGM {
         });
         
         if (!personagemId || !campanhaId) {
-            console.error('❌ Parâmetros faltando na URL');
-            throw new Error('Parâmetros insuficientes. É necessário character e campaign.');
+            throw new Error('URL inválida. É necessário character e campaign.');
         }
     }
 
@@ -82,7 +75,7 @@ class FichaGM {
         console.log('📥 Buscando dados do personagem ID:', personagemId);
         
         try {
-            // PRIMEIRO: Tentar pegar da VIEW com o link ID
+            // PRIMEIRO: Tentar pegar da VIEW gm_characters_view
             if (vinculoId) {
                 const { data: viewData, error: viewError } = await supabase
                     .from('gm_characters_view')
@@ -91,30 +84,27 @@ class FichaGM {
                     .single();
                 
                 if (!viewError && viewData) {
-                    console.log('✅ Dados da view carregados:', viewData);
+                    console.log('✅ Dados da VIEW:', viewData);
                     dadosPersonagem = viewData;
                     return;
                 }
             }
             
-            // SEGUNDO: Buscar diretamente da tabela characters
-            console.log('🔄 Buscando direto da tabela characters...');
+            // SEGUNDO: Se não tiver view, buscar direto da tabela characters
+            console.log('🔄 Buscando diretamente da tabela characters...');
             const { data: characterData, error: characterError } = await supabase
                 .from('characters')
                 .select('*')
                 .eq('id', personagemId)
                 .single();
             
-            if (characterError) {
-                console.error('❌ Erro ao buscar personagem:', characterError);
-                throw new Error('Personagem não encontrado no banco de dados');
-            }
+            if (characterError) throw characterError;
             
             dadosPersonagem = characterData;
             console.log('✅ Dados do personagem carregados:', dadosPersonagem);
             
         } catch (error) {
-            console.error('❌ Erro no carregamento:', error);
+            console.error('❌ Erro ao carregar personagem:', error);
             throw error;
         }
     }
@@ -130,7 +120,6 @@ class FichaGM {
             
             if (!error && campanhaData) {
                 dadosCampanha = campanhaData;
-                console.log('✅ Dados da campanha:', dadosCampanha);
             } else {
                 dadosCampanha = { gm_notes: '', is_frozen: false };
             }
@@ -151,10 +140,10 @@ class FichaGM {
         // 1. Informações básicas
         this.atualizarInformacoesBasicas();
         
-        // 2. Atributos (AGORA VAI PEGAR OS VALORES REAIS!)
+        // 2. Atributos
         this.atualizarAtributosReais();
         
-        // 3. Status
+        // 3. Status (PV/PF/Dinheiro)
         this.atualizarStatusReais();
         
         // 4. Vantagens
@@ -169,11 +158,11 @@ class FichaGM {
         // 7. Status de combate
         this.atualizarStatusCombate();
         
-        console.log('✅ Interface atualizada com sucesso!');
+        console.log('✅ Interface atualizada!');
     }
 
     atualizarInformacoesBasicas() {
-        // Nome
+        // Nome do personagem
         document.getElementById('nomePersonagem').textContent = 
             dadosPersonagem.nome || dadosPersonagem.character_name || 'Sem nome';
         
@@ -181,19 +170,13 @@ class FichaGM {
         document.getElementById('racaPersonagem').textContent = 
             dadosPersonagem.raca || dadosPersonagem.race || 'Sem raça';
         
-        // Classe (se existir no banco)
-        if (dadosPersonagem.classe) {
-            document.getElementById('classePersonagem').textContent = dadosPersonagem.classe;
-        } else {
-            document.getElementById('classePersonagem').textContent = 'Aventureiro';
-        }
+        // Classe
+        document.getElementById('classePersonagem').textContent = 
+            dadosPersonagem.classe || 'Aventureiro';
         
         // Nível
-        if (dadosPersonagem.nivel) {
-            document.getElementById('nivelPersonagem').textContent = dadosPersonagem.nivel;
-        } else {
-            document.getElementById('nivelPersonagem').textContent = 'Nível 1';
-        }
+        document.getElementById('nivelPersonagem').textContent = 
+            dadosPersonagem.nivel || 'Nível 1';
         
         // Pontos
         const pontos = dadosPersonagem.pontos_totais || dadosPersonagem.total_points || 0;
@@ -206,14 +189,10 @@ class FichaGM {
         // Campanha e Jogador
         if (dadosPersonagem.campaign_name) {
             document.getElementById('nomeCampanha').textContent = dadosPersonagem.campaign_name;
-        } else {
-            document.getElementById('nomeCampanha').textContent = 'Campanha';
         }
         
         if (dadosPersonagem.player_username) {
             document.getElementById('nomeJogador').textContent = dadosPersonagem.player_username;
-        } else {
-            document.getElementById('nomeJogador').textContent = 'Jogador';
         }
         
         // Foto
@@ -226,18 +205,18 @@ class FichaGM {
     }
 
     atualizarAtributosReais() {
-        console.log('🎯 Atualizando atributos com dados reais do banco:', {
+        console.log('🎯 Atualizando atributos com dados reais:', {
             forca: dadosPersonagem.forca,
             destreza: dadosPersonagem.destreza,
             inteligencia: dadosPersonagem.inteligencia,
             saude: dadosPersonagem.saude
         });
         
-        // PEGAR OS VALORES EXATOS DO BANCO (não usar defaults 10)
-        const ST = dadosPersonagem.forca || 10;
-        const DX = dadosPersonagem.destreza || 10;
-        const IQ = dadosPersonagem.inteligencia || 10;
-        const HT = dadosPersonagem.saude || 10;
+        // ATRIBUTOS PRINCIPAIS - PEGAR OS VALORES REAIS
+        const ST = dadosPersonagem.forca || dadosPersonagem.st || 10;
+        const DX = dadosPersonagem.destreza || dadosPersonagem.dx || 10;
+        const IQ = dadosPersonagem.inteligencia || dadosPersonagem.iq || 10;
+        const HT = dadosPersonagem.saude || dadosPersonagem.ht || 10;
         
         console.log('📊 Atributos finais:', { ST, DX, IQ, HT });
         
@@ -259,24 +238,25 @@ class FichaGM {
         document.getElementById('gmHTMod').textContent = `[${HTMod >= 0 ? '+' : ''}${HTMod}]`;
         
         // Vontade e Percepção
-        const vontade = dadosPersonagem.vontade || IQ;
-        const percepcao = dadosPersonagem.percepcao || IQ;
+        const vontade = dadosPersonagem.vontade || dadosPersonagem.vontade_base || IQ;
+        const percepcao = dadosPersonagem.percepcao || dadosPersonagem.percepcao_base || IQ;
         
         document.getElementById('gmVontade').textContent = vontade;
         document.getElementById('gmPercepcao').textContent = percepcao;
         
         // Carga (sem "lb")
-        const cargaAtual = dadosPersonagem.peso_atual || 0;
-        const cargaMaxima = dadosPersonagem.peso_maximo || 0;
+        const cargaAtual = dadosPersonagem.peso_atual || dadosPersonagem.current_weight || 0;
+        const cargaMaxima = dadosPersonagem.peso_maximo || dadosPersonagem.max_weight || 0;
         
         document.getElementById('gmCargaAtual').textContent = cargaAtual;
         document.getElementById('gmCargaMaxima').textContent = cargaMaxima;
     }
 
     atualizarStatusReais() {
-        // PV
-        const pvAtual = dadosPersonagem.pv_atual || 10;
-        const pvMaximo = dadosPersonagem.pv_maximo || dadosPersonagem.pontos_vida || 10;
+        // PV - Pontos de Vida
+        const pvAtual = dadosPersonagem.pv_atual || dadosPersonagem.current_hp || 10;
+        const pvMaximo = dadosPersonagem.pv_maximo || dadosPersonagem.max_hp || 
+                        dadosPersonagem.pontos_vida || 10;
         
         document.getElementById('pvAtualGM').textContent = pvAtual;
         document.getElementById('pvMaximoGM').textContent = pvMaximo;
@@ -293,20 +273,21 @@ class FichaGM {
             indicator.style.background = '#e74c3c';
         }
         
-        // PF
-        const pfAtual = dadosPersonagem.pf_atual || 10;
-        const pfMaximo = dadosPersonagem.pf_maximo || dadosPersonagem.pontos_fadiga || 10;
+        // PF - Pontos de Fadiga
+        const pfAtual = dadosPersonagem.pf_atual || dadosPersonagem.current_fp || 10;
+        const pfMaximo = dadosPersonagem.pf_maximo || dadosPersonagem.max_fp || 
+                        dadosPersonagem.pontos_fadiga || 10;
         
         document.getElementById('pfAtualGM').textContent = pfAtual;
         document.getElementById('pfMaximoGM').textContent = pfMaximo;
         
         // Dinheiro
-        const dinheiro = dadosPersonagem.dinheiro || 0;
+        const dinheiro = dadosPersonagem.dinheiro || dadosPersonagem.money || 0;
         document.getElementById('dinheiroGM').textContent = `$${dinheiro}`;
         
         // Movimento
-        const deslocamento = dadosPersonagem.deslocamento || 5;
-        const bonusMovimento = dadosPersonagem.bonus_deslocamento || 0;
+        const deslocamento = dadosPersonagem.deslocamento || dadosPersonagem.basic_move || 5;
+        const bonusMovimento = dadosPersonagem.bonus_deslocamento || dadosPersonagem.move_bonus || 0;
         
         document.getElementById('gmDeslocamento').textContent = deslocamento;
         document.getElementById('gmBonusMovimento').textContent = bonusMovimento;
@@ -329,6 +310,14 @@ class FichaGM {
                     vantagens = JSON.parse(dadosPersonagem.vantagens);
                 } else if (Array.isArray(dadosPersonagem.vantagens)) {
                     vantagens = dadosPersonagem.vantagens;
+                }
+            }
+            // Fallback: campo advantages
+            else if (dadosPersonagem.advantages) {
+                if (typeof dadosPersonagem.advantages === 'string') {
+                    vantagens = JSON.parse(dadosPersonagem.advantages);
+                } else if (Array.isArray(dadosPersonagem.advantages)) {
+                    vantagens = dadosPersonagem.advantages;
                 }
             }
             
@@ -399,6 +388,14 @@ class FichaGM {
                     pericias = dadosPersonagem.pericias;
                 }
             }
+            // Fallback: campo skills
+            else if (dadosPersonagem.skills) {
+                if (typeof dadosPersonagem.skills === 'string') {
+                    pericias = JSON.parse(dadosPersonagem.skills);
+                } else if (Array.isArray(dadosPersonagem.skills)) {
+                    pericias = dadosPersonagem.skills;
+                }
+            }
             
             console.log(`🎯 ${pericias.length} perícias encontradas`);
             
@@ -455,15 +452,15 @@ class FichaGM {
 
     atualizarStatusCombate() {
         // Esquiva
-        const esquiva = dadosPersonagem.esquiva || 
+        const esquiva = dadosPersonagem.esquiva || dadosPersonagem.dodge || 
                        Math.floor((dadosPersonagem.destreza || 10) / 2) + 3;
         document.getElementById('gmEsquiva').textContent = esquiva;
         
         // Dano
         document.getElementById('gmDanoGolpe').textContent = 
-            dadosPersonagem.dano_gdp || '1d-2';
+            dadosPersonagem.dano_gdp || dadosPersonagem.thrust_damage || '1d-2';
         document.getElementById('gmDanoArremesso').textContent = 
-            dadosPersonagem.dano_geb || '1d';
+            dadosPersonagem.dano_geb || dadosPersonagem.swing_damage || '1d';
     }
 
     atualizarAnotacoes() {
@@ -473,7 +470,8 @@ class FichaGM {
         }
     }
 
-    // ====== EVENTOS ======
+    // CONTINUA NO PRÓXIMO COMENTÁRIO...
+        // ====== CONFIGURAÇÃO DE EVENTOS ======
     configurarEventListeners() {
         // Tabs
         document.querySelectorAll('.tab').forEach(tab => {
@@ -502,9 +500,23 @@ class FichaGM {
             this.sincronizarDados();
         });
 
+        // Botão congelar
+        document.getElementById('btnCongelar').addEventListener('click', () => {
+            this.congelarPersonagem();
+        });
+
+        // Botão remover
+        document.getElementById('btnRemover').addEventListener('click', () => {
+            this.removerPersonagem();
+        });
+
         // Anotações
         document.getElementById('btnSalvarAnotacoes').addEventListener('click', () => {
             this.salvarAnotacoes();
+        });
+
+        document.getElementById('btnLimparAnotacoes').addEventListener('click', () => {
+            this.limparAnotacoes();
         });
     }
 
@@ -532,7 +544,7 @@ class FichaGM {
 
     iniciarSincronizacao() {
         // Sincronizar a cada 30 segundos
-        setInterval(() => {
+        intervaloAtualizacao = setInterval(() => {
             this.sincronizarDados();
         }, 30000);
     }
@@ -541,9 +553,51 @@ class FichaGM {
         try {
             await this.carregarDadosPersonagem();
             this.atualizarInterfaceCompleta();
-            console.log('🔄 Dados sincronizados');
+            this.mostrarMensagem('Dados atualizados', 'info');
         } catch (error) {
             console.error('❌ Erro na sincronização:', error);
+        }
+    }
+
+    async congelarPersonagem() {
+        if (confirm('Congelar este personagem? O jogador não poderá fazer alterações.')) {
+            try {
+                const { error } = await supabase
+                    .from('campaign_characters')
+                    .update({ is_frozen: true })
+                    .eq('character_id', personagemId)
+                    .eq('campaign_id', campanhaId);
+                
+                if (error) throw error;
+                
+                this.mostrarMensagem('Personagem congelado!', 'sucesso');
+            } catch (error) {
+                this.mostrarMensagem('Erro ao congelar', 'erro');
+            }
+        }
+    }
+
+    async removerPersonagem() {
+        if (confirm('ATENÇÃO: Remover este personagem da campanha?')) {
+            try {
+                const { error } = await supabase
+                    .from('campaign_characters')
+                    .update({ status: 'removed' })
+                    .eq('character_id', personagemId)
+                    .eq('campaign_id', campanhaId);
+                
+                if (error) throw error;
+                
+                this.mostrarMensagem('Personagem removido', 'sucesso');
+                
+                // Voltar para campanha após 2 segundos
+                setTimeout(() => {
+                    window.location.href = `campanha.html?id=${campanhaId}`;
+                }, 2000);
+                
+            } catch (error) {
+                this.mostrarMensagem('Erro ao remover', 'erro');
+            }
         }
     }
 
@@ -562,6 +616,12 @@ class FichaGM {
             this.mostrarMensagem('Anotações salvas!', 'sucesso');
         } catch (error) {
             this.mostrarMensagem('Erro ao salvar anotações', 'erro');
+        }
+    }
+
+    limparAnotacoes() {
+        if (confirm('Limpar todas as anotações?')) {
+            document.getElementById('anotacoesGM').value = '';
         }
     }
 
