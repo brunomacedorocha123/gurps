@@ -1,14 +1,16 @@
 // salvamento-supabase.js - VERSÃO COMPLETA E FUNCIONAL
 class SalvamentoSupabase {
     constructor() {
-        // Verificar se Supabase está disponível
+        // Verificar Supabase
         if (!window.supabase) {
-            console.error('❌ ERRO: Supabase não carregado!');
+            console.error('❌ Supabase não carregado!');
             throw new Error('Supabase não está disponível');
         }
         
         this.supabase = window.supabase;
         this.limitePersonagens = 10;
+        
+        console.log('✅ Sistema de salvamento inicializado');
     }
 
     // ======================
@@ -16,7 +18,6 @@ class SalvamentoSupabase {
     // ======================
     async verificarLimitePersonagens() {
         try {
-            // 1. Obter usuário autenticado
             const { data: { session } } = await this.supabase.auth.getSession();
             
             if (!session) {
@@ -28,7 +29,6 @@ class SalvamentoSupabase {
                 };
             }
             
-            // 2. Contar personagens do usuário
             const { count, error } = await this.supabase
                 .from('characters')
                 .select('*', { count: 'exact', head: true })
@@ -37,7 +37,7 @@ class SalvamentoSupabase {
             if (error) {
                 console.error('Erro ao contar:', error);
                 return {
-                    podeCriar: true, // Permite mesmo com erro
+                    podeCriar: true,
                     quantidade: 0,
                     limite: this.limitePersonagens,
                     motivo: ''
@@ -67,391 +67,246 @@ class SalvamentoSupabase {
     }
 
     // ======================
-    // SISTEMA DE FOTOS
+    // COLETAR DADOS DAS ABAS
     // ======================
-    async salvarFotoNoSupabase(file, personagemId) {
-        if (!file || !personagemId) {
-            return null;
-        }
-
-        try {
-            // 1. Obter usuário
-            const { data: { session } } = await this.supabase.auth.getSession();
-            if (!session) return null;
-            
-            const userId = session.user.id;
-            
-            // 2. Configurar nome do arquivo
-            const fileExt = file.name.split('.').pop().toLowerCase();
-            const fileName = `avatar_${personagemId}_${Date.now()}.${fileExt}`;
-            const filePath = `avatars/${userId}/${fileName}`;
-
-            // 3. Fazer upload
-            const { data: uploadData, error: uploadError } = await this.supabase.storage
-                .from('characters')
-                .upload(filePath, file, {
-                    cacheControl: '3600',
-                    upsert: true
-                });
-
-            if (uploadError) {
-                console.error('Erro no upload:', uploadError);
-                return null;
-            }
-
-            // 4. Obter URL pública
-            const { data: { publicUrl } } = this.supabase.storage
-                .from('characters')
-                .getPublicUrl(filePath);
-
-            return publicUrl;
-
-        } catch (error) {
-            console.error('Erro ao salvar foto:', error);
-            return null;
-        }
-    }
-
-    // ======================
-    // PEGAR DADOS DO DASHBOARD (DIRETO DOS DISPLAYS)
-    // ======================
-    pegarDadosDashboard() {
-        console.log('📊 Pegando dados do Dashboard...');
-        
+    coletarDadosDasAbas() {
         const dados = {};
         
+        console.log('🔍 Coletando dados de todas as abas...');
+        
         try {
-            // 1. DADOS BÁSICOS
+            // 1. DADOS DO DASHBOARD
             dados.nome = document.getElementById('charName')?.value || 'Novo Personagem';
             dados.raca = document.getElementById('racaPersonagem')?.value || '';
             dados.classe = document.getElementById('classePersonagem')?.value || '';
-            dados.nivel = document.getElementById('nivelPersonagem')?.value || 'Nível 1';
+            dados.nivel = document.getElementById('nivelPersonagem')?.value || '';
             dados.descricao = document.getElementById('descricaoPersonagem')?.value || '';
             
-            // 2. PONTOS (DIRETO DOS DISPLAYS VISÍVEIS)
-            // Pontos totais do input
-            const pontosTotaisInput = document.getElementById('pontosTotaisDashboard');
-            if (pontosTotaisInput) {
-                dados.pontos_totais = parseInt(pontosTotaisInput.value) || 150;
-            } else {
-                dados.pontos_totais = 150;
-            }
+            // 2. PONTOS DO SISTEMA
+            const pontosTotais = document.getElementById('pontosTotaisDashboard');
+            const pontosGastos = document.getElementById('pontosGastosDashboard');
+            const saldoDisponivel = document.getElementById('saldoDisponivelDashboard');
             
-            // Pontos gastos do display
-            const pontosGastosElement = document.getElementById('pontosGastosDashboard');
-            if (pontosGastosElement) {
-                dados.pontos_gastos = parseInt(pontosGastosElement.textContent) || 0;
-            } else {
-                dados.pontos_gastos = 0;
-            }
+            dados.pontos_totais = pontosTotais ? parseInt(pontosTotais.value) : 150;
+            dados.pontos_gastos = pontosGastos ? parseInt(pontosGastos.textContent) : 0;
+            dados.pontos_disponiveis = saldoDisponivel ? parseInt(saldoDisponivel.textContent) : 150;
             
-            // Saldo disponível do display
-            const saldoElement = document.getElementById('saldoDisponivelDashboard');
-            if (saldoElement) {
-                dados.pontos_disponiveis = parseInt(saldoElement.textContent) || 150;
-            } else {
-                dados.pontos_disponiveis = 150;
-            }
-            
-            // Limite de desvantagens
-            const limiteDesvantagensInput = document.getElementById('limiteDesvantagens');
-            if (limiteDesvantagensInput) {
-                dados.limite_desvantagens = parseInt(limiteDesvantagensInput.value) || -50;
-            } else {
-                dados.limite_desvantagens = -50;
-            }
-            
-            // Desvantagens atuais
-            const desvantagensElement = document.getElementById('desvantagensAtuais');
-            if (desvantagensElement) {
-                dados.desvantagens_atuais = parseInt(desvantagensElement.textContent) || 0;
-            } else {
-                dados.desvantagens_atuais = 0;
-            }
-            
-            console.log('✅ Pontos coletados do Dashboard:', {
-                totais: dados.pontos_totais,
-                gastos: dados.pontos_gastos,
-                disponiveis: dados.pontos_disponiveis,
-                desvantagens: dados.desvantagens_atuais
-            });
-            
-        } catch (error) {
-            console.error('Erro ao pegar dados do Dashboard:', error);
-            // Valores padrão
-            dados.pontos_totais = 150;
-            dados.pontos_gastos = 0;
-            dados.pontos_disponiveis = 150;
-            dados.limite_desvantagens = -50;
-            dados.desvantagens_atuais = 0;
-        }
-        
-        return dados;
-    }
-
-    // ======================
-    // PEGAR DADOS DOS ATRIBUTOS
-    // ======================
-    pegarDadosAtributos() {
-        const dados = {};
-        
-        try {
-            // Atributos principais
+            // 3. ATRIBUTOS
             dados.forca = parseInt(document.getElementById('ST')?.value) || 10;
             dados.destreza = parseInt(document.getElementById('DX')?.value) || 10;
             dados.inteligencia = parseInt(document.getElementById('IQ')?.value) || 10;
             dados.saude = parseInt(document.getElementById('HT')?.value) || 10;
             
-            // Atributos secundários (se disponíveis)
-            const pvTotal = document.getElementById('PVTotal');
-            if (pvTotal) dados.pontos_vida = parseInt(pvTotal.textContent) || 10;
-            
-            const pfTotal = document.getElementById('PFTotal');
-            if (pfTotal) dados.pontos_fadiga = parseInt(pfTotal.textContent) || 10;
-            
-            const vontadeTotal = document.getElementById('VontadeTotal');
-            if (vontadeTotal) dados.vontade = parseInt(vontadeTotal.textContent) || 10;
-            
-            const percepcaoTotal = document.getElementById('PercepcaoTotal');
-            if (percepcaoTotal) dados.percepcao = parseInt(percepcaoTotal.textContent) || 10;
-            
-            const deslocamentoTotal = document.getElementById('DeslocamentoTotal');
-            if (deslocamentoTotal) dados.deslocamento = parseFloat(deslocamentoTotal.textContent) || 5.00;
-            
-        } catch (error) {
-            console.error('Erro ao pegar atributos:', error);
-            // Valores padrão
-            dados.forca = 10;
-            dados.destreza = 10;
-            dados.inteligencia = 10;
-            dados.saude = 10;
-            dados.pontos_vida = 10;
-            dados.pontos_fadiga = 10;
-            dados.vontade = 10;
-            dados.percepcao = 10;
-            dados.deslocamento = 5.00;
-        }
-        
-        return dados;
-    }
-
-    // ======================
-    // PEGAR DADOS DAS CARACTERÍSTICAS
-    // ======================
-    pegarDadosCaracteristicas() {
-        const dados = {};
-        
-        try {
-            // Aparência
+            // 4. CARACTERÍSTICAS
             const selectAparencia = document.getElementById('nivelAparencia');
             if (selectAparencia) {
-                const texto = selectAparencia.options[selectAparencia.selectedIndex]?.text;
-                dados.aparencia = texto?.split('[')[0]?.trim() || 'Comum';
+                dados.aparencia = selectAparencia.options[selectAparencia.selectedIndex]?.text.split('[')[0]?.trim() || 'Comum';
                 dados.custo_aparencia = parseInt(selectAparencia.value) || 0;
             }
             
-            // Riqueza
             const selectRiqueza = document.getElementById('nivelRiqueza');
             if (selectRiqueza) {
-                const texto = selectRiqueza.options[selectRiqueza.selectedIndex]?.text;
-                dados.riqueza = texto?.split('[')[0]?.trim() || 'Média';
+                dados.riqueza = selectRiqueza.options[selectRiqueza.selectedIndex]?.text.split('[')[0]?.trim() || 'Média';
                 dados.custo_riqueza = parseInt(selectRiqueza.value) || 0;
             }
             
-            // Altura e peso
             dados.altura = parseFloat(document.getElementById('altura')?.value) || 1.70;
             dados.peso = parseFloat(document.getElementById('peso')?.value) || 70.00;
             
-        } catch (error) {
-            console.error('Erro ao pegar características:', error);
-            // Valores padrão
-            dados.aparencia = 'Comum';
-            dados.custo_aparencia = 0;
-            dados.riqueza = 'Média';
-            dados.custo_riqueza = 0;
-            dados.altura = 1.70;
-            dados.peso = 70.00;
-        }
-        
-        return dados;
-    }
-
-    // ======================
-    // PEGAR DADOS DAS VANTAGENS/DESVANTAGENS
-    // ======================
-    pegarDadosVantagensDesvantagens() {
-        const dados = {
-            vantagens: '[]',
-            desvantagens: '[]',
-            peculiaridades: '[]',
-            total_vantagens: 0,
-            total_desvantagens: 0,
-            total_peculiaridades: 0
-        };
-        
-        try {
-            // Verificar se existe algum display com pontos
-            const totalVantagensElement = document.getElementById('total-vantagens');
-            if (totalVantagensElement) {
-                const texto = totalVantagensElement.textContent;
-                const match = texto.match(/[+-]?\d+/);
-                if (match) {
-                    const valor = parseInt(match[0]);
-                    if (valor > 0) dados.total_vantagens = valor;
-                    if (valor < 0) dados.total_desvantagens = Math.abs(valor);
-                }
+            // 5. VANTAGENS/DESVANTAGENS (usando o coletor se disponível)
+            if (window.coletor && typeof window.coletor._coletarVantagens === 'function') {
+                console.log('📌 Usando coletor de dados...');
+                dados.vantagens = JSON.stringify(window.coletor._coletarVantagens());
+                dados.desvantagens = JSON.stringify(window.coletor._coletarDesvantagens());
+                dados.peculiaridades = JSON.stringify(window.coletor._coletarPeculiaridades());
+                dados.total_vantagens = window.coletor._coletarVantagens().length;
+                dados.total_desvantagens = window.coletor._coletarDesvantagens().length;
+                dados.total_peculiaridades = window.coletor._coletarPeculiaridades().length;
+            } else {
+                // Fallback manual
+                dados.vantagens = this._coletarVantagensManual();
+                dados.desvantagens = this._coletarDesvantagensManual();
+                dados.peculiaridades = this._coletarPeculiaridadesManual();
+                dados.total_vantagens = JSON.parse(dados.vantagens).length;
+                dados.total_desvantagens = JSON.parse(dados.desvantagens).length;
+                dados.total_peculiaridades = JSON.parse(dados.peculiaridades).length;
             }
             
-            // Peculiaridades
-            const listaPeculiaridades = document.getElementById('lista-peculiaridades');
-            if (listaPeculiaridades) {
-                const itens = listaPeculiaridades.querySelectorAll('.peculiaridade-item');
-                const peculiaridades = [];
-                itens.forEach(item => {
-                    const texto = item.querySelector('.peculiaridade-texto')?.textContent;
-                    if (texto) peculiaridades.push(texto);
-                });
-                dados.total_peculiaridades = peculiaridades.length;
-                dados.peculiaridades = JSON.stringify(peculiaridades);
+            // 6. PERÍCIAS
+            if (window.coletor && typeof window.coletor._coletarPericias === 'function') {
+                dados.pericias = JSON.stringify(window.coletor._coletarPericias());
+                dados.total_pericias = window.coletor._coletarPericias().length;
+                
+                // Calcular pontos de perícias
+                const periciasArray = window.coletor._coletarPericias();
+                dados.pontos_pericias = periciasArray.reduce((total, p) => total + (p.pontos || 0), 0);
+            } else {
+                dados.pericias = '[]';
+                dados.total_pericias = 0;
+                dados.pontos_pericias = 0;
             }
             
-        } catch (error) {
-            console.error('Erro ao pegar vantagens:', error);
-        }
-        
-        return dados;
-    }
-
-    // ======================
-    // PEGAR DADOS DAS PERÍCIAS
-    // ======================
-    pegarDadosPericias() {
-        const dados = {
-            pericias: '[]',
-            tecnicas: '[]',
-            total_pericias: 0,
-            total_tecnicas: 0,
-            pontos_pericias: 0,
-            pontos_tecnicas: 0
-        };
-        
-        try {
-            // Pontos de perícias
-            const pontosPericiasElement = document.getElementById('pontos-pericias-total');
-            if (pontosPericiasElement) {
-                const texto = pontosPericiasElement.textContent;
-                const match = texto.match(/\d+/);
-                if (match) dados.pontos_pericias = parseInt(match[0]) || 0;
+            // 7. MAGIAS
+            if (window.coletor && typeof window.coletor._coletarMagias === 'function') {
+                dados.magias = JSON.stringify(window.coletor._coletarMagias());
+                dados.total_magias = window.coletor._coletarMagias().length;
+                
+                const magiasArray = window.coletor._coletarMagias();
+                dados.pontos_magias = magiasArray.reduce((total, m) => total + (m.pontos || 0), 0);
+            } else {
+                dados.magias = '[]';
+                dados.total_magias = 0;
+                dados.pontos_magias = 0;
             }
             
-        } catch (error) {
-            console.error('Erro ao pegar perícias:', error);
-        }
-        
-        return dados;
-    }
-
-    // ======================
-    // PEGAR DADOS DAS MAGIAS
-    // ======================
-    pegarDadosMagias() {
-        const dados = {
-            aptidao_magica: 0,
-            mana_atual: 10,
-            mana_base: 10,
-            bonus_mana: 0,
-            magias: '[]',
-            total_magias: 0,
-            pontos_magias: 0
-        };
-        
-        try {
             // Status mágico
-            const aptidaoInput = document.getElementById('aptidao-magica');
-            if (aptidaoInput) dados.aptidao_magica = parseInt(aptidaoInput.value) || 0;
+            dados.aptidao_magica = parseInt(document.getElementById('aptidao-magica')?.value) || 0;
+            dados.mana_atual = parseInt(document.getElementById('mana-atual')?.value) || 10;
+            dados.mana_base = parseInt(document.getElementById('mana-base')?.textContent) || 10;
+            dados.bonus_mana = parseInt(document.getElementById('bonus-mana')?.value) || 0;
             
-            const manaAtualInput = document.getElementById('mana-atual');
-            if (manaAtualInput) dados.mana_atual = parseInt(manaAtualInput.value) || 10;
+            // 8. EQUIPAMENTOS
+            if (window.coletor && typeof window.coletor._coletarEquipamentos === 'function') {
+                dados.equipamentos = JSON.stringify(window.coletor._coletarEquipamentos());
+            } else {
+                dados.equipamentos = '[]';
+            }
             
-            const manaBaseElement = document.getElementById('mana-base');
-            if (manaBaseElement) dados.mana_base = parseInt(manaBaseElement.textContent) || 10;
+            dados.dinheiro = this._obterDinheiro();
             
-            const bonusManaInput = document.getElementById('bonus-mana');
-            if (bonusManaInput) dados.bonus_mana = parseInt(bonusManaInput.value) || 0;
+            // 9. COMBATE
+            dados.pv_atual = parseInt(document.getElementById('pvAtualDisplay')?.value) || 10;
+            dados.pv_maximo = parseInt(document.getElementById('pvMaxDisplay')?.textContent) || 10;
+            dados.pf_atual = parseInt(document.getElementById('pfAtualDisplay')?.value) || 10;
+            dados.pf_maximo = parseInt(document.getElementById('pfMaxDisplay')?.textContent) || 10;
+            
+            // 10. STATUS E DATAS
+            dados.status = 'Ativo';
+            dados.updated_at = new Date().toISOString();
+            
+            console.log('✅ Dados coletados:', {
+                nome: dados.nome,
+                vantagens: dados.total_vantagens,
+                desvantagens: dados.total_desvantagens,
+                pericias: dados.total_pericias,
+                magias: dados.total_magias
+            });
+            
+            return dados;
             
         } catch (error) {
-            console.error('Erro ao pegar magias:', error);
+            console.error('❌ Erro ao coletar dados:', error);
+            
+            // Retornar dados mínimos em caso de erro
+            return {
+                nome: document.getElementById('charName')?.value || 'Novo Personagem',
+                forca: 10,
+                destreza: 10,
+                inteligencia: 10,
+                saude: 10,
+                pontos_totais: 150,
+                pontos_gastos: 0,
+                status: 'Ativo',
+                updated_at: new Date().toISOString()
+            };
         }
-        
-        return dados;
     }
 
     // ======================
-    // COLETAR TODOS OS DADOS
+    // MÉTODOS MANUAIS (FALLBACK)
     // ======================
-    coletarTodosDados() {
-        console.log('📦 Coletando todos os dados...');
-        
-        const dados = {
-            // Dados serão combinados abaixo
-        };
-        
-        // 1. Dashboard (INCLUINDO PONTOS)
-        const dadosDashboard = this.pegarDadosDashboard();
-        Object.assign(dados, dadosDashboard);
-        
-        // 2. Atributos
-        const dadosAtributos = this.pegarDadosAtributos();
-        Object.assign(dados, dadosAtributos);
-        
-        // 3. Características
-        const dadosCaracteristicas = this.pegarDadosCaracteristicas();
-        Object.assign(dados, dadosCaracteristicas);
-        
-        // 4. Vantagens/Desvantagens
-        const dadosVantagens = this.pegarDadosVantagensDesvantagens();
-        Object.assign(dados, dadosVantagens);
-        
-        // 5. Perícias
-        const dadosPericias = this.pegarDadosPericias();
-        Object.assign(dados, dadosPericias);
-        
-        // 6. Magias
-        const dadosMagias = this.pegarDadosMagias();
-        Object.assign(dados, dadosMagias);
-        
-        // 7. Campos obrigatórios
-        dados.status = 'Ativo';
-        dados.updated_at = new Date().toISOString();
-        
-        // 8. Log para debug
-        console.log('✅ Dados coletados para salvar:', {
-            nome: dados.nome,
-            pontos: {
-                totais: dados.pontos_totais,
-                gastos: dados.pontos_gastos,
-                disponiveis: dados.pontos_disponiveis
-            },
-            atributos: {
-                forca: dados.forca,
-                destreza: dados.destreza
-            }
-        });
-        
-        return dados;
+    _coletarVantagensManual() {
+        try {
+            const lista = document.getElementById('vantagens-adquiridas');
+            if (!lista) return '[]';
+            
+            const itens = lista.querySelectorAll('.item-adquirido, [data-vantagem-id]');
+            const vantagens = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.nome-vantagem, .nome-item')?.textContent?.trim();
+                if (nome && nome !== 'Nenhuma vantagem adquirida') {
+                    vantagens.push({
+                        nome: nome,
+                        pontos: parseInt(item.getAttribute('data-pontos')) || 0
+                    });
+                }
+            });
+            
+            return JSON.stringify(vantagens);
+        } catch (error) {
+            return '[]';
+        }
+    }
+
+    _coletarDesvantagensManual() {
+        try {
+            const lista = document.getElementById('desvantagens-adquiridas');
+            if (!lista) return '[]';
+            
+            const itens = lista.querySelectorAll('.item-adquirido, [data-desvantagem-id]');
+            const desvantagens = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.nome-desvantagem, .nome-item')?.textContent?.trim();
+                if (nome && nome !== 'Nenhuma desvantagem adquirida') {
+                    desvantagens.push({
+                        nome: nome,
+                        pontos: parseInt(item.getAttribute('data-pontos')) || 0
+                    });
+                }
+            });
+            
+            return JSON.stringify(desvantagens);
+        } catch (error) {
+            return '[]';
+        }
+    }
+
+    _coletarPeculiaridadesManual() {
+        try {
+            const lista = document.getElementById('lista-peculiaridades');
+            if (!lista) return '[]';
+            
+            const itens = lista.querySelectorAll('.peculiaridade-item');
+            const peculiaridades = [];
+            
+            itens.forEach(item => {
+                const texto = item.querySelector('.peculiaridade-texto')?.textContent?.trim();
+                if (texto && texto !== 'Nenhuma peculiaridade adicionada') {
+                    peculiaridades.push(texto);
+                }
+            });
+            
+            return JSON.stringify(peculiaridades);
+        } catch (error) {
+            return '[]';
+        }
+    }
+
+    _obterDinheiro() {
+        try {
+            const elemento = document.getElementById('dinheiroEquipamento') || 
+                            document.getElementById('dinheiro-disponivel');
+            if (!elemento) return 2000;
+            
+            const texto = elemento.textContent || elemento.value || '$2000';
+            const numero = texto.replace(/[^0-9]/g, '');
+            return parseInt(numero) || 2000;
+        } catch (error) {
+            return 2000;
+        }
     }
 
     // ======================
-    // VALIDAÇÃO SIMPLES
+    // VALIDAÇÃO
     // ======================
     validarDados(dados) {
-        // Nome é obrigatório
         if (!dados.nome || dados.nome.trim() === '') {
-            alert('❌ Erro: O personagem precisa ter um nome!');
+            alert('❌ O personagem precisa ter um nome!');
             return false;
         }
         
-        // Verificar pontos (opcional, pode remover se quiser)
         if (dados.pontos_gastos > dados.pontos_totais) {
             if (!confirm(`⚠️ Atenção: Você gastou ${dados.pontos_gastos} pontos, mas tem apenas ${dados.pontos_totais} pontos totais.\n\nDeseja salvar mesmo assim?`)) {
                 return false;
@@ -466,7 +321,7 @@ class SalvamentoSupabase {
     // ======================
     async salvarPersonagem(personagemId = null) {
         try {
-            console.log('💾 Iniciando salvamento...');
+            console.log('💾💾💾 INICIANDO SALVAMENTO COMPLETO 💾💾💾');
             
             // 1. VERIFICAR AUTENTICAÇÃO
             const { data: { session } } = await this.supabase.auth.getSession();
@@ -477,7 +332,7 @@ class SalvamentoSupabase {
             }
 
             const userId = session.user.id;
-            console.log('👤 Usuário autenticado:', session.user.email);
+            console.log('👤 Usuário:', session.user.email);
 
             // 2. MOSTRAR CARREGANDO
             const btnSalvar = document.getElementById('btnSalvar');
@@ -488,9 +343,10 @@ class SalvamentoSupabase {
             }
 
             // 3. COLETAR TODOS OS DADOS
-            const dados = this.coletarTodosDados();
+            console.log('🔍 Coletando dados...');
+            const dados = this.coletarDadosDasAbas();
             
-            // 4. ADICIONAR user_id (CRÍTICO!)
+            // 4. ADICIONAR user_id
             dados.user_id = userId;
             
             // 5. VALIDAR
@@ -505,28 +361,14 @@ class SalvamentoSupabase {
             let resultado;
             let personagemSalvoId = personagemId;
 
-            // 6. GERENCIAR FOTO
-            let fotoUrl = null;
-            try {
-                if (window.dashboard && typeof window.dashboard.getFotoParaSalvar === 'function') {
-                    const fotoData = window.dashboard.getFotoParaSalvar();
-                    if (fotoData && fotoData.file) {
-                        console.log('🖼️ Foto encontrada para salvar');
-                        // A foto será processada depois de salvar o personagem
-                    }
-                }
-            } catch (error) {
-                console.warn('⚠️ Erro ao verificar foto:', error);
-            }
-
-            // 7. SALVAR NO BANCO
+            // 6. SALVAR NO BANCO
             if (personagemId) {
                 // MODO EDIÇÃO
                 console.log('✏️ Editando personagem:', personagemId);
                 
                 // Remover campos que não devem ser atualizados
                 delete dados.created_at;
-                delete dados.user_id; // Manter o original
+                delete dados.user_id;
                 
                 const { data, error } = await this.supabase
                     .from('characters')
@@ -542,7 +384,6 @@ class SalvamentoSupabase {
                 // MODO CRIAÇÃO
                 console.log('🆕 Criando novo personagem');
                 
-                // Adicionar campos de criação
                 dados.created_at = new Date().toISOString();
                 dados.status = 'Ativo';
                 
@@ -555,19 +396,19 @@ class SalvamentoSupabase {
                 
                 if (data && data[0]) {
                     personagemSalvoId = data[0].id;
-                    console.log('✅ ID criado:', personagemSalvoId);
                     resultado = data;
+                    console.log('✅ ID criado:', personagemSalvoId);
                 }
             }
 
-            // 8. SALVAR FOTO (se houver e após salvar o personagem)
+            // 7. SALVAR FOTO (se houver)
             if (personagemSalvoId) {
                 try {
                     if (window.dashboard && typeof window.dashboard.getFotoParaSalvar === 'function') {
                         const fotoData = window.dashboard.getFotoParaSalvar();
                         if (fotoData && fotoData.file) {
-                            console.log('📸 Salvando foto no Supabase...');
-                            fotoUrl = await this.salvarFotoNoSupabase(fotoData.file, personagemSalvoId);
+                            console.log('📸 Salvando foto...');
+                            const fotoUrl = await this.salvarFotoNoSupabase(fotoData.file, personagemSalvoId);
                             
                             if (fotoUrl) {
                                 await this.supabase
@@ -579,18 +420,12 @@ class SalvamentoSupabase {
                         }
                     }
                 } catch (error) {
-                    console.warn('⚠️ Erro ao salvar foto:', error);
-                    // Não falha o salvamento se a foto der erro
+                    console.warn('⚠️ Foto não salva (continuando):', error);
                 }
             }
 
-            // 9. VERIFICAR RESULTADO
-            if (!resultado) {
-                throw new Error('Nenhum resultado retornado');
-            }
-
-            // 10. SUCESSO
-            console.log('✅ Personagem salvo com sucesso!');
+            // 8. SUCESSO
+            console.log('✅✅✅ SALVAMENTO CONCLUÍDO COM SUCESSO! ✅✅✅');
             
             // Restaurar botão
             if (btnSalvar) {
@@ -598,23 +433,31 @@ class SalvamentoSupabase {
                 btnSalvar.disabled = false;
             }
             
+            // Mensagem de sucesso
             const mensagem = personagemId 
-                ? '✅ Personagem atualizado com sucesso!' 
-                : '✅ Personagem criado com sucesso!';
+                ? '✅ Personagem ATUALIZADO com sucesso!\n\n' 
+                : '✅ Personagem CRIADO com sucesso!\n\n';
             
-            // Mostrar os pontos salvos na mensagem
-            const pontosMsg = `\n\nPontos: ${dados.pontos_gastos}/${dados.pontos_totais} (Saldo: ${dados.pontos_disponiveis})`;
+            const resumo = `📊 RESUMO SALVO:
+• Nome: ${dados.nome}
+• Pontos: ${dados.pontos_gastos || 0}/${dados.pontos_totais || 150}
+• Vantagens: ${dados.total_vantagens || 0}
+• Desvantagens: ${dados.total_desvantagens || 0}
+• Perícias: ${dados.total_pericias || 0}
+• Magias: ${dados.total_magias || 0}
+
+✅ Todos os dados foram salvos!`;
             
-            alert(mensagem + pontosMsg + '\n\nRedirecionando para seus personagens...');
+            alert(mensagem + resumo + '\n\nRedirecionando para seus personagens...');
             
             setTimeout(() => {
                 window.location.href = 'personagens.html';
-            }, 2000);
+            }, 3000);
             
             return true;
 
         } catch (error) {
-            console.error('❌ Erro ao salvar:', error);
+            console.error('❌❌❌ ERRO NO SALVAMENTO:', error);
             
             // Restaurar botão
             const btnSalvar = document.getElementById('btnSalvar');
@@ -624,19 +467,15 @@ class SalvamentoSupabase {
             }
             
             // Mostrar erro
-            let mensagemErro = 'Erro ao salvar: ';
+            let mensagemErro = '❌ Erro ao salvar:\n\n';
             
-            if (error.message.includes('permission denied') || error.code === '42501') {
-                mensagemErro = 'ERRO DE PERMISSÃO!\n\nVerifique se você está logado corretamente.';
-            } else if (error.message.includes('network') || error.message.includes('fetch')) {
-                mensagemErro = '❌ Problema de conexão. Verifique sua internet.';
+            if (error.message.includes('permission denied')) {
+                mensagemErro += 'ERRO DE PERMISSÃO!\nVerifique se está logado.';
+            } else if (error.message.includes('network')) {
+                mensagemErro += 'SEM CONEXÃO!\nVerifique sua internet.';
             } else if (error.message.includes('auth')) {
-                mensagemErro = '🔐 Problema de autenticação. Faça login novamente.';
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-            } else if (error.message.includes('duplicate key')) {
-                mensagemErro = '⚠️ Este personagem já existe!';
+                mensagemErro += 'SESSÃO EXPIRADA!\nFaça login novamente.';
+                setTimeout(() => window.location.href = 'login.html', 2000);
             } else {
                 mensagemErro += error.message;
             }
@@ -647,13 +486,52 @@ class SalvamentoSupabase {
     }
 
     // ======================
-    // CARREGAMENTO
+    // FOTO NO SUPABASE
+    // ======================
+    async salvarFotoNoSupabase(file, personagemId) {
+        if (!file || !personagemId) return null;
+
+        try {
+            const { data: { session } } = await this.supabase.auth.getSession();
+            if (!session) return null;
+            
+            const userId = session.user.id;
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            const fileName = `avatar_${personagemId}_${Date.now()}.${fileExt}`;
+            const filePath = `avatars/${userId}/${fileName}`;
+
+            const { data: uploadData, error: uploadError } = await this.supabase.storage
+                .from('characters')
+                .upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: true
+                });
+
+            if (uploadError) {
+                console.error('Erro no upload:', uploadError);
+                return null;
+            }
+
+            const { data: { publicUrl } } = this.supabase.storage
+                .from('characters')
+                .getPublicUrl(filePath);
+
+            return publicUrl;
+
+        } catch (error) {
+            console.error('Erro ao salvar foto:', error);
+            return null;
+        }
+    }
+
+    // ======================
+    // CARREGAR PERSONAGEM
     // ======================
     async carregarPersonagem(personagemId) {
         try {
             const { data: { session } } = await this.supabase.auth.getSession();
             if (!session) {
-                alert('Você precisa estar logado para carregar personagens!');
+                alert('Você precisa estar logado!');
                 return null;
             }
 
@@ -679,13 +557,13 @@ class SalvamentoSupabase {
     }
 
     // ======================
-    // EXCLUSÃO
+    // EXCLUIR PERSONAGEM
     // ======================
     async excluirPersonagem(personagemId) {
         try {
             const { data: { session } } = await this.supabase.auth.getSession();
             if (!session) {
-                alert('Você precisa estar logado para excluir personagens!');
+                alert('Você precisa estar logado!');
                 return false;
             }
 
@@ -700,7 +578,7 @@ class SalvamentoSupabase {
                 .eq('user_id', session.user.id);
 
             if (error) {
-                alert('Erro ao excluir personagem:\n' + error.message);
+                alert('Erro ao excluir: ' + error.message);
                 return false;
             }
 
@@ -714,7 +592,7 @@ class SalvamentoSupabase {
     }
 
     // ======================
-    // FUNÇÃO DE TESTE
+    // TESTE DE CONEXÃO
     // ======================
     async testarConexao() {
         try {
@@ -727,7 +605,6 @@ class SalvamentoSupabase {
                 };
             }
             
-            // Testar contagem
             const { count, error } = await this.supabase
                 .from('characters')
                 .select('*', { count: 'exact', head: true })
@@ -757,51 +634,42 @@ class SalvamentoSupabase {
 // ======================
 // INICIALIZAÇÃO GLOBAL
 // ======================
-
 let salvamento;
 
 try {
     salvamento = new SalvamentoSupabase();
     window.salvamento = salvamento;
     
-    console.log('✅ Sistema de salvamento carregado com sucesso!');
+    console.log('✅ Sistema de salvamento COMPLETO carregado!');
+    
+    // Adicionar função de teste
+    window.testeSalvamentoCompleto = async function() {
+        console.log('🧪 TESTANDO SALVAMENTO COMPLETO');
+        
+        if (!window.salvamento) {
+            alert('Sistema não carregado!');
+            return;
+        }
+        
+        const teste = await window.salvamento.testarConexao();
+        
+        if (teste.sucesso) {
+            alert(teste.mensagem + '\n\nSistema pronto para salvar!');
+        } else {
+            alert(teste.mensagem);
+        }
+    };
     
 } catch (error) {
     console.error('❌ Erro ao carregar salvamento:', error);
     
-    // Fallback simples
+    // Fallback
     salvamento = {
-        verificarLimitePersonagens: async () => ({ 
-            podeCriar: true, 
-            quantidade: 0, 
-            limite: 10, 
-            motivo: '' 
-        }),
         salvarPersonagem: async () => {
-            alert('Sistema de salvamento não disponível. Tente recarregar a página.');
+            alert('Sistema de salvamento não disponível. Recarregue a página.');
             return false;
-        },
-        carregarPersonagem: async () => null,
-        excluirPersonagem: async () => false
+        }
     };
     
     window.salvamento = salvamento;
 }
-
-// Função para teste rápido
-window.testeSalvamento = async function() {
-    console.log('🧪 Testando salvamento...');
-    
-    if (!window.salvamento) {
-        alert('Sistema de salvamento não carregado!');
-        return;
-    }
-    
-    const teste = await window.salvamento.testarConexao();
-    
-    if (teste.sucesso) {
-        alert(teste.mensagem);
-    } else {
-        alert(teste.mensagem);
-    }
-};

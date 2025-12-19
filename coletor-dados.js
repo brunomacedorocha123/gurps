@@ -1,7 +1,15 @@
-// coletor-dados.js
+// coletor-dados.js - VERSÃO COMPLETA E FUNCIONAL
 class ColetorDados {
-    // Coleta TODOS os dados do formulário
+    constructor() {
+        console.log('✅ Coletor de Dados inicializado');
+    }
+
+    // ======================
+    // COLETA COMPLETA DE TODOS OS DADOS
+    // ======================
     coletarTodosDados() {
+        console.log('📦 Coletando TODOS os dados do personagem...');
+        
         return {
             // ======================
             // DADOS BÁSICOS (Dashboard)
@@ -13,23 +21,25 @@ class ColetorDados {
             descricao: this._obterValor('descricaoPersonagem'),
             
             // ======================
-            // PONTOS (do sistema)
+            // PONTOS (do Dashboard)
             // ======================
-            pontos_totais: sistemaPontos.pontos.totais,
-            pontos_gastos: sistemaPontos.pontos.gastos,
-            pontos_disponiveis: sistemaPontos.pontos.disponiveis,
-            limite_desvantagens: sistemaPontos.pontos.limiteDesvantagens,
-            desvantagens_atuais: sistemaPontos.pontos.desvantagensAtuais,
+            pontos_totais: this._obterPontosTotais(),
+            pontos_gastos: this._obterPontosGastos(),
+            pontos_disponiveis: this._obterPontosDisponiveis(),
+            limite_desvantagens: this._obterLimiteDesvantagens(),
+            desvantagens_atuais: this._obterDesvantagensAtuais(),
             
             // ======================
-            // ATRIBUTOS
+            // ATRIBUTOS PRINCIPAIS
             // ======================
             forca: this._obterNumero('ST', 10),
             destreza: this._obterNumero('DX', 10),
             inteligencia: this._obterNumero('IQ', 10),
             saude: this._obterNumero('HT', 10),
             
-            // Atributos Secundários
+            // ======================
+            // ATRIBUTOS SECUNDÁRIOS
+            // ======================
             pontos_vida: this._obterNumeroTexto('PVTotal', 10),
             bonus_pv: this._obterNumero('bonusPV', 0),
             pontos_fadiga: this._obterNumeroTexto('PFTotal', 10),
@@ -41,11 +51,15 @@ class ColetorDados {
             deslocamento: this._obterNumeroTexto('DeslocamentoTotal', 5.00, true),
             bonus_deslocamento: this._obterNumero('bonusDeslocamento', 0, true),
             
-            // Dano
+            // ======================
+            // DANO
+            // ======================
             dano_gdp: this._obterTexto('danoGDP', '1d-2'),
             dano_geb: this._obterTexto('danoGEB', '1d'),
             
-            // Carga
+            // ======================
+            // CARGA
+            // ======================
             carga_nenhuma: this._obterNumeroTexto('cargaNenhuma', 10.0, true),
             carga_leve: this._obterNumeroTexto('cargaLeve', 20.0, true),
             carga_media: this._obterNumeroTexto('cargaMedia', 30.0, true),
@@ -77,14 +91,27 @@ class ColetorDados {
             // VANTAGENS/DESVANTAGENS
             // ======================
             vantagens: this._coletarVantagens(),
+            total_vantagens: this._contarVantagens(),
+            pontos_vantagens: this._calcularPontosVantagens(),
+            
             desvantagens: this._coletarDesvantagens(),
+            total_desvantagens: this._contarDesvantagens(),
+            pontos_desvantagens: this._calcularPontosDesvantagens(),
+            
             peculiaridades: this._coletarPeculiaridades(),
+            total_peculiaridades: this._contarPeculiaridades(),
+            pontos_peculiaridades: this._calcularPontosPeculiaridades(),
             
             // ======================
             // PERÍCIAS E TÉCNICAS
             // ======================
             pericias: this._coletarPericias(),
+            total_pericias: this._contarPericias(),
+            pontos_pericias: this._calcularPontosPericias(),
+            
             tecnicas: this._coletarTecnicas(),
+            total_tecnicas: this._contarTecnicas(),
+            pontos_tecnicas: this._calcularPontosTecnicas(),
             
             // ======================
             // MAGIAS
@@ -94,6 +121,8 @@ class ColetorDados {
             mana_base: this._obterNumeroTexto('mana-base', 10),
             bonus_mana: this._obterNumero('bonus-mana', 0),
             magias: this._coletarMagias(),
+            total_magias: this._contarMagias(),
+            pontos_magias: this._calcularPontosMagias(),
             
             // ======================
             // EQUIPAMENTO
@@ -104,6 +133,7 @@ class ColetorDados {
             nivel_carga: this._obterTexto('nivelCarga', 'LEVE'),
             penalidades_carga: this._obterTexto('penalidadesCarga', 'MOV +0 / DODGE +0'),
             equipamentos: this._coletarEquipamentos(),
+            total_equipamentos: this._contarEquipamentos(),
             
             // ======================
             // COMBATE
@@ -141,7 +171,7 @@ class ColetorDados {
     }
     
     // ======================
-    // MÉTODOS AUXILIARES
+    // MÉTODOS AUXILIARES BÁSICOS
     // ======================
     
     _obterValor(id, padrao = '') {
@@ -152,15 +182,17 @@ class ColetorDados {
     _obterNumero(id, padrao = 0, decimal = false) {
         const el = document.getElementById(id);
         if (!el) return padrao;
-        const valor = el.value || padrao;
-        return decimal ? parseFloat(valor) : parseInt(valor);
+        const valor = el.value || el.textContent || padrao;
+        const num = decimal ? parseFloat(valor) : parseInt(valor);
+        return isNaN(num) ? padrao : num;
     }
     
     _obterNumeroTexto(id, padrao = 0, decimal = false) {
         const el = document.getElementById(id);
         if (!el) return padrao;
-        const valor = el.textContent || el.value || padrao;
-        return decimal ? parseFloat(valor) : parseInt(valor);
+        const texto = el.textContent || el.value || padrao.toString();
+        const num = decimal ? parseFloat(texto) : parseInt(texto);
+        return isNaN(num) ? padrao : num;
     }
     
     _obterTexto(id, padrao = '') {
@@ -173,7 +205,6 @@ class ColetorDados {
         const select = document.getElementById(id);
         if (!select || !select.selectedOptions[0]) return '';
         const texto = select.selectedOptions[0].text;
-        // Remove o [xx pts] do final
         return texto.split('[')[0].trim();
     }
     
@@ -184,13 +215,59 @@ class ColetorDados {
         return numero ? parseInt(valor) : valor;
     }
     
+    // ======================
+    // MÉTODOS PARA PONTOS
+    // ======================
+    
+    _obterPontosTotais() {
+        const input = document.getElementById('pontosTotaisDashboard');
+        if (input) return parseInt(input.value) || 150;
+        
+        const display = document.getElementById('pontosTotais');
+        if (display) return this._obterNumeroTexto('pontosTotais', 150);
+        
+        return 150;
+    }
+    
+    _obterPontosGastos() {
+        const display = document.getElementById('pontosGastosDashboard');
+        if (display) return this._obterNumeroTexto('pontosGastosDashboard', 0);
+        
+        const display2 = document.getElementById('pontosGastos');
+        if (display2) return this._obterNumeroTexto('pontosGastos', 0);
+        
+        return 0;
+    }
+    
+    _obterPontosDisponiveis() {
+        const display = document.getElementById('saldoDisponivelDashboard');
+        if (display) return this._obterNumeroTexto('saldoDisponivelDashboard', 150);
+        
+        const display2 = document.getElementById('pontosSaldo');
+        if (display2) return this._obterNumeroTexto('pontosSaldo', 150);
+        
+        return 150;
+    }
+    
+    _obterLimiteDesvantagens() {
+        const input = document.getElementById('limiteDesvantagens');
+        if (input) return parseInt(input.value) || -50;
+        return -50;
+    }
+    
+    _obterDesvantagensAtuais() {
+        const display = document.getElementById('desvantagensAtuais');
+        if (display) return this._obterNumeroTexto('desvantagensAtuais', 0);
+        return 0;
+    }
+    
     _obterDinheiro(id, padrao = 0) {
         const el = document.getElementById(id);
         if (!el) return padrao;
         const texto = el.textContent || el.value || '$0';
-        // Remove $ e converte
         const valor = texto.replace('$', '').replace(/\./g, '').replace(',', '.');
-        return parseFloat(valor) || padrao;
+        const num = parseFloat(valor);
+        return isNaN(num) ? padrao : num;
     }
     
     // ======================
@@ -198,127 +275,503 @@ class ColetorDados {
     // ======================
     
     _coletarIdiomas() {
-        const itens = document.querySelectorAll('.idioma-adicional-item');
-        if (itens.length === 0) return [];
+        try {
+            const container = document.getElementById('listaIdiomasAdicionais');
+            if (!container) return [];
+            
+            const itens = container.querySelectorAll('.idioma-adicional-item');
+            if (itens.length === 0) return [];
+            
+            const idiomas = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.idioma-nome')?.textContent?.trim();
+                const fala = item.querySelector('.idioma-fala')?.textContent?.trim();
+                const escrita = item.querySelector('.idioma-escrita')?.textContent?.trim();
+                
+                if (nome && nome !== '') {
+                    idiomas.push({
+                        nome: nome,
+                        fala: fala || 'Rudimentar',
+                        escrita: escrita || 'Nenhum',
+                        pontos: this._calcularPontosIdioma(fala, escrita)
+                    });
+                }
+            });
+            
+            return idiomas;
+        } catch (error) {
+            console.error('Erro ao coletar idiomas:', error);
+            return [];
+        }
+    }
+    
+    _calcularPontosIdioma(fala, escrita) {
+        let pontos = 0;
         
-        return Array.from(itens).map(item => ({
-            nome: item.querySelector('.idioma-nome')?.textContent || '',
-            fala: item.querySelector('.idioma-fala')?.textContent || '',
-            escrita: item.querySelector('.idioma-escrita')?.textContent || ''
-        }));
+        // Pontos de fala
+        if (fala.includes('Rudimentar')) pontos += 2;
+        else if (fala.includes('Sotaque')) pontos += 4;
+        else if (fala.includes('Nativo')) pontos += 6;
+        
+        // Pontos de escrita
+        if (escrita.includes('Rudimentar')) pontos += 1;
+        else if (escrita.includes('Sotaque')) pontos += 2;
+        else if (escrita.includes('Nativo')) pontos += 3;
+        
+        return pontos;
     }
     
     _coletarCaracteristicasFisicas() {
-        const selecionadas = document.querySelectorAll('.caracteristica-selecionada-item');
-        if (selecionadas.length === 0) return [];
-        
-        return Array.from(selecionadas).map(item => ({
-            nome: item.querySelector('.caracteristica-nome')?.textContent || '',
-            pontos: parseInt(item.getAttribute('data-pontos')) || 0
-        }));
+        try {
+            const container = document.getElementById('caracteristicasSelecionadas');
+            if (!container) return [];
+            
+            const itens = container.querySelectorAll('.caracteristica-selecionada-item');
+            if (itens.length === 0) return [];
+            
+            const caracteristicas = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.caracteristica-nome')?.textContent?.trim();
+                const pontosTexto = item.querySelector('.caracteristica-pontos')?.textContent?.trim();
+                const pontos = parseInt(pontosTexto?.match(/-?\d+/)?.[0]) || 0;
+                
+                if (nome && nome !== '') {
+                    caracteristicas.push({
+                        nome: nome,
+                        pontos: pontos,
+                        tipo: item.getAttribute('data-tipo') || ''
+                    });
+                }
+            });
+            
+            return caracteristicas;
+        } catch (error) {
+            console.error('Erro ao coletar características:', error);
+            return [];
+        }
     }
+    
+    // ======================
+    // VANTAGENS
+    // ======================
     
     _coletarVantagens() {
-        const itens = document.querySelectorAll('.vantagem-adquirida');
-        if (itens.length === 0) return [];
-        
-        return Array.from(itens).map(item => ({
-            nome: item.querySelector('.vantagem-nome')?.textContent || '',
-            pontos: parseInt(item.getAttribute('data-pontos')) || 0,
-            descricao: item.querySelector('.vantagem-desc')?.textContent || ''
-        }));
+        try {
+            const lista = document.getElementById('vantagens-adquiridas');
+            if (!lista) return [];
+            
+            const itens = lista.querySelectorAll('.item-adquirido, [data-vantagem-id]');
+            if (itens.length === 0) return [];
+            
+            const vantagens = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.nome-vantagem, .nome-item')?.textContent?.trim();
+                const pontosTexto = item.querySelector('.custo-vantagem, .pontos-item')?.textContent?.trim();
+                const pontos = parseInt(pontosTexto?.match(/-?\d+/)?.[0]) || 0;
+                const id = item.getAttribute('data-vantagem-id') || item.getAttribute('data-id') || nome;
+                
+                if (nome && nome !== '' && nome !== 'Nenhuma vantagem adquirida') {
+                    vantagens.push({
+                        id: id,
+                        nome: nome,
+                        pontos: pontos,
+                        descricao: item.querySelector('.descricao-vantagem')?.textContent?.trim() || ''
+                    });
+                }
+            });
+            
+            return vantagens;
+        } catch (error) {
+            console.error('Erro ao coletar vantagens:', error);
+            return [];
+        }
     }
+    
+    _contarVantagens() {
+        const vantagens = this._coletarVantagens();
+        return vantagens.length;
+    }
+    
+    _calcularPontosVantagens() {
+        const vantagens = this._coletarVantagens();
+        return vantagens.reduce((total, v) => total + (v.pontos || 0), 0);
+    }
+    
+    // ======================
+    // DESVANTAGENS
+    // ======================
     
     _coletarDesvantagens() {
-        const itens = document.querySelectorAll('.desvantagem-adquirida');
-        if (itens.length === 0) return [];
-        
-        return Array.from(itens).map(item => ({
-            nome: item.querySelector('.desvantagem-nome')?.textContent || '',
-            pontos: parseInt(item.getAttribute('data-pontos')) || 0,
-            descricao: item.querySelector('.desvantagem-desc')?.textContent || ''
-        }));
+        try {
+            const lista = document.getElementById('desvantagens-adquiridas');
+            if (!lista) return [];
+            
+            const itens = lista.querySelectorAll('.item-adquirido, [data-desvantagem-id]');
+            if (itens.length === 0) return [];
+            
+            const desvantagens = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.nome-desvantagem, .nome-item')?.textContent?.trim();
+                const pontosTexto = item.querySelector('.custo-desvantagem, .pontos-item')?.textContent?.trim();
+                const pontos = parseInt(pontosTexto?.match(/-?\d+/)?.[0]) || 0;
+                const id = item.getAttribute('data-desvantagem-id') || item.getAttribute('data-id') || nome;
+                
+                if (nome && nome !== '' && nome !== 'Nenhuma desvantagem adquirida') {
+                    desvantagens.push({
+                        id: id,
+                        nome: nome,
+                        pontos: pontos,
+                        descricao: item.querySelector('.descricao-desvantagem')?.textContent?.trim() || ''
+                    });
+                }
+            });
+            
+            return desvantagens;
+        } catch (error) {
+            console.error('Erro ao coletar desvantagens:', error);
+            return [];
+        }
     }
+    
+    _contarDesvantagens() {
+        const desvantagens = this._coletarDesvantagens();
+        return desvantagens.length;
+    }
+    
+    _calcularPontosDesvantagens() {
+        const desvantagens = this._coletarDesvantagens();
+        return desvantagens.reduce((total, d) => total + (Math.abs(d.pontos) || 0), 0);
+    }
+    
+    // ======================
+    // PECULIARIDADES
+    // ======================
     
     _coletarPeculiaridades() {
-        const itens = document.querySelectorAll('.peculiaridade-item');
-        if (itens.length === 0) return [];
-        
-        return Array.from(itens).map(item => 
-            item.querySelector('.peculiaridade-texto')?.textContent || ''
-        );
+        try {
+            const lista = document.getElementById('lista-peculiaridades');
+            if (!lista) return [];
+            
+            const itens = lista.querySelectorAll('.peculiaridade-item');
+            if (itens.length === 0) return [];
+            
+            const peculiaridades = [];
+            
+            itens.forEach(item => {
+                const texto = item.querySelector('.peculiaridade-texto')?.textContent?.trim();
+                
+                if (texto && texto !== '' && texto !== 'Nenhuma peculiaridade adicionada') {
+                    peculiaridades.push({
+                        texto: texto,
+                        pontos: -1 // Cada peculiaridade custa -1 ponto
+                    });
+                }
+            });
+            
+            return peculiaridades;
+        } catch (error) {
+            console.error('Erro ao coletar peculiaridades:', error);
+            return [];
+        }
     }
+    
+    _contarPeculiaridades() {
+        const peculiaridades = this._coletarPeculiaridades();
+        return peculiaridades.length;
+    }
+    
+    _calcularPontosPeculiaridades() {
+        const peculiaridades = this._coletarPeculiaridades();
+        return peculiaridades.length * -1; // -1 ponto cada
+    }
+    
+    // ======================
+    // PERÍCIAS
+    // ======================
     
     _coletarPericias() {
-        const itens = document.querySelectorAll('.pericia-adquirida');
-        if (itens.length === 0) return [];
-        
-        return Array.from(itens).map(item => ({
-            nome: item.querySelector('.pericia-nome')?.textContent || '',
-            atributo: item.getAttribute('data-atributo') || '',
-            nivel: parseInt(item.querySelector('.pericia-nivel')?.textContent) || 0,
-            pontos: parseInt(item.getAttribute('data-pontos')) || 0
-        }));
+        try {
+            const lista = document.getElementById('pericias-aprendidas');
+            if (!lista) return [];
+            
+            const itens = lista.querySelectorAll('.pericia-adquirida, [data-pericia-id]');
+            if (itens.length === 0) return [];
+            
+            const pericias = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.pericia-nome, .nome-pericia')?.textContent?.trim();
+                const nivel = parseInt(item.querySelector('.pericia-nivel, .nivel-pericia')?.textContent) || 0;
+                const pontos = parseInt(item.getAttribute('data-pontos')) || 0;
+                const atributo = item.getAttribute('data-atributo') || 'DX';
+                const id = item.getAttribute('data-pericia-id') || nome;
+                
+                if (nome && nome !== '' && nome !== 'Nenhuma perícia aprendida') {
+                    pericias.push({
+                        id: id,
+                        nome: nome,
+                        nivel: nivel,
+                        pontos: pontos,
+                        atributo: atributo,
+                        especializacao: item.getAttribute('data-especializacao') || ''
+                    });
+                }
+            });
+            
+            return pericias;
+        } catch (error) {
+            console.error('Erro ao coletar perícias:', error);
+            return [];
+        }
     }
+    
+    _contarPericias() {
+        const pericias = this._coletarPericias();
+        return pericias.length;
+    }
+    
+    _calcularPontosPericias() {
+        const pericias = this._coletarPericias();
+        return pericias.reduce((total, p) => total + (p.pontos || 0), 0);
+    }
+    
+    // ======================
+    // TÉCNICAS
+    // ======================
     
     _coletarTecnicas() {
-        const itens = document.querySelectorAll('.tecnica-adquirida');
-        if (itens.length === 0) return [];
-        
-        return Array.from(itens).map(item => ({
-            nome: item.querySelector('.tecnica-nome')?.textContent || '',
-            pericia: item.getAttribute('data-pericia') || '',
-            dificuldade: item.getAttribute('data-dificuldade') || '',
-            pontos: parseInt(item.getAttribute('data-pontos')) || 0
-        }));
+        try {
+            const lista = document.getElementById('tecnicas-aprendidas');
+            if (!lista) return [];
+            
+            const itens = lista.querySelectorAll('.tecnica-adquirida, [data-tecnica-id]');
+            if (itens.length === 0) return [];
+            
+            const tecnicas = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.tecnica-nome, .nome-tecnica')?.textContent?.trim();
+                const pontos = parseInt(item.getAttribute('data-pontos')) || 0;
+                const periciaBase = item.getAttribute('data-pericia') || '';
+                const dificuldade = item.getAttribute('data-dificuldade') || 'Média';
+                const id = item.getAttribute('data-tecnica-id') || nome;
+                
+                if (nome && nome !== '' && nome !== 'Nenhuma técnica aprendida') {
+                    tecnicas.push({
+                        id: id,
+                        nome: nome,
+                        pontos: pontos,
+                        periciaBase: periciaBase,
+                        dificuldade: dificuldade
+                    });
+                }
+            });
+            
+            return tecnicas;
+        } catch (error) {
+            console.error('Erro ao coletar técnicas:', error);
+            return [];
+        }
     }
+    
+    _contarTecnicas() {
+        const tecnicas = this._coletarTecnicas();
+        return tecnicas.length;
+    }
+    
+    _calcularPontosTecnicas() {
+        const tecnicas = this._coletarTecnicas();
+        return tecnicas.reduce((total, t) => total + (t.pontos || 0), 0);
+    }
+    
+    // ======================
+    // MAGIAS
+    // ======================
     
     _coletarMagias() {
-        const itens = document.querySelectorAll('.magia-adquirida');
-        if (itens.length === 0) return [];
-        
-        return Array.from(itens).map(item => ({
-            nome: item.querySelector('.magia-nome')?.textContent || '',
-            escola: item.getAttribute('data-escola') || '',
-            classe: item.getAttribute('data-classe') || '',
-            nivel: parseInt(item.querySelector('.magia-nivel')?.textContent) || 0,
-            pontos: parseInt(item.getAttribute('data-pontos')) || 0
-        }));
+        try {
+            const lista = document.getElementById('magias-aprendidas');
+            if (!lista) return [];
+            
+            const itens = lista.querySelectorAll('.magia-adquirida, [data-magia-id]');
+            if (itens.length === 0) return [];
+            
+            const magias = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.magia-nome, .nome-magia')?.textContent?.trim();
+                const nivel = parseInt(item.querySelector('.magia-nivel, .nivel-magia')?.textContent) || 0;
+                const pontos = parseInt(item.getAttribute('data-pontos')) || 0;
+                const escola = item.getAttribute('data-escola') || '';
+                const classe = item.getAttribute('data-classe') || 'Comum';
+                const id = item.getAttribute('data-magia-id') || nome;
+                
+                if (nome && nome !== '' && nome !== 'Nenhuma magia aprendida') {
+                    magias.push({
+                        id: id,
+                        nome: nome,
+                        nivel: nivel,
+                        pontos: pontos,
+                        escola: escola,
+                        classe: classe,
+                        descricao: item.querySelector('.descricao-magia')?.textContent?.trim() || ''
+                    });
+                }
+            });
+            
+            return magias;
+        } catch (error) {
+            console.error('Erro ao coletar magias:', error);
+            return [];
+        }
     }
     
+    _contarMagias() {
+        const magias = this._coletarMagias();
+        return magias.length;
+    }
+    
+    _calcularPontosMagias() {
+        const magias = this._coletarMagias();
+        return magias.reduce((total, m) => total + (m.pontos || 0), 0);
+    }
+    
+    // ======================
+    // EQUIPAMENTOS
+    // ======================
+    
     _coletarEquipamentos() {
-        const itens = document.querySelectorAll('.equipamento-adquirido');
-        if (itens.length === 0) return [];
-        
-        return Array.from(itens).map(item => ({
-            nome: item.querySelector('.equipamento-nome')?.textContent || '',
-            tipo: item.getAttribute('data-tipo') || '',
-            peso: parseFloat(item.getAttribute('data-peso')) || 0,
-            custo: parseFloat(item.getAttribute('data-custo')) || 0,
-            equipado: item.classList.contains('equipado') || false
-        }));
+        try {
+            const lista = document.getElementById('lista-equipamentos-adquiridos');
+            if (!lista) return [];
+            
+            const itens = lista.querySelectorAll('.equipamento-adquirido, .item-inventario, [data-item-id]');
+            if (itens.length === 0) return [];
+            
+            const equipamentos = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.equipamento-nome, .item-nome')?.textContent?.trim();
+                const tipo = item.getAttribute('data-tipo') || item.querySelector('.item-tipo')?.textContent?.trim() || 'Equipamento';
+                const peso = parseFloat(item.getAttribute('data-peso')) || parseFloat(item.querySelector('.item-peso')?.textContent) || 0;
+                const custo = parseFloat(item.getAttribute('data-custo')) || parseFloat(item.querySelector('.item-valor')?.textContent) || 0;
+                const equipado = item.classList.contains('equipado') || false;
+                const id = item.getAttribute('data-item-id') || nome;
+                
+                if (nome && nome !== '' && nome !== 'Inventário Vazio') {
+                    equipamentos.push({
+                        id: id,
+                        nome: nome,
+                        tipo: tipo,
+                        peso: peso,
+                        custo: custo,
+                        quantidade: parseInt(item.getAttribute('data-quantidade')) || 1,
+                        equipado: equipado,
+                        local: item.getAttribute('data-local') || 'mochila'
+                    });
+                }
+            });
+            
+            return equipamentos;
+        } catch (error) {
+            console.error('Erro ao coletar equipamentos:', error);
+            return [];
+        }
+    }
+    
+    _contarEquipamentos() {
+        const equipamentos = this._coletarEquipamentos();
+        return equipamentos.length;
     }
     
     // ======================
     // MÉTODOS PÚBLICOS
     // ======================
     
-    // Retorna apenas os dados básicos para exibição rápida
     obterDadosBasicos() {
         return {
             nome: this._obterValor('charName', 'Novo Personagem'),
             classe: this._obterValor('classePersonagem'),
             raca: this._obterValor('racaPersonagem'),
             nivel: this._obterValor('nivelPersonagem'),
-            pontos_gastos: sistemaPontos.pontos.gastos,
-            pontos_totais: sistemaPontos.pontos.totais,
+            pontos_gastos: this._obterPontosGastos(),
+            pontos_totais: this._obterPontosTotais(),
             forca: this._obterNumero('ST', 10),
             destreza: this._obterNumero('DX', 10),
             inteligencia: this._obterNumero('IQ', 10),
             saude: this._obterNumero('HT', 10)
         };
     }
+    
+    // Teste rápido de coleta
+    testarColeta() {
+        console.log('🧪 Testando coleta de dados...');
+        
+        const dados = {
+            basicos: this.obterDadosBasicos(),
+            vantagens: this._contarVantagens(),
+            desvantagens: this._contarDesvantagens(),
+            pericias: this._contarPericias(),
+            magias: this._contarMagias(),
+            equipamentos: this._contarEquipamentos()
+        };
+        
+        console.log('📊 Resultado do teste:', dados);
+        
+        alert(`✅ Teste de coleta realizado!\n\nDados encontrados:\n• Vantagens: ${dados.vantagens}\n• Desvantagens: ${dados.desvantagens}\n• Perícias: ${dados.pericias}\n• Magias: ${dados.magias}\n• Equipamentos: ${dados.equipamentos}\n\nVerifique o console para mais detalhes.`);
+        
+        return dados;
+    }
 }
 
-// Instância global
-const coletor = new ColetorDados();
+// ======================
+// INSTÂNCIA GLOBAL
+// ======================
+let coletor;
+
+try {
+    coletor = new ColetorDados();
+    window.coletor = coletor;
+    
+    console.log('✅ Coletor de Dados carregado globalmente');
+    
+    // Adicionar função de teste global
+    window.testeColetor = function() {
+        if (window.coletor && typeof window.coletor.testarColeta === 'function') {
+            return window.coletor.testarColeta();
+        } else {
+            alert('❌ Coletor não disponível!');
+            return null;
+        }
+    };
+    
+} catch (error) {
+    console.error('❌ Erro ao carregar coletor:', error);
+    
+    // Fallback básico
+    coletor = {
+        coletarTodosDados: () => {
+            console.warn('Coletor não disponível - retornando dados básicos');
+            return {
+                nome: document.getElementById('charName')?.value || 'Novo Personagem',
+                pontos_totais: 150,
+                pontos_gastos: 0,
+                forca: 10,
+                destreza: 10,
+                inteligencia: 10,
+                saude: 10
+            };
+        },
+        obterDadosBasicos: () => ({
+            nome: document.getElementById('charName')?.value || 'Novo Personagem',
+            classe: document.getElementById('classePersonagem')?.value || '',
+            raca: document.getElementById('racaPersonagem')?.value || ''
+        })
+    };
+    
+    window.coletor = coletor;
+}
