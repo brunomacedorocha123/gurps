@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ficha do Personagem - Visão do Mestre</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="estilo-ficha-gm.css">
+</head>
+<body>
+  <!-- CABEÇALHO DO MESTRE -->
+  <header class="cabecalho-mestre">
+    <div class="cabecalho-conteudo">
+      <!-- LOCALIZAÇÃO -->
+      <div class="localizacao">
+        <a href="#" id="btnVoltarCampanha" class="link-localizacao">
+          <i class="fas fa-arrow-left"></i> Voltar para Campanha
+        </a>
+        <span class="separador">/</span>
+        <span class="atual">Ficha do Personagem</span>
+      </div>
+      
+      <!-- CONTROLES DO MESTRE -->
+      <div class="controles-mestre">
+        <div class="info-sessao">
+          <span class="nome-campanha" id="nomeCampanha">Campanha</span>
+          <span class="nome-jogador" id="nomeJogador">Jogador</span>
+        </div>
+        
+        <div class="acoes-mestre">
+          <!-- CONTROLE DE VISUALIZAÇÃO -->
+          <div class="alternar-visualizacao">
+            <button class="botao-visualizacao ativo" data-visao="instantaneo">
+              <i class="fas fa-camera"></i> Instantâneo
+            </button>
+            <button class="botao-visualizacao" data-visao="ao-vivo">
+              <i class="fas fa-sync"></i> Ao Vivo
+            </button>
+            <button class="botao-visualizacao" data-visao="campanha">
+              <i class="fas fa-book"></i> Campanha
+            </button>
+          </div>
+          
+          <!-- CONTROLES DE GERENCIAMENTO -->
+          <div class="gerenciamento-rapido">
+            <button class="botao-acao" id="btnCongelar">
+              <i class="fas fa-snowflake"></i> Congelar PV
+            </button>
+            <button class="botao-acao" id="btnSincronizar">
+              <i class="fas fa-redo"></i> Sincronizar
+            </button>
+            <button class="botao-acao perigo" id="btnRemover">
+              <i class="fas fa-user-minus"></i> Remover
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- NOME E INFORMAÇÕES PRINCIPAIS -->
+  <section class="identificacao-personagem">
+    <div class="foto-personagem">
+      <div class="container-foto" id="containerFoto">
+        <img id="fotoPersonagem" src="" alt="Foto">
+        <div class="placeholder-foto" id="placeholderFoto">
+          <i class="fas fa-user-circle"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dados-principais">
+      <h1 id="nomePersonagem">Personagem</h1>
+      <div class="tags-identificacao">
+        <span class="tag" id="racaPersonagem">Raça</span>
+        <span class="tag" id="classePersonagem">Classe</span>
+        <span class="tag" id="nivelPersonagem">Nível</span>
+      </div>
+      <p class="descricao-personagem" id="descricaoPersonagem">
+        Descrição do personagem...
+      </p>
+    </div>
+    
+    <div class="status-rapido">
+      <div class="card-status">
+        <div class="cabecalho-status">
+          <i class="fas fa-heartbeat"></i>
+          <h4>Pontos de Vida</h4>
+        </div>
+        <div class="conteudo-status">
+          <div class="valor-status" id="pvAtualGM">10</div>
+          <div class="maximo-status">/ <span id="pvMaximoGM">10</span></div>
+        </div>
+        <div class="controles-rapidos">
+          <button class="btn-controle" onclick="aplicarDanoGM(1)">-1</button>
+          <button class="btn-controle cura" onclick="aplicarCuraGM(1)">+1</button>
+        </div>
+      </div>
+      
+      <div class="card-status">
+        <div class="cabecalho-status">
+          <i class="fas fa-coins"></i>
+          <h4>Dinheiro</h4>
+        </div>
+        <div class="conteudo-status">
+          <div class="valor-status dinheiro" id="dinheiroGM">$0</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA DE NAVEGAÇÃO (TABS) -->
+  <nav class="navegacao-fichas">
+    <div class="container-tabs">
+      <button class="tab ativo" data-tab="resumo">
+        <i class="fas fa-eye"></i>
+        <span>Visão Geral</span>
+      </button>
+      <button class="tab" data-tab="atributos">
+        <i class="fas fa-dumbbell"></i>
+        <span>Atributos</span>
+      </button>
+      <button class="tab" data-tab="vantagens">
+        <i class="fas fa-star"></i>
+        <span>Vantagens</span>
+      </button>
+      <button class="tab" data-tab="pericias">
+        <i class="fas fa-graduation-cap"></i>
+        <span>Perícias</span>
+      </button>
+      <button class="tab" data-tab="equipamento">
+        <i class="fas fa-backpack"></i>
+        <span>Equipamento</span>
+      </button>
+      <button class="tab" data-tab="combate">
+        <i class="fas fa-fist-raised"></i>
+        <span>Combate</span>
+      </button>
+      <button class="tab" data-tab="anotacoes">
+        <i class="fas fa-edit"></i>
+        <span>Anotações</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- CONTEÚDO DAS ABAS -->
+  <main class="conteudo-ficha">
+    
+    <!-- ABA: VISÃO GERAL (RESUMO) -->
+    <div id="aba-resumo" class="conteudo-aba ativo">
+      <div class="resumo-container">
+        <!-- COLUNA 1: ATRIBUTOS BÁSICOS -->
+        <div class="coluna-resumo">
+          <div class="card-resumo">
+            <div class="cabecalho-card">
+              <h3><i class="fas fa-chart-bar"></i> Atributos</h3>
+            </div>
+            <div class="grade-atributos">
+              <div class="item-atributo">
+                <span class="rotulo">FOR</span>
+                <span class="valor" id="gmST">10</span>
+              </div>
+              <!-- ... outros atributos -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- COLUNA 2: PERÍCIAS E MAGIAS -->
+        <div class="coluna-resumo">
+          <div class="card-resumo">
+            <div class="cabecalho-card">
+              <h3><i class="fas fa-graduation-cap"></i> Perícias Principais</h3>
+            </div>
+            <div class="lista-pericias-gm" id="listaPericiasGM">
+              <!-- Perícias carregadas dinamicamente -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- COLUNA 3: EQUIPAMENTO E STATUS -->
+        <div class="coluna-resumo">
+          <div class="card-resumo">
+            <div class="cabecalho-card">
+              <h3><i class="fas fa-shield-alt"></i> Status de Combate</h3>
+            </div>
+            <div class="status-combate-gm">
+              <div class="item-status">
+                <span class="rotulo">Esquiva:</span>
+                <span class="valor" id="gmEsquiva">10</span>
+              </div>
+              <!-- ... outros status -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ABA: ANOTAÇÕES DO MESTRE -->
+    <div id="aba-anotacoes" class="conteudo-aba">
+      <div class="anotacoes-container">
+        <div class="area-anotacoes">
+          <h3><i class="fas fa-book"></i> Anotações da Campanha</h3>
+          <textarea id="anotacoesGM" class="texto-anotacoes" 
+                    placeholder="Anotações privadas do Mestre sobre este personagem..."></textarea>
+          <div class="controles-anotacoes">
+            <button class="botao-salvar" id="btnSalvarAnotacoes">
+              <i class="fas fa-save"></i> Salvar Anotações
+            </button>
+          </div>
+        </div>
+        
+        <div class="historico-campanha">
+          <h3><i class="fas fa-history"></i> Histórico da Campanha</h3>
+          <div class="lista-historico" id="historicoCampanha">
+            <!-- Histórico carregado dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Outras abas serão similares ao criar-personagens.html -->
+    
+  </main>
+
+  <!-- MODAL PARA CONFIGURAÇÕES -->
+  <div id="modal-config" class="modal-overlay">
+    <div class="modal-conteudo">
+      <div class="cabecalho-modal">
+        <h3><i class="fas fa-cog"></i> Configurações da Visualização</h3>
+        <button class="fechar-modal">&times;</button>
+      </div>
+      <div class="corpo-modal">
+        <div class="opcao-config">
+          <input type="checkbox" id="autoAtualizar" checked>
+          <label for="autoAtualizar">Atualizar dados automaticamente</label>
+        </div>
+        <!-- Mais opções -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="logica-ficha-gm.js"></script>
+  <script src="busca-dados-gm.js"></script>
+</body>
+</html>

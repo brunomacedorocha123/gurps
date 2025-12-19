@@ -1,0 +1,409 @@
+/* ESTILOS GERAIS */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), 
+              url('Cris2.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* CABEÇALHO DO MESTRE */
+.cabecalho-mestre {
+  background: rgba(30, 30, 40, 0.95);
+  padding: 15px 20px;
+  border-bottom: 3px solid #ff8c00;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.cabecalho-conteudo {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.localizacao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.link-localizacao {
+  color: #3498db;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.link-localizacao:hover {
+  color: #5dade2;
+}
+
+.controles-mestre {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.info-sessao {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.nome-campanha {
+  color: #ffd700;
+  font-weight: bold;
+  padding: 5px 10px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 4px;
+}
+
+.nome-jogador {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+/* IDENTIFICAÇÃO DO PERSONAGEM */
+.identificacao-personagem {
+  max-width: 1400px;
+  margin: 20px auto;
+  padding: 20px;
+  background: rgba(30, 30, 40, 0.7);
+  border-radius: 10px;
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  border: 1px solid rgba(255, 140, 0, 0.2);
+}
+
+.foto-personagem {
+  flex-shrink: 0;
+}
+
+.container-foto {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #ff8c00;
+  background: rgba(40, 40, 50, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.foto-personagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder-foto {
+  color: #666;
+  font-size: 4rem;
+}
+
+.dados-principais {
+  flex: 1;
+}
+
+.dados-principais h1 {
+  color: #ffd700;
+  margin-bottom: 10px;
+  font-size: 2rem;
+}
+
+.tags-identificacao {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tag {
+  padding: 4px 12px;
+  background: rgba(52, 152, 219, 0.2);
+  border-radius: 15px;
+  font-size: 0.85rem;
+  color: #3498db;
+}
+
+.descricao-personagem {
+  color: #ccc;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.status-rapido {
+  display: flex;
+  gap: 20px;
+}
+
+.card-status {
+  background: rgba(40, 40, 50, 0.8);
+  padding: 15px;
+  border-radius: 8px;
+  min-width: 140px;
+  border: 1px solid rgba(255, 140, 0, 0.1);
+}
+
+.cabecalho-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #ff8c00;
+}
+
+.cabecalho-status h4 {
+  font-size: 0.9rem;
+}
+
+.conteudo-status {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.valor-status {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.valor-status.dinheiro {
+  color: #f1c40f;
+}
+
+.maximo-status {
+  color: #888;
+  font-size: 1.2rem;
+}
+
+.controles-rapidos {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-controle {
+  flex: 1;
+  padding: 5px;
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-controle.cura {
+  background: rgba(46, 204, 113, 0.2);
+  border-color: rgba(46, 204, 113, 0.3);
+  color: #2ecc71;
+}
+
+/* NAVEGAÇÃO DE ABAS */
+.navegacao-fichas {
+  background: rgba(20, 20, 30, 0.9);
+  border-bottom: 1px solid rgba(255, 140, 0, 0.2);
+  position: sticky;
+  top: 125px;
+  z-index: 999;
+}
+
+.container-tabs {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  overflow-x: auto;
+  padding: 0 20px;
+}
+
+.tab {
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  color: #ff8c00;
+  background: rgba(255, 140, 0, 0.1);
+}
+
+.tab.ativo {
+  color: #ffd700;
+  border-bottom-color: #ff8c00;
+  background: rgba(255, 140, 0, 0.1);
+}
+
+/* CONTEÚDO DAS ABAS */
+.conteudo-ficha {
+  max-width: 1400px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.conteudo-aba {
+  display: none;
+  animation: aparecer 0.3s ease;
+}
+
+.conteudo-aba.ativo {
+  display: block;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* CARD DE RESUMO */
+.card-resumo {
+  background: rgba(40, 40, 50, 0.7);
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid rgba(255, 140, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.cabecalho-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: #ffd700;
+}
+
+.grade-atributos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.item-atributo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background: rgba(30, 30, 40, 0.8);
+  border-radius: 6px;
+}
+
+.rotulo {
+  font-size: 0.8rem;
+  color: #ccc;
+  text-transform: uppercase;
+}
+
+.valor {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* ANOTAÇÕES */
+.anotacoes-container {
+  display: flex;
+  gap: 30px;
+}
+
+.area-anotacoes {
+  flex: 1;
+}
+
+.texto-anotacoes {
+  width: 100%;
+  min-height: 200px;
+  background: rgba(30, 30, 40, 0.8);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: vertical;
+  margin-bottom: 15px;
+}
+
+.controles-anotacoes {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.botao-salvar {
+  padding: 10px 20px;
+  background: linear-gradient(45deg, #27ae60, #2ecc71);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+  .identificacao-personagem {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .status-rapido {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .card-status {
+    width: 100%;
+  }
+  
+  .anotacoes-container {
+    flex-direction: column;
+  }
+  
+  .container-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tab {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .dados-principais h1 {
+    font-size: 1.5rem;
+  }
+  
+  .container-foto {
+    width: 100px;
+    height: 100px;
+  }
+}
