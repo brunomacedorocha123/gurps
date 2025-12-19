@@ -3450,12 +3450,46 @@
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let supabase = null;
     let personagemId = null;
+
+    // AGUARDAR SUPABASE CARREGAR
+    function aguardarSupabase() {
+        return new Promise((resolve, reject) => {
+            let tentativas = 0;
+            const maxTentativas = 10;
+            
+            const verificar = () => {
+                if (window.supabase && window.supabase.createClient) {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    resolve(true);
+                } else if (tentativas < maxTentativas) {
+                    tentativas++;
+                    setTimeout(verificar, 500);
+                } else {
+                    reject(new Error('Supabase não carregado após 5 segundos'));
+                }
+            };
+            
+            verificar();
+        });
+    }
 
     async function inicializarSistema() {
         try {
-            const { data: { session } } = await supabase.auth.getSession();
+            // 1. AGUARDAR SUPABASE CARREGAR
+            await aguardarSupabase();
+            
+            if (!supabase) {
+                throw new Error('Falha ao inicializar Supabase');
+            }
+            
+            // 2. VERIFICAR SESSÃO
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError) {
+                throw new Error('Erro ao verificar sessão: ' + sessionError.message);
+            }
             
             if (!session) {
                 alert('Você precisa estar logado para criar personagens.');
@@ -3463,6 +3497,7 @@
                 return;
             }
             
+            // 3. INICIALIZAR SISTEMA
             inicializarNavegacaoAbas();
             
             const urlParams = new URLSearchParams(window.location.search);
@@ -3875,6 +3910,10 @@
 
     async function salvarPersonagemCompleto() {
         try {
+            if (!supabase) {
+                throw new Error('Sistema não inicializado');
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 alert('Sua sessão expirou. Faça login novamente.');
@@ -4046,15 +4085,18 @@
         }
     }
 
+    // INICIALIZAÇÃO QUANDO O DOCUMENTO CARREGAR
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             inicializarSistema();
-        }, 500);
+        }, 1000);
     });
 
+    // EXPORTAR FUNÇÕES PARA USO GLOBAL
     window.salvarPersonagemCompleto = salvarPersonagemCompleto;
     window.sincronizarResumo = sincronizarResumo;
     window.atualizarResumoNome = atualizarResumoNome;
+    window.coletarTodosDados = coletarTodosDados;
 
     window.addEventListener('beforeunload', function() {
         localStorage.removeItem('personagens_cache');
