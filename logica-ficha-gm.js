@@ -10,7 +10,6 @@ let dadosCampanha = null;
 let personagemId = null;
 let campanhaId = null;
 let vinculoId = null;
-let intervaloAtualizacao = null;
 
 // ====== CLASSE PRINCIPAL ======
 class FichaGM {
@@ -21,39 +20,34 @@ class FichaGM {
     async init() {
         try {
             this.mostrarLoading();
+            console.log('🚀 Iniciando Ficha GM...');
             
-            // 1. Pegar parâmetros da URL - COM VERIFICAÇÃO
-            const temParametros = this.extrairParametrosURL();
+            // 1. Pegar parâmetros da URL (COM OS NOMES CORRETOS!)
+            this.extrairParametrosURLCorretos();
             
-            if (!temParametros) {
-                // Se não tem parâmetros, mostrar mensagem e redirecionar
-                this.mostrarMensagem('Personagem não especificado. Redirecionando...', 'aviso');
-                setTimeout(() => {
-                    window.location.href = 'campanhas.html';
-                }, 2000);
-                return;
-            }
+            console.log('🔗 IDs extraídos:', {
+                personagemId,
+                campanhaId,
+                vinculoId
+            });
             
-            // 2. Verificar autenticação
-            await this.verificarAutenticacao();
-            
-            // 3. Carregar dados do personagem
+            // 2. Carregar dados do personagem
             await this.carregarDadosPersonagem();
             
-            // 4. Carregar dados da campanha
+            // 3. Carregar dados da campanha
             await this.carregarDadosCampanha();
             
-            // 5. Atualizar interface
+            // 4. Atualizar interface
             this.atualizarInterfaceCompleta();
             
-            // 6. Configurar eventos
+            // 5. Configurar eventos
             this.configurarEventListeners();
             
-            // 7. Iniciar sincronização
+            // 6. Iniciar sincronização
             this.iniciarSincronizacao();
             
             this.esconderLoading();
-            this.mostrarMensagem('Ficha carregada com sucesso!', 'sucesso');
+            console.log('✅ Ficha GM carregada com sucesso!');
             
         } catch (error) {
             console.error('❌ Erro na inicialização:', error);
@@ -62,87 +56,67 @@ class FichaGM {
         }
     }
 
-    verificarAutenticacao() {
-        return new Promise((resolve, reject) => {
-            supabase.auth.getSession().then(({ data: { session } }) => {
-                if (!session) {
-                    window.location.href = 'login.html';
-                    reject(new Error('Não autenticado'));
-                } else {
-                    resolve(session);
-                }
-            });
-        });
-    }
-
-    extrairParametrosURL() {
+    // ====== EXTRAIR PARÂMETROS CORRETOS ======
+    extrairParametrosURLCorretos() {
         const params = new URLSearchParams(window.location.search);
-        personagemId = params.get('personagem');
-        campanhaId = params.get('campanha');
-        vinculoId = params.get('vinculo');
         
-        console.log('🔗 Parâmetros da URL:', { personagemId, campanhaId, vinculoId });
+        // AGORA COM OS NOMES CORRETOS DA SUA URL!
+        personagemId = params.get('character');
+        campanhaId = params.get('campaign');
+        vinculoId = params.get('link');
         
-        // Verificar se temos pelo menos personagem e campanha
+        console.log('📋 Parâmetros da URL:', {
+            character: personagemId,
+            campaign: campanhaId,
+            link: vinculoId
+        });
+        
         if (!personagemId || !campanhaId) {
-            console.warn('⚠️ Parâmetros insuficientes na URL');
-            
-            // Tentar pegar do localStorage (se vier de outra página)
-            const ultimoPersonagem = localStorage.getItem('ultimoPersonagemGM');
-            const ultimaCampanha = localStorage.getItem('ultimaCampanhaGM');
-            
-            if (ultimoPersonagem && ultimaCampanha) {
-                personagemId = ultimoPersonagem;
-                campanhaId = ultimaCampanha;
-                console.log('📝 Usando dados do localStorage:', { personagemId, campanhaId });
-                return true;
-            }
-            
-            return false;
+            console.error('❌ Parâmetros faltando na URL');
+            throw new Error('Parâmetros insuficientes. É necessário character e campaign.');
         }
-        
-        // Salvar no localStorage para futuras visitas
-        localStorage.setItem('ultimoPersonagemGM', personagemId);
-        localStorage.setItem('ultimaCampanhaGM', campanhaId);
-        
-        return true;
     }
 
     // ====== CARREGAMENTO DE DADOS ======
     async carregarDadosPersonagem() {
-        console.log('📥 Buscando dados do personagem:', personagemId);
+        console.log('📥 Buscando dados do personagem ID:', personagemId);
         
-        // PRIMEIRO: Tentar pegar da view (dados consolidados)
-        if (vinculoId) {
-            const { data: viewData, error: viewError } = await supabase
-                .from('gm_characters_view')
+        try {
+            // PRIMEIRO: Tentar pegar da VIEW com o link ID
+            if (vinculoId) {
+                const { data: viewData, error: viewError } = await supabase
+                    .from('gm_characters_view')
+                    .select('*')
+                    .eq('vinculo_id', vinculoId)
+                    .single();
+                
+                if (!viewError && viewData) {
+                    console.log('✅ Dados da view carregados:', viewData);
+                    dadosPersonagem = viewData;
+                    return;
+                }
+            }
+            
+            // SEGUNDO: Buscar diretamente da tabela characters
+            console.log('🔄 Buscando direto da tabela characters...');
+            const { data: characterData, error: characterError } = await supabase
+                .from('characters')
                 .select('*')
-                .eq('vinculo_id', vinculoId)
+                .eq('id', personagemId)
                 .single();
             
-            if (!viewError && viewData) {
-                console.log('✅ Dados da view:', viewData);
-                dadosPersonagem = viewData;
-                return;
+            if (characterError) {
+                console.error('❌ Erro ao buscar personagem:', characterError);
+                throw new Error('Personagem não encontrado no banco de dados');
             }
+            
+            dadosPersonagem = characterData;
+            console.log('✅ Dados do personagem carregados:', dadosPersonagem);
+            
+        } catch (error) {
+            console.error('❌ Erro no carregamento:', error);
+            throw error;
         }
-        
-        // SEGUNDO: Se não tiver view ou falhar, pegar direto da tabela characters
-        console.log('🔄 Buscando dados diretos da tabela characters...');
-        
-        const { data: characterData, error: characterError } = await supabase
-            .from('characters')
-            .select('*')
-            .eq('id', personagemId)
-            .single();
-        
-        if (characterError) {
-            console.error('❌ Erro ao buscar personagem:', characterError);
-            throw new Error('Personagem não encontrado');
-        }
-        
-        dadosPersonagem = characterData;
-        console.log('✅ Dados do personagem carregados:', dadosPersonagem);
     }
 
     async carregarDadosCampanha() {
@@ -157,6 +131,8 @@ class FichaGM {
             if (!error && campanhaData) {
                 dadosCampanha = campanhaData;
                 console.log('✅ Dados da campanha:', dadosCampanha);
+            } else {
+                dadosCampanha = { gm_notes: '', is_frozen: false };
             }
         } catch (error) {
             console.warn('⚠️ Erro ao buscar dados da campanha:', error);
@@ -167,17 +143,18 @@ class FichaGM {
     // ====== ATUALIZAR INTERFACE ======
     atualizarInterfaceCompleta() {
         if (!dadosPersonagem) {
-            this.mostrarMensagem('Dados do personagem não encontrados', 'erro');
-            return;
+            throw new Error('Dados do personagem não carregados');
         }
+        
+        console.log('🎨 Atualizando interface com dados:', dadosPersonagem);
         
         // 1. Informações básicas
         this.atualizarInformacoesBasicas();
         
-        // 2. Atributos (VAMOS PEGAR OS DADOS REAIS!)
+        // 2. Atributos (AGORA VAI PEGAR OS VALORES REAIS!)
         this.atualizarAtributosReais();
         
-        // 3. Status (PV/PF/Dinheiro)
+        // 3. Status
         this.atualizarStatusReais();
         
         // 4. Vantagens
@@ -191,10 +168,12 @@ class FichaGM {
         
         // 7. Status de combate
         this.atualizarStatusCombate();
+        
+        console.log('✅ Interface atualizada com sucesso!');
     }
 
     atualizarInformacoesBasicas() {
-        // Nome do personagem
+        // Nome
         document.getElementById('nomePersonagem').textContent = 
             dadosPersonagem.nome || dadosPersonagem.character_name || 'Sem nome';
         
@@ -202,31 +181,39 @@ class FichaGM {
         document.getElementById('racaPersonagem').textContent = 
             dadosPersonagem.raca || dadosPersonagem.race || 'Sem raça';
         
-        // Classe (se existir)
+        // Classe (se existir no banco)
         if (dadosPersonagem.classe) {
             document.getElementById('classePersonagem').textContent = dadosPersonagem.classe;
+        } else {
+            document.getElementById('classePersonagem').textContent = 'Aventureiro';
         }
         
         // Nível
         if (dadosPersonagem.nivel) {
             document.getElementById('nivelPersonagem').textContent = dadosPersonagem.nivel;
+        } else {
+            document.getElementById('nivelPersonagem').textContent = 'Nível 1';
         }
         
         // Pontos
-        document.getElementById('pontosPersonagem').textContent = 
-            `${dadosPersonagem.pontos_totais || dadosPersonagem.total_points || 0} pontos`;
+        const pontos = dadosPersonagem.pontos_totais || dadosPersonagem.total_points || 0;
+        document.getElementById('pontosPersonagem').textContent = `${pontos} pontos`;
         
         // Descrição
         document.getElementById('descricaoPersonagem').textContent = 
-            dadosPersonagem.descricao || dadosPersonagem.description || 'Sem descrição';
+            dadosPersonagem.descricao || dadosPersonagem.description || 'Sem descrição disponível.';
         
-        // Campanha e Jogador (da view se existir)
+        // Campanha e Jogador
         if (dadosPersonagem.campaign_name) {
             document.getElementById('nomeCampanha').textContent = dadosPersonagem.campaign_name;
+        } else {
+            document.getElementById('nomeCampanha').textContent = 'Campanha';
         }
         
         if (dadosPersonagem.player_username) {
             document.getElementById('nomeJogador').textContent = dadosPersonagem.player_username;
+        } else {
+            document.getElementById('nomeJogador').textContent = 'Jogador';
         }
         
         // Foto
@@ -239,20 +226,20 @@ class FichaGM {
     }
 
     atualizarAtributosReais() {
-        console.log('🎯 Atualizando atributos com dados reais:', {
+        console.log('🎯 Atualizando atributos com dados reais do banco:', {
             forca: dadosPersonagem.forca,
             destreza: dadosPersonagem.destreza,
             inteligencia: dadosPersonagem.inteligencia,
             saude: dadosPersonagem.saude
         });
         
-        // ATRIBUTOS PRINCIPAIS - PEGAR OS VALORES REAIS QUE O JOGADOR SALVOU
-        const ST = dadosPersonagem.forca || dadosPersonagem.st || 10;
-        const DX = dadosPersonagem.destreza || dadosPersonagem.dx || 10;
-        const IQ = dadosPersonagem.inteligencia || dadosPersonagem.iq || 10;
-        const HT = dadosPersonagem.saude || dadosPersonagem.ht || 10;
+        // PEGAR OS VALORES EXATOS DO BANCO (não usar defaults 10)
+        const ST = dadosPersonagem.forca || 10;
+        const DX = dadosPersonagem.destreza || 10;
+        const IQ = dadosPersonagem.inteligencia || 10;
+        const HT = dadosPersonagem.saude || 10;
         
-        console.log('🎯 Atributos finais:', { ST, DX, IQ, HT });
+        console.log('📊 Atributos finais:', { ST, DX, IQ, HT });
         
         // Atualizar na interface
         document.getElementById('gmST').textContent = ST;
@@ -260,7 +247,7 @@ class FichaGM {
         document.getElementById('gmIQ').textContent = IQ;
         document.getElementById('gmHT').textContent = HT;
         
-        // Calcular custos (para informação do GM)
+        // Calcular custos
         const STMod = (ST - 10) * 10;
         const DXMod = (DX - 10) * 20;
         const IQMod = (IQ - 10) * 20;
@@ -272,25 +259,24 @@ class FichaGM {
         document.getElementById('gmHTMod').textContent = `[${HTMod >= 0 ? '+' : ''}${HTMod}]`;
         
         // Vontade e Percepção
-        const vontade = dadosPersonagem.vontade || dadosPersonagem.vontade_base || IQ;
-        const percepcao = dadosPersonagem.percepcao || dadosPersonagem.percepcao_base || IQ;
+        const vontade = dadosPersonagem.vontade || IQ;
+        const percepcao = dadosPersonagem.percepcao || IQ;
         
         document.getElementById('gmVontade').textContent = vontade;
         document.getElementById('gmPercepcao').textContent = percepcao;
         
         // Carga (sem "lb")
-        const cargaAtual = dadosPersonagem.peso_atual || dadosPersonagem.current_weight || 0;
-        const cargaMaxima = dadosPersonagem.peso_maximo || dadosPersonagem.max_weight || 0;
+        const cargaAtual = dadosPersonagem.peso_atual || 0;
+        const cargaMaxima = dadosPersonagem.peso_maximo || 0;
         
-        document.getElementById('gmCargaAtual').textContent = Math.round(cargaAtual * 10) / 10;
-        document.getElementById('gmCargaMaxima').textContent = Math.round(cargaMaxima * 10) / 10;
+        document.getElementById('gmCargaAtual').textContent = cargaAtual;
+        document.getElementById('gmCargaMaxima').textContent = cargaMaxima;
     }
 
     atualizarStatusReais() {
-        // PV - Pontos de Vida
-        const pvAtual = dadosPersonagem.pv_atual || dadosPersonagem.current_hp || 10;
-        const pvMaximo = dadosPersonagem.pv_maximo || dadosPersonagem.max_hp || 
-                        dadosPersonagem.pontos_vida || 10;
+        // PV
+        const pvAtual = dadosPersonagem.pv_atual || 10;
+        const pvMaximo = dadosPersonagem.pv_maximo || dadosPersonagem.pontos_vida || 10;
         
         document.getElementById('pvAtualGM').textContent = pvAtual;
         document.getElementById('pvMaximoGM').textContent = pvMaximo;
@@ -307,21 +293,20 @@ class FichaGM {
             indicator.style.background = '#e74c3c';
         }
         
-        // PF - Pontos de Fadiga
-        const pfAtual = dadosPersonagem.pf_atual || dadosPersonagem.current_fp || 10;
-        const pfMaximo = dadosPersonagem.pf_maximo || dadosPersonagem.max_fp || 
-                        dadosPersonagem.pontos_fadiga || 10;
+        // PF
+        const pfAtual = dadosPersonagem.pf_atual || 10;
+        const pfMaximo = dadosPersonagem.pf_maximo || dadosPersonagem.pontos_fadiga || 10;
         
         document.getElementById('pfAtualGM').textContent = pfAtual;
         document.getElementById('pfMaximoGM').textContent = pfMaximo;
         
         // Dinheiro
-        const dinheiro = dadosPersonagem.dinheiro || dadosPersonagem.money || 0;
+        const dinheiro = dadosPersonagem.dinheiro || 0;
         document.getElementById('dinheiroGM').textContent = `$${dinheiro}`;
         
         // Movimento
-        const deslocamento = dadosPersonagem.deslocamento || dadosPersonagem.basic_move || 5;
-        const bonusMovimento = dadosPersonagem.bonus_deslocamento || dadosPersonagem.move_bonus || 0;
+        const deslocamento = dadosPersonagem.deslocamento || 5;
+        const bonusMovimento = dadosPersonagem.bonus_deslocamento || 0;
         
         document.getElementById('gmDeslocamento').textContent = deslocamento;
         document.getElementById('gmBonusMovimento').textContent = bonusMovimento;
@@ -333,31 +318,26 @@ class FichaGM {
         
         if (!container) return;
         
+        console.log('🔄 Processando vantagens...');
+        
         let vantagens = [];
-        let totalPontos = 0;
         
         try {
-            // Vantagens podem estar em diferentes formatos
-            const vantagensData = dadosPersonagem.vantagens;
-            
-            if (typeof vantagensData === 'string' && vantagensData) {
-                vantagens = JSON.parse(vantagensData);
-            } else if (Array.isArray(vantagensData)) {
-                vantagens = vantagensData;
-            } else if (dadosPersonagem.advantages) {
-                if (typeof dadosPersonagem.advantages === 'string') {
-                    vantagens = JSON.parse(dadosPersonagem.advantages || '[]');
-                } else {
-                    vantagens = dadosPersonagem.advantages;
+            // Tentar pegar do campo vantagens (JSON)
+            if (dadosPersonagem.vantagens) {
+                if (typeof dadosPersonagem.vantagens === 'string') {
+                    vantagens = JSON.parse(dadosPersonagem.vantagens);
+                } else if (Array.isArray(dadosPersonagem.vantagens)) {
+                    vantagens = dadosPersonagem.vantagens;
                 }
             }
             
-            console.log('🎯 Vantagens encontradas:', vantagens);
+            console.log(`🎯 ${vantagens.length} vantagens encontradas:`, vantagens);
             
             // Limpar container
             container.innerHTML = '';
             
-            if (!vantagens || vantagens.length === 0) {
+            if (vantagens.length === 0) {
                 const emptyItem = document.createElement('div');
                 emptyItem.className = 'vantagem-item';
                 emptyItem.innerHTML = `
@@ -369,7 +349,6 @@ class FichaGM {
                 vantagens.forEach((vantagem, index) => {
                     const nome = vantagem.nome || vantagem.name || `Vantagem ${index + 1}`;
                     const custo = vantagem.custo || vantagem.cost || 0;
-                    totalPontos += custo;
                     
                     const item = document.createElement('div');
                     item.className = 'vantagem-item';
@@ -379,6 +358,7 @@ class FichaGM {
                         <span class="custo-vantagem">${custo >= 0 ? '+' : ''}${custo}</span>
                     `;
                     
+                    // Tooltip com descrição
                     if (vantagem.descricao || vantagem.description) {
                         item.title = vantagem.descricao || vantagem.description;
                     }
@@ -391,11 +371,6 @@ class FichaGM {
             if (totalElement) {
                 totalElement.textContent = vantagens.length;
             }
-            
-            // Atualizar pontos
-            document.getElementById('pontosTotais').textContent = dadosPersonagem.pontos_totais || dadosPersonagem.total_points || 0;
-            document.getElementById('pontosGastos').textContent = dadosPersonagem.pontos_gastos || dadosPersonagem.spent_points || 0;
-            document.getElementById('pontosDisponiveis').textContent = dadosPersonagem.pontos_disponiveis || dadosPersonagem.available_points || 0;
             
         } catch (error) {
             console.error('❌ Erro ao processar vantagens:', error);
@@ -417,19 +392,19 @@ class FichaGM {
         let pericias = [];
         
         try {
-            const periciasData = dadosPersonagem.pericias || dadosPersonagem.skills;
-            
-            if (typeof periciasData === 'string' && periciasData) {
-                pericias = JSON.parse(periciasData);
-            } else if (Array.isArray(periciasData)) {
-                pericias = periciasData;
+            if (dadosPersonagem.pericias) {
+                if (typeof dadosPersonagem.pericias === 'string') {
+                    pericias = JSON.parse(dadosPersonagem.pericias);
+                } else if (Array.isArray(dadosPersonagem.pericias)) {
+                    pericias = dadosPersonagem.pericias;
+                }
             }
             
-            console.log('🎯 Perícias encontradas:', pericias.length);
+            console.log(`🎯 ${pericias.length} perícias encontradas`);
             
             container.innerHTML = '';
             
-            if (!pericias || pericias.length === 0) {
+            if (pericias.length === 0) {
                 const emptyItem = document.createElement('div');
                 emptyItem.className = 'pericia-item';
                 emptyItem.innerHTML = `
@@ -438,12 +413,12 @@ class FichaGM {
                 `;
                 container.appendChild(emptyItem);
             } else {
-                // Ordenar por nível
-                const periciasOrdenadas = [...pericias].sort((a, b) => 
-                    (b.nivel || b.level || 0) - (a.nivel || a.level || 0)
-                ).slice(0, 10);
+                // Ordenar por nível e pegar top 10
+                const topPericias = [...pericias]
+                    .sort((a, b) => (b.nivel || 0) - (a.nivel || 0))
+                    .slice(0, 10);
                 
-                periciasOrdenadas.forEach((pericia) => {
+                topPericias.forEach((pericia) => {
                     const nome = pericia.nome || pericia.name || 'Perícia';
                     const nivel = pericia.nivel || pericia.level || 0;
                     
@@ -480,15 +455,15 @@ class FichaGM {
 
     atualizarStatusCombate() {
         // Esquiva
-        const esquiva = dadosPersonagem.esquiva || dadosPersonagem.dodge || 
+        const esquiva = dadosPersonagem.esquiva || 
                        Math.floor((dadosPersonagem.destreza || 10) / 2) + 3;
         document.getElementById('gmEsquiva').textContent = esquiva;
         
         // Dano
         document.getElementById('gmDanoGolpe').textContent = 
-            dadosPersonagem.dano_gdp || dadosPersonagem.thrust_damage || '1d-2';
+            dadosPersonagem.dano_gdp || '1d-2';
         document.getElementById('gmDanoArremesso').textContent = 
-            dadosPersonagem.dano_geb || dadosPersonagem.swing_damage || '1d';
+            dadosPersonagem.dano_geb || '1d';
     }
 
     atualizarAnotacoes() {
@@ -557,7 +532,7 @@ class FichaGM {
 
     iniciarSincronizacao() {
         // Sincronizar a cada 30 segundos
-        intervaloAtualizacao = setInterval(() => {
+        setInterval(() => {
             this.sincronizarDados();
         }, 30000);
     }
@@ -565,9 +540,8 @@ class FichaGM {
     async sincronizarDados() {
         try {
             await this.carregarDadosPersonagem();
-            await this.carregarDadosCampanha();
             this.atualizarInterfaceCompleta();
-            this.mostrarMensagem('Dados atualizados', 'info');
+            console.log('🔄 Dados sincronizados');
         } catch (error) {
             console.error('❌ Erro na sincronização:', error);
         }
@@ -587,7 +561,7 @@ class FichaGM {
             
             this.mostrarMensagem('Anotações salvas!', 'sucesso');
         } catch (error) {
-            this.mostrarMensagem('Erro ao salvar', 'erro');
+            this.mostrarMensagem('Erro ao salvar anotações', 'erro');
         }
     }
 
@@ -638,3 +612,20 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Inicializando Ficha GM...');
     new FichaGM();
 });
+
+// Adicionar animações CSS
+if (!document.querySelector('#animacoes-flutuantes')) {
+    const style = document.createElement('style');
+    style.id = 'animacoes-flutuantes';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+}
