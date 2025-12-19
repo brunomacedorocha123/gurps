@@ -37,12 +37,9 @@
         </div>
         
         <div class="acoes-mestre">
-          <!-- CONTROLE DE VISUALIZAÇÃO -->
+          <!-- CONTROLE DE VISUALIZAÇÃO (REMOVEMOS O INSTANTÂNEO) -->
           <div class="alternar-visualizacao">
-            <button class="botao-visualizacao ativo" data-visao="instantaneo">
-              <i class="fas fa-camera"></i> Instantâneo
-            </button>
-            <button class="botao-visualizacao" data-visao="ao-vivo">
+            <button class="botao-visualizacao ativo" data-visao="ao-vivo">
               <i class="fas fa-sync"></i> Ao Vivo
             </button>
             <button class="botao-visualizacao" data-visao="campanha">
@@ -143,40 +140,12 @@
     </div>
   </section>
 
-  <!-- ABA DE NAVEGAÇÃO (TABS) -->
+  <!-- ABA DE NAVEGAÇÃO (APENAS 2 ABAS) -->
   <nav class="navegacao-fichas">
     <div class="container-tabs">
       <button class="tab ativo" data-tab="resumo">
         <i class="fas fa-eye"></i>
         <span>Visão Geral</span>
-      </button>
-      <button class="tab" data-tab="atributos">
-        <i class="fas fa-dumbbell"></i>
-        <span>Atributos</span>
-      </button>
-      <button class="tab" data-tab="vantagens">
-        <i class="fas fa-star"></i>
-        <span>Vantagens</span>
-      </button>
-      <button class="tab" data-tab="desvantagens">
-        <i class="fas fa-exclamation-triangle"></i>
-        <span>Desvantagens</span>
-      </button>
-      <button class="tab" data-tab="pericias">
-        <i class="fas fa-graduation-cap"></i>
-        <span>Perícias</span>
-      </button>
-      <button class="tab" data-tab="magias">
-        <i class="fas fa-hat-wizard"></i>
-        <span>Magias</span>
-      </button>
-      <button class="tab" data-tab="equipamento">
-        <i class="fas fa-backpack"></i>
-        <span>Equipamento</span>
-      </button>
-      <button class="tab" data-tab="combate">
-        <i class="fas fa-fist-raised"></i>
-        <span>Combate</span>
       </button>
       <button class="tab" data-tab="anotacoes">
         <i class="fas fa-edit"></i>
@@ -191,8 +160,10 @@
     <!-- ABA: VISÃO GERAL (RESUMO) -->
     <div id="aba-resumo" class="conteudo-aba ativo">
       <div class="resumo-container">
-        <!-- COLUNA 1: ATRIBUTOS BÁSICOS -->
+        
+        <!-- COLUNA 1: ATRIBUTOS E MOVIMENTO -->
         <div class="coluna-resumo">
+          <!-- CARD DE ATRIBUTOS PRINCIPAIS -->
           <div class="card-resumo">
             <div class="cabecalho-card">
               <h3><i class="fas fa-chart-bar"></i> Atributos Principais</h3>
@@ -229,6 +200,7 @@
             </div>
           </div>
 
+          <!-- CARD DE MOVIMENTO -->
           <div class="card-resumo">
             <div class="cabecalho-card">
               <h3><i class="fas fa-running"></i> Movimento</h3>
@@ -244,47 +216,16 @@
               </div>
               <div class="info-item">
                 <span class="rotulo">Carga Atual</span>
-                <span class="valor" id="gmCargaAtual">0 lb</span>
+                <span class="valor" id="gmCargaAtual">0</span>
               </div>
               <div class="info-item">
                 <span class="rotulo">Carga Máx.</span>
-                <span class="valor" id="gmCargaMaxima">0 lb</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- COLUNA 2: PERÍCIAS E MAGIAS -->
-        <div class="coluna-resumo">
-          <div class="card-resumo">
-            <div class="cabecalho-card">
-              <h3><i class="fas fa-graduation-cap"></i> Perícias Principais</h3>
-              <span class="badge" id="totalPericias">0</span>
-            </div>
-            <div class="lista-pericias-gm" id="listaPericiasGM">
-              <div class="pericia-item">
-                <span class="nome-pericia">Carregando...</span>
-                <span class="nivel-pericia">-</span>
+                <span class="valor" id="gmCargaMaxima">0</span>
               </div>
             </div>
           </div>
 
-          <div class="card-resumo">
-            <div class="cabecalho-card">
-              <h3><i class="fas fa-hat-wizard"></i> Magias Conhecidas</h3>
-              <span class="badge" id="totalMagias">0</span>
-            </div>
-            <div class="lista-magias-gm" id="listaMagiasGM">
-              <div class="magia-item">
-                <span class="nome-magia">Carregando...</span>
-                <span class="nivel-magia">-</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- COLUNA 3: EQUIPAMENTO E STATUS -->
-        <div class="coluna-resumo">
+          <!-- CARD DE STATUS DE COMBATE -->
           <div class="card-resumo">
             <div class="cabecalho-card">
               <h3><i class="fas fa-shield-alt"></i> Status de Combate</h3>
@@ -312,264 +253,83 @@
               </div>
             </div>
           </div>
-
+        </div>
+        
+        <!-- COLUNA 2: PERÍCIAS E MAGIAS -->
+        <div class="coluna-resumo">
+          <!-- CARD DE PERÍCIAS PRINCIPAIS -->
           <div class="card-resumo">
             <div class="cabecalho-card">
-              <h3><i class="fas fa-box-open"></i> Equipamento Rápido</h3>
+              <h3><i class="fas fa-graduation-cap"></i> Perícias</h3>
+              <span class="badge" id="totalPericias">0</span>
+            </div>
+            <div class="lista-pericias-gm" id="listaPericiasGM">
+              <div class="pericia-item">
+                <span class="nome-pericia">Carregando perícias...</span>
+                <span class="nivel-pericia">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD DE MAGIAS -->
+          <div class="card-resumo">
+            <div class="cabecalho-card">
+              <h3><i class="fas fa-hat-wizard"></i> Magias</h3>
+              <span class="badge" id="totalMagias">0</span>
+            </div>
+            <div class="lista-magias-gm" id="listaMagiasGM">
+              <div class="magia-item">
+                <span class="nome-magia">Carregando magias...</span>
+                <span class="nivel-magia">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- COLUNA 3: VANTAGENS, DESVANTAGENS E EQUIPAMENTO -->
+        <div class="coluna-resumo">
+          <!-- CARD DE VANTAGENS -->
+          <div class="card-resumo">
+            <div class="cabecalho-card">
+              <h3><i class="fas fa-star"></i> Vantagens</h3>
+              <span class="badge" id="totalVantagensGM">0</span>
+            </div>
+            <div class="lista-vantagens-gm" id="listaVantagensGM">
+              <div class="vantagem-item">
+                <span class="nome-vantagem">Carregando vantagens...</span>
+                <span class="custo-vantagem">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD DE DESVANTAGENS -->
+          <div class="card-resumo">
+            <div class="cabecalho-card">
+              <h3><i class="fas fa-exclamation-triangle"></i> Desvantagens</h3>
+              <span class="badge" id="totalDesvantagensGM">0</span>
+            </div>
+            <div class="lista-desvantagens-gm" id="listaDesvantagensGM">
+              <div class="desvantagem-item">
+                <span class="nome-desvantagem">Carregando desvantagens...</span>
+                <span class="custo-desvantagem">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD DE EQUIPAMENTO RÁPIDO -->
+          <div class="card-resumo">
+            <div class="cabecalho-card">
+              <h3><i class="fas fa-box-open"></i> Equipamento</h3>
             </div>
             <div class="lista-equipamento-rapido" id="listaEquipamentoRapido">
               <div class="equipamento-item">
-                <span class="nome-equipamento">Carregando...</span>
+                <span class="nome-equipamento">Carregando equipamento...</span>
                 <span class="peso-equipamento">-</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    
-    <!-- ABA: ATRIBUTOS -->
-    <div id="aba-atributos" class="conteudo-aba">
-      <div class="atributos-container">
-        <div class="card-atributos">
-          <h3><i class="fas fa-chart-line"></i> Atributos Detalhados</h3>
-          <div class="tabela-atributos">
-            <div class="linha-tabela cabecalho-tabela">
-              <div class="coluna">Atributo</div>
-              <div class="coluna">Valor</div>
-              <div class="coluna">Custo</div>
-              <div class="coluna">Modificador</div>
-            </div>
-            <div class="linha-tabela">
-              <div class="coluna">Força (ST)</div>
-              <div class="coluna" id="detalheST">10</div>
-              <div class="coluna">0</div>
-              <div class="coluna" id="detalheSTMod">[0]</div>
-            </div>
-            <div class="linha-tabela">
-              <div class="coluna">Destreza (DX)</div>
-              <div class="coluna" id="detalheDX">10</div>
-              <div class="coluna">0</div>
-              <div class="coluna" id="detalheDXMod">[0]</div>
-            </div>
-            <div class="linha-tabela">
-              <div class="coluna">Inteligência (IQ)</div>
-              <div class="coluna" id="detalheIQ">10</div>
-              <div class="coluna">0</div>
-              <div class="coluna" id="detalheIQMod">[0]</div>
-            </div>
-            <div class="linha-tabela">
-              <div class="coluna">Saúde (HT)</div>
-              <div class="coluna" id="detalheHT">10</div>
-              <div class="coluna">0</div>
-              <div class="coluna" id="detalheHTMod">[0]</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-atributos">
-          <h3><i class="fas fa-calculator"></i> Pontuação GURPS</h3>
-          <div class="pontuacao-grid">
-            <div class="pontuacao-item">
-              <span class="rotulo">Pontos Totais:</span>
-              <span class="valor" id="pontosTotais">0</span>
-            </div>
-            <div class="pontuacao-item">
-              <span class="rotulo">Pontos Gastos:</span>
-              <span class="valor" id="pontosGastos">0</span>
-            </div>
-            <div class="pontuacao-item">
-              <span class="rotulo">Disponíveis:</span>
-              <span class="valor" id="pontosDisponiveis">0</span>
-            </div>
-            <div class="pontuacao-item">
-              <span class="rotulo">Limite Desvantagens:</span>
-              <span class="valor" id="limiteDesvantagens">-40</span>
-            </div>
-            <div class="pontuacao-item">
-              <span class="rotulo">Desvantagens Atuais:</span>
-              <span class="valor" id="desvantagensAtuais">0</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- ABA: VANTAGENS -->
-    <div id="aba-vantagens" class="conteudo-aba">
-      <div class="vantagens-container">
-        <div class="card-vantagens">
-          <div class="cabecalho-card">
-            <h3><i class="fas fa-star"></i> Vantagens</h3>
-            <span class="badge" id="totalVantagensGM">0</span>
-          </div>
-          <div class="lista-vantagens-gm" id="listaVantagensGM">
-            <div class="vantagem-item">
-              <span class="nome-vantagem">Carregando...</span>
-              <span class="custo-vantagem">-</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- ABA: DESVANTAGENS -->
-    <div id="aba-desvantagens" class="conteudo-aba">
-      <div class="desvantagens-container">
-        <div class="card-desvantagens">
-          <div class="cabecalho-card">
-            <h3><i class="fas fa-exclamation-triangle"></i> Desvantagens</h3>
-            <span class="badge" id="totalDesvantagensGM">0</span>
-          </div>
-          <div class="lista-desvantagens-gm" id="listaDesvantagensGM">
-            <div class="desvantagem-item">
-              <span class="nome-desvantagem">Carregando...</span>
-              <span class="custo-desvantagem">-</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- ABA: PERÍCIAS -->
-    <div id="aba-pericias" class="conteudo-aba">
-      <div class="pericias-container">
-        <div class="card-pericias">
-          <div class="cabecalho-card">
-            <h3><i class="fas fa-graduation-cap"></i> Perícias</h3>
-            <div class="filtros-pericias">
-              <input type="text" id="filtroPericias" placeholder="Filtrar perícias..." class="filtro-input">
-              <select id="filtroAtributo" class="filtro-select">
-                <option value="">Todos atributos</option>
-                <option value="ST">FOR</option>
-                <option value="DX">DES</option>
-                <option value="IQ">INT</option>
-                <option value="HT">SAÚ</option>
-              </select>
-            </div>
-          </div>
-          <div class="tabela-pericias-gm" id="tabelaPericiasGM">
-            <!-- Tabela será populada via JS -->
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- ABA: MAGIAS -->
-    <div id="aba-magias" class="conteudo-aba">
-      <div class="magias-container">
-        <div class="card-magias">
-          <div class="cabecalho-card">
-            <h3><i class="fas fa-hat-wizard"></i> Magias</h3>
-            <span class="badge" id="totalMagiasDetalhado">0</span>
-          </div>
-          <div class="lista-magias-detalhado" id="listaMagiasDetalhado">
-            <!-- Magias serão populadas via JS -->
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- ABA: EQUIPAMENTO -->
-    <div id="aba-equipamento" class="conteudo-aba">
-      <div class="equipamento-container">
-        <div class="card-equipamento">
-          <div class="cabecalho-card">
-            <h3><i class="fas fa-backpack"></i> Inventário Completo</h3>
-            <div class="estatisticas-equipamento">
-              <span>Peso: <span id="pesoAtualGM">0</span>/<span id="pesoMaximoGM">0</span> lb</span>
-            </div>
-          </div>
-          <div class="tabela-equipamento-gm" id="tabelaEquipamentoGM">
-            <!-- Tabela será populada via JS -->
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- ABA: COMBATE -->
-    <div id="aba-combate" class="conteudo-aba">
-      <div class="combate-container">
-        <!-- DEFESAS -->
-        <div class="card-combate">
-          <h3><i class="fas fa-shield-alt"></i> Defesas</h3>
-          <div class="defesas-grid">
-            <div class="defesa-item">
-              <span class="rotulo">Esquiva</span>
-              <span class="valor" id="combateEsquiva">10</span>
-            </div>
-            <div class="defesa-item">
-              <span class="rotulo">Esquiva Mod.</span>
-              <span class="valor" id="combateEsquivaMod">0</span>
-            </div>
-            <div class="defesa-item">
-              <span class="rotulo">Bloqueio</span>
-              <span class="valor" id="combateBloqueio">-</span>
-            </div>
-            <div class="defesa-item">
-              <span class="rotulo">Bloqueio Mod.</span>
-              <span class="valor" id="combateBloqueioMod">0</span>
-            </div>
-            <div class="defesa-item">
-              <span class="rotulo">Aparar</span>
-              <span class="valor" id="combateAparar">-</span>
-            </div>
-            <div class="defesa-item">
-              <span class="rotulo">Aparar Mod.</span>
-              <span class="valor" id="combateApararMod">0</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- DANO -->
-        <div class="card-combate">
-          <h3><i class="fas fa-crosshairs"></i> Dano Básico</h3>
-          <div class="dano-grid">
-            <div class="dano-item">
-              <span class="rotulo">Golpe (Thrust)</span>
-              <span class="valor" id="combateThrust">1d-2</span>
-            </div>
-            <div class="dano-item">
-              <span class="rotulo">Arremesso (Swing)</span>
-              <span class="valor" id="combateSwing">1d</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ARMADURA -->
-        <div class="card-combate">
-          <h3><i class="fas fa-shield"></i> Proteção (DR)</h3>
-          <div class="armadura-grid">
-            <div class="armadura-item">
-              <span class="rotulo">Cabeça</span>
-              <span class="valor" id="drCabeca">0</span>
-            </div>
-            <div class="armadura-item">
-              <span class="rotulo">Tronco</span>
-              <span class="valor" id="drTronco">0</span>
-            </div>
-            <div class="armadura-item">
-              <span class="rotulo">Braços</span>
-              <span class="valor" id="drBracos">0</span>
-            </div>
-            <div class="armadura-item">
-              <span class="rotulo">Pernas</span>
-              <span class="valor" id="drPernas">0</span>
-            </div>
-            <div class="armadura-item">
-              <span class="rotulo">Total</span>
-              <span class="valor" id="drTotal">0</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ESCUDO -->
-        <div class="card-combate">
-          <h3><i class="fas fa-shield-virus"></i> Escudo</h3>
-          <div class="escudo-info" id="infoEscudo">
-            <p>Nenhum escudo equipado</p>
-          </div>
-        </div>
+        
       </div>
     </div>
     
@@ -595,41 +355,13 @@
           <div class="lista-historico" id="historicoCampanha">
             <div class="evento-historico">
               <span class="data-evento">Carregando histórico...</span>
+              <span class="descricao-evento">Ainda não há eventos registrados</span>
             </div>
           </div>
         </div>
       </div>
     </div>
   </main>
-
-  <!-- MODAL PARA CONFIGURAÇÕES -->
-  <div id="modal-config" class="modal-overlay">
-    <div class="modal-conteudo">
-      <div class="cabecalho-modal">
-        <h3><i class="fas fa-cog"></i> Configurações da Visualização</h3>
-        <button class="fechar-modal">&times;</button>
-      </div>
-      <div class="corpo-modal">
-        <div class="opcao-config">
-          <input type="checkbox" id="autoAtualizar" checked>
-          <label for="autoAtualizar">Atualizar dados automaticamente</label>
-        </div>
-        <div class="opcao-config">
-          <label for="intervaloAtualizacao">Intervalo de atualização:</label>
-          <select id="intervaloAtualizacao">
-            <option value="30000">30 segundos</option>
-            <option value="60000">1 minuto</option>
-            <option value="300000">5 minutos</option>
-            <option value="0">Manual</option>
-          </select>
-        </div>
-      </div>
-      <div class="rodape-modal">
-        <button class="botao-modal" id="btnSalvarConfig">Salvar</button>
-        <button class="botao-modal secundario" id="btnFecharConfig">Fechar</button>
-      </div>
-    </div>
-  </div>
 
   <!-- MODAL DE CONFIRMAÇÃO -->
   <div id="modal-confirmacao" class="modal-overlay">
