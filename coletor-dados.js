@@ -1,3 +1,4 @@
+// coletor-dados-completo.js
 class ColetorDados {
     constructor() {}
 
@@ -50,37 +51,79 @@ class ColetorDados {
     }
 
     _coletarVantagensDesvantagens() {
-        const vantagensData = typeof capturarVantagensResumo === 'function' ? 
-            capturarVantagensResumo() : { vantagens: [], totalPontos: 0 };
-        
-        const desvantagensData = typeof capturarDesvantagensResumo === 'function' ? 
-            capturarDesvantagensResumo() : { desvantagens: [], totalPontos: 0 };
-        
-        const peculiaridadesData = typeof capturarPeculiaridadesResumo === 'function' ? 
-            capturarPeculiaridadesResumo() : { peculiaridades: [], totalPontos: 0 };
-        
+        const vantagens = this._coletarListaVantagensDesvantagens('vantagens-adquiridas');
+        const desvantagens = this._coletarListaVantagensDesvantagens('desvantagens-adquiridas');
+        const peculiaridades = this._coletarPeculiaridades();
+
         return {
-            vantagens: vantagensData.vantagens,
-            total_vantagens: vantagensData.totalPontos,
-            desvantagens: desvantagensData.desvantagens,
-            total_desvantagens: desvantagensData.totalPontos,
-            peculiaridades: peculiaridadesData.peculiaridades,
-            total_peculiaridades: peculiaridadesData.totalPontos
+            vantagens: vantagens,
+            total_vantagens: vantagens.reduce((sum, v) => sum + (v.pontos || 0), 0),
+            desvantagens: desvantagens,
+            total_desvantagens: desvantagens.reduce((sum, d) => sum + (d.pontos || 0), 0),
+            peculiaridades: peculiaridades,
+            total_peculiaridades: peculiaridades.reduce((sum, p) => sum + (p.pontos || 0), 0)
         };
+    }
+
+    _coletarListaVantagensDesvantagens(idLista) {
+        const lista = document.getElementById(idLista);
+        const itens = [];
+        
+        if (lista) {
+            const elementos = lista.querySelectorAll('.vantagem-adquirida, .desvantagem-adquirida, .item-adquirido');
+            
+            elementos.forEach(elemento => {
+                const nome = elemento.querySelector('.nome-vantagem, .nome-desvantagem, .item-nome')?.textContent?.trim();
+                if (nome && nome !== '' && !nome.includes('Nenhuma')) {
+                    const pontosTexto = elemento.querySelector('.custo-vantagem, .custo-desvantagem, .item-pontos')?.textContent?.trim();
+                    const pontos = parseInt(pontosTexto?.replace(/[^\d-]/g, '')) || 0;
+                    
+                    itens.push({
+                        nome: nome,
+                        pontos: pontos,
+                        tipo: elemento.getAttribute('data-tipo') || '',
+                        descricao: elemento.querySelector('.descricao-vantagem, .descricao-desvantagem')?.textContent?.trim() || ''
+                    });
+                }
+            });
+        }
+        
+        return itens;
+    }
+
+    _coletarPeculiaridades() {
+        const lista = document.getElementById('lista-peculiaridades');
+        const peculiaridades = [];
+        
+        if (lista) {
+            const itens = lista.querySelectorAll('.peculiaridade-item');
+            
+            itens.forEach(item => {
+                const texto = item.querySelector('.peculiaridade-texto')?.textContent?.trim();
+                if (texto && texto !== '') {
+                    peculiaridades.push({
+                        texto: texto,
+                        pontos: parseInt(item.getAttribute('data-custo')) || 0
+                    });
+                }
+            });
+        }
+        
+        return peculiaridades;
     }
 
     _coletarPericiasTecnicas() {
         const pericias = this._coletarListaGenerica(
             'pericias-aprendidas',
-            '.pericia-adquirida, .item-lista',
-            '.pericia-nome, .item-nome, h4',
+            '.pericia-adquirida, .pericia-item',
+            '.pericia-nome, .item-nome',
             'data-pontos'
         );
         
         const tecnicas = this._coletarListaGenerica(
             'tecnicas-aprendidas',
-            '.tecnica-adquirida, .item-lista',
-            '.tecnica-nome, .item-nome, h4',
+            '.tecnica-adquirida, .tecnica-item',
+            '.tecnica-nome, .item-nome',
             'data-pontos'
         );
         
@@ -95,8 +138,8 @@ class ColetorDados {
     _coletarMagias() {
         const magias = this._coletarListaGenerica(
             'magias-aprendidas',
-            '.magia-adquirida, .item-lista',
-            '.magia-nome, .item-nome, h4',
+            '.magia-adquirida, .magia-item',
+            '.magia-nome, .item-nome',
             'data-pontos'
         );
         
@@ -113,16 +156,17 @@ class ColetorDados {
         const equipamentos = [];
         
         if (lista) {
-            const itens = lista.querySelectorAll('.equipamento-adquirido, .item-inventario, .item-lista');
+            const itens = lista.querySelectorAll('.equipamento-adquirido, .item-inventario');
             
             itens.forEach(item => {
-                const nome = item.querySelector('.equipamento-nome, .item-nome, h4')?.textContent?.trim();
+                const nome = item.querySelector('.equipamento-nome, .item-nome')?.textContent?.trim();
                 if (nome && nome !== 'Inventário Vazio') {
                     equipamentos.push({
                         nome: nome,
                         tipo: item.getAttribute('data-tipo') || 'Equipamento',
                         peso: parseFloat(item.getAttribute('data-peso')) || 0,
-                        equipado: item.classList.contains('equipado') || false
+                        equipado: item.classList.contains('equipado') || false,
+                        quantidade: parseInt(item.getAttribute('data-quantidade')) || 1
                     });
                 }
             });
@@ -174,7 +218,8 @@ class ColetorDados {
                 if (nome && !nome.includes('Nenhuma') && !nome.includes('Nenhum')) {
                     resultados.push({
                         nome: nome,
-                        pontos: parseInt(item.getAttribute(atributoPontos)) || 0
+                        pontos: parseInt(item.getAttribute(atributoPontos)) || 0,
+                        nivel: parseInt(item.querySelector('.nivel')?.textContent) || 0
                     });
                 }
             });
@@ -250,6 +295,11 @@ class ColetorDados {
             destreza: dados.atributos.destreza,
             inteligencia: dados.atributos.inteligencia,
             saude: dados.atributos.saude,
+            pontos_vida: dados.atributos.pontos_vida,
+            pontos_fadiga: dados.atributos.pontos_fadiga,
+            vontade: dados.atributos.vontade,
+            percepcao: dados.atributos.percepcao,
+            deslocamento: dados.atributos.deslocamento,
             
             pontos_totais: dados.pontos.totais,
             pontos_gastos: dados.pontos.gastos,
@@ -265,8 +315,27 @@ class ColetorDados {
             
             total_vantagens: dados.vantagensDesvantagens.total_vantagens,
             total_desvantagens: dados.vantagensDesvantagens.total_desvantagens,
+            total_peculiaridades: dados.vantagensDesvantagens.total_peculiaridades,
             total_pericias: dados.periciasTecnicas.total_pericias,
+            total_tecnicas: dados.periciasTecnicas.total_tecnicas,
             total_magias: dados.magias.total_magias,
+            
+            dinheiro: dados.equipamentos.dinheiro,
+            peso_atual: dados.equipamentos.peso_atual,
+            peso_maximo: dados.equipamentos.peso_maximo,
+            
+            pv_atual: dados.combate.pv_atual,
+            pv_maximo: dados.combate.pv_maximo,
+            pf_atual: dados.combate.pf_atual,
+            pf_maximo: dados.combate.pf_maximo,
+            esquiva: dados.combate.esquiva,
+            bloqueio: dados.combate.bloqueio,
+            aparar: dados.combate.aparar,
+            
+            aparencia: dados.caracteristicas.aparencia,
+            riqueza: dados.caracteristicas.riqueza,
+            altura: dados.caracteristicas.altura,
+            peso: dados.caracteristicas.peso,
             
             status: 'Ativo',
             updated_at: new Date().toISOString()
