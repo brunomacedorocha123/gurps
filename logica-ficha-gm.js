@@ -11,8 +11,6 @@ let personagemId = null;
 let campanhaId = null;
 let vinculoId = null;
 let intervaloAtualizacao = null;
-let modoAtualizacao = 'ao-vivo'; // 'ao-vivo' ou 'campanha'
-let isAtualizando = false;
 
 // ====== CLASSE PRINCIPAL ======
 class FichaGM {
@@ -24,25 +22,38 @@ class FichaGM {
         try {
             this.mostrarLoading();
             
-            // 1. Pegar parâmetros da URL
-            this.extrairParametrosURL();
+            // 1. Pegar parâmetros da URL - COM VERIFICAÇÃO
+            const temParametros = this.extrairParametrosURL();
+            
+            if (!temParametros) {
+                // Se não tem parâmetros, mostrar mensagem e redirecionar
+                this.mostrarMensagem('Personagem não especificado. Redirecionando...', 'aviso');
+                setTimeout(() => {
+                    window.location.href = 'campanhas.html';
+                }, 2000);
+                return;
+            }
             
             // 2. Verificar autenticação
             await this.verificarAutenticacao();
             
-            // 3. Carregar dados iniciais
-            await this.carregarDadosIniciais();
+            // 3. Carregar dados do personagem
+            await this.carregarDadosPersonagem();
             
-            // 4. Configurar eventos
+            // 4. Carregar dados da campanha
+            await this.carregarDadosCampanha();
+            
+            // 5. Atualizar interface
+            this.atualizarInterfaceCompleta();
+            
+            // 6. Configurar eventos
             this.configurarEventListeners();
             
-            // 5. Configurar modo visualização
-            this.configurarModoVisualizacao();
+            // 7. Iniciar sincronização
+            this.iniciarSincronizacao();
             
-            // 6. Esconder loading
             this.esconderLoading();
-            
-            console.log('✅ Ficha GM inicializada com sucesso!');
+            this.mostrarMensagem('Ficha carregada com sucesso!', 'sucesso');
             
         } catch (error) {
             console.error('❌ Erro na inicialização:', error);
@@ -51,13 +62,17 @@ class FichaGM {
         }
     }
 
-    // ====== AUTENTICAÇÃO ======
-    async verificarAutenticacao() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            window.location.href = 'login.html';
-            throw new Error('Usuário não autenticado');
-        }
+    verificarAutenticacao() {
+        return new Promise((resolve, reject) => {
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                if (!session) {
+                    window.location.href = 'login.html';
+                    reject(new Error('Não autenticado'));
+                } else {
+                    resolve(session);
+                }
+            });
+        });
     }
 
     extrairParametrosURL() {
@@ -66,71 +81,110 @@ class FichaGM {
         campanhaId = params.get('campanha');
         vinculoId = params.get('vinculo');
         
+        console.log('🔗 Parâmetros da URL:', { personagemId, campanhaId, vinculoId });
+        
+        // Verificar se temos pelo menos personagem e campanha
         if (!personagemId || !campanhaId) {
-            throw new Error('Parâmetros inválidos na URL');
+            console.warn('⚠️ Parâmetros insuficientes na URL');
+            
+            // Tentar pegar do localStorage (se vier de outra página)
+            const ultimoPersonagem = localStorage.getItem('ultimoPersonagemGM');
+            const ultimaCampanha = localStorage.getItem('ultimaCampanhaGM');
+            
+            if (ultimoPersonagem && ultimaCampanha) {
+                personagemId = ultimoPersonagem;
+                campanhaId = ultimaCampanha;
+                console.log('📝 Usando dados do localStorage:', { personagemId, campanhaId });
+                return true;
+            }
+            
+            return false;
         }
         
-        console.log('📋 IDs:', { personagemId, campanhaId, vinculoId });
+        // Salvar no localStorage para futuras visitas
+        localStorage.setItem('ultimoPersonagemGM', personagemId);
+        localStorage.setItem('ultimaCampanhaGM', campanhaId);
+        
+        return true;
     }
 
     // ====== CARREGAMENTO DE DADOS ======
-    async carregarDadosIniciais() {
-        try {
-            console.log('📥 Buscando dados da view...');
-            
-            // Buscar dados da VIEW (já consolidado)
+    async carregarDadosPersonagem() {
+        console.log('📥 Buscando dados do personagem:', personagemId);
+        
+        // PRIMEIRO: Tentar pegar da view (dados consolidados)
+        if (vinculoId) {
             const { data: viewData, error: viewError } = await supabase
                 .from('gm_characters_view')
                 .select('*')
                 .eq('vinculo_id', vinculoId)
                 .single();
             
-            if (viewError) {
-                console.error('Erro na view:', viewError);
-                throw viewError;
+            if (!viewError && viewData) {
+                console.log('✅ Dados da view:', viewData);
+                dadosPersonagem = viewData;
+                return;
             }
-            
-            dadosPersonagem = viewData;
-            console.log('✅ Dados da view carregados:', dadosPersonagem);
-            
-            // Buscar anotações do GM
-            const { data: campanhaData, error: campanhaError } = await supabase
+        }
+        
+        // SEGUNDO: Se não tiver view ou falhar, pegar direto da tabela characters
+        console.log('🔄 Buscando dados diretos da tabela characters...');
+        
+        const { data: characterData, error: characterError } = await supabase
+            .from('characters')
+            .select('*')
+            .eq('id', personagemId)
+            .single();
+        
+        if (characterError) {
+            console.error('❌ Erro ao buscar personagem:', characterError);
+            throw new Error('Personagem não encontrado');
+        }
+        
+        dadosPersonagem = characterData;
+        console.log('✅ Dados do personagem carregados:', dadosPersonagem);
+    }
+
+    async carregarDadosCampanha() {
+        try {
+            const { data: campanhaData, error } = await supabase
                 .from('campaign_characters')
-                .select('gm_notes')
-                .eq('id', vinculoId)
+                .select('gm_notes, is_frozen, status')
+                .eq('character_id', personagemId)
+                .eq('campaign_id', campanhaId)
                 .single();
             
-            if (!campanhaError) {
+            if (!error && campanhaData) {
                 dadosCampanha = campanhaData;
+                console.log('✅ Dados da campanha:', dadosCampanha);
             }
-            
-            // Atualizar interface
-            this.atualizarInterfaceCompleta();
-            
         } catch (error) {
-            console.error('❌ Erro ao carregar dados:', error);
-            throw error;
+            console.warn('⚠️ Erro ao buscar dados da campanha:', error);
+            dadosCampanha = { gm_notes: '', is_frozen: false };
         }
     }
 
     // ====== ATUALIZAR INTERFACE ======
     atualizarInterfaceCompleta() {
-        if (!dadosPersonagem) return;
+        if (!dadosPersonagem) {
+            this.mostrarMensagem('Dados do personagem não encontrados', 'erro');
+            return;
+        }
         
         // 1. Informações básicas
         this.atualizarInformacoesBasicas();
         
-        // 2. Atributos
-        this.atualizarAtributos();
+        // 2. Atributos (VAMOS PEGAR OS DADOS REAIS!)
+        this.atualizarAtributosReais();
         
         // 3. Status (PV/PF/Dinheiro)
-        this.atualizarStatus();
+        this.atualizarStatusReais();
         
         // 4. Vantagens
-        this.atualizarVantagens();
+        this.atualizarVantagensReais();
         
-        // 5. Perícias (simplificado por enquanto)
-        this.atualizarPericias();
+        // 5. Perícias
+        this.atualizarPericiasReais();
         
         // 6. Anotações
         this.atualizarAnotacoes();
@@ -140,31 +194,42 @@ class FichaGM {
     }
 
     atualizarInformacoesBasicas() {
+        // Nome do personagem
         document.getElementById('nomePersonagem').textContent = 
-            dadosPersonagem.character_name || 'Sem nome';
+            dadosPersonagem.nome || dadosPersonagem.character_name || 'Sem nome';
         
+        // Raça
         document.getElementById('racaPersonagem').textContent = 
-            dadosPersonagem.race || 'Sem raça';
+            dadosPersonagem.raca || dadosPersonagem.race || 'Sem raça';
         
-        // Tentar detectar "classe" da descrição
-        const descricao = dadosPersonagem.description || '';
-        const primeiraPalavra = descricao.split(' ')[0] || 'Aventureiro';
-        document.getElementById('classePersonagem').textContent = primeiraPalavra;
+        // Classe (se existir)
+        if (dadosPersonagem.classe) {
+            document.getElementById('classePersonagem').textContent = dadosPersonagem.classe;
+        }
         
+        // Nível
+        if (dadosPersonagem.nivel) {
+            document.getElementById('nivelPersonagem').textContent = dadosPersonagem.nivel;
+        }
+        
+        // Pontos
         document.getElementById('pontosPersonagem').textContent = 
-            `${dadosPersonagem.total_points || 0} pontos`;
+            `${dadosPersonagem.pontos_totais || dadosPersonagem.total_points || 0} pontos`;
         
+        // Descrição
         document.getElementById('descricaoPersonagem').textContent = 
-            descricao || 'Sem descrição disponível.';
+            dadosPersonagem.descricao || dadosPersonagem.description || 'Sem descrição';
         
-        // Campanha e Jogador
-        document.getElementById('nomeCampanha').textContent = 
-            dadosPersonagem.campaign_name || 'Campanha';
+        // Campanha e Jogador (da view se existir)
+        if (dadosPersonagem.campaign_name) {
+            document.getElementById('nomeCampanha').textContent = dadosPersonagem.campaign_name;
+        }
         
-        document.getElementById('nomeJogador').textContent = 
-            dadosPersonagem.player_username || 'Jogador';
+        if (dadosPersonagem.player_username) {
+            document.getElementById('nomeJogador').textContent = dadosPersonagem.player_username;
+        }
         
-        // Foto do personagem
+        // Foto
         if (dadosPersonagem.avatar_url) {
             const img = document.getElementById('fotoPersonagem');
             img.src = dadosPersonagem.avatar_url;
@@ -173,86 +238,96 @@ class FichaGM {
         }
     }
 
-    atualizarAtributos() {
-        // ATRIBUTOS PRINCIPAIS (já calculados pelo jogador)
-        const ST = dadosPersonagem.st || 10;
-        const DX = dadosPersonagem.dx || 10;
-        const IQ = dadosPersonagem.iq || 10;
-        const HT = dadosPersonagem.ht || 10;
+    atualizarAtributosReais() {
+        console.log('🎯 Atualizando atributos com dados reais:', {
+            forca: dadosPersonagem.forca,
+            destreza: dadosPersonagem.destreza,
+            inteligencia: dadosPersonagem.inteligencia,
+            saude: dadosPersonagem.saude
+        });
         
+        // ATRIBUTOS PRINCIPAIS - PEGAR OS VALORES REAIS QUE O JOGADOR SALVOU
+        const ST = dadosPersonagem.forca || dadosPersonagem.st || 10;
+        const DX = dadosPersonagem.destreza || dadosPersonagem.dx || 10;
+        const IQ = dadosPersonagem.inteligencia || dadosPersonagem.iq || 10;
+        const HT = dadosPersonagem.saude || dadosPersonagem.ht || 10;
+        
+        console.log('🎯 Atributos finais:', { ST, DX, IQ, HT });
+        
+        // Atualizar na interface
         document.getElementById('gmST').textContent = ST;
         document.getElementById('gmDX').textContent = DX;
         document.getElementById('gmIQ').textContent = IQ;
         document.getElementById('gmHT').textContent = HT;
         
-        // Modificadores (calculados conforme sua regra)
-        const STMod = (ST - 10) * 10; // 10 pontos por +1 ST
-        const DXMod = (DX - 10) * 20; // 20 pontos por +1 DX
-        const IQMod = (IQ - 10) * 20; // 20 pontos por +1 IQ
-        const HTMod = (HT - 10) * 10; // 10 pontos por +1 HT
+        // Calcular custos (para informação do GM)
+        const STMod = (ST - 10) * 10;
+        const DXMod = (DX - 10) * 20;
+        const IQMod = (IQ - 10) * 20;
+        const HTMod = (HT - 10) * 10;
         
         document.getElementById('gmSTMod').textContent = `[${STMod >= 0 ? '+' : ''}${STMod}]`;
         document.getElementById('gmDXMod').textContent = `[${DXMod >= 0 ? '+' : ''}${DXMod}]`;
         document.getElementById('gmIQMod').textContent = `[${IQMod >= 0 ? '+' : ''}${IQMod}]`;
         document.getElementById('gmHTMod').textContent = `[${HTMod >= 0 ? '+' : ''}${HTMod}]`;
         
-        // Vontade e Percepção (baseado em IQ)
-        const vontade = dadosPersonagem.vontade || IQ;
-        const percepcao = dadosPersonagem.percepcao || IQ;
+        // Vontade e Percepção
+        const vontade = dadosPersonagem.vontade || dadosPersonagem.vontade_base || IQ;
+        const percepcao = dadosPersonagem.percepcao || dadosPersonagem.percepcao_base || IQ;
         
         document.getElementById('gmVontade').textContent = vontade;
         document.getElementById('gmPercepcao').textContent = percepcao;
         
-        // Carga (removendo "lb" conforme solicitado)
-        document.getElementById('gmCargaAtual').textContent = 
-            dadosPersonagem.current_weight?.toString()?.replace(' lb', '') || '0';
+        // Carga (sem "lb")
+        const cargaAtual = dadosPersonagem.peso_atual || dadosPersonagem.current_weight || 0;
+        const cargaMaxima = dadosPersonagem.peso_maximo || dadosPersonagem.max_weight || 0;
         
-        document.getElementById('gmCargaMaxima').textContent = 
-            dadosPersonagem.max_weight?.toString()?.replace(' lb', '') || '0';
+        document.getElementById('gmCargaAtual').textContent = Math.round(cargaAtual * 10) / 10;
+        document.getElementById('gmCargaMaxima').textContent = Math.round(cargaMaxima * 10) / 10;
     }
 
-    atualizarStatus() {
+    atualizarStatusReais() {
         // PV - Pontos de Vida
-        const pvAtual = dadosPersonagem.current_hp || 10;
-        const pvMaximo = dadosPersonagem.max_hp || 10;
+        const pvAtual = dadosPersonagem.pv_atual || dadosPersonagem.current_hp || 10;
+        const pvMaximo = dadosPersonagem.pv_maximo || dadosPersonagem.max_hp || 
+                        dadosPersonagem.pontos_vida || 10;
         
         document.getElementById('pvAtualGM').textContent = pvAtual;
         document.getElementById('pvMaximoGM').textContent = pvMaximo;
         
-        // Atualizar indicador de status PV
+        // Indicador de status
         const pvPercent = (pvAtual / pvMaximo) * 100;
         const indicator = document.getElementById('pvStatus');
         
         if (pvPercent > 50) {
-            indicator.className = 'status-indicator';
             indicator.style.background = '#27ae60';
         } else if (pvPercent > 25) {
-            indicator.className = 'status-indicator baixo';
             indicator.style.background = '#f39c12';
         } else {
-            indicator.className = 'status-indicator critico';
             indicator.style.background = '#e74c3c';
         }
         
         // PF - Pontos de Fadiga
-        const pfAtual = dadosPersonagem.current_fp || 10;
-        const pfMaximo = dadosPersonagem.max_fp || 10;
+        const pfAtual = dadosPersonagem.pf_atual || dadosPersonagem.current_fp || 10;
+        const pfMaximo = dadosPersonagem.pf_maximo || dadosPersonagem.max_fp || 
+                        dadosPersonagem.pontos_fadiga || 10;
         
         document.getElementById('pfAtualGM').textContent = pfAtual;
         document.getElementById('pfMaximoGM').textContent = pfMaximo;
         
         // Dinheiro
-        const dinheiro = dadosPersonagem.money || 0;
+        const dinheiro = dadosPersonagem.dinheiro || dadosPersonagem.money || 0;
         document.getElementById('dinheiroGM').textContent = `$${dinheiro}`;
         
-        // Deslocamento
-        document.getElementById('gmDeslocamento').textContent = 
-            dadosPersonagem.basic_move || 5;
-        document.getElementById('gmBonusMovimento').textContent = 
-            dadosPersonagem.move_bonus || 0;
+        // Movimento
+        const deslocamento = dadosPersonagem.deslocamento || dadosPersonagem.basic_move || 5;
+        const bonusMovimento = dadosPersonagem.bonus_deslocamento || dadosPersonagem.move_bonus || 0;
+        
+        document.getElementById('gmDeslocamento').textContent = deslocamento;
+        document.getElementById('gmBonusMovimento').textContent = bonusMovimento;
     }
 
-    atualizarVantagens() {
+    atualizarVantagensReais() {
         const container = document.getElementById('listaVantagensGM');
         const totalElement = document.getElementById('totalVantagensGM');
         
@@ -262,19 +337,27 @@ class FichaGM {
         let totalPontos = 0;
         
         try {
-            // Vantagens podem vir como string JSON ou já como array
-            if (typeof dadosPersonagem.advantages === 'string') {
-                vantagens = JSON.parse(dadosPersonagem.advantages || '[]');
-            } else if (Array.isArray(dadosPersonagem.advantages)) {
-                vantagens = dadosPersonagem.advantages;
+            // Vantagens podem estar em diferentes formatos
+            const vantagensData = dadosPersonagem.vantagens;
+            
+            if (typeof vantagensData === 'string' && vantagensData) {
+                vantagens = JSON.parse(vantagensData);
+            } else if (Array.isArray(vantagensData)) {
+                vantagens = vantagensData;
+            } else if (dadosPersonagem.advantages) {
+                if (typeof dadosPersonagem.advantages === 'string') {
+                    vantagens = JSON.parse(dadosPersonagem.advantages || '[]');
+                } else {
+                    vantagens = dadosPersonagem.advantages;
+                }
             }
             
-            console.log('🎯 Vantagens carregadas:', vantagens);
+            console.log('🎯 Vantagens encontradas:', vantagens);
             
             // Limpar container
             container.innerHTML = '';
             
-            if (vantagens.length === 0) {
+            if (!vantagens || vantagens.length === 0) {
                 const emptyItem = document.createElement('div');
                 emptyItem.className = 'vantagem-item';
                 emptyItem.innerHTML = `
@@ -282,11 +365,7 @@ class FichaGM {
                     <span class="custo-vantagem">0</span>
                 `;
                 container.appendChild(emptyItem);
-                totalPontos = 0;
             } else {
-                // Ordenar por custo (maior primeiro)
-                vantagens.sort((a, b) => (b.custo || b.cost || 0) - (a.custo || a.cost || 0));
-                
                 vantagens.forEach((vantagem, index) => {
                     const nome = vantagem.nome || vantagem.name || `Vantagem ${index + 1}`;
                     const custo = vantagem.custo || vantagem.cost || 0;
@@ -300,9 +379,8 @@ class FichaGM {
                         <span class="custo-vantagem">${custo >= 0 ? '+' : ''}${custo}</span>
                     `;
                     
-                    // Tooltip com descrição se existir
                     if (vantagem.descricao || vantagem.description) {
-                        item.title = vantagem.descricao || vantagem.description || '';
+                        item.title = vantagem.descricao || vantagem.description;
                     }
                     
                     container.appendChild(item);
@@ -314,18 +392,23 @@ class FichaGM {
                 totalElement.textContent = vantagens.length;
             }
             
-            // Atualizar total de pontos em atributos também
-            document.getElementById('pontosTotais').textContent = dadosPersonagem.total_points || 0;
-            document.getElementById('pontosGastos').textContent = dadosPersonagem.spent_points || 0;
-            document.getElementById('pontosDisponiveis').textContent = dadosPersonagem.available_points || 0;
+            // Atualizar pontos
+            document.getElementById('pontosTotais').textContent = dadosPersonagem.pontos_totais || dadosPersonagem.total_points || 0;
+            document.getElementById('pontosGastos').textContent = dadosPersonagem.pontos_gastos || dadosPersonagem.spent_points || 0;
+            document.getElementById('pontosDisponiveis').textContent = dadosPersonagem.pontos_disponiveis || dadosPersonagem.available_points || 0;
             
         } catch (error) {
             console.error('❌ Erro ao processar vantagens:', error);
-            container.innerHTML = '<div class="vantagem-item"><span class="nome-vantagem">Erro ao carregar vantagens</span></div>';
+            container.innerHTML = `
+                <div class="vantagem-item">
+                    <span class="nome-vantagem">Erro ao carregar vantagens</span>
+                    <span class="custo-vantagem">-</span>
+                </div>
+            `;
         }
     }
 
-    atualizarPericias() {
+    atualizarPericiasReais() {
         const container = document.getElementById('listaPericiasGM');
         const totalElement = document.getElementById('totalPericias');
         
@@ -334,18 +417,19 @@ class FichaGM {
         let pericias = [];
         
         try {
-            if (typeof dadosPersonagem.skills === 'string') {
-                pericias = JSON.parse(dadosPersonagem.skills || '[]');
-            } else if (Array.isArray(dadosPersonagem.skills)) {
-                pericias = dadosPersonagem.skills;
+            const periciasData = dadosPersonagem.pericias || dadosPersonagem.skills;
+            
+            if (typeof periciasData === 'string' && periciasData) {
+                pericias = JSON.parse(periciasData);
+            } else if (Array.isArray(periciasData)) {
+                pericias = periciasData;
             }
             
-            console.log('🎯 Perícias carregadas:', pericias.length);
+            console.log('🎯 Perícias encontradas:', pericias.length);
             
-            // Limpar container
             container.innerHTML = '';
             
-            if (pericias.length === 0) {
+            if (!pericias || pericias.length === 0) {
                 const emptyItem = document.createElement('div');
                 emptyItem.className = 'pericia-item';
                 emptyItem.innerHTML = `
@@ -354,12 +438,13 @@ class FichaGM {
                 `;
                 container.appendChild(emptyItem);
             } else {
-                // Ordenar por nível (maior primeiro) e pegar top 10
-                pericias.sort((a, b) => (b.nivel || b.level || 0) - (a.nivel || a.level || 0));
-                const topPericias = pericias.slice(0, 10);
+                // Ordenar por nível
+                const periciasOrdenadas = [...pericias].sort((a, b) => 
+                    (b.nivel || b.level || 0) - (a.nivel || a.level || 0)
+                ).slice(0, 10);
                 
-                topPericias.forEach((pericia, index) => {
-                    const nome = pericia.nome || pericia.name || `Perícia ${index + 1}`;
+                periciasOrdenadas.forEach((pericia) => {
+                    const nome = pericia.nome || pericia.name || 'Perícia';
                     const nivel = pericia.nivel || pericia.level || 0;
                     
                     const item = document.createElement('div');
@@ -370,47 +455,40 @@ class FichaGM {
                         <span class="nivel-pericia">${nivel}</span>
                     `;
                     
-                    // Tooltip com atributo base
                     if (pericia.atributo) {
                         item.title = `Atributo: ${pericia.atributo}`;
                     }
                     
                     container.appendChild(item);
                 });
-                
-                // Se tiver mais de 10, mostrar indicador
-                if (pericias.length > 10) {
-                    const maisItem = document.createElement('div');
-                    maisItem.className = 'pericia-item mais-itens';
-                    maisItem.innerHTML = `
-                        <span class="nome-pericia">...mais ${pericias.length - 10} perícias</span>
-                        <span class="nivel-pericia">↻</span>
-                    `;
-                    container.appendChild(maisItem);
-                }
             }
             
-            // Atualizar total
             if (totalElement) {
                 totalElement.textContent = pericias.length;
             }
             
         } catch (error) {
             console.error('❌ Erro ao processar perícias:', error);
-            container.innerHTML = '<div class="pericia-item"><span class="nome-pericia">Erro ao carregar perícias</span></div>';
+            container.innerHTML = `
+                <div class="pericia-item">
+                    <span class="nome-pericia">Erro ao carregar perícias</span>
+                    <span class="nivel-pericia">-</span>
+                </div>
+            `;
         }
     }
 
     atualizarStatusCombate() {
         // Esquiva
-        document.getElementById('gmEsquiva').textContent = 
-            dadosPersonagem.dodge || 10;
+        const esquiva = dadosPersonagem.esquiva || dadosPersonagem.dodge || 
+                       Math.floor((dadosPersonagem.destreza || 10) / 2) + 3;
+        document.getElementById('gmEsquiva').textContent = esquiva;
         
         // Dano
         document.getElementById('gmDanoGolpe').textContent = 
-            dadosPersonagem.thrust_damage || '1d-2';
+            dadosPersonagem.dano_gdp || dadosPersonagem.thrust_damage || '1d-2';
         document.getElementById('gmDanoArremesso').textContent = 
-            dadosPersonagem.swing_damage || '1d';
+            dadosPersonagem.dano_geb || dadosPersonagem.swing_damage || '1d';
     }
 
     atualizarAnotacoes() {
@@ -420,7 +498,7 @@ class FichaGM {
         }
     }
 
-    // ====== CONFIGURAÇÃO DE EVENTOS ======
+    // ====== EVENTOS ======
     configurarEventListeners() {
         // Tabs
         document.querySelectorAll('.tab').forEach(tab => {
@@ -441,7 +519,7 @@ class FichaGM {
         // Botão voltar
         document.getElementById('btnVoltarCampanha').addEventListener('click', (e) => {
             e.preventDefault();
-            this.voltarParaCampanha();
+            window.location.href = `campanha.html?id=${campanhaId}`;
         });
 
         // Botão sincronizar
@@ -449,60 +527,16 @@ class FichaGM {
             this.sincronizarDados();
         });
 
-        // Botão congelar
-        document.getElementById('btnCongelar').addEventListener('click', () => {
-            this.congelarPersonagem();
-        });
-
-        // Botão remover
-        document.getElementById('btnRemover').addEventListener('click', () => {
-            this.removerPersonagem();
-        });
-
         // Anotações
         document.getElementById('btnSalvarAnotacoes').addEventListener('click', () => {
             this.salvarAnotacoes();
         });
-
-        document.getElementById('btnLimparAnotacoes').addEventListener('click', () => {
-            this.limparAnotacoes();
-        });
-
-        // Controles de PV/PF (APENAS para visualização do GM)
-        document.querySelectorAll('.btn-controle').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const acao = e.target.dataset.acao;
-                const valor = parseInt(e.target.dataset.valor);
-                console.log(`Controle clicado: ${acao} ${valor}`);
-                // Por enquanto só log - jogador controla
-            });
-        });
-
-        // Input personalizado de PV
-        document.getElementById('btnAplicarPvCustom').addEventListener('click', () => {
-            const input = document.getElementById('inputPvCustom');
-            const valor = parseInt(input.value);
-            if (valor) {
-                console.log(`Aplicar PV personalizado: ${valor}`);
-                input.value = '';
-            }
-        });
     }
 
-    configurarModoVisualizacao() {
-        // Definir modo "ao-vivo" como padrão
-        this.alterarModoVisualizacao('ao-vivo');
-    }
-
-    // ====== FUNCIONALIDADES ======
     mudarAba(abaId) {
-        console.log(`Mudando para aba: ${abaId}`);
-        
-        // Remover classe ativa de todas as abas
         document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('ativo'));
         document.querySelectorAll('.conteudo-aba').forEach(aba => aba.classList.remove('ativo'));
 
-        // Adicionar classe ativa
         const tabAtiva = document.querySelector(`.tab[data-tab="${abaId}"]`);
         const abaAtiva = document.getElementById(`aba-${abaId}`);
         
@@ -513,109 +547,29 @@ class FichaGM {
     }
 
     alterarModoVisualizacao(modo) {
-        modoAtualizacao = modo;
-        console.log(`Modo de visualização alterado para: ${modo}`);
-        
-        // Atualizar botões
         document.querySelectorAll('.botao-visualizacao').forEach(btn => {
             btn.classList.remove('ativo');
             if (btn.dataset.visao === modo) {
                 btn.classList.add('ativo');
             }
         });
-        
-        // Configurar sincronização baseada no modo
-        if (modo === 'ao-vivo') {
-            this.iniciarSincronizacaoAutomatica();
-        } else {
-            this.pararSincronizacao();
-        }
     }
 
-    iniciarSincronizacaoAutomatica() {
-        console.log('🔄 Iniciando sincronização automática...');
-        
-        // Parar sincronização anterior se existir
-        if (intervaloAtualizacao) {
-            clearInterval(intervaloAtualizacao);
-        }
-        
-        // Sincronizar a cada 15 segundos
-        intervaloAtualizacao = setInterval(async () => {
-            if (isAtualizando) return;
-            
-            isAtualizando = true;
-            try {
-                await this.sincronizarDados();
-                console.log('✅ Sincronização automática concluída');
-            } catch (error) {
-                console.error('❌ Erro na sincronização automática:', error);
-            } finally {
-                isAtualizando = false;
-            }
-        }, 15000); // 15 segundos
-    }
-
-    pararSincronizacao() {
-        if (intervaloAtualizacao) {
-            clearInterval(intervaloAtualizacao);
-            intervaloAtualizacao = null;
-            console.log('⏹️ Sincronização automática parada');
-        }
+    iniciarSincronizacao() {
+        // Sincronizar a cada 30 segundos
+        intervaloAtualizacao = setInterval(() => {
+            this.sincronizarDados();
+        }, 30000);
     }
 
     async sincronizarDados() {
-        console.log('🔄 Sincronizando dados...');
-        this.mostrarMensagem('Sincronizando...', 'info');
-        
         try {
-            await this.carregarDadosIniciais();
-            this.mostrarMensagem('Dados atualizados!', 'sucesso');
+            await this.carregarDadosPersonagem();
+            await this.carregarDadosCampanha();
+            this.atualizarInterfaceCompleta();
+            this.mostrarMensagem('Dados atualizados', 'info');
         } catch (error) {
-            console.error('❌ Erro ao sincronizar:', error);
-            this.mostrarMensagem('Erro ao sincronizar', 'erro');
-        }
-    }
-
-    async congelarPersonagem() {
-        if (confirm('Congelar este personagem? O jogador não poderá fazer alterações.')) {
-            try {
-                const { error } = await supabase
-                    .from('campaign_characters')
-                    .update({ is_frozen: true })
-                    .eq('id', vinculoId);
-                
-                if (error) throw error;
-                
-                this.mostrarMensagem('Personagem congelado!', 'sucesso');
-            } catch (error) {
-                console.error('❌ Erro ao congelar:', error);
-                this.mostrarMensagem('Erro ao congelar', 'erro');
-            }
-        }
-    }
-
-    async removerPersonagem() {
-        if (confirm('ATENÇÃO: Remover este personagem da campanha?')) {
-            try {
-                const { error } = await supabase
-                    .from('campaign_characters')
-                    .update({ status: 'removed' })
-                    .eq('id', vinculoId);
-                
-                if (error) throw error;
-                
-                this.mostrarMensagem('Personagem removido', 'sucesso');
-                
-                // Voltar para campanha após 2 segundos
-                setTimeout(() => {
-                    this.voltarParaCampanha();
-                }, 2000);
-                
-            } catch (error) {
-                console.error('❌ Erro ao remover:', error);
-                this.mostrarMensagem('Erro ao remover', 'erro');
-            }
+            console.error('❌ Erro na sincronização:', error);
         }
     }
 
@@ -626,30 +580,15 @@ class FichaGM {
             const { error } = await supabase
                 .from('campaign_characters')
                 .update({ gm_notes: notas })
-                .eq('id', vinculoId);
+                .eq('character_id', personagemId)
+                .eq('campaign_id', campanhaId);
             
             if (error) throw error;
             
-            if (!dadosCampanha) dadosCampanha = {};
-            dadosCampanha.gm_notes = notas;
-            
             this.mostrarMensagem('Anotações salvas!', 'sucesso');
-            
         } catch (error) {
-            console.error('❌ Erro ao salvar anotações:', error);
             this.mostrarMensagem('Erro ao salvar', 'erro');
         }
-    }
-
-    limparAnotacoes() {
-        if (confirm('Limpar todas as anotações?')) {
-            document.getElementById('anotacoesGM').value = '';
-        }
-    }
-
-    voltarParaCampanha() {
-        const url = `campanha.html?id=${campanhaId}`;
-        window.location.href = url;
     }
 
     // ====== UTILITÁRIOS ======
@@ -664,11 +603,6 @@ class FichaGM {
     }
 
     mostrarMensagem(texto, tipo = 'info') {
-        // Remover mensagens anteriores
-        const mensagensAntigas = document.querySelectorAll('.mensagem-flutuante');
-        mensagensAntigas.forEach(msg => msg.remove());
-        
-        // Cores por tipo
         const cores = {
             sucesso: '#27ae60',
             erro: '#e74c3c',
@@ -676,7 +610,6 @@ class FichaGM {
             info: '#3498db'
         };
         
-        // Criar mensagem
         const mensagem = document.createElement('div');
         mensagem.className = 'mensagem-flutuante';
         mensagem.textContent = texto;
@@ -685,48 +618,23 @@ class FichaGM {
             top: 20px;
             right: 20px;
             padding: 15px 20px;
-            background: ${cores[tipo] || cores.info};
+            background: ${cores[tipo]};
             color: white;
             border-radius: 6px;
             z-index: 9999;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s ease;
         `;
         
         document.body.appendChild(mensagem);
         
-        // Remover após 3 segundos
         setTimeout(() => {
-            mensagem.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => mensagem.remove(), 300);
+            mensagem.remove();
         }, 3000);
     }
 }
 
 // ====== INICIALIZAÇÃO ======
-let sistemaFichaGM;
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Inicializando Ficha do GM...');
-    sistemaFichaGM = new FichaGM();
+    console.log('🚀 Inicializando Ficha GM...');
+    new FichaGM();
 });
-
-// Adicionar animações CSS se não existirem
-if (!document.querySelector('#animacoes-flutuantes')) {
-    const style = document.createElement('style');
-    style.id = 'animacoes-flutuantes';
-    style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
-}
-
-// Exportar para debug
-window.sistemaFichaGM = sistemaFichaGM;
