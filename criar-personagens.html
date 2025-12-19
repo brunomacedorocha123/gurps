@@ -3498,35 +3498,9 @@
                 
                 if (tabContent) {
                     tabContent.classList.add('active');
-                    inicializarSistemasAba(tabId);
                 }
             });
         });
-    }
-
-    function inicializarSistemaAbas() {
-        const activeTab = document.querySelector('.tab-btn.active');
-        if (activeTab) {
-            const tabId = activeTab.getAttribute('data-tab');
-            inicializarSistemasAba(tabId);
-        }
-    }
-
-    function inicializarSistemasAba(abaId) {
-        setTimeout(() => {
-            switch(abaId) {
-                case 'dashboard':
-                    if (typeof window.dashboard?.inicializar === 'function') {
-                        window.dashboard.inicializar();
-                    }
-                    break;
-                case 'resumo':
-                    if (typeof sincronizarResumo === 'function') {
-                        sincronizarResumo();
-                    }
-                    break;
-            }
-        }, 100);
     }
 
     function configurarEventListeners() {
@@ -3534,7 +3508,7 @@
         const btnExcluir = document.getElementById('btnExcluir');
         const btnSair = document.getElementById('btnSair');
         
-        if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
+        if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagemCompleto);
         if (btnExcluir) btnExcluir.addEventListener('click', solicitarExclusao);
         if (btnSair) btnSair.addEventListener('click', sairSemSalvar);
         
@@ -3545,6 +3519,13 @@
                     atualizarResumoNome(this.value);
                 }
             });
+        }
+    }
+
+    function inicializarSistemaAbas() {
+        const activeTab = document.querySelector('.tab-btn.active');
+        if (activeTab) {
+            const tabId = activeTab.getAttribute('data-tab');
         }
     }
 
@@ -3594,7 +3575,305 @@
         }
     }
 
-    async function salvarPersonagem() {
+    function coletarTodosDados() {
+        const dados = {};
+        
+        dados.nome = document.getElementById('charName')?.value || 'Novo Personagem';
+        dados.raca = document.getElementById('racaPersonagem')?.value || '';
+        dados.classe = document.getElementById('classePersonagem')?.value || '';
+        dados.nivel = document.getElementById('nivelPersonagem')?.value || '1';
+        dados.descricao = document.getElementById('descricaoPersonagem')?.value || '';
+        
+        dados.forca = parseInt(document.getElementById('ST')?.value) || 10;
+        dados.destreza = parseInt(document.getElementById('DX')?.value) || 10;
+        dados.inteligencia = parseInt(document.getElementById('IQ')?.value) || 10;
+        dados.saude = parseInt(document.getElementById('HT')?.value) || 10;
+        
+        dados.pontos_vida = obterValorNumerico('PVTotal', 10);
+        dados.pontos_fadiga = obterValorNumerico('PFTotal', 10);
+        dados.vontade = obterValorNumerico('VontadeTotal', 10);
+        dados.percepcao = obterValorNumerico('PercepcaoTotal', 10);
+        dados.deslocamento = obterValorDecimal('DeslocamentoTotal', 5.0);
+        
+        dados.pontos_totais = obterValorNumerico('pontosTotaisDashboard', 150);
+        dados.pontos_gastos = obterValorNumerico('pontosGastosDashboard', 0);
+        dados.pontos_disponiveis = obterValorNumerico('saldoDisponivelDashboard', 150);
+        
+        dados.limite_desvantagens = -50;
+        dados.desvantagens_atuais = 0;
+        
+        dados.pv_atual = obterValorNumerico('pvAtualDisplay', 10);
+        dados.pv_maximo = obterValorNumerico('pvMaxDisplay', 10);
+        dados.pf_atual = obterValorNumerico('pfAtualDisplay', 10);
+        dados.pf_maximo = obterValorNumerico('pfMaxDisplay', 10);
+        
+        dados.esquiva = obterValorNumerico('esquivaTotal', 8);
+        dados.bloqueio = obterValorNumerico('bloqueioTotal', 9);
+        dados.aparar = obterValorNumerico('apararTotal', 0);
+        
+        dados.dano_gdp = obterValorTexto('danoGDP', '1d-2');
+        dados.dano_geb = obterValorTexto('danoGEB', '1d');
+        
+        dados.aparencia = obterAparencia();
+        dados.custo_aparencia = obterCustoAparencia();
+        dados.riqueza = obterRiqueza();
+        dados.custo_riqueza = obterCustoRiqueza();
+        
+        dados.altura = parseFloat(document.getElementById('altura')?.value) || 1.70;
+        dados.peso = parseFloat(document.getElementById('peso')?.value) || 70;
+        
+        dados.vantagens = coletarVantagens();
+        dados.desvantagens = coletarDesvantagens();
+        dados.peculiaridades = coletarPeculiaridades();
+        dados.pericias = coletarPericias();
+        dados.tecnicas = coletarTecnicas();
+        dados.magias = coletarMagias();
+        dados.equipamentos = coletarEquipamentos();
+        
+        dados.total_vantagens = calcularTotalVantagens();
+        dados.total_desvantagens = calcularTotalDesvantagens();
+        dados.total_peculiaridades = calcularTotalPeculiaridades();
+        dados.total_pericias = coletarPericias().length;
+        dados.total_tecnicas = coletarTecnicas().length;
+        dados.total_magias = coletarMagias().length;
+        
+        dados.dinheiro = obterDinheiro();
+        dados.peso_atual = obterValorDecimal('pesoAtual', 0);
+        dados.peso_maximo = obterValorDecimal('pesoMaximo', 60);
+        
+        dados.avatar_url = obterAvatarUrl();
+        dados.status = 'Ativo';
+        
+        return dados;
+    }
+
+    function obterValorNumerico(id, padrao) {
+        const el = document.getElementById(id);
+        if (!el) return padrao;
+        const valor = el.textContent || el.value || padrao;
+        const num = parseInt(valor);
+        return isNaN(num) ? padrao : num;
+    }
+
+    function obterValorDecimal(id, padrao) {
+        const el = document.getElementById(id);
+        if (!el) return padrao;
+        const valor = el.textContent || el.value || padrao;
+        const num = parseFloat(valor);
+        return isNaN(num) ? padrao : num;
+    }
+
+    function obterValorTexto(id, padrao) {
+        const el = document.getElementById(id);
+        return el ? (el.textContent || el.value || padrao) : padrao;
+    }
+
+    function obterAparencia() {
+        const select = document.getElementById('nivelAparencia');
+        if (!select) return 'Comum';
+        const texto = select.options[select.selectedIndex].text;
+        return texto.split('[')[0].trim();
+    }
+
+    function obterCustoAparencia() {
+        const select = document.getElementById('nivelAparencia');
+        return select ? parseInt(select.value) || 0 : 0;
+    }
+
+    function obterRiqueza() {
+        const select = document.getElementById('nivelRiqueza');
+        if (!select) return 'Média';
+        const texto = select.options[select.selectedIndex].text;
+        return texto.split('[')[0].trim();
+    }
+
+    function obterCustoRiqueza() {
+        const select = document.getElementById('nivelRiqueza');
+        return select ? parseInt(select.value) || 0 : 0;
+    }
+
+    function obterDinheiro() {
+        const el = document.getElementById('dinheiroEquipamento') || 
+                   document.getElementById('dinheiro-disponivel');
+        if (!el) return 2000.00;
+        const texto = el.textContent || el.value || '$2000';
+        const limpo = texto.replace('$', '').replace(/\./g, '').replace(',', '.');
+        const num = parseFloat(limpo);
+        return isNaN(num) ? 2000.00 : num;
+    }
+
+    function obterAvatarUrl() {
+        if (window.dashboard && window.dashboard.fotoTemporaria) {
+            return window.dashboard.fotoTemporaria.dataUrl;
+        }
+        const img = document.querySelector('.avatar-img, .char-avatar img');
+        return img ? img.src : null;
+    }
+
+    function coletarVantagens() {
+        const lista = document.getElementById('vantagens-adquiridas');
+        const vantagens = [];
+        
+        if (lista) {
+            const itens = lista.querySelectorAll('.vantagem-adquirida, .item-adquirido');
+            itens.forEach(item => {
+                const nome = item.querySelector('.nome-vantagem, .item-nome')?.textContent?.trim();
+                if (nome && !nome.includes('Nenhuma')) {
+                    const custo = item.querySelector('.custo-vantagem, .item-pontos')?.textContent?.trim();
+                    const pontos = parseInt(custo?.replace(/[^\d-]/g, '')) || 0;
+                    vantagens.push({ nome, pontos });
+                }
+            });
+        }
+        
+        return JSON.stringify(vantagens);
+    }
+
+    function coletarDesvantagens() {
+        const lista = document.getElementById('desvantagens-adquiridas');
+        const desvantagens = [];
+        
+        if (lista) {
+            const itens = lista.querySelectorAll('.desvantagem-adquirida, .item-adquirido');
+            itens.forEach(item => {
+                const nome = item.querySelector('.nome-desvantagem, .item-nome')?.textContent?.trim();
+                if (nome && !nome.includes('Nenhuma')) {
+                    const custo = item.querySelector('.custo-desvantagem, .item-pontos')?.textContent?.trim();
+                    const pontos = parseInt(custo?.replace(/[^\d-]/g, '')) || 0;
+                    desvantagens.push({ nome, pontos });
+                }
+            });
+        }
+        
+        return JSON.stringify(desvantagens);
+    }
+
+    function coletarPeculiaridades() {
+        const lista = document.getElementById('lista-peculiaridades');
+        const peculiaridades = [];
+        
+        if (lista) {
+            const itens = lista.querySelectorAll('.peculiaridade-item');
+            itens.forEach(item => {
+                const texto = item.querySelector('.peculiaridade-texto')?.textContent?.trim();
+                if (texto) {
+                    peculiaridades.push({ texto });
+                }
+            });
+        }
+        
+        return JSON.stringify(peculiaridades);
+    }
+
+    function coletarPericias() {
+        const lista = document.getElementById('pericias-aprendidas');
+        const pericias = [];
+        
+        if (lista) {
+            const itens = lista.querySelectorAll('.pericia-adquirida');
+            itens.forEach(item => {
+                const nome = item.querySelector('.pericia-nome')?.textContent?.trim();
+                if (nome && !nome.includes('Nenhuma')) {
+                    const nivel = item.querySelector('.pericia-nivel')?.textContent?.trim();
+                    pericias.push({ 
+                        nome, 
+                        nivel: parseInt(nivel) || 0 
+                    });
+                }
+            });
+        }
+        
+        return JSON.stringify(pericias);
+    }
+
+    function coletarTecnicas() {
+        const lista = document.getElementById('tecnicas-aprendidas');
+        const tecnicas = [];
+        
+        if (lista) {
+            const itens = lista.querySelectorAll('.tecnica-adquirida');
+            itens.forEach(item => {
+                const nome = item.querySelector('.tecnica-nome')?.textContent?.trim();
+                if (nome && !nome.includes('Nenhuma')) {
+                    tecnicas.push({ nome });
+                }
+            });
+        }
+        
+        return JSON.stringify(tecnicas);
+    }
+
+    function coletarMagias() {
+        const lista = document.getElementById('magias-aprendidas');
+        const magias = [];
+        
+        if (lista) {
+            const itens = lista.querySelectorAll('.magia-adquirida');
+            itens.forEach(item => {
+                const nome = item.querySelector('.magia-nome')?.textContent?.trim();
+                if (nome && !nome.includes('Nenhuma')) {
+                    const nivel = item.querySelector('.magia-nivel')?.textContent?.trim();
+                    magias.push({ 
+                        nome, 
+                        nivel: parseInt(nivel) || 0 
+                    });
+                }
+            });
+        }
+        
+        return JSON.stringify(magias);
+    }
+
+    function coletarEquipamentos() {
+        const lista = document.getElementById('lista-equipamentos-adquiridos');
+        const equipamentos = [];
+        
+        if (lista) {
+            const itens = lista.querySelectorAll('.equipamento-adquirido');
+            itens.forEach(item => {
+                const nome = item.querySelector('.equipamento-nome')?.textContent?.trim();
+                if (nome && !nome.includes('Inventário Vazio')) {
+                    const peso = item.getAttribute('data-peso') || '0';
+                    equipamentos.push({ 
+                        nome, 
+                        peso: parseFloat(peso) || 0,
+                        equipado: item.classList.contains('equipado') 
+                    });
+                }
+            });
+        }
+        
+        return JSON.stringify(equipamentos);
+    }
+
+    function calcularTotalVantagens() {
+        try {
+            const vantagens = JSON.parse(coletarVantagens());
+            return vantagens.reduce((total, v) => total + (v.pontos || 0), 0);
+        } catch {
+            return 0;
+        }
+    }
+
+    function calcularTotalDesvantagens() {
+        try {
+            const desvantagens = JSON.parse(coletarDesvantagens());
+            return Math.abs(desvantagens.reduce((total, d) => total + (d.pontos || 0), 0));
+        } catch {
+            return 0;
+        }
+    }
+
+    function calcularTotalPeculiaridades() {
+        try {
+            const peculiaridades = JSON.parse(coletarPeculiaridades());
+            return peculiaridades.length;
+        } catch {
+            return 0;
+        }
+    }
+
+    async function salvarPersonagemCompleto() {
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -3608,30 +3887,9 @@
             btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
             btnSalvar.disabled = true;
             
-            let fotoDataURL = null;
-            if (window.dashboard && window.dashboard.fotoTemporaria) {
-                fotoDataURL = window.dashboard.fotoTemporaria.dataUrl;
-            }
-            
-            const dados = {
-                user_id: session.user.id,
-                nome: document.getElementById('charName')?.value || 'Novo Personagem',
-                raca: document.getElementById('racaPersonagem')?.value || '',
-                classe: document.getElementById('classePersonagem')?.value || '',
-                nivel: document.getElementById('nivelPersonagem')?.value || '',
-                descricao: document.getElementById('descricaoPersonagem')?.value || '',
-                avatar_url: fotoDataURL,
-                forca: parseInt(document.getElementById('ST')?.value) || 10,
-                destreza: parseInt(document.getElementById('DX')?.value) || 10,
-                inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
-                saude: parseInt(document.getElementById('HT')?.value) || 10,
-                pontos_totais: parseInt(document.getElementById('pontosTotaisDashboard')?.value) || 150,
-                pontos_gastos: parseInt(document.getElementById('pontosGastosDashboard')?.textContent) || 0,
-                pontos_disponiveis: parseInt(document.getElementById('saldoDisponivelDashboard')?.textContent) || 150,
-                limite_desvantagens: parseInt(document.getElementById('limiteDesvantagens')?.value) || -50,
-                desvantagens_atuais: parseInt(document.getElementById('desvantagensAtuais')?.textContent) || 0,
-                updated_at: new Date().toISOString()
-            };
+            const dados = coletarTodosDados();
+            dados.user_id = session.user.id;
+            dados.updated_at = new Date().toISOString();
             
             let resultado;
             
@@ -3685,6 +3943,8 @@
             } else if (error.message.includes('auth')) {
                 mensagemErro = 'Problema de autenticação. Faça login novamente.';
                 setTimeout(() => window.location.href = 'login.html', 2000);
+            } else if (error.message.includes('JSON')) {
+                mensagemErro = 'Erro nos dados do personagem. Verifique os campos preenchidos.';
             } else {
                 mensagemErro += error.message;
             }
@@ -3792,7 +4052,7 @@
         }, 500);
     });
 
-    window.salvarPersonagem = salvarPersonagem;
+    window.salvarPersonagemCompleto = salvarPersonagemCompleto;
     window.sincronizarResumo = sincronizarResumo;
     window.atualizarResumoNome = atualizarResumoNome;
 
