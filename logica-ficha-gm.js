@@ -2,89 +2,427 @@
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
-// Inicializar Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ====== ESTADO GLOBAL ======
+// ====== VARIÁVEIS GLOBAIS ======
 let dadosPersonagem = null;
 let dadosCampanha = null;
-let dadosAoVivo = null;
-let intervaloAtualizacao = null;
-let modoVisualizacao = 'instantaneo';
-let autoAtualizar = true;
-let intervaloAtualizacaoMs = 30000;
-
-// IDs da URL
 let personagemId = null;
 let campanhaId = null;
 let vinculoId = null;
-let gmId = null;
+let intervaloAtualizacao = null;
+let modoAtualizacao = 'ao-vivo'; // 'ao-vivo' ou 'campanha'
+let isAtualizando = false;
 
 // ====== CLASSE PRINCIPAL ======
-class SistemaFichaGM {
+class FichaGM {
     constructor() {
         this.init();
     }
 
     async init() {
         try {
-            // 1. Verificar autenticação
-            await this.verificarAutenticacao();
+            this.mostrarLoading();
             
-            // 2. Pegar parâmetros da URL
+            // 1. Pegar parâmetros da URL
             this.extrairParametrosURL();
             
-            // 3. Configurar interface
-            this.configurarEventListeners();
+            // 2. Verificar autenticação
+            await this.verificarAutenticacao();
             
-            // 4. Carregar dados iniciais
+            // 3. Carregar dados iniciais
             await this.carregarDadosIniciais();
             
-            // 5. Iniciar atualização automática se habilitado
-            if (autoAtualizar) {
-                this.iniciarAtualizacaoAutomatica();
-            }
+            // 4. Configurar eventos
+            this.configurarEventListeners();
+            
+            // 5. Configurar modo visualização
+            this.configurarModoVisualizacao();
             
             // 6. Esconder loading
             this.esconderLoading();
             
+            console.log('✅ Ficha GM inicializada com sucesso!');
+            
         } catch (error) {
-            console.error('Erro na inicialização:', error);
+            console.error('❌ Erro na inicialização:', error);
             this.mostrarMensagem(`Erro: ${error.message}`, 'erro');
             this.esconderLoading();
         }
     }
 
-    // ====== MÉTODOS DE AUTENTICAÇÃO ======
+    // ====== AUTENTICAÇÃO ======
     async verificarAutenticacao() {
         const { data: { session } } = await supabase.auth.getSession();
-        
         if (!session) {
             window.location.href = 'login.html';
-            throw new Error('Não autenticado');
+            throw new Error('Usuário não autenticado');
         }
-        
-        gmId = session.user.id;
-        console.log('GM autenticado:', gmId);
     }
 
     extrairParametrosURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        personagemId = urlParams.get('personagem');
-        campanhaId = urlParams.get('campanha');
-        vinculoId = urlParams.get('vinculo');
+        const params = new URLSearchParams(window.location.search);
+        personagemId = params.get('personagem');
+        campanhaId = params.get('campanha');
+        vinculoId = params.get('vinculo');
         
         if (!personagemId || !campanhaId) {
-            throw new Error('Parâmetros da URL inválidos');
+            throw new Error('Parâmetros inválidos na URL');
         }
         
-        console.log('IDs extraídos:', { personagemId, campanhaId, vinculoId });
+        console.log('📋 IDs:', { personagemId, campanhaId, vinculoId });
+    }
+
+    // ====== CARREGAMENTO DE DADOS ======
+    async carregarDadosIniciais() {
+        try {
+            console.log('📥 Buscando dados da view...');
+            
+            // Buscar dados da VIEW (já consolidado)
+            const { data: viewData, error: viewError } = await supabase
+                .from('gm_characters_view')
+                .select('*')
+                .eq('vinculo_id', vinculoId)
+                .single();
+            
+            if (viewError) {
+                console.error('Erro na view:', viewError);
+                throw viewError;
+            }
+            
+            dadosPersonagem = viewData;
+            console.log('✅ Dados da view carregados:', dadosPersonagem);
+            
+            // Buscar anotações do GM
+            const { data: campanhaData, error: campanhaError } = await supabase
+                .from('campaign_characters')
+                .select('gm_notes')
+                .eq('id', vinculoId)
+                .single();
+            
+            if (!campanhaError) {
+                dadosCampanha = campanhaData;
+            }
+            
+            // Atualizar interface
+            this.atualizarInterfaceCompleta();
+            
+        } catch (error) {
+            console.error('❌ Erro ao carregar dados:', error);
+            throw error;
+        }
+    }
+
+    // ====== ATUALIZAR INTERFACE ======
+    atualizarInterfaceCompleta() {
+        if (!dadosPersonagem) return;
+        
+        // 1. Informações básicas
+        this.atualizarInformacoesBasicas();
+        
+        // 2. Atributos
+        this.atualizarAtributos();
+        
+        // 3. Status (PV/PF/Dinheiro)
+        this.atualizarStatus();
+        
+        // 4. Vantagens
+        this.atualizarVantagens();
+        
+        // 5. Perícias (simplificado por enquanto)
+        this.atualizarPericias();
+        
+        // 6. Anotações
+        this.atualizarAnotacoes();
+        
+        // 7. Status de combate
+        this.atualizarStatusCombate();
+    }
+
+    atualizarInformacoesBasicas() {
+        document.getElementById('nomePersonagem').textContent = 
+            dadosPersonagem.character_name || 'Sem nome';
+        
+        document.getElementById('racaPersonagem').textContent = 
+            dadosPersonagem.race || 'Sem raça';
+        
+        // Tentar detectar "classe" da descrição
+        const descricao = dadosPersonagem.description || '';
+        const primeiraPalavra = descricao.split(' ')[0] || 'Aventureiro';
+        document.getElementById('classePersonagem').textContent = primeiraPalavra;
+        
+        document.getElementById('pontosPersonagem').textContent = 
+            `${dadosPersonagem.total_points || 0} pontos`;
+        
+        document.getElementById('descricaoPersonagem').textContent = 
+            descricao || 'Sem descrição disponível.';
+        
+        // Campanha e Jogador
+        document.getElementById('nomeCampanha').textContent = 
+            dadosPersonagem.campaign_name || 'Campanha';
+        
+        document.getElementById('nomeJogador').textContent = 
+            dadosPersonagem.player_username || 'Jogador';
+        
+        // Foto do personagem
+        if (dadosPersonagem.avatar_url) {
+            const img = document.getElementById('fotoPersonagem');
+            img.src = dadosPersonagem.avatar_url;
+            img.style.display = 'block';
+            document.getElementById('placeholderFoto').style.display = 'none';
+        }
+    }
+
+    atualizarAtributos() {
+        // ATRIBUTOS PRINCIPAIS (já calculados pelo jogador)
+        const ST = dadosPersonagem.st || 10;
+        const DX = dadosPersonagem.dx || 10;
+        const IQ = dadosPersonagem.iq || 10;
+        const HT = dadosPersonagem.ht || 10;
+        
+        document.getElementById('gmST').textContent = ST;
+        document.getElementById('gmDX').textContent = DX;
+        document.getElementById('gmIQ').textContent = IQ;
+        document.getElementById('gmHT').textContent = HT;
+        
+        // Modificadores (calculados conforme sua regra)
+        const STMod = (ST - 10) * 10; // 10 pontos por +1 ST
+        const DXMod = (DX - 10) * 20; // 20 pontos por +1 DX
+        const IQMod = (IQ - 10) * 20; // 20 pontos por +1 IQ
+        const HTMod = (HT - 10) * 10; // 10 pontos por +1 HT
+        
+        document.getElementById('gmSTMod').textContent = `[${STMod >= 0 ? '+' : ''}${STMod}]`;
+        document.getElementById('gmDXMod').textContent = `[${DXMod >= 0 ? '+' : ''}${DXMod}]`;
+        document.getElementById('gmIQMod').textContent = `[${IQMod >= 0 ? '+' : ''}${IQMod}]`;
+        document.getElementById('gmHTMod').textContent = `[${HTMod >= 0 ? '+' : ''}${HTMod}]`;
+        
+        // Vontade e Percepção (baseado em IQ)
+        const vontade = dadosPersonagem.vontade || IQ;
+        const percepcao = dadosPersonagem.percepcao || IQ;
+        
+        document.getElementById('gmVontade').textContent = vontade;
+        document.getElementById('gmPercepcao').textContent = percepcao;
+        
+        // Carga (removendo "lb" conforme solicitado)
+        document.getElementById('gmCargaAtual').textContent = 
+            dadosPersonagem.current_weight?.toString()?.replace(' lb', '') || '0';
+        
+        document.getElementById('gmCargaMaxima').textContent = 
+            dadosPersonagem.max_weight?.toString()?.replace(' lb', '') || '0';
+    }
+
+    atualizarStatus() {
+        // PV - Pontos de Vida
+        const pvAtual = dadosPersonagem.current_hp || 10;
+        const pvMaximo = dadosPersonagem.max_hp || 10;
+        
+        document.getElementById('pvAtualGM').textContent = pvAtual;
+        document.getElementById('pvMaximoGM').textContent = pvMaximo;
+        
+        // Atualizar indicador de status PV
+        const pvPercent = (pvAtual / pvMaximo) * 100;
+        const indicator = document.getElementById('pvStatus');
+        
+        if (pvPercent > 50) {
+            indicator.className = 'status-indicator';
+            indicator.style.background = '#27ae60';
+        } else if (pvPercent > 25) {
+            indicator.className = 'status-indicator baixo';
+            indicator.style.background = '#f39c12';
+        } else {
+            indicator.className = 'status-indicator critico';
+            indicator.style.background = '#e74c3c';
+        }
+        
+        // PF - Pontos de Fadiga
+        const pfAtual = dadosPersonagem.current_fp || 10;
+        const pfMaximo = dadosPersonagem.max_fp || 10;
+        
+        document.getElementById('pfAtualGM').textContent = pfAtual;
+        document.getElementById('pfMaximoGM').textContent = pfMaximo;
+        
+        // Dinheiro
+        const dinheiro = dadosPersonagem.money || 0;
+        document.getElementById('dinheiroGM').textContent = `$${dinheiro}`;
+        
+        // Deslocamento
+        document.getElementById('gmDeslocamento').textContent = 
+            dadosPersonagem.basic_move || 5;
+        document.getElementById('gmBonusMovimento').textContent = 
+            dadosPersonagem.move_bonus || 0;
+    }
+
+    atualizarVantagens() {
+        const container = document.getElementById('listaVantagensGM');
+        const totalElement = document.getElementById('totalVantagensGM');
+        
+        if (!container) return;
+        
+        let vantagens = [];
+        let totalPontos = 0;
+        
+        try {
+            // Vantagens podem vir como string JSON ou já como array
+            if (typeof dadosPersonagem.advantages === 'string') {
+                vantagens = JSON.parse(dadosPersonagem.advantages || '[]');
+            } else if (Array.isArray(dadosPersonagem.advantages)) {
+                vantagens = dadosPersonagem.advantages;
+            }
+            
+            console.log('🎯 Vantagens carregadas:', vantagens);
+            
+            // Limpar container
+            container.innerHTML = '';
+            
+            if (vantagens.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'vantagem-item';
+                emptyItem.innerHTML = `
+                    <span class="nome-vantagem">Nenhuma vantagem</span>
+                    <span class="custo-vantagem">0</span>
+                `;
+                container.appendChild(emptyItem);
+                totalPontos = 0;
+            } else {
+                // Ordenar por custo (maior primeiro)
+                vantagens.sort((a, b) => (b.custo || b.cost || 0) - (a.custo || a.cost || 0));
+                
+                vantagens.forEach((vantagem, index) => {
+                    const nome = vantagem.nome || vantagem.name || `Vantagem ${index + 1}`;
+                    const custo = vantagem.custo || vantagem.cost || 0;
+                    totalPontos += custo;
+                    
+                    const item = document.createElement('div');
+                    item.className = 'vantagem-item';
+                    
+                    item.innerHTML = `
+                        <span class="nome-vantagem">${nome}</span>
+                        <span class="custo-vantagem">${custo >= 0 ? '+' : ''}${custo}</span>
+                    `;
+                    
+                    // Tooltip com descrição se existir
+                    if (vantagem.descricao || vantagem.description) {
+                        item.title = vantagem.descricao || vantagem.description || '';
+                    }
+                    
+                    container.appendChild(item);
+                });
+            }
+            
+            // Atualizar total
+            if (totalElement) {
+                totalElement.textContent = vantagens.length;
+            }
+            
+            // Atualizar total de pontos em atributos também
+            document.getElementById('pontosTotais').textContent = dadosPersonagem.total_points || 0;
+            document.getElementById('pontosGastos').textContent = dadosPersonagem.spent_points || 0;
+            document.getElementById('pontosDisponiveis').textContent = dadosPersonagem.available_points || 0;
+            
+        } catch (error) {
+            console.error('❌ Erro ao processar vantagens:', error);
+            container.innerHTML = '<div class="vantagem-item"><span class="nome-vantagem">Erro ao carregar vantagens</span></div>';
+        }
+    }
+
+    atualizarPericias() {
+        const container = document.getElementById('listaPericiasGM');
+        const totalElement = document.getElementById('totalPericias');
+        
+        if (!container) return;
+        
+        let pericias = [];
+        
+        try {
+            if (typeof dadosPersonagem.skills === 'string') {
+                pericias = JSON.parse(dadosPersonagem.skills || '[]');
+            } else if (Array.isArray(dadosPersonagem.skills)) {
+                pericias = dadosPersonagem.skills;
+            }
+            
+            console.log('🎯 Perícias carregadas:', pericias.length);
+            
+            // Limpar container
+            container.innerHTML = '';
+            
+            if (pericias.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'pericia-item';
+                emptyItem.innerHTML = `
+                    <span class="nome-pericia">Nenhuma perícia</span>
+                    <span class="nivel-pericia">-</span>
+                `;
+                container.appendChild(emptyItem);
+            } else {
+                // Ordenar por nível (maior primeiro) e pegar top 10
+                pericias.sort((a, b) => (b.nivel || b.level || 0) - (a.nivel || a.level || 0));
+                const topPericias = pericias.slice(0, 10);
+                
+                topPericias.forEach((pericia, index) => {
+                    const nome = pericia.nome || pericia.name || `Perícia ${index + 1}`;
+                    const nivel = pericia.nivel || pericia.level || 0;
+                    
+                    const item = document.createElement('div');
+                    item.className = 'pericia-item';
+                    
+                    item.innerHTML = `
+                        <span class="nome-pericia">${nome}</span>
+                        <span class="nivel-pericia">${nivel}</span>
+                    `;
+                    
+                    // Tooltip com atributo base
+                    if (pericia.atributo) {
+                        item.title = `Atributo: ${pericia.atributo}`;
+                    }
+                    
+                    container.appendChild(item);
+                });
+                
+                // Se tiver mais de 10, mostrar indicador
+                if (pericias.length > 10) {
+                    const maisItem = document.createElement('div');
+                    maisItem.className = 'pericia-item mais-itens';
+                    maisItem.innerHTML = `
+                        <span class="nome-pericia">...mais ${pericias.length - 10} perícias</span>
+                        <span class="nivel-pericia">↻</span>
+                    `;
+                    container.appendChild(maisItem);
+                }
+            }
+            
+            // Atualizar total
+            if (totalElement) {
+                totalElement.textContent = pericias.length;
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao processar perícias:', error);
+            container.innerHTML = '<div class="pericia-item"><span class="nome-pericia">Erro ao carregar perícias</span></div>';
+        }
+    }
+
+    atualizarStatusCombate() {
+        // Esquiva
+        document.getElementById('gmEsquiva').textContent = 
+            dadosPersonagem.dodge || 10;
+        
+        // Dano
+        document.getElementById('gmDanoGolpe').textContent = 
+            dadosPersonagem.thrust_damage || '1d-2';
+        document.getElementById('gmDanoArremesso').textContent = 
+            dadosPersonagem.swing_damage || '1d';
+    }
+
+    atualizarAnotacoes() {
+        const textarea = document.getElementById('anotacoesGM');
+        if (textarea && dadosCampanha?.gm_notes) {
+            textarea.value = dadosCampanha.gm_notes;
+        }
     }
 
     // ====== CONFIGURAÇÃO DE EVENTOS ======
     configurarEventListeners() {
-        // Tabs de navegação
+        // Tabs
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 const tabId = e.currentTarget.dataset.tab;
@@ -100,40 +438,23 @@ class SistemaFichaGM {
             });
         });
 
-        // Controles de PV/PF
-        document.querySelectorAll('.btn-controle').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const acao = e.target.dataset.acao;
-                const valor = parseInt(e.target.dataset.valor);
-                this.aplicarModificador(acao, valor);
-            });
-        });
-
-        // Botão de PV customizado
-        document.getElementById('btnAplicarPvCustom').addEventListener('click', () => {
-            const input = document.getElementById('inputPvCustom');
-            const valor = parseInt(input.value);
-            if (valor) {
-                this.aplicarModificador('cura', valor);
-                input.value = '';
-            }
-        });
-
         // Botão voltar
         document.getElementById('btnVoltarCampanha').addEventListener('click', (e) => {
             e.preventDefault();
             this.voltarParaCampanha();
         });
 
-        // Botões do cabeçalho
+        // Botão sincronizar
         document.getElementById('btnSincronizar').addEventListener('click', () => {
             this.sincronizarDados();
         });
 
+        // Botão congelar
         document.getElementById('btnCongelar').addEventListener('click', () => {
             this.congelarPersonagem();
         });
 
+        // Botão remover
         document.getElementById('btnRemover').addEventListener('click', () => {
             this.removerPersonagem();
         });
@@ -147,696 +468,53 @@ class SistemaFichaGM {
             this.limparAnotacoes();
         });
 
-        // Filtro de perícias
-        document.getElementById('filtroPericias').addEventListener('input', (e) => {
-            this.filtrarPericias(e.target.value);
-        });
-
-        document.getElementById('filtroAtributo').addEventListener('change', (e) => {
-            this.filtrarPericiasPorAtributo(e.target.value);
-        });
-
-        // Modais
-        document.querySelectorAll('.fechar-modal').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.fecharModal('modal-config');
-                this.fecharModal('modal-confirmacao');
+        // Controles de PV/PF (APENAS para visualização do GM)
+        document.querySelectorAll('.btn-controle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const acao = e.target.dataset.acao;
+                const valor = parseInt(e.target.dataset.valor);
+                console.log(`Controle clicado: ${acao} ${valor}`);
+                // Por enquanto só log - jogador controla
             });
         });
 
-        document.getElementById('btnFecharConfig').addEventListener('click', () => {
-            this.fecharModal('modal-config');
-        });
-
-        document.getElementById('btnSalvarConfig').addEventListener('click', () => {
-            this.salvarConfiguracoes();
-        });
-
-        document.getElementById('btnCancelarAcao').addEventListener('click', () => {
-            this.fecharModal('modal-confirmacao');
-        });
-
-        // Fechar modal ao clicar fora
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                this.fecharModal('modal-config');
-                this.fecharModal('modal-confirmacao');
+        // Input personalizado de PV
+        document.getElementById('btnAplicarPvCustom').addEventListener('click', () => {
+            const input = document.getElementById('inputPvCustom');
+            const valor = parseInt(input.value);
+            if (valor) {
+                console.log(`Aplicar PV personalizado: ${valor}`);
+                input.value = '';
             }
         });
     }
 
-    // ====== CARREGAMENTO DE DADOS ======
-    async carregarDadosIniciais() {
-        try {
-            // Carregar dados da view
-            const dadosView = await this.buscarDadosView();
-            dadosPersonagem = dadosView;
-            
-            // Carregar dados ao vivo
-            dadosAoVivo = await this.buscarDadosAoVivo();
-            
-            // Carregar dados da campanha
-            dadosCampanha = await this.buscarDadosCampanha();
-            
-            // Atualizar interface
-            this.atualizarInterfaceCompleta();
-            
-            // Registrar acesso
-            await this.registrarAcessoGM();
-            
-        } catch (error) {
-            throw new Error(`Falha ao carregar dados: ${error.message}`);
-        }
-    }
-
-    async buscarDadosView() {
-        console.log('Buscando dados da view para vinculo:', vinculoId);
-        
-        const { data, error } = await supabase
-            .from('gm_characters_view')
-            .select('*')
-            .eq('vinculo_id', vinculoId)
-            .single();
-
-        if (error) {
-            console.error('Erro na view:', error);
-            throw error;
-        }
-
-        console.log('Dados da view:', data);
-        return data;
-    }
-
-    async buscarDadosAoVivo() {
-        const { data, error } = await supabase
-            .from('characters')
-            .select('*')
-            .eq('id', personagemId)
-            .single();
-
-        if (error) throw error;
-        return data;
-    }
-
-    async buscarDadosCampanha() {
-        const { data, error } = await supabase
-            .from('campaign_characters')
-            .select('gm_notes, is_frozen, status')
-            .eq('id', vinculoId)
-            .single();
-
-        if (error) throw error;
-        return data;
-    }
-
-    // ====== ATUALIZAÇÃO DA INTERFACE ======
-    atualizarInterfaceCompleta() {
-        if (!dadosPersonagem) return;
-
-        // Informações básicas
-        this.atualizarInformacoesBasicas();
-        
-        // Atributos e status
-        this.atualizarAtributos();
-        this.atualizarStatus();
-        this.atualizarPontuacao();
-        
-        // Habilidades
-        this.atualizarVantagens();
-        this.atualizarDesvantagens();
-        this.atualizarPericias();
-        this.atualizarMagias();
-        
-        // Equipamento e inventário
-        this.atualizarEquipamento();
-        this.atualizarInventario();
-        
-        // Combate
-        this.atualizarCombate();
-        
-        // Anotações
-        this.atualizarAnotacoes();
-        
-        // Informações da campanha
-        this.atualizarInfoCampanha();
-    }
-
-    atualizarInformacoesBasicas() {
-        document.getElementById('nomePersonagem').textContent = 
-            dadosPersonagem.character_name || 'Sem nome';
-        
-        document.getElementById('racaPersonagem').textContent = 
-            dadosPersonagem.race || 'Sem raça';
-        
-        document.getElementById('classePersonagem').textContent = 
-            dadosPersonagem.description?.split(' ')[0] || 'Aventureiro';
-        
-        document.getElementById('pontosPersonagem').textContent = 
-            `${dadosPersonagem.total_points || 0} pontos`;
-        
-        document.getElementById('descricaoPersonagem').textContent = 
-            dadosPersonagem.description || 'Sem descrição.';
-        
-        // Atualizar foto
-        if (dadosPersonagem.avatar_url) {
-            const img = document.getElementById('fotoPersonagem');
-            img.src = dadosPersonagem.avatar_url;
-            img.style.display = 'block';
-            document.getElementById('placeholderFoto').style.display = 'none';
-        }
-        
-        // Atualizar nomes da campanha e jogador
-        document.getElementById('nomeCampanha').textContent = 
-            dadosPersonagem.campaign_name || 'Campanha';
-        
-        document.getElementById('nomeJogador').textContent = 
-            dadosPersonagem.player_username || 'Jogador';
-    }
-
-    atualizarAtributos() {
-        // Atributos principais
-        document.getElementById('gmST').textContent = dadosPersonagem.st || 10;
-        document.getElementById('gmDX').textContent = dadosPersonagem.dx || 10;
-        document.getElementById('gmIQ').textContent = dadosPersonagem.iq || 10;
-        document.getElementById('gmHT').textContent = dadosPersonagem.ht || 10;
-        
-        // Vontade e Percepção (baseados em IQ)
-        const iq = dadosPersonagem.iq || 10;
-        document.getElementById('gmVontade').textContent = iq;
-        document.getElementById('gmPercepcao').textContent = iq;
-        
-        // Atributos detalhados
-        document.getElementById('detalheST').textContent = dadosPersonagem.st || 10;
-        document.getElementById('detalheDX').textContent = dadosPersonagem.dx || 10;
-        document.getElementById('detalheIQ').textContent = dadosPersonagem.iq || 10;
-        document.getElementById('detalheHT').textContent = dadosPersonagem.ht || 10;
-    }
-
-    atualizarStatus() {
-        // PV
-        const pvAtual = dadosAoVivo?.pv_atual || dadosPersonagem.current_hp || 10;
-        const pvMaximo = dadosPersonagem.max_hp || 10;
-        
-        document.getElementById('pvAtualGM').textContent = pvAtual;
-        document.getElementById('pvMaximoGM').textContent = pvMaximo;
-        
-        // Atualizar indicador de status
-        const pvPercent = (pvAtual / pvMaximo) * 100;
-        const indicator = document.getElementById('pvStatus');
-        
-        if (pvPercent > 50) {
-            indicator.className = 'status-indicator';
-        } else if (pvPercent > 25) {
-            indicator.className = 'status-indicator baixo';
-        } else {
-            indicator.className = 'status-indicator critico';
-        }
-        
-        // PF
-        const pfAtual = dadosAoVivo?.pf_atual || dadosPersonagem.current_fp || 10;
-        const pfMaximo = dadosPersonagem.max_fp || 10;
-        
-        document.getElementById('pfAtualGM').textContent = pfAtual;
-        document.getElementById('pfMaximoGM').textContent = pfMaximo;
-        
-        // Dinheiro
-        const dinheiro = dadosPersonagem.money || 0;
-        document.getElementById('dinheiroGM').textContent = `$${dinheiro}`;
-        
-        // Movimento e carga
-        document.getElementById('gmDeslocamento').textContent = 
-            dadosPersonagem.basic_move || 5;
-        
-        document.getElementById('gmBonusMovimento').textContent = 
-            dadosPersonagem.move_bonus || 0;
-        
-        document.getElementById('gmCargaAtual').textContent = 
-            `${dadosPersonagem.current_weight || 0} lb`;
-        
-        document.getElementById('gmCargaMaxima').textContent = 
-            `${dadosPersonagem.max_weight || 0} lb`;
-    }
-
-    atualizarPontuacao() {
-        document.getElementById('pontosTotais').textContent = 
-            dadosPersonagem.total_points || 0;
-        
-        document.getElementById('pontosGastos').textContent = 
-            dadosPersonagem.spent_points || 0;
-        
-        document.getElementById('pontosDisponiveis').textContent = 
-            dadosPersonagem.available_points || 0;
-        
-        document.getElementById('limiteDesvantagens').textContent = 
-            dadosPersonagem.disadvantage_limit || -40;
-        
-        document.getElementById('desvantagensAtuais').textContent = 
-            dadosPersonagem.current_disadvantages || 0;
-    }
-
-    atualizarVantagens() {
-        const container = document.getElementById('listaVantagensGM');
-        const totalElement = document.getElementById('totalVantagensGM');
-        
-        if (!container) return;
-        
-        let vantagens = [];
-        try {
-            if (typeof dadosPersonagem.advantages === 'string') {
-                vantagens = JSON.parse(dadosPersonagem.advantages || '[]');
-            } else if (Array.isArray(dadosPersonagem.advantages)) {
-                vantagens = dadosPersonagem.advantages;
-            }
-        } catch (e) {
-            console.error('Erro ao parsear vantagens:', e);
-        }
-        
-        container.innerHTML = '';
-        
-        if (vantagens.length === 0) {
-            const emptyItem = document.createElement('div');
-            emptyItem.className = 'vantagem-item';
-            emptyItem.innerHTML = `
-                <span class="nome-vantagem">Nenhuma vantagem</span>
-                <span class="custo-vantagem">0</span>
-            `;
-            container.appendChild(emptyItem);
-        } else {
-            vantagens.forEach(vantagem => {
-                const item = document.createElement('div');
-                item.className = 'vantagem-item';
-                item.innerHTML = `
-                    <span class="nome-vantagem">${vantagem.nome || vantagem.name || 'Vantagem'}</span>
-                    <span class="custo-vantagem">${vantagem.custo || vantagem.cost || 0}</span>
-                `;
-                container.appendChild(item);
-            });
-        }
-        
-        if (totalElement) {
-            totalElement.textContent = vantagens.length;
-        }
-    }
-
-    atualizarDesvantagens() {
-        const container = document.getElementById('listaDesvantagensGM');
-        const totalElement = document.getElementById('totalDesvantagensGM');
-        
-        if (!container) return;
-        
-        let desvantagens = [];
-        try {
-            if (typeof dadosPersonagem.disadvantages === 'string') {
-                desvantagens = JSON.parse(dadosPersonagem.disadvantages || '[]');
-            } else if (Array.isArray(dadosPersonagem.disadvantages)) {
-                desvantagens = dadosPersonagem.disadvantages;
-            }
-        } catch (e) {
-            console.error('Erro ao parsear desvantagens:', e);
-        }
-        
-        container.innerHTML = '';
-        
-        if (desvantagens.length === 0) {
-            const emptyItem = document.createElement('div');
-            emptyItem.className = 'desvantagem-item';
-            emptyItem.innerHTML = `
-                <span class="nome-desvantagem">Nenhuma desvantagem</span>
-                <span class="custo-desvantagem">0</span>
-            `;
-            container.appendChild(emptyItem);
-        } else {
-            desvantagens.forEach(desvantagem => {
-                const item = document.createElement('div');
-                item.className = 'desvantagem-item';
-                item.innerHTML = `
-                    <span class="nome-desvantagem">${desvantagem.nome || desvantagem.name || 'Desvantagem'}</span>
-                    <span class="custo-desvantagem">${desvantagem.custo || desvantagem.cost || 0}</span>
-                `;
-                container.appendChild(item);
-            });
-        }
-        
-        if (totalElement) {
-            totalElement.textContent = desvantagens.length;
-        }
-    }
-
-    atualizarPericias() {
-        const containerResumo = document.getElementById('listaPericiasGM');
-        const containerDetalhado = document.getElementById('tabelaPericiasGM');
-        const totalElement = document.getElementById('totalPericias');
-        
-        if (!containerResumo || !containerDetalhado) return;
-        
-        let pericias = [];
-        try {
-            if (typeof dadosPersonagem.skills === 'string') {
-                pericias = JSON.parse(dadosPersonagem.skills || '[]');
-            } else if (Array.isArray(dadosPersonagem.skills)) {
-                pericias = dadosPersonagem.skills;
-            }
-        } catch (e) {
-            console.error('Erro ao parsear perícias:', e);
-        }
-        
-        // Atualizar resumo (top 5 perícias)
-        containerResumo.innerHTML = '';
-        const periciasOrdenadas = [...pericias]
-            .sort((a, b) => (b.nivel || 0) - (a.nivel || 0))
-            .slice(0, 5);
-        
-        periciasOrdenadas.forEach(pericia => {
-            const item = document.createElement('div');
-            item.className = 'pericia-item';
-            item.innerHTML = `
-                <span class="nome-pericia">${pericia.nome || pericia.name || 'Perícia'}</span>
-                <span class="nivel-pericia">${pericia.nivel || pericia.level || 0}</span>
-            `;
-            containerResumo.appendChild(item);
-        });
-        
-        if (periciasOrdenadas.length === 0) {
-            const emptyItem = document.createElement('div');
-            emptyItem.className = 'pericia-item';
-            emptyItem.innerHTML = `
-                <span class="nome-pericia">Nenhuma perícia</span>
-                <span class="nivel-pericia">-</span>
-            `;
-            containerResumo.appendChild(emptyItem);
-        }
-        
-        // Atualizar tabela detalhada
-        containerDetalhado.innerHTML = '';
-        
-        // Cabeçalho da tabela
-        const cabecalho = document.createElement('div');
-        cabecalho.className = 'linha-tabela cabecalho-tabela';
-        cabecalho.innerHTML = `
-            <div class="coluna">Perícia</div>
-            <div class="coluna">Atributo</div>
-            <div class="coluna">Nível</div>
-            <div class="coluna">Custo</div>
-        `;
-        containerDetalhado.appendChild(cabecalho);
-        
-        // Linhas da tabela
-        pericias.forEach(pericia => {
-            const linha = document.createElement('div');
-            linha.className = 'linha-tabela';
-            linha.innerHTML = `
-                <div class="coluna">${pericia.nome || pericia.name || 'Perícia'}</div>
-                <div class="coluna">${pericia.atributo || 'DX'}</div>
-                <div class="coluna">${pericia.nivel || pericia.level || 0}</div>
-                <div class="coluna">${pericia.custo || pericia.cost || 0}</div>
-            `;
-            containerDetalhado.appendChild(linha);
-        });
-        
-        if (pericias.length === 0) {
-            const linha = document.createElement('div');
-            linha.className = 'linha-tabela';
-            linha.innerHTML = `
-                <div class="coluna" colspan="4">Nenhuma perícia cadastrada</div>
-            `;
-            containerDetalhado.appendChild(linha);
-        }
-        
-        if (totalElement) {
-            totalElement.textContent = pericias.length;
-        }
-    }
-
-    atualizarMagias() {
-        const containerResumo = document.getElementById('listaMagiasGM');
-        const containerDetalhado = document.getElementById('listaMagiasDetalhado');
-        const totalResumo = document.getElementById('totalMagias');
-        const totalDetalhado = document.getElementById('totalMagiasDetalhado');
-        
-        if (!containerResumo || !containerDetalhado) return;
-        
-        let magias = [];
-        try {
-            if (typeof dadosPersonagem.spells === 'string') {
-                magias = JSON.parse(dadosPersonagem.spells || '[]');
-            } else if (Array.isArray(dadosPersonagem.spells)) {
-                magias = dadosPersonagem.spells;
-            }
-        } catch (e) {
-            console.error('Erro ao parsear magias:', e);
-        }
-        
-        // Atualizar resumo (top 5 magias)
-        containerResumo.innerHTML = '';
-        const magiasOrdenadas = [...magias]
-            .sort((a, b) => (b.nivel || 0) - (a.nivel || 0))
-            .slice(0, 5);
-        
-        magiasOrdenadas.forEach(magia => {
-            const item = document.createElement('div');
-            item.className = 'magia-item';
-            item.innerHTML = `
-                <span class="nome-magia">${magia.nome || magia.name || 'Magia'}</span>
-                <span class="nivel-magia">${magia.nivel || magia.level || 0}</span>
-            `;
-            containerResumo.appendChild(item);
-        });
-        
-        if (magiasOrdenadas.length === 0) {
-            const emptyItem = document.createElement('div');
-            emptyItem.className = 'magia-item';
-            emptyItem.innerHTML = `
-                <span class="nome-magia">Nenhuma magia</span>
-                <span class="nivel-magia">-</span>
-            `;
-            containerResumo.appendChild(emptyItem);
-        }
-        
-        // Atualizar lista detalhada
-        containerDetalhado.innerHTML = '';
-        
-        magias.forEach(magia => {
-            const item = document.createElement('div');
-            item.className = 'magia-item';
-            item.innerHTML = `
-                <div class="magia-info">
-                    <strong>${magia.nome || magia.name || 'Magia'}</strong>
-                    <div class="magia-detalhes">
-                        <span>Nível: ${magia.nivel || magia.level || 0}</span>
-                        <span>Custo: ${magia.custo || magia.cost || 0}</span>
-                        <span>Duração: ${magia.duracao || 'Instantânea'}</span>
-                    </div>
-                    ${magia.descricao ? `<p class="magia-descricao">${magia.descricao}</p>` : ''}
-                </div>
-            `;
-            containerDetalhado.appendChild(item);
-        });
-        
-        if (magias.length === 0) {
-            const emptyItem = document.createElement('div');
-            emptyItem.className = 'magia-item';
-            emptyItem.innerHTML = `
-                <div class="magia-info">
-                    <strong>Nenhuma magia conhecida</strong>
-                </div>
-            `;
-            containerDetalhado.appendChild(emptyItem);
-        }
-        
-        // Atualizar totais
-        if (totalResumo) totalResumo.textContent = magias.length;
-        if (totalDetalhado) totalDetalhado.textContent = magias.length;
-    }
-
-    atualizarEquipamento() {
-        const containerRapido = document.getElementById('listaEquipamentoRapido');
-        const containerDetalhado = document.getElementById('tabelaEquipamentoGM');
-        const pesoAtual = document.getElementById('pesoAtualGM');
-        const pesoMaximo = document.getElementById('pesoMaximoGM');
-        
-        if (!containerRapido || !containerDetalhado) return;
-        
-        let equipamentos = [];
-        try {
-            if (typeof dadosPersonagem.equipment === 'string') {
-                equipamentos = JSON.parse(dadosPersonagem.equipment || '[]');
-            } else if (Array.isArray(dadosPersonagem.equipment)) {
-                equipamentos = dadosPersonagem.equipment;
-            }
-        } catch (e) {
-            console.error('Erro ao parsear equipamentos:', e);
-        }
-        
-        // Atualizar equipamento rápido (top 5 itens)
-        containerRapido.innerHTML = '';
-        const equipamentosRapidos = equipamentos.slice(0, 5);
-        
-        equipamentosRapidos.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'equipamento-item';
-            div.innerHTML = `
-                <span class="nome-equipamento">${item.nome || item.name || 'Item'}</span>
-                <span class="peso-equipamento">${item.peso || item.weight || 0} lb</span>
-            `;
-            containerRapido.appendChild(div);
-        });
-        
-        if (equipamentosRapidos.length === 0) {
-            const emptyItem = document.createElement('div');
-            emptyItem.className = 'equipamento-item';
-            emptyItem.innerHTML = `
-                <span class="nome-equipamento">Inventário vazio</span>
-                <span class="peso-equipamento">-</span>
-            `;
-            containerRapido.appendChild(emptyItem);
-        }
-        
-        // Atualizar tabela detalhada
-        containerDetalhado.innerHTML = '';
-        
-        // Cabeçalho
-        const cabecalho = document.createElement('div');
-        cabecalho.className = 'linha-tabela cabecalho-tabela';
-        cabecalho.innerHTML = `
-            <div class="coluna">Item</div>
-            <div class="coluna">Quantidade</div>
-            <div class="coluna">Peso (lb)</div>
-            <div class="coluna">Valor</div>
-            <div class="coluna">Local</div>
-        `;
-        containerDetalhado.appendChild(cabecalho);
-        
-        // Linhas
-        equipamentos.forEach(item => {
-            const linha = document.createElement('div');
-            linha.className = 'linha-tabela';
-            linha.innerHTML = `
-                <div class="coluna">${item.nome || item.name || 'Item'}</div>
-                <div class="coluna">${item.quantidade || item.quantity || 1}</div>
-                <div class="coluna">${item.peso || item.weight || 0}</div>
-                <div class="coluna">$${item.valor || item.value || 0}</div>
-                <div class="coluna">${item.local || 'Mochila'}</div>
-            `;
-            containerDetalhado.appendChild(linha);
-        });
-        
-        if (equipamentos.length === 0) {
-            const linha = document.createElement('div');
-            linha.className = 'linha-tabela';
-            linha.innerHTML = `
-                <div class="coluna" colspan="5">Nenhum item no inventário</div>
-            `;
-            containerDetalhado.appendChild(linha);
-        }
-        
-        // Atualizar pesos
-        if (pesoAtual) pesoAtual.textContent = dadosPersonagem.current_weight || 0;
-        if (pesoMaximo) pesoMaximo.textContent = dadosPersonagem.max_weight || 0;
-    }
-
-    atualizarInventario() {
-        // Similar ao equipamento, mas focado em itens gerais
-        // Implementação similar à atualizarEquipamento()
-    }
-
-    atualizarCombate() {
-        // Defesas
-        document.getElementById('gmEsquiva').textContent = 
-            dadosPersonagem.dodge || 10;
-        document.getElementById('gmBloqueio').textContent = 
-            dadosPersonagem.block || '-';
-        document.getElementById('gmAparar').textContent = 
-            dadosPersonagem.parry || '-';
-        
-        document.getElementById('combateEsquiva').textContent = 
-            dadosPersonagem.dodge || 10;
-        document.getElementById('combateEsquivaMod').textContent = 
-            dadosPersonagem.dodge_mod || 0;
-        document.getElementById('combateBloqueio').textContent = 
-            dadosPersonagem.block || '-';
-        document.getElementById('combateBloqueioMod').textContent = 
-            dadosPersonagem.block_mod || 0;
-        document.getElementById('combateAparar').textContent = 
-            dadosPersonagem.parry || '-';
-        document.getElementById('combateApararMod').textContent = 
-            dadosPersonagem.parry_mod || 0;
-        
-        // Dano
-        document.getElementById('gmDanoGolpe').textContent = 
-            dadosPersonagem.thrust_damage || '1d-2';
-        document.getElementById('gmDanoArremesso').textContent = 
-            dadosPersonagem.swing_damage || '1d';
-        
-        document.getElementById('combateThrust').textContent = 
-            dadosPersonagem.thrust_damage || '1d-2';
-        document.getElementById('combateSwing').textContent = 
-            dadosPersonagem.swing_damage || '1d';
-        
-        // DR (Defesa)
-        document.getElementById('drCabeca').textContent = 
-            dadosPersonagem.dr_head || 0;
-        document.getElementById('drTronco').textContent = 
-            dadosPersonagem.dr_torso || 0;
-        document.getElementById('drBracos').textContent = 
-            dadosPersonagem.dr_arms || 0;
-        document.getElementById('drPernas').textContent = 
-            dadosPersonagem.dr_legs || 0;
-        document.getElementById('drTotal').textContent = 
-            dadosPersonagem.total_dr || 0;
-        
-        // Escudo
-        const infoEscudo = document.getElementById('infoEscudo');
-        if (dadosPersonagem.shield_equipped) {
-            infoEscudo.innerHTML = `
-                <p><strong>${dadosPersonagem.shield_name || 'Escudo'}</strong></p>
-                <p>DR: ${dadosPersonagem.shield_dr || 0}</p>
-                <p>PV: ${dadosPersonagem.shield_current_hp || 0}/${dadosPersonagem.shield_max_hp || 0}</p>
-            `;
-        } else {
-            infoEscudo.innerHTML = `<p>Nenhum escudo equipado</p>`;
-        }
-    }
-
-    atualizarAnotacoes() {
-        const textarea = document.getElementById('anotacoesGM');
-        if (textarea && dadosCampanha?.gm_notes) {
-            textarea.value = dadosCampanha.gm_notes;
-        }
-    }
-
-    atualizarInfoCampanha() {
-        const historico = document.getElementById('historicoCampanha');
-        if (historico) {
-            historico.innerHTML = `
-                <div class="evento-historico">
-                    <span class="data-evento">${new Date().toLocaleDateString('pt-BR')}</span>
-                    <p>GM visualizou a ficha</p>
-                </div>
-            `;
-        }
+    configurarModoVisualizacao() {
+        // Definir modo "ao-vivo" como padrão
+        this.alterarModoVisualizacao('ao-vivo');
     }
 
     // ====== FUNCIONALIDADES ======
     mudarAba(abaId) {
+        console.log(`Mudando para aba: ${abaId}`);
+        
         // Remover classe ativa de todas as abas
         document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('ativo'));
         document.querySelectorAll('.conteudo-aba').forEach(aba => aba.classList.remove('ativo'));
 
-        // Adicionar classe ativa na aba selecionada
+        // Adicionar classe ativa
         const tabAtiva = document.querySelector(`.tab[data-tab="${abaId}"]`);
         const abaAtiva = document.getElementById(`aba-${abaId}`);
-
+        
         if (tabAtiva && abaAtiva) {
             tabAtiva.classList.add('ativo');
             abaAtiva.classList.add('ativo');
-            
-            // Salvar a aba ativa no localStorage
-            localStorage.setItem('ultimaAbaGM', abaId);
         }
     }
 
     alterarModoVisualizacao(modo) {
-        modoVisualizacao = modo;
+        modoAtualizacao = modo;
+        console.log(`Modo de visualização alterado para: ${modo}`);
         
         // Atualizar botões
         document.querySelectorAll('.botao-visualizacao').forEach(btn => {
@@ -846,141 +524,99 @@ class SistemaFichaGM {
             }
         });
         
-        // Recarregar dados se necessário
+        // Configurar sincronização baseada no modo
         if (modo === 'ao-vivo') {
-            this.sincronizarDados();
+            this.iniciarSincronizacaoAutomatica();
+        } else {
+            this.pararSincronizacao();
         }
-        
-        this.mostrarMensagem(`Modo alterado para: ${modo}`, 'info');
     }
 
-    async aplicarModificador(acao, valor) {
-        if (!dadosPersonagem) return;
+    iniciarSincronizacaoAutomatica() {
+        console.log('🔄 Iniciando sincronização automática...');
         
-        try {
-            let novoValor;
-            let campo;
+        // Parar sincronização anterior se existir
+        if (intervaloAtualizacao) {
+            clearInterval(intervaloAtualizacao);
+        }
+        
+        // Sincronizar a cada 15 segundos
+        intervaloAtualizacao = setInterval(async () => {
+            if (isAtualizando) return;
             
-            switch(acao) {
-                case 'dano':
-                case 'cura':
-                    const pvAtual = parseInt(document.getElementById('pvAtualGM').textContent);
-                    const pvMaximo = parseInt(document.getElementById('pvMaximoGM').textContent);
-                    
-                    if (acao === 'cura') {
-                        novoValor = Math.min(pvMaximo, pvAtual + valor);
-                    } else {
-                        novoValor = Math.max(0, pvAtual - valor);
-                    }
-                    
-                    campo = 'pv_atual';
-                    document.getElementById('pvAtualGM').textContent = novoValor;
-                    break;
-                    
-                case 'fadiga':
-                case 'recuperar':
-                    const pfAtual = parseInt(document.getElementById('pfAtualGM').textContent);
-                    const pfMaximo = parseInt(document.getElementById('pfMaximoGM').textContent);
-                    
-                    if (acao === 'recuperar') {
-                        novoValor = Math.min(pfMaximo, pfAtual + valor);
-                    } else {
-                        novoValor = Math.max(0, pfAtual - valor);
-                    }
-                    
-                    campo = 'pf_atual';
-                    document.getElementById('pfAtualGM').textContent = novoValor;
-                    break;
-                    
-                case 'dinheiro':
-                    const dinheiroAtual = parseInt(dadosPersonagem.money) || 0;
-                    novoValor = dinheiroAtual + valor;
-                    campo = 'money';
-                    document.getElementById('dinheiroGM').textContent = `$${novoValor}`;
-                    break;
+            isAtualizando = true;
+            try {
+                await this.sincronizarDados();
+                console.log('✅ Sincronização automática concluída');
+            } catch (error) {
+                console.error('❌ Erro na sincronização automática:', error);
+            } finally {
+                isAtualizando = false;
             }
-            
-            // Atualizar no servidor
-            if (campo && novoValor !== undefined) {
-                const { error } = await supabase
-                    .from('characters')
-                    .update({ [campo]: novoValor })
-                    .eq('id', personagemId);
-                
-                if (error) throw error;
-                
-                // Atualizar dados locais
-                dadosPersonagem[campo] = novoValor;
-                
-                this.mostrarMensagem(`${acao} aplicado com sucesso!`, 'sucesso');
-            }
-            
-        } catch (error) {
-            console.error('Erro ao aplicar modificador:', error);
-            this.mostrarMensagem('Erro ao atualizar', 'erro');
+        }, 15000); // 15 segundos
+    }
+
+    pararSincronizacao() {
+        if (intervaloAtualizacao) {
+            clearInterval(intervaloAtualizacao);
+            intervaloAtualizacao = null;
+            console.log('⏹️ Sincronização automática parada');
         }
     }
 
     async sincronizarDados() {
-        this.mostrarLoading();
+        console.log('🔄 Sincronizando dados...');
+        this.mostrarMensagem('Sincronizando...', 'info');
         
         try {
             await this.carregarDadosIniciais();
-            this.mostrarMensagem('Dados sincronizados!', 'sucesso');
+            this.mostrarMensagem('Dados atualizados!', 'sucesso');
         } catch (error) {
+            console.error('❌ Erro ao sincronizar:', error);
             this.mostrarMensagem('Erro ao sincronizar', 'erro');
-        } finally {
-            this.esconderLoading();
         }
     }
 
     async congelarPersonagem() {
-        this.mostrarConfirmacao(
-            'Congelar Personagem',
-            'Tem certeza que deseja congelar este personagem? O jogador não poderá fazer alterações até que seja descongelado.',
-            async () => {
-                try {
-                    const { error } = await supabase
-                        .from('campaign_characters')
-                        .update({ is_frozen: true })
-                        .eq('id', vinculoId);
-                    
-                    if (error) throw error;
-                    
-                    dadosCampanha.is_frozen = true;
-                    this.mostrarMensagem('Personagem congelado!', 'sucesso');
-                } catch (error) {
-                    this.mostrarMensagem('Erro ao congelar', 'erro');
-                }
+        if (confirm('Congelar este personagem? O jogador não poderá fazer alterações.')) {
+            try {
+                const { error } = await supabase
+                    .from('campaign_characters')
+                    .update({ is_frozen: true })
+                    .eq('id', vinculoId);
+                
+                if (error) throw error;
+                
+                this.mostrarMensagem('Personagem congelado!', 'sucesso');
+            } catch (error) {
+                console.error('❌ Erro ao congelar:', error);
+                this.mostrarMensagem('Erro ao congelar', 'erro');
             }
-        );
+        }
     }
 
     async removerPersonagem() {
-        this.mostrarConfirmacao(
-            'Remover Personagem',
-            'ATENÇÃO: Esta ação removerá o personagem da campanha. O jogador perderá acesso a esta campanha com este personagem. Deseja continuar?',
-            async () => {
-                try {
-                    const { error } = await supabase
-                        .from('campaign_characters')
-                        .update({ status: 'removed' })
-                        .eq('id', vinculoId);
-                    
-                    if (error) throw error;
-                    
-                    this.mostrarMensagem('Personagem removido da campanha', 'sucesso');
-                    
-                    // Redirecionar após 2 segundos
-                    setTimeout(() => {
-                        window.history.back();
-                    }, 2000);
-                    
-                } catch (error) {
-                    this.mostrarMensagem('Erro ao remover', 'erro');
-                }
+        if (confirm('ATENÇÃO: Remover este personagem da campanha?')) {
+            try {
+                const { error } = await supabase
+                    .from('campaign_characters')
+                    .update({ status: 'removed' })
+                    .eq('id', vinculoId);
+                
+                if (error) throw error;
+                
+                this.mostrarMensagem('Personagem removido', 'sucesso');
+                
+                // Voltar para campanha após 2 segundos
+                setTimeout(() => {
+                    this.voltarParaCampanha();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('❌ Erro ao remover:', error);
+                this.mostrarMensagem('Erro ao remover', 'erro');
             }
-        );
+        }
     }
 
     async salvarAnotacoes() {
@@ -994,127 +630,26 @@ class SistemaFichaGM {
             
             if (error) throw error;
             
+            if (!dadosCampanha) dadosCampanha = {};
             dadosCampanha.gm_notes = notas;
+            
             this.mostrarMensagem('Anotações salvas!', 'sucesso');
             
         } catch (error) {
-            console.error('Erro ao salvar anotações:', error);
+            console.error('❌ Erro ao salvar anotações:', error);
             this.mostrarMensagem('Erro ao salvar', 'erro');
         }
     }
 
     limparAnotacoes() {
-        document.getElementById('anotacoesGM').value = '';
-    }
-
-    filtrarPericias(termo) {
-        const tabela = document.getElementById('tabelaPericiasGM');
-        const linhas = tabela.querySelectorAll('.linha-tabela:not(.cabecalho-tabela)');
-        
-        linhas.forEach(linha => {
-            const texto = linha.textContent.toLowerCase();
-            linha.style.display = texto.includes(termo.toLowerCase()) ? '' : 'none';
-        });
-    }
-
-    filtrarPericiasPorAtributo(atributo) {
-        const tabela = document.getElementById('tabelaPericiasGM');
-        const linhas = tabela.querySelectorAll('.linha-tabela:not(.cabecalho-tabela)');
-        
-        linhas.forEach(linha => {
-            const colunaAtributo = linha.querySelector('.coluna:nth-child(2)');
-            if (colunaAtributo) {
-                const textoAtributo = colunaAtributo.textContent.toUpperCase();
-                linha.style.display = !atributo || textoAtributo.includes(atributo) ? '' : 'none';
-            }
-        });
-    }
-
-    // ====== MODAIS ======
-    mostrarModal(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+        if (confirm('Limpar todas as anotações?')) {
+            document.getElementById('anotacoesGM').value = '';
         }
     }
 
-    fecharModal(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    }
-
-    mostrarConfirmacao(titulo, mensagem, callback) {
-        document.getElementById('tituloConfirmacao').textContent = titulo;
-        document.getElementById('mensagemConfirmacao').textContent = mensagem;
-        
-        const btnConfirmar = document.getElementById('btnConfirmarAcao');
-        btnConfirmar.onclick = () => {
-            callback();
-            this.fecharModal('modal-confirmacao');
-        };
-        
-        this.mostrarModal('modal-confirmacao');
-    }
-
-    // ====== CONFIGURAÇÕES ======
-    salvarConfiguracoes() {
-        autoAtualizar = document.getElementById('autoAtualizar').checked;
-        intervaloAtualizacaoMs = parseInt(document.getElementById('intervaloAtualizacao').value);
-        
-        // Reiniciar atualização automática se necessário
-        if (intervaloAtualizacao) {
-            clearInterval(intervaloAtualizacao);
-            intervaloAtualizacao = null;
-        }
-        
-        if (autoAtualizar && intervaloAtualizacaoMs > 0) {
-            this.iniciarAtualizacaoAutomatica();
-        }
-        
-        this.fecharModal('modal-config');
-        this.mostrarMensagem('Configurações salvas!', 'sucesso');
-    }
-
-    // ====== ATUALIZAÇÃO AUTOMÁTICA ======
-    iniciarAtualizacaoAutomatica() {
-        if (intervaloAtualizacaoMs > 0) {
-            intervaloAtualizacao = setInterval(() => {
-                if (modoVisualizacao === 'ao-vivo') {
-                    this.sincronizarDados();
-                }
-            }, intervaloAtualizacaoMs);
-            
-            console.log(`Atualização automática iniciada: ${intervaloAtualizacaoMs}ms`);
-        }
-    }
-
-    // ====== NAVEGAÇÃO ======
     voltarParaCampanha() {
         const url = `campanha.html?id=${campanhaId}`;
         window.location.href = url;
-    }
-
-    // ====== LOGGING ======
-    async registrarAcessoGM() {
-        try {
-            const { error } = await supabase
-                .from('gm_access_log')
-                .insert([{
-                    gm_id: gmId,
-                    character_id: personagemId,
-                    campaign_id: campanhaId,
-                    accessed_at: new Date().toISOString()
-                }]);
-            
-            if (error) throw error;
-            
-        } catch (error) {
-            console.error('Erro ao registrar acesso:', error);
-        }
     }
 
     // ====== UTILITÁRIOS ======
@@ -1130,56 +665,68 @@ class SistemaFichaGM {
 
     mostrarMensagem(texto, tipo = 'info') {
         // Remover mensagens anteriores
-        const mensagensAntigas = document.querySelectorAll('.mensagem-gm');
+        const mensagensAntigas = document.querySelectorAll('.mensagem-flutuante');
         mensagensAntigas.forEach(msg => msg.remove());
         
-        // Criar nova mensagem
+        // Cores por tipo
+        const cores = {
+            sucesso: '#27ae60',
+            erro: '#e74c3c',
+            aviso: '#f39c12',
+            info: '#3498db'
+        };
+        
+        // Criar mensagem
         const mensagem = document.createElement('div');
-        mensagem.className = `mensagem-gm ${tipo}`;
+        mensagem.className = 'mensagem-flutuante';
         mensagem.textContent = texto;
         mensagem.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
             padding: 15px 20px;
-            background: ${tipo === 'sucesso' ? '#27ae60' : 
-                         tipo === 'erro' ? '#e74c3c' : 
-                         tipo === 'aviso' ? '#f39c12' : '#3498db'};
+            background: ${cores[tipo] || cores.info};
             color: white;
             border-radius: 6px;
             z-index: 9999;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             animation: slideIn 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         `;
         
         document.body.appendChild(mensagem);
         
-        // Auto-remover após 3 segundos
+        // Remover após 3 segundos
         setTimeout(() => {
             mensagem.style.animation = 'slideOut 0.3s ease';
             setTimeout(() => mensagem.remove(), 300);
         }, 3000);
     }
-
-    // ====== DESTRUIDOR ======
-    destroy() {
-        if (intervaloAtualizacao) {
-            clearInterval(intervaloAtualizacao);
-        }
-        
-        // Limpar event listeners
-        document.querySelectorAll('.tab, .botao-visualizacao, .btn-controle').forEach(el => {
-            el.replaceWith(el.cloneNode(true));
-        });
-    }
 }
 
 // ====== INICIALIZAÇÃO ======
-let sistemaGM;
+let sistemaFichaGM;
 
 document.addEventListener('DOMContentLoaded', () => {
-    sistemaGM = new SistemaFichaGM();
+    console.log('🚀 Inicializando Ficha do GM...');
+    sistemaFichaGM = new FichaGM();
 });
 
-// Exportar para debugging
-window.sistemaGM = sistemaGM;
+// Adicionar animações CSS se não existirem
+if (!document.querySelector('#animacoes-flutuantes')) {
+    const style = document.createElement('style');
+    style.id = 'animacoes-flutuantes';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Exportar para debug
+window.sistemaFichaGM = sistemaFichaGM;
