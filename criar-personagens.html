@@ -3460,23 +3460,18 @@
     window.supabaseClient = supabase;
     
     let personagemId = null;
-    let sistemaSalvamento = null; // VARIÁVEL GLOBAL ADICIONADA
+    let sistemaSalvamento = null;
 
     async function inicializarSistema() {
         try {
-            console.log('🚀 Inicializando sistema de personagem...');
-            
             // 1. Verificar autenticação
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
-                console.warn('Usuário não autenticado');
-                alert('⚠️ Você precisa estar logado para criar personagens.');
+                alert('Você precisa estar logado para criar personagens.');
                 setTimeout(() => window.location.href = 'login.html', 2000);
                 return;
             }
-            
-            console.log('✅ Usuário autenticado:', session.user.email);
             
             // 2. INICIALIZAR SISTEMA DE SALVAMENTO
             await inicializarSistemaSalvamento();
@@ -3489,11 +3484,9 @@
             personagemId = urlParams.get('id');
             
             if (personagemId) {
-                console.log('✏️ Modo edição - ID:', personagemId);
                 document.title = 'Editar Personagem - RPG System';
                 await carregarPersonagemParaEdicao(personagemId);
             } else {
-                console.log('🆕 Modo criação - Novo personagem');
                 document.title = 'Criar Personagem - RPG System';
             }
             
@@ -3503,10 +3496,7 @@
             // 6. Inicializar sistemas
             inicializarSistemaAbas();
             
-            console.log('✅ Sistema inicializado com sucesso!');
-            
         } catch (error) {
-            console.error('❌ Erro ao inicializar sistema:', error);
             alert('Erro ao inicializar sistema: ' + error.message);
         }
     }
@@ -3514,13 +3504,8 @@
     // FUNÇÃO PARA INICIALIZAR SISTEMA DE SALVAMENTO
     async function inicializarSistemaSalvamento() {
         try {
-            console.log('🔧 Inicializando sistema de salvamento...');
-            
             // Verificar se o arquivo de salvamento está carregado
             if (typeof SalvamentoSupabase === 'undefined') {
-                console.warn('⚠️ Classe SalvamentoSupabase não encontrada, carregando...');
-                
-                // Tentar carregar dinamicamente
                 await carregarScript('salvamento-supabase.js');
                 
                 if (typeof SalvamentoSupabase === 'undefined') {
@@ -3530,18 +3515,12 @@
             
             // Criar instância do sistema de salvamento
             sistemaSalvamento = new SalvamentoSupabase();
-            window.sistemaSalvamento = sistemaSalvamento; // Torna global
-            
-            console.log('✅✅✅ Sistema de salvamento inicializado com sucesso!');
+            window.sistemaSalvamento = sistemaSalvamento;
             
         } catch (error) {
-            console.error('❌❌❌ ERRO CRÍTICO:', error);
-            
             // Sistema de salvamento simplificado (fallback)
             sistemaSalvamento = criarSistemaSalvamentoFallback();
             window.sistemaSalvamento = sistemaSalvamento;
-            
-            console.warn('⚠️ Usando sistema de salvamento fallback');
         }
     }
 
@@ -3550,8 +3529,6 @@
         return {
             salvarPersonagem: async function(personagemId) {
                 try {
-                    console.log('💾 Salvamento Fallback - Coletando dados...');
-                    
                     // Coletar dados básicos
                     const dados = {
                         nome: document.getElementById('charName')?.value || 'Novo Personagem',
@@ -3579,12 +3556,10 @@
                         dados.created_at = new Date().toISOString();
                     }
                     
-                    console.log('📦 Dados coletados (fallback):', dados);
-                    
                     // Verificar autenticação
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) {
-                        alert('❌ Sessão expirada. Faça login novamente.');
+                        alert('Sessão expirada. Faça login novamente.');
                         window.location.href = 'login.html';
                         return false;
                     }
@@ -3595,8 +3570,6 @@
                     
                     if (personagemId) {
                         // EDITAR
-                        console.log('✏️ Atualizando personagem:', personagemId);
-                        
                         const { data, error } = await supabase
                             .from('characters')
                             .update(dados)
@@ -3608,8 +3581,6 @@
                         resultado = data;
                     } else {
                         // CRIAR NOVO
-                        console.log('🆕 Criando novo personagem');
-                        
                         const { data, error } = await supabase
                             .from('characters')
                             .insert([dados])
@@ -3623,7 +3594,7 @@
                         }
                     }
                     
-                    alert('✅ Personagem salvo com sucesso! (Modo fallback)');
+                    alert('Personagem salvo com sucesso!');
                     
                     // Redirecionar
                     setTimeout(() => {
@@ -3633,32 +3604,8 @@
                     return true;
                     
                 } catch (error) {
-                    console.error('❌ Erro no salvamento fallback:', error);
-                    alert('❌ Erro ao salvar: ' + error.message);
+                    alert('Erro ao salvar: ' + error.message);
                     return false;
-                }
-            },
-            
-            testarConexao: async function() {
-                try {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    
-                    if (!session) {
-                        return {
-                            sucesso: false,
-                            mensagem: '❌ Não autenticado'
-                        };
-                    }
-                    
-                    return {
-                        sucesso: true,
-                        mensagem: '✅ Conexão OK - Fallback'
-                    };
-                } catch (error) {
-                    return {
-                        sucesso: false,
-                        mensagem: '❌ Erro: ' + error.message
-                    };
                 }
             }
         };
@@ -3668,7 +3615,6 @@
     function carregarScript(src) {
         return new Promise((resolve, reject) => {
             if (document.querySelector(`script[src="${src}"]`)) {
-                console.log(`✅ Script ${src} já carregado`);
                 resolve();
                 return;
             }
@@ -3776,8 +3722,6 @@
 
     async function carregarPersonagemParaEdicao(personagemId) {
         try {
-            console.log('📥 Carregando personagem para edição:', personagemId);
-            
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) throw new Error('Usuário não autenticado');
             
@@ -3790,8 +3734,6 @@
             
             if (error) throw error;
             if (!personagem) throw new Error('Personagem não encontrado');
-            
-            console.log('✅ Personagem carregado:', personagem.nome);
             
             // Preencher dados básicos
             document.getElementById('charName').value = personagem.nome || 'Novo Personagem';
@@ -3829,7 +3771,6 @@
             sincronizarResumo();
             
         } catch (error) {
-            console.error('❌ Erro ao carregar personagem:', error);
             alert('Erro ao carregar personagem: ' + error.message);
             setTimeout(() => window.location.href = 'personagens.html', 2000);
         }
@@ -3838,19 +3779,15 @@
     // FUNÇÃO PRINCIPAL DE SALVAMENTO
     async function salvarPersonagem() {
         try {
-            console.log('💾💾💾 INICIANDO SALVAMENTO COMPLETO 💾💾💾');
-            
             // 1. Verificar se sistema de salvamento está inicializado
             if (!sistemaSalvamento) {
-                console.error('❌ sistemaSalvamento não inicializado!');
-                alert('❌ Sistema de salvamento não está pronto. Aguarde a inicialização.');
+                alert('Sistema de salvamento não está pronto.');
                 return false;
             }
             
             // 2. Verificar se tem método salvarPersonagem
             if (typeof sistemaSalvamento.salvarPersonagem !== 'function') {
-                console.error('❌ Método salvarPersonagem não encontrado!');
-                alert('❌ Sistema de salvamento corrompido. Recarregue a página.');
+                alert('Sistema de salvamento corrompido. Recarregue a página.');
                 return false;
             }
             
@@ -3861,8 +3798,6 @@
                 btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
                 btnSalvar.disabled = true;
             }
-            
-            console.log('📤 Passando personagemId para salvamento:', personagemId);
             
             // 4. Executar salvamento
             const sucesso = await sistemaSalvamento.salvarPersonagem(personagemId);
@@ -3876,8 +3811,6 @@
             return sucesso;
             
         } catch (error) {
-            console.error('❌❌❌ ERRO CRÍTICO NO SALVAMENTO:', error);
-            
             // Restaurar botão
             const btnSalvar = document.getElementById('btnSalvar');
             if (btnSalvar) {
@@ -3885,14 +3818,14 @@
                 btnSalvar.disabled = false;
             }
             
-            alert('❌ Erro ao salvar personagem:\n\n' + error.message + '\n\nVerifique o console para detalhes.');
+            alert('Erro ao salvar personagem: ' + error.message);
             return false;
         }
     }
 
     function solicitarExclusao() {
         if (personagemId) {
-            if (confirm('⚠️ TEM CERTEZA que deseja EXCLUIR este personagem?\n\nEsta ação NÃO PODE ser desfeita!')) {
+            if (confirm('Tem certeza que deseja excluir este personagem?\n\nEsta ação não pode ser desfeita!')) {
                 excluirPersonagem(personagemId);
             }
         } else {
@@ -3906,7 +3839,7 @@
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                alert('❌ Sessão expirada. Faça login novamente.');
+                alert('Sessão expirada. Faça login novamente.');
                 window.location.href = 'login.html';
                 return;
             }
@@ -3919,15 +3852,14 @@
             
             if (error) throw error;
             
-            alert('✅ Personagem excluído com sucesso!');
+            alert('Personagem excluído com sucesso!');
             
             setTimeout(() => {
                 window.location.href = 'personagens.html';
             }, 1000);
             
         } catch (error) {
-            console.error('Erro ao excluir:', error);
-            alert('❌ Erro ao excluir personagem: ' + error.message);
+            alert('Erro ao excluir personagem: ' + error.message);
         }
     }
 
@@ -3939,8 +3871,6 @@
 
     function sincronizarResumo() {
         try {
-            console.log('🔄 Sincronizando resumo...');
-            
             // Nome
             const nomeInput = document.getElementById('charName');
             if (nomeInput && document.getElementById('resumoNome')) {
@@ -3996,7 +3926,7 @@
             }
             
         } catch (error) {
-            console.warn('⚠️ Erro ao sincronizar resumo:', error);
+            // Ignorar erro silenciosamente
         }
     }
 
@@ -4007,49 +3937,23 @@
         }
     }
 
-    // Teste do sistema
-    function testeSistemaCompleto() {
-        console.log('🧪 TESTANDO SISTEMA COMPLETO');
-        
-        if (sistemaSalvamento) {
-            alert('✅ Sistema de salvamento está disponível!\n\n' +
-                  'Clique em "Salvar Personagem" para salvar todos os dados.');
-        } else {
-            alert('❌ Sistema de salvamento NÃO está disponível.\n\n' +
-                  'Recarregue a página ou verifique o console.');
-        }
-    }
-
     // Evento quando a página carrega
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 DOM carregado, inicializando...');
-        
         // Pequeno delay para garantir tudo carregou
         setTimeout(() => {
             inicializarSistema();
-        }, 800);
-    });
-
-    // Testar ao pressionar F12
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-            testeSistemaCompleto();
-        }
+        }, 500);
     });
 
     // Exportar funções para uso global
     window.salvarPersonagem = salvarPersonagem;
     window.sincronizarResumo = sincronizarResumo;
     window.atualizarResumoNome = atualizarResumoNome;
-    window.testeSistemaCompleto = testeSistemaCompleto;
 
     // Limpar cache ao sair
     window.addEventListener('beforeunload', function() {
         localStorage.removeItem('personagens_cache');
-        console.log('🧹 Cache limpo');
     });
-
-    console.log('✅ Script principal carregado e pronto!');
 </script>
 </body>
 </html>  
