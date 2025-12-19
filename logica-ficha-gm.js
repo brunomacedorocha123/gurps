@@ -1,691 +1,608 @@
-// ====== CONFIGURAÇÕES DO SUPABASE ======
+// ====== SISTEMA COMPLETO VANTAGENS/DESVANTAGENS PARA FICHA GM ======
+
+// Configuração do Supabase (SEMPRE NECESSÁRIA)
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
+// Inicializar cliente Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ====== VARIÁVEIS GLOBAIS ======
-let dadosPersonagem = null;
-let dadosCampanha = null;
-let personagemId = null;
-let campanhaId = null;
-let vinculoId = null;
-let intervaloAtualizacao = null;
-
-// ====== CLASSE PRINCIPAL ======
-class FichaGM {
-    constructor() {
+class SistemaVantagensDesvantagensGM {
+    constructor(dadosPersonagem) {
+        this.dadosPersonagem = dadosPersonagem;
+        this.vantagensProcessadas = [];
+        this.desvantagensProcessadas = [];
+        this.peculiaridadesProcessadas = [];
         this.init();
     }
 
-    async init() {
-        try {
-            this.mostrarLoading();
-            
-            // 1. Pegar parâmetros da URL
-            this.extrairParametrosURLCorretos();
-            
-            // 2. Carregar dados do personagem
-            await this.carregarDadosPersonagem();
-            
-            // 3. Carregar dados da campanha
-            await this.carregarDadosCampanha();
-            
-            // 4. Atualizar interface
-            this.atualizarInterfaceCompleta();
-            
-            // 5. Configurar eventos
-            this.configurarEventListeners();
-            
-            // 6. Iniciar sincronização
-            this.iniciarSincronizacao();
-            
-            this.esconderLoading();
-            this.mostrarMensagem('Ficha carregada!', 'sucesso');
-            
-        } catch (error) {
-            console.error('❌ Erro:', error);
-            this.mostrarMensagem('Erro ao carregar ficha', 'erro');
-            this.esconderLoading();
-        }
+    init() {
+        console.log('🎯 Sistema Vantagens/Desvantagens GM iniciando...');
+        this.processarVantagens();
+        this.processarDesvantagens();
+        this.processarPeculiaridades();
+        this.renderizarTudo();
+        this.atualizarTotais();
+        return this;
     }
 
-    // ====== EXTRAIR PARÂMETROS DA URL ======
-    extrairParametrosURLCorretos() {
-        const params = new URLSearchParams(window.location.search);
-        
-        // AGORA COM OS NOMES CORRETOS DA SUA URL!
-        personagemId = params.get('character');
-        campanhaId = params.get('campaign');
-        vinculoId = params.get('link');
-        
-        console.log('📋 Parâmetros da URL:', {
-            character: personagemId,
-            campaign: campanhaId,
-            link: vinculoId
-        });
-        
-        if (!personagemId || !campanhaId) {
-            throw new Error('URL inválida. É necessário character e campaign.');
-        }
-    }
-
-    // ====== CARREGAMENTO DE DADOS ======
-    async carregarDadosPersonagem() {
-        console.log('📥 Buscando dados do personagem ID:', personagemId);
-        
-        try {
-            // PRIMEIRO: Tentar pegar da VIEW gm_characters_view
-            if (vinculoId) {
-                const { data: viewData, error: viewError } = await supabase
-                    .from('gm_characters_view')
-                    .select('*')
-                    .eq('vinculo_id', vinculoId)
-                    .single();
-                
-                if (!viewError && viewData) {
-                    console.log('✅ Dados da VIEW:', viewData);
-                    dadosPersonagem = viewData;
-                    return;
-                }
-            }
-            
-            // SEGUNDO: Se não tiver view, buscar direto da tabela characters
-            console.log('🔄 Buscando diretamente da tabela characters...');
-            const { data: characterData, error: characterError } = await supabase
-                .from('characters')
-                .select('*')
-                .eq('id', personagemId)
-                .single();
-            
-            if (characterError) throw characterError;
-            
-            dadosPersonagem = characterData;
-            console.log('✅ Dados do personagem carregados:', dadosPersonagem);
-            
-        } catch (error) {
-            console.error('❌ Erro ao carregar personagem:', error);
-            throw error;
-        }
-    }
-
-    async carregarDadosCampanha() {
-        try {
-            const { data: campanhaData, error } = await supabase
-                .from('campaign_characters')
-                .select('gm_notes, is_frozen, status')
-                .eq('character_id', personagemId)
-                .eq('campaign_id', campanhaId)
-                .single();
-            
-            if (!error && campanhaData) {
-                dadosCampanha = campanhaData;
-            } else {
-                dadosCampanha = { gm_notes: '', is_frozen: false };
-            }
-        } catch (error) {
-            console.warn('⚠️ Erro ao buscar dados da campanha:', error);
-            dadosCampanha = { gm_notes: '', is_frozen: false };
-        }
-    }
-
-    // ====== ATUALIZAR INTERFACE ======
-    atualizarInterfaceCompleta() {
-        if (!dadosPersonagem) {
-            throw new Error('Dados do personagem não carregados');
-        }
-        
-        console.log('🎨 Atualizando interface com dados:', dadosPersonagem);
-        
-        // 1. Informações básicas
-        this.atualizarInformacoesBasicas();
-        
-        // 2. Atributos
-        this.atualizarAtributosReais();
-        
-        // 3. Status (PV/PF/Dinheiro)
-        this.atualizarStatusReais();
-        
-        // 4. Vantagens
-        this.atualizarVantagensReais();
-        
-        // 5. Perícias
-        this.atualizarPericiasReais();
-        
-        // 6. Anotações
-        this.atualizarAnotacoes();
-        
-        // 7. Status de combate
-        this.atualizarStatusCombate();
-        
-        console.log('✅ Interface atualizada!');
-    }
-
-    atualizarInformacoesBasicas() {
-        // Nome do personagem
-        document.getElementById('nomePersonagem').textContent = 
-            dadosPersonagem.nome || dadosPersonagem.character_name || 'Sem nome';
-        
-        // Raça
-        document.getElementById('racaPersonagem').textContent = 
-            dadosPersonagem.raca || dadosPersonagem.race || 'Sem raça';
-        
-        // Classe
-        document.getElementById('classePersonagem').textContent = 
-            dadosPersonagem.classe || 'Aventureiro';
-        
-        // Nível
-        document.getElementById('nivelPersonagem').textContent = 
-            dadosPersonagem.nivel || 'Nível 1';
-        
-        // Pontos
-        const pontos = dadosPersonagem.pontos_totais || dadosPersonagem.total_points || 0;
-        document.getElementById('pontosPersonagem').textContent = `${pontos} pontos`;
-        
-        // Descrição
-        document.getElementById('descricaoPersonagem').textContent = 
-            dadosPersonagem.descricao || dadosPersonagem.description || 'Sem descrição disponível.';
-        
-        // Campanha e Jogador
-        if (dadosPersonagem.campaign_name) {
-            document.getElementById('nomeCampanha').textContent = dadosPersonagem.campaign_name;
-        }
-        
-        if (dadosPersonagem.player_username) {
-            document.getElementById('nomeJogador').textContent = dadosPersonagem.player_username;
-        }
-        
-        // Foto
-        if (dadosPersonagem.avatar_url) {
-            const img = document.getElementById('fotoPersonagem');
-            img.src = dadosPersonagem.avatar_url;
-            img.style.display = 'block';
-            document.getElementById('placeholderFoto').style.display = 'none';
-        }
-    }
-
-    atualizarAtributosReais() {
-        console.log('🎯 Atualizando atributos com dados reais:', {
-            forca: dadosPersonagem.forca,
-            destreza: dadosPersonagem.destreza,
-            inteligencia: dadosPersonagem.inteligencia,
-            saude: dadosPersonagem.saude
-        });
-        
-        // ATRIBUTOS PRINCIPAIS - PEGAR OS VALORES REAIS
-        const ST = dadosPersonagem.forca || dadosPersonagem.st || 10;
-        const DX = dadosPersonagem.destreza || dadosPersonagem.dx || 10;
-        const IQ = dadosPersonagem.inteligencia || dadosPersonagem.iq || 10;
-        const HT = dadosPersonagem.saude || dadosPersonagem.ht || 10;
-        
-        console.log('📊 Atributos finais:', { ST, DX, IQ, HT });
-        
-        // Atualizar na interface
-        document.getElementById('gmST').textContent = ST;
-        document.getElementById('gmDX').textContent = DX;
-        document.getElementById('gmIQ').textContent = IQ;
-        document.getElementById('gmHT').textContent = HT;
-        
-        // Calcular custos
-        const STMod = (ST - 10) * 10;
-        const DXMod = (DX - 10) * 20;
-        const IQMod = (IQ - 10) * 20;
-        const HTMod = (HT - 10) * 10;
-        
-        document.getElementById('gmSTMod').textContent = `[${STMod >= 0 ? '+' : ''}${STMod}]`;
-        document.getElementById('gmDXMod').textContent = `[${DXMod >= 0 ? '+' : ''}${DXMod}]`;
-        document.getElementById('gmIQMod').textContent = `[${IQMod >= 0 ? '+' : ''}${IQMod}]`;
-        document.getElementById('gmHTMod').textContent = `[${HTMod >= 0 ? '+' : ''}${HTMod}]`;
-        
-        // Vontade e Percepção
-        const vontade = dadosPersonagem.vontade || dadosPersonagem.vontade_base || IQ;
-        const percepcao = dadosPersonagem.percepcao || dadosPersonagem.percepcao_base || IQ;
-        
-        document.getElementById('gmVontade').textContent = vontade;
-        document.getElementById('gmPercepcao').textContent = percepcao;
-        
-        // Carga (sem "lb")
-        const cargaAtual = dadosPersonagem.peso_atual || dadosPersonagem.current_weight || 0;
-        const cargaMaxima = dadosPersonagem.peso_maximo || dadosPersonagem.max_weight || 0;
-        
-        document.getElementById('gmCargaAtual').textContent = cargaAtual;
-        document.getElementById('gmCargaMaxima').textContent = cargaMaxima;
-    }
-
-    atualizarStatusReais() {
-        // PV - Pontos de Vida
-        const pvAtual = dadosPersonagem.pv_atual || dadosPersonagem.current_hp || 10;
-        const pvMaximo = dadosPersonagem.pv_maximo || dadosPersonagem.max_hp || 
-                        dadosPersonagem.pontos_vida || 10;
-        
-        document.getElementById('pvAtualGM').textContent = pvAtual;
-        document.getElementById('pvMaximoGM').textContent = pvMaximo;
-        
-        // Indicador de status
-        const pvPercent = (pvAtual / pvMaximo) * 100;
-        const indicator = document.getElementById('pvStatus');
-        
-        if (pvPercent > 50) {
-            indicator.style.background = '#27ae60';
-        } else if (pvPercent > 25) {
-            indicator.style.background = '#f39c12';
-        } else {
-            indicator.style.background = '#e74c3c';
-        }
-        
-        // PF - Pontos de Fadiga
-        const pfAtual = dadosPersonagem.pf_atual || dadosPersonagem.current_fp || 10;
-        const pfMaximo = dadosPersonagem.pf_maximo || dadosPersonagem.max_fp || 
-                        dadosPersonagem.pontos_fadiga || 10;
-        
-        document.getElementById('pfAtualGM').textContent = pfAtual;
-        document.getElementById('pfMaximoGM').textContent = pfMaximo;
-        
-        // Dinheiro
-        const dinheiro = dadosPersonagem.dinheiro || dadosPersonagem.money || 0;
-        document.getElementById('dinheiroGM').textContent = `$${dinheiro}`;
-        
-        // Movimento
-        const deslocamento = dadosPersonagem.deslocamento || dadosPersonagem.basic_move || 5;
-        const bonusMovimento = dadosPersonagem.bonus_deslocamento || dadosPersonagem.move_bonus || 0;
-        
-        document.getElementById('gmDeslocamento').textContent = deslocamento;
-        document.getElementById('gmBonusMovimento').textContent = bonusMovimento;
-    }
-
-    atualizarVantagensReais() {
-        const container = document.getElementById('listaVantagensGM');
-        const totalElement = document.getElementById('totalVantagensGM');
-        
-        if (!container) return;
-        
+    // ====== PROCESSAR VANTAGENS ======
+    processarVantagens() {
         console.log('🔄 Processando vantagens...');
         
-        let vantagens = [];
+        let vantagensDados = null;
         
-        try {
-            // Tentar pegar do campo vantagens (JSON)
-            if (dadosPersonagem.vantagens) {
-                if (typeof dadosPersonagem.vantagens === 'string') {
-                    vantagens = JSON.parse(dadosPersonagem.vantagens);
-                } else if (Array.isArray(dadosPersonagem.vantagens)) {
-                    vantagens = dadosPersonagem.vantagens;
+        // 1. Campo "vantagens" (JSON string ou array)
+        if (this.dadosPersonagem.vantagens) {
+            if (typeof this.dadosPersonagem.vantagens === 'string') {
+                try {
+                    vantagensDados = JSON.parse(this.dadosPersonagem.vantagens);
+                    console.log('✅ Vantagens parseadas de string JSON');
+                } catch (e) {
+                    console.error('❌ Erro ao parsear vantagens:', e);
+                    vantagensDados = [];
                 }
-            }
-            // Fallback: campo advantages
-            else if (dadosPersonagem.advantages) {
-                if (typeof dadosPersonagem.advantages === 'string') {
-                    vantagens = JSON.parse(dadosPersonagem.advantages);
-                } else if (Array.isArray(dadosPersonagem.advantages)) {
-                    vantagens = dadosPersonagem.advantages;
-                }
-            }
-            
-            console.log(`🎯 ${vantagens.length} vantagens encontradas:`, vantagens);
-            
-            // Limpar container
-            container.innerHTML = '';
-            
-            if (vantagens.length === 0) {
-                const emptyItem = document.createElement('div');
-                emptyItem.className = 'vantagem-item';
-                emptyItem.innerHTML = `
-                    <span class="nome-vantagem">Nenhuma vantagem</span>
-                    <span class="custo-vantagem">0</span>
-                `;
-                container.appendChild(emptyItem);
+            } else if (Array.isArray(this.dadosPersonagem.vantagens)) {
+                vantagensDados = this.dadosPersonagem.vantagens;
+                console.log('✅ Vantagens já são array');
             } else {
-                vantagens.forEach((vantagem, index) => {
-                    const nome = vantagem.nome || vantagem.name || `Vantagem ${index + 1}`;
-                    const custo = vantagem.custo || vantagem.cost || 0;
-                    
-                    const item = document.createElement('div');
-                    item.className = 'vantagem-item';
-                    
-                    item.innerHTML = `
-                        <span class="nome-vantagem">${nome}</span>
-                        <span class="custo-vantagem">${custo >= 0 ? '+' : ''}${custo}</span>
-                    `;
-                    
-                    // Tooltip com descrição
-                    if (vantagem.descricao || vantagem.description) {
-                        item.title = vantagem.descricao || vantagem.description;
-                    }
-                    
-                    container.appendChild(item);
-                });
+                vantagensDados = [];
             }
-            
-            // Atualizar total
-            if (totalElement) {
-                totalElement.textContent = vantagens.length;
-            }
-            
-        } catch (error) {
-            console.error('❌ Erro ao processar vantagens:', error);
-            container.innerHTML = `
-                <div class="vantagem-item">
-                    <span class="nome-vantagem">Erro ao carregar vantagens</span>
-                    <span class="custo-vantagem">-</span>
-                </div>
-            `;
         }
+        
+        // 2. Fallback: campo "advantages" (da VIEW)
+        if ((!vantagensDados || vantagensDados.length === 0) && this.dadosPersonagem.advantages) {
+            console.log('🔄 Tentando campo "advantages"...');
+            if (typeof this.dadosPersonagem.advantages === 'string') {
+                try {
+                    vantagensDados = JSON.parse(this.dadosPersonagem.advantages);
+                    console.log('✅ Advantages parseadas de string JSON');
+                } catch (e) {
+                    console.error('❌ Erro ao parsear advantages:', e);
+                }
+            } else if (Array.isArray(this.dadosPersonagem.advantages)) {
+                vantagensDados = this.dadosPersonagem.advantages;
+                console.log('✅ Advantages já são array');
+            }
+        }
+        
+        // 3. Se ainda não tem, array vazio
+        if (!vantagensDados || !Array.isArray(vantagensDados)) {
+            vantagensDados = [];
+        }
+        
+        console.log(`📊 ${vantagensDados.length} vantagens encontradas`);
+        
+        // Processar cada vantagem
+        this.vantagensProcessadas = vantagensDados.map((vantagem, index) => {
+            return {
+                nome: vantagem.nome || vantagem.name || `Vantagem ${index + 1}`,
+                custo: vantagem.custo || vantagem.cost || 0,
+                descricao: vantagem.descricao || vantagem.description || '',
+                categoria: vantagem.categoria || vantagem.category || '',
+                id: vantagem.id || `vantagem-${Date.now()}-${index}`
+            };
+        });
+        
+        return this.vantagensProcessadas;
     }
 
-    atualizarPericiasReais() {
-        const container = document.getElementById('listaPericiasGM');
-        const totalElement = document.getElementById('totalPericias');
+    // ====== PROCESSAR DESVANTAGENS ======
+    processarDesvantagens() {
+        console.log('🔄 Processando desvantagens...');
         
-        if (!container) return;
+        let desvantagensDados = null;
         
-        let pericias = [];
-        
-        try {
-            if (dadosPersonagem.pericias) {
-                if (typeof dadosPersonagem.pericias === 'string') {
-                    pericias = JSON.parse(dadosPersonagem.pericias);
-                } else if (Array.isArray(dadosPersonagem.pericias)) {
-                    pericias = dadosPersonagem.pericias;
+        // 1. Campo "desvantagens"
+        if (this.dadosPersonagem.desvantagens) {
+            if (typeof this.dadosPersonagem.desvantagens === 'string') {
+                try {
+                    desvantagensDados = JSON.parse(this.dadosPersonagem.desvantagens);
+                    console.log('✅ Desvantagens parseadas de string JSON');
+                } catch (e) {
+                    console.error('❌ Erro ao parsear desvantagens:', e);
+                    desvantagensDados = [];
                 }
-            }
-            // Fallback: campo skills
-            else if (dadosPersonagem.skills) {
-                if (typeof dadosPersonagem.skills === 'string') {
-                    pericias = JSON.parse(dadosPersonagem.skills);
-                } else if (Array.isArray(dadosPersonagem.skills)) {
-                    pericias = dadosPersonagem.skills;
-                }
-            }
-            
-            console.log(`🎯 ${pericias.length} perícias encontradas`);
-            
-            container.innerHTML = '';
-            
-            if (pericias.length === 0) {
-                const emptyItem = document.createElement('div');
-                emptyItem.className = 'pericia-item';
-                emptyItem.innerHTML = `
-                    <span class="nome-pericia">Nenhuma perícia</span>
-                    <span class="nivel-pericia">-</span>
-                `;
-                container.appendChild(emptyItem);
+            } else if (Array.isArray(this.dadosPersonagem.desvantagens)) {
+                desvantagensDados = this.dadosPersonagem.desvantagens;
+                console.log('✅ Desvantagens já são array');
             } else {
-                // Ordenar por nível e pegar top 10
-                const topPericias = [...pericias]
-                    .sort((a, b) => (b.nivel || 0) - (a.nivel || 0))
-                    .slice(0, 10);
-                
-                topPericias.forEach((pericia) => {
-                    const nome = pericia.nome || pericia.name || 'Perícia';
-                    const nivel = pericia.nivel || pericia.level || 0;
-                    
-                    const item = document.createElement('div');
-                    item.className = 'pericia-item';
-                    
-                    item.innerHTML = `
-                        <span class="nome-pericia">${nome}</span>
-                        <span class="nivel-pericia">${nivel}</span>
-                    `;
-                    
-                    if (pericia.atributo) {
-                        item.title = `Atributo: ${pericia.atributo}`;
-                    }
-                    
-                    container.appendChild(item);
-                });
+                desvantagensDados = [];
             }
-            
-            if (totalElement) {
-                totalElement.textContent = pericias.length;
-            }
-            
-        } catch (error) {
-            console.error('❌ Erro ao processar perícias:', error);
-            container.innerHTML = `
-                <div class="pericia-item">
-                    <span class="nome-pericia">Erro ao carregar perícias</span>
-                    <span class="nivel-pericia">-</span>
-                </div>
-            `;
         }
-    }
-
-    atualizarStatusCombate() {
-        // Esquiva
-        const esquiva = dadosPersonagem.esquiva || dadosPersonagem.dodge || 
-                       Math.floor((dadosPersonagem.destreza || 10) / 2) + 3;
-        document.getElementById('gmEsquiva').textContent = esquiva;
         
-        // Dano
-        document.getElementById('gmDanoGolpe').textContent = 
-            dadosPersonagem.dano_gdp || dadosPersonagem.thrust_damage || '1d-2';
-        document.getElementById('gmDanoArremesso').textContent = 
-            dadosPersonagem.dano_geb || dadosPersonagem.swing_damage || '1d';
-    }
-
-    atualizarAnotacoes() {
-        const textarea = document.getElementById('anotacoesGM');
-        if (textarea && dadosCampanha?.gm_notes) {
-            textarea.value = dadosCampanha.gm_notes;
+        // 2. Fallback: campo "disadvantages"
+        if ((!desvantagensDados || desvantagensDados.length === 0) && this.dadosPersonagem.disadvantages) {
+            console.log('🔄 Tentando campo "disadvantages"...');
+            if (typeof this.dadosPersonagem.disadvantages === 'string') {
+                try {
+                    desvantagensDados = JSON.parse(this.dadosPersonagem.disadvantages);
+                    console.log('✅ Disadvantages parseadas de string JSON');
+                } catch (e) {
+                    console.error('❌ Erro ao parsear disadvantages:', e);
+                }
+            } else if (Array.isArray(this.dadosPersonagem.disadvantages)) {
+                desvantagensDados = this.dadosPersonagem.disadvantages;
+                console.log('✅ Disadvantages já são array');
+            }
         }
-    }
-
-    // CONTINUA NO PRÓXIMO COMENTÁRIO...
-        // ====== CONFIGURAÇÃO DE EVENTOS ======
-    configurarEventListeners() {
-        // Tabs
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                const tabId = e.currentTarget.dataset.tab;
-                this.mudarAba(tabId);
-            });
-        });
-
-        // Botões de visualização
-        document.querySelectorAll('.botao-visualizacao').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const modo = e.currentTarget.dataset.visao;
-                this.alterarModoVisualizacao(modo);
-            });
-        });
-
-        // Botão voltar
-        document.getElementById('btnVoltarCampanha').addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = `campanha.html?id=${campanhaId}`;
-        });
-
-        // Botão sincronizar
-        document.getElementById('btnSincronizar').addEventListener('click', () => {
-            this.sincronizarDados();
-        });
-
-        // Botão congelar
-        document.getElementById('btnCongelar').addEventListener('click', () => {
-            this.congelarPersonagem();
-        });
-
-        // Botão remover
-        document.getElementById('btnRemover').addEventListener('click', () => {
-            this.removerPersonagem();
-        });
-
-        // Anotações
-        document.getElementById('btnSalvarAnotacoes').addEventListener('click', () => {
-            this.salvarAnotacoes();
-        });
-
-        document.getElementById('btnLimparAnotacoes').addEventListener('click', () => {
-            this.limparAnotacoes();
-        });
-    }
-
-    mudarAba(abaId) {
-        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('ativo'));
-        document.querySelectorAll('.conteudo-aba').forEach(aba => aba.classList.remove('ativo'));
-
-        const tabAtiva = document.querySelector(`.tab[data-tab="${abaId}"]`);
-        const abaAtiva = document.getElementById(`aba-${abaId}`);
         
-        if (tabAtiva && abaAtiva) {
-            tabAtiva.classList.add('ativo');
-            abaAtiva.classList.add('ativo');
+        if (!desvantagensDados || !Array.isArray(desvantagensDados)) {
+            desvantagensDados = [];
         }
+        
+        console.log(`📊 ${desvantagensDados.length} desvantagens encontradas`);
+        
+        // Processar desvantagens
+        this.desvantagensProcessadas = desvantagensDados.map((desvantagem, index) => {
+            const custo = desvantagem.custo || desvantagem.cost || 0;
+            
+            return {
+                nome: desvantagem.nome || desvantagem.name || `Desvantagem ${index + 1}`,
+                custo: custo,
+                custoAbsoluto: Math.abs(custo),
+                descricao: desvantagem.descricao || desvantagem.description || '',
+                categoria: desvantagem.categoria || desvantagem.category || '',
+                id: desvantagem.id || `desvantagem-${Date.now()}-${index}`
+            };
+        });
+        
+        return this.desvantagensProcessadas;
     }
 
-    alterarModoVisualizacao(modo) {
-        document.querySelectorAll('.botao-visualizacao').forEach(btn => {
-            btn.classList.remove('ativo');
-            if (btn.dataset.visao === modo) {
-                btn.classList.add('ativo');
+    // ====== PROCESSAR PECULIARIDADES ======
+    processarPeculiaridades() {
+        console.log('🔄 Processando peculiaridades...');
+        
+        let peculiaridadesDados = null;
+        
+        // 1. Campo "peculiaridades"
+        if (this.dadosPersonagem.peculiaridades) {
+            if (typeof this.dadosPersonagem.peculiaridades === 'string') {
+                try {
+                    peculiaridadesDados = JSON.parse(this.dadosPersonagem.peculiaridades);
+                    console.log('✅ Peculiaridades parseadas de string JSON');
+                } catch (e) {
+                    console.error('❌ Erro ao parsear peculiaridades:', e);
+                    peculiaridadesDados = [];
+                }
+            } else if (Array.isArray(this.dadosPersonagem.peculiaridades)) {
+                peculiaridadesDados = this.dadosPersonagem.peculiaridades;
+                console.log('✅ Peculiaridades já são array');
+            } else {
+                peculiaridadesDados = [];
             }
+        }
+        
+        // 2. Campo "peculiarities"
+        if ((!peculiaridadesDados || peculiaridadesDados.length === 0) && this.dadosPersonagem.peculiarities) {
+            console.log('🔄 Tentando campo "peculiarities"...');
+            if (typeof this.dadosPersonagem.peculiarities === 'string') {
+                try {
+                    peculiaridadesDados = JSON.parse(this.dadosPersonagem.peculiarities);
+                    console.log('✅ Peculiarities parseadas de string JSON');
+                } catch (e) {
+                    console.error('❌ Erro ao parsear peculiarities:', e);
+                }
+            } else if (Array.isArray(this.dadosPersonagem.peculiarities)) {
+                peculiaridadesDados = this.dadosPersonagem.peculiarities;
+                console.log('✅ Peculiarities já são array');
+            }
+        }
+        
+        if (!peculiaridadesDados || !Array.isArray(peculiaridadesDados)) {
+            peculiaridadesDados = [];
+        }
+        
+        console.log(`📊 ${peculiaridadesDados.length} peculiaridades encontradas`);
+        
+        // Processar peculiaridades (custo fixo de -1 cada)
+        this.peculiaridadesProcessadas = peculiaridadesDados.map((peculiaridade, index) => {
+            return {
+                nome: peculiaridade.nome || peculiaridade.name || peculiaridade.texto || `Peculiaridade ${index + 1}`,
+                descricao: peculiaridade.descricao || peculiaridade.description || '',
+                custo: -1,
+                id: peculiaridade.id || `peculiaridade-${Date.now()}-${index}`
+            };
+        });
+        
+        return this.peculiaridadesProcessadas;
+    }
+
+    // ====== RENDERIZAR TUDO ======
+    renderizarTudo() {
+        this.renderizarVantagens('listaVantagensGM');
+        this.renderizarDesvantagens('listaDesvantagensGM');
+        this.renderizarPeculiaridades('listaPeculiaridadesGM');
+    }
+
+    renderizarVantagens(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`❌ Container ${containerId} não encontrado`);
+            return;
+        }
+        
+        // Limpar container
+        container.innerHTML = '';
+        
+        if (this.vantagensProcessadas.length === 0) {
+            const emptyItem = this.criarItemVazio('Nenhuma vantagem', '0');
+            container.appendChild(emptyItem);
+            return;
+        }
+        
+        // Ordenar por custo (maior primeiro)
+        const vantagensOrdenadas = [...this.vantagensProcessadas]
+            .sort((a, b) => (b.custo || 0) - (a.custo || 0));
+        
+        vantagensOrdenadas.forEach(vantagem => {
+            const item = this.criarItemLista(vantagem, 'vantagem');
+            container.appendChild(item);
+        });
+        
+        // Atualizar contador
+        this.atualizarContador('totalVantagensGM', this.vantagensProcessadas.length);
+    }
+
+    renderizarDesvantagens(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`❌ Container ${containerId} não encontrado`);
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        if (this.desvantagensProcessadas.length === 0) {
+            const emptyItem = this.criarItemVazio('Nenhuma desvantagem', '0');
+            container.appendChild(emptyItem);
+            return;
+        }
+        
+        // Ordenar por custo absoluto (maior negativo primeiro)
+        const desvantagensOrdenadas = [...this.desvantagensProcessadas]
+            .sort((a, b) => Math.abs(b.custo || 0) - Math.abs(a.custo || 0));
+        
+        desvantagensOrdenadas.forEach(desvantagem => {
+            const item = this.criarItemLista(desvantagem, 'desvantagem');
+            container.appendChild(item);
+        });
+        
+        // Atualizar contador
+        this.atualizarContador('totalDesvantagensGM', this.desvantagensProcessadas.length);
+    }
+
+    renderizarPeculiaridades(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`❌ Container ${containerId} não encontrado`);
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        if (this.peculiaridadesProcessadas.length === 0) {
+            const emptyItem = this.criarItemVazio('Nenhuma peculiaridade', '0');
+            container.appendChild(emptyItem);
+            return;
+        }
+        
+        this.peculiaridadesProcessadas.forEach(peculiaridade => {
+            const item = this.criarItemLista(peculiaridade, 'peculiaridade');
+            container.appendChild(item);
         });
     }
 
-    iniciarSincronizacao() {
-        // Sincronizar a cada 30 segundos
-        intervaloAtualizacao = setInterval(() => {
-            this.sincronizarDados();
-        }, 30000);
+    // ====== CRIAR ELEMENTOS HTML ======
+    criarItemLista(item, tipo = 'vantagem') {
+        const div = document.createElement('div');
+        
+        // Classes CSS baseadas no tipo
+        const classes = {
+            vantagem: 'vantagem-item',
+            desvantagem: 'desvantagem-item',
+            peculiaridade: 'peculiaridade-item'
+        };
+        
+        div.className = classes[tipo] || 'item-lista';
+        
+        // Determinar texto e classe do custo
+        let custoTexto, custoClass;
+        
+        if (tipo === 'peculiaridade') {
+            custoTexto = '-1';
+            custoClass = 'negativo';
+        } else {
+            custoTexto = item.custo >= 0 ? `+${item.custo}` : `${item.custo}`;
+            custoClass = item.custo >= 0 ? 'positivo' : 'negativo';
+        }
+        
+        div.innerHTML = `
+            <span class="nome-${tipo}">${this.escapeHtml(item.nome)}</span>
+            <span class="custo-${tipo} ${custoClass}">${custoTexto}</span>
+        `;
+        
+        // Tooltip com descrição se existir
+        if (item.descricao && item.descricao.trim()) {
+            div.title = this.escapeHtml(item.descricao);
+            div.style.cursor = 'help';
+        }
+        
+        // Categoria se existir
+        if (item.categoria && item.categoria.trim()) {
+            const categoriaSpan = document.createElement('span');
+            categoriaSpan.className = 'categoria-item';
+            categoriaSpan.textContent = item.categoria;
+            categoriaSpan.style.cssText = 'font-size: 0.8rem; color: #95a5a6; margin-left: 10px;';
+            div.appendChild(categoriaSpan);
+        }
+        
+        return div;
     }
 
-    async sincronizarDados() {
-        try {
-            await this.carregarDadosPersonagem();
-            this.atualizarInterfaceCompleta();
-            this.mostrarMensagem('Dados atualizados', 'info');
-        } catch (error) {
-            console.error('❌ Erro na sincronização:', error);
+    criarItemVazio(texto, valor = '0') {
+        const div = document.createElement('div');
+        div.className = 'item-lista';
+        div.style.opacity = '0.7';
+        div.innerHTML = `
+            <span class="nome-vantagem">${texto}</span>
+            <span class="custo-vantagem">${valor}</span>
+        `;
+        return div;
+    }
+
+    // ====== ATUALIZAR CONTADORES E TOTAIS ======
+    atualizarContador(elementoId, total) {
+        const elemento = document.getElementById(elementoId);
+        if (elemento) {
+            elemento.textContent = total;
         }
     }
 
-    async congelarPersonagem() {
-        if (confirm('Congelar este personagem? O jogador não poderá fazer alterações.')) {
-            try {
-                const { error } = await supabase
-                    .from('campaign_characters')
-                    .update({ is_frozen: true })
-                    .eq('character_id', personagemId)
-                    .eq('campaign_id', campanhaId);
-                
-                if (error) throw error;
-                
-                this.mostrarMensagem('Personagem congelado!', 'sucesso');
-            } catch (error) {
-                this.mostrarMensagem('Erro ao congelar', 'erro');
+    atualizarTotais() {
+        const totalVantagens = this.calcularTotalVantagens();
+        const totalDesvantagens = this.calcularTotalDesvantagens();
+        const totalPeculiaridades = this.calcularTotalPeculiaridades();
+        const totalDesvantagensComPeculiaridades = totalDesvantagens + totalPeculiaridades;
+        const saldoTotal = totalVantagens + totalDesvantagensComPeculiaridades;
+        
+        console.log('💰 Totais calculados:', {
+            vantagens: totalVantagens,
+            desvantagens: totalDesvantagens,
+            peculiaridades: totalPeculiaridades,
+            totalNegativo: totalDesvantagensComPeculiaridades,
+            saldo: saldoTotal
+        });
+        
+        // Atualizar elementos na interface
+        this.atualizarElementosTotais(
+            totalVantagens, 
+            totalDesvantagensComPeculiaridades, 
+            totalPeculiaridades, 
+            saldoTotal
+        );
+    }
+
+    calcularTotalVantagens() {
+        return this.vantagensProcessadas.reduce((total, vantagem) => total + (vantagem.custo || 0), 0);
+    }
+
+    calcularTotalDesvantagens() {
+        return this.desvantagensProcessadas.reduce((total, desvantagem) => total + (desvantagem.custo || 0), 0);
+    }
+
+    calcularTotalPeculiaridades() {
+        return this.peculiaridadesProcessadas.reduce((total, peculiaridade) => total + (peculiaridade.custo || 0), 0);
+    }
+
+    atualizarElementosTotais(totalVantagens, totalDesvantagens, totalPeculiaridades, saldoTotal) {
+        // Total de Vantagens
+        const elTotalVantagens = document.getElementById('total-vantagens');
+        if (elTotalVantagens) {
+            elTotalVantagens.textContent = totalVantagens >= 0 ? `+${totalVantagens} pts` : `${totalVantagens} pts`;
+        }
+        
+        // Total de Desvantagens (incluindo peculiaridades)
+        const elTotalDesvantagens = document.getElementById('total-desvantagens');
+        if (elTotalDesvantagens) {
+            elTotalDesvantagens.textContent = `${totalDesvantagens} pts`;
+            elTotalDesvantagens.style.color = '#e74c3c';
+        }
+        
+        // Total de Peculiaridades
+        const elTotalPeculiaridades = document.getElementById('total-peculiaridades');
+        if (elTotalPeculiaridades) {
+            elTotalPeculiaridades.textContent = `${totalPeculiaridades} pts`;
+            elTotalPeculiaridades.style.color = '#9b59b6';
+        }
+        
+        // Saldo Total (Vantagens - Desvantagens)
+        const elSaldoTotal = document.getElementById('saldo-total-vantagens');
+        if (elSaldoTotal) {
+            elSaldoTotal.textContent = `${saldoTotal} pts`;
+            if (saldoTotal > 0) {
+                elSaldoTotal.style.color = '#27ae60';
+            } else if (saldoTotal < 0) {
+                elSaldoTotal.style.color = '#e74c3c';
+            } else {
+                elSaldoTotal.style.color = '#ffd700';
             }
         }
+        
+        // Atualizar também na aba de atributos
+        this.atualizarPontosAtributos();
     }
 
-    async removerPersonagem() {
-        if (confirm('ATENÇÃO: Remover este personagem da campanha?')) {
-            try {
-                const { error } = await supabase
-                    .from('campaign_characters')
-                    .update({ status: 'removed' })
-                    .eq('character_id', personagemId)
-                    .eq('campaign_id', campanhaId);
-                
-                if (error) throw error;
-                
-                this.mostrarMensagem('Personagem removido', 'sucesso');
-                
-                // Voltar para campanha após 2 segundos
-                setTimeout(() => {
-                    window.location.href = `campanha.html?id=${campanhaId}`;
-                }, 2000);
-                
-            } catch (error) {
-                this.mostrarMensagem('Erro ao remover', 'erro');
-            }
+    atualizarPontosAtributos() {
+        // Atualizar pontos gastos em atributos se existirem esses elementos
+        const pontosGastos = this.calcularTotalVantagens() + Math.abs(this.calcularTotalDesvantagens() + this.calcularTotalPeculiaridades());
+        
+        const elPontosGastos = document.getElementById('pontosGastos');
+        if (elPontosGastos) {
+            elPontosGastos.textContent = pontosGastos;
         }
-    }
-
-    async salvarAnotacoes() {
-        try {
-            const notas = document.getElementById('anotacoesGM').value;
-            
-            const { error } = await supabase
-                .from('campaign_characters')
-                .update({ gm_notes: notas })
-                .eq('character_id', personagemId)
-                .eq('campaign_id', campanhaId);
-            
-            if (error) throw error;
-            
-            this.mostrarMensagem('Anotações salvas!', 'sucesso');
-        } catch (error) {
-            this.mostrarMensagem('Erro ao salvar anotações', 'erro');
-        }
-    }
-
-    limparAnotacoes() {
-        if (confirm('Limpar todas as anotações?')) {
-            document.getElementById('anotacoesGM').value = '';
+        
+        const elDesvantagensAtuais = document.getElementById('desvantagensAtuais');
+        if (elDesvantagensAtuais) {
+            const totalNegativo = Math.abs(this.calcularTotalDesvantagens() + this.calcularTotalPeculiaridades());
+            elDesvantagensAtuais.textContent = totalNegativo;
         }
     }
 
     // ====== UTILITÁRIOS ======
-    mostrarLoading() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) overlay.style.display = 'flex';
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
-    esconderLoading() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) overlay.style.display = 'none';
-    }
-
-    mostrarMensagem(texto, tipo = 'info') {
-        const cores = {
-            sucesso: '#27ae60',
-            erro: '#e74c3c',
-            aviso: '#f39c12',
-            info: '#3498db'
+    // ====== OBTER DADOS PARA SAVE/EXPORT ======
+    obterDadosParaSalvar() {
+        return {
+            vantagens: this.vantagensProcessadas,
+            desvantagens: this.desvantagensProcessadas,
+            peculiaridades: this.peculiaridadesProcessadas,
+            totais: {
+                vantagens: this.calcularTotalVantagens(),
+                desvantagens: this.calcularTotalDesvantagens(),
+                peculiaridades: this.calcularTotalPeculiaridades(),
+                saldoTotal: this.calcularTotalVantagens() + this.calcularTotalDesvantagens() + this.calcularTotalPeculiaridades()
+            }
         };
-        
-        const mensagem = document.createElement('div');
-        mensagem.className = 'mensagem-flutuante';
-        mensagem.textContent = texto;
-        mensagem.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            background: ${cores[tipo]};
-            color: white;
-            border-radius: 6px;
-            z-index: 9999;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        `;
-        
-        document.body.appendChild(mensagem);
-        
-        setTimeout(() => {
-            mensagem.remove();
-        }, 3000);
+    }
+
+    // ====== FUNÇÃO PARA ATUALIZAR DADOS DINAMICAMENTE ======
+    atualizarComNovosDados(novosDadosPersonagem) {
+        this.dadosPersonagem = novosDadosPersonagem;
+        this.vantagensProcessadas = [];
+        this.desvantagensProcessadas = [];
+        this.peculiaridadesProcessadas = [];
+        this.init();
     }
 }
 
-// ====== INICIALIZAÇÃO ======
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Inicializando Ficha GM...');
-    new FichaGM();
-});
+// ====== INICIALIZAÇÃO AUTOMÁTICA ======
+// Adicionar CSS estilos para os itens
+const adicionarEstilosVD = () => {
+    if (!document.querySelector('#estilo-vd-gm')) {
+        const style = document.createElement('style');
+        style.id = 'estilo-vd-gm';
+        style.textContent = `
+            .vantagem-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px;
+                background: rgba(46, 204, 113, 0.1);
+                border-left: 3px solid #27ae60;
+                margin-bottom: 5px;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+            }
+            
+            .vantagem-item:hover {
+                background: rgba(46, 204, 113, 0.2);
+                transform: translateX(2px);
+            }
+            
+            .desvantagem-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px;
+                background: rgba(231, 76, 60, 0.1);
+                border-left: 3px solid #e74c3c;
+                margin-bottom: 5px;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+            }
+            
+            .desvantagem-item:hover {
+                background: rgba(231, 76, 60, 0.2);
+                transform: translateX(2px);
+            }
+            
+            .peculiaridade-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px;
+                background: rgba(155, 89, 182, 0.1);
+                border-left: 3px solid #9b59b6;
+                margin-bottom: 5px;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+            }
+            
+            .peculiaridade-item:hover {
+                background: rgba(155, 89, 182, 0.2);
+                transform: translateX(2px);
+            }
+            
+            .nome-vantagem, .nome-desvantagem, .nome-peculiaridade {
+                font-weight: 500;
+                color: #fff;
+                flex: 1;
+            }
+            
+            .custo-vantagem, .custo-desvantagem, .custo-peculiaridade {
+                font-weight: bold;
+                padding: 3px 10px;
+                border-radius: 12px;
+                font-size: 0.9rem;
+                min-width: 60px;
+                text-align: center;
+            }
+            
+            .positivo {
+                background: rgba(46, 204, 113, 0.3);
+                color: #27ae60;
+                border: 1px solid rgba(46, 204, 113, 0.5);
+            }
+            
+            .negativo {
+                background: rgba(231, 76, 60, 0.3);
+                color: #e74c3c;
+                border: 1px solid rgba(231, 76, 60, 0.5);
+            }
+            
+            .categoria-item {
+                font-size: 0.8rem;
+                color: #95a5a6;
+                margin-left: 10px;
+                font-style: italic;
+            }
+            
+            .item-lista {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px;
+                background: rgba(255, 255, 255, 0.05);
+                margin-bottom: 5px;
+                border-radius: 4px;
+            }
+        `;
+        document.head.appendChild(style);
+        console.log('✅ Estilos Vantagens/Desvantagens adicionados');
+    }
+};
 
-// Adicionar animações CSS
-if (!document.querySelector('#animacoes-flutuantes')) {
-    const style = document.createElement('style');
-    style.id = 'animacoes-flutuantes';
-    style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
-}
+// Função para usar em qualquer lugar
+const inicializarSistemaVD = (dadosPersonagem) => {
+    adicionarEstilosVD();
+    return new SistemaVantagensDesvantagensGM(dadosPersonagem);
+};
+
+// Exportar para uso global
+window.SistemaVantagensDesvantagensGM = SistemaVantagensDesvantagensGM;
+window.inicializarSistemaVD = inicializarSistemaVD;
+
+console.log('✅ Sistema Vantagens/Desvantagens GM COMPLETO carregado!');
+
+// Uso na sua ficha GM:
+// 1. Chame assim: const sistemaVD = inicializarSistemaVD(dadosPersonagem);
+// 2. Ele já vai atualizar tudo automaticamente
+// 3. Para atualizar com novos dados: sistemaVD.atualizarComNovosDados(novosDados);
