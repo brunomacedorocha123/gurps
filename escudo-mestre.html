@@ -581,13 +581,18 @@
     </div>
   </main>
 <script>
-// NOVO SCRIPT COMPLETO PARA escudo-do-mestre.html
+// ============================================
+// CONFIGURAÇÃO DO SUPABASE
+// ============================================
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// VARIÁVEIS GLOBAIS
 let currentUser = null;
 let campanhasGM = [];
 
+// INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', async function() {
   try {
     // Verificar autenticação
@@ -612,13 +617,16 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 });
 
-// CONFIGURAR NAVEGAÇÃO E EVENTOS
+// ============================================
+// FUNÇÕES DE NAVEGAÇÃO
+// ============================================
 function configurarNavegacao() {
-  // Botões de navegação
+  // Botão voltar
   document.getElementById('btnVoltar').addEventListener('click', () => {
     window.location.href = 'campanhas.html';
   });
   
+  // Botão sair
   document.getElementById('btnSair').addEventListener('click', async () => {
     if (confirm('Tem certeza que deseja sair?')) {
       await supabase.auth.signOut();
@@ -639,15 +647,19 @@ function configurarNavegacao() {
       this.classList.add('active');
       document.getElementById(tabId + '-tab').classList.add('active');
       
-      // Se for a tab de PCs, carregar campanhas no seletor
+      // Carregar dados específicos da tab
       if (tabId === 'pcs') {
         carregarCampanhasNoSeletor();
+      } else if (tabId === 'dashboard') {
+        carregarDashboard();
       }
     });
   });
 }
 
-// CARREGAR DASHBOARD INICIAL
+// ============================================
+// FUNÇÕES DO DASHBOARD
+// ============================================
 async function carregarDashboard() {
   try {
     mostrarLoading('campaignsList', 'Carregando suas campanhas...');
@@ -670,7 +682,6 @@ async function carregarDashboard() {
   }
 }
 
-// MOSTRAR CAMPANHAS NO DASHBOARD
 function mostrarCampanhasDashboard(campanhas) {
   const container = document.getElementById('campaignsList');
   
@@ -680,9 +691,6 @@ function mostrarCampanhasDashboard(campanhas) {
         <i class="fas fa-campground"></i>
         <h3>Nenhuma Campanha</h3>
         <p>Você ainda não criou nenhuma campanha como Mestre.</p>
-        <button class="btn" onclick="window.location.href='criar-campanha.html'">
-          <i class="fas fa-plus"></i> Criar Primeira Campanha
-        </button>
       </div>
     `;
     return;
@@ -698,21 +706,14 @@ function mostrarCampanhasDashboard(campanhas) {
           </div>
           <div class="campaign-stats">
             <div><i class="fas fa-user"></i> Mestre: Você</div>
-            <div><i class="fas fa-scroll"></i> Cenário: ${camp.scenario || 'Fantasy'}</div>
-            <div><i class="fas fa-bolt"></i> Pontos: ${camp.points || '100'} pts</div>
-            <div><i class="fas fa-chart-bar"></i> Status: 
-              <span class="status-badge status-${camp.status || 'active'}">
-                ${camp.status || 'Ativa'}
-              </span>
-            </div>
+            <div><i class="fas fa-scroll"></i> Sistema: ${camp.game_system || 'GURPS'}</div>
+            <div><i class="fas fa-users"></i> Máx. Jogadores: ${camp.max_players || '4'}</div>
+            <div><i class="fas fa-chart-bar"></i> Status: ${camp.status || 'Ativa'}</div>
           </div>
           <div class="campaign-actions">
             <button class="btn btn-small btn-gerenciar" 
                     onclick="selecionarCampanhaParaGerenciamento('${camp.id}', '${escaparHTML(camp.name)}')">
               <i class="fas fa-users"></i> Gerenciar Personagens
-            </button>
-            <button class="btn btn-small" onclick="verDetalhesCampanha('${camp.id}')">
-              <i class="fas fa-eye"></i> Ver Campanha
             </button>
           </div>
         </div>
@@ -721,7 +722,9 @@ function mostrarCampanhasDashboard(campanhas) {
   `;
 }
 
-// CARREGAR CAMPANHAS NO SELECTOR DA ABA "GERENCIAR PCS"
+// ============================================
+// FUNÇÕES DA ABA "GERENCIAR PCS"
+// ============================================
 function carregarCampanhasNoSeletor() {
   const selector = document.getElementById('selectedCampaign');
   
@@ -751,7 +754,6 @@ function carregarCampanhasNoSeletor() {
   };
 }
 
-// SELECIONAR CAMPANHA PARA GERENCIAMENTO
 function selecionarCampanhaParaGerenciamento(campanhaId, campanhaNome) {
   // Ir para tab de PCs
   document.querySelector('[data-tab="dashboard"]').classList.remove('active');
@@ -768,107 +770,55 @@ function selecionarCampanhaParaGerenciamento(campanhaId, campanhaNome) {
   carregarPersonagensDaCampanha(campanhaId, campanhaNome);
 }
 
-// FUNÇÃO PRINCIPAL - CARREGAR PERSONAGENS DA CAMPANHA
+// ============================================
+// FUNÇÃO PRINCIPAL - CARREGAR PERSONAGENS
+// ============================================
 async function carregarPersonagensDaCampanha(campanhaId, campanhaNome) {
   try {
     // Mostrar loading
-    mostrarLoading('pendingList', 'Buscando vínculos...');
+    mostrarLoading('pendingList', 'Carregando vínculos...');
     mostrarLoading('charactersList', 'Carregando personagens...');
     
-    // 1. BUSCAR VÍNCULOS DA CAMPANHA
-    const { data: vinculos, error: errorVinculos } = await supabase
-      .from('campaign_characters')
-      .select(`
-        *,
-        character:characters(*),
-        player:profiles!user_id(id, username, nickname, email)
-      `)
-      .eq('campaign_id', campanhaId);
+    // ✅ BUSCAR DA VIEW QUE EXISTE: gm_characters_view
+    const { data: personagens, error } = await supabase
+      .from('gm_characters_view')
+      .select('*')
+      .eq('campaign_id', campanhaId)
+      .eq('gm_user_id', currentUser.id)  // Apenas personagens do GM
+      .order('character_name', { ascending: true });
     
-    if (errorVinculos) throw errorVinculos;
+    if (error) throw error;
     
-    if (!vinculos || vinculos.length === 0) {
+    if (!personagens || personagens.length === 0) {
       mostrarNenhumPersonagemEncontrado(campanhaId);
       return;
     }
     
-    // 2. SEPARAR PENDENTES E ATIVOS
-    const pendentes = vinculos.filter(v => !v.user_id);
-    const ativos = vinculos.filter(v => v.user_id);
+    // Separar por status
+    const pendentes = personagens.filter(p => p.link_status === 'pending');
+    const ativos = personagens.filter(p => p.link_status === 'active');
     
-    // 3. MOSTRAR VÍNCULOS PENDENTES
-    mostrarVinculosPendentes(pendentes);
-    
-    // 4. MOSTRAR PERSONAGENS VINCULADOS
+    // Mostrar os cards
     mostrarPersonagensVinculados(ativos);
+    mostrarVinculosPendentes(pendentes);
     
   } catch (error) {
     console.error('Erro ao carregar personagens:', error);
-    mostrarErro('Erro ao carregar personagens: ' + error.message);
+    mostrarErroNoElemento('charactersList', 'Erro: ' + error.message);
   }
 }
 
-// MOSTRAR VÍNCULOS PENDENTES
-function mostrarVinculosPendentes(pendentes) {
-  const container = document.getElementById('pendingList');
-  
-  if (pendentes.length > 0) {
-    container.innerHTML = `
-      <div class="pending-list">
-        ${pendentes.map(v => `
-          <div class="pending-item">
-            <div class="item-header">
-              <div class="player-name">
-                <i class="fas fa-user-clock"></i> Vínculo Disponível
-              </div>
-              <div class="campaign-code">
-                ID: ${v.character_id ? v.character_id.substring(0, 8) + '...' : 'Sem ID'}
-              </div>
-            </div>
-            <div style="margin: 10px 0; color: #ccc; font-size: 0.9rem;">
-              <i class="fas fa-info-circle"></i> Aguardando jogador
-            </div>
-            <div class="pending-actions">
-              <button class="btn btn-small btn-aceitar" 
-                      onclick="atribuirJogadorAoVínculo('${v.id}')">
-                <i class="fas fa-user-plus"></i> Atribuir Jogador
-              </button>
-              <button class="btn btn-small btn-recusar" 
-                      onclick="deletarVínculo('${v.id}')">
-                <i class="fas fa-trash"></i> Remover
-              </button>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  } else {
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-check-circle"></i>
-        <p>Nenhum vínculo pendente.</p>
-      </div>
-    `;
-  }
-}
-
-// MOSTRAR PERSONAGENS VINCULADOS
-function mostrarPersonagensVinculados(vinculosAtivos) {
+// ============================================
+// FUNÇÕES PARA MOSTRAR OS CARDS
+// ============================================
+function mostrarPersonagensVinculados(personagens) {
   const container = document.getElementById('charactersList');
   
-  if (vinculosAtivos.length === 0) {
-    const selector = document.getElementById('selectedCampaign');
-    const campanhaId = selector ? selector.value : null;
-    
+  if (!personagens || personagens.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
         <i class="fas fa-users-slash"></i>
-        <p>Nenhum personagem vinculado ainda.</p>
-        ${campanhaId ? `
-          <button class="btn btn-small" onclick="gerarLinkConvite('${campanhaId}')" style="margin-top: 10px;">
-            <i class="fas fa-link"></i> Gerar Link de Convite
-          </button>
-        ` : ''}
+        <p>Nenhum personagem ativo nesta campanha.</p>
       </div>
     `;
     return;
@@ -876,30 +826,22 @@ function mostrarPersonagensVinculados(vinculosAtivos) {
   
   container.innerHTML = `
     <div class="characters-list">
-      ${vinculosAtivos.map(v => {
-        const personagem = v.character || {};
-        const jogador = v.player || {};
-        const vinculoId = v.id;
-        
+      ${personagens.map(p => {
         // Dados do personagem
-        const nome = escaparHTML(personagem.nome || `Personagem ${personagem.id?.substring(0, 8) || 'Sem nome'}`);
-        const raca = escaparHTML(personagem.raca || 'Sem Raça');
-        const classe = escaparHTML(personagem.classe || 'Sem Classe');
+        const nome = escaparHTML(p.character_name || 'Sem nome');
+        const raca = escaparHTML(p.race || '');
+        const pontos = p.total_points || 0;
+        const pontosGastos = p.spent_points || 0;
+        const pontosDisponiveis = p.available_points || 0;
+        const pv = `${p.current_hp || 0}/${p.max_hp || 0}`;
+        const pf = `${p.current_fp || 0}/${p.max_fp || 0}`;
+        const jogador = p.player_username || p.player_email?.split('@')[0] || 'Sem jogador';
         
-        // Atributos
-        const forca = personagem.forca || 10;
-        const destreza = personagem.destreza || 10;
-        const inteligencia = personagem.inteligencia || 10;
-        const saude = personagem.saude || 10;
-        
-        // Pontos
-        const pontosGastos = personagem.pontos_gastos || 0;
-        const pontosTotais = personagem.pontos_totais || 150;
-        const pontosDisponiveis = personagem.pontos_disponiveis || (pontosTotais - pontosGastos);
-        
-        // Nome do jogador
-        const nomeJogador = jogador.nickname || jogador.username || 
-                           jogador.email?.split('@')[0] || v.user_id?.substring(0, 6) || 'Desconhecido';
+        // Atributos GURPS
+        const st = p.st || 10;
+        const dx = p.dx || 10;
+        const iq = p.iq || 10;
+        const ht = p.ht || 10;
         
         return `
           <div class="character-item">
@@ -907,53 +849,116 @@ function mostrarPersonagensVinculados(vinculosAtivos) {
               <div class="character-name">
                 <i class="fas fa-user"></i> ${nome}
               </div>
+              <div class="campaign-code">
+                ${raca}
+              </div>
             </div>
             
-            <!-- RAÇA E CLASSE -->
-            <div style="margin: 8px 0; color: #ff8c00; font-size: 0.9rem;">
-              <i class="fas fa-dna"></i> ${raca} • ${classe}
-            </div>
-            
-            <!-- ATRIBUTOS - FORMATO GURPS -->
+            <!-- ATRIBUTOS GURPS -->
             <div class="character-attributes-gurps">
               <div class="attr-gurps">
                 <span class="attr-label-gurps">FOR</span>
-                <span class="attr-value-gurps">${forca}</span>
+                <span class="attr-value-gurps">${st}</span>
               </div>
               <div class="attr-gurps">
                 <span class="attr-label-gurps">DES</span>
-                <span class="attr-value-gurps">${destreza}</span>
+                <span class="attr-value-gurps">${dx}</span>
               </div>
               <div class="attr-gurps">
                 <span class="attr-label-gurps">INT</span>
-                <span class="attr-value-gurps">${inteligencia}</span>
+                <span class="attr-value-gurps">${iq}</span>
               </div>
               <div class="attr-gurps">
                 <span class="attr-label-gurps">SAÚ</span>
-                <span class="attr-value-gurps">${saude}</span>
+                <span class="attr-value-gurps">${ht}</span>
+              </div>
+            </div>
+            
+            <!-- PV e PF -->
+            <div class="character-stats">
+              <div class="stat-item">
+                <i class="fas fa-heart"></i>
+                <span>PV: <strong>${pv}</strong></span>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-bolt"></i>
+                <span>PF: <strong>${pf}</strong></span>
               </div>
             </div>
             
             <!-- PONTOS -->
-            <div style="margin: 10px 0; padding: 8px; background: rgba(255, 140, 0, 0.1); border-radius: 4px; font-size: 0.9rem;">
-              <i class="fas fa-coins"></i> Pontos: <strong>${pontosDisponiveis}/${pontosTotais}</strong>
-              ${pontosGastos > 0 ? ` (Gastos: ${pontosGastos})` : ''}
+            <div class="points-info">
+              <i class="fas fa-coins"></i>
+              <span>Pontos: <strong>${pontosDisponiveis}/${pontos}</strong></span>
+              ${pontosGastos > 0 ? `<span class="points-spent">(Gastos: ${pontosGastos})</span>` : ''}
             </div>
             
-            <!-- VINCULADO AO JOGADOR -->
-            <div style="margin: 10px 0; padding: 8px; background: rgba(52, 152, 219, 0.1); border-radius: 4px; font-size: 0.85rem;">
-              <i class="fas fa-link"></i> Jogador: <strong>${nomeJogador}</strong>
+            <!-- JOGADOR -->
+            <div class="player-info">
+              <i class="fas fa-user-friends"></i>
+              <span>Jogador: <strong>${jogador}</strong></span>
             </div>
             
             <!-- AÇÕES -->
             <div class="character-actions">
               <button class="btn btn-small btn-ver" 
-                      onclick="verFichaPersonagemGM('${personagem.id}', '${v.campaign_id}', '${vinculoId}')">
+                      onclick="verFichaPersonagemGM('${p.character_id}', '${p.campaign_id}', '${p.vinculo_id}')">
                 <i class="fas fa-scroll"></i> Ver Ficha (GM)
               </button>
               <button class="btn btn-small btn-recusar" 
-                      onclick="removerDaCampanha('${vinculoId}', '${escaparHTML(nome)}')">
+                      onclick="removerDaCampanha('${p.vinculo_id}', '${escaparHTML(nome)}')">
                 <i class="fas fa-user-minus"></i> Remover
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  
+  // Adicionar estilos CSS para os novos elementos
+  adicionarEstilosGURPS();
+}
+
+function mostrarVinculosPendentes(pendentes) {
+  const container = document.getElementById('pendingList');
+  
+  if (!pendentes || pendentes.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-check-circle"></i>
+        <p>Nenhum vínculo pendente.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = `
+    <div class="pending-list">
+      ${pendentes.map(p => {
+        const nome = escaparHTML(p.character_name || 'Personagem sem nome');
+        return `
+          <div class="pending-item">
+            <div class="item-header">
+              <div class="player-name">
+                <i class="fas fa-user-clock"></i> ${nome}
+              </div>
+              <div class="campaign-code">
+                ${p.race || 'Sem raça'}
+              </div>
+            </div>
+            <div class="pending-info">
+              <i class="fas fa-info-circle"></i>
+              <span>Aguardando jogador</span>
+            </div>
+            <div class="pending-actions">
+              <button class="btn btn-small btn-aceitar" 
+                      onclick="atribuirJogadorAoVínculo('${p.vinculo_id}')">
+                <i class="fas fa-user-plus"></i> Atribuir Jogador
+              </button>
+              <button class="btn btn-small btn-recusar" 
+                      onclick="deletarVínculo('${p.vinculo_id}')">
+                <i class="fas fa-trash"></i> Remover
               </button>
             </div>
           </div>
@@ -963,54 +968,52 @@ function mostrarPersonagensVinculados(vinculosAtivos) {
   `;
 }
 
-// ======================
+// ============================================
 // FUNÇÕES DE AÇÃO
-// ======================
-
-// VER FICHA DO PERSONAGEM (NOVA PÁGINA GM)
-async function verFichaPersonagemGM(personagemId, campanhaId, vinculoId) {
+// ============================================
+async function verFichaPersonagemGM(characterId, campaignId, vinculoId) {
   try {
-    // Primeiro, verificar se o vínculo existe e o GM tem acesso
-    const { data: vinculo, error } = await supabase
-      .from('campaign_characters')
-      .select('campaign_id')
-      .eq('id', vinculoId)
+    // Buscar dados completos
+    const { data: personagem, error } = await supabase
+      .from('gm_characters_view')
+      .select('*')
+      .eq('character_id', characterId)
+      .eq('campaign_id', campaignId)
+      .eq('vinculo_id', vinculoId)
       .single();
     
     if (error) throw error;
     
-    // Verificar se a campanha pertence ao GM
-    const campanha = campanhasGM.find(c => c.id === vinculo.campaign_id);
-    if (!campanha) {
+    // Verificar permissão
+    if (personagem.gm_user_id !== currentUser.id) {
       alert('Você não tem permissão para ver esta ficha.');
       return;
     }
     
-    // Abrir a nova página de ficha do GM
-    const url = `ficha-personagem-gm.html?personagem=${personagemId}&campanha=${campanhaId}&vinculo=${vinculoId}`;
-    window.open(url, '_blank');
+    // Salvar dados e abrir ficha
+    localStorage.setItem('gm_character_data', JSON.stringify(personagem));
+    window.open(`ficha-personagem-gm.html?character=${characterId}&campaign=${campaignId}&link=${vinculoId}`, '_blank');
     
   } catch (error) {
     console.error('Erro ao abrir ficha:', error);
-    alert('Erro ao abrir ficha: ' + error.message);
+    alert('Erro: ' + error.message);
   }
 }
 
-// ATRIBUIR JOGADOR AO VÍNCULO
-async function atribuirJogadorAoVínculo(vínculoId) {
-  const emailJogador = prompt('Digite o email do jogador para vincular:');
-  if (!emailJogador) return;
+async function atribuirJogadorAoVínculo(vinculoId) {
+  const email = prompt('Digite o email do jogador:');
+  if (!email) return;
   
   try {
-    // Buscar ID do usuário pelo email
-    const { data: usuario, error } = await supabase
+    // Buscar ID do jogador pelo email
+    const { data: jogador, error } = await supabase
       .from('profiles')
       .select('id')
-      .eq('email', emailJogador)
+      .eq('email', email)
       .single();
     
-    if (error || !usuario) {
-      alert('Jogador não encontrado! Verifique o email digitado.');
+    if (error || !jogador) {
+      alert('Jogador não encontrado!');
       return;
     }
     
@@ -1018,18 +1021,19 @@ async function atribuirJogadorAoVínculo(vínculoId) {
     const { error: updateError } = await supabase
       .from('campaign_characters')
       .update({
-        user_id: usuario.id,
+        user_id: jogador.id,
+        status: 'active',
         updated_at: new Date().toISOString()
       })
-      .eq('id', vínculoId);
+      .eq('id', vinculoId);
     
     if (updateError) throw updateError;
     
-    mostrarMensagem('Jogador vinculado com sucesso!', 'sucesso');
+    alert('Jogador atribuído com sucesso!');
     
-    // Recarregar a lista
+    // Recarregar
     const selector = document.getElementById('selectedCampaign');
-    if (selector && selector.value) {
+    if (selector.value) {
       const campanha = campanhasGM.find(c => c.id === selector.value);
       if (campanha) {
         setTimeout(() => carregarPersonagensDaCampanha(campanha.id, campanha.name), 500);
@@ -1037,28 +1041,27 @@ async function atribuirJogadorAoVínculo(vínculoId) {
     }
     
   } catch (error) {
-    console.error('Erro ao vincular jogador:', error);
-    mostrarMensagem('Erro: ' + error.message, 'erro');
+    console.error('Erro:', error);
+    alert('Erro: ' + error.message);
   }
 }
 
-// DELETAR VÍNCULO
-async function deletarVínculo(vínculoId) {
-  if (!confirm('Remover este vínculo? O personagem ficará disponível para outros jogadores.')) return;
+async function deletarVínculo(vinculoId) {
+  if (!confirm('Remover este vínculo?')) return;
   
   try {
     const { error } = await supabase
       .from('campaign_characters')
       .delete()
-      .eq('id', vínculoId);
+      .eq('id', vinculoId);
     
     if (error) throw error;
     
-    mostrarMensagem('Vínculo removido!', 'sucesso');
+    alert('Vínculo removido!');
     
-    // Recarregar a lista
+    // Recarregar
     const selector = document.getElementById('selectedCampaign');
-    if (selector && selector.value) {
+    if (selector.value) {
       const campanha = campanhasGM.find(c => c.id === selector.value);
       if (campanha) {
         setTimeout(() => carregarPersonagensDaCampanha(campanha.id, campanha.name), 500);
@@ -1066,28 +1069,30 @@ async function deletarVínculo(vínculoId) {
     }
     
   } catch (error) {
-    console.error('Erro ao remover vínculo:', error);
-    mostrarMensagem('Erro: ' + error.message, 'erro');
+    console.error('Erro:', error);
+    alert('Erro: ' + error.message);
   }
 }
 
-// REMOVER PERSONAGEM DA CAMPANHA
-async function removerDaCampanha(vínculoId, nomePersonagem) {
+async function removerDaCampanha(vinculoId, nomePersonagem) {
   if (!confirm(`Remover "${nomePersonagem}" da campanha?`)) return;
   
   try {
     const { error } = await supabase
       .from('campaign_characters')
-      .delete()
-      .eq('id', vínculoId);
+      .update({
+        status: 'inactive',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', vinculoId);
     
     if (error) throw error;
     
-    mostrarMensagem('Personagem removido da campanha!', 'sucesso');
+    alert('Personagem removido!');
     
-    // Recarregar a lista
+    // Recarregar
     const selector = document.getElementById('selectedCampaign');
-    if (selector && selector.value) {
+    if (selector.value) {
       const campanha = campanhasGM.find(c => c.id === selector.value);
       if (campanha) {
         setTimeout(() => carregarPersonagensDaCampanha(campanha.id, campanha.name), 500);
@@ -1095,74 +1100,48 @@ async function removerDaCampanha(vínculoId, nomePersonagem) {
     }
     
   } catch (error) {
-    console.error('Erro ao remover personagem:', error);
-    mostrarMensagem('Erro: ' + error.message, 'erro');
+    console.error('Erro:', error);
+    alert('Erro: ' + error.message);
   }
 }
 
-// VER DETALHES DA CAMPANHA
-function verDetalhesCampanha(campanhaId) {
-  window.open(`campanha.html?id=${campanhaId}`, '_blank');
-}
-
-// GERAR LINK DE CONVITE
-function gerarLinkConvite(campanhaId) {
-  const campanha = campanhasGM.find(c => c.id === campanhaId);
-  if (!campanha) return;
-  
-  const link = `${window.location.origin}/entrar-campanha.html?code=${campanha.campaign_id}`;
-  
-  alert(`Link de convite para "${campanha.name}":\n\n${link}\n\nCompartilhe com seus jogadores!`);
-  
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(link);
-    mostrarMensagem('Link copiado para a área de transferência!', 'sucesso');
-  }
-}
-
-// ======================
+// ============================================
 // FUNÇÕES AUXILIARES
-// ======================
-
+// ============================================
 function mostrarNenhumPersonagemEncontrado(campanhaId) {
+  document.getElementById('charactersList').innerHTML = `
+    <div class="empty-state">
+      <i class="fas fa-users-slash"></i>
+      <h3>Nenhum Personagem</h3>
+      <p>Esta campanha não tem personagens vinculados.</p>
+    </div>
+  `;
+  
   document.getElementById('pendingList').innerHTML = `
     <div class="empty-state">
       <i class="fas fa-search"></i>
       <p>Nenhum vínculo encontrado.</p>
     </div>
   `;
-  
-  document.getElementById('charactersList').innerHTML = `
-    <div class="empty-state">
-      <i class="fas fa-users-slash"></i>
-      <h3>Nenhum Personagem</h3>
-      <p>Esta campanha não tem personagens vinculados ainda.</p>
-      <div style="margin-top: 20px;">
-        <button class="btn" onclick="gerarLinkConvite('${campanhaId}')">
-          <i class="fas fa-user-plus"></i> Convidar Jogadores
-        </button>
-      </div>
-    </div>
-  `;
 }
 
 function resetarListasDePersonagens() {
-  document.getElementById('pendingList').innerHTML = `
-    <div class="empty-state">
-      <i class="fas fa-clock"></i>
-      <p>Selecione uma campanha para ver vínculos pendentes</p>
-    </div>
-  `;
-  
   document.getElementById('charactersList').innerHTML = `
     <div class="empty-state">
       <i class="fas fa-users"></i>
-      <p>Selecione uma campanha para ver personagens vinculados</p>
+      <p>Selecione uma campanha para ver personagens</p>
+    </div>
+  `;
+  
+  document.getElementById('pendingList').innerHTML = `
+    <div class="empty-state">
+      <i class="fas fa-clock"></i>
+      <p>Selecione uma campanha para ver vínculos</p>
     </div>
   `;
 }
 
-function mostrarLoading(elementId, mensagem = 'Carregando...') {
+function mostrarLoading(elementId, mensagem) {
   const elemento = document.getElementById(elementId);
   if (elemento) {
     elemento.innerHTML = `
@@ -1176,7 +1155,6 @@ function mostrarLoading(elementId, mensagem = 'Carregando...') {
 
 function mostrarErro(mensagem) {
   console.error(mensagem);
-  // Você pode implementar um sistema de notificações mais sofisticado aqui
   alert(mensagem);
 }
 
@@ -1186,40 +1164,11 @@ function mostrarErroNoElemento(elementId, mensagem) {
     elemento.innerHTML = `
       <div class="empty-state">
         <i class="fas fa-exclamation-triangle"></i>
-        <h3>Erro ao Carregar</h3>
+        <h3>Erro</h3>
         <p>${mensagem}</p>
-        <button class="btn" onclick="carregarDashboard()">
-          <i class="fas fa-redo"></i> Tentar Novamente
-        </button>
       </div>
     `;
   }
-}
-
-function mostrarMensagem(texto, tipo = 'info') {
-  // Criar elemento de mensagem
-  const mensagem = document.createElement('div');
-  mensagem.className = `mensagem-flutuante ${tipo}`;
-  mensagem.textContent = texto;
-  mensagem.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    background: ${tipo === 'sucesso' ? '#27ae60' : tipo === 'erro' ? '#e74c3c' : '#3498db'};
-    color: white;
-    border-radius: 6px;
-    z-index: 9999;
-    animation: slideIn 0.3s ease;
-  `;
-  
-  document.body.appendChild(mensagem);
-  
-  // Remover após 3 segundos
-  setTimeout(() => {
-    mensagem.style.animation = 'slideOut 0.3s ease';
-    setTimeout(() => mensagem.remove(), 300);
-  }, 3000);
 }
 
 function escaparHTML(texto) {
@@ -1229,143 +1178,136 @@ function escaparHTML(texto) {
   return div.innerHTML;
 }
 
-// ======================
-// ESTILOS ADICIONAIS
-// ======================
-const estilosAdicionais = document.createElement('style');
-estilosAdicionais.textContent = `
-/* ANIMAÇÕES PARA MENSAGENS */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideOut {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-}
-
-/* MELHORIAS PARA OS CARDS */
-.character-item {
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 140, 0, 0.1);
-}
-
-.character-item:hover {
-  border-color: rgba(255, 140, 0, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* BOTÕES COM ÍCONES ALINHADOS */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-/* RESPONSIVIDADE MELHORADA */
-@media (max-width: 768px) {
-  .character-attributes-gurps {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+// ============================================
+// ESTILOS ADICIONAIS PARA GURPS
+// ============================================
+function adicionarEstilosGURPS() {
+  if (document.getElementById('estilos-gurps')) return;
   
-  .attr-gurps {
-    margin: 5px;
-  }
+  const estilos = document.createElement('style');
+  estilos.id = 'estilos-gurps';
+  estilos.textContent = `
+    /* ATRIBUTOS GURPS */
+    .character-attributes-gurps {
+      display: flex;
+      justify-content: space-around;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(30, 30, 40, 0.5);
+      border-radius: 8px;
+    }
+    
+    .attr-gurps {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .attr-label-gurps {
+      font-size: 0.8rem;
+      color: #ff8c00;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    
+    .attr-value-gurps {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background: rgba(255, 140, 0, 0.2);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 140, 0, 0.5);
+    }
+    
+    /* ESTATÍSTICAS */
+    .character-stats {
+      display: flex;
+      gap: 15px;
+      margin: 10px 0;
+      padding: 8px;
+      background: rgba(40, 40, 50, 0.5);
+      border-radius: 6px;
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #ccc;
+    }
+    
+    .stat-item i {
+      color: #ff8c00;
+    }
+    
+    /* PONTOS */
+    .points-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      padding: 8px;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 4px;
+      color: #ffd700;
+    }
+    
+    .points-spent {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-left: 10px;
+    }
+    
+    /* JOGADOR */
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      padding: 8px;
+      background: rgba(52, 152, 219, 0.1);
+      border-radius: 4px;
+      color: #3498db;
+    }
+    
+    /* VÍNCULOS PENDENTES */
+    .pending-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+      color: #f1c40f;
+    }
+    
+    /* RESPONSIVIDADE */
+    @media (max-width: 768px) {
+      .character-attributes-gurps {
+        flex-wrap: wrap;
+      }
+      
+      .attr-gurps {
+        margin: 5px;
+      }
+    }
+  `;
   
-  .character-actions {
-    flex-direction: column;
-  }
-  
-  .btn-small {
-    width: 100%;
-    margin-bottom: 5px;
-  }
+  document.head.appendChild(estilos);
 }
 
-/* ESTILOS PARA A NOVA FUNCIONALIDADE */
-.gm-tools {
-  margin-top: 20px;
-  padding: 15px;
-  background: rgba(30, 30, 40, 0.7);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 140, 0, 0.2);
-}
-
-.gm-tools h4 {
-  color: #ffd700;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
-}
-
-.tool-card {
-  background: rgba(40, 40, 50, 0.8);
-  padding: 15px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.tool-card:hover {
-  border-color: #ff8c00;
-  transform: translateY(-2px);
-}
-
-.tool-card i {
-  color: #ff8c00;
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
-
-.tool-card h5 {
-  color: #fff;
-  margin-bottom: 5px;
-}
-
-.tool-card p {
-  color: #ccc;
-  font-size: 0.9rem;
-}
-`;
-
-document.head.appendChild(estilosAdicionais);
-
-// ======================
-// FUNÇÕES GLOBAIS
-// ======================
+// ============================================
+// EXPORTAÇÕES GLOBAIS
+// ============================================
 window.carregarDashboard = carregarDashboard;
 window.selecionarCampanhaParaGerenciamento = selecionarCampanhaParaGerenciamento;
 window.verFichaPersonagemGM = verFichaPersonagemGM;
 window.atribuirJogadorAoVínculo = atribuirJogadorAoVínculo;
 window.deletarVínculo = deletarVínculo;
 window.removerDaCampanha = removerDaCampanha;
-window.verDetalhesCampanha = verDetalhesCampanha;
-window.gerarLinkConvite = gerarLinkConvite;
 </script>
 </body>
 </html>
