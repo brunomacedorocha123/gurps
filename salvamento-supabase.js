@@ -1,136 +1,217 @@
-// salvamento-supabase.js - VERSÃO CORRIGIDA E SIMPLIFICADA
+// salvamento-supabase.js - VERSÃO COMPLETA E FUNCIONAL
 class SalvamentoSupabase {
     constructor() {
-        // Aguardar o Supabase estar disponível
-        this.supabase = null;
-        this.inicializarSupabase();
-    }
-
-    inicializarSupabase() {
-        // Tentar diferentes formas de acessar o Supabase
-        if (window.supabase) {
-            this.supabase = window.supabase;
-        } else if (window.supabaseClient) {
-            this.supabase = window.supabaseClient;
-        } else {
-            // Tentar criar se as constantes existirem
-            try {
-                if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-                    this.supabase = window.supabase.createClient(
-                        window.SUPABASE_URL, 
-                        window.SUPABASE_ANON_KEY
-                    );
-                }
-            } catch (error) {
-                console.error('Não foi possível inicializar o Supabase:', error);
-            }
-        }
-    }
-
-    async verificarAutenticacao() {
+        // Usar o supabase que já existe no window (criado no script principal)
+        this.supabase = window.supabase || window.supabaseClient;
+        
         if (!this.supabase) {
-            return { sucesso: false, erro: 'Supabase não inicializado' };
+            throw new Error('Supabase não está disponível');
         }
+        
+        console.log('✅ Sistema de salvamento inicializado');
+    }
 
+    // MÉTODO PRINCIPAL DE SALVAMENTO
+    async salvarPersonagem(personagemId = null) {
         try {
-            const { data: { session }, error } = await this.supabase.auth.getSession();
-            
-            if (error) {
-                return { sucesso: false, erro: error.message };
-            }
+            // 1. Verificar autenticação
+            const { data: { session } } = await this.supabase.auth.getSession();
             
             if (!session) {
-                return { 
-                    sucesso: false, 
-                    erro: 'Não autenticado',
-                    redirecionar: 'login.html'
-                };
+                alert('Você precisa estar logado para salvar!');
+                window.location.href = 'login.html';
+                return false;
             }
+
+            const userId = session.user.id;
+
+            // 2. Mostrar carregando
+            const btnSalvar = document.getElementById('btnSalvar');
+            const btnSalvarOriginal = btnSalvar?.innerHTML || '';
+            if (btnSalvar) {
+                btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                btnSalvar.disabled = true;
+            }
+
+            // 3. Coletar dados COMPLETOS
+            const dadosCompletos = this.coletarTodosOsDados();
+
+            // 4. Adicionar campos obrigatórios
+            dadosCompletos.user_id = userId;
+            dadosCompletos.updated_at = new Date().toISOString();
+
+            // 5. Validar dados básicos
+            if (!dadosCompletos.nome || dadosCompletos.nome.trim() === '') {
+                alert('O personagem precisa ter um nome!');
+                if (btnSalvar) {
+                    btnSalvar.innerHTML = btnSalvarOriginal;
+                    btnSalvar.disabled = false;
+                }
+                return false;
+            }
+
+            let resultado;
+
+            // 6. Salvar no Supabase
+            if (personagemId) {
+                // EDITAR personagem existente
+                const { data, error } = await this.supabase
+                    .from('characters')
+                    .update(dadosCompletos)
+                    .eq('id', personagemId)
+                    .eq('user_id', userId)
+                    .select();
+
+                if (error) throw error;
+                resultado = data;
+                
+            } else {
+                // CRIAR novo personagem
+                dadosCompletos.created_at = new Date().toISOString();
+                dadosCompletos.status = 'Ativo';
+                
+                const { data, error } = await this.supabase
+                    .from('characters')
+                    .insert([dadosCompletos])
+                    .select();
+
+                if (error) throw error;
+                
+                if (data && data[0]) {
+                    personagemId = data[0].id;
+                    resultado = data;
+                }
+            }
+
+            // 7. Sucesso - restaurar botão
+            if (btnSalvar) {
+                btnSalvar.innerHTML = btnSalvarOriginal;
+                btnSalvar.disabled = false;
+            }
+
+            // 8. Mostrar mensagem de sucesso
+            const mensagem = personagemId 
+                ? 'Personagem atualizado com sucesso!' 
+                : 'Personagem criado com sucesso!';
             
-            return { 
-                sucesso: true, 
-                session,
-                userId: session.user.id,
-                userEmail: session.user.email
-            };
+            alert(mensagem + '\n\nRedirecionando para seus personagens...');
+
+            // 9. Redirecionar
+            setTimeout(() => {
+                window.location.href = 'personagens.html';
+            }, 2000);
+
+            return true;
+
         } catch (error) {
-            return { sucesso: false, erro: error.message };
+            // Restaurar botão em caso de erro
+            const btnSalvar = document.getElementById('btnSalvar');
+            if (btnSalvar) {
+                btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
+                btnSalvar.disabled = false;
+            }
+
+            // Mostrar erro detalhado
+            this.mostrarErroDetalhado(error);
+            return false;
         }
     }
 
-    // COLETAR DADOS SIMPLIFICADO
-    coletarDadosParaSalvar() {
+    // COLETAR TODOS OS DADOS DAS ABAS
+    coletarTodosOsDados() {
+        const dados = {};
+        
         try {
-            // Dados básicos obrigatórios
-            const dados = {
-                nome: document.getElementById('charName')?.value || 'Novo Personagem',
-                raca: document.getElementById('racaPersonagem')?.value || '',
-                classe: document.getElementById('classePersonagem')?.value || '',
-                nivel: document.getElementById('nivelPersonagem')?.value || '',
-                descricao: document.getElementById('descricaoPersonagem')?.value || '',
-                
-                // Atributos principais
-                forca: parseInt(document.getElementById('ST')?.value) || 10,
-                destreza: parseInt(document.getElementById('DX')?.value) || 10,
-                inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
-                saude: parseInt(document.getElementById('HT')?.value) || 10,
-                
-                // Pontos
-                pontos_totais: this.obterPontosTotais(),
-                pontos_gastos: this.obterPontosGastos(),
-                pontos_disponiveis: this.obterPontosDisponiveis(),
-                
-                // Atributos secundários
-                pontos_vida: this.obterValorNumerico('PVTotal', 10),
-                pontos_fadiga: this.obterValorNumerico('PFTotal', 10),
-                vontade: this.obterValorNumerico('VontadeTotal', 10),
-                percepcao: this.obterValorNumerico('PercepcaoTotal', 10),
-                deslocamento: this.obterValorNumerico('DeslocamentoTotal', 5.0, true),
-                
-                // Características
-                aparencia: this.obterValorSelect('nivelAparencia', 'Comum'),
-                custo_aparencia: this.obterValorNumericoSelect('nivelAparencia', 0),
-                riqueza: this.obterValorSelect('nivelRiqueza', 'Média'),
-                custo_riqueza: this.obterValorNumericoSelect('nivelRiqueza', 0),
-                
-                // Dados físicos
-                altura: parseFloat(document.getElementById('altura')?.value) || 1.70,
-                peso: parseFloat(document.getElementById('peso')?.value) || 70,
-                
-                // JSON para dados complexos
-                vantagens: this.coletarVantagens(),
-                desvantagens: this.coletarDesvantagens(),
-                peculiaridades: this.coletarPeculiaridades(),
-                pericias: this.coletarPericias(),
-                equipamentos: this.coletarEquipamentos(),
-                magias: this.coletarMagias(),
-                
-                // Status e datas
-                status: 'Ativo',
-                updated_at: new Date().toISOString()
-            };
-
-            // Se for novo personagem, adicionar created_at
-            if (!window.location.search.includes('id=')) {
-                dados.created_at = new Date().toISOString();
-            }
-
-            return { sucesso: true, dados };
-
+            // A. DADOS BÁSICOS
+            dados.nome = document.getElementById('charName')?.value || 'Novo Personagem';
+            dados.raca = document.getElementById('racaPersonagem')?.value || '';
+            dados.classe = document.getElementById('classePersonagem')?.value || '';
+            dados.nivel = document.getElementById('nivelPersonagem')?.value || '';
+            dados.descricao = document.getElementById('descricaoPersonagem')?.value || '';
+            
+            // B. ATRIBUTOS PRINCIPAIS
+            dados.forca = parseInt(document.getElementById('ST')?.value) || 10;
+            dados.destreza = parseInt(document.getElementById('DX')?.value) || 10;
+            dados.inteligencia = parseInt(document.getElementById('IQ')?.value) || 10;
+            dados.saude = parseInt(document.getElementById('HT')?.value) || 10;
+            
+            // C. PONTOS
+            dados.pontos_totais = this.obterPontosTotais();
+            dados.pontos_gastos = this.obterPontosGastos();
+            dados.pontos_disponiveis = this.obterPontosDisponiveis();
+            
+            // D. ATRIBUTOS SECUNDÁRIOS
+            dados.pontos_vida = this.obterValorNumerico('PVTotal', 10);
+            dados.pontos_fadiga = this.obterValorNumerico('PFTotal', 10);
+            dados.vontade = this.obterValorNumerico('VontadeTotal', 10);
+            dados.percepcao = this.obterValorNumerico('PercepcaoTotal', 10);
+            dados.deslocamento = this.obterValorNumerico('DeslocamentoTotal', 5.0, true);
+            
+            // E. DANO
+            dados.dano_gdp = this.obterTexto('danoGDP', '1d-2');
+            dados.dano_geb = this.obterTexto('danoGEB', '1d');
+            
+            // F. CARACTERÍSTICAS
+            dados.aparencia = this.obterValorSelect('nivelAparencia', 'Comum');
+            dados.custo_aparencia = this.obterValorNumericoSelect('nivelAparencia', 0);
+            dados.riqueza = this.obterValorSelect('nivelRiqueza', 'Média');
+            dados.custo_riqueza = this.obterValorNumericoSelect('nivelRiqueza', 0);
+            dados.altura = parseFloat(document.getElementById('altura')?.value) || 1.70;
+            dados.peso = parseFloat(document.getElementById('peso')?.value) || 70;
+            
+            // G. DADOS COMPLEXOS (JSON)
+            dados.vantagens = this.coletarVantagensJSON();
+            dados.desvantagens = this.coletarDesvantagensJSON();
+            dados.peculiaridades = this.coletarPeculiaridadesJSON();
+            dados.pericias = this.coletarPericiasJSON();
+            dados.magias = this.coletarMagiasJSON();
+            dados.equipamentos = this.coletarEquipamentosJSON();
+            dados.tecnicas = this.coletarTecnicasJSON();
+            
+            // H. COMBATE
+            dados.pv_atual = this.obterValorNumerico('pvAtualDisplay', 10);
+            dados.pv_maximo = this.obterValorNumerico('pvMaxDisplay', 10);
+            dados.pf_atual = this.obterValorNumerico('pfAtualDisplay', 10);
+            dados.pf_maximo = this.obterValorNumerico('pfMaxDisplay', 10);
+            dados.esquiva = this.obterValorNumerico('esquivaTotal', 10);
+            dados.bloqueio = this.obterValorNumerico('bloqueioTotal', 11);
+            dados.aparar = this.obterValorNumerico('apararTotal', 3);
+            
+            // I. DINHEIRO E CARGA
+            dados.dinheiro = this.obterDinheiro();
+            dados.peso_atual = this.obterValorNumerico('pesoAtual', 0, true);
+            dados.peso_maximo = this.obterValorNumerico('pesoMaximo', 60, true);
+            
+            // J. STATUS
+            dados.status = 'Ativo';
+            
+            return dados;
+            
         } catch (error) {
             console.error('Erro ao coletar dados:', error);
-            return { 
-                sucesso: false, 
-                erro: 'Erro ao coletar dados: ' + error.message,
-                dados: this.coletarDadosMinimos()
+            // Retornar dados mínimos em caso de erro
+            return {
+                nome: document.getElementById('charName')?.value || 'Novo Personagem',
+                forca: 10,
+                destreza: 10,
+                inteligencia: 10,
+                saude: 10,
+                pontos_totais: 150,
+                pontos_gastos: 0,
+                pontos_disponiveis: 150,
+                status: 'Ativo'
             };
         }
     }
 
-    // MÉTODOS AUXILIARES SIMPLIFICADOS
+    // MÉTODOS AUXILIARES
     obterValor(id, padrao = '') {
         const el = document.getElementById(id);
         return el ? (el.value || el.textContent || padrao) : padrao;
+    }
+
+    obterTexto(id, padrao = '') {
+        return this.obterValor(id, padrao);
     }
 
     obterValorNumerico(id, padrao = 0, decimal = false) {
@@ -152,9 +233,9 @@ class SalvamentoSupabase {
 
     obterPontosTotais() {
         const input = document.getElementById('pontosTotaisDashboard');
-        const display = document.getElementById('pontosTotais');
-        
         if (input) return parseInt(input.value) || 150;
+        
+        const display = document.getElementById('pontosTotais');
         if (display) return this.obterValorNumerico('pontosTotais', 150);
         
         return 150;
@@ -180,8 +261,23 @@ class SalvamentoSupabase {
         return 150;
     }
 
-    // COLETORES DE DADOS COMPLEXOS
-    coletarVantagens() {
+    obterDinheiro() {
+        try {
+            const elemento = document.getElementById('dinheiroEquipamento') || 
+                            document.getElementById('dinheiro-disponivel');
+            if (!elemento) return 2000.00;
+            
+            const texto = elemento.textContent || elemento.value || '$2000';
+            const valor = texto.replace('$', '').replace(/\./g, '').replace(',', '.');
+            const num = parseFloat(valor);
+            return isNaN(num) ? 2000.00 : num;
+        } catch (error) {
+            return 2000.00;
+        }
+    }
+
+    // COLETORES DE DADOS COMPLEXOS (JSON)
+    coletarVantagensJSON() {
         try {
             const lista = document.getElementById('vantagens-adquiridas');
             if (!lista) return JSON.stringify([]);
@@ -207,7 +303,7 @@ class SalvamentoSupabase {
         }
     }
 
-    coletarDesvantagens() {
+    coletarDesvantagensJSON() {
         try {
             const lista = document.getElementById('desvantagens-adquiridas');
             if (!lista) return JSON.stringify([]);
@@ -233,7 +329,7 @@ class SalvamentoSupabase {
         }
     }
 
-    coletarPeculiaridades() {
+    coletarPeculiaridadesJSON() {
         try {
             const lista = document.getElementById('lista-peculiaridades');
             if (!lista) return JSON.stringify([]);
@@ -256,7 +352,7 @@ class SalvamentoSupabase {
         }
     }
 
-    coletarPericias() {
+    coletarPericiasJSON() {
         try {
             const lista = document.getElementById('pericias-aprendidas');
             if (!lista) return JSON.stringify([]);
@@ -269,13 +365,12 @@ class SalvamentoSupabase {
             itens.forEach(item => {
                 const nome = item.querySelector('.pericia-nome, .nome-pericia')?.textContent?.trim();
                 const nivel = parseInt(item.querySelector('.pericia-nivel, .nivel-pericia')?.textContent) || 0;
-                const pontos = parseInt(item.getAttribute('data-pontos')) || 0;
                 
                 if (nome && nome !== '' && nome !== 'Nenhuma perícia aprendida') {
-                    pericias.push({ 
-                        nome, 
-                        nivel, 
-                        pontos,
+                    pericias.push({
+                        nome,
+                        nivel,
+                        pontos: parseInt(item.getAttribute('data-pontos')) || 0,
                         atributo: item.getAttribute('data-atributo') || 'DX'
                     });
                 }
@@ -287,38 +382,7 @@ class SalvamentoSupabase {
         }
     }
 
-    coletarEquipamentos() {
-        try {
-            const lista = document.getElementById('lista-equipamentos-adquiridos');
-            if (!lista) return JSON.stringify([]);
-            
-            const itens = lista.querySelectorAll('.equipamento-adquirido, .item-inventario, [data-item-id]');
-            if (itens.length === 0) return JSON.stringify([]);
-            
-            const equipamentos = [];
-            
-            itens.forEach(item => {
-                const nome = item.querySelector('.equipamento-nome, .item-nome')?.textContent?.trim();
-                
-                if (nome && nome !== '' && nome !== 'Inventário Vazio') {
-                    equipamentos.push({
-                        nome,
-                        tipo: item.getAttribute('data-tipo') || 'Equipamento',
-                        peso: parseFloat(item.getAttribute('data-peso')) || 0,
-                        custo: parseFloat(item.getAttribute('data-custo')) || 0,
-                        quantidade: parseInt(item.getAttribute('data-quantidade')) || 1,
-                        equipado: item.classList.contains('equipado') || false
-                    });
-                }
-            });
-            
-            return JSON.stringify(equipamentos);
-        } catch (error) {
-            return JSON.stringify([]);
-        }
-    }
-
-    coletarMagias() {
+    coletarMagiasJSON() {
         try {
             const lista = document.getElementById('magias-aprendidas');
             if (!lista) return JSON.stringify([]);
@@ -349,127 +413,68 @@ class SalvamentoSupabase {
         }
     }
 
-    coletarDadosMinimos() {
-        return {
-            nome: document.getElementById('charName')?.value || 'Novo Personagem',
-            raca: document.getElementById('racaPersonagem')?.value || 'Humano',
-            classe: document.getElementById('classePersonagem')?.value || 'Guerreiro',
-            forca: 10,
-            destreza: 10,
-            inteligencia: 10,
-            saude: 10,
-            pontos_totais: 150,
-            pontos_gastos: 0,
-            pontos_disponiveis: 150,
-            status: 'Ativo'
-        };
-    }
-
-    // MÉTODO PRINCIPAL DE SALVAMENTO
-    async salvarPersonagem(personagemId = null) {
+    coletarEquipamentosJSON() {
         try {
-            // 1. Verificar autenticação
-            const auth = await this.verificarAutenticacao();
-            if (!auth.sucesso) {
-                if (auth.redirecionar) {
-                    window.location.href = auth.redirecionar;
-                }
-                alert('Erro: ' + auth.erro);
-                return false;
-            }
-
-            // 2. Mostrar carregando
-            const btnSalvar = document.getElementById('btnSalvar');
-            const originalHTML = btnSalvar?.innerHTML;
-            if (btnSalvar) {
-                btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-                btnSalvar.disabled = true;
-            }
-
-            // 3. Coletar dados
-            const coleta = this.coletarDadosParaSalvar();
-            if (!coleta.sucesso) {
-                alert(coleta.erro);
-                return false;
-            }
-
-            const dados = coleta.dados;
-            dados.user_id = auth.userId;
-
-            // 4. Validar nome
-            if (!dados.nome || dados.nome.trim() === '') {
-                alert('O personagem precisa ter um nome!');
-                return false;
-            }
-
-            let resultado;
-
-            // 5. Salvar no banco
-            if (personagemId) {
-                // EDITAR
-                delete dados.created_at;
-                
-                const { data, error } = await this.supabase
-                    .from('characters')
-                    .update(dados)
-                    .eq('id', personagemId)
-                    .eq('user_id', auth.userId)
-                    .select();
-
-                if (error) throw error;
-                resultado = data;
-                
-            } else {
-                // CRIAR NOVO
-                const { data, error } = await this.supabase
-                    .from('characters')
-                    .insert([dados])
-                    .select();
-
-                if (error) throw error;
-                
-                if (data && data[0]) {
-                    personagemId = data[0].id;
-                    resultado = data;
-                }
-            }
-
-            // 6. Sucesso
-            if (btnSalvar) {
-                btnSalvar.innerHTML = originalHTML;
-                btnSalvar.disabled = false;
-            }
-
-            const mensagem = personagemId ? 
-                'Personagem atualizado com sucesso!' : 
-                'Personagem criado com sucesso!';
+            const lista = document.getElementById('lista-equipamentos-adquiridos');
+            if (!lista) return JSON.stringify([]);
             
-            alert(mensagem + '\n\nRedirecionando para seus personagens...');
-
-            // 7. Redirecionar
-            setTimeout(() => {
-                window.location.href = 'personagens.html';
-            }, 2000);
-
-            return true;
-
+            const itens = lista.querySelectorAll('.equipamento-adquirido, .item-inventario, [data-item-id]');
+            if (itens.length === 0) return JSON.stringify([]);
+            
+            const equipamentos = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.equipamento-nome, .item-nome')?.textContent?.trim();
+                
+                if (nome && nome !== '' && nome !== 'Inventário Vazio') {
+                    equipamentos.push({
+                        nome,
+                        tipo: item.getAttribute('data-tipo') || 'Equipamento',
+                        peso: parseFloat(item.getAttribute('data-peso')) || 0,
+                        custo: parseFloat(item.getAttribute('data-custo')) || 0,
+                        quantidade: parseInt(item.getAttribute('data-quantidade')) || 1,
+                        equipado: item.classList.contains('equipado') || false
+                    });
+                }
+            });
+            
+            return JSON.stringify(equipamentos);
         } catch (error) {
-            console.error('Erro no salvamento:', error);
-            
-            // Restaurar botão
-            const btnSalvar = document.getElementById('btnSalvar');
-            if (btnSalvar) {
-                btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
-                btnSalvar.disabled = false;
-            }
-
-            // Mostrar erro
-            this.mostrarErro(error);
-            return false;
+            return JSON.stringify([]);
         }
     }
 
-    mostrarErro(error) {
+    coletarTecnicasJSON() {
+        try {
+            const lista = document.getElementById('tecnicas-aprendidas');
+            if (!lista) return JSON.stringify([]);
+            
+            const itens = lista.querySelectorAll('.tecnica-adquirida, [data-tecnica-id]');
+            if (itens.length === 0) return JSON.stringify([]);
+            
+            const tecnicas = [];
+            
+            itens.forEach(item => {
+                const nome = item.querySelector('.tecnica-nome, .nome-tecnica')?.textContent?.trim();
+                
+                if (nome && nome !== '' && nome !== 'Nenhuma técnica aprendida') {
+                    tecnicas.push({
+                        nome,
+                        pontos: parseInt(item.getAttribute('data-pontos')) || 0,
+                        periciaBase: item.getAttribute('data-pericia') || '',
+                        dificuldade: item.getAttribute('data-dificuldade') || 'Média'
+                    });
+                }
+            });
+            
+            return JSON.stringify(tecnicas);
+        } catch (error) {
+            return JSON.stringify([]);
+        }
+    }
+
+    // MÉTODOS DE ERRO
+    mostrarErroDetalhado(error) {
         let mensagem = 'Erro ao salvar personagem:\n\n';
         
         if (error.message.includes('permission denied') || error.code === '42501') {
@@ -481,12 +486,16 @@ class SalvamentoSupabase {
             mensagem += 'Faça login novamente.';
             setTimeout(() => window.location.href = 'login.html', 2000);
             
-        } else if (error.message.includes('network')) {
-            mensagem += 'Erro de conexão.\n';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+            mensagem += 'Erro de conexão com o servidor.\n';
             mensagem += 'Verifique sua internet.';
             
+        } else if (error.message.includes('JSON')) {
+            mensagem += 'Erro ao processar os dados.\n';
+            mensagem += 'Verifique os campos preenchidos.';
+            
         } else {
-            mensagem += error.message;
+            mensagem += 'Erro: ' + error.message;
         }
         
         alert(mensagem);
@@ -495,14 +504,17 @@ class SalvamentoSupabase {
     // MÉTODOS ADICIONAIS
     async carregarPersonagem(personagemId) {
         try {
-            const auth = await this.verificarAutenticacao();
-            if (!auth.sucesso) return null;
+            const { data: { session } } = await this.supabase.auth.getSession();
+            if (!session) {
+                alert('Você precisa estar logado!');
+                return null;
+            }
 
             const { data: personagem, error } = await this.supabase
                 .from('characters')
                 .select('*')
                 .eq('id', personagemId)
-                .eq('user_id', auth.userId)
+                .eq('user_id', session.user.id)
                 .single();
 
             if (error) {
@@ -517,7 +529,6 @@ class SalvamentoSupabase {
             return personagem;
 
         } catch (error) {
-            console.error('Erro ao carregar:', error);
             alert('Erro ao carregar personagem.');
             return null;
         }
@@ -529,14 +540,17 @@ class SalvamentoSupabase {
         }
 
         try {
-            const auth = await this.verificarAutenticacao();
-            if (!auth.sucesso) return false;
+            const { data: { session } } = await this.supabase.auth.getSession();
+            if (!session) {
+                alert('Você precisa estar logado!');
+                return false;
+            }
 
             const { error } = await this.supabase
                 .from('characters')
                 .delete()
                 .eq('id', personagemId)
-                .eq('user_id', auth.userId);
+                .eq('user_id', session.user.id);
 
             if (error) throw error;
 
@@ -561,11 +575,12 @@ let salvamento;
 try {
     salvamento = new SalvamentoSupabase();
     window.salvamento = salvamento;
+    console.log('✅ Sistema de salvamento carregado com sucesso!');
 } catch (error) {
-    console.error('Erro ao inicializar salvamento:', error);
+    console.error('❌ Erro ao carregar salvamento:', error);
     salvamento = {
         salvarPersonagem: async () => {
-            alert('Sistema de salvamento não disponível.');
+            alert('Sistema de salvamento não disponível. Recarregue a página.');
             return false;
         }
     };
