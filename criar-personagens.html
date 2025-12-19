@@ -998,7 +998,7 @@
                         
                         <div class="niveis-container">
                             <div class="nivel-group">
-                                <label>🗣️ Nível de Fala:</label>
+                                <label>  ️ Nível de Fala:</label>
                                 <select id="novoIdiomaFala" class="form-select">
                                     <option value="0">Nenhum (0 pts)</option>
                                     <option value="2" selected>Rudimentar (2 pts)</option>
@@ -1008,7 +1008,7 @@
                             </div>
                             
                             <div class="nivel-group">
-                                <label>📝 Nível de Escrita:</label>
+                                <label>   Nível de Escrita:</label>
                                 <select id="novoIdiomaEscrita" class="form-select">
                                     <option value="0" selected>Nenhum (0 pts)</option>
                                     <option value="2">Rudimentar (1 pt)</option>
@@ -1116,7 +1116,7 @@
                 <div class="card-content">
                     <!-- CONTROLES ALTURA -->
                     <div class="fisica-control">
-                        <label>📏 Altura (metros):</label>
+                        <label>   Altura (metros):</label>
                         <div class="controle-numerico">
                             <button class="btn-controle" onclick="ajustarAltura(-0.01)">
                                 <i class="fas fa-minus"></i>
@@ -1209,7 +1209,7 @@
                 
                 <!-- SISTEMA DE BUSCA -->
                 <div class="busca-simples">
-                    <input type="text" id="busca-vantagens" placeholder="🔍 Buscar vantagem..." 
+                    <input type="text" id="busca-vantagens" placeholder="   Buscar vantagem..." 
                            class="busca-input" autocomplete="off">
                 </div>
                 
@@ -1249,7 +1249,7 @@
                 
                 <!-- SISTEMA DE BUSCA -->
                 <div class="busca-simples">
-                    <input type="text" id="busca-desvantagens" placeholder="🔍 Buscar desvantagem..." 
+                    <input type="text" id="busca-desvantagens" placeholder="   Buscar desvantagem..." 
                            class="busca-input" autocomplete="off">
                 </div>
                 
@@ -1282,7 +1282,7 @@
         <!-- CARD DE PECULIARIDADES - CORRIGIDO -->
         <div class="atributo-card peculiaridades-card">
             <div class="atributo-header">
-                <h3>🔤 Peculiaridades do Personagem</h3>
+                <h3>   Peculiaridades do Personagem</h3>
                 <div class="contador" id="contador-peculiaridades">0/5</div>
             </div>
             
@@ -1455,7 +1455,7 @@
           
           <!-- BARRA DE BUSCA -->
           <div class="busca-pericias">
-            <input type="text" placeholder="🔍 Buscar perícias..." class="search-input" id="busca-pericias">
+            <input type="text" placeholder="   Buscar perícias..." class="search-input" id="busca-pericias">
           </div>
           
           <!-- FILTROS POR ATRIBUTO E COMBATE -->
@@ -1577,7 +1577,7 @@
             
             <!-- BARRA DE BUSCA COM ID ÚNICO -->
             <div class="busca-pericias">
-              <input type="text" placeholder="🔍 Buscar técnicas..." class="search-input" id="busca-tecnicas-input">
+              <input type="text" placeholder="   Buscar técnicas..." class="search-input" id="busca-tecnicas-input">
             </div>
             
             <!-- FILTROS POR DIFICULDADE COM IDs ÚNICOS -->
@@ -1703,7 +1703,7 @@
                             
                             <!-- BARRA DE BUSCA -->
                             <div class="busca-magias">
-                                <input type="text" placeholder="🔍 Buscar magias..." class="search-input" id="busca-magias">
+                                <input type="text" placeholder="   Buscar magias..." class="search-input" id="busca-magias">
                             </div>
                             
                             <!-- FILTROS COM SUBMENUS (como nas perícias) -->
@@ -1930,7 +1930,7 @@
                                 <h4>Mãos Livres</h4>
                             </div>
                             <div class="status-value" id="displayMaos">
-                                <span class="mao-livre">👐</span><span class="mao-livre">👐</span>
+                                <span class="mao-livre">  </span><span class="mao-livre">  </span>
                             </div>
                             <div class="status-info">
                                 <small>2 mãos disponíveis</small>
@@ -3446,51 +3446,25 @@
 
 <!-- NO criar-personagens.html, substitua TODO o script por este: -->
 
-<!-- Adicione estes scripts ANTES do script principal -->
-<script src="coletor-dados.js"></script>
-<script src="salvamento-supabase.js"></script>
-
-<!-- SCRIPT PRINCIPAL CORRIGIDO E COMPLETO -->
 <script>
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
     
-    let supabase;
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let personagemId = null;
-    let sistemaSalvamento = null;
-
-    // INICIALIZAR SUPABASE
-    function inicializarSupabase() {
-        try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            window.supabaseClient = supabase;
-            window.supabase = supabase; // IMPORTANTE: definir no window
-            return supabase;
-        } catch (error) {
-            console.error('Erro ao inicializar Supabase:', error);
-            return null;
-        }
-    }
 
     async function inicializarSistema() {
         try {
-            // 1. Inicializar Supabase primeiro
-            supabase = inicializarSupabase();
-            if (!supabase) {
-                alert('Erro ao conectar com o servidor.');
-                return;
-            }
-
-            // 2. Verificar autenticação
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
                 alert('Você precisa estar logado para criar personagens.');
-                setTimeout(() => window.location.href = 'login.html', 2000);
+                setTimeout(() => window.location.href = 'login.html', 1000);
                 return;
             }
             
-            // 3. Verificar se é edição ou criação
+            inicializarNavegacaoAbas();
+            
             const urlParams = new URLSearchParams(window.location.search);
             personagemId = urlParams.get('id');
             
@@ -3501,13 +3475,7 @@
                 document.title = 'Criar Personagem - RPG System';
             }
             
-            // 4. Inicializar navegação de abas
-            inicializarNavegacaoAbas();
-            
-            // 5. Configurar eventos
             configurarEventListeners();
-            
-            // 6. Inicializar sistemas
             inicializarSistemaAbas();
             
         } catch (error) {
@@ -3530,13 +3498,35 @@
                 
                 if (tabContent) {
                     tabContent.classList.add('active');
+                    inicializarSistemasAba(tabId);
                 }
             });
         });
     }
 
     function inicializarSistemaAbas() {
-        // Inicializar sistemas específicos de cada aba se necessário
+        const activeTab = document.querySelector('.tab-btn.active');
+        if (activeTab) {
+            const tabId = activeTab.getAttribute('data-tab');
+            inicializarSistemasAba(tabId);
+        }
+    }
+
+    function inicializarSistemasAba(abaId) {
+        setTimeout(() => {
+            switch(abaId) {
+                case 'dashboard':
+                    if (typeof window.dashboard?.inicializar === 'function') {
+                        window.dashboard.inicializar();
+                    }
+                    break;
+                case 'resumo':
+                    if (typeof sincronizarResumo === 'function') {
+                        sincronizarResumo();
+                    }
+                    break;
+            }
+        }, 100);
     }
 
     function configurarEventListeners() {
@@ -3544,12 +3534,18 @@
         const btnExcluir = document.getElementById('btnExcluir');
         const btnSair = document.getElementById('btnSair');
         
-        if (btnSalvar) {
-            btnSalvar.addEventListener('click', salvarPersonagemDireto);
-        }
-        
+        if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
         if (btnExcluir) btnExcluir.addEventListener('click', solicitarExclusao);
         if (btnSair) btnSair.addEventListener('click', sairSemSalvar);
+        
+        const charName = document.getElementById('charName');
+        if (charName) {
+            charName.addEventListener('input', function() {
+                if (typeof atualizarResumoNome === 'function') {
+                    atualizarResumoNome(this.value);
+                }
+            });
+        }
     }
 
     async function carregarPersonagemParaEdicao(personagemId) {
@@ -3567,81 +3563,90 @@
             if (error) throw error;
             if (!personagem) throw new Error('Personagem não encontrado');
             
-            // Preencher dados básicos
             document.getElementById('charName').value = personagem.nome || 'Novo Personagem';
             document.getElementById('racaPersonagem').value = personagem.raca || '';
             document.getElementById('classePersonagem').value = personagem.classe || '';
             document.getElementById('nivelPersonagem').value = personagem.nivel || '';
             document.getElementById('descricaoPersonagem').value = personagem.descricao || '';
             
-            // Atributos
             document.getElementById('ST').value = personagem.forca || 10;
             document.getElementById('DX').value = personagem.destreza || 10;
             document.getElementById('IQ').value = personagem.inteligencia || 10;
             document.getElementById('HT').value = personagem.saude || 10;
             
+            if (personagem.avatar_url) {
+                const fotoPreview = document.getElementById('fotoPreview');
+                const fotoPlaceholder = document.getElementById('fotoPlaceholder');
+                if (fotoPreview && fotoPlaceholder) {
+                    fotoPreview.src = personagem.avatar_url;
+                    fotoPreview.style.display = 'block';
+                    fotoPlaceholder.style.display = 'none';
+                    
+                    const btnRemoverFoto = document.getElementById('btnRemoverFoto');
+                    if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
+                }
+            }
+            
         } catch (error) {
             alert('Erro ao carregar personagem: ' + error.message);
             setTimeout(() => window.location.href = 'personagens.html', 2000);
+            throw error;
         }
     }
 
-    // FUNÇÃO PRINCIPAL DE SALVAMENTO DIRETO (SEM DEPENDÊNCIAS)
-    async function salvarPersonagemDireto() {
+    async function salvarPersonagem() {
         try {
-            // 1. Verificar autenticação
             const { data: { session } } = await supabase.auth.getSession();
-            
             if (!session) {
-                alert('Você precisa estar logado para salvar!');
+                alert('Sua sessão expirou. Faça login novamente.');
                 window.location.href = 'login.html';
                 return false;
             }
 
-            const userId = session.user.id;
-
-            // 2. Mostrar carregando
             const btnSalvar = document.getElementById('btnSalvar');
-            const btnSalvarOriginal = btnSalvar?.innerHTML || '';
-            if (btnSalvar) {
-                btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-                btnSalvar.disabled = true;
+            const btnSalvarOriginal = btnSalvar.innerHTML;
+            btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            btnSalvar.disabled = true;
+            
+            let fotoDataURL = null;
+            if (window.dashboard && window.dashboard.fotoTemporaria) {
+                fotoDataURL = window.dashboard.fotoTemporaria.dataUrl;
             }
-
-            // 3. Coletar dados SIMPLIFICADOS (só o essencial para começar)
-            const dados = coletarDadosSimples();
-
-            // 4. Validar nome
-            if (!dados.nome || dados.nome.trim() === '') {
-                alert('O personagem precisa ter um nome!');
-                if (btnSalvar) {
-                    btnSalvar.innerHTML = btnSalvarOriginal;
-                    btnSalvar.disabled = false;
-                }
-                return false;
-            }
-
-            // 5. Adicionar campos obrigatórios
-            dados.user_id = userId;
-            dados.updated_at = new Date().toISOString();
-
+            
+            const dados = {
+                user_id: session.user.id,
+                nome: document.getElementById('charName')?.value || 'Novo Personagem',
+                raca: document.getElementById('racaPersonagem')?.value || '',
+                classe: document.getElementById('classePersonagem')?.value || '',
+                nivel: document.getElementById('nivelPersonagem')?.value || '',
+                descricao: document.getElementById('descricaoPersonagem')?.value || '',
+                avatar_url: fotoDataURL,
+                forca: parseInt(document.getElementById('ST')?.value) || 10,
+                destreza: parseInt(document.getElementById('DX')?.value) || 10,
+                inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
+                saude: parseInt(document.getElementById('HT')?.value) || 10,
+                pontos_totais: parseInt(document.getElementById('pontosTotaisDashboard')?.value) || 150,
+                pontos_gastos: parseInt(document.getElementById('pontosGastosDashboard')?.textContent) || 0,
+                pontos_disponiveis: parseInt(document.getElementById('saldoDisponivelDashboard')?.textContent) || 150,
+                limite_desvantagens: parseInt(document.getElementById('limiteDesvantagens')?.value) || -50,
+                desvantagens_atuais: parseInt(document.getElementById('desvantagensAtuais')?.textContent) || 0,
+                updated_at: new Date().toISOString()
+            };
+            
             let resultado;
-
-            // 6. Salvar no Supabase
+            
             if (personagemId) {
-                // EDITAR
                 const { data, error } = await supabase
                     .from('characters')
                     .update(dados)
                     .eq('id', personagemId)
-                    .eq('user_id', userId)
+                    .eq('user_id', session.user.id)
                     .select();
-
+                
                 if (error) throw error;
                 resultado = data;
                 
             } else {
-                // CRIAR NOVO
                 dados.created_at = new Date().toISOString();
                 dados.status = 'Ativo';
                 
@@ -3649,88 +3654,44 @@
                     .from('characters')
                     .insert([dados])
                     .select();
-
-                if (error) throw error;
                 
-                if (data && data[0]) {
-                    personagemId = data[0].id;
-                    resultado = data;
-                }
+                if (error) throw error;
+                resultado = data;
             }
-
-            // 7. Sucesso
-            if (btnSalvar) {
-                btnSalvar.innerHTML = btnSalvarOriginal;
-                btnSalvar.disabled = false;
-            }
-
+            
             const mensagem = personagemId 
                 ? 'Personagem atualizado com sucesso!' 
                 : 'Personagem criado com sucesso!';
             
             alert(mensagem + '\n\nRedirecionando para seus personagens...');
-
-            // 8. Redirecionar
+            
             setTimeout(() => {
                 window.location.href = 'personagens.html';
-            }, 2000);
-
+            }, 1500);
+            
             return true;
 
         } catch (error) {
-            // Restaurar botão
             const btnSalvar = document.getElementById('btnSalvar');
-            if (btnSalvar) {
-                btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
-                btnSalvar.disabled = false;
+            btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
+            btnSalvar.disabled = false;
+            
+            let mensagemErro = 'Erro ao salvar: ';
+            
+            if (error.message.includes('permission denied') || error.code === '42501') {
+                mensagemErro = 'ERRO DE PERMISSÃO! Verifique se você está logado corretamente.';
+            } else if (error.message.includes('network')) {
+                mensagemErro = 'Problema de conexão. Verifique sua internet.';
+            } else if (error.message.includes('auth')) {
+                mensagemErro = 'Problema de autenticação. Faça login novamente.';
+                setTimeout(() => window.location.href = 'login.html', 2000);
+            } else {
+                mensagemErro += error.message;
             }
-
-            mostrarErroSimples(error);
+            
+            alert(mensagemErro);
             return false;
         }
-    }
-
-    // COLETAR DADOS SIMPLES (PARA TESTAR PRIMEIRO)
-    function coletarDadosSimples() {
-        const dados = {
-            nome: document.getElementById('charName')?.value || 'Novo Personagem',
-            raca: document.getElementById('racaPersonagem')?.value || '',
-            classe: document.getElementById('classePersonagem')?.value || '',
-            nivel: document.getElementById('nivelPersonagem')?.value || '',
-            descricao: document.getElementById('descricaoPersonagem')?.value || '',
-            
-            // Atributos básicos
-            forca: parseInt(document.getElementById('ST')?.value) || 10,
-            destreza: parseInt(document.getElementById('DX')?.value) || 10,
-            inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
-            saude: parseInt(document.getElementById('HT')?.value) || 10,
-            
-            // Pontos
-            pontos_totais: 150,
-            pontos_gastos: 0,
-            pontos_disponiveis: 150,
-            
-            // Status
-            status: 'Ativo'
-        };
-
-        return dados;
-    }
-
-    function mostrarErroSimples(error) {
-        let mensagem = 'Erro ao salvar:\n\n';
-        
-        if (error.message.includes('permission denied')) {
-            mensagem += 'Permissão negada. Verifique se está logado.';
-        } else if (error.message.includes('auth')) {
-            mensagem += 'Sessão expirada. Faça login novamente.';
-        } else if (error.message.includes('network')) {
-            mensagem += 'Erro de conexão. Verifique sua internet.';
-        } else {
-            mensagem += error.message;
-        }
-        
-        alert(mensagem);
     }
 
     function solicitarExclusao() {
@@ -3769,7 +3730,7 @@
             }, 1000);
             
         } catch (error) {
-            alert('Erro ao excluir personagem: ' + error.message);
+            alert('Erro ao excluir: ' + error.message);
         }
     }
 
@@ -3779,16 +3740,65 @@
         }
     }
 
-    // INICIALIZAR QUANDO A PÁGINA CARREGAR
+    function sincronizarResumo() {
+        try {
+            const nomeInput = document.getElementById('charName');
+            if (nomeInput && document.getElementById('resumoNome')) {
+                document.getElementById('resumoNome').textContent = nomeInput.value || 'Novo Personagem';
+            }
+            
+            const campos = {
+                'racaPersonagem': 'resumoRaca',
+                'classePersonagem': 'resumoClasse', 
+                'nivelPersonagem': 'resumoNivel'
+            };
+            
+            for (const [origem, destino] of Object.entries(campos)) {
+                const origemEl = document.getElementById(origem);
+                const destinoEl = document.getElementById(destino);
+                if (origemEl && destinoEl) {
+                    destinoEl.textContent = origemEl.value || '-';
+                }
+            }
+            
+            const atributos = {
+                'ST': 'resumoST',
+                'DX': 'resumoDX',
+                'IQ': 'resumoIQ',
+                'HT': 'resumoHT'
+            };
+            
+            for (const [origem, destino] of Object.entries(atributos)) {
+                const origemEl = document.getElementById(origem);
+                const destinoEl = document.getElementById(destino);
+                if (origemEl && destinoEl) {
+                    destinoEl.textContent = origemEl.value || '10';
+                }
+            }
+            
+        } catch (error) {}
+    }
+
+    function atualizarResumoNome(nome) {
+        const resumoNome = document.getElementById('resumoNome');
+        if (resumoNome) {
+            resumoNome.textContent = nome || 'Novo Personagem';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             inicializarSistema();
         }, 500);
     });
 
-    // EXPORTAR FUNÇÕES PARA USO GLOBAL
-    window.salvarPersonagem = salvarPersonagemDireto;
-    window.supabase = supabase;
+    window.salvarPersonagem = salvarPersonagem;
+    window.sincronizarResumo = sincronizarResumo;
+    window.atualizarResumoNome = atualizarResumoNome;
+
+    window.addEventListener('beforeunload', function() {
+        localStorage.removeItem('personagens_cache');
+    });
 </script>
 </body>
 </html>  
