@@ -15,18 +15,17 @@
         }
 
         body {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('Cris2.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff;
+            background-color: #F2E8D5;
+            color: #2B2B2B;
             min-height: 100vh;
         }
 
         /* Header */
         .header {
-            background: rgba(30, 30, 40, 0.9);
-            padding: 15px 0;
-            border-bottom: 2px solid rgba(255, 140, 0, 0.3);
-            backdrop-filter: blur(10px);
+            background: #4A2E1B;
+            padding: 20px 0;
+            border-bottom: 3px solid #8C6A2F;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .header-content {
@@ -40,9 +39,8 @@
 
         .logo h1 {
             font-size: 1.8rem;
-            background: linear-gradient(45deg, #ffd700, #ff8c00, #ff4500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #F2E8D5;
+            letter-spacing: 1px;
         }
 
         .user-menu {
@@ -52,19 +50,23 @@
         }
 
         .btn-voltar {
-            color: #ff8c00;
+            background: #E6D8BC;
+            color: #4A2E1B;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 15px;
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 1px solid #B89B6A;
             transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .btn-voltar:hover {
-            background: rgba(255, 140, 0, 0.1);
+            background: #D8C6A0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         /* Main Content */
@@ -79,16 +81,18 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 2px solid #B89B6A;
         }
 
         .page-title {
-            font-size: 2rem;
-            color: #ffd700;
+            font-size: 2.2rem;
+            color: #4A2E1B;
         }
 
         .btn-novo-personagem {
-            background: linear-gradient(45deg, #ff8c00, #ff4500);
-            color: white;
+            background: #8C6A2F;
+            color: #F2E8D5;
             border: none;
             padding: 12px 25px;
             border-radius: 10px;
@@ -101,36 +105,37 @@
         }
 
         .btn-novo-personagem:hover {
+            background: #6B4A2D;
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(139, 106, 47, 0.3);
         }
 
-        /* Personagens Grid */
+        /* Personagens Grid - NOVO DESIGN */
         .personagens-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
             margin-bottom: 40px;
         }
 
-        /* Card de Personagem - ATUALIZADO */
+        /* Card de Personagem - NOVO TEMA */
         .personagem-card {
-            background: rgba(30, 30, 40, 0.8);
+            background: #E6D8BC;
             border-radius: 15px;
             padding: 25px;
-            border: 1px solid rgba(255, 140, 0, 0.2);
+            border: 2px solid #B89B6A;
             transition: all 0.3s ease;
             position: relative;
-            backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             height: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
 
         .personagem-card:hover {
             transform: translateY(-5px);
-            border-color: rgba(255, 140, 0, 0.5);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: #8C6A2F;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .card-topo {
@@ -140,31 +145,32 @@
             margin-bottom: 20px;
         }
 
-        /* Foto do Personagem */
+        /* Foto do Personagem - NOVO TEMA */
         .personagem-foto {
             width: 100px;
             height: 100px;
             border-radius: 10px;
             overflow: hidden;
-            border: 2px solid rgba(255, 140, 0, 0.3);
+            border: 2px solid #8C6A2F;
             flex-shrink: 0;
         }
 
         .foto-placeholder {
             width: 100%;
             height: 100%;
-            background: rgba(20, 20, 30, 0.8);
+            background: #D8C6A0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #ff8c00;
+            color: #6B4A2D;
             font-size: 0.8rem;
         }
 
         .foto-placeholder i {
             font-size: 2.5rem;
             margin-bottom: 5px;
+            color: #8C6A2F;
         }
 
         .personagem-foto img {
@@ -179,7 +185,7 @@
 
         .personagem-nome {
             font-size: 1.5rem;
-            color: #ffd700;
+            color: #4A2E1B;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
@@ -194,40 +200,43 @@
 
         .personagem-classe {
             font-size: 1rem;
-            color: #ff8c00;
+            color: #8C6A2F;
             font-weight: 600;
             padding: 4px 12px;
-            background: rgba(255, 140, 0, 0.1);
+            background: rgba(139, 106, 47, 0.1);
             border-radius: 20px;
-            border: 1px solid rgba(255, 140, 0, 0.3);
+            border: 1px solid #B89B6A;
             display: inline-block;
             width: fit-content;
         }
 
         .personagem-raca {
             font-size: 0.9rem;
-            color: #ccc;
+            color: #6B4A2D;
             margin-bottom: 10px;
         }
 
         .personagem-status {
-            background: rgba(255, 140, 0, 0.2);
+            background: rgba(139, 106, 47, 0.2);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
-            border: 1px solid rgba(255, 140, 0, 0.5);
+            border: 1px solid #8C6A2F;
             display: inline-block;
+            color: #4A2E1B;
+            font-weight: 600;
         }
 
-        /* Informações do Personagem */
+        /* Informações do Personagem - NOVO TEMA */
         .personagem-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 20px;
             padding: 15px;
-            background: rgba(20, 20, 30, 0.6);
+            background: rgba(184, 155, 106, 0.1);
             border-radius: 10px;
+            border: 1px solid rgba(184, 155, 106, 0.3);
         }
 
         .info-item {
@@ -238,23 +247,24 @@
 
         .info-label {
             font-size: 0.8rem;
-            color: #ccc;
+            color: #6B4A2D;
         }
 
         .info-value {
             font-weight: 600;
-            color: #ff8c00;
+            color: #4A2E1B;
         }
 
-        /* Atributos Rápidos */
+        /* Atributos Rápidos - NOVO TEMA */
         .atributos-rapidos {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin-bottom: 20px;
             padding: 15px;
-            background: rgba(20, 20, 30, 0.6);
+            background: rgba(184, 155, 106, 0.1);
             border-radius: 10px;
+            border: 1px solid rgba(184, 155, 106, 0.3);
         }
 
         .atributo {
@@ -264,23 +274,23 @@
         .atributo-valor {
             font-size: 1.4rem;
             font-weight: bold;
-            color: #ffd700;
+            color: #4A2E1B;
             margin-bottom: 3px;
         }
 
         .atributo-nome {
             font-size: 0.8rem;
-            color: #ccc;
+            color: #6B4A2D;
             text-transform: uppercase;
         }
 
-        /* Ações do Card */
+        /* Ações do Card - NOVO TEMA */
         .card-actions {
             display: flex;
             gap: 10px;
             margin-top: auto;
             padding-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid #B89B6A;
         }
 
         .btn-acao {
@@ -299,52 +309,56 @@
         }
 
         .btn-editar {
-            background: rgba(255, 140, 0, 0.2);
-            color: #ff8c00;
-            border: 1px solid rgba(255, 140, 0, 0.3);
+            background: rgba(139, 106, 47, 0.2);
+            color: #6B4A2D;
+            border: 1px solid #8C6A2F;
         }
 
         .btn-editar:hover {
-            background: rgba(255, 140, 0, 0.3);
+            background: rgba(139, 106, 47, 0.3);
         }
 
         .btn-resumo {
-            background: rgba(46, 125, 50, 0.2);
-            color: #4CAF50;
-            border: 1px solid rgba(76, 175, 80, 0.3);
+            background: rgba(42, 157, 143, 0.2);
+            color: #2D6A4F;
+            border: 1px solid #40916C;
         }
 
         .btn-resumo:hover {
-            background: rgba(76, 175, 80, 0.3);
+            background: rgba(42, 157, 143, 0.3);
         }
 
         .btn-excluir {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-            border: 1px solid rgba(231, 76, 60, 0.3);
+            background: rgba(231, 111, 81, 0.2);
+            color: #E76F51;
+            border: 1px solid #E76F51;
         }
 
         .btn-excluir:hover {
-            background: rgba(231, 76, 60, 0.3);
+            background: rgba(231, 111, 81, 0.3);
         }
 
-        /* Estado Vazio */
+        /* Estado Vazio - NOVO TEMA */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
-            color: #888;
+            color: #6B4A2D;
+            background: #E6D8BC;
+            border-radius: 15px;
+            border: 2px dashed #B89B6A;
+            margin: 20px 0;
         }
 
         .empty-state i {
             font-size: 5rem;
             margin-bottom: 20px;
-            color: #555;
+            color: #8C6A2F;
         }
 
         .empty-state h3 {
             font-size: 1.8rem;
             margin-bottom: 15px;
-            color: #ccc;
+            color: #4A2E1B;
         }
 
         .empty-state p {
@@ -454,8 +468,8 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid rgba(255, 140, 0, 0.3);
-            border-left: 4px solid #ff8c00;
+            border: 4px solid rgba(139, 106, 47, 0.3);
+            border-left: 4px solid #8C6A2F;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -465,7 +479,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Modal de Confirmação */
+        /* Modal de Confirmação - NOVO TEMA */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -480,23 +494,24 @@
         }
 
         .modal {
-            background: rgba(30, 30, 40, 0.95);
+            background: #E6D8BC;
             border-radius: 15px;
             padding: 30px;
-            border: 1px solid rgba(255, 140, 0, 0.3);
+            border: 2px solid #8C6A2F;
             max-width: 400px;
             width: 90%;
             text-align: center;
+            color: #4A2E1B;
         }
 
         .modal h3 {
-            color: #ffd700;
+            color: #4A2E1B;
             margin-bottom: 15px;
         }
 
         .modal p {
             margin-bottom: 25px;
-            color: #ccc;
+            color: #6B4A2D;
         }
 
         .modal-actions {
@@ -506,7 +521,7 @@
         }
 
         .btn-confirmar {
-            background: #e74c3c;
+            background: #E76F51;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -516,9 +531,9 @@
         }
 
         .btn-cancelar {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ccc;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(184, 155, 106, 0.2);
+            color: #6B4A2D;
+            border: 1px solid #B89B6A;
             padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
@@ -526,28 +541,29 @@
         }
 
         .btn-confirmar:hover {
-            background: #c0392b;
+            background: #D65C3E;
         }
 
         .btn-cancelar:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(184, 155, 106, 0.3);
         }
 
-        /* Notificação */
+        /* Notificação - NOVO TEMA */
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
             padding: 15px 25px;
             border-radius: 8px;
-            background: rgba(30, 30, 40, 0.95);
-            border-left: 4px solid #ff8c00;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background: #E6D8BC;
+            border-left: 4px solid #8C6A2F;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             gap: 10px;
             z-index: 1001;
             animation: slideIn 0.3s ease;
+            color: #4A2E1B;
         }
 
         @keyframes slideIn {
@@ -556,11 +572,40 @@
         }
 
         .notification.success {
-            border-left-color: #27ae60;
+            border-left-color: #2D6A4F;
+            background: rgba(45, 106, 79, 0.1);
         }
 
         .notification.error {
-            border-left-color: #e74c3c;
+            border-left-color: #E76F51;
+            background: rgba(231, 111, 81, 0.1);
+        }
+
+        /* Status Badges - NOVO TEMA */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-active { 
+            background: rgba(45, 106, 79, 0.2); 
+            color: #2D6A4F; 
+            border: 1px solid rgba(45, 106, 79, 0.3);
+        }
+
+        .status-pending { 
+            background: rgba(242, 204, 143, 0.2); 
+            color: #B68D40; 
+            border: 1px solid rgba(242, 204, 143, 0.3);
+        }
+
+        .status-inactive { 
+            background: rgba(155, 155, 155, 0.2); 
+            color: #6B6B6B; 
+            border: 1px solid rgba(155, 155, 155, 0.3);
         }
     </style>
 </head>
@@ -594,6 +639,7 @@
         <div class="personagens-grid" id="personagensGrid">
             <div class="loading">
                 <div class="spinner"></div>
+                <p style="margin-left: 15px; color: #6B4A2D;">Carregando seus personagens...</p>
             </div>
         </div>
 
@@ -614,7 +660,7 @@
         <div class="modal">
             <h3>Excluir Personagem</h3>
             <p>Tem certeza que deseja excluir <strong id="personagemNomeExcluir">este personagem</strong>?</p>
-            <p style="color: #e74c3c; font-size: 0.9rem;">Esta ação não pode ser desfeita!</p>
+            <p style="color: #E76F51; font-size: 0.9rem;">Esta ação não pode ser desfeita!</p>
             <div class="modal-actions">
                 <button class="btn-confirmar" id="btnConfirmarExcluir">Excluir</button>
                 <button class="btn-cancelar" id="btnCancelarExcluir">Cancelar</button>
@@ -622,364 +668,243 @@
         </div>
     </div>
 
-   <script>
-    // Configuração do Supabase
-    const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // Estado global
-    let personagens = [];
-    let personagemParaExcluir = null;
-
-    // Carregar personagens ao iniciar
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 Página personagens carregada');
-        carregarPersonagens(true); // Forçar recarregamento
-        configurarEventListeners();
-    });
-
-    // Configurar event listeners
-    function configurarEventListeners() {
-        // Modal de exclusão
-        document.getElementById('btnConfirmarExcluir').addEventListener('click', confirmarExclusao);
-        document.getElementById('btnCancelarExcluir').addEventListener('click', fecharModal);
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
         
-        // Fechar modal ao clicar fora
-        document.getElementById('modalOverlay').addEventListener('click', function(e) {
-            if (e.target === this) {
-                fecharModal();
-            }
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let personagensParaExcluir = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarPersonagens();
+            configurarEventos();
         });
-        
-        // Forçar recarregamento ao voltar para a página
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                console.log('🔄 Página carregada do cache - recarregando dados');
-                carregarPersonagens(true);
-            }
-        });
-    }
 
-    // Criar novo personagem
-    function criarNovoPersonagem() {
-        window.location.href = 'criar-personagens.html';
-    }
-
-    // Carregar personagens do usuário - VERSÃO COMPLETA
-    async function carregarPersonagens(forcarRecarregamento = false) {
-        try {
-            // Mostrar loading
-            const grid = document.getElementById('personagensGrid');
-            if (grid) {
-                grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando personagens...</p></div>';
-            }
-
-            // 1. Verificar autenticação
-            const { data: { session } } = await supabase.auth.getSession();
+        function configurarEventos() {
+            // Botão Novo Personagem
+            document.getElementById('btnNovoPersonagem').addEventListener('click', criarNovoPersonagem);
             
-            if (!session) {
-                console.warn('Nenhuma sessão encontrada. Redirecionando...');
-                window.location.href = 'login.html';
+            // Modal de exclusão
+            document.getElementById('btnCancelarExcluir').addEventListener('click', fecharModal);
+            document.getElementById('btnConfirmarExcluir').addEventListener('click', confirmarExclusao);
+        }
+
+        async function carregarPersonagens() {
+            try {
+                // Verificar autenticação
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Buscar personagens do usuário
+                const { data: personagens, error } = await supabase
+                    .from('characters')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error('Erro ao carregar personagens:', error);
+                    mostrarErro('Erro ao carregar personagens');
+                    return;
+                }
+
+                exibirPersonagens(personagens);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarErro('Erro ao carregar dados');
+            }
+        }
+
+        function exibirPersonagens(personagens) {
+            const container = document.getElementById('personagensGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (!personagens || personagens.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
                 return;
             }
 
-            console.log('✅ Usuário autenticado:', session.user.email);
+            container.innerHTML = '';
+            emptyState.style.display = 'none';
 
-            // 2. Buscar personagens SEM CACHE
-            console.log('🔄 Buscando dados ATUALIZADOS do Supabase...');
-            const { data: personagensData, error } = await supabase
-                .from('characters')
-                .select('*')
-                .eq('user_id', session.user.id)
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error('Erro ao carregar personagens:', error);
-                mostrarErro('Erro ao carregar personagens: ' + error.message);
-                return;
-            }
-
-            // 3. DEBUG: Mostrar o que veio do banco
-            console.log('📊 Dados recebidos do Supabase:');
-            if (personagensData && personagensData.length > 0) {
-                personagensData.forEach((p, i) => {
-                    console.log(`${i+1}. ${p.nome}:`);
-                    console.log(`   Pontos: ${p.pontos_gastos || 0}/${p.pontos_totais || 150}`);
-                    console.log(`   Saldo: ${p.pontos_disponiveis || 150}`);
-                    console.log(`   Atributos: ST=${p.forca || 10}, DX=${p.destreza || 10}`);
-                });
-            } else {
-                console.log('⚠️ Nenhum personagem encontrado');
-            }
-
-            personagens = personagensData || [];
-            renderizarPersonagens();
-            
-        } catch (error) {
-            console.error('Erro ao carregar personagens:', error);
-            mostrarErro('Erro ao carregar personagens: ' + error.message);
-        }
-    }
-
-    // Renderizar lista de personagens - VERSÃO QUE MOSTRA OS PONTOS REAIS
-    function renderizarPersonagens() {
-        const grid = document.getElementById('personagensGrid');
-        const emptyState = document.getElementById('emptyState');
-
-        if (!grid) return;
-
-        if (personagens.length === 0) {
-            grid.style.display = 'none';
-            if (emptyState) emptyState.style.display = 'block';
-            return;
+            personagens.forEach(personagem => {
+                const card = criarCardPersonagem(personagem);
+                container.appendChild(card);
+            });
         }
 
-        grid.style.display = 'grid';
-        if (emptyState) emptyState.style.display = 'none';
-
-        grid.innerHTML = personagens.map((personagem, index) => {
-            // Formatar dados
-            const nome = escapeHtml(personagem.nome || 'Personagem Sem Nome');
-            const nomeTruncado = nome.length > 30 ? nome.substring(0, 27) + '...' : nome;
-            const classe = escapeHtml(personagem.classe || 'Sem Classe');
-            const raca = escapeHtml(personagem.raca || 'Sem Raça');
-            const nivel = escapeHtml(personagem.nivel || 'Nível 1');
-            
-            // PONTOS DO BANCO - USAR OS VALORES REAIS
-            const pontosTotais = personagem.pontos_totais || 150;
-            const pontosGastos = personagem.pontos_gastos || 0;
-            const pontosDisponiveis = personagem.pontos_disponiveis || (pontosTotais - pontosGastos);
-            const limiteDesvantagens = personagem.limite_desvantagens || -50;
-            const desvantagensAtuais = personagem.desvantagens_atuais || 0;
-            
-            // DEBUG: Mostrar no console
-            console.log(`Personagem ${index + 1}: ${nome}`);
-            console.log(`  Pontos no banco: Gastos=${pontosGastos}, Totais=${pontosTotais}, Disponíveis=${pontosDisponiveis}`);
-            
-            // Atributos
-            const forca = personagem.forca || 10;
-            const destreza = personagem.destreza || 10;
-            const inteligencia = personagem.inteligencia || 10;
-            const saude = personagem.saude || 10;
-            
-            // Data formatada
-            const dataCriacao = formatarData(personagem.created_at);
-            
-            // Status
-            const status = personagem.status || 'Ativo';
-            
-            // Foto
-            const fotoHTML = personagem.avatar_url 
-                ? `<img src="${personagem.avatar_url}" alt="${nome}" onerror="this.style.display='none'; this.parentElement.querySelector('.foto-placeholder').style.display='flex';">`
-                : '';
-            
-            return `
-            <div class="personagem-card" data-id="${personagem.id}" data-index="${index}">
+        function criarCardPersonagem(personagem) {
+            const div = document.createElement('div');
+            div.className = 'personagem-card';
+            div.innerHTML = `
                 <div class="card-topo">
-                    <!-- Foto do Personagem -->
                     <div class="personagem-foto">
-                        ${fotoHTML}
-                        <div class="foto-placeholder" ${personagem.avatar_url ? 'style="display: none;"' : ''}>
+                        <div class="foto-placeholder">
                             <i class="fas fa-user-circle"></i>
                             <span>Sem foto</span>
                         </div>
                     </div>
-                    
-                    <!-- Informações Básicas -->
                     <div class="card-info">
+                        <div class="personagem-nome">${escapeHtml(personagem.nome || 'Sem nome')}</div>
                         <div class="nome-classe">
-                            <h3 class="personagem-nome" title="${nome}">
-                                ${nomeTruncado}
-                                <span class="personagem-status">${status}</span>
-                            </h3>
-                            <div class="personagem-classe">${classe}</div>
-                            <div class="personagem-raca">${raca} • ${nivel}</div>
+                            <span class="personagem-classe">${escapeHtml(personagem.classe || 'Sem classe')}</span>
+                            <span class="personagem-raca">${escapeHtml(personagem.raca || 'Sem raça')}</span>
                         </div>
+                        <span class="personagem-status status-active">Ativo</span>
                     </div>
                 </div>
 
-                <!-- Informações Detalhadas -->
                 <div class="personagem-info">
                     <div class="info-item">
-                        <span class="info-label">Pontos Gastos</span>
-                        <span class="info-value">${pontosGastos}/${pontosTotais}</span>
+                        <span class="info-label">Nível</span>
+                        <span class="info-value">${personagem.nivel || 1}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Saldo Disponível</span>
-                        <span class="info-value" id="saldo-${personagem.id}">${pontosDisponiveis}</span>
+                        <span class="info-label">Pontos</span>
+                        <span class="info-value">${personagem.pontos_disponiveis || 0}/${personagem.pontos_totais || 150}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Criado em</span>
-                        <span class="info-value">${dataCriacao}</span>
+                        <span class="info-value">${formatarData(personagem.created_at)}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Status</span>
-                        <span class="info-value">${status}</span>
+                        <span class="info-label">ID</span>
+                        <span class="info-value">${personagem.id.substring(0, 8)}...</span>
                     </div>
                 </div>
 
-                <!-- Atributos Rápidos -->
                 <div class="atributos-rapidos">
                     <div class="atributo">
-                        <div class="atributo-valor">${forca}</div>
+                        <div class="atributo-valor">${personagem.forca || 10}</div>
                         <div class="atributo-nome">FOR</div>
                     </div>
                     <div class="atributo">
-                        <div class="atributo-valor">${destreza}</div>
+                        <div class="atributo-valor">${personagem.destreza || 10}</div>
                         <div class="atributo-nome">DES</div>
                     </div>
                     <div class="atributo">
-                        <div class="atributo-valor">${inteligencia}</div>
+                        <div class="atributo-valor">${personagem.inteligencia || 10}</div>
                         <div class="atributo-nome">INT</div>
                     </div>
                     <div class="atributo">
-                        <div class="atributo-valor">${saude}</div>
-                        <div class="atributo-nome">SAÚ</div>
+                        <div class="atributo-valor">${personagem.saude || 10}</div>
+                        <div class="atributo-nome">VIG</div>
                     </div>
                 </div>
 
-                <!-- Ações -->
                 <div class="card-actions">
                     <button class="btn-acao btn-editar" onclick="editarPersonagem('${personagem.id}')">
                         <i class="fas fa-edit"></i>
                         Editar
                     </button>
-                    <button class="btn-acao btn-excluir" onclick="solicitarExclusao('${personagem.id}', '${escapeHtml(nome)}')">
+                    <button class="btn-acao btn-resumo" onclick="verResumo('${personagem.id}')">
+                        <i class="fas fa-scroll"></i>
+                        Resumo
+                    </button>
+                    <button class="btn-acao btn-excluir" onclick="solicitarExclusao('${personagem.id}', '${escapeHtml(personagem.nome || 'este personagem')}')">
                         <i class="fas fa-trash"></i>
                         Excluir
                     </button>
                 </div>
-                
-                <!-- DEBUG: Mostrar dados brutos (remover depois) -->
-                <div style="display: none; font-size: 10px; color: #666; margin-top: 10px; border-top: 1px solid #333; padding-top: 5px;">
-                    ID: ${personagem.id}<br>
-                    Pontos no BD: G=${pontosGastos}, T=${pontosTotais}, D=${pontosDisponiveis}
-                </div>
-            </div>
             `;
-        }).join('');
-        
-        // Adicionar log para verificar renderização
-        console.log(`✅ Renderizados ${personagens.length} personagens`);
-    }
+            return div;
+        }
 
-    // Editar personagem existente
-    function editarPersonagem(personagemId) {
-        window.location.href = `criar-personagens.html?id=${personagemId}`;
-    }
+        function criarNovoPersonagem() {
+            // Redireciona para a página de criação de personagem
+            window.location.href = 'criar-personagens-atual.html';
+        }
 
-    // Solicitar exclusão de personagem
-    function solicitarExclusao(personagemId, nome) {
-        personagemParaExcluir = personagemId;
-        document.getElementById('personagemNomeExcluir').textContent = nome;
-        document.getElementById('modalOverlay').style.display = 'flex';
-    }
+        function editarPersonagem(personagemId) {
+            // Redireciona para a página de edição
+            window.location.href = `criar-personagens-atual.html?id=${personagemId}`;
+        }
 
-    // Confirmar exclusão
-    async function confirmarExclusao() {
-        if (!personagemParaExcluir) return;
+        function verResumo(personagemId) {
+            // Abre o resumo em nova aba
+            window.open(`criar-personagens-atual.html?id=${personagemId}#resumo`, '_blank');
+        }
 
-        try {
-            // Verificar autenticação antes
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                alert('Sessão expirada. Faça login novamente.');
-                window.location.href = 'login.html';
-                return;
+        function solicitarExclusao(personagemId, nomePersonagem) {
+            personagensParaExcluir = personagemId;
+            document.getElementById('personagemNomeExcluir').textContent = nomePersonagem;
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            personagensParaExcluir = null;
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+        async function confirmarExclusao() {
+            if (!personagensParaExcluir) return;
+
+            try {
+                const { error } = await supabase
+                    .from('characters')
+                    .delete()
+                    .eq('id', personagensParaExcluir);
+
+                if (error) throw error;
+
+                mostrarNotificacao('Personagem excluído com sucesso!', 'success');
+                fecharModal();
+                carregarPersonagens(); // Recarrega a lista
+                
+            } catch (error) {
+                console.error('Erro ao excluir personagem:', error);
+                mostrarNotificacao('Erro ao excluir personagem', 'error');
             }
-
-            const { error } = await supabase
-                .from('characters')
-                .delete()
-                .eq('id', personagemParaExcluir)
-                .eq('user_id', session.user.id);
-
-            if (error) throw error;
-
-            // Remover da lista local
-            personagens = personagens.filter(p => p.id !== personagemParaExcluir);
-            renderizarPersonagens();
-            fecharModal();
-            
-            mostrarNotificacao('Personagem excluído com sucesso!', 'success');
-            
-        } catch (error) {
-            console.error('Erro ao excluir personagem:', error);
-            mostrarErro('Erro ao excluir personagem: ' + error.message);
         }
-    }
 
-    // Fechar modal
-    function fecharModal() {
-        document.getElementById('modalOverlay').style.display = 'none';
-        personagemParaExcluir = null;
-    }
-
-    // Funções utilitárias
-    function formatarData(dataString) {
-        try {
+        function formatarData(dataString) {
+            if (!dataString) return 'N/A';
             const data = new Date(dataString);
-            return data.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        } catch {
-            return 'Data inválida';
+            return data.toLocaleDateString('pt-BR');
         }
-    }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function mostrarNotificacao(mensagem, tipo = 'info') {
-        // Remove notificação anterior
-        const notificacaoAnterior = document.querySelector('.notification');
-        if (notificacaoAnterior) {
-            notificacaoAnterior.remove();
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-        
-        const notificacao = document.createElement('div');
-        notificacao.className = `notification ${tipo}`;
-        notificacao.innerHTML = `
-            <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-            <span>${mensagem}</span>
-        `;
-        
-        document.body.appendChild(notificacao);
-        
-        // Remove após 5 segundos
-        setTimeout(() => {
-            notificacao.remove();
-        }, 5000);
-    }
 
-    function mostrarErro(mensagem) {
-        console.error(mensagem);
-        mostrarNotificacao(mensagem, 'error');
-    }
+        function mostrarNotificacao(mensagem, tipo = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${tipo}`;
+            notification.innerHTML = `
+                <i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${mensagem}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
 
-    // Função para recarregar personagens
-    window.recarregarPersonagens = function(forcar = true) {
-        console.log('🔁 Recarregando personagens...');
-        carregarPersonagens(forcar);
-    };
-    
-    // Teste rápido: verificar dados no console
-    window.verificarDados = function() {
-        console.log('🔍 Verificando dados dos personagens:');
-        personagens.forEach((p, i) => {
-            console.log(`${i+1}. ${p.nome}`);
-            console.log(`   Pontos: ${p.pontos_gastos || 0}/${p.pontos_totais || 150}`);
-            console.log(`   Saldo: ${p.pontos_disponiveis || 150}`);
-        });
-    };
-</script>
+        function mostrarErro(mensagem) {
+            const container = document.getElementById('personagensGrid');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Erro ao Carregar</h3>
+                    <p>${mensagem}</p>
+                    <button class="btn-novo-personagem" onclick="carregarPersonagens()">
+                        <i class="fas fa-redo"></i>
+                        Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>
