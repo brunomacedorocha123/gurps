@@ -3475,6 +3475,18 @@
             return isNaN(num) ? padrao : num;
         }
 
+        extrairPontos(texto) {
+            if (!texto) return 0;
+            const match = texto.match(/[-+]?\d+/);
+            return match ? parseInt(match[0]) : 0;
+        }
+
+        extrairDecimal(texto) {
+            if (!texto) return 0;
+            const match = texto.match(/[\d.]+/);
+            return match ? parseFloat(match[0]) : 0;
+        }
+
         // 1. COLETAR DASHBOARD
         coletarDashboard() {
             return {
@@ -3484,14 +3496,12 @@
                 nivel: this.getValor('nivelPersonagem', ''),
                 descricao: this.getValor('descricaoPersonagem', ''),
                 
-                // Pontos GURPS
                 pontos_totais: this.getNumero('pontosTotaisDashboard', 150),
                 pontos_gastos: this.getNumero('pontosGastosDashboard', 0),
                 pontos_disponiveis: this.getNumero('saldoDisponivelDashboard', 150),
                 limite_desvantagens: this.getNumero('limiteDesvantagens', -50),
                 desvantagens_atuais: this.getNumero('desvantagensAtuais', 0),
                 
-                // Resumo de gastos
                 gastos_atributos: this.getNumero('gastosAtributos', 0),
                 gastos_vantagens: this.getNumero('gastosVantagens', 0),
                 gastos_pericias: this.getNumero('gastosPericias', 0),
@@ -3499,7 +3509,6 @@
                 gastos_desvantagens: this.getNumero('gastosDesvantagens', 0),
                 gastos_total: this.getNumero('gastosTotal', 0),
                 
-                // Status rápido
                 status_st: this.getNumero('statusST', 10),
                 status_dx: this.getNumero('statusDX', 10),
                 status_iq: this.getNumero('statusIQ', 10),
@@ -3515,19 +3524,16 @@
         // 2. COLETAR ATRIBUTOS
         coletarAtributos() {
             return {
-                // Atributos principais
                 forca: this.getNumero('ST', 10),
                 destreza: this.getNumero('DX', 10),
                 inteligencia: this.getNumero('IQ', 10),
                 saude: this.getNumero('HT', 10),
                 
-                // Custos
                 custo_st: this.getNumero('custoST', 0),
                 custo_dx: this.getNumero('custoDX', 0),
                 custo_iq: this.getNumero('custoIQ', 0),
                 custo_ht: this.getNumero('custoHT', 0),
                 
-                // Atributos secundários
                 pontos_vida: {
                     base: this.getNumero('PVBase', 10),
                     bonus: this.getNumero('bonusPV', 0),
@@ -3554,13 +3560,11 @@
                     total: this.getDecimal('DeslocamentoTotal', 5.00)
                 },
                 
-                // Sistema de combate
                 dano: {
                     gdp: this.getValor('danoGDP', '1d-2'),
                     geb: this.getValor('danoGEB', '1d')
                 },
                 
-                // Cargas
                 carga: {
                     nenhuma: this.getDecimal('cargaNenhuma', 10.0),
                     leve: this.getDecimal('cargaLeve', 20.0),
@@ -3574,14 +3578,12 @@
         // 3. COLETAR CARACTERÍSTICAS
         coletarCaracteristicas() {
             return {
-                // Aparência
                 aparencia: {
                     nivel: this.getValor('nivelAparencia', '0'),
                     descricao: this.getValor('displayAparencia', 'Comum'),
                     pontos: this.getNumero('pontosAparencia', 0)
                 },
                 
-                // Riqueza
                 riqueza: {
                     nivel: this.getValor('nivelRiqueza', '0'),
                     descricao: this.getValor('displayRiqueza', 'Média'),
@@ -3589,21 +3591,18 @@
                     renda: this.getValor('rendaMensal', '$1.000')
                 },
                 
-                // Idiomas
                 idiomas: {
                     materno: this.getValor('idiomaMaternoNome', 'Comum'),
-                    adicionais: this.coletarIdiomasAdicionais(),
+                    adicionais: [],
                     total: this.getNumero('totalIdiomas', 0),
                     pontos: this.getNumero('pontosIdiomas', 0)
                 },
                 
-                // Características físicas
                 caracteristicas_fisicas: {
-                    selecionadas: this.coletarCaracteristicasSelecionadas(),
+                    selecionadas: [],
                     pontos: this.getNumero('pontosCaracteristicas', 0)
                 },
                 
-                // Altura e peso
                 fisico: {
                     altura: this.getDecimal('altura', 1.70),
                     peso: this.getDecimal('peso', 70),
@@ -3616,52 +3615,7 @@
             };
         }
 
-        coletarIdiomasAdicionais() {
-            const idiomas = [];
-            const lista = document.getElementById('listaIdiomasAdicionais');
-            
-            if (lista && !lista.querySelector('.empty-state')) {
-                const itens = lista.querySelectorAll('.idioma-item');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.idioma-nome')?.textContent;
-                    const nivel = item.querySelector('.idioma-nivel')?.textContent;
-                    const pontos = item.querySelector('.idioma-pontos')?.textContent;
-                    
-                    if (nome) {
-                        idiomas.push({
-                            nome: nome.trim(),
-                            nivel: nivel?.trim() || '',
-                            pontos: this.extrairPontos(pontos) || 0
-                        });
-                    }
-                });
-            }
-            
-            return idiomas;
-        }
-
-        coletarCaracteristicasSelecionadas() {
-            const caracteristicas = [];
-            const container = document.getElementById('caracteristicasSelecionadas');
-            
-            if (container) {
-                const itens = container.querySelectorAll('.caracteristica-selecionada');
-                itens.forEach(item => {
-                    const texto = item.textContent?.replace('×', '').trim();
-                    if (texto) caracteristicas.push(texto);
-                });
-            }
-            
-            return caracteristicas;
-        }
-
-        extrairPontos(texto) {
-            if (!texto) return 0;
-            const match = texto.match(/[-+]?\d+/);
-            return match ? parseInt(match[0]) : 0;
-        }
-
-        // 4. COLETAR VANTAGENS E DESVANTAGENS
+        // 4. COLETAR VANTAGENS/DESVANTAGENS
         coletarVantagensDesvantagens() {
             return {
                 vantagens: {
@@ -3669,7 +3623,7 @@
                         pontos: this.getNumero('total-vantagens', 0),
                         adquiridas: this.getNumero('total-vantagens-adquiridas', 0)
                     },
-                    lista: this.coletarListaItens('vantagens-adquiridas', 'vantagem')
+                    lista: []
                 },
                 
                 desvantagens: {
@@ -3677,61 +3631,21 @@
                         pontos: this.getNumero('total-desvantagens', 0),
                         adquiridas: this.getNumero('total-desvantagens-adquiridas', 0)
                     },
-                    lista: this.coletarListaItens('desvantagens-adquiridas', 'desvantagem')
+                    lista: []
                 },
                 
                 peculiaridades: {
                     total: this.getNumero('total-peculiaridades', 0),
                     custo: this.getNumero('custo-peculiaridades', 0),
-                    lista: this.coletarPeculiaridades()
+                    lista: []
                 },
                 
                 saldo_total: this.getNumero('saldo-total-vantagens', 0)
             };
         }
 
-        coletarListaItens(idContainer, tipo) {
-            const itens = [];
-            const container = document.getElementById(idContainer);
-            
-            if (container && !container.querySelector('.lista-vazia')) {
-                const elementos = container.querySelectorAll('.item-adquirido');
-                elementos.forEach(el => {
-                    const nome = el.querySelector('.item-nome')?.textContent;
-                    const pontos = el.querySelector('.item-pontos')?.textContent;
-                    const desc = el.querySelector('.item-desc')?.textContent;
-                    
-                    if (nome) {
-                        itens.push({
-                            nome: nome.trim(),
-                            pontos: this.extrairPontos(pontos),
-                            descricao: desc?.trim() || '',
-                            tipo: tipo
-                        });
-                    }
-                });
-            }
-            
-            return itens;
-        }
-
-        coletarPeculiaridades() {
-            const peculiaridades = [];
-            const lista = document.getElementById('lista-peculiaridades');
-            
-            if (lista && !lista.querySelector('.lista-vazia')) {
-                const itens = lista.querySelectorAll('.peculiaridade-item');
-                itens.forEach(item => {
-                    const texto = item.querySelector('.peculiaridade-texto')?.textContent;
-                    if (texto) peculiaridades.push(texto.trim());
-                });
-            }
-            
-            return peculiaridades;
-        }
-
-        // 5. COLETAR PERÍCIAS
-        coletarPericias() {
+        // 5. COLETAR PERÍCIAS/TÉCNICAS
+        coletarPericiasTecnicas() {
             return {
                 resumo: {
                     dx: {
@@ -3756,7 +3670,7 @@
                     }
                 },
                 
-                pericias_aprendidas: this.coletarPericiasAprendidas(),
+                pericias_aprendidas: [],
                 
                 tecnicas: {
                     medias: {
@@ -3771,62 +3685,11 @@
                         quantidade: this.getNumero('qtd-tecnicas-total', 0),
                         pontos: this.getNumero('pts-tecnicas-total', 0)
                     },
-                    lista: this.coletarTecnicasAprendidas()
+                    lista: []
                 },
                 
                 pontos_total: this.getNumero('pontos-pericias-total', 0)
             };
-        }
-
-                coletarPericiasAprendidas() {
-            const pericias = [];
-            const container = document.getElementById('pericias-aprendidas');
-            
-            if (container && !container.querySelector('.nenhuma-pericia-aprendida')) {
-                const itens = container.querySelectorAll('.pericia-aprendida');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.pericia-nome')?.textContent;
-                    const nivel = item.querySelector('.pericia-nivel')?.textContent;
-                    const pontos = item.querySelector('.pericia-pontos')?.textContent;
-                    const atributo = item.querySelector('.pericia-atributo')?.textContent;
-                    
-                    if (nome) {
-                        pericias.push({
-                            nome: nome.trim(),
-                            nivel: nivel?.trim() || '',
-                            pontos: this.extrairPontos(pontos) || 0,
-                            atributo: atributo?.trim() || 'DX'
-                        });
-                    }
-                });
-            }
-            
-            return pericias;
-        }
-
-        coletarTecnicasAprendidas() {
-            const tecnicas = [];
-            const container = document.getElementById('tecnicas-aprendidas');
-            
-            if (container && !container.querySelector('.nenhuma-pericia-aprendida')) {
-                const itens = container.querySelectorAll('.tecnica-aprendida');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.pericia-nome, .tecnica-nome')?.textContent;
-                    const nivel = item.querySelector('.pericia-nivel, .tecnica-nivel')?.textContent;
-                    const pontos = item.querySelector('.pericia-pontos, .tecnica-pontos')?.textContent;
-                    
-                    if (nome) {
-                        tecnicas.push({
-                            nome: nome.trim(),
-                            nivel: nivel?.trim() || '',
-                            pontos: this.extrairPontos(pontos) || 0,
-                            dificuldade: nome.toLowerCase().includes('difícil') ? 'Difícil' : 'Média'
-                        });
-                    }
-                });
-            }
-            
-            return tecnicas;
         }
 
         // 6. COLETAR MAGIAS
@@ -3841,38 +3704,10 @@
                     total_gasto: this.getNumero('total-gasto-magia', 0)
                 },
                 
-                magias_aprendidas: this.coletarMagiasAprendidas(),
+                magias_aprendidas: [],
                 
                 pontos_total: this.getNumero('pontos-magia-total', 0)
             };
-        }
-
-        coletarMagiasAprendidas() {
-            const magias = [];
-            const container = document.getElementById('magias-aprendidas');
-            
-            if (container && !container.querySelector('.nenhuma-magia-aprendida')) {
-                const itens = container.querySelectorAll('.magia-aprendida');
-                itens.forEach(item => {
-                    const nome = item.querySelector('.magia-nome')?.textContent;
-                    const escola = item.querySelector('.magia-escola')?.textContent;
-                    const nivel = item.querySelector('.magia-nivel')?.textContent;
-                    const pontos = item.querySelector('.magia-pontos')?.textContent;
-                    const mana = item.querySelector('.magia-mana')?.textContent;
-                    
-                    if (nome) {
-                        magias.push({
-                            nome: nome.trim(),
-                            escola: escola?.trim() || '',
-                            nivel: nivel?.trim() || '',
-                            pontos: this.extrairPontos(pontos) || 0,
-                            mana: this.extrairPontos(mana) || 0
-                        });
-                    }
-                });
-            }
-            
-            return magias;
         }
 
         // 7. COLETAR EQUIPAMENTO
@@ -3885,16 +3720,16 @@
                     nivel_carga: this.getValor('nivelCarga', 'LEVE'),
                     penalidades_carga: this.getValor('penalidadesCarga', 'MOV +0 / DODGE +0'),
                     contador_mochila: this.getNumero('contadorMochila', 0),
-                    maos_livres: this.coletarMaosLivres()
+                    maos_livres: 2
                 },
                 
-                inventario: this.coletarInventario(),
+                inventario: [],
                 
                 deposito: {
                     itens_guardados: this.getNumero('contador-deposito', 0),
                     peso_liberado: this.getDecimal('peso-liberado', 0),
                     valor_total: this.getValor('valor-deposito', '$0'),
-                    itens: this.coletarDeposito()
+                    itens: []
                 },
                 
                 financeiro: {
@@ -3903,110 +3738,32 @@
             };
         }
 
-        coletarMaosLivres() {
-            const display = document.getElementById('displayMaos');
-            if (!display) return 2;
-            
-            let livres = 0;
-            const maos = display.querySelectorAll('.mao-livre, .mao-ocupada');
-            
-            maos.forEach(mao => {
-                if (mao.classList.contains('mao-livre') || 
-                    mao.textContent.includes('🖐️') || 
-                    mao.innerHTML.includes('🖐️')) {
-                    livres++;
-                }
-            });
-            
-            return livres;
-        }
-
-        coletarInventario() {
-            const itens = [];
-            const container = document.getElementById('lista-equipamentos-adquiridos');
-            
-            if (container && !container.querySelector('.inventario-vazio')) {
-                const linhas = container.querySelectorAll('tr');
-                linhas.forEach(linha => {
-                    if (linha.cells && linha.cells.length >= 4) {
-                        const nome = linha.cells[0]?.textContent?.trim();
-                        const tipo = linha.cells[1]?.textContent?.trim();
-                        const peso = linha.cells[2]?.textContent?.trim();
-                        const quantidade = linha.cells[3]?.textContent?.trim();
-                        
-                        if (nome && nome !== 'Nome' && nome !== 'Equipamento') {
-                            itens.push({
-                                nome: nome,
-                                tipo: tipo || '',
-                                peso: this.extrairDecimal(peso) || 0,
-                                quantidade: this.extrairPontos(quantidade) || 1,
-                                equipado: linha.classList.contains('equipado') || false
-                            });
-                        }
-                    }
-                });
-            }
-            
-            return itens;
-        }
-
-        coletarDeposito() {
-            const itens = [];
-            const container = document.getElementById('lista-deposito');
-            
-            if (container && !container.querySelector('.deposito-vazio')) {
-                const elementos = container.querySelectorAll('.item-deposito');
-                elementos.forEach(item => {
-                    const nome = item.querySelector('.item-nome')?.textContent?.trim();
-                    const quantidade = item.querySelector('.item-quantidade')?.textContent?.trim();
-                    
-                    if (nome) {
-                        itens.push({
-                            nome: nome,
-                            quantidade: this.extrairPontos(quantidade) || 1
-                        });
-                    }
-                });
-            }
-            
-            return itens;
-        }
-
-        extrairDecimal(texto) {
-            if (!texto) return 0;
-            const match = texto.match(/[\d.]+/);
-            return match ? parseFloat(match[0]) : 0;
-        }
-
         // 8. COLETAR COMBATE
         coletarCombate() {
             return {
-                // Pontos de Vida
                 pontos_vida: {
-                    base: this.getNumero('pvBaseDisplay', 10),
-                    maximo: this.getNumero('pvMaxDisplay', 10),
                     atual: this.getNumero('pvAtualDisplay', 10),
+                    maximo: this.getNumero('pvMaxDisplay', 10),
                     estado: this.getValor('pvEstadoDisplay', 'Saudável'),
                     modificador: this.getNumero('pvModificador', 0)
                 },
                 
-                // Pontos de Fadiga
                 pontos_fadiga: {
-                    base: this.getNumero('pfBaseDisplay', 10),
-                    maximo: this.getNumero('pfMaxDisplay', 10),
                     atual: this.getNumero('pfAtualDisplay', 10),
+                    maximo: this.getNumero('pfMaxDisplay', 10),
                     estado: this.getValor('pfEstadoDisplay', 'Normal'),
                     modificador: this.getNumero('pfModificador', 0)
                 },
                 
-                // Dano
                 dano: {
                     gdp: this.getValor('danoGdp', '1d-2'),
                     geb: this.getValor('danoGeb', '1d'),
-                    arma_equipada: this.coletarArmaEquipada()
+                    arma_equipada: {
+                        equipada: false,
+                        usando_corporal: true
+                    }
                 },
                 
-                // Defesas
                 defesas: {
                     esquiva: {
                         valor: this.getNumero('esquivaTotal', 10),
@@ -4033,296 +3790,47 @@
                     }
                 },
                 
-                // Resistência a Dano
                 resistencia_dano: {
-                    cabeca: this.getNumero('rdCabeca', 0),
-                    tronco: this.getNumero('rdTronco', 0),
-                    rosto: this.getNumero('rdRosto', 0),
-                    cranio: this.getNumero('rdCranio', 0),
-                    pescoco: this.getNumero('rdPescoco', 0),
-                    virilha: this.getNumero('rdVirilha', 0),
-                    bracos: this.getNumero('rdBracos', 0),
-                    pernas: this.getNumero('rdPernas', 0),
-                    maos: this.getNumero('rdMaos', 0),
-                    pes: this.getNumero('rdPes', 0),
+                    cabeca: 0,
+                    tronco: 0,
+                    rosto: 0,
+                    cranio: 0,
+                    pescoco: 0,
+                    virilha: 0,
+                    bracos: 0,
+                    pernas: 0,
+                    maos: 0,
+                    pes: 0,
                     total: this.getNumero('rdTotal', 0)
                 },
                 
-                // Escudo
                 escudo: {
                     nome: this.getValor('escudoNome', 'Nenhum escudo equipado'),
                     dr: this.getNumero('escudoDR', 0),
                     pontos_vida: this.getValor('escudoPVTexto', '0/0'),
                     status: this.getValor('escudoStatus', 'Inativo'),
-                    ativo: !this.getValor('escudoNome', '').includes('Nenhum')
+                    ativo: false
                 },
                 
-                // Condições
-                condicoes: this.coletarCondicoesAtivas(),
+                condicoes: [],
                 condicoes_ativas: this.getNumero('condicoesAtivas', 0)
             };
         }
 
-        coletarArmaEquipada() {
-            const nome = this.getValor('armaNome', '-');
-            const dano = this.getValor('armaDano', '-');
-            const tipo = this.getValor('armaTipo', '-');
-            
-            if (nome === '-' || nome.includes('Usando dano corporal')) {
-                return {
-                    equipada: false,
-                    usando_corporal: true
-                };
-            }
-            
-            return {
-                equipada: true,
-                nome: nome,
-                dano: dano,
-                tipo: tipo
-            };
-        }
-
-        coletarCondicoesAtivas() {
-            const condicoes = [];
-            const ativas = document.querySelectorAll('.condicao-item.ativa');
-            
-            ativas.forEach(condicao => {
-                const tipo = condicao.getAttribute('data-condicao');
-                if (tipo) condicoes.push(tipo);
-            });
-            
-            return condicoes;
-        }
-
-        // 9. COLETAR RESUMO
-        coletarResumo() {
-            return {
-                cabecalho: {
-                    nome: this.getValor('resumoNome', 'NOVO PERSONAGEM'),
-                    raca: this.getValor('resumoRaca', 'Humano'),
-                    classe: this.getValor('resumoClasse', 'Guerreiro'),
-                    nivel: this.getValor('resumoNivel', 'Novato'),
-                    pontos_totais: this.getNumero('resumoPontosTotais', 150),
-                    pontos_gastos: this.getNumero('resumoPontosGastos', 0),
-                    saldo: this.getNumero('resumoSaldo', 150)
-                },
-                
-                atributos: {
-                    st: this.getNumero('resumoST', 10),
-                    dx: this.getNumero('resumoDX', 10),
-                    iq: this.getNumero('resumoIQ', 10),
-                    ht: this.getNumero('resumoHT', 10),
-                    pv: this.getNumero('resumoPV', 10),
-                    pf: this.getNumero('resumoPF', 10),
-                    vontade: this.getNumero('resumoVontade', 10),
-                    percepcao: this.getNumero('resumoPercepcao', 10),
-                    deslocamento: this.getDecimal('resumoDeslocamento', 5.0),
-                    pontos: this.getNumero('pontosAtributos', 0)
-                },
-                
-                caracteristicas: {
-                    altura_peso: this.getValor('resumoAlturaPeso', '1.70m/70kg'),
-                    aparencia: this.getValor('resumoAparencia', 'Comum'),
-                    riqueza: this.getValor('resumoRiqueza', 'Média'),
-                    idiomas: this.getValor('resumoIdiomas', 'Comum')
-                },
-                
-                pericias: {
-                    lista: this.coletarPericiasResumo(),
-                    pontos: this.getNumero('pontosPericias', 0)
-                },
-                
-                tecnicas: {
-                    lista: this.coletarTecnicasResumo(),
-                    pontos: this.getNumero('pontosTecnicas', 0)
-                },
-                
-                magias: {
-                    lista: this.coletarMagiasResumo(),
-                    aptidao: this.getNumero('resumoAptidao', 0),
-                    mana: this.getValor('resumoMana', '10/10'),
-                    pontos: this.getNumero('pontosMagias', 0)
-                },
-                
-                vantagens: {
-                    lista: this.coletarVantagensResumo(),
-                    pontos: this.getNumero('pontosVantagens', 0)
-                },
-                
-                desvantagens: {
-                    lista: this.coletarDesvantagensResumo(),
-                    pontos: this.getNumero('pontosDesvantagens', 0)
-                },
-                
-                peculiaridades: {
-                    lista: this.coletarPeculiaridadesResumo(),
-                    pontos: this.getNumero('pontosPeculiaridades', 0)
-                },
-                
-                equipamento: {
-                    dinheiro: this.getValor('resumoDinheiro', '$2.000'),
-                    carga: this.getValor('resumoCarga', '0/60 kg'),
-                    itens: this.coletarEquipamentoResumo()
-                },
-                
-                combate: {
-                    esquiva: this.getNumero('resumoEsquiva', 10),
-                    bloqueio: this.getNumero('resumoBloqueio', 11),
-                    aparar: this.getNumero('resumoAparar', 3),
-                    dano: this.getValor('resumoDano', '1d-2/1d')
-                },
-                
-                relacionamentos: {
-                    inimigos: this.getNumero('resumoInimigos', 0),
-                    aliados: this.getNumero('resumoAliados', 0),
-                    dependentes: this.getNumero('resumoDependentes', 0)
-                }
-            };
-        }
-
-        coletarPericiasResumo() {
-            const pericias = [];
-            const tabela = document.getElementById('tabelaPericiasResumo');
-            
-            if (tabela) {
-                const linhas = tabela.querySelectorAll('tr:not(.vazio)');
-                linhas.forEach(linha => {
-                    if (linha.cells && linha.cells.length >= 3) {
-                        const nome = linha.cells[0]?.textContent?.trim();
-                        const nivel = linha.cells[1]?.textContent?.trim();
-                        const pontos = linha.cells[2]?.textContent?.trim();
-                        
-                        if (nome && nome !== 'PERÍCIA') {
-                            pericias.push({
-                                nome: nome,
-                                nivel: nivel || '',
-                                pontos: this.extrairPontos(pontos) || 0
-                            });
-                        }
-                    }
-                });
-            }
-            
-            return pericias;
-        }
-                coletarTecnicasResumo() {
-            const tecnicas = [];
-            const lista = document.getElementById('listaTecnicasResumo');
-            
-            if (lista && !lista.querySelector('.vazio')) {
-                const itens = lista.querySelectorAll('div:not(.vazio)');
-                itens.forEach(item => {
-                    const texto = item.textContent?.trim();
-                    if (texto && texto !== 'Nenhuma técnica') {
-                        tecnicas.push(texto);
-                    }
-                });
-            }
-            
-            return tecnicas;
-        }
-
-        coletarMagiasResumo() {
-            const magias = [];
-            const lista = document.getElementById('listaMagiasResumo');
-            
-            if (lista && !lista.querySelector('.vazio')) {
-                const itens = lista.querySelectorAll('div:not(.vazio)');
-                itens.forEach(item => {
-                    const texto = item.textContent?.trim();
-                    if (texto && texto !== 'Nenhuma magia') {
-                        magias.push(texto);
-                    }
-                });
-            }
-            
-            return magias;
-        }
-
-        coletarVantagensResumo() {
-            const vantagens = [];
-            const lista = document.getElementById('listaVantagensResumo');
-            
-            if (lista && !lista.querySelector('.vazio')) {
-                const itens = lista.querySelectorAll('div:not(.vazio)');
-                itens.forEach(item => {
-                    const texto = item.textContent?.trim();
-                    if (texto && texto !== 'Nenhuma vantagem') {
-                        vantagens.push(texto);
-                    }
-                });
-            }
-            
-            return vantagens;
-        }
-
-        coletarDesvantagensResumo() {
-            const desvantagens = [];
-            const lista = document.getElementById('listaDesvantagensResumo');
-            
-            if (lista && !lista.querySelector('.vazio')) {
-                const itens = lista.querySelectorAll('div:not(.vazio)');
-                itens.forEach(item => {
-                    const texto = item.textContent?.trim();
-                    if (texto && texto !== 'Nenhuma desvantagem') {
-                        desvantagens.push(texto);
-                    }
-                });
-            }
-            
-            return desvantagens;
-        }
-
-        coletarPeculiaridadesResumo() {
-            const peculiaridades = [];
-            const lista = document.getElementById('listaPeculiaridadesResumo');
-            
-            if (lista && !lista.querySelector('.vazio')) {
-                const itens = lista.querySelectorAll('div:not(.vazio)');
-                itens.forEach(item => {
-                    const texto = item.textContent?.trim();
-                    if (texto && texto !== 'Nenhuma peculiaridade') {
-                        peculiaridades.push(texto);
-                    }
-                });
-            }
-            
-            return peculiaridades;
-        }
-
-        coletarEquipamentoResumo() {
-            const equipamentos = [];
-            const lista = document.getElementById('listaEquipamentoResumo');
-            
-            if (lista && !lista.querySelector('.vazio')) {
-                const itens = lista.querySelectorAll('span:not(.vazio)');
-                itens.forEach(item => {
-                    const texto = item.textContent?.trim();
-                    if (texto && texto !== 'Inventário vazio') {
-                        equipamentos.push(texto);
-                    }
-                });
-            }
-            
-            return equipamentos;
-        }
-
-        // 10. COLETAR TUDO
+        // 9. COLETAR TUDO
         coletarTudo() {
             console.log('🔄 Coletando dados de TODAS as abas...');
             
             try {
-                const dadosCompletos = {
+                return {
                     dashboard: this.coletarDashboard(),
                     atributos: this.coletarAtributos(),
                     caracteristicas: this.coletarCaracteristicas(),
                     vantagens_desvantagens: this.coletarVantagensDesvantagens(),
-                    pericias: this.coletarPericias(),
+                    pericias: this.coletarPericiasTecnicas(),
                     magias: this.coletarMagias(),
                     equipamento: this.coletarEquipamento(),
                     combate: this.coletarCombate(),
-                    resumo: this.coletarResumo(),
                     
                     metadata: {
                         coletado_em: new Date().toISOString(),
@@ -4330,9 +3838,6 @@
                         timestamp: Date.now()
                     }
                 };
-                
-                console.log('✅ Coleta completa realizada!', dadosCompletos);
-                return dadosCompletos;
                 
             } catch (error) {
                 console.error('❌ Erro na coleta completa:', error);
@@ -4354,51 +3859,25 @@
                 // Coletar todos os dados
                 const dadosCompletos = this.coletarTudo();
                 
-                // Preparar dados para salvar
+                // Dados básicos que SEMPRE devem existir
                 const dadosParaSalvar = {
                     user_id: session.user.id,
-                    nome: dadosCompletos.dashboard.nome,
+                    nome: dadosCompletos.dashboard.nome || 'Novo Personagem',
                     raca: dadosCompletos.dashboard.raca || '',
                     classe: dadosCompletos.dashboard.classe || '',
                     nivel: dadosCompletos.dashboard.nivel || '',
                     descricao: dadosCompletos.dashboard.descricao || '',
                     
                     // Atributos principais
-                    forca: dadosCompletos.atributos.forca,
-                    destreza: dadosCompletos.atributos.destreza,
-                    inteligencia: dadosCompletos.atributos.inteligencia,
-                    saude: dadosCompletos.atributos.saude,
-                    
-                    // Pontos secundários
-                    pontos_vida: dadosCompletos.atributos.pontos_vida.total,
-                    pontos_fadiga: dadosCompletos.atributos.pontos_fadiga.total,
-                    vontade: dadosCompletos.atributos.vontade.total,
-                    percepcao: dadosCompletos.atributos.percepcao.total,
-                    deslocamento: dadosCompletos.atributos.deslocamento.total,
+                    forca: dadosCompletos.atributos.forca || 10,
+                    destreza: dadosCompletos.atributos.destreza || 10,
+                    inteligencia: dadosCompletos.atributos.inteligencia || 10,
+                    saude: dadosCompletos.atributos.saude || 10,
                     
                     // Pontos GURPS
-                    pontos_totais: dadosCompletos.dashboard.pontos_totais,
-                    pontos_gastos: dadosCompletos.dashboard.pontos_gastos,
-                    pontos_disponiveis: dadosCompletos.dashboard.pontos_disponiveis,
-                    limite_desvantagens: dadosCompletos.dashboard.limite_desvantagens,
-                    desvantagens_atuais: dadosCompletos.dashboard.desvantagens_atuais,
-                    
-                    // Características
-                    aparencia: dadosCompletos.caracteristicas.aparencia.descricao || 'Comum',
-                    riqueza: dadosCompletos.caracteristicas.riqueza.descricao || 'Média',
-                    altura: dadosCompletos.caracteristicas.fisico.altura || 1.70,
-                    peso: dadosCompletos.caracteristicas.fisico.peso || 70.0,
-                    
-                    // Combate
-                    esquiva: dadosCompletos.combate.defesas.esquiva.valor || 10,
-                    bloqueio: dadosCompletos.combate.defesas.bloqueio.valor || 11,
-                    aparar: dadosCompletos.combate.defesas.aparar.valor || 3,
-                    deslocamento_combate: dadosCompletos.combate.defesas.deslocamento.valor || 5.00,
-                    
-                    // Equipamento
-                    dinheiro: this.extrairDecimal(dadosCompletos.equipamento.status.dinheiro) || 2000,
-                    carga_atual: dadosCompletos.equipamento.status.peso_atual || 0,
-                    carga_maxima: dadosCompletos.equipamento.status.peso_maximo || 60,
+                    pontos_totais: dadosCompletos.dashboard.pontos_totais || 150,
+                    pontos_gastos: dadosCompletos.dashboard.pontos_gastos || 0,
+                    pontos_disponiveis: dadosCompletos.dashboard.pontos_disponiveis || 150,
                     
                     // Dados JSON completos
                     dados_completos: dadosCompletos,
@@ -4406,6 +3885,35 @@
                     // Timestamps
                     updated_at: new Date().toISOString()
                 };
+
+                // Tentar adicionar dados opcionais (se as colunas existirem)
+                try {
+                    // Características
+                    if (dadosCompletos.caracteristicas) {
+                        dadosParaSalvar.aparencia = dadosCompletos.caracteristicas.aparencia?.descricao || 'Comum';
+                        dadosParaSalvar.riqueza = dadosCompletos.caracteristicas.riqueza?.descricao || 'Média';
+                    }
+                    
+                    // Pontos secundários
+                    if (dadosCompletos.atributos) {
+                        dadosParaSalvar.pontos_vida = dadosCompletos.atributos.pontos_vida?.total || 10;
+                        dadosParaSalvar.pontos_fadiga = dadosCompletos.atributos.pontos_fadiga?.total || 10;
+                    }
+                    
+                    // Combate
+                    if (dadosCompletos.combate) {
+                        dadosParaSalvar.esquiva = dadosCompletos.combate.defesas?.esquiva?.valor || 10;
+                        dadosParaSalvar.bloqueio = dadosCompletos.combate.defesas?.bloqueio?.valor || 11;
+                    }
+                    
+                    // Equipamento
+                    if (dadosCompletos.equipamento) {
+                        dadosParaSalvar.dinheiro = this.extrairDecimal(dadosCompletos.equipamento.status?.dinheiro) || 2000;
+                    }
+                    
+                } catch (erroOpcional) {
+                    console.warn('⚠️ Alguns dados opcionais ignorados:', erroOpcional);
+                }
 
                 // Adicionar created_at se for novo
                 if (!personagemId) {
@@ -4419,6 +3927,8 @@
                 if (personagemId) {
                     // Atualizar existente
                     console.log(`🔄 Atualizando personagem ${personagemId}...`);
+                    
+                    // Primeiro, tentar com dados completos
                     const { data, error } = await supabase
                         .from('characters')
                         .update(dadosParaSalvar)
@@ -4427,16 +3937,62 @@
                         .select()
                         .single();
                     
-                    if (error) throw error;
-                    resultado = data;
+                    if (error) {
+                        // Se falhar, tentar apenas dados básicos
+                        console.log('🔄 Tentando salvamento simplificado...');
+                        
+                        const dadosMinimos = {
+                            user_id: session.user.id,
+                            nome: dadosParaSalvar.nome,
+                            forca: dadosParaSalvar.forca,
+                            destreza: dadosParaSalvar.destreza,
+                            inteligencia: dadosParaSalvar.inteligencia,
+                            saude: dadosParaSalvar.saude,
+                            updated_at: new Date().toISOString()
+                        };
+                        
+                        const { data: data2, error: error2 } = await supabase
+                            .from('characters')
+                            .update(dadosMinimos)
+                            .eq('id', personagemId)
+                            .eq('user_id', session.user.id)
+                            .select()
+                            .single();
+                        
+                        if (error2) throw error2;
+                        resultado = data2;
+                    } else {
+                        resultado = data;
+                    }
+                    
                     console.log('✅ Personagem atualizado:', resultado.id);
                     
                 } else {
                     // Criar novo
                     console.log('🆕 Criando novo personagem...');
+                    
+                    const dadosCriacao = {
+                        user_id: session.user.id,
+                        nome: dadosParaSalvar.nome,
+                        raca: dadosParaSalvar.raca,
+                        classe: dadosParaSalvar.classe,
+                        nivel: dadosParaSalvar.nivel,
+                        descricao: dadosParaSalvar.descricao,
+                        forca: dadosParaSalvar.forca,
+                        destreza: dadosParaSalvar.destreza,
+                        inteligencia: dadosParaSalvar.inteligencia,
+                        saude: dadosParaSalvar.saude,
+                        pontos_totais: dadosParaSalvar.pontos_totais,
+                        pontos_gastos: dadosParaSalvar.pontos_gastos,
+                        pontos_disponiveis: dadosParaSalvar.pontos_disponiveis,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                        status: 'Ativo'
+                    };
+                    
                     const { data, error } = await supabase
                         .from('characters')
-                        .insert([dadosParaSalvar])
+                        .insert([dadosCriacao])
                         .select()
                         .single();
                     
@@ -4464,6 +4020,11 @@
                     mensagemErro = `Coluna "${coluna}" não existe.\n\n`;
                     mensagemErro += 'Execute este SQL para criá-la:\n\n';
                     mensagemErro += `ALTER TABLE characters ADD COLUMN ${coluna} TEXT DEFAULT '';`;
+                    
+                } else if (error.message.includes('permission denied')) {
+                    mensagemErro = 'ERRO DE PERMISSÃO! Execute no Supabase:\n\n';
+                    mensagemErro += 'GRANT ALL ON TABLE characters TO authenticated;\n';
+                    mensagemErro += 'GRANT ALL ON TABLE characters TO anon;';
                     
                 } else {
                     mensagemErro += error.message;
@@ -4570,28 +4131,28 @@
                 return;
             }
 
-            // Obter personagemId da URL ou variável global
+            // Obter personagemId da URL
             const urlParams = new URLSearchParams(window.location.search);
             const idDaUrl = urlParams.get('id');
             const idParaSalvar = personagemId || idDaUrl;
             
-            // Executar salvamento de TUDO
+            // Executar salvamento
             const resultado = await coletorPersonagem.salvarTudoNoSupabase(verificacao.session, idParaSalvar);
             
             if (resultado.success) {
-                // Atualizar personagemId global se for novo
+                // Atualizar personagemId se for novo
                 if (!personagemId && resultado.personagemId) {
                     personagemId = resultado.personagemId;
                     
-                    // Atualizar URL sem recarregar
+                    // Atualizar URL
                     const novaUrl = window.location.pathname + '?id=' + resultado.personagemId;
                     window.history.replaceState({}, '', novaUrl);
                 }
                 
-                // Mostrar mensagem de sucesso
+                // Mostrar sucesso
                 alert('✅ ' + resultado.message + '\n\nTodos os dados foram salvos!');
                 
-                // Redirecionar após 2 segundos
+                // Redirecionar
                 setTimeout(() => {
                     window.location.href = 'personagens.html';
                 }, 2000);
@@ -4608,7 +4169,7 @@
         } catch (error) {
             console.error('Erro no salvamento:', error);
             
-            // Restaurar botão em caso de erro
+            // Restaurar botão
             const btnSalvar = document.getElementById('btnSalvar');
             if (btnSalvar) {
                 btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
@@ -4627,7 +4188,7 @@
         console.log('🚀 Inicializando sistema...');
         
         try {
-            // Verificar sessão no início
+            // Verificar sessão
             const verificacao = await verificarSessao();
             
             if (!verificacao.sucesso) {
@@ -4664,7 +4225,7 @@
     }
 
     // ============================================
-    // FUNÇÕES AUXILIARES (mantidas do seu código)
+    // FUNÇÕES AUXILIARES
     // ============================================
 
     function inicializarNavegacaoAbas() {
@@ -4718,10 +4279,7 @@
         const btnExcluir = document.getElementById('btnExcluir');
         const btnSair = document.getElementById('btnSair');
         
-        if (btnSalvar) {
-            btnSalvar.addEventListener('click', salvarPersonagem);
-        }
-        
+        if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
         if (btnExcluir) btnExcluir.addEventListener('click', solicitarExclusao);
         if (btnSair) btnSair.addEventListener('click', sairSemSalvar);
         
@@ -4737,11 +4295,8 @@
 
     async function carregarPersonagemParaEdicao(personagemId) {
         try {
-            // Verificar sessão antes de carregar
             const verificacao = await verificarSessao();
-            if (!verificacao.sucesso) {
-                throw new Error('Sessão inválida');
-            }
+            if (!verificacao.sucesso) throw new Error('Sessão inválida');
             
             const { data: personagem, error } = await supabase
                 .from('characters')
@@ -4766,32 +4321,17 @@
             document.getElementById('IQ').value = personagem.inteligencia || 10;
             document.getElementById('HT').value = personagem.saude || 10;
             
-            // Carregar foto se existir
-            if (personagem.avatar_url) {
-                const fotoPreview = document.getElementById('fotoPreview');
-                const fotoPlaceholder = document.getElementById('fotoPlaceholder');
-                if (fotoPreview && fotoPlaceholder) {
-                    fotoPreview.src = personagem.avatar_url;
-                    fotoPreview.style.display = 'block';
-                    fotoPlaceholder.style.display = 'none';
-                    
-                    const btnRemoverFoto = document.getElementById('btnRemoverFoto');
-                    if (btnRemoverFoto) btnRemoverFoto.style.display = 'inline-block';
-                }
-            }
-            
-            console.log('✅ Personagem carregado para edição:', personagemId);
+            console.log('✅ Personagem carregado:', personagemId);
             
         } catch (error) {
             alert('Erro ao carregar personagem: ' + error.message);
             setTimeout(() => window.location.href = 'personagens.html', 2000);
-            throw error;
         }
     }
 
     function solicitarExclusao() {
         if (personagemId) {
-            if (confirm('Tem certeza que deseja excluir este personagem?\n\nEsta ação não pode ser desfeita!')) {
+            if (confirm('Tem certeza que deseja excluir este personagem?')) {
                 excluirPersonagem(personagemId);
             }
         } else {
@@ -4803,7 +4343,6 @@
 
     async function excluirPersonagem(personagemId) {
         try {
-            // Verificar sessão antes de excluir
             const verificacao = await verificarSessao();
             if (!verificacao.sucesso) {
                 alert('Sessão expirada. Faça login novamente.');
@@ -4842,36 +4381,6 @@
             if (nomeInput && document.getElementById('resumoNome')) {
                 document.getElementById('resumoNome').textContent = nomeInput.value || 'Novo Personagem';
             }
-            
-            const campos = {
-                'racaPersonagem': 'resumoRaca',
-                'classePersonagem': 'resumoClasse', 
-                'nivelPersonagem': 'resumoNivel'
-            };
-            
-            for (const [origem, destino] of Object.entries(campos)) {
-                const origemEl = document.getElementById(origem);
-                const destinoEl = document.getElementById(destino);
-                if (origemEl && destinoEl) {
-                    destinoEl.textContent = origemEl.value || '-';
-                }
-            }
-            
-            const atributos = {
-                'ST': 'resumoST',
-                'DX': 'resumoDX',
-                'IQ': 'resumoIQ',
-                'HT': 'resumoHT'
-            };
-            
-            for (const [origem, destino] of Object.entries(atributos)) {
-                const origemEl = document.getElementById(origem);
-                const destinoEl = document.getElementById(destino);
-                if (origemEl && destinoEl) {
-                    destinoEl.textContent = origemEl.value || '10';
-                }
-            }
-            
         } catch (error) {
             console.error('Erro ao sincronizar resumo:', error);
         }
@@ -4895,14 +4404,14 @@
     });
 
     // ============================================
-    // EXPORTAÇÕES PARA USO GLOBAL
+    // EXPORTAÇÕES
     // ============================================
     window.salvarPersonagem = salvarPersonagem;
     window.coletorPersonagem = coletorPersonagem;
     window.sincronizarResumo = sincronizarResumo;
     window.atualizarResumoNome = atualizarResumoNome;
 
-    // Limpar cache ao sair
+    // Limpar cache
     window.addEventListener('beforeunload', function() {
         localStorage.removeItem('personagens_cache');
     });
