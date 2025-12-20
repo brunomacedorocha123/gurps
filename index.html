@@ -3,268 +3,887 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GURPS Helper - Ferramenta Não Oficial</title>
+    <title>GURPS Realm - Sua Jornada Começa Aqui</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-bg: #F2E8D5;
+            --text-color: #2B2B2B;
+            --primary-title: #4A2E1B;
+            --secondary-title: #6B4A2D;
+            --borders: #B89B6A;
+            --boxes: #E6D8BC;
+            --accent: #8C6A2F;
+            --accent-light: #B89B6A;
+            --shadow: rgba(74, 46, 27, 0.15);
+            --epic-red: #8C1C13;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Cinzel', 'Georgia', 'Times New Roman', serif;
         }
         
         body {
-            background-color: #F2E8D5;
-            color: #2B2B2B;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
             line-height: 1.6;
-            padding: 20px;
             min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(230, 216, 188, 0.7) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(184, 155, 106, 0.5) 0%, transparent 20%);
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
+        /* Header Épico */
         header {
-            text-align: center;
-            padding: 30px 0;
-            border-bottom: 2px solid #B89B6A;
-            margin-bottom: 40px;
+            background: linear-gradient(to bottom, rgba(74, 46, 27, 0.95), rgba(74, 46, 27, 0.85));
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border-bottom: 3px solid var(--accent);
+            backdrop-filter: blur(5px);
         }
         
-        .logo-area {
-            margin-bottom: 20px;
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
         }
         
         .logo {
-            font-size: 2.5rem;
-            color: #4A2E1B;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        
-        .logo-subtitle {
-            font-size: 1.2rem;
-            color: #6B4A2D;
-            margin-top: 5px;
-        }
-        
-        h1 {
-            color: #4A2E1B;
-            font-size: 2.2rem;
-            margin-bottom: 15px;
-        }
-        
-        h2 {
-            color: #6B4A2D;
-            font-size: 1.8rem;
-            margin: 25px 0 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #B89B6A;
-        }
-        
-        h3 {
-            color: #6B4A2D;
-            font-size: 1.4rem;
-            margin: 20px 0 10px;
-        }
-        
-        .disclaimer-box {
-            background-color: #E6D8BC;
-            border: 2px solid #B89B6A;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .highlight {
-            color: #8C6A2F;
-            font-weight: bold;
-        }
-        
-        .warning {
-            background-color: rgba(140, 106, 47, 0.1);
-            border-left: 4px solid #8C6A2F;
-            padding: 15px;
-            margin: 20px 0;
-            font-style: italic;
-        }
-        
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 30px;
-        }
-        
-        .card {
-            background-color: #E6D8BC;
-            border-radius: 10px;
-            padding: 25px;
-            border: 1px solid #B89B6A;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card h3 {
-            color: #4A2E1B;
-            margin-bottom: 15px;
             display: flex;
             align-items: center;
+            gap: 15px;
         }
         
-        .card-icon {
-            background-color: #8C6A2F;
-            color: #F2E8D5;
-            width: 36px;
-            height: 36px;
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 10px;
-            font-weight: bold;
+            color: white;
+            font-size: 1.5rem;
+            border: 2px solid var(--borders);
+            box-shadow: 0 0 10px rgba(140, 106, 47, 0.5);
         }
         
-        ul {
-            padding-left: 20px;
+        .logo-text {
+            color: #F2E8D5;
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .logo-sub {
+            color: #B89B6A;
+            font-size: 0.9rem;
+            margin-top: 3px;
+            font-style: italic;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: #E6D8BC;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 15px;
+            border-radius: 4px;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent);
+            background: rgba(184, 155, 106, 0.1);
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: 'Cinzel', serif;
+        }
+        
+        .btn-login {
+            background: transparent;
+            color: #F2E8D5;
+            border: 2px solid var(--accent);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-login:hover {
+            background: rgba(140, 106, 47, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(140, 106, 47, 0.3);
+        }
+        
+        .btn-signup {
+            background: linear-gradient(135deg, var(--accent), #6B4A2D);
+            color: white;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-signup:hover {
+            background: linear-gradient(135deg, #6B4A2D, var(--accent));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(140, 106, 47, 0.4);
+        }
+        
+        /* Hero Section Épica */
+        .hero {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 30px 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            min-height: 85vh;
+        }
+        
+        .hero-content {
+            padding-right: 20px;
+        }
+        
+        .hero-tag {
+            display: inline-block;
+            background: var(--epic-red);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            color: var(--primary-title);
+            margin-bottom: 20px;
+            line-height: 1.1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--secondary-title);
+            margin-bottom: 30px;
+            font-weight: 300;
+            max-width: 90%;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .btn-hero {
+            padding: 16px 35px;
+            font-size: 1.1rem;
+        }
+        
+        .hero-image-container {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            border: 8px solid var(--boxes);
+            transform: perspective(1000px) rotateY(-5deg);
+            transition: transform 0.5s;
+        }
+        
+        .hero-image-container:hover {
+            transform: perspective(1000px) rotateY(0deg);
+        }
+        
+        .warrior-image {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
+            display: block;
+            filter: sepia(0.2) brightness(1.05);
+        }
+        
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(74, 46, 27, 0.9), transparent);
+            padding: 30px;
+            color: white;
+        }
+        
+        .image-quote {
+            font-size: 1.2rem;
+            font-style: italic;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+        
+        /* Disclaimer Estilizado */
+        .disclaimer-container {
+            max-width: 1400px;
+            margin: 60px auto 40px;
+            padding: 0 30px;
+        }
+        
+        .disclaimer {
+            background: linear-gradient(135deg, var(--boxes), #E6D8BC);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 15px 30px var(--shadow);
+            border-left: 10px solid var(--epic-red);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .disclaimer:before {
+            content: "⚔️";
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 4rem;
+            opacity: 0.1;
+        }
+        
+        .disclaimer h2 {
+            color: var(--epic-red);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 2rem;
+        }
+        
+        .disclaimer-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        .disclaimer-text strong {
+            color: var(--epic-red);
+            font-weight: 700;
+        }
+        
+        /* Features Épicas */
+        .features-section {
+            max-width: 1400px;
+            margin: 80px auto;
+            padding: 0 30px;
+        }
+        
+        .section-title {
+            text-align: center;
+            color: var(--primary-title);
+            font-size: 2.8rem;
+            margin-bottom: 60px;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(to right, transparent, var(--accent), transparent);
+            border-radius: 2px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+        
+        .feature-card {
+            background: linear-gradient(145deg, #f5ebd9, #e6d8bc);
+            border-radius: 15px;
+            padding: 40px 30px;
+            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1), 
+                        -10px -10px 20px rgba(255, 255, 255, 0.5);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(184, 155, 106, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent), var(--epic-red));
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 15px 15px 30px rgba(0, 0, 0, 0.15), 
+                        -15px -15px 30px rgba(255, 255, 255, 0.6);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, var(--accent), var(--epic-red));
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 8px 16px rgba(140, 106, 47, 0.3);
+        }
+        
+        .feature-card h3 {
+            color: var(--primary-title);
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+        
+        /* CTA Épico */
+        .cta-section {
+            max-width: 1400px;
+            margin: 100px auto;
+            padding: 80px 40px;
+            background: linear-gradient(rgba(74, 46, 27, 0.9), rgba(74, 46, 27, 0.95)), 
+                        url('https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80');
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-title {
+            font-size: 3rem;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .cta-text {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+            line-height: 1.8;
+        }
+        
+        .btn-cta {
+            background: linear-gradient(135deg, var(--epic-red), #B22222);
+            color: white;
+            padding: 18px 45px;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-cta:hover {
+            background: linear-gradient(135deg, #B22222, var(--epic-red));
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Footer */
+        footer {
+            background: linear-gradient(to bottom, var(--primary-title), #2B1B12);
+            color: #F2E8D5;
+            padding: 60px 0 30px;
+            margin-top: 80px;
+            border-top: 3px solid var(--accent);
+        }
+        
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 50px;
+        }
+        
+        .footer-brand h3 {
+            color: var(--accent-light);
+            font-size: 1.8rem;
             margin-bottom: 15px;
         }
         
-        li {
-            margin-bottom: 8px;
+        .footer-section h4 {
+            color: var(--accent);
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            position: relative;
+            padding-bottom: 10px;
         }
         
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+        .footer-section h4:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--accent);
         }
         
-        .feature {
-            background-color: rgba(230, 216, 188, 0.6);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #8C6A2F;
+        .footer-section ul {
+            list-style: none;
         }
         
-        footer {
+        .footer-section ul li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-section ul li a {
+            color: #E6D8BC;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .footer-section ul li a:hover {
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+        
+        .copyright {
             text-align: center;
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #B89B6A;
-            color: #6B4A2D;
+            padding-top: 40px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(184, 155, 106, 0.2);
+            color: #B89B6A;
             font-size: 0.9rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        .gurps-reference {
-            font-size: 0.8rem;
-            margin-top: 10px;
-            color: #8C6A2F;
+        /* Responsividade */
+        @media (max-width: 1200px) {
+            .hero {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 40px;
+            }
+            
+            .hero-content {
+                padding-right: 0;
+            }
+            
+            .hero-subtitle {
+                max-width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            
+            .cta-title {
+                font-size: 2.5rem;
+            }
         }
         
         @media (max-width: 768px) {
-            .content {
+            .hero-title {
+                font-size: 2.3rem;
+            }
+            
+            .section-title {
+                font-size: 2.2rem;
+            }
+            
+            .features-grid {
                 grid-template-columns: 1fr;
             }
             
-            .features {
-                grid-template-columns: 1fr;
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
             }
             
-            h1 {
-                font-size: 1.8rem;
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
             }
+        }
+        
+        @media (max-width: 576px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .disclaimer {
+                padding: 25px;
+            }
+            
+            .cta-section {
+                padding: 50px 20px;
+            }
+        }
+        
+        /* Efeitos de fogo para botões */
+        .fire-effect {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+        
+        .btn:hover .fire-effect {
+            left: 100%;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo-area">
-                <div class="logo">GURPS HELPER</div>
-                <div class="logo-subtitle">Ferramentas para seu jogo</div>
+    <!-- Header Épico -->
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-dragon"></i>
+                </div>
+                <div>
+                    <div class="logo-text">GURPS REALM</div>
+                    <div class="logo-sub">Forje Sua Lenda</div>
+                </div>
             </div>
-        </header>
+            
+            <div class="nav-links">
+                <a href="#"><i class="fas fa-home"></i> Início</a>
+                <a href="#"><i class="fas fa-tools"></i> Ferramentas</a>
+                <a href="#"><i class="fas fa-book"></i> Biblioteca</a>
+                <a href="#"><i class="fas fa-users"></i> Comunidade</a>
+                <a href="#"><i class="fas fa-question-circle"></i> Ajuda</a>
+            </div>
+            
+            <div class="auth-buttons">
+                <button class="btn btn-login">
+                    <span class="fire-effect"></span>
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button class="btn btn-signup">
+                    <span class="fire-effect"></span>
+                    <i class="fas fa-user-plus"></i> Cadastrar
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Hero Section Épica -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-tag">
+                <i class="fas fa-exclamation-triangle"></i> FERRAMENTA NÃO OFICIAL
+            </div>
+            
+            <h1 class="hero-title">Forje Seu Destino no Mundo de GURPS</h1>
+            
+            <p class="hero-subtitle">
+                Crie heróis lendários, enfrente monstros colossais e escreva suas próprias sagas com nosso conjunto completo de ferramentas para GURPS. Tudo criado por fãs, para fãs.
+            </p>
+            
+            <div class="hero-buttons">
+                <button class="btn btn-signup btn-hero">
+                    <span class="fire-effect"></span>
+                    <i class="fas fa-play"></i> Começar Aventura
+                </button>
+                <button class="btn btn-login btn-hero">
+                    <span class="fire-effect"></span>
+                    <i class="fas fa-video"></i> Ver Demonstração
+                </button>
+            </div>
+        </div>
         
-        <main>
-            <div class="disclaimer-box">
-                <h1>AVISO IMPORTANTE</h1>
-                <p>Este <span class="highlight">NÃO</span> é um site oficial do <strong>GURPS (Generic Universal RolePlaying System)</strong> nem está associado à <strong>Steve Jackson Games</strong>.</p>
-                
-                <div class="warning">
-                    <p>Este projeto é uma ferramenta independente criada por fãs para auxiliar jogadores e mestres do sistema GURPS. Todo o conteúdo oficial do GURPS é propriedade da Steve Jackson Games e deve ser adquirido através dos canais oficiais.</p>
-                </div>
-                
-                <p>Nosso objetivo é fornecer recursos complementares, calculadoras, geradores e organizadores que possam tornar sua experiência com GURPS mais fluida e divertida, mas sempre respeitando os materiais oficiais e incentivando seu suporte.</p>
+        <div class="hero-image-container">
+            <!-- SUA IMAGEM DA GUERREIRA AQUI -->
+            <img src="cris.jpg" alt="Guerreira lendária pronta para batalha" class="warrior-image">
+            
+            <div class="image-overlay">
+                <p class="image-quote">
+                    "Grandes aventuras não são escritas por aqueles que temem o desconhecido, mas por aqueles que ousam desbravá-lo."
+                </p>
             </div>
+        </div>
+    </section>
+    
+    <!-- Disclaimer -->
+    <div class="disclaimer-container">
+        <div class="disclaimer">
+            <h2><i class="fas fa-shield-alt"></i> AVISO LEGAL IMPORTANTE</h2>
             
-            <h2>O que você encontra aqui</h2>
-            
-            <div class="content">
-                <div class="card">
-                    <h3><span class="card-icon">1</span> Para Jogadores</h3>
-                    <p>Ferramentas para criar e gerenciar suas fichas de personagem de forma mais eficiente:</p>
-                    <ul>
-                        <li>Criação guiada de personagens</li>
-                        <li>Calculadora de pontos de vantagens/desvantagens</li>
-                        <li>Gerenciador de equipamentos</li>
-                        <li>Rastreador de recursos (PV, PE, FP)</li>
-                    </ul>
-                </div>
+            <div class="disclaimer-text">
+                <p>Este site <strong>NÃO É OFICIAL</strong> e não possui nenhuma afiliação com a <strong>Steve Jackson Games</strong> ou com a marca <strong>GURPS (Generic Universal RolePlaying System)</strong>.</p>
                 
-                <div class="card">
-                    <h3><span class="card-icon">2</span> Para Mestres</h3>
-                    <p>Recursos para ajudar a preparar e conduzir suas sessões de jogo:</p>
-                    <ul>
-                        <li>Gerador de encontros e NPCs</li>
-                        <li>Calculadora de combate</li>
-                        <li>Organizador de campanhas</li>
-                        <li>Tabelas de referência rápida</li>
-                    </ul>
-                </div>
+                <p style="margin-top: 20px;">Trata-se de um projeto desenvolvido por entusiastas do sistema GURPS, com o objetivo de fornecer ferramentas complementares para jogadores e mestres. Todo o conteúdo oficial do GURPS é propriedade intelectual da Steve Jackson Games e deve ser adquirido através dos canais oficiais.</p>
+                
+                <p style="margin-top: 20px; font-style: italic;">Apoiamos os criadores originais e incentivamos a compra dos materiais oficiais para uma experiência completa do sistema.</p>
             </div>
-            
-            <h2>Recursos Disponíveis</h2>
-            
-            <div class="features">
-                <div class="feature">
-                    <h3>Calculadora de Combate</h3>
-                    <p>Calcule rapidamente modificadores de ataque, defesa e dano seguindo as regras do GURPS.</p>
-                </div>
-                
-                <div class="feature">
-                    <h3>Gerador de NPCs</h3>
-                    <p>Crie personagens não-jogadores com níveis de detalhe configuráveis para sua campanha.</p>
-                </div>
-                
-                <div class="feature">
-                    <h3>Organizador de Campanha</h3>
-                    <p>Mantenha o controle de enredos, locais, NPCs e tesouros em suas aventuras.</p>
-                </div>
-                
-                <div class="feature">
-                    <h3>Biblioteca de Regras</h3>
-                    <p>Busca rápida por regras específicas com referências aos livros oficiais.</p>
-                </div>
-            </div>
-            
-            <div class="warning" style="margin-top: 40px;">
-                <p><strong>Suporte aos criadores oficiais:</strong> Recomendamos fortemente a compra dos livros oficiais do GURPS para aproveitar todo o potencial do sistema. Este site é apenas um complemento às ferramentas oficiais.</p>
-            </div>
-        </main>
-        
-        <footer>
-            <p>GURPS Helper - Ferramenta não oficial para o sistema GURPS</p>
-            <p class="gurps-reference">GURPS é uma marca registrada da Steve Jackson Games. Este projeto não tem afiliação com a Steve Jackson Games.</p>
-        </footer>
+        </div>
     </div>
+    
+    <!-- Features Épicas -->
+    <section class="features-section">
+        <h2 class="section-title">Armas da Sua Jornada</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3>Criação de Heróis</h3>
+                <p>Da ideia à ficha completa: crie personagens únicos com nosso sistema guiado passo a passo. Cálculo automático de pontos, vantagens e desvantagens.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-crosshairs"></i>
+                </div>
+                <h3>Sistema de Combate</h3>
+                <p>Simulações realistas de batalhas com cálculo automático de ataques, defesas, danos e efeitos especiais. Foque na estratégia, não na matemática.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-dungeon"></i>
+                </div>
+                <h3>Mundo dos Mestres</h3>
+                <p>Ferramentas completas para mestres: gerador de NPCs, construtor de dungeons, criador de tesouros e organizador de campanhas.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-scroll"></i>
+                </div>
+                <h3>Biblioteca Épica</h3>
+                <p>Acesso rápido a regras, referências e tabelas. Busca inteligente por palavras-chave e filtros por livro de referência.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h3>Campanha Colaborativa</h3>
+                <p>Compartilhe sua campanha com jogadores, atualize fichas em tempo real e mantenha o histórico completo de todas as sessões.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>Multiplataforma</h3>
+                <p>Acesse suas campanhas de qualquer dispositivo. Modo offline disponível para sessões sem internet. Sincronização automática.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Épico -->
+    <section class="cta-section">
+        <h2 class="cta-title">Sua Lenda Aguarda</h2>
+        
+        <p class="cta-text">
+            Junte-se a mais de 50.000 aventureiros que já transformaram suas sessões de GURPS com nossas ferramentas. De iniciantes a veteranos, todos encontram recursos para elevar suas histórias a novos patamares.
+        </p>
+        
+        <button class="btn btn-cta">
+            <span class="fire-effect"></span>
+            <i class="fas fa-crown"></i> Tornar-se Lendário
+        </button>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>GURPS REALM</h3>
+                <p>Ferramentas épicas para aventuras lendárias.</p>
+                <p style="margin-top: 15px; color: #B89B6A; font-size: 0.9rem;">
+                    Projeto independente de fãs para fãs.
+                </p>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Ferramentas</h4>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Criador de Personagens</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Calculadora de Combate</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Gerador de NPCs</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Organizador de Campanha</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Recursos</h4>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Tutoriais</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Templates</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Fórum da Comunidade</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Blog de Dicas</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Aviso Legal</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Termos de Uso</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Política de Privacidade</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> DMCA</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>GURPS® é uma marca registrada da Steve Jackson Games. Este projeto é independente e não tem afiliação com a Steve Jackson Games.</p>
+            <p style="margin-top: 15px;">© 2023 GURPS Realm. Desenvolvido com paixão pela comunidade de RPG.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Efeitos interativos
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Efeito de clique
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 200);
+                
+                // Ações específicas
+                if (this.classList.contains('btn-login')) {
+                    alert('Redirecionando para a página de login...\n(Em um site real, isso levaria para /login)');
+                } else if (this.classList.contains('btn-signup')) {
+                    alert('Redirecionando para a página de cadastro...\n(Em um site real, isso levaria para /cadastro)');
+                }
+            });
+        });
+        
+        // Efeito de parallax na imagem da guerreira
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const heroImage = document.querySelector('.hero-image-container');
+            
+            if (heroImage) {
+                heroImage.style.transform = `perspective(1000px) rotateY(-5deg) translateY(${scrolled * 0.05}px)`;
+            }
+        });
+        
+        // Animação de entrada dos cards
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Aplicar animação aos cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+        
+        // Efeito de digitação no título (opcional)
+        const heroTitle = document.querySelector('.hero-title');
+        const originalText = heroTitle.textContent;
+        
+        // Se quiser efeito de digitação, descomente abaixo:
+        /*
+        heroTitle.textContent = '';
+        let i = 0;
+        const typeWriter = () => {
+            if (i < originalText.length) {
+                heroTitle.textContent += originalText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            }
+        };
+        setTimeout(typeWriter, 1000);
+        */
+    </script>
 </body>
 </html>
