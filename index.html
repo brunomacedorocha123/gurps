@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GURPS Realm - Sua Jornada Começa Aqui</title>
+    <title>GURPS Tools - Ferramenta Não Oficial</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -16,14 +16,13 @@
             --accent: #8C6A2F;
             --accent-light: #B89B6A;
             --shadow: rgba(74, 46, 27, 0.15);
-            --epic-red: #8C1C13;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Cinzel', 'Georgia', 'Times New Roman', serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
@@ -31,94 +30,37 @@
             color: var(--text-color);
             line-height: 1.6;
             min-height: 100vh;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(230, 216, 188, 0.7) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(184, 155, 106, 0.5) 0%, transparent 20%);
         }
         
-        /* Header Épico */
+        /* Header Simples */
         header {
-            background: linear-gradient(to bottom, rgba(74, 46, 27, 0.95), rgba(74, 46, 27, 0.85));
-            padding: 15px 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background-color: var(--primary-title);
+            padding: 20px 0;
+            text-align: center;
             border-bottom: 3px solid var(--accent);
-            backdrop-filter: blur(5px);
-        }
-        
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
         }
         
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .logo-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            border: 2px solid var(--borders);
-            box-shadow: 0 0 10px rgba(140, 106, 47, 0.5);
-        }
-        
-        .logo-text {
             color: #F2E8D5;
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: bold;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 5px;
         }
         
         .logo-sub {
             color: #B89B6A;
             font-size: 0.9rem;
-            margin-top: 3px;
-            font-style: italic;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-        
-        .nav-links a {
-            color: #E6D8BC;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s;
-            padding: 8px 15px;
-            border-radius: 4px;
-        }
-        
-        .nav-links a:hover {
-            color: var(--accent);
-            background: rgba(184, 155, 106, 0.1);
         }
         
         .auth-buttons {
             display: flex;
+            justify-content: center;
             gap: 15px;
+            margin-top: 20px;
         }
         
         .btn {
-            padding: 12px 28px;
+            padding: 10px 25px;
             border-radius: 30px;
             font-weight: 600;
             cursor: pointer;
@@ -127,763 +69,303 @@
             font-size: 1rem;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-family: 'Cinzel', serif;
+            gap: 8px;
         }
         
         .btn-login {
-            background: transparent;
+            background-color: transparent;
             color: #F2E8D5;
-            border: 2px solid var(--accent);
-            position: relative;
-            overflow: hidden;
+            border: 2px solid #B89B6A;
         }
         
         .btn-login:hover {
-            background: rgba(140, 106, 47, 0.2);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(140, 106, 47, 0.3);
+            background-color: rgba(184, 155, 106, 0.2);
         }
         
         .btn-signup {
-            background: linear-gradient(135deg, var(--accent), #6B4A2D);
+            background-color: var(--accent);
             color: white;
-            border: 2px solid transparent;
-            position: relative;
-            overflow: hidden;
         }
         
         .btn-signup:hover {
-            background: linear-gradient(135deg, #6B4A2D, var(--accent));
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(140, 106, 47, 0.4);
+            background-color: #6B4A2D;
         }
         
-        /* Hero Section Épica */
-        .hero {
-            max-width: 1400px;
+        /* Conteúdo Principal - TUDO CENTRALIZADO */
+        .main-content {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 60px 30px 30px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-            min-height: 85vh;
+            padding: 40px 20px;
+            text-align: center; /* Centraliza tudo */
         }
         
-        .hero-content {
-            padding-right: 20px;
-        }
-        
-        .hero-tag {
-            display: inline-block;
-            background: var(--epic-red);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        
-        .hero-title {
-            font-size: 3.5rem;
-            color: var(--primary-title);
-            margin-bottom: 20px;
-            line-height: 1.1;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.3rem;
-            color: var(--secondary-title);
-            margin-bottom: 30px;
-            font-weight: 300;
-            max-width: 90%;
-        }
-        
-        .hero-buttons {
-            display: flex;
-            gap: 20px;
-            margin-top: 40px;
-        }
-        
-        .btn-hero {
-            padding: 16px 35px;
-            font-size: 1.1rem;
-        }
-        
-        .hero-image-container {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-            border: 8px solid var(--boxes);
-            transform: perspective(1000px) rotateY(-5deg);
-            transition: transform 0.5s;
-        }
-        
-        .hero-image-container:hover {
-            transform: perspective(1000px) rotateY(0deg);
+        /* Imagem da Guerreira - Centralizada */
+        .warrior-section {
+            margin: 40px 0;
         }
         
         .warrior-image {
+            max-width: 600px;
             width: 100%;
-            height: 600px;
-            object-fit: cover;
+            height: auto;
+            border-radius: 10px;
+            border: 5px solid var(--boxes);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
             display: block;
-            filter: sepia(0.2) brightness(1.05);
         }
         
-        .image-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(74, 46, 27, 0.9), transparent);
-            padding: 30px;
-            color: white;
-        }
-        
-        .image-quote {
-            font-size: 1.2rem;
-            font-style: italic;
+        /* Textos Centralizados */
+        h1, h2, h3, p {
             text-align: center;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        /* Disclaimer Estilizado */
-        .disclaimer-container {
-            max-width: 1400px;
-            margin: 60px auto 40px;
-            padding: 0 30px;
+        h1 {
+            color: var(--primary-title);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            max-width: 800px;
         }
         
+        h2 {
+            color: var(--secondary-title);
+            font-size: 1.8rem;
+            margin: 30px 0 15px;
+            max-width: 800px;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+        
+        /* Disclaimer Centralizado */
         .disclaimer {
-            background: linear-gradient(135deg, var(--boxes), #E6D8BC);
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 15px 30px var(--shadow);
-            border-left: 10px solid var(--epic-red);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .disclaimer:before {
-            content: "⚔️";
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 4rem;
-            opacity: 0.1;
+            background-color: var(--boxes);
+            border-radius: 10px;
+            padding: 30px;
+            border-left: 5px solid var(--accent);
+            margin: 40px auto;
+            max-width: 800px;
+            text-align: center;
         }
         
         .disclaimer h2 {
-            color: var(--epic-red);
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 2rem;
+            color: #8C1C13;
+            margin-bottom: 20px;
         }
         
-        .disclaimer-text {
-            font-size: 1.1rem;
-            line-height: 1.8;
+        .highlight {
+            color: #8C1C13;
+            font-weight: bold;
         }
         
-        .disclaimer-text strong {
-            color: var(--epic-red);
-            font-weight: 700;
-        }
-        
-        /* Features Épicas */
-        .features-section {
-            max-width: 1400px;
-            margin: 80px auto;
-            padding: 0 30px;
-        }
-        
-        .section-title {
-            text-align: center;
-            color: var(--primary-title);
-            font-size: 2.8rem;
-            margin-bottom: 60px;
-            position: relative;
-        }
-        
-        .section-title:after {
-            content: "";
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 4px;
-            background: linear-gradient(to right, transparent, var(--accent), transparent);
-            border-radius: 2px;
-        }
-        
-        .features-grid {
+        /* Features Centralizadas */
+        .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        .feature-card {
-            background: linear-gradient(145deg, #f5ebd9, #e6d8bc);
-            border-radius: 15px;
-            padding: 40px 30px;
-            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1), 
-                        -10px -10px 20px rgba(255, 255, 255, 0.5);
-            transition: all 0.4s ease;
-            border: 1px solid rgba(184, 155, 106, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .feature-card:before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background: linear-gradient(to bottom, var(--accent), var(--epic-red));
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            box-shadow: 15px 15px 30px rgba(0, 0, 0, 0.15), 
-                        -15px -15px 30px rgba(255, 255, 255, 0.6);
+        .feature {
+            background-color: var(--boxes);
+            border-radius: 10px;
+            padding: 25px;
+            border-top: 4px solid var(--accent);
+            text-align: center;
         }
         
         .feature-icon {
-            background: linear-gradient(135deg, var(--accent), var(--epic-red));
-            width: 80px;
-            height: 80px;
+            background-color: var(--accent);
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 25px;
+            margin: 0 auto 20px;
             color: white;
-            font-size: 2rem;
-            box-shadow: 0 8px 16px rgba(140, 106, 47, 0.3);
+            font-size: 1.5rem;
         }
         
-        .feature-card h3 {
+        .feature h3 {
             color: var(--primary-title);
-            margin-bottom: 20px;
-            font-size: 1.6rem;
-            font-weight: 700;
-        }
-        
-        /* CTA Épico */
-        .cta-section {
-            max-width: 1400px;
-            margin: 100px auto;
-            padding: 80px 40px;
-            background: linear-gradient(rgba(74, 46, 27, 0.9), rgba(74, 46, 27, 0.95)), 
-                        url('https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80');
-            background-size: cover;
-            background-position: center;
-            border-radius: 20px;
-            text-align: center;
-            color: white;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .cta-title {
-            font-size: 3rem;
-            margin-bottom: 25px;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-        }
-        
-        .cta-text {
-            font-size: 1.3rem;
-            margin-bottom: 40px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            opacity: 0.9;
-            line-height: 1.8;
-        }
-        
-        .btn-cta {
-            background: linear-gradient(135deg, var(--epic-red), #B22222);
-            color: white;
-            padding: 18px 45px;
-            font-size: 1.2rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .btn-cta:hover {
-            background: linear-gradient(135deg, #B22222, var(--epic-red));
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-        }
-        
-        /* Footer */
-        footer {
-            background: linear-gradient(to bottom, var(--primary-title), #2B1B12);
-            color: #F2E8D5;
-            padding: 60px 0 30px;
-            margin-top: 80px;
-            border-top: 3px solid var(--accent);
-        }
-        
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 50px;
-        }
-        
-        .footer-brand h3 {
-            color: var(--accent-light);
-            font-size: 1.8rem;
             margin-bottom: 15px;
         }
         
-        .footer-section h4 {
-            color: var(--accent);
-            margin-bottom: 25px;
-            font-size: 1.3rem;
-            position: relative;
-            padding-bottom: 10px;
+        /* CTA Centralizado */
+        .cta {
+            background: linear-gradient(135deg, var(--primary-title), var(--secondary-title));
+            border-radius: 15px;
+            padding: 40px;
+            color: white;
+            margin: 50px auto;
+            max-width: 800px;
+            text-align: center;
         }
         
-        .footer-section h4:after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50px;
-            height: 2px;
-            background: var(--accent);
+        .btn-cta {
+            background-color: var(--accent);
+            color: white;
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            margin-top: 20px;
         }
         
-        .footer-section ul {
-            list-style: none;
+        /* Footer Centralizado */
+        footer {
+            background-color: var(--primary-title);
+            color: #F2E8D5;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 60px;
         }
         
-        .footer-section ul li {
-            margin-bottom: 12px;
-        }
-        
-        .footer-section ul li a {
-            color: #E6D8BC;
-            text-decoration: none;
-            transition: all 0.3s;
-            display: inline-block;
-        }
-        
-        .footer-section ul li a:hover {
-            color: var(--accent);
-            transform: translateX(5px);
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
         
         .copyright {
-            text-align: center;
-            padding-top: 40px;
-            margin-top: 40px;
-            border-top: 1px solid rgba(184, 155, 106, 0.2);
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(184, 155, 106, 0.3);
             color: #B89B6A;
             font-size: 0.9rem;
-            max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
         }
         
         /* Responsividade */
-        @media (max-width: 1200px) {
-            .hero {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 40px;
-            }
-            
-            .hero-content {
-                padding-right: 0;
-            }
-            
-            .hero-subtitle {
-                max-width: 100%;
-                margin-left: auto;
-                margin-right: auto;
-            }
-        }
-        
-        @media (max-width: 992px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 20px;
-            }
-            
-            .nav-links {
-                order: 3;
-                width: 100%;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-            
-            .hero-title {
-                font-size: 2.8rem;
-            }
-            
-            .cta-title {
-                font-size: 2.5rem;
-            }
-        }
-        
         @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.3rem;
+            h1 {
+                font-size: 2rem;
             }
             
-            .section-title {
-                font-size: 2.2rem;
+            h2 {
+                font-size: 1.5rem;
             }
             
-            .features-grid {
+            .features {
                 grid-template-columns: 1fr;
             }
             
-            .hero-buttons {
+            .auth-buttons {
                 flex-direction: column;
                 align-items: center;
             }
             
             .btn {
-                width: 100%;
-                max-width: 300px;
+                width: 200px;
                 justify-content: center;
             }
-        }
-        
-        @media (max-width: 576px) {
-            .nav-links {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .auth-buttons {
-                flex-direction: column;
-                width: 100%;
-                max-width: 300px;
-            }
-            
-            .hero-title {
-                font-size: 2rem;
-            }
-            
-            .disclaimer {
-                padding: 25px;
-            }
-            
-            .cta-section {
-                padding: 50px 20px;
-            }
-        }
-        
-        /* Efeitos de fogo para botões */
-        .fire-effect {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.7s;
-        }
-        
-        .btn:hover .fire-effect {
-            left: 100%;
         }
     </style>
 </head>
 <body>
-    <!-- Header Épico -->
+    <!-- Header Simples -->
     <header>
-        <div class="nav-container">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-dragon"></i>
-                </div>
-                <div>
-                    <div class="logo-text">GURPS REALM</div>
-                    <div class="logo-sub">Forje Sua Lenda</div>
-                </div>
-            </div>
-            
-            <div class="nav-links">
-                <a href="#"><i class="fas fa-home"></i> Início</a>
-                <a href="#"><i class="fas fa-tools"></i> Ferramentas</a>
-                <a href="#"><i class="fas fa-book"></i> Biblioteca</a>
-                <a href="#"><i class="fas fa-users"></i> Comunidade</a>
-                <a href="#"><i class="fas fa-question-circle"></i> Ajuda</a>
-            </div>
-            
-            <div class="auth-buttons">
-                <button class="btn btn-login">
-                    <span class="fire-effect"></span>
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </button>
-                <button class="btn btn-signup">
-                    <span class="fire-effect"></span>
-                    <i class="fas fa-user-plus"></i> Cadastrar
-                </button>
-            </div>
+        <div class="logo">GURPS TOOLS</div>
+        <div class="logo-sub">Ferramenta Não Oficial</div>
+        
+        <div class="auth-buttons">
+            <button class="btn btn-login">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button class="btn btn-signup">
+                <i class="fas fa-user-plus"></i> Cadastrar
+            </button>
         </div>
     </header>
     
-    <!-- Hero Section Épica -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-tag">
-                <i class="fas fa-exclamation-triangle"></i> FERRAMENTA NÃO OFICIAL
-            </div>
-            
-            <h1 class="hero-title">Forje Seu Destino no Mundo de GURPS</h1>
-            
-            <p class="hero-subtitle">
-                Crie heróis lendários, enfrente monstros colossais e escreva suas próprias sagas com nosso conjunto completo de ferramentas para GURPS. Tudo criado por fãs, para fãs.
-            </p>
-            
-            <div class="hero-buttons">
-                <button class="btn btn-signup btn-hero">
-                    <span class="fire-effect"></span>
-                    <i class="fas fa-play"></i> Começar Aventura
-                </button>
-                <button class="btn btn-login btn-hero">
-                    <span class="fire-effect"></span>
-                    <i class="fas fa-video"></i> Ver Demonstração
-                </button>
-            </div>
+    <!-- Conteúdo Principal - TUDO CENTRALIZADO -->
+    <div class="main-content">
+        <!-- Título Principal -->
+        <h1>Ferramentas para GURPS - Projeto Não Oficial</h1>
+        <p>Crie, gerencie e jogue com nossas ferramentas desenvolvidas para facilitar sua experiência com o sistema GURPS.</p>
+        
+        <!-- Imagem da Guerreira - Centralizada -->
+        <div class="warrior-section">
+            <img src="cris.jpg" alt="Guerreira" class="warrior-image">
         </div>
         
-        <div class="hero-image-container">
-            <!-- SUA IMAGEM DA GUERREIRA AQUI -->
-            <img src="cris.jpg" alt="Guerreira lendária pronta para batalha" class="warrior-image">
-            
-            <div class="image-overlay">
-                <p class="image-quote">
-                    "Grandes aventuras não são escritas por aqueles que temem o desconhecido, mas por aqueles que ousam desbravá-lo."
-                </p>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Disclaimer -->
-    <div class="disclaimer-container">
+        <!-- Disclaimer Centralizado -->
         <div class="disclaimer">
-            <h2><i class="fas fa-shield-alt"></i> AVISO LEGAL IMPORTANTE</h2>
-            
-            <div class="disclaimer-text">
-                <p>Este site <strong>NÃO É OFICIAL</strong> e não possui nenhuma afiliação com a <strong>Steve Jackson Games</strong> ou com a marca <strong>GURPS (Generic Universal RolePlaying System)</strong>.</p>
-                
-                <p style="margin-top: 20px;">Trata-se de um projeto desenvolvido por entusiastas do sistema GURPS, com o objetivo de fornecer ferramentas complementares para jogadores e mestres. Todo o conteúdo oficial do GURPS é propriedade intelectual da Steve Jackson Games e deve ser adquirido através dos canais oficiais.</p>
-                
-                <p style="margin-top: 20px; font-style: italic;">Apoiamos os criadores originais e incentivamos a compra dos materiais oficiais para uma experiência completa do sistema.</p>
-            </div>
+            <h2><i class="fas fa-exclamation-triangle"></i> AVISO IMPORTANTE</h2>
+            <p>Este <span class="highlight">NÃO É UM SITE OFICIAL</span> do <strong>GURPS (Generic Universal RolePlaying System)</strong> nem está associado à <strong>Steve Jackson Games</strong>.</p>
+            <p>Este projeto é uma ferramenta independente criada por fãs para auxiliar jogadores e mestres do sistema GURPS.</p>
+            <p>Todo o conteúdo oficial do GURPS é propriedade da Steve Jackson Games e deve ser adquirido através dos canais oficiais.</p>
         </div>
-    </div>
-    
-    <!-- Features Épicas -->
-    <section class="features-section">
-        <h2 class="section-title">Armas da Sua Jornada</h2>
         
-        <div class="features-grid">
-            <div class="feature-card">
+        <!-- O que oferecemos - Centralizado -->
+        <h2>O que oferecemos</h2>
+        
+        <div class="features">
+            <div class="feature">
                 <div class="feature-icon">
-                    <i class="fas fa-user-shield"></i>
+                    <i class="fas fa-user"></i>
                 </div>
-                <h3>Criação de Heróis</h3>
-                <p>Da ideia à ficha completa: crie personagens únicos com nosso sistema guiado passo a passo. Cálculo automático de pontos, vantagens e desvantagens.</p>
+                <h3>Criador de Personagens</h3>
+                <p>Crie fichas de personagem com cálculo automático de pontos e atributos.</p>
             </div>
             
-            <div class="feature-card">
+            <div class="feature">
                 <div class="feature-icon">
-                    <i class="fas fa-crosshairs"></i>
+                    <i class="fas fa-fist-raised"></i>
                 </div>
-                <h3>Sistema de Combate</h3>
-                <p>Simulações realistas de batalhas com cálculo automático de ataques, defesas, danos e efeitos especiais. Foque na estratégia, não na matemática.</p>
+                <h3>Calculadora de Combate</h3>
+                <p>Calcule ataques, defesas e danos seguindo as regras do GURPS.</p>
             </div>
             
-            <div class="feature-card">
+            <div class="feature">
                 <div class="feature-icon">
                     <i class="fas fa-dungeon"></i>
                 </div>
-                <h3>Mundo dos Mestres</h3>
-                <p>Ferramentas completas para mestres: gerador de NPCs, construtor de dungeons, criador de tesouros e organizador de campanhas.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-scroll"></i>
-                </div>
-                <h3>Biblioteca Épica</h3>
-                <p>Acesso rápido a regras, referências e tabelas. Busca inteligente por palavras-chave e filtros por livro de referência.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-users-cog"></i>
-                </div>
-                <h3>Campanha Colaborativa</h3>
-                <p>Compartilhe sua campanha com jogadores, atualize fichas em tempo real e mantenha o histórico completo de todas as sessões.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-mobile-alt"></i>
-                </div>
-                <h3>Multiplataforma</h3>
-                <p>Acesse suas campanhas de qualquer dispositivo. Modo offline disponível para sessões sem internet. Sincronização automática.</p>
+                <h3>Gerador de Aventuras</h3>
+                <p>Crie NPCs, encontros e tesouros para suas campanhas.</p>
             </div>
         </div>
-    </section>
-    
-    <!-- CTA Épico -->
-    <section class="cta-section">
-        <h2 class="cta-title">Sua Lenda Aguarda</h2>
         
-        <p class="cta-text">
-            Junte-se a mais de 50.000 aventureiros que já transformaram suas sessões de GURPS com nossas ferramentas. De iniciantes a veteranos, todos encontram recursos para elevar suas histórias a novos patamares.
-        </p>
-        
-        <button class="btn btn-cta">
-            <span class="fire-effect"></span>
-            <i class="fas fa-crown"></i> Tornar-se Lendário
-        </button>
-    </section>
+        <!-- CTA Centralizado -->
+        <div class="cta">
+            <h2>Pronto para começar?</h2>
+            <p>Cadastre-se gratuitamente e tenha acesso a todas as ferramentas para melhorar suas sessões de GURPS.</p>
+            <button class="btn btn-signup btn-cta">
+                <i class="fas fa-play-circle"></i> Começar Agora
+            </button>
+        </div>
+    </div>
     
-    <!-- Footer -->
+    <!-- Footer Centralizado -->
     <footer>
         <div class="footer-content">
-            <div class="footer-brand">
-                <h3>GURPS REALM</h3>
-                <p>Ferramentas épicas para aventuras lendárias.</p>
-                <p style="margin-top: 15px; color: #B89B6A; font-size: 0.9rem;">
-                    Projeto independente de fãs para fãs.
-                </p>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Ferramentas</h4>
-                <ul>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Criador de Personagens</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Calculadora de Combate</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Gerador de NPCs</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Organizador de Campanha</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Recursos</h4>
-                <ul>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Tutoriais</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Templates</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Fórum da Comunidade</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Blog de Dicas</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Legal</h4>
-                <ul>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Aviso Legal</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Termos de Uso</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Política de Privacidade</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> DMCA</a></li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="copyright">
-            <p>GURPS® é uma marca registrada da Steve Jackson Games. Este projeto é independente e não tem afiliação com a Steve Jackson Games.</p>
-            <p style="margin-top: 15px;">© 2023 GURPS Realm. Desenvolvido com paixão pela comunidade de RPG.</p>
+            <p>GURPS Tools - Ferramenta não oficial para o sistema GURPS</p>
+            <p class="copyright">
+                GURPS é uma marca registrada da Steve Jackson Games. Este projeto não tem afiliação com a Steve Jackson Games.
+                <br>© 2023 GURPS Tools. Todos os direitos reservados.
+            </p>
         </div>
     </footer>
     
     <script>
-        // Efeitos interativos
-        document.querySelectorAll('.btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                // Efeito de clique
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 200);
-                
-                // Ações específicas
-                if (this.classList.contains('btn-login')) {
-                    alert('Redirecionando para a página de login...\n(Em um site real, isso levaria para /login)');
-                } else if (this.classList.contains('btn-signup')) {
-                    alert('Redirecionando para a página de cadastro...\n(Em um site real, isso levaria para /cadastro)');
-                }
+        // Interatividade simples para os botões
+        document.querySelectorAll('.btn-login').forEach(button => {
+            button.addEventListener('click', function() {
+                alert('Página de login - Em desenvolvimento');
             });
         });
         
-        // Efeito de parallax na imagem da guerreira
-        window.addEventListener('scroll', function() {
-            const scrolled = window.pageYOffset;
-            const heroImage = document.querySelector('.hero-image-container');
-            
-            if (heroImage) {
-                heroImage.style.transform = `perspective(1000px) rotateY(-5deg) translateY(${scrolled * 0.05}px)`;
-            }
-        });
-        
-        // Animação de entrada dos cards
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
+        document.querySelectorAll('.btn-signup').forEach(button => {
+            button.addEventListener('click', function() {
+                alert('Página de cadastro - Em desenvolvimento');
             });
-        }, observerOptions);
-        
-        // Aplicar animação aos cards
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(card);
         });
-        
-        // Efeito de digitação no título (opcional)
-        const heroTitle = document.querySelector('.hero-title');
-        const originalText = heroTitle.textContent;
-        
-        // Se quiser efeito de digitação, descomente abaixo:
-        /*
-        heroTitle.textContent = '';
-        let i = 0;
-        const typeWriter = () => {
-            if (i < originalText.length) {
-                heroTitle.textContent += originalText.charAt(i);
-                i++;
-                setTimeout(typeWriter, 50);
-            }
-        };
-        setTimeout(typeWriter, 1000);
-        */
     </script>
 </body>
 </html>
