@@ -246,6 +246,46 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Notificações flutuantes */
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+.notificacao-flutuante {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    background: rgba(30, 30, 40, 0.95);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 9999;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border-left: 4px solid #ff8c00;
+}
+
+.notificacao-flutuante.success {
+    border-left-color: #27ae60;
+}
+
+.notificacao-flutuante.error {
+    border-left-color: #e74c3c;
+}
+
+.notificacao-flutuante i {
+    font-size: 1.2rem;
+}
     </style>
 </head>
 <body>
@@ -3447,484 +3487,371 @@
 <!-- NO criar-personagens.html, substitua TODO o script por este: -->
 
 <script>
-    // ============================================
-    // CONFIGURAÇÃO SUPABASE
-    // ============================================
-    const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
-    
-    let supabase = null;
-    let personagemId = null;
-    let usuarioLogadoId = null;
+// ============================================
+// SISTEMA DE SALVAMENTO SIMPLES PARA SITE
+// ============================================
 
-    // ============================================
-    // INICIALIZAÇÃO DO SISTEMA
-    // ============================================
-    async function inicializarSistema() {
-        try {
-            console.log('🚀 Iniciando sistema...');
-            
-            // 1. Configurar Supabase
-            if (window.supabase && window.supabase.createClient) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log('✅ Supabase configurado');
-            } else {
-                console.error('❌ Supabase não disponível');
-                return;
-            }
-            
-            // 2. Verificar login
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error) throw error;
-            
-            if (!session) {
-                alert('⚠️ Faça login primeiro!');
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            usuarioLogadoId = session.user.id;
-            console.log('✅ Usuário logado:', usuarioLogadoId);
-            
-            // 3. Configurar navegação de abas
-            configurarNavegacaoAbas();
-            
-            // 4. Verificar se é edição
-            const urlParams = new URLSearchParams(window.location.search);
-            personagemId = urlParams.get('id');
-            
-            if (personagemId) {
-                console.log('📝 Modo edição - ID:', personagemId);
-                document.title = 'Editar Personagem';
-                await carregarPersonagemExistente(personagemId);
-            } else {
-                console.log('🆕 Modo criação');
-                document.title = 'Criar Personagem';
-            }
-            
-            // 5. Configurar botões
-            configurarBotoes();
-            
-            console.log('✅ Sistema inicializado com sucesso!');
-            
-        } catch (error) {
-            console.error('❌ Erro na inicialização:', error);
-            alert('Erro: ' + error.message);
-        }
-    }
+// Configuração do Supabase
+const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
-    // ============================================
-    // FUNÇÕES DE NAVEGAÇÃO
-    // ============================================
-    function configurarNavegacaoAbas() {
-        const tabs = document.querySelectorAll('.tab-btn');
-        const contents = document.querySelectorAll('.tab-content');
-        
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Remover ativo de tudo
-                tabs.forEach(t => t.classList.remove('active'));
-                contents.forEach(c => c.classList.remove('active'));
-                
-                // Ativar tab clicada
-                tab.classList.add('active');
-                const tabId = tab.getAttribute('data-tab');
-                const content = document.getElementById(tabId);
-                if (content) content.classList.add('active');
-            });
-        });
-    }
+// Variáveis globais
+let supabase = null;
+let usuarioId = null;
 
-    function configurarBotoes() {
-        const btnSalvar = document.getElementById('btnSalvar');
-        const btnExcluir = document.getElementById('btnExcluir');
-        const btnSair = document.getElementById('btnSair');
-        
-        if (btnSalvar) {
-            btnSalvar.addEventListener('click', salvarPersonagem);
-        }
-        
-        if (btnExcluir) {
-            btnExcluir.addEventListener('click', () => {
-                if (confirm('Excluir este personagem permanentemente?')) {
-                    excluirPersonagem();
-                }
-            });
-        }
-        
-        if (btnSair) {
-            btnSair.addEventListener('click', () => {
-                if (confirm('Sair sem salvar?')) {
-                    window.location.href = 'personagens.html';
-                }
-            });
-        }
-    }
-
-    // ============================================
-    // CARREGAR PERSONAGEM EXISTENTE (EDIÇÃO)
-    // ============================================
-    async function carregarPersonagemExistente(id) {
-        try {
-            console.log('📥 Carregando personagem:', id);
-            
-            const { data, error } = await supabase
-                .from('characters')
-                .select('*')
-                .eq('id', id)
-                .eq('user_id', usuarioLogadoId)
-                .single();
-            
-            if (error) throw error;
-            if (!data) throw new Error('Personagem não encontrado');
-            
-            console.log('✅ Personagem carregado:', data.nome);
-            
-            // Preencher campos básicos
-            document.getElementById('charName').value = data.nome || '';
-            document.getElementById('racaPersonagem').value = data.raca || '';
-            document.getElementById('classePersonagem').value = data.classe || '';
-            document.getElementById('nivelPersonagem').value = data.nivel || '';
-            document.getElementById('descricaoPersonagem').value = data.descricao || '';
-            
-            // Atributos
-            document.getElementById('ST').value = data.forca || 10;
-            document.getElementById('DX').value = data.destreza || 10;
-            document.getElementById('IQ').value = data.inteligencia || 10;
-            document.getElementById('HT').value = data.saude || 10;
-            
-            console.log('✅ Campos preenchidos');
-            
-        } catch (error) {
-            console.error('❌ Erro ao carregar:', error);
-            alert('Erro ao carregar personagem: ' + error.message);
-            window.location.href = 'personagens.html';
-        }
-    }
-
-    // ============================================
-    // COLETAR DADOS DE TODAS AS ABAS (SIMPLIFICADO)
-    // ============================================
-    function coletarTodosDados() {
-        console.log('🔄 Coletando dados...');
-        
-        const dados = {
-            // Dados básicos
-            nome: document.getElementById('charName')?.value || 'Novo Personagem',
-            raca: document.getElementById('racaPersonagem')?.value || '',
-            classe: document.getElementById('classePersonagem')?.value || '',
-            nivel: document.getElementById('nivelPersonagem')?.value || '1',
-            descricao: document.getElementById('descricaoPersonagem')?.value || '',
-            
-            // Atributos principais
-            forca: parseInt(document.getElementById('ST')?.value) || 10,
-            destreza: parseInt(document.getElementById('DX')?.value) || 10,
-            inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
-            saude: parseInt(document.getElementById('HT')?.value) || 10,
-            
-            // Pontos de vida/fadiga (busca dos sistemas)
-            pontos_vida: obterNumero('PVTotal', 10),
-            pontos_fadiga: obterNumero('PFTotal', 10),
-            pv_atual: obterNumero('pvAtualDisplay', 10),
-            pv_maximo: obterNumero('pvMaxDisplay', 10),
-            pf_atual: obterNumero('pfAtualDisplay', 10),
-            pf_maximo: obterNumero('pfMaxDisplay', 10),
-            
-            // Pontos do sistema
-            pontos_totais: obterNumero('pontosTotaisDashboard', 150),
-            pontos_gastos: obterNumero('pontosGastosDashboard', 0),
-            pontos_disponiveis: obterNumero('saldoDisponivelDashboard', 150),
-            
-            // Defesas
-            esquiva: obterNumero('esquivaTotal', 8),
-            bloqueio: obterNumero('bloqueioTotal', 9),
-            aparar: obterNumero('apararTotal', 0),
-            
-            // Dano
-            dano_gdp: obterTexto('danoGDP', '1d-2'),
-            dano_geb: obterTexto('danoGEB', '1d'),
-            
-            // Características
-            aparencia: obterTextoSelect('nivelAparencia', 'Comum'),
-            riqueza: obterTextoSelect('nivelRiqueza', 'Média'),
-            altura: parseFloat(document.getElementById('altura')?.value) || 1.70,
-            peso: parseFloat(document.getElementById('peso')?.value) || 70,
-            
-            // Listas (JSON) - CORRIGIDO: retorna ARRAY, não string
-            vantagens: coletarLista('vantagens-adquiridas', '.vantagem-adquirida'),
-            desvantagens: coletarLista('desvantagens-adquiridas', '.desvantagem-adquirida'),
-            pericias: coletarLista('pericias-aprendidas', '.pericia-adquirida'),
-            magias: coletarLista('magias-aprendidas', '.magia-adquirida'),
-            equipamentos: coletarListaEquipamentos(),
-            peculiaridades: coletarPeculiaridades(),
-            
-            // Totais
-            total_vantagens: 0, // Será calculado
-            total_desvantagens: 0, // Será calculado
-            total_pericias: 0, // Será calculado
-            total_magias: 0, // Será calculado
-            
-            // Financeiro
-            dinheiro: obterDinheiro(),
-            peso_atual: obterDecimal('pesoAtual', 0),
-            peso_maximo: obterDecimal('pesoMaximo', 60),
-            
-            // Sistema
-            status: 'Ativo',
-            limite_desvantagens: -50,
-            desvantagens_atuais: 0,
-            user_id: usuarioLogadoId,
-            updated_at: new Date().toISOString()
-        };
-        
-        // Calcular totais
-        dados.total_vantagens = dados.vantagens.length;
-        dados.total_desvantagens = dados.desvantagens.length;
-        dados.total_pericias = dados.pericias.length;
-        dados.total_magias = dados.magias.length;
-        
-        console.log('✅ Dados coletados:', dados);
-        return dados;
-    }
-
-    // ============================================
-    // FUNÇÕES AUXILIARES DE COLETA
-    // ============================================
-    function obterNumero(id, padrao) {
-        const el = document.getElementById(id);
-        if (!el) return padrao;
-        const texto = el.textContent || el.value || el.innerText || padrao;
-        const num = parseInt(texto);
-        return isNaN(num) ? padrao : num;
-    }
+// ============================================
+// 1. INICIAR TUDO
+// ============================================
+async function iniciar() {
+    console.log('🔧 Iniciando sistema...');
     
-    function obterDecimal(id, padrao) {
-        const el = document.getElementById(id);
-        if (!el) return padrao;
-        const texto = el.textContent || el.value || el.innerText || padrao;
-        const num = parseFloat(texto);
-        return isNaN(num) ? padrao : num;
-    }
-    
-    function obterTexto(id, padrao) {
-        const el = document.getElementById(id);
-        return el ? (el.textContent || el.value || padrao) : padrao;
-    }
-    
-    function obterTextoSelect(id, padrao) {
-        const select = document.getElementById(id);
-        if (!select || !select.options[select.selectedIndex]) return padrao;
-        return select.options[select.selectedIndex].text.split('[')[0].trim();
-    }
-    
-    function obterDinheiro() {
-        const el = document.getElementById('dinheiroEquipamento') || 
-                   document.getElementById('dinheiro-disponivel');
-        if (!el) return 2000.00;
-        const texto = el.textContent || el.value || '$2000';
-        const limpo = texto.replace('$', '').replace(/\./g, '').replace(',', '.');
-        const num = parseFloat(limpo);
-        return isNaN(num) ? 2000.00 : num;
-    }
-    
-    function coletarLista(idContainer, seletorItem) {
-        const container = document.getElementById(idContainer);
-        const itens = [];
+    try {
+        // Criar conexão com Supabase
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        if (container) {
-            const elementos = container.querySelectorAll(seletorItem);
-            elementos.forEach(el => {
-                const nome = el.querySelector('.nome-vantagem, .nome-desvantagem, .pericia-nome, .magia-nome')?.textContent?.trim();
-                if (nome && !nome.includes('Nenhum') && !nome.includes('Nenhuma')) {
-                    itens.push({ nome: nome });
-                }
-            });
-        }
-        
-        return itens; // Retorna ARRAY, não string!
-    }
-    
-    function coletarListaEquipamentos() {
-        const container = document.getElementById('lista-equipamentos-adquiridos');
-        const equipamentos = [];
-        
-        if (container) {
-            const elementos = container.querySelectorAll('.equipamento-adquirido');
-            elementos.forEach(el => {
-                const nome = el.querySelector('.equipamento-nome')?.textContent?.trim();
-                if (nome && nome !== 'Inventário Vazio') {
-                    equipamentos.push({ 
-                        nome: nome,
-                        equipado: el.classList.contains('equipado')
-                    });
-                }
-            });
-        }
-        
-        return equipamentos;
-    }
-    
-    function coletarPeculiaridades() {
-        const container = document.getElementById('lista-peculiaridades');
-        const peculiaridades = [];
-        
-        if (container) {
-            const elementos = container.querySelectorAll('.peculiaridade-item');
-            elementos.forEach(el => {
-                const texto = el.querySelector('.peculiaridade-texto')?.textContent?.trim();
-                if (texto) {
-                    peculiaridades.push({ texto: texto });
-                }
-            });
-        }
-        
-        return peculiaridades;
-    }
-
-    // ============================================
-    // SALVAR PERSONAGEM (FUNÇÃO PRINCIPAL)
-    // ============================================
-    async function salvarPersonagem() {
-        const btnSalvar = document.getElementById('btnSalvar');
-        const textoOriginal = btnSalvar.innerHTML;
-        
-        try {
-            console.log('💾 Iniciando salvamento...');
-            
-            // 1. Mostrar loading
-            btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-            btnSalvar.disabled = true;
-            
-            // 2. Verificar autenticação
-            if (!usuarioLogadoId) {
-                throw new Error('Usuário não autenticado');
-            }
-            
-            // 3. Coletar dados
-            const dados = coletarTodosDados();
-            
-            // 4. Adicionar created_at se for novo
-            if (!personagemId) {
-                dados.created_at = new Date().toISOString();
-            }
-            
-            console.log('📤 Enviando para Supabase:', dados);
-            
-            // 5. Salvar no Supabase
-            let resultado;
-            
-            if (personagemId) {
-                // ATUALIZAR existente
-                const { data, error } = await supabase
-                    .from('characters')
-                    .update(dados)
-                    .eq('id', personagemId)
-                    .eq('user_id', usuarioLogadoId)
-                    .select();
-                
-                if (error) throw error;
-                resultado = data;
-                console.log('✅ Atualizado:', resultado);
-                
-            } else {
-                // CRIAR novo
-                const { data, error } = await supabase
-                    .from('characters')
-                    .insert([dados])
-                    .select();
-                
-                if (error) throw error;
-                resultado = data;
-                personagemId = data[0]?.id;
-                console.log('✅ Criado:', resultado);
-            }
-            
-            // 6. Sucesso!
-            alert(personagemId ? '✅ Personagem atualizado!' : '✅ Personagem criado!');
-            
-            // 7. Redirecionar após 1 segundo
-            setTimeout(() => {
-                window.location.href = 'personagens.html';
-            }, 1000);
-            
-            return resultado;
-            
-        } catch (error) {
-            console.error('❌ ERRO NO SALVAMENTO:', error);
-            
-            // Mensagem amigável
-            let mensagem = 'Erro ao salvar: ';
-            
-            if (error.message.includes('permission denied')) {
-                mensagem = '🔒 Permissão negada! Faça login novamente.';
-                window.location.href = 'login.html';
-            } else if (error.message.includes('network') || error.message.includes('fetch')) {
-                mensagem = '🌐 Problema de conexão. Verifique sua internet.';
-            } else if (error.message.includes('JSON')) {
-                mensagem = '📄 Erro nos dados. Verifique os campos.';
-            } else {
-                mensagem += error.message;
-            }
-            
-            alert(mensagem);
-            return null;
-            
-        } finally {
-            // Restaurar botão
-            btnSalvar.innerHTML = textoOriginal;
-            btnSalvar.disabled = false;
-        }
-    }
-
-    // ============================================
-    // EXCLUIR PERSONAGEM
-    // ============================================
-    async function excluirPersonagem() {
-        if (!personagemId) return;
-        
-        if (!confirm('⚠️ ATENÇÃO!\n\nExcluir este personagem PERMANENTEMENTE?\nEsta ação não pode ser desfeita!')) {
+        // Verificar se está logado
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) {
+            alert('⚠️ Faça login primeiro!');
+            window.location.href = 'login.html';
             return;
         }
         
-        try {
-            const { error } = await supabase
+        usuarioId = data.session.user.id;
+        console.log('✅ Usuário logado:', usuarioId);
+        
+        // Configurar botões
+        configurarBotoes();
+        
+        // Carregar personagem se estiver editando
+        const urlId = new URLSearchParams(window.location.search).get('id');
+        if (urlId) {
+            await carregarPersonagem(urlId);
+        }
+        
+        console.log('✅ Sistema pronto!');
+        
+    } catch (erro) {
+        console.error('❌ Erro:', erro);
+        alert('Erro: ' + erro.message);
+    }
+}
+
+// ============================================
+// 2. CONFIGURAR BOTÕES
+// ============================================
+function configurarBotoes() {
+    // Botão SALVAR
+    const btnSalvar = document.getElementById('btnSalvar');
+    if (btnSalvar) {
+        btnSalvar.onclick = salvarTudo;
+    }
+    
+    // Botão EXCLUIR
+    const btnExcluir = document.getElementById('btnExcluir');
+    if (btnExcluir) {
+        btnExcluir.onclick = excluirPersonagem;
+    }
+    
+    // Botão SAIR
+    const btnSair = document.getElementById('btnSair');
+    if (btnSair) {
+        btnSair.onclick = () => {
+            if (confirm('Sair sem salvar?')) {
+                window.location.href = 'personagens.html';
+            }
+        };
+    }
+    
+    // Configurar tabs
+    document.querySelectorAll('.tab-btn').forEach(tab => {
+        tab.onclick = () => {
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            tab.classList.add('active');
+            const tabId = tab.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        };
+    });
+}
+
+// ============================================
+// 3. COLETAR DADOS SIMPLES
+// ============================================
+function coletarDados() {
+    console.log('📦 Coletando dados...');
+    
+    // Dados básicos que todos os sites conseguem pegar
+    const dados = {
+        // Informações principais
+        nome: pegarValor('charName') || 'Novo Personagem',
+        raca: pegarValor('racaPersonagem') || '',
+        classe: pegarValor('classePersonagem') || '',
+        nivel: pegarValor('nivelPersonagem') || '',
+        descricao: pegarValor('descricaoPersonagem') || '',
+        
+        // Atributos (sempre tem)
+        forca: Number(pegarValor('ST')) || 10,
+        destreza: Number(pegarValor('DX')) || 10,
+        inteligencia: Number(pegarValor('IQ')) || 10,
+        saude: Number(pegarValor('HT')) || 10,
+        
+        // Pontos do sistema
+        pontos_totais: Number(pegarValor('pontosTotaisDashboard')) || 150,
+        pontos_gastos: Number(pegarTexto('pontosGastosDashboard')) || 0,
+        pontos_disponiveis: Number(pegarTexto('saldoDisponivelDashboard')) || 150,
+        
+        // Características
+        aparencia: pegarSelectTexto('nivelAparencia') || 'Comum',
+        riqueza: pegarSelectTexto('nivelRiqueza') || 'Média',
+        altura: Number(pegarValor('altura')) || 1.70,
+        peso: Number(pegarValor('peso')) || 70,
+        
+        // Combat (valores importantes)
+        esquiva: Number(pegarTexto('esquivaTotal')) || 8,
+        bloqueio: Number(pegarTexto('bloqueioTotal')) || 9,
+        dano_gdp: pegarTexto('danoGDP') || '1d-2',
+        dano_geb: pegarTexto('danoGEB') || '1d',
+        
+        // Sistema
+        status: 'Ativo',
+        user_id: usuarioId,
+        criado_em: new Date().toISOString(),
+        atualizado_em: new Date().toISOString()
+    };
+    
+    console.log('✅ Dados coletados');
+    return dados;
+}
+
+// ============================================
+// 4. SALVAR TUDO (FUNÇÃO PRINCIPAL)
+// ============================================
+async function salvarTudo() {
+    const botao = document.getElementById('btnSalvar');
+    if (!botao) return;
+    
+    // Salvar estado do botão
+    const textoOriginal = botao.innerHTML;
+    botao.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+    botao.disabled = true;
+    
+    try {
+        // Coletar dados
+        const dados = coletarDados();
+        
+        // Verificar se é edição
+        const urlId = new URLSearchParams(window.location.search).get('id');
+        
+        let resultado;
+        
+        if (urlId) {
+            // Atualizar existente
+            const { data, error } = await supabase
                 .from('characters')
-                .delete()
-                .eq('id', personagemId)
-                .eq('user_id', usuarioLogadoId);
+                .update(dados)
+                .eq('id', urlId)
+                .eq('user_id', usuarioId)
+                .select();
             
             if (error) throw error;
+            resultado = data;
+            console.log('✅ Atualizado');
             
-            alert('🗑️ Personagem excluído!');
-            setTimeout(() => {
-                window.location.href = 'personagens.html';
-            }, 1000);
+        } else {
+            // Criar novo
+            const { data, error } = await supabase
+                .from('characters')
+                .insert([dados])
+                .select();
             
-        } catch (error) {
-            console.error('❌ Erro ao excluir:', error);
-            alert('Erro ao excluir: ' + error.message);
+            if (error) throw error;
+            resultado = data;
+            
+            // Atualizar URL com o novo ID
+            if (resultado && resultado[0]) {
+                setTimeout(() => {
+                    window.history.replaceState({}, '', `?id=${resultado[0].id}`);
+                }, 500);
+            }
+            
+            console.log('✅ Criado');
         }
+        
+        // Mostrar mensagem de sucesso
+        mostrarMensagem('✅ Personagem salvo!', 'success');
+        
+        // Atualizar tela após salvar
+        setTimeout(atualizarTela, 1000);
+        
+        return resultado;
+        
+    } catch (erro) {
+        console.error('❌ Erro ao salvar:', erro);
+        mostrarMensagem('Erro: ' + erro.message, 'error');
+        return null;
+        
+    } finally {
+        // Restaurar botão
+        botao.innerHTML = textoOriginal;
+        botao.disabled = false;
     }
+}
 
-    // ============================================
-    // INICIALIZAR QUANDO A PÁGINA CARREGAR
-    // ============================================
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 Página carregada, iniciando sistema...');
-        setTimeout(inicializarSistema, 500);
-    });
+// ============================================
+// 5. FUNÇÕES AUXILIARES SIMPLES
+// ============================================
+function pegarValor(id) {
+    const elemento = document.getElementById(id);
+    return elemento ? elemento.value : '';
+}
 
-    // ============================================
-    // EXPORTAR FUNÇÕES PARA OUTROS SCRIPTS
-    // ============================================
-    window.salvarPersonagem = salvarPersonagem;
-    window.coletarTodosDados = coletarTodosDados;
-    window.atualizarResumoNome = function(nome) {
-        const el = document.getElementById('resumoNome');
-        if (el) el.textContent = nome || 'Novo Personagem';
-    };
+function pegarTexto(id) {
+    const elemento = document.getElementById(id);
+    if (!elemento) return '';
+    
+    // Tenta pegar textContent, depois value
+    return elemento.textContent || elemento.value || elemento.innerText || '';
+}
 
-    console.log('🎯 Script de salvamento carregado e pronto!');
+function pegarSelectTexto(id) {
+    const select = document.getElementById(id);
+    if (!select) return '';
+    
+    const opcao = select.options[select.selectedIndex];
+    return opcao ? opcao.text.split('[')[0].trim() : '';
+}
+
+function mostrarMensagem(texto, tipo) {
+    // Criar mensagem simples
+    const div = document.createElement('div');
+    div.textContent = texto;
+    div.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${tipo === 'success' ? '#2ecc71' : '#e74c3c'};
+        color: white;
+        border-radius: 5px;
+        z-index: 9999;
+        animation: aparecer 0.3s;
+    `;
+    
+    document.body.appendChild(div);
+    
+    // Remover após 3 segundos
+    setTimeout(() => {
+        div.style.animation = 'desaparecer 0.3s';
+        setTimeout(() => div.remove(), 300);
+    }, 3000);
+}
+
+function atualizarTela() {
+    // Atualizar nome no topo
+    const nome = pegarValor('charName') || 'Novo Personagem';
+    document.title = nome + ' - RPG System';
+    
+    // Atualizar resumo se existir
+    const resumoNome = document.getElementById('resumoNome');
+    if (resumoNome) {
+        resumoNome.textContent = nome.toUpperCase();
+    }
+}
+
+// ============================================
+// 6. CARREGAR PERSONAGEM
+// ============================================
+async function carregarPersonagem(id) {
+    try {
+        const { data, error } = await supabase
+            .from('characters')
+            .select('*')
+            .eq('id', id)
+            .eq('user_id', usuarioId)
+            .single();
+        
+        if (error) throw error;
+        if (!data) throw new Error('Personagem não encontrado');
+        
+        console.log('📥 Carregando:', data.nome);
+        
+        // Preencher campos básicos
+        document.getElementById('charName').value = data.nome || '';
+        document.getElementById('racaPersonagem').value = data.raca || '';
+        document.getElementById('classePersonagem').value = data.classe || '';
+        document.getElementById('nivelPersonagem').value = data.nivel || '';
+        document.getElementById('descricaoPersonagem').value = data.descricao || '';
+        
+        // Atributos
+        document.getElementById('ST').value = data.forca || 10;
+        document.getElementById('DX').value = data.destreza || 10;
+        document.getElementById('IQ').value = data.inteligencia || 10;
+        document.getElementById('HT').value = data.saude || 10;
+        
+        // Atualizar título
+        document.title = data.nome + ' - Editar Personagem';
+        
+    } catch (erro) {
+        console.error('❌ Erro ao carregar:', erro);
+        mostrarMensagem('Erro ao carregar personagem', 'error');
+    }
+}
+
+// ============================================
+// 7. EXCLUIR PERSONAGEM
+// ============================================
+async function excluirPersonagem() {
+    const urlId = new URLSearchParams(window.location.search).get('id');
+    if (!urlId) return;
+    
+    if (!confirm('Tem certeza que quer excluir este personagem?')) {
+        return;
+    }
+    
+    try {
+        const { error } = await supabase
+            .from('characters')
+            .delete()
+            .eq('id', urlId)
+            .eq('user_id', usuarioId);
+        
+        if (error) throw error;
+        
+        mostrarMensagem('🗑️ Personagem excluído!', 'success');
+        
+        setTimeout(() => {
+            window.location.href = 'personagens.html';
+        }, 1500);
+        
+    } catch (erro) {
+        console.error('❌ Erro ao excluir:', erro);
+        mostrarMensagem('Erro ao excluir: ' + erro.message, 'error');
+    }
+}
+
+// ============================================
+// 8. INICIAR QUANDO A PÁGINA CARREGAR
+// ============================================
+document.addEventListener('DOMContentLoaded', iniciar);
+
+// Adicionar estilos CSS para animações
+const estilo = document.createElement('style');
+estilo.textContent = `
+    @keyframes aparecer {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes desaparecer {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(estilo);
+
+console.log('🚀 Sistema carregado e pronto!');
 </script>
 </body>
 </html>  
