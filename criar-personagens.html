@@ -3440,55 +3440,38 @@
 
 <!-- NO criar-personagens.html, substitua TODO o script por este: -->
 <script>
-// ============================================
-// CONFIGURAÇÃO SUPABASE
-// ============================================
+// SUPABASE REAL
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let personagemId = null;
 
-// ============================================
 // COLETOR DE DADOS
-// ============================================
 class ColetorPersonagem {
     constructor() {
         this.dados = {};
     }
-    
-    // FUNÇÃO QUE RESOLVE A DESGRAÇA TODA
-    limitarCampo(texto, limite = 50) {
+
+    // FUNÇÃO QUE RESOLVE TUDO
+    limitar(texto, limite = 50) {
         if (!texto || texto === 'undefined' || texto === 'null') return '';
         const str = String(texto).trim();
         return str.length > limite ? str.substring(0, limite) : str;
     }
-    
+
     getValor(id, padrao = '') {
         const el = document.getElementById(id);
         if (!el) return padrao;
         return el.value || el.textContent || el.innerText || padrao;
     }
-    
+
     getNumero(id, padrao = 0) {
         const valor = this.getValor(id, padrao.toString());
         const num = parseInt(valor) || parseFloat(valor) || padrao;
         return isNaN(num) ? padrao : num;
     }
-    
-    getDecimal(id, padrao = 0) {
-        const valor = this.getValor(id, padrao.toString());
-        const num = parseFloat(valor) || padrao;
-        return isNaN(num) ? padrao : num;
-    }
-    
-    extrairPontos(texto) {
-        if (!texto) return 0;
-        const match = texto.match(/[-+]?\d+/);
-        return match ? parseInt(match[0]) : 0;
-    }
-    
-    // COLETAR DADOS DAS ABAS
+
     coletarDashboard() {
         return {
             nome: this.getValor('charName', 'Novo Personagem'),
@@ -3496,309 +3479,182 @@ class ColetorPersonagem {
             classe: this.getValor('classePersonagem', ''),
             nivel: this.getValor('nivelPersonagem', ''),
             descricao: this.getValor('descricaoPersonagem', ''),
-            
             pontos_totais: this.getNumero('pontosTotaisDashboard', 150),
             pontos_gastos: this.getNumero('pontosGastosDashboard', 0),
-            pontos_disponiveis: this.getNumero('saldoDisponivelDashboard', 150),
-            limite_desvantagens: this.getNumero('limiteDesvantagens', -50),
-            desvantagens_atuais: this.getNumero('desvantagensAtuais', 0),
-            
-            foto_url: document.getElementById('fotoPreview')?.src || ''
+            pontos_disponiveis: this.getNumero('saldoDisponivelDashboard', 150)
         };
     }
-    
+
     coletarAtributos() {
         return {
             forca: this.getNumero('ST', 10),
             destreza: this.getNumero('DX', 10),
             inteligencia: this.getNumero('IQ', 10),
-            saude: this.getNumero('HT', 10),
-            
-            pv_total: this.getNumero('PVTotal', 10),
-            pf_total: this.getNumero('PFTotal', 10),
-            vontade: this.getNumero('VontadeTotal', 10),
-            percepcao: this.getNumero('PercepcaoTotal', 10),
-            deslocamento: this.getDecimal('DeslocamentoTotal', 5.00)
+            saude: this.getNumero('HT', 10)
         };
     }
-    
+
     coletarCaracteristicas() {
         return {
             aparencia: {
-                nivel: this.getValor('nivelAparencia', '0'),
-                descricao: this.getValor('displayAparencia', 'Comum'),
-                pontos: this.extrairPontos(this.getValor('pontosAparencia', '0 pts'))
+                descricao: this.getValor('displayAparencia', 'Comum')
             },
-            
             riqueza: {
-                nivel: this.getValor('nivelRiqueza', '0'),
                 descricao: this.getValor('displayRiqueza', 'Média'),
-                pontos: this.extrairPontos(this.getValor('pontosRiqueza', '0 pts')),
                 renda: this.getValor('rendaMensal', '$1.000')
             },
-            
-            altura: this.getDecimal('altura', 1.70),
-            peso: this.getDecimal('peso', 70),
-            status_fisico: this.getValor('statusFisico', 'Normal')
+            altura: this.getNumero('altura', 1.70),
+            peso: this.getNumero('peso', 70)
         };
     }
-    
+
     coletarCombate() {
         return {
             pv_atual: this.getNumero('pvAtualDisplay', 10),
             pv_maximo: this.getNumero('pvMaxDisplay', 10),
             pf_atual: this.getNumero('pfAtualDisplay', 10),
-            pf_maximo: this.getNumero('pfMaxDisplay', 10),
-            esquiva: this.getNumero('esquivaTotal', 10),
-            bloqueio: this.getNumero('bloqueioTotal', 11),
-            aparar: this.getNumero('apararTotal', 3),
-            rd_total: this.getNumero('rdTotal', 0)
+            pf_maximo: this.getNumero('pfMaxDisplay', 10)
         };
     }
-    
-    // COLETAR DADOS DOS SISTEMAS JS
-    coletarDadosVantagens() {
+
+    coletarVantagens() {
         try {
-            if (typeof window.exportarDadosVantagens === 'function') {
-                const dados = window.exportarDadosVantagens();
-                return {
-                    vantagens: dados.vantagens || [],
-                    peculiaridades: dados.peculiaridades || [],
-                    total_vantagens: dados.totais?.vantagens || 0,
-                    total_peculiaridades: dados.totais?.peculiaridades || 0
-                };
+            if (window.exportarDadosVantagens) {
+                return window.exportarDadosVantagens();
             }
-        } catch (error) {}
-        return { vantagens: [], peculiaridades: [], total_vantagens: 0, total_peculiaridades: 0 };
+        } catch (e) {}
+        return { vantagens: [], peculiaridades: [], totais: { vantagens: 0, peculiaridades: 0 } };
     }
-    
-    coletarDadosDesvantagens() {
+
+    coletarDesvantagens() {
         try {
-            if (typeof window.exportarDadosDesvantagens === 'function') {
-                const dados = window.exportarDadosDesvantagens();
-                return {
-                    desvantagens: dados.desvantagens || [],
-                    total_desvantagens: dados.totais?.desvantagens || 0
-                };
+            if (window.exportarDadosDesvantagens) {
+                return window.exportarDadosDesvantagens();
             }
-        } catch (error) {}
-        return { desvantagens: [], total_desvantagens: 0 };
+        } catch (e) {}
+        return { desvantagens: [], totais: { desvantagens: 0 } };
     }
-    
-    coletarDadosPericias() {
+
+    coletarPericias() {
         try {
-            if (typeof window.exportarDadosPericias === 'function') {
-                const dados = window.exportarDadosPericias();
-                return {
-                    pericias: dados.pericias || [],
-                    tecnicas: dados.tecnicas || [],
-                    total_pericias: dados.totais?.pericias || 0,
-                    total_tecnicas: dados.totais?.tecnicas || 0
-                };
+            if (window.exportarDadosPericias) {
+                return window.exportarDadosPericias();
             }
-        } catch (error) {}
-        return { pericias: [], tecnicas: [], total_pericias: 0, total_tecnicas: 0 };
+        } catch (e) {}
+        return { pericias: [], tecnicas: [], totais: { pericias: 0, tecnicas: 0 } };
     }
-    
-    coletarDadosMagias() {
+
+    coletarMagias() {
         try {
-            if (typeof window.exportarDadosMagias === 'function') {
-                const dados = window.exportarDadosMagias();
-                return {
-                    magias: dados.magias || [],
-                    total_magias: dados.totais?.magias || 0,
-                    mana_atual: dados.totais?.mana || 10
-                };
+            if (window.exportarDadosMagias) {
+                return window.exportarDadosMagias();
             }
-        } catch (error) {}
-        return { magias: [], total_magias: 0, mana_atual: 10 };
+        } catch (e) {}
+        return { magias: [], totais: { magias: 0 } };
     }
-    
-    coletarDadosEquipamento() {
+
+    coletarEquipamento() {
         try {
-            if (typeof window.exportarDadosEquipamento === 'function') {
-                const dados = window.exportarDadosEquipamento();
-                return {
-                    inventario: dados.inventario || [],
-                    deposito: dados.deposito || [],
-                    equipamentos: dados.equipamentos || [],
-                    dinheiro: dados.totais?.dinheiro || 2000,
-                    peso_atual: dados.totais?.peso || 0
-                };
+            if (window.exportarDadosEquipamento) {
+                return window.exportarDadosEquipamento();
             }
-        } catch (error) {}
-        return { inventario: [], deposito: [], equipamentos: [], dinheiro: 2000, peso_atual: 0 };
+        } catch (e) {}
+        return { inventario: [], deposito: [], equipamentos: [], totais: { dinheiro: 2000, peso: 0 } };
     }
-    
-    coletarDadosCombate() {
-        try {
-            if (typeof window.exportarDadosCombate === 'function') {
-                return window.exportarDadosCombate();
-            }
-        } catch (error) {}
-        return {
-            pv: { atual: 10, maximo: 10, modificador: 0, estado: 'Saudável' },
-            pf: { atual: 10, maximo: 10, modificador: 0, estado: 'Normal' },
-            defesas: { esquiva: 10, bloqueio: 11, aparar: 3 },
-            rd: { total: 0, partes: {} },
-            condicoes: []
-        };
-    }
-    
-    coletarRelacionamentos() {
-        try {
-            if (typeof window.exportarDadosRelacionamentos === 'function') {
-                return window.exportarDadosRelacionamentos();
-            }
-        } catch (error) {}
-        return { inimigos: [], aliados: [], dependentes: [] };
-    }
-    
-    // COLETAR TUDO
+
     coletarTudo() {
-        try {
-            return {
-                dashboard: this.coletarDashboard(),
-                atributos: this.coletarAtributos(),
-                caracteristicas: this.coletarCaracteristicas(),
-                combate: this.coletarCombate(),
-                
-                sistemas: {
-                    vantagens: this.coletarDadosVantagens(),
-                    desvantagens: this.coletarDadosDesvantagens(),
-                    pericias: this.coletarDadosPericias(),
-                    magias: this.coletarDadosMagias(),
-                    equipamento: this.coletarDadosEquipamento(),
-                    combate_detalhado: this.coletarDadosCombate(),
-                    relacionamentos: this.coletarRelacionamentos()
-                }
-            };
-        } catch (error) {
-            return { erro: error.message };
-        }
+        return {
+            dashboard: this.coletarDashboard(),
+            atributos: this.coletarAtributos(),
+            caracteristicas: this.coletarCaracteristicas(),
+            combate: this.coletarCombate(),
+            vantagens: this.coletarVantagens(),
+            desvantagens: this.coletarDesvantagens(),
+            pericias: this.coletarPericias(),
+            magias: this.coletarMagias(),
+            equipamento: this.coletarEquipamento()
+        };
     }
-    
-    // ============================================
-    // SALVAR NO SUPABASE - VERSÃO CORRIGIDA
-    // ============================================
+
+    // SALVAR NO SUPABASE - CORRETO
     async salvarTudoNoSupabase(session, personagemId = null) {
         try {
-            const dadosCompletos = this.coletarTudo();
-            
-            // DADOS COM LIMITES - RESOLVE TUDO
+            const dados = this.coletarTudo();
+
             const dadosParaSalvar = {
                 user_id: session.user.id,
-                nome: this.limitarCampo(dadosCompletos.dashboard.nome, 100),
-                raca: this.limitarCampo(dadosCompletos.dashboard.raca, 50),
-                classe: this.limitarCampo(dadosCompletos.dashboard.classe, 50),
-                nivel: this.limitarCampo(dadosCompletos.dashboard.nivel, 50),
-                descricao: dadosCompletos.dashboard.descricao || '',
                 
-                pontos_totais: dadosCompletos.dashboard.pontos_totais || 150,
-                pontos_gastos: dadosCompletos.dashboard.pontos_gastos || 0,
-                pontos_disponiveis: dadosCompletos.dashboard.pontos_disponiveis || 150,
-                limite_desvantagens: dadosCompletos.dashboard.limite_desvantagens || -50,
-                desvantagens_atuais: dadosCompletos.dashboard.desvantagens_atuais || 0,
+                // DASHBOARD
+                nome: this.limitar(dados.dashboard.nome, 100),
+                raca: this.limitar(dados.dashboard.raca, 50),
+                classe: this.limitar(dados.dashboard.classe, 50),
+                nivel: this.limitar(dados.dashboard.nivel, 50),
+                descricao: dados.dashboard.descricao || '',
                 
-                forca: dadosCompletos.atributos.forca || 10,
-                destreza: dadosCompletos.atributos.destreza || 10,
-                inteligencia: dadosCompletos.atributos.inteligencia || 10,
-                saude: dadosCompletos.atributos.saude || 10,
+                // PONTOS
+                pontos_totais: dados.dashboard.pontos_totais || 150,
+                pontos_gastos: dados.dashboard.pontos_gastos || 0,
+                pontos_disponiveis: dados.dashboard.pontos_disponiveis || 150,
                 
-                pontos_vida: dadosCompletos.atributos.pv_total || 10,
-                pontos_fadiga: dadosCompletos.atributos.pf_total || 10,
-                vontade: dadosCompletos.atributos.vontade || 10,
-                percepcao: dadosCompletos.atributos.percepcao || 10,
-                deslocamento: dadosCompletos.atributos.deslocamento || 5.00,
+                // ATRIBUTOS
+                forca: dados.atributos.forca || 10,
+                destreza: dados.atributos.destreza || 10,
+                inteligencia: dados.atributos.inteligencia || 10,
+                saude: dados.atributos.saude || 10,
                 
-                aparencia: this.limitarCampo(dadosCompletos.caracteristicas.aparencia?.descricao, 50) || 'Comum',
-                custo_aparencia: dadosCompletos.caracteristicas.aparencia?.pontos || 0,
-                riqueza: this.limitarCampo(dadosCompletos.caracteristicas.riqueza?.descricao, 50) || 'Média',
-                custo_riqueza: dadosCompletos.caracteristicas.riqueza?.pontos || 0,
-                renda_mensal: this.limitarCampo(dadosCompletos.caracteristicas.riqueza?.renda, 50) || '$1.000',
-                altura: dadosCompletos.caracteristicas.altura || 1.70,
-                peso: dadosCompletos.caracteristicas.peso || 70,
+                // CARACTERÍSTICAS
+                aparencia: this.limitar(dados.caracteristicas.aparencia?.descricao, 50) || 'Comum',
+                riqueza: this.limitar(dados.caracteristicas.riqueza?.descricao, 50) || 'Média',
+                renda_mensal: this.limitar(dados.caracteristicas.riqueza?.renda, 50) || '$1.000',
+                altura: dados.caracteristicas.altura || 1.70,
+                peso: dados.caracteristicas.peso || 70,
                 
-                pv_atual: dadosCompletos.combate.pv_atual || 10,
-                pv_maximo: dadosCompletos.combate.pv_maximo || 10,
-                pf_atual: dadosCompletos.combate.pf_atual || 10,
-                pf_maximo: dadosCompletos.combate.pf_maximo || 10,
-                esquiva: dadosCompletos.combate.esquiva || 10,
-                bloqueio: dadosCompletos.combate.bloqueio || 11,
-                aparar: dadosCompletos.combate.aparar || 3,
-                rd_total: dadosCompletos.combate.rd_total || 0,
+                // COMBATE
+                pv_atual: dados.combate.pv_atual || 10,
+                pv_maximo: dados.combate.pv_maximo || 10,
+                pf_atual: dados.combate.pf_atual || 10,
+                pf_maximo: dados.combate.pf_maximo || 10,
                 
+                // VANTAGENS
+                vantagens: dados.vantagens.vantagens || [],
+                total_vantagens: dados.vantagens.totais?.vantagens || 0,
+                peculiaridades: dados.vantagens.peculiaridades || [],
+                total_peculiaridades: dados.vantagens.totais?.peculiaridades || 0,
+                
+                // DESVANTAGENS
+                desvantagens: dados.desvantagens.desvantagens || [],
+                total_desvantagens: dados.desvantagens.totais?.desvantagens || 0,
+                
+                // PERÍCIAS
+                pericias: dados.pericias.pericias || [],
+                total_pericias: dados.pericias.totais?.pericias || 0,
+                tecnicas: dados.pericias.tecnicas || [],
+                total_tecnicas: dados.pericias.totais?.tecnicas || 0,
+                
+                // MAGIAS
+                magias: dados.magias.magias || [],
+                total_magias: dados.magias.totais?.magias || 0,
+                mana_atual: 10,
+                mana_base: 10,
+                
+                // EQUIPAMENTO
+                equipamentos: dados.equipamento.equipamentos || [],
+                inventario: dados.equipamento.inventario || [],
+                deposito: dados.equipamento.deposito || [],
+                dinheiro: dados.equipamento.totais?.dinheiro || 2000,
+                peso_atual: dados.equipamento.totais?.peso || 0,
+                peso_maximo: 60,
+                
+                // PADRÕES
+                pv_estado: 'Saudável',
+                pf_estado: 'Normal',
+                nivel_carga: 'LEVE',
+                penalidades_carga: '',
+                escudo_nome: '',
+                status: 'Ativo',
                 updated_at: new Date().toISOString()
             };
-            
-            // DADOS ADICIONAIS (SE EXISTIREM)
-            try {
-                // Vantagens
-                const vantagensData = dadosCompletos.sistemas.vantagens;
-                if (vantagensData) {
-                    dadosParaSalvar.vantagens = vantagensData.vantagens || [];
-                    dadosParaSalvar.total_vantagens = vantagensData.total_vantagens || 0;
-                    dadosParaSalvar.peculiaridades = vantagensData.peculiaridades || [];
-                    dadosParaSalvar.total_peculiaridades = vantagensData.total_peculiaridades || 0;
-                }
-                
-                // Desvantagens
-                const desvantagensData = dadosCompletos.sistemas.desvantagens;
-                if (desvantagensData) {
-                    dadosParaSalvar.desvantagens = desvantagensData.desvantagens || [];
-                    dadosParaSalvar.total_desvantagens = desvantagensData.total_desvantagens || 0;
-                }
-                
-                // Perícias
-                const periciasData = dadosCompletos.sistemas.pericias;
-                if (periciasData) {
-                    dadosParaSalvar.pericias = periciasData.pericias || [];
-                    dadosParaSalvar.total_pericias = periciasData.total_pericias || 0;
-                    dadosParaSalvar.tecnicas = periciasData.tecnicas || [];
-                    dadosParaSalvar.total_tecnicas = periciasData.total_tecnicas || 0;
-                }
-                
-                // Magias
-                const magiasData = dadosCompletos.sistemas.magias;
-                if (magiasData) {
-                    dadosParaSalvar.magias = magiasData.magias || [];
-                    dadosParaSalvar.total_magias = magiasData.total_magias || 0;
-                    dadosParaSalvar.mana_atual = magiasData.mana_atual || 10;
-                    dadosParaSalvar.mana_base = 10;
-                }
-                
-                // Equipamento
-                const equipamentoData = dadosCompletos.sistemas.equipamento;
-                if (equipamentoData) {
-                    dadosParaSalvar.equipamentos = equipamentoData.equipamentos || [];
-                    dadosParaSalvar.inventario = equipamentoData.inventario || [];
-                    dadosParaSalvar.deposito = equipamentoData.deposito || [];
-                    dadosParaSalvar.dinheiro = equipamentoData.dinheiro || 2000;
-                    dadosParaSalvar.peso_atual = equipamentoData.peso_atual || 0;
-                    dadosParaSalvar.peso_maximo = 60;
-                }
-                
-                // Combate detalhado
-                const combateData = dadosCompletos.sistemas.combate_detalhado;
-                if (combateData) {
-                    dadosParaSalvar.pv_modificador = combateData.pv?.modificador || 0;
-                    dadosParaSalvar.pv_estado = this.limitarCampo(combateData.pv?.estado, 50) || 'Saudável';
-                    dadosParaSalvar.pf_modificador = combateData.pf?.modificador || 0;
-                    dadosParaSalvar.pf_estado = this.limitarCampo(combateData.pf?.estado, 50) || 'Normal';
-                    dadosParaSalvar.condicoes = combateData.condicoes || [];
-                    dadosParaSalvar.condicoes_ativas = combateData.condicoes?.length || 0;
-                }
-                
-                // Relacionamentos
-                const relacionamentosData = dadosCompletos.sistemas.relacionamentos;
-                if (relacionamentosData) {
-                    dadosParaSalvar.inimigos = relacionamentosData.inimigos || [];
-                    dadosParaSalvar.aliados = relacionamentosData.aliados || [];
-                    dadosParaSalvar.dependentes = relacionamentosData.dependentes || [];
-                }
-            } catch (erroOpcional) {}
-            
-            // SALVAR
+
             let resultado;
             
             if (personagemId) {
@@ -3814,9 +3670,8 @@ class ColetorPersonagem {
                 if (error) throw error;
                 resultado = data;
             } else {
-                // CRIAR NOVO
+                // CRIAR
                 dadosParaSalvar.created_at = new Date().toISOString();
-                dadosParaSalvar.status = 'Ativo';
                 
                 const { data, error } = await supabase
                     .from('characters')
@@ -3827,38 +3682,31 @@ class ColetorPersonagem {
                 if (error) throw error;
                 resultado = data;
             }
-            
+
             return {
                 success: true,
                 message: personagemId ? 'Personagem atualizado!' : 'Personagem criado!',
                 data: resultado,
                 personagemId: resultado.id
             };
-            
+
         } catch (error) {
-            let mensagemErro = 'Erro ao salvar: ' + error.message;
+            let mensagem = 'Erro ao salvar: ' + error.message;
             
             if (error.message.includes('value too long')) {
-                mensagemErro = 'Campo com texto muito longo. Use valores mais curtos.';
-            } else if (error.message.includes('permission denied')) {
-                mensagemErro = 'Sem permissão para salvar.';
-            } else if (error.message.includes('JWT')) {
-                mensagemErro = 'Sessão expirada. Faça login novamente.';
-                setTimeout(() => window.location.href = 'login.html', 1000);
+                mensagem = 'Texto muito longo em algum campo. Use valores mais curtos.';
             }
             
             return {
                 success: false,
-                message: mensagemErro,
+                message: mensagem,
                 error: error.message
             };
         }
     }
 }
 
-// ============================================
 // FUNÇÕES PRINCIPAIS
-// ============================================
 window.coletorPersonagem = new ColetorPersonagem();
 
 async function verificarSessao() {
@@ -3866,9 +3714,6 @@ async function verificarSessao() {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) return { sucesso: false, mensagem: 'Erro de sessão' };
         if (session) return { sucesso: true, session: session };
-        
-        const { data: refreshData } = await supabase.auth.refreshSession();
-        if (refreshData.session) return { sucesso: true, session: refreshData.session };
         
         return { sucesso: false, mensagem: 'Faça login', redirecionar: true };
     } catch (erro) {
@@ -3936,9 +3781,7 @@ async function salvarPersonagem() {
     }
 }
 
-// ============================================
 // INICIALIZAÇÃO
-// ============================================
 async function inicializarSistema() {
     try {
         const verificacao = await verificarSessao();
@@ -4085,9 +3928,7 @@ function sairSemSalvar() {
     }
 }
 
-// ============================================
-// INICIAR TUDO
-// ============================================
+// INICIAR
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         inicializarSistema();
@@ -4097,6 +3938,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // EXPORTAÇÕES
 window.salvarPersonagem = salvarPersonagem;
 window.coletorPersonagem = window.coletorPersonagem;
+window.verificarSessao = verificarSessao;
 </script>
 </body>
 </html>  
