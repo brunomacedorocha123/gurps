@@ -3488,179 +3488,104 @@
 
 <script>
 // ============================================
-// SISTEMA DE SALVAMENTO SIMPLES PARA SITE
+// SCRIPT DE SALVAMENTO CERTO E FUNCIONAL
 // ============================================
 
-// Configuração do Supabase
+// 1. CONFIGURAÇÃO
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
-// Variáveis globais
-let supabase = null;
-let usuarioId = null;
+// 2. INICIAR
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página carregada');
+    
+    // Configurar botões
+    document.getElementById('btnSalvar').onclick = salvarPersonagem;
+    document.getElementById('btnExcluir').onclick = excluirPersonagem;
+    document.getElementById('btnSair').onclick = sair;
+    
+    // Configurar tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.onclick = function() {
+            // Remover active de tudo
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Ativar este
+            this.classList.add('active');
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        };
+    });
+});
 
-// ============================================
-// 1. INICIAR TUDO
-// ============================================
-async function iniciar() {
-    console.log('🔧 Iniciando sistema...');
+// 3. FUNÇÃO PARA SALVAR
+async function salvarPersonagem() {
+    const botao = document.getElementById('btnSalvar');
+    const textoOriginal = botao.innerHTML;
     
     try {
-        // Criar conexão com Supabase
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Mostrar loading
+        botao.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        botao.disabled = true;
         
-        // Verificar se está logado
-        const { data } = await supabase.auth.getSession();
-        if (!data.session) {
-            alert('⚠️ Faça login primeiro!');
+        // Conectar ao Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Verificar login
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            alert('Faça login primeiro!');
             window.location.href = 'login.html';
             return;
         }
         
-        usuarioId = data.session.user.id;
-        console.log('✅ Usuário logado:', usuarioId);
-        
-        // Configurar botões
-        configurarBotoes();
-        
-        // Carregar personagem se estiver editando
-        const urlId = new URLSearchParams(window.location.search).get('id');
-        if (urlId) {
-            await carregarPersonagem(urlId);
-        }
-        
-        console.log('✅ Sistema pronto!');
-        
-    } catch (erro) {
-        console.error('❌ Erro:', erro);
-        alert('Erro: ' + erro.message);
-    }
-}
-
-// ============================================
-// 2. CONFIGURAR BOTÕES
-// ============================================
-function configurarBotoes() {
-    // Botão SALVAR
-    const btnSalvar = document.getElementById('btnSalvar');
-    if (btnSalvar) {
-        btnSalvar.onclick = salvarTudo;
-    }
-    
-    // Botão EXCLUIR
-    const btnExcluir = document.getElementById('btnExcluir');
-    if (btnExcluir) {
-        btnExcluir.onclick = excluirPersonagem;
-    }
-    
-    // Botão SAIR
-    const btnSair = document.getElementById('btnSair');
-    if (btnSair) {
-        btnSair.onclick = () => {
-            if (confirm('Sair sem salvar?')) {
-                window.location.href = 'personagens.html';
-            }
-        };
-    }
-    
-    // Configurar tabs
-    document.querySelectorAll('.tab-btn').forEach(tab => {
-        tab.onclick = () => {
-            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        // Coletar dados BÁSICOS
+        const dados = {
+            nome: document.getElementById('charName').value || 'Novo Personagem',
+            raca: document.getElementById('racaPersonagem').value || '',
+            classe: document.getElementById('classePersonagem').value || '',
+            nivel: document.getElementById('nivelPersonagem').value || '',
             
-            tab.classList.add('active');
-            const tabId = tab.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
+            // Atributos
+            forca: parseInt(document.getElementById('ST').value) || 10,
+            destreza: parseInt(document.getElementById('DX').value) || 10,
+            inteligencia: parseInt(document.getElementById('IQ').value) || 10,
+            saude: parseInt(document.getElementById('HT').value) || 10,
+            
+            // Pontos
+            pontos_totais: parseInt(document.getElementById('pontosTotaisDashboard').value) || 150,
+            
+            // Sistema
+            user_id: session.user.id,
+            atualizado_em: new Date().toISOString()
         };
-    });
-}
-
-// ============================================
-// 3. COLETAR DADOS SIMPLES
-// ============================================
-function coletarDados() {
-    console.log('📦 Coletando dados...');
-    
-    // Dados básicos que todos os sites conseguem pegar
-    const dados = {
-        // Informações principais
-        nome: pegarValor('charName') || 'Novo Personagem',
-        raca: pegarValor('racaPersonagem') || '',
-        classe: pegarValor('classePersonagem') || '',
-        nivel: pegarValor('nivelPersonagem') || '',
-        descricao: pegarValor('descricaoPersonagem') || '',
         
-        // Atributos (sempre tem)
-        forca: Number(pegarValor('ST')) || 10,
-        destreza: Number(pegarValor('DX')) || 10,
-        inteligencia: Number(pegarValor('IQ')) || 10,
-        saude: Number(pegarValor('HT')) || 10,
-        
-        // Pontos do sistema
-        pontos_totais: Number(pegarValor('pontosTotaisDashboard')) || 150,
-        pontos_gastos: Number(pegarTexto('pontosGastosDashboard')) || 0,
-        pontos_disponiveis: Number(pegarTexto('saldoDisponivelDashboard')) || 150,
-        
-        // Características
-        aparencia: pegarSelectTexto('nivelAparencia') || 'Comum',
-        riqueza: pegarSelectTexto('nivelRiqueza') || 'Média',
-        altura: Number(pegarValor('altura')) || 1.70,
-        peso: Number(pegarValor('peso')) || 70,
-        
-        // Combat (valores importantes)
-        esquiva: Number(pegarTexto('esquivaTotal')) || 8,
-        bloqueio: Number(pegarTexto('bloqueioTotal')) || 9,
-        dano_gdp: pegarTexto('danoGDP') || '1d-2',
-        dano_geb: pegarTexto('danoGEB') || '1d',
-        
-        // Sistema
-        status: 'Ativo',
-        user_id: usuarioId,
-        criado_em: new Date().toISOString(),
-        atualizado_em: new Date().toISOString()
-    };
-    
-    console.log('✅ Dados coletados');
-    return dados;
-}
-
-// ============================================
-// 4. SALVAR TUDO (FUNÇÃO PRINCIPAL)
-// ============================================
-async function salvarTudo() {
-    const botao = document.getElementById('btnSalvar');
-    if (!botao) return;
-    
-    // Salvar estado do botão
-    const textoOriginal = botao.innerHTML;
-    botao.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-    botao.disabled = true;
-    
-    try {
-        // Coletar dados
-        const dados = coletarDados();
+        console.log('Dados para salvar:', dados);
         
         // Verificar se é edição
-        const urlId = new URLSearchParams(window.location.search).get('id');
+        const urlParams = new URLSearchParams(window.location.search);
+        const personagemId = urlParams.get('id');
         
         let resultado;
         
-        if (urlId) {
-            // Atualizar existente
+        if (personagemId) {
+            // Atualizar
             const { data, error } = await supabase
                 .from('characters')
                 .update(dados)
-                .eq('id', urlId)
-                .eq('user_id', usuarioId)
+                .eq('id', personagemId)
+                .eq('user_id', session.user.id)
                 .select();
             
             if (error) throw error;
             resultado = data;
-            console.log('✅ Atualizado');
+            console.log('Atualizado:', data);
             
         } else {
             // Criar novo
+            dados.criado_em = new Date().toISOString();
+            
             const { data, error } = await supabase
                 .from('characters')
                 .insert([dados])
@@ -3668,29 +3593,27 @@ async function salvarTudo() {
             
             if (error) throw error;
             resultado = data;
+            console.log('Criado:', data);
             
-            // Atualizar URL com o novo ID
-            if (resultado && resultado[0]) {
+            // Atualizar URL
+            if (data && data[0]) {
                 setTimeout(() => {
-                    window.history.replaceState({}, '', `?id=${resultado[0].id}`);
+                    window.history.replaceState({}, '', `?id=${data[0].id}`);
                 }, 500);
             }
-            
-            console.log('✅ Criado');
         }
         
-        // Mostrar mensagem de sucesso
-        mostrarMensagem('✅ Personagem salvo!', 'success');
+        // Sucesso!
+        alert('✅ Personagem salvo!');
         
-        // Atualizar tela após salvar
-        setTimeout(atualizarTela, 1000);
+        // Redirecionar após 1 segundo
+        setTimeout(() => {
+            window.location.href = 'personagens.html';
+        }, 1000);
         
-        return resultado;
-        
-    } catch (erro) {
-        console.error('❌ Erro ao salvar:', erro);
-        mostrarMensagem('Erro: ' + erro.message, 'error');
-        return null;
+    } catch (error) {
+        console.error('ERRO:', error);
+        alert('❌ Erro: ' + error.message);
         
     } finally {
         // Restaurar botão
@@ -3699,159 +3622,57 @@ async function salvarTudo() {
     }
 }
 
-// ============================================
-// 5. FUNÇÕES AUXILIARES SIMPLES
-// ============================================
-function pegarValor(id) {
-    const elemento = document.getElementById(id);
-    return elemento ? elemento.value : '';
-}
-
-function pegarTexto(id) {
-    const elemento = document.getElementById(id);
-    if (!elemento) return '';
-    
-    // Tenta pegar textContent, depois value
-    return elemento.textContent || elemento.value || elemento.innerText || '';
-}
-
-function pegarSelectTexto(id) {
-    const select = document.getElementById(id);
-    if (!select) return '';
-    
-    const opcao = select.options[select.selectedIndex];
-    return opcao ? opcao.text.split('[')[0].trim() : '';
-}
-
-function mostrarMensagem(texto, tipo) {
-    // Criar mensagem simples
-    const div = document.createElement('div');
-    div.textContent = texto;
-    div.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        background: ${tipo === 'success' ? '#2ecc71' : '#e74c3c'};
-        color: white;
-        border-radius: 5px;
-        z-index: 9999;
-        animation: aparecer 0.3s;
-    `;
-    
-    document.body.appendChild(div);
-    
-    // Remover após 3 segundos
-    setTimeout(() => {
-        div.style.animation = 'desaparecer 0.3s';
-        setTimeout(() => div.remove(), 300);
-    }, 3000);
-}
-
-function atualizarTela() {
-    // Atualizar nome no topo
-    const nome = pegarValor('charName') || 'Novo Personagem';
-    document.title = nome + ' - RPG System';
-    
-    // Atualizar resumo se existir
-    const resumoNome = document.getElementById('resumoNome');
-    if (resumoNome) {
-        resumoNome.textContent = nome.toUpperCase();
-    }
-}
-
-// ============================================
-// 6. CARREGAR PERSONAGEM
-// ============================================
-async function carregarPersonagem(id) {
-    try {
-        const { data, error } = await supabase
-            .from('characters')
-            .select('*')
-            .eq('id', id)
-            .eq('user_id', usuarioId)
-            .single();
-        
-        if (error) throw error;
-        if (!data) throw new Error('Personagem não encontrado');
-        
-        console.log('📥 Carregando:', data.nome);
-        
-        // Preencher campos básicos
-        document.getElementById('charName').value = data.nome || '';
-        document.getElementById('racaPersonagem').value = data.raca || '';
-        document.getElementById('classePersonagem').value = data.classe || '';
-        document.getElementById('nivelPersonagem').value = data.nivel || '';
-        document.getElementById('descricaoPersonagem').value = data.descricao || '';
-        
-        // Atributos
-        document.getElementById('ST').value = data.forca || 10;
-        document.getElementById('DX').value = data.destreza || 10;
-        document.getElementById('IQ').value = data.inteligencia || 10;
-        document.getElementById('HT').value = data.saude || 10;
-        
-        // Atualizar título
-        document.title = data.nome + ' - Editar Personagem';
-        
-    } catch (erro) {
-        console.error('❌ Erro ao carregar:', erro);
-        mostrarMensagem('Erro ao carregar personagem', 'error');
-    }
-}
-
-// ============================================
-// 7. EXCLUIR PERSONAGEM
-// ============================================
+// 4. FUNÇÃO PARA EXCLUIR
 async function excluirPersonagem() {
-    const urlId = new URLSearchParams(window.location.search).get('id');
-    if (!urlId) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const personagemId = urlParams.get('id');
+    
+    if (!personagemId) {
+        alert('Não há personagem para excluir');
+        return;
+    }
     
     if (!confirm('Tem certeza que quer excluir este personagem?')) {
         return;
     }
     
     try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+            alert('Faça login primeiro!');
+            return;
+        }
+        
         const { error } = await supabase
             .from('characters')
             .delete()
-            .eq('id', urlId)
-            .eq('user_id', usuarioId);
+            .eq('id', personagemId)
+            .eq('user_id', session.user.id);
         
         if (error) throw error;
         
-        mostrarMensagem('🗑️ Personagem excluído!', 'success');
+        alert('🗑️ Personagem excluído!');
         
         setTimeout(() => {
             window.location.href = 'personagens.html';
-        }, 1500);
+        }, 1000);
         
-    } catch (erro) {
-        console.error('❌ Erro ao excluir:', erro);
-        mostrarMensagem('Erro ao excluir: ' + erro.message, 'error');
+    } catch (error) {
+        console.error('Erro ao excluir:', error);
+        alert('Erro: ' + error.message);
     }
 }
 
-// ============================================
-// 8. INICIAR QUANDO A PÁGINA CARREGAR
-// ============================================
-document.addEventListener('DOMContentLoaded', iniciar);
-
-// Adicionar estilos CSS para animações
-const estilo = document.createElement('style');
-estilo.textContent = `
-    @keyframes aparecer {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+// 5. FUNÇÃO PARA SAIR
+function sair() {
+    if (confirm('Sair sem salvar?')) {
+        window.location.href = 'personagens.html';
     }
-    
-    @keyframes desaparecer {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(estilo);
+}
 
-console.log('🚀 Sistema carregado e pronto!');
+console.log('Script carregado - pronto para salvar!');
 </script>
 </body>
 </html>  
