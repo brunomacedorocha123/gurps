@@ -1,4 +1,4 @@
-// vantagens.js - VERSÃO DEFINITIVA 100% FUNCIONAL - COM PECULIARIDADES INTEGRADAS
+// vantagens.js - VERSÃO 100% COMPLETA COM EXPORTAÇÃO PARA SALVAMENTO
 class SistemaVantagens {
     constructor() {
         this.vantagensAdquiridas = [];
@@ -40,19 +40,16 @@ class SistemaVantagens {
     }
     
     configurarParaDashboard() {
-        // Configurar para enviar eventos ao dashboard
         this.dispararEventoDashboardInicial();
     }
     
     dispararEventoDashboardInicial() {
-        // Disparar evento inicial para o dashboard
         setTimeout(() => {
             this.dispararEventoDashboard();
         }, 300);
     }
     
     configurarEventosPermanentes() {
-        // Busca vantagens
         const buscaVantagens = document.getElementById('busca-vantagens');
         if (buscaVantagens) {
             buscaVantagens.addEventListener('input', (e) => {
@@ -60,7 +57,6 @@ class SistemaVantagens {
             });
         }
         
-        // Peculiaridades
         const btnAddPeculiaridade = document.getElementById('btn-adicionar-peculiaridade');
         if (btnAddPeculiaridade) {
             btnAddPeculiaridade.addEventListener('click', () => {
@@ -77,21 +73,18 @@ class SistemaVantagens {
             }
         }
         
-        // Fechar modal clicando fora
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal')) {
                 this.fecharModalAtivo();
             }
         });
         
-        // Tecla ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.fecharModalAtivo();
             }
         });
         
-        // Configurar eventos dos modais UMA VEZ
         this.configurarModalVantagem();
         this.configurarModalOpcoes();
     }
@@ -100,7 +93,6 @@ class SistemaVantagens {
         const modal = document.getElementById('modal-vantagem');
         if (!modal) return;
         
-        // Botão fechar (X)
         const closeBtn = modal.querySelector('.modal-close');
         if (closeBtn) {
             closeBtn.onclick = () => {
@@ -108,7 +100,6 @@ class SistemaVantagens {
             };
         }
         
-        // Botão cancelar
         const cancelBtn = modal.querySelector('.btn-cancelar');
         if (cancelBtn) {
             cancelBtn.onclick = () => {
@@ -116,7 +107,6 @@ class SistemaVantagens {
             };
         }
         
-        // Botão confirmar
         const confirmBtn = modal.querySelector('.btn-confirmar');
         if (confirmBtn) {
             confirmBtn.onclick = (e) => {
@@ -131,7 +121,6 @@ class SistemaVantagens {
         const modal = document.getElementById('modal-opcoes');
         if (!modal) return;
         
-        // Botão fechar (X)
         const closeBtn = modal.querySelector('.modal-close');
         if (closeBtn) {
             closeBtn.onclick = () => {
@@ -139,7 +128,6 @@ class SistemaVantagens {
             };
         }
         
-        // Botão cancelar/voltar
         const cancelBtn = modal.querySelector('.btn-cancelar');
         if (cancelBtn) {
             cancelBtn.onclick = () => {
@@ -147,7 +135,6 @@ class SistemaVantagens {
             };
         }
         
-        // Botão selecionar
         const confirmBtn = modal.querySelector('.btn-confirmar');
         if (confirmBtn) {
             const newConfirmBtn = confirmBtn.cloneNode(true);
@@ -158,16 +145,9 @@ class SistemaVantagens {
                 e.stopPropagation();
                 this.confirmarSelecaoOpcao();
             };
-            
-            newConfirmBtn.ontouchstart = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.confirmarSelecaoOpcao();
-            };
         }
     }
     
-    // ===== SISTEMA DE PECULIARIDADES =====
     adicionarPeculiaridade() {
         const input = document.getElementById('nova-peculiaridade');
         if (!input) return;
@@ -186,7 +166,8 @@ class SistemaVantagens {
         const novaPeculiaridade = {
             id: 'peculiaridade-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
             texto: texto,
-            data: new Date().toISOString()
+            data: new Date().toISOString(),
+            custo: -1
         };
         
         this.peculiaridades.push(novaPeculiaridade);
@@ -197,8 +178,6 @@ class SistemaVantagens {
         
         this.atualizarListaPeculiaridades();
         this.atualizarTotais();
-        
-        console.log(`Peculiaridade adicionada: "${texto}"`);
     }
     
     removerPeculiaridade(id) {
@@ -256,7 +235,6 @@ class SistemaVantagens {
         this.dispararEventoDashboard();
     }
     
-    // ===== COMUNICAÇÃO COM DASHBOARD =====
     dispararEventoDashboard() {
         const totalVantagens = this.calcularTotalVantagens();
         const totalDesvantagens = this.calcularTotalDesvantagens();
@@ -291,7 +269,40 @@ class SistemaVantagens {
         return -this.peculiaridades.length;
     }
     
-    // ===== FUNÇÕES EXISTENTES (COMPLETAS) =====
+    // ===== NOVA FUNÇÃO: EXPORTAR DADOS PARA SALVAMENTO =====
+    exportarDadosParaSalvamento() {
+        return {
+            sistema: 'vantagens',
+            timestamp: new Date().toISOString(),
+            dados: {
+                vantagensAdquiridas: this.vantagensAdquiridas.map(v => ({
+                    id: v.id,
+                    baseId: v.baseId,
+                    nome: v.nome,
+                    nomeBase: v.nomeBase,
+                    custo: v.custo,
+                    descricao: v.descricao || '',
+                    categoria: v.categoria || '',
+                    dataAdquisicao: v.dataAdquisicao || new Date().toISOString()
+                })),
+                
+                peculiaridades: this.peculiaridades.map(p => ({
+                    id: p.id,
+                    texto: p.texto,
+                    custo: p.custo || -1,
+                    data: p.data || new Date().toISOString()
+                })),
+                
+                totais: {
+                    vantagens: this.calcularTotalVantagens(),
+                    desvantagens: this.calcularTotalDesvantagens(),
+                    peculiaridades: this.calcularTotalPeculiaridades(),
+                    totalGeral: this.calcularTotalVantagens() + this.calcularTotalDesvantagens() + this.calcularTotalPeculiaridades()
+                }
+            }
+        };
+    }
+    
     filtrarVantagens(termo) {
         const listaContainer = document.getElementById('lista-vantagens');
         if (!listaContainer) return;
@@ -423,12 +434,6 @@ class SistemaVantagens {
         btnSelecionar.parentNode.replaceChild(newBtn, btnSelecionar);
         
         newBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.confirmarSelecaoOpcao();
-        };
-        
-        newBtn.ontouchstart = (e) => {
             e.preventDefault();
             e.stopPropagation();
             this.confirmarSelecaoOpcao();
@@ -687,15 +692,76 @@ class SistemaVantagens {
     }
 }
 
-// Inicialização
+// ============================================
+// FUNÇÃO DE EXPORTAÇÃO GLOBAL
+// ============================================
+
+window.exportarDadosVantagens = function() {
+    try {
+        if (!window.sistemaVantagens) {
+            return {
+                vantagens: [],
+                peculiaridades: [],
+                totalVantagens: 0,
+                totalDesvantagens: 0,
+                totalPeculiaridades: 0,
+                saldoTotal: 0
+            };
+        }
+        
+        const sistema = window.sistemaVantagens;
+        
+        if (typeof sistema.exportarDadosParaSalvamento === 'function') {
+            return sistema.exportarDadosParaSalvamento();
+        }
+        
+        const totalVantagens = sistema.calcularTotalVantagens ? sistema.calcularTotalVantagens() : 0;
+        const totalDesvantagens = sistema.calcularTotalDesvantagens ? sistema.calcularTotalDesvantagens() : 0;
+        const totalPeculiaridades = sistema.calcularTotalPeculiaridades ? sistema.calcularTotalPeculiaridades() : 0;
+        
+        return {
+            sistema: 'vantagens',
+            timestamp: new Date().toISOString(),
+            dados: {
+                vantagensAdquiridas: sistema.vantagensAdquiridas || [],
+                peculiaridades: sistema.peculiaridades || [],
+                totais: {
+                    vantagens: totalVantagens,
+                    desvantagens: totalDesvantagens,
+                    peculiaridades: totalPeculiaridades,
+                    totalGeral: totalVantagens + totalDesvantagens + totalPeculiaridades
+                }
+            }
+        };
+        
+    } catch (error) {
+        return {
+            sistema: 'vantagens',
+            erro: error.message,
+            dados: {
+                vantagensAdquiridas: [],
+                peculiaridades: [],
+                totais: {
+                    vantagens: 0,
+                    desvantagens: 0,
+                    peculiaridades: 0,
+                    totalGeral: 0
+                }
+            }
+        };
+    }
+};
+
+// ============================================
+// INICIALIZAÇÃO DO SISTEMA
+// ============================================
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Inicializando Sistema de Vantagens...');
-    
     if (window.sistemaVantagens) {
         try {
             window.sistemaVantagens.fecharModalAtivo();
         } catch (e) {
-            console.warn('Erro ao limpar:', e);
+            // Ignorar erro
         }
         window.sistemaVantagens = null;
     }
@@ -705,12 +771,14 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if (window.sistemaVantagens) {
             window.sistemaVantagens.atualizarListaPeculiaridades();
-            console.log('✅ Sistema de Vantagens pronto!');
         }
     }, 100);
 });
 
-// Exportar
+// ============================================
+// EXPORTAÇÃO DA CLASSE
+// ============================================
+
 if (typeof window !== 'undefined') {
     window.SistemaVantagens = SistemaVantagens;
 }
