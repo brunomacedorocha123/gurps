@@ -6,18 +6,6 @@
     <title>Criar Personagem - RPG System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Logo após o title -->
-  
-     <link rel="stylesheet" href="style-dashboard.css">
-    <link rel="stylesheet" href="style-atributos.css">
-    <link rel="stylesheet" href="style-caracteristicas.css">
-    <link rel="stylesheet" href="style-vantagens.css">
-    <link rel="stylesheet" href="style-pericias.css">
-    <link rel="stylesheet" href="style-magias.css">
-    <link rel="stylesheet" href="style-equipamentos.css">
-    <link rel="stylesheet" href="style-combate.css">
-    <link rel="stylesheet" href="style-resumo.css">
-   
     <style>
         * {
             margin: 0;
@@ -33,7 +21,7 @@
             min-height: 100vh;
         }
 
-        /* Header do Personagem */
+        /* Header */
         .char-header {
             background: rgba(30, 30, 40, 0.9);
             padding: 15px 20px;
@@ -58,6 +46,7 @@
             align-items: center;
             gap: 15px;
             flex: 1;
+            min-width: 0;
         }
 
         .char-name-input {
@@ -68,8 +57,9 @@
             font-weight: bold;
             padding: 8px 12px;
             border-bottom: 2px solid rgba(255, 140, 0, 0.3);
-            min-width: 250px;
-            max-width: 400px;
+            min-width: 150px;
+            max-width: 100%;
+            width: 100%;
         }
 
         .char-name-input:focus {
@@ -79,11 +69,13 @@
 
         .char-actions {
             display: flex;
-            gap: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
         .btn-header {
-            padding: 10px 20px;
+            padding: 10px 15px;
             border: none;
             border-radius: 8px;
             font-weight: 600;
@@ -93,6 +85,7 @@
             gap: 8px;
             transition: all 0.3s ease;
             white-space: nowrap;
+            font-size: 0.9rem;
         }
 
         .btn-salvar {
@@ -125,6 +118,7 @@
             position: sticky;
             top: 80px;
             z-index: 99;
+            -webkit-overflow-scrolling: touch;
         }
 
         .tabs-container {
@@ -132,11 +126,12 @@
             margin: 0 auto;
             display: flex;
             gap: 5px;
-            padding: 0 20px;
+            padding: 0 10px;
+            min-width: min-content;
         }
 
         .tab-btn {
-            padding: 12px 20px;
+            padding: 12px 15px;
             background: transparent;
             border: none;
             color: #ccc;
@@ -148,6 +143,7 @@
             gap: 8px;
             white-space: nowrap;
             border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
         }
 
         .tab-btn:hover {
@@ -165,7 +161,7 @@
         .char-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 30px 15px;
         }
 
         .tab-content {
@@ -182,11 +178,42 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Conteúdo de Desenvolvimento */
+        .dev-content {
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            border: 2px dashed rgba(255, 140, 0, 0.3);
+            margin-top: 20px;
+        }
+
+        .dev-icon {
+            font-size: 4rem;
+            color: rgba(255, 140, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .dev-title {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+
+        .dev-message {
+            color: #ccc;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 25px;
+            line-height: 1.5;
+        }
+
         /* Responsividade */
         @media (max-width: 768px) {
             .char-header-content {
                 flex-direction: column;
                 gap: 15px;
+                text-align: center;
             }
 
             .char-name-section {
@@ -195,9 +222,9 @@
             }
 
             .char-name-input {
-                min-width: 200px;
                 font-size: 1.3rem;
                 text-align: center;
+                min-width: 100%;
             }
 
             .char-actions {
@@ -206,22 +233,70 @@
             }
 
             .btn-header {
-                padding: 8px 15px;
-                font-size: 0.9rem;
+                padding: 8px 12px;
+                font-size: 0.85rem;
             }
 
             .tabs-container {
-                padding: 0 10px;
+                padding: 0 5px;
                 gap: 2px;
             }
 
             .tab-btn {
                 padding: 10px 12px;
                 font-size: 0.8rem;
+                gap: 5px;
             }
 
             .tab-btn i {
+                font-size: 0.9rem;
+            }
+
+            .dev-icon {
+                font-size: 3rem;
+            }
+
+            .dev-title {
+                font-size: 1.6rem;
+            }
+
+            .dev-message {
+                font-size: 1rem;
+                padding: 0 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tab-btn span {
                 display: none;
+            }
+
+            .tab-btn {
+                padding: 12px;
+                justify-content: center;
+            }
+
+            .tab-btn i {
+                font-size: 1.1rem;
+            }
+
+            .char-content {
+                padding: 20px 10px;
+            }
+
+            .dev-content {
+                padding: 30px 15px;
+            }
+        }
+
+        /* Tablet */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .char-header-content {
+                padding: 15px;
+            }
+
+            .tabs-container {
+                padding: 0 15px;
             }
         }
 
@@ -258,15 +333,15 @@
             <div class="char-actions">
                 <button class="btn-header btn-salvar" id="btnSalvar">
                     <i class="fas fa-save"></i>
-                    Salvar
+                    <span class="btn-text">Salvar</span>
                 </button>
                 <button class="btn-header btn-excluir" id="btnExcluir">
                     <i class="fas fa-trash"></i>
-                    Excluir
+                    <span class="btn-text">Excluir</span>
                 </button>
                 <button class="btn-header btn-sair" id="btnSair">
                     <i class="fas fa-sign-out-alt"></i>
-                    Sair
+                    <span class="btn-text">Sair</span>
                 </button>
             </div>
         </div>
@@ -277,42 +352,39 @@
         <div class="tabs-container">
             <button class="tab-btn active" data-tab="dashboard">
                 <i class="fas fa-tachometer-alt"></i>
-                Dashboard
+                <span>Dashboard</span>
             </button>
             <button class="tab-btn" data-tab="atributos">
                 <i class="fas fa-dumbbell"></i>
-                Atributos
+                <span>Atributos</span>
             </button>
             <button class="tab-btn" data-tab="caracteristicas">
                 <i class="fas fa-user-tie"></i>
-                Características
+                <span>Características</span>
             </button>
             <button class="tab-btn" data-tab="vantagens">
                 <i class="fas fa-star"></i>
-                Vantagens
+                <span>Vantagens</span>
             </button>
             <button class="tab-btn" data-tab="pericias">
                 <i class="fas fa-graduation-cap"></i>
-                Perícias
+                <span>Perícias</span>
             </button>
-          
             <button class="tab-btn" data-tab="magia">
                 <i class="fas fa-hat-wizard"></i>
-                Magias
+                <span>Magias</span>
             </button>
             <button class="tab-btn" data-tab="equipamento">
                 <i class="fas fa-backpack"></i>
-                Equipamento
+                <span>Equipamento</span>
             </button>
-           <!-- Linha para adicionar na seção de navegação de abas (por volta da linha 153) -->
-<button class="tab-btn" data-tab="combate">
-    <i class="fas fa-fist-raised"></i>
-    Combate
-</button>
-           
+            <button class="tab-btn" data-tab="combate">
+                <i class="fas fa-fist-raised"></i>
+                <span>Combate</span>
+            </button>
             <button class="tab-btn" data-tab="resumo">
                 <i class="fas fa-file-alt"></i>
-                Resumo
+                <span>Resumo</span>
             </button>
         </div>
     </nav>
@@ -320,3322 +392,201 @@
     <!-- Conteúdo das Abas -->
     <main class="char-content">
         
-    <!-- ABA DASHBOARD -->
-<div id="dashboard" class="tab-content active">
-    <div class="dashboard-container">
-        
-        <!-- SEÇÃO 1: IDENTIFICAÇÃO DO PERSONAGEM -->
-        <div class="dashboard-section">
-            <h2 class="secao-titulo">
-                <i class="fas fa-user-circle"></i> Identificação do Personagem
-            </h2>
-            
-            <div class="identificacao-grid">
-                <!-- COLUNA DA FOTO -->
-                <div class="foto-coluna">
-                    <div class="foto-container" id="fotoContainer">
-                        <div class="foto-placeholder" id="fotoPlaceholder">
-                            <i class="fas fa-user-circle fa-6x"></i>
-                            <span>Clique para adicionar foto</span>
-                        </div>
-                        <img id="fotoPreview" class="foto-preview" style="display: none;" alt="Foto do Personagem">
-                        <input type="file" id="fotoUpload" accept="image/*" class="foto-upload-input">
-                    </div>
-                    <div class="foto-acoes">
-                        <button class="btn-foto" onclick="document.getElementById('fotoUpload').click()">
-                            <i class="fas fa-upload"></i> Upload
-                        </button>
-                        <button class="btn-foto btn-remover" id="btnRemoverFoto" style="display: none;">
-                            <i class="fas fa-trash"></i> Remover
-                        </button>
-                    </div>
+        <!-- ABA DASHBOARD -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dev-content">
+                <div class="dev-icon">
+                    <i class="fas fa-tachometer-alt"></i>
                 </div>
-                
-                <!-- COLUNA DOS DADOS -->
-                <div class="dados-coluna">
-                    <div class="campo-dashboard">
-                        <label for="racaPersonagem">Raça/Espécie:</label>
-                        <input type="text" id="racaPersonagem" class="dashboard-input" 
-                               placeholder="Ex: Humano, Elfo, Anão..." maxlength="30">
-                    </div>
-                    
-                    <div class="campo-dashboard">
-                        <label for="classePersonagem">Classe/Profissão:</label>
-                        <input type="text" id="classePersonagem" class="dashboard-input" 
-                               placeholder="Ex: Guerreiro, Mago, Ladino..." maxlength="30">
-                    </div>
-                    
-                    <div class="campo-dashboard">
-                        <label for="nivelPersonagem">Nível/Hierarquia:</label>
-                        <input type="text" id="nivelPersonagem" class="dashboard-input" 
-                               placeholder="Ex: Noviço, Veterano, Capitão..." maxlength="30">
-                    </div>
-                    
-                    <div class="campo-dashboard full-width">
-                        <label for="descricaoPersonagem">História do personagem:</label>
-                        <textarea id="descricaoPersonagem" class="dashboard-textarea" 
-                                  placeholder="Breve descrição do personagem, sua história, personalidade..."
-                                  rows="3" maxlength="500"></textarea>
-                        <div class="contador-caracteres">
-                            <span id="contadorDescricao">0</span>/500 caracteres
-                        </div>
-                    </div>
-                </div>
+                <h2 class="dev-title">Dashboard</h2>
+                <p class="dev-message">
+                    Área para controle geral do personagem, resumo de pontos, status rápido e informações básicas.
+                    Em desenvolvimento...
+                </p>
             </div>
         </div>
-        
-        <!-- SEÇÃO 2: CONTROLE DE PONTOS -->
-        <div class="dashboard-section">
-            <h2 class="secao-titulo">
-                <i class="fas fa-calculator"></i> Controle de Pontos
-            </h2>
-            
-            <div class="pontos-grid">
-                <!-- PONTOS TOTAIS -->
-                <div class="ponto-card card-principal">
-                    <div class="ponto-header">
-                        <i class="fas fa-star"></i>
-                        <h3>Pontos Totais</h3>
-                    </div>
-                    <div class="ponto-content">
-                        <input type="number" id="pontosTotaisDashboard" class="ponto-input" 
-                               value="150" min="0" step="10">
-                        <div class="ponto-desc">Definido pelo GM</div>
-                    </div>
-                </div>
-                
-                <!-- PONTOS GASTOS -->
-                <div class="ponto-card card-gastos">
-                    <div class="ponto-header">
-                        <i class="fas fa-coins"></i>
-                        <h3>Pontos Gastos</h3>
-                    </div>
-                    <div class="ponto-content">
-                        <div class="ponto-valor" id="pontosGastosDashboard">0</div>
-                        <div class="ponto-desc">Total utilizado</div>
-                    </div>
-                </div>
-                
-                <!-- SALDO DISPONÍVEL -->
-                <div class="ponto-card card-saldo">
-                    <div class="ponto-header">
-                        <i class="fas fa-wallet"></i>
-                        <h3>Saldo Disponível</h3>
-                    </div>
-                    <div class="ponto-content">
-                        <div class="ponto-valor" id="saldoDisponivelDashboard">150</div>
-                        <div class="ponto-desc">Pontos restantes</div>
-                    </div>
-                </div>
-                
-                <!-- LIMITE DESVANTAGENS -->
-                <div class="ponto-card card-limite">
-                    <div class="ponto-header">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Limite Desvantagens</h3>
-                    </div>
-                    <div class="ponto-content">
-                        <input type="number" id="limiteDesvantagens" class="ponto-input" 
-                               value="-50" min="-200" max="0" step="5">
-                        <div class="ponto-desc">Máximo permitido</div>
-                    </div>
-                </div>
-                
-                <!-- DESVANTAGENS ATUAIS -->
-                <div class="ponto-card card-desvantagens">
-                    <div class="ponto-header">
-                        <i class="fas fa-ban"></i>
-                        <h3>Desvantagens Atuais</h3>
-                    </div>
-                    <div class="ponto-content">
-                        <div class="ponto-valor" id="desvantagensAtuais">0</div>
-                        <div class="ponto-desc">Total em desvantagens</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- SEÇÃO 3: STATUS RÁPIDO -->
-        <div class="dashboard-section">
-            <h2 class="secao-titulo">
-                <i class="fas fa-chart-line"></i> Status Rápido
-            </h2>
-            
-            <div class="status-grid">
-                <!-- ATRIBUTOS -->
-                <div class="status-card">
-                    <div class="status-header">
-                        <i class="fas fa-dumbbell"></i>
-                        <h3>Atributos</h3>
-                    </div>
-                    <div class="status-content">
-                        <div class="status-item">
-                            <span class="status-label">FOR (ST):</span>
-                            <span class="status-valor" id="statusST">10</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">DES (DX):</span>
-                            <span class="status-valor" id="statusDX">10</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">INT (IQ):</span>
-                            <span class="status-valor" id="statusIQ">10</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">VIG (HT):</span>
-                            <span class="status-valor" id="statusHT">10</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- PONTOS DE VIDA/FADIGA -->
-                <div class="status-card">
-                    <div class="status-header">
-                        <i class="fas fa-heartbeat"></i>
-                        <h3>Vitalidade</h3>
-                    </div>
-                    <div class="status-content">
-                        <div class="vitalidade-item">
-                            <div class="vitalidade-info">
-                                <span class="vitalidade-label">Pontos de Vida</span>
-                                <span class="vitalidade-valor" id="statusPV">10/10</span>
-                            </div>
-                            <div class="vitalidade-bar">
-                                <div class="bar-pv" style="width: 100%"></div>
-                            </div>
-                        </div>
-                        <div class="vitalidade-item">
-                            <div class="vitalidade-info">
-                                <span class="vitalidade-label">Pontos de Fadiga</span>
-                                <span class="vitalidade-valor" id="statusPF">10/10</span>
-                            </div>
-                            <div class="vitalidade-bar">
-                                <div class="bar-pf" style="width: 100%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- APARÊNCIA E RIQUEZA -->
-                <div class="status-card">
-                    <div class="status-header">
-                        <i class="fas fa-user-tie"></i>
-                        <h3>Características</h3>
-                    </div>
-                    <div class="status-content">
-                        <div class="status-item">
-                            <span class="status-label">Aparência:</span>
-                            <span class="status-valor" id="statusAparencia">Comum</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">Riqueza:</span>
-                            <span class="status-valor" id="statusRiqueza">Média</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">Saldo:</span>
-                            <span class="status-valor dinheiro" id="statusSaldo">$2.000</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- SEÇÃO 4: RELACIONAMENTOS -->
-        <div class="dashboard-section">
-            <h2 class="secao-titulo">
-                <i class="fas fa-users"></i> Relacionamentos
-            </h2>
-            
-            <div class="relacionamentos-grid">
-                <!-- INIMIGOS -->
-                <div class="relacionamento-card card-inimigo">
-                    <div class="relacionamento-header">
-                        <i class="fas fa-skull-crossbones"></i>
-                        <h3>Inimigos</h3>
-                        <button class="btn-adicionar" data-tipo="inimigo">
-                            <i class="fas fa-plus"></i> Adicionar
-                        </button>
-                    </div>
-                    <div class="relacionamento-lista" id="listaInimigos">
-                        <div class="relacionamento-vazio">
-                            Nenhum inimigo adicionado
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- ALIADOS -->
-                <div class="relacionamento-card card-aliado">
-                    <div class="relacionamento-header">
-                        <i class="fas fa-handshake"></i>
-                        <h3>Aliados</h3>
-                        <button class="btn-adicionar" data-tipo="aliado">
-                            <i class="fas fa-plus"></i> Adicionar
-                        </button>
-                    </div>
-                    <div class="relacionamento-lista" id="listaAliados">
-                        <div class="relacionamento-vazio">
-                            Nenhum aliado adicionado
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- DEPENDENTES -->
-                <div class="relacionamento-card card-dependente">
-                    <div class="relacionamento-header">
-                        <i class="fas fa-child"></i>
-                        <h3>Dependentes</h3>
-                        <button class="btn-adicionar" data-tipo="dependente">
-                            <i class="fas fa-plus"></i> Adicionar
-                        </button>
-                    </div>
-                    <div class="relacionamento-lista" id="listaDependentes">
-                        <div class="relacionamento-vazio">
-                            Nenhum dependente adicionado
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- SEÇÃO 5: RESUMO DE GASTOS -->
-<div class="dashboard-section">
-    <h2 class="secao-titulo">
-        <i class="fas fa-file-invoice-dollar"></i> Resumo de Gastos
-    </h2>
-    
-    <div class="resumo-grid">
-        <div class="resumo-card">
-            <div class="resumo-header">
-                <i class="fas fa-dumbbell"></i>
-                <h4>Atributos</h4>
-            </div>
-            <div class="resumo-content">
-                <div class="resumo-valor" id="gastosAtributos">0</div>
-                <div class="resumo-label">pontos</div>
-            </div>
-        </div>
-        
-        <div class="resumo-card">
-            <div class="resumo-header">
-                <i class="fas fa-star"></i>
-                <h4>Vantagens</h4>
-            </div>
-            <div class="resumo-content">
-                <div class="resumo-valor" id="gastosVantagens">0</div>
-                <div class="resumo-label">pontos</div>
-            </div>
-        </div>
-        
-        <div class="resumo-card">
-            <div class="resumo-header">
-                <i class="fas fa-graduation-cap"></i>
-                <h4>Perícias</h4>
-            </div>
-            <div class="resumo-content">
-                <div class="resumo-valor" id="gastosPericias">0</div>
-                <div class="resumo-label">pontos</div>
-            </div>
-        </div>
-        
-        <div class="resumo-card">
-            <div class="resumo-header">
-                <i class="fas fa-hat-wizard"></i>
-                <h4>Magias</h4>
-            </div>
-            <div class="resumo-content">
-                <div class="resumo-valor" id="gastosMagias">0</div>
-                <div class="resumo-label">pontos</div>
-            </div>
-        </div>
-        
-        <!-- NOVO CARD: DESVANTAGENS E PECULIARIDADES -->
-        <div class="resumo-card">
-            <div class="resumo-header">
-                <i class="fas fa-exclamation-circle"></i>
-                <h4>Desvantagens & Peculiaridades</h4>
-            </div>
-            <div class="resumo-content">
-                <div class="resumo-valor" id="gastosDesvantagens">0</div>
-                <div class="resumo-label">pontos (negativos)</div>
-            </div>
-        </div>
-        
-        <div class="resumo-card total">
-            <div class="resumo-header">
-                <i class="fas fa-calculator"></i>
-                <h4>Total Gastos</h4>
-            </div>
-            <div class="resumo-content">
-                <div class="resumo-valor" id="gastosTotal">0</div>
-                <div class="resumo-label">pontos líquidos</div>
-            </div>
-        </div>
-    </div>
-</div>
-        
-    </div>
-</div>   
 
-<!-- ABA ATRIBUTOS -->
+        <!-- ABA ATRIBUTOS -->
         <div id="atributos" class="tab-content">
-            <div class="atributos-container">
-                <!-- Seção de Pontos -->
-                <div class="pontos-section">
-                    <div class="ponto-card total">
-                        <h3>Pontos Totais</h3>
-                        <div class="ponto-valor" id="pontosTotais">150</div>
-                    </div>
-                    <div class="ponto-card gastos">
-                        <h3>Pontos Gastos</h3>
-                        <div class="ponto-valor" id="pontosGastos">0</div>
-                    </div>
-                    <div class="ponto-card saldo">
-                        <h3>Saldo Disponível</h3>
-                        <div class="ponto-valor" id="pontosSaldo">150</div>
-                    </div>
+            <div class="dev-content">
+                <div class="dev-icon">
+                    <i class="fas fa-dumbbell"></i>
                 </div>
-
-                <!-- Atributos Principais -->
-                <div class="atributos-principais">
-                    <h2 class="secao-titulo">Atributos Principais</h2>
-                    <div class="cards-grid principais-grid">
-                        <!-- ST -->
-                        <div class="atributo-card">
-                            <div class="atributo-header">
-                                <h3>FORÇA (ST)</h3>
-                                <span class="custo-pontos" id="custoST">0</span>
-                            </div>
-                            <div class="atributo-controles">
-                                <button class="btn-controle" onclick="alterarAtributo('ST', -1)">-</button>
-                                <input type="number" id="ST" class="atributo-input" value="10" min="1" max="40">
-                                <button class="btn-controle" onclick="alterarAtributo('ST', 1)">+</button>
-                            </div>
-                            <div class="atributo-desc">Custo: 10 pontos por nível</div>
-                        </div>
-
-                        <!-- DX -->
-                        <div class="atributo-card">
-                            <div class="atributo-header">
-                                <h3>DESTREZA (DX)</h3>
-                                <span class="custo-pontos" id="custoDX">0</span>
-                            </div>
-                            <div class="atributo-controles">
-                                <button class="btn-controle" onclick="alterarAtributo('DX', -1)">-</button>
-                                <input type="number" id="DX" class="atributo-input" value="10" min="1" max="40">
-                                <button class="btn-controle" onclick="alterarAtributo('DX', 1)">+</button>
-                            </div>
-                            <div class="atributo-desc">Custo: 20 pontos por nível</div>
-                        </div>
-
-                        <!-- IQ -->
-                        <div class="atributo-card">
-                            <div class="atributo-header">
-                                <h3>INTELIGÊNCIA (IQ)</h3>
-                                <span class="custo-pontos" id="custoIQ">0</span>
-                            </div>
-                            <div class="atributo-controles">
-                                <button class="btn-controle" onclick="alterarAtributo('IQ', -1)">-</button>
-                                <input type="number" id="IQ" class="atributo-input" value="10" min="1" max="40">
-                                <button class="btn-controle" onclick="alterarAtributo('IQ', 1)">+</button>
-                            </div>
-                            <div class="atributo-desc">Custo: 20 pontos por nível</div>
-                        </div>
-
-                        <!-- HT -->
-                        <div class="atributo-card">
-                            <div class="atributo-header">
-                                <h3>VIGOR (HT)</h3>
-                                <span class="custo-pontos" id="custoHT">0</span>
-                            </div>
-                            <div class="atributo-controles">
-                                <button class="btn-controle" onclick="alterarAtributo('HT', -1)">-</button>
-                                <input type="number" id="HT" class="atributo-input" value="10" min="1" max="40">
-                                <button class="btn-controle" onclick="alterarAtributo('HT', 1)">+</button>
-                            </div>
-                            <div class="atributo-desc">Custo: 10 pontos por nível</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Atributos Secundários -->
-                <div class="atributos-secundarios">
-                    <h2 class="secao-titulo">Atributos Secundários</h2>
-                    <div class="cards-grid secundarios-grid">
-                        <!-- PV -->
-                        <div class="secundario-card">
-                            <h3>PONTOS DE VIDA (PV)</h3>
-                            <div class="secundario-base">
-                                <span class="base-label">Base:</span>
-                                <span class="base-valor" id="PVBase">10</span>
-                            </div>
-                            <div class="bonus-section">
-                                <span class="bonus-label">Bônus/Redutor:</span>
-                                <input type="number" id="bonusPV" class="bonus-input" value="0" min="-10" max="10">
-                            </div>
-                            <div class="secundario-total">
-                                <span class="total-label">Total:</span>
-                                <span class="total-valor" id="PVTotal">10</span>
-                            </div>
-                            <div class="secundario-desc">Baseado em ST</div>
-                        </div>
-
-                        <!-- PF -->
-                        <div class="secundario-card">
-                            <h3>PONTOS DE FADIGA (PF)</h3>
-                            <div class="secundario-base">
-                                <span class="base-label">Base:</span>
-                                <span class="base-valor" id="PFBase">10</span>
-                            </div>
-                            <div class="bonus-section">
-                                <span class="bonus-label">Bônus/Redutor:</span>
-                                <input type="number" id="bonusPF" class="bonus-input" value="0" min="-10" max="10">
-                            </div>
-                            <div class="secundario-total">
-                                <span class="total-label">Total:</span>
-                                <span class="total-valor" id="PFTotal">10</span>
-                            </div>
-                            <div class="secundario-desc">Baseado em HT</div>
-                        </div>
-
-                        <!-- Vontade -->
-                        <div class="secundario-card">
-                            <h3>VONTADE</h3>
-                            <div class="secundario-base">
-                                <span class="base-label">Base:</span>
-                                <span class="base-valor" id="VontadeBase">10</span>
-                            </div>
-                            <div class="bonus-section">
-                                <span class="bonus-label">Bônus/Redutor:</span>
-                                <input type="number" id="bonusVontade" class="bonus-input" value="0" min="-10" max="10">
-                            </div>
-                            <div class="secundario-total">
-                                <span class="total-label">Total:</span>
-                                <span class="total-valor" id="VontadeTotal">10</span>
-                            </div>
-                            <div class="secundario-desc">Baseado em IQ</div>
-                        </div>
-
-                        <!-- Percepção -->
-                        <div class="secundario-card">
-                            <h3>PERCEPÇÃO</h3>
-                            <div class="secundario-base">
-                                <span class="base-label">Base:</span>
-                                <span class="base-valor" id="PercepcaoBase">10</span>
-                            </div>
-                            <div class="bonus-section">
-                                <span class="bonus-label">Bônus/Redutor:</span>
-                                <input type="number" id="bonusPercepcao" class="bonus-input" value="0" min="-10" max="10">
-                            </div>
-                            <div class="secundario-total">
-                                <span class="total-label">Total:</span>
-                                <span class="total-valor" id="PercepcaoTotal">10</span>
-                            </div>
-                            <div class="secundario-desc">Baseado em IQ</div>
-                        </div>
-
-                        <!-- Deslocamento -->
-                        <div class="secundario-card">
-                            <h3>DESLOCAMENTO</h3>
-                            <div class="secundario-base">
-                                <span class="base-label">Base:</span>
-                                <span class="base-valor" id="DeslocamentoBase">5.00</span>
-                            </div>
-                            <div class="bonus-section">
-                                <span class="bonus-label">Bônus/Redutor:</span>
-                                <input type="number" id="bonusDeslocamento" class="bonus-input" value="0" min="-5" max="5" step="0.25">
-                            </div>
-                            <div class="secundario-total">
-                                <span class="total-label">Total:</span>
-                                <span class="total-valor" id="DeslocamentoTotal">5.00</span>
-                            </div>
-                            <div class="secundario-desc">(DX + HT) / 4</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sistema de Combate -->
-                <div class="combate-section">
-                    <h2 class="secao-titulo">Sistema de Combate</h2>
-                    <div class="cards-grid combate-grid">
-                        <!-- Dano Base -->
-                        <div class="combate-card">
-                            <h3>DANO BÁSICO</h3>
-                            <div class="dano-container">
-                                <div class="dano-tipo">
-                                    <span class="dano-label">GDP:</span>
-                                    <span class="dano-valor" id="danoGDP">1d-2</span>
-                                </div>
-                                <div class="dano-tipo">
-                                    <span class="dano-label">GEB:</span>
-                                    <span class="dano-valor" id="danoGEB">1d</span>
-                                </div>
-                            </div>
-                            <div class="combate-desc">Baseado em ST</div>
-                        </div>
-
-                        <!-- Níveis de Carga -->
-                        <div class="combate-card">
-                            <h3>NÍVEIS DE CARGA</h3>
-                            <div class="carga-container">
-                                <div class="carga-item">
-                                    <span class="carga-label">Nenhuma:</span>
-                                    <span class="carga-valor" id="cargaNenhuma">10.0</span>
-                                </div>
-                                <div class="carga-item">
-                                    <span class="carga-label">Leve:</span>
-                                    <span class="carga-valor" id="cargaLeve">20.0</span>
-                                </div>
-                                <div class="carga-item">
-                                    <span class="carga-label">Média:</span>
-                                    <span class="carga-valor" id="cargaMedia">30.0</span>
-                                </div>
-                                <div class="carga-item">
-                                    <span class="carga-label">Pesada:</span>
-                                    <span class="carga-valor" id="cargaPesada">60.0</span>
-                                </div>
-                                <div class="carga-item">
-                                    <span class="carga-label">Muito Pesada:</span>
-                                    <span class="carga-valor" id="cargaMuitoPesada">100.0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <h2 class="dev-title">Atributos</h2>
+                <p class="dev-message">
+                    Configure os atributos principais (FOR, DES, INT, VIG) e secundários (PV, PF, Vontade, Percepção).
+                    Em desenvolvimento...
+                </p>
             </div>
         </div>
 
-       <!-- ABA CARACTERÍSTICAS -->
-<div id="caracteristicas" class="tab-content">
-    <div class="caracteristicas-container">
-        <!-- CARDS SUPERIORES - APARÊNCIA E RIQUEZA -->
-        <div class="caracteristicas-grid">
-            <!-- CARD APARÊNCIA FÍSICA -->
-            <div class="caracteristica-card">
-                <div class="card-header">
-                    <i class="fas fa-user"></i>
-                    <h3>Aparência Física</h3>
-                    <span class="pontos-badge" id="pontosAparencia">0 pts</span>
+        <!-- ABA CARACTERÍSTICAS -->
+        <div id="caracteristicas" class="tab-content">
+            <div class="dev-content">
+                <div class="dev-icon">
+                    <i class="fas fa-user-tie"></i>
                 </div>
-                <div class="card-content">
-                    <div class="select-group">
-                        <label>Nível de Aparência:</label>
-                        <select id="nivelAparencia" class="form-select">
-                            <option value="-24">Horrendo [-24 pts]</option>
-                            <option value="-20">Monstruoso [-20 pts]</option>
-                            <option value="-16">Hediondo [-16 pts]</option>
-                            <option value="-8">Feio [-8 pts]</option>
-                            <option value="-4">Sem Atrativos [-4 pts]</option>
-                            <option value="0" selected>Comum [0 pts]</option>
-                            <option value="4">Atraente [+4 pts]</option>
-                            <option value="12">Elegante [+12 pts]</option>
-                            <option value="16">Muito Elegante [+16 pts]</option>
-                            <option value="20">Lindo [+20 pts]</option>
-                        </select>
-                    </div>
-                    <div class="info-display" id="displayAparencia">
-                        <strong>Comum</strong>
-                        <br><small>Reação: +0</small>
-                        <br><small>Aparência padrão, sem modificadores</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CARD NÍVEL DE RIQUEZA -->
-            <div class="caracteristica-card">
-                <div class="card-header">
-                    <i class="fas fa-coins"></i>
-                    <h3>Nível de Riqueza</h3>
-                    <span class="pontos-badge" id="pontosRiqueza">0 pts</span>
-                </div>
-                <div class="card-content">
-                    <div class="select-group">
-                        <label>Nível de Riqueza:</label>
-                        <select id="nivelRiqueza" class="form-select">
-                            <option value="-25">Falido [-25 pts]</option>
-                            <option value="-15">Pobre [-15 pts]</option>
-                            <option value="-10">Batalhador [-10 pts]</option>
-                            <option value="0" selected>Médio [0 pts]</option>
-                            <option value="10">Confortável [+10 pts]</option>
-                            <option value="20">Rico [+20 pts]</option>
-                            <option value="30">Muito Rico [+30 pts]</option>
-                            <option value="50">Podre de Rico [+50 pts]</option>
-                        </select>
-                    </div>
-                    <div class="info-display" id="displayRiqueza">
-                        <strong>Médio</strong>
-                        <br><small>Multiplicador: 1x</small>
-                        <br><small>Nível de recursos pré-definido padrão</small>
-                    </div>
-                    <div class="renda-info">
-                        <small>Renda Mensal Estimada: <span id="rendaMensal">$1.000</span></small>
-                    </div>
-                </div>
+                <h2 class="dev-title">Características</h2>
+                <p class="dev-message">
+                    Defina aparência física, nível de riqueza, idiomas e características físicas do personagem.
+                    Em desenvolvimento...
+                </p>
             </div>
         </div>
 
-        <!-- CARD IDIOMAS -->
-        <div class="caracteristica-card full-width">
-            <div class="card-header">
-                <i class="fas fa-globe"></i>
-                <h3>Idiomas</h3>
-                <span class="pontos-badge" id="pontosIdiomas">0 pts</span>
-            </div>
-            <div class="card-content">
-                <!-- IDIOMA MATERNO -->
-                <div class="idioma-section">
-                    <h4>Idioma Materno</h4>
-                    <div class="idioma-materno">
-                        <input type="text" id="idiomaMaternoNome" value="Comum" placeholder="Nome do idioma materno" class="form-input">
-                        <span class="nivel-info">Nativo (0 pts)</span>
-                    </div>
+        <!-- ABA VANTAGENS -->
+        <div id="vantagens" class="tab-content">
+            <div class="dev-content">
+                <div class="dev-icon">
+                    <i class="fas fa-star"></i>
                 </div>
+                <h2 class="dev-title">Vantagens & Desvantagens</h2>
+                <p class="dev-message">
+                    Selecione vantagens, desvantagens e peculiaridades para personalizar seu personagem.
+                    Em desenvolvimento...
+                </p>
+            </div>
+        </div>
 
-                <!-- ADICIONAR NOVO IDIOMA -->
-                <div class="idioma-section">
-                    <h4>Adicionar Idioma</h4>
-                    <div class="add-idioma-form">
-                        <input type="text" id="novoIdiomaNome" placeholder="Digite o nome do idioma" class="form-input">
-                        
-                        <div class="niveis-container">
-                            <div class="nivel-group">
-                                <label>  ️ Nível de Fala:</label>
-                                <select id="novoIdiomaFala" class="form-select">
-                                    <option value="0">Nenhum (0 pts)</option>
-                                    <option value="2" selected>Rudimentar (2 pts)</option>
-                                    <option value="4">Sotaque (4 pts)</option>
-                                    <option value="6">Nativo (6 pts)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="nivel-group">
-                                <label>   Nível de Escrita:</label>
-                                <select id="novoIdiomaEscrita" class="form-select">
-                                    <option value="0" selected>Nenhum (0 pts)</option>
-                                    <option value="2">Rudimentar (1 pt)</option>
-                                    <option value="4">Sotaque (2 pts)</option>
-                                    <option value="6">Nativo (3 pts)</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="add-idioma-actions">
-                            <span class="custo-preview">Custo: <span id="custoIdiomaPreview">+2 pts</span></span>
-                            <button id="btnAdicionarIdioma" class="btn-primary">
-                                <i class="fas fa-plus"></i> Adicionar Idioma
-                            </button>
-                        </div>
-                    </div>
+        <!-- ABA PERÍCIAS -->
+        <div id="pericias" class="tab-content">
+            <div class="dev-content">
+                <div class="dev-icon">
+                    <i class="fas fa-graduation-cap"></i>
                 </div>
-
-                <!-- LISTA DE IDIOMAS ADICIONAIS -->
-                <div class="idioma-section">
-                    <h4>Idiomas Adicionais <small>(<span id="totalIdiomas">0</span> idiomas)</small></h4>
-                    <div id="listaIdiomasAdicionais" class="idiomas-lista">
-                        <div class="empty-state">
-                            Nenhum idioma adicional adicionado
-                        </div>
-                    </div>
-                </div>
+                <h2 class="dev-title">Perícias</h2>
+                <p class="dev-message">
+                    Escolha e configure perícias gerais e técnicas especiais para seu personagem.
+                    Em desenvolvimento...
+                </p>
             </div>
         </div>
 
-        <!-- CARACTERÍSTICAS FÍSICAS E ALTURA/PESO -->
-        <div class="caracteristicas-grid">
-            <!-- CARD CARACTERÍSTICAS FÍSICAS -->
-            <div class="caracteristica-card">
-                <div class="card-header">
-                    <i class="fas fa-weight"></i>
-                    <h3>Características Físicas</h3>
-                    <span class="pontos-badge" id="pontosCaracteristicas">0 pts</span>
-                </div>
-                <div class="card-content">
-                    <div class="caracteristicas-lista">
-                        <div class="caracteristica-item" data-tipo="magro">
-                            <div class="caracteristica-info">
-                                <strong>Magro</strong>
-                                <small>-5 pts | Peso: 67% do normal</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
-                        </div>
-                        
-                        <div class="caracteristica-item" data-tipo="acima-peso">
-                            <div class="caracteristica-info">
-                                <strong>Acima do Peso</strong>
-                                <small>-1 pt | Peso: 130% do normal</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
-                        </div>
-                        
-                        <div class="caracteristica-item" data-tipo="gordo">
-                            <div class="caracteristica-info">
-                                <strong>Gordo</strong>
-                                <small>-3 pts | Peso: 150% do normal</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
-                        </div>
-                        
-                        <div class="caracteristica-item" data-tipo="muito-gordo">
-                            <div class="caracteristica-info">
-                                <strong>Muito Gordo</strong>
-                                <small>-5 pts | Peso: 200% do normal</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
-                        </div>
-                        
-                        <div class="caracteristica-item" data-tipo="nanismo">
-                            <div class="caracteristica-info">
-                                <strong>Nanismo</strong>
-                                <small>-15 pts | MT -1, -1 Deslocamento</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
-                        </div>
-                        
-                        <div class="caracteristica-item" data-tipo="gigantismo">
-                            <div class="caracteristica-info">
-                                <strong>Gigantismo</strong>
-                                <small>0 pts | MT +1, +1 Deslocamento</small>
-                            </div>
-                            <button class="btn-add-caracteristica">Adicionar</button>
-                        </div>
-                    </div>
-                    
-                    <!-- CARACTERÍSTICAS SELECIONADAS -->
-                    <div id="caracteristicasSelecionadas" class="caracteristicas-selecionadas">
-                        <!-- Dinâmico - características adicionadas aparecem aqui -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- CARD ALTURA E PESO - VERSÃO COM DESVANTAGENS ATIVAS -->
-            <div class="caracteristica-card">
-                <div class="card-header">
-                    <i class="fas fa-ruler-combined"></i>
-                    <h3>Altura e Peso</h3>
-                    <span class="status-badge" id="statusFisico">Normal</span>
-                </div>
-                <div class="card-content">
-                    <!-- CONTROLES ALTURA -->
-                    <div class="fisica-control">
-                        <label>   Altura (metros):</label>
-                        <div class="controle-numerico">
-                            <button class="btn-controle" onclick="ajustarAltura(-0.01)">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="number" id="altura" value="1.70" step="0.01" min="1.30" max="2.50" class="fisica-input">
-                            <button class="btn-controle" onclick="ajustarAltura(0.01)">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div id="statusAltura" class="status-info"></div>
-                    </div>
-
-                    <!-- CONTROLES PESO -->
-                    <div class="fisica-control">
-                        <label>⚖️ Peso (kg):</label>
-                        <div class="controle-numerico">
-                            <button class="btn-controle" onclick="ajustarPeso(-1)">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="number" id="peso" value="70" step="1" min="30" max="200" class="fisica-input">
-                            <button class="btn-controle" onclick="ajustarPeso(1)">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div id="statusPeso" class="status-info"></div>
-                    </div>
-
-                    <!-- NOVA SEÇÃO: DESVANTAGENS ATIVAS -->
-                    <div class="desvantagens-ativas" id="desvantagensAtivas" style="display: none;">
-                        <div class="desvantagens-header">
-                            <i class="fas fa-list-check"></i>
-                            <h4>Desvantagens Físicas Ativas</h4>
-                        </div>
-                        <div class="desvantagens-lista" id="listaDesvantagens">
-                            <!-- As desvantagens aparecerão aqui automaticamente -->
-                        </div>
-                    </div>
-
-                    <!-- INFO BASE ST - CORRIGIDO -->
-                    <div class="fisica-info">
-                        <div class="info-row">
-                            <span>ST Base:</span>
-                            <strong id="stBase">10</strong>
-                        </div>
-                        <div class="info-row">
-                            <span>Faixa de Altura (ST):</span>
-                            <span id="alturaFaixa">1.58m - 1.83m</span>
-                        </div>
-                        <div class="info-row">
-                            <span>Faixa de Peso (ST):</span>
-                            <span id="pesoFaixa">57.5kg - 87.5kg</span>
-                        </div>
-                        <div class="info-row">
-                            <span>Status:</span>
-                            <span id="modificadorPeso">Dentro da faixa</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- ABA VANTAGENS & DESVANTAGENS -->
-<div id="vantagens" class="tab-content">
-    <div class="atributos-container">
-        <!-- CARD DE RESUMO DE PONTOS -->
-        <div class="pontos-section">
-            <div class="ponto-card">
-                <h3>Vantagens</h3>
-                <div class="ponto-valor" id="total-vantagens">+0 pts</div>
-            </div>
-            <div class="ponto-card gastos">
-                <h3>Desvantagens</h3>
-                <div class="ponto-valor" id="total-desvantagens">0 pts</div>
-            </div>
-            <div class="ponto-card saldo">
-                <h3>Saldo Total</h3>
-                <div class="ponto-valor" id="saldo-total-vantagens">0 pts</div>
-            </div>
-        </div>
-
-        <!-- SEÇÃO VANTAGENS E DESVANTAGENS -->
-        <div class="cards-grid principais-grid">
-            <!-- CARD VANTAGENS DISPONÍVEIS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>⭐ Vantagens Disponíveis</h3>
-                    <div class="contador" id="contador-vantagens">0 vantagens</div>
-                </div>
-                
-                <!-- SISTEMA DE BUSCA -->
-                <div class="busca-simples">
-                    <input type="text" id="busca-vantagens" placeholder="   Buscar vantagem..." 
-                           class="busca-input" autocomplete="off">
-                </div>
-                
-                <!-- LISTA DE VANTAGENS -->
-                <div class="lista-container" id="lista-vantagens">
-                    <!-- Conteúdo será preenchido por JavaScript -->
-                    <div class="lista-vazia">Carregando vantagens...</div>
-                </div>
-            </div>
-
-            <!-- CARD VANTAGENS ADQUIRIDAS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>✅ Vantagens Adquiridas</h3>
-                    <div class="custo-pontos" id="total-vantagens-adquiridas">0 pts</div>
-                </div>
-                
-                <div class="lista-container" id="vantagens-adquiridas">
-                    <div class="lista-vazia">Nenhuma vantagem adquirida</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEPARADOR -->
-        <div class="secao-titulo">
-            <h2>Desvantagens</h2>
-        </div>
-
-        <!-- SEÇÃO DESVANTAGENS -->
-        <div class="cards-grid principais-grid">
-            <!-- CARD DESVANTAGENS DISPONÍVEIS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>⚠️ Desvantagens Disponíveis</h3>
-                    <div class="contador" id="contador-desvantagens">0 desvantagens</div>
-                </div>
-                
-                <!-- SISTEMA DE BUSCA -->
-                <div class="busca-simples">
-                    <input type="text" id="busca-desvantagens" placeholder="   Buscar desvantagem..." 
-                           class="busca-input" autocomplete="off">
-                </div>
-                
-                <!-- LISTA DE DESVANTAGENS -->
-                <div class="lista-container" id="lista-desvantagens">
-                    <!-- Conteúdo será preenchido por JavaScript -->
-                    <div class="lista-vazia">Carregando desvantagens...</div>
-                </div>
-            </div>
-
-            <!-- CARD DESVANTAGENS ADQUIRIDAS -->
-            <div class="atributo-card">
-                <div class="atributo-header">
-                    <h3>❌ Desvantagens Adquiridas</h3>
-                    <div class="custo-pontos negativo" id="total-desvantagens-adquiridas">0 pts</div>
-                </div>
-                
-                <div class="lista-container" id="desvantagens-adquiridas">
-                    <div class="lista-vazia">Nenhuma desvantagem adquirida</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEÇÃO PECULIARIDADES - ATUALIZADA -->
-        <div class="secao-titulo">
-            <h2>Peculiaridades</h2>
-            <small class="subtitulo">Máximo 5 peculiaridades • -1 ponto cada</small>
-        </div>
-
-        <!-- CARD DE PECULIARIDADES - CORRIGIDO -->
-        <div class="atributo-card peculiaridades-card">
-            <div class="atributo-header">
-                <h3>   Peculiaridades do Personagem</h3>
-                <div class="contador" id="contador-peculiaridades">0/5</div>
-            </div>
-            
-            <div class="peculiaridades-container">
-                <!-- ÁREA PARA ADICIONAR NOVAS PECULIARIDADES -->
-                <div class="adicionar-peculiaridade">
-                    <input type="text" id="nova-peculiaridade" 
-                           placeholder="Digite uma peculiaridade (ex: Medo de altura, Tique nervoso...)" 
-                           maxlength="100" class="peculiaridade-input">
-                    <button id="btn-adicionar-peculiaridade" class="btn btn-pequeno">
-                        ➕ Adicionar
-                    </button>
-                </div>
-                
-                <!-- LISTA DE PECULIARIDADES - CLASSE CORRIGIDA -->
-                <div class="lista-peculiaridades" id="lista-peculiaridades">
-                    <div class="lista-vazia">Nenhuma peculiaridade adicionada</div>
-                </div>
-                
-                <!-- RESUMO -->
-                <div class="peculiaridades-resumo">
-                    <div class="resumo-item">
-                        <span>Peculiaridades:</span>
-                        <strong id="total-peculiaridades">0</strong>
-                    </div>
-                    <div class="resumo-item">
-                        <span>Custo Total:</span>
-                        <strong class="negativo" id="custo-peculiaridades">-0 pts</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL PARA VANTAGENS -->
-<div id="modal-vantagem" class="modal">
-    <div class="modal-content modal-vantagem">
-        <span class="modal-close">&times;</span>
-        <div class="modal-header">
-            <h3 id="modal-titulo-vantagem">Selecionar Vantagem</h3>
-        </div>
-        <div class="modal-body" id="modal-corpo-vantagem">
-            <!-- Conteúdo será preenchido dinamicamente -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-cancelar">Cancelar</button>
-            <button class="btn btn-confirmar" disabled>Adicionar Vantagem</button>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL PARA DESVANTAGENS -->
-<div id="modal-desvantagem" class="modal">
-    <div class="modal-content modal-desvantagem">
-        <span class="modal-close">&times;</span>
-        <div class="modal-header">
-            <h3 id="modal-titulo-desvantagem">Selecionar Desvantagem</h3>
-        </div>
-        <div class="modal-body" id="modal-corpo-desvantagem">
-            <!-- Conteúdo será preenchido dinamicamente -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-cancelar">Cancelar</button>
-            <button class="btn btn-confirmar" disabled>Adicionar Desvantagem</button>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL PARA OPÇÕES (QUANDO TEM VÁRIAS VERSÕES) -->
-<div id="modal-opcoes" class="modal">
-    <div class="modal-content modal-opcoes">
-        <span class="modal-close">&times;</span>
-        <div class="modal-header">
-            <h3 id="modal-titulo-opcoes">Escolha uma Opção</h3>
-        </div>
-        <div class="modal-body" id="modal-corpo-opcoes">
-            <!-- Lista de opções (ex: Abençoado 10pts, 20pts, etc) -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-cancelar">Voltar</button>
-            <button class="btn btn-confirmar" disabled>Selecionar</button>
-        </div>
-    </div>
-</div>
-
-<!-- ABA PERÍCIAS -->
-<div id="pericias" class="tab-content">
-  <div class="container-principal">
-    
-    <!-- STATUS PERÍCIAS - VERSÃO POR ATRIBUTO -->
-    <div class="status-cards-container">
-      <div class="card-status-resumo">
-        <h3><i class="fas fa-chart-pie"></i> Resumo das Perícias</h3>
-        
-        <div class="status-linhas-container">
-          <!-- DX -->
-          <div class="status-linha">
-            <div class="status-categoria">
-              <i class="fas fa-running"></i>
-              <span>DX</span>
-            </div>
-            <div class="status-valores">
-              <span class="status-qtd" id="qtd-dx">0</span>
-              <span class="status-pontos" id="pts-dx">(0 pts)</span>
-            </div>
-          </div>
-          
-          <!-- IQ -->
-          <div class="status-linha">
-            <div class="status-categoria">
-              <i class="fas fa-brain"></i>
-              <span>IQ</span>
-            </div>
-            <div class="status-valores">
-              <span class="status-qtd" id="qtd-iq">0</span>
-              <span class="status-pontos" id="pts-iq">(0 pts)</span>
-            </div>
-          </div>
-          
-          <!-- HT -->
-          <div class="status-linha">
-            <div class="status-categoria">
-              <i class="fas fa-heartbeat"></i>
-              <span>HT</span>
-            </div>
-            <div class="status-valores">
-              <span class="status-qtd" id="qtd-ht">0</span>
-              <span class="status-pontos" id="pts-ht">(0 pts)</span>
-            </div>
-          </div>
-          
-          <!-- PERC -->
-          <div class="status-linha">
-            <div class="status-categoria">
-              <i class="fas fa-eye"></i>
-              <span>PERC</span>
-            </div>
-            <div class="status-valores">
-              <span class="status-qtd" id="qtd-perc">0</span>
-              <span class="status-pontos" id="pts-perc">(0 pts)</span>
-            </div>
-          </div>
-          
-          <!-- SEPARADOR -->
-          <div class="status-separador"></div>
-          
-          <!-- TOTAL -->
-          <div class="status-linha total">
-            <div class="status-categoria">
-              <i class="fas fa-box"></i>
-              <span>TOTAL</span>
-            </div>
-            <div class="status-valores">
-              <span class="status-qtd" id="qtd-total">0</span>
-              <span class="status-pontos" id="pts-total">(0 pts)</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
-    <div class="sistema-aquisicao-pericias">
-      
-      <!-- COLUNA ESQUERDA - CATÁLOGO DE PERÍCIAS -->
-      <div class="catalog-column-pericias">
-        <div class="catalog-section-pericias">
-          <h3><i class="fas fa-book-open"></i> Catálogo de Perícias</h3>
-          
-          <!-- BARRA DE BUSCA -->
-          <div class="busca-pericias">
-            <input type="text" placeholder="   Buscar perícias..." class="search-input" id="busca-pericias">
-          </div>
-          
-          <!-- FILTROS POR ATRIBUTO E COMBATE -->
-          <div class="filtros-container-pericias">
-            <div class="filtro-buttons">
-              <button class="filtro-btn active" data-filtro="todas">
-                <i class="fas fa-layer-group"></i> Todas
-              </button>
-              <button class="filtro-btn" data-filtro="dx">
-                <i class="fas fa-running"></i> DX
-              </button>
-              <button class="filtro-btn" data-filtro="iq">
-                <i class="fas fa-brain"></i> IQ
-              </button>
-              <button class="filtro-btn" data-filtro="ht">
-                <i class="fas fa-heartbeat"></i> HT
-              </button>
-              <button class="filtro-btn" data-filtro="perc">
-                <i class="fas fa-eye"></i> PERC
-              </button>
-              <button class="filtro-btn" data-filtro="combate">
-                <i class="fas fa-fist-raised"></i> Combate
-              </button>
-            </div>
-          </div>
-          
-          <!-- CONTAINER COM SCROLL PARA CATÁLOGO -->
-          <div class="scroll-container catalogo-scroll">
-            <div class="catalog-list-pericias" id="lista-pericias">
-              <!-- As perícias serão carregadas dinamicamente pelo JavaScript -->
-              <div class="loading-spinner">
-                <i class="fas fa-spinner fa-spin"></i>
-                <div>Carregando catálogo de perícias...</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- COLUNA DIREITA - PERÍCIAS APRENDIDAS -->
-      <div class="acquired-column-pericias">
-        <div class="acquired-section-pericias">
-          <h3><i class="fas fa-graduation-cap"></i> Perícias Aprendidas 
-            <span class="points-badge" id="pontos-pericias-total">[0 pts]</span>
-          </h3>
-          
-          <!-- CONTAINER COM SCROLL PARA APRENDIDAS -->
-          <div class="scroll-container aprendidas-scroll">
-            <div class="acquired-list-pericias" id="pericias-aprendidas">
-              <div class="nenhuma-pericia-aprendida">
-                <i class="fas fa-graduation-cap"></i>
-                <div>Nenhuma perícia aprendida</div>
-                <small>As perícias que você aprender aparecerão aqui</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== SEÇÃO DE TÉCNICAS - ABAIXO DAS PERÍCIAS ===== -->
-    <div class="tecnicas-section">
-      
-      <!-- STATUS DAS TÉCNICAS -->
-      <div class="status-cards-container">
-        <div class="card-status-resumo">
-          <h3><i class="fas fa-tools"></i> Técnicas Especiais</h3>
-          
-          <div class="status-linhas-container">
-            <!-- TÉCNICAS MÉDIAS -->
-            <div class="status-linha">
-              <div class="status-categoria">
-                <i class="fas fa-star-half-alt"></i>
-                <span>Médias</span>
-              </div>
-              <div class="status-valores">
-                <span class="status-qtd" id="qtd-tecnicas-medio">0</span>
-                <span class="status-pontos" id="pts-tecnicas-medio">(0 pts)</span>
-              </div>
-            </div>
-            
-            <!-- TÉCNICAS DIFÍCEIS -->
-            <div class="status-linha">
-              <div class="status-categoria">
-                <i class="fas fa-star"></i>
-                <span>Difíceis</span>
-              </div>
-              <div class="status-valores">
-                <span class="status-qtd" id="qtd-tecnicas-dificil">0</span>
-                <span class="status-pontos" id="pts-tecnicas-dificil">(0 pts)</span>
-              </div>
-            </div>
-            
-            <!-- SEPARADOR -->
-            <div class="status-separador"></div>
-            
-            <!-- TOTAL TÉCNICAS -->
-            <div class="status-linha total">
-              <div class="status-categoria">
-                <i class="fas fa-tools"></i>
-                <span>TOTAL TÉCNICAS</span>
-              </div>
-              <div class="status-valores">
-                <span class="status-qtd" id="qtd-tecnicas-total">0</span>
-                <span class="status-pontos" id="pts-tecnicas-total">(0 pts)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SISTEMA DE AQUISIÇÃO DE TÉCNICAS -->
-      <div class="sistema-aquisicao-pericias">
-        
-        <!-- COLUNA ESQUERDA - CATÁLOGO DE TÉCNICAS -->
-        <div class="catalog-column-pericias">
-          <div class="catalog-section-pericias">
-            <h3><i class="fas fa-book-open"></i> Técnicas Disponíveis</h3>
-            
-            <!-- BARRA DE BUSCA COM ID ÚNICO -->
-            <div class="busca-pericias">
-              <input type="text" placeholder="   Buscar técnicas..." class="search-input" id="busca-tecnicas-input">
-            </div>
-            
-            <!-- FILTROS POR DIFICULDADE COM IDs ÚNICOS -->
-            <div class="filtros-container-pericias">
-              <div class="filtro-buttons">
-                <button class="filtro-btn-tecnica active" data-filtro="todas-tecnicas">
-                  <i class="fas fa-layer-group"></i> Todas
-                </button>
-                <button class="filtro-btn-tecnica" data-filtro="medio-tecnicas">
-                  <i class="fas fa-star-half-alt"></i> Médias
-                </button>
-                <button class="filtro-btn-tecnica" data-filtro="dificil-tecnicas">
-                  <i class="fas fa-star"></i> Difíceis
-                </button>
-                <button class="filtro-btn-tecnica" data-filtro="pericia-tecnicas">
-                  <i class="fas fa-filter"></i> Por Perícia
-                </button>
-              </div>
-            </div>
-            
-            <!-- CONTAINER COM SCROLL PARA TÉCNICAS DISPONÍVEIS -->
-            <div class="scroll-container tecnicas-catalogo-scroll">
-              <div class="catalog-list-pericias" id="lista-tecnicas">
-                <div class="nenhuma-pericia">
-                  <i class="fas fa-info-circle"></i>
-                  <div>Aprenda perícias primeiro</div>
-                  <small>As técnicas aparecerão aqui quando você tiver as perícias necessárias</small>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- COLUNA DIREITA - TÉCNICAS APRENDIDAS -->
-        <div class="acquired-column-pericias">
-          <div class="acquired-section-pericias">
-            <h3><i class="fas fa-graduation-cap"></i> Técnicas Aprendidas 
-              <span class="points-badge" id="pontos-tecnicas-total">[0 pts]</span>
-            </h3>
-            
-            <!-- CONTAINER COM SCROLL PARA TÉCNICAS APRENDIDAS -->
-            <div class="scroll-container tecnicas-aprendidas-scroll">
-              <div class="acquired-list-pericias" id="tecnicas-aprendidas">
-                <div class="nenhuma-pericia-aprendida">
-                  <i class="fas fa-tools"></i>
-                  <div>Nenhuma técnica aprendida</div>
-                  <small>As técnicas que você aprender aparecerão aqui</small>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-  </div> <!-- Fecha .container-principal -->
-</div> <!-- Fecha #pericias -->
-
-<!-- MODAL DE COMPRA/EDIÇÃO DE PERÍCIA -->
-<div class="modal-pericia-overlay" style="display: none;">
-  <div class="modal-pericia">
-    <!-- Conteúdo será preenchido pelo JavaScript -->
-  </div>
-</div>
-
-<!-- MODAL DE ESCOLHA DE ESPECIALIZAÇÃO (Para Armas, etc) -->
-<div class="modal-especializacao-overlay" style="display: none;">
-  <div class="modal-especializacao">
-    <!-- Conteúdo será preenchido pelo JavaScript -->
-  </div>
-</div>
-
-<!-- MODAL DE COMPRA DE TÉCNICA -->
-<div class="modal-tecnica-overlay" style="display: none;">
-  <div class="modal-tecnica">
-    <!-- Conteúdo será preenchido pelo JavaScript -->
-  </div>
-</div>
         <!-- ABA MAGIAS -->
         <div id="magia" class="tab-content">
-            <div class="container-principal">
-                
-                <!-- STATUS MÁGICO -->
-                <div class="status-cards-container">
-                    <div class="card-magia-status">
-                        <h3><i class="fas fa-hat-wizard"></i> Status Mágico</h3>
-                        <div class="magia-status-grid">
-                            <div class="magia-status-item">
-                                <label><i class="fas fa-wand-magic"></i> Aptidão Mágica:</label>
-                                <input type="number" id="aptidao-magica" value="0" min="0" max="10">
-                            </div>
-                            <div class="magia-status-item">
-                                <label><i class="fas fa-brain"></i> IQ Mágico:</label>
-                                <span id="iq-magico">10</span>
-                            </div>
-                            <div class="magia-status-item">
-                                <label><i class="fas fa-tint"></i> Mana Base:</label>
-                                <span id="mana-base">10</span>
-                            </div>
-                            <div class="magia-status-item">
-                                <label><i class="fas fa-battery-half"></i> Mana Atual:</label>
-                                <input type="number" id="mana-atual" value="10" min="0" max="50">
-                            </div>
-                            <div class="magia-status-item">
-                                <label><i class="fas fa-plus-circle"></i> Bônus de Mana:</label>
-                                <input type="number" id="bonus-mana" value="0" min="0" max="20">
-                            </div>
-                            <div class="magia-status-item total">
-                                <label><i class="fas fa-coins"></i> Total Gasto:</label>
-                                <span id="total-gasto-magia">0</span> pts
-                            </div>
-                        </div>
-                    </div>
+            <div class="dev-content">
+                <div class="dev-icon">
+                    <i class="fas fa-hat-wizard"></i>
                 </div>
-
-                <!-- SISTEMA DE AQUISIÇÃO - LADO A LADO -->
-                <div class="sistema-aquisicao-magia">
-                    
-                    <!-- COLUNA ESQUERDA - CATÁLOGO -->
-                    <div class="catalog-column-magia">
-                        <div class="catalog-section-magia">
-                            <h3><i class="fas fa-book"></i> Catálogo de Magias</h3>
-                            
-                            <!-- BARRA DE BUSCA -->
-                            <div class="busca-magias">
-                                <input type="text" placeholder="   Buscar magias..." class="search-input" id="busca-magias">
-                            </div>
-                            
-                            <!-- FILTROS COM SUBMENUS (como nas perícias) -->
-                            <div class="filtros-container-magia">
-                                
-                                <!-- FILTRO ESCOLAS -->
-                                <div class="filtro-grupo">
-                                    <div class="filtro-header" onclick="toggleSubmenu('escolas-submenu')">
-                                        <i class="fas fa-graduation-cap"></i>
-                                        <span>Escolas de Magia</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </div>
-                                    <div class="filtro-submenu" id="escolas-submenu">
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-todas" checked>
-                                            <label for="escola-todas">Todas as Escolas</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-agua" class="escola-checkbox" checked>
-                                            <label for="escola-agua">Água</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-ar" class="escola-checkbox" checked>
-                                            <label for="escola-ar">Ar</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-compreensao" class="escola-checkbox" checked>
-                                            <label for="escola-compreensao">Compreensão e Empatia</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-controle-mente" class="escola-checkbox" checked>
-                                            <label for="escola-controle-mente">Controle da Mente</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-controle-corpo" class="escola-checkbox" checked>
-                                            <label for="escola-controle-corpo">Controle do Corpo</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-cura" class="escola-checkbox" checked>
-                                            <label for="escola-cura">Cura</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-deslocamento" class="escola-checkbox" checked>
-                                            <label for="escola-deslocamento">Deslocamento</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-fogo" class="escola-checkbox" checked>
-                                            <label for="escola-fogo">Fogo</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-luz-trevas" class="escola-checkbox" checked>
-                                            <label for="escola-luz-trevas">Luz e Trevas</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-necromancia" class="escola-checkbox" checked>
-                                            <label for="escola-necromancia">Necromancia</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-portal" class="escola-checkbox" checked>
-                                            <label for="escola-portal">Portal</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-protecao" class="escola-checkbox" checked>
-                                            <label for="escola-protecao">Proteção e Aviso</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-reconhecimento" class="escola-checkbox" checked>
-                                            <label for="escola-reconhecimento">Reconhecimento</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-terra" class="escola-checkbox" checked>
-                                            <label for="escola-terra">Terra</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="escola-metamagica" class="escola-checkbox" checked>
-                                            <label for="escola-metamagica">Metamágica</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- FILTRO CLASSES -->
-                                <div class="filtro-grupo">
-                                    <div class="filtro-header" onclick="toggleSubmenu('classes-submenu')">
-                                        <i class="fas fa-layer-group"></i>
-                                        <span>Classes de Magia</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </div>
-                                    <div class="filtro-submenu" id="classes-submenu">
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="classe-todas" checked>
-                                            <label for="classe-todas">Todas as Classes</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="classe-comuns" class="classe-checkbox" checked>
-                                            <label for="classe-comuns">Comuns</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="classe-area" class="classe-checkbox" checked>
-                                            <label for="classe-area">Área</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="classe-toque" class="classe-checkbox" checked>
-                                            <label for="classe-toque">Toque</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="classe-projetil" class="classe-checkbox" checked>
-                                            <label for="classe-projetil">Projétil</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="classe-bloqueio" class="classe-checkbox" checked>
-                                            <label for="classe-bloqueio">Bloqueio</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="classe-informacao" class="classe-checkbox" checked>
-                                            <label for="classe-informacao">Informação</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="classe-resistiveis" class="classe-checkbox" checked>
-                                            <label for="classe-resistiveis">Resistíveis</label>
-                                        </div>
-                                        <div class="filtro-option">
-                                            <input type="checkbox" id="classe-especiais" class="classe-checkbox" checked>
-                                            <label for="classe-especiais">Especiais</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- LISTA DE MAGIAS DO CATÁLOGO -->
-                            <div class="catalog-list-magias" id="lista-magias">
-                                <!-- As magias serão carregadas dinamicamente pelo JavaScript -->
-                                <div class="nenhuma-magia">
-                                    <i class="fas fa-spinner fa-spin"></i>
-                                    <div>Carregando catálogo de magias...</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- COLUNA DIREITA - MAGIAS APRENDIDAS -->
-                    <div class="acquired-column-magia">
-                        
-                        <!-- MAGIAS APRENDIDAS -->
-                        <div class="acquired-section-magia">
-                            <h3><i class="fas fa-graduation-cap"></i> Magias Aprendidas 
-                                <span class="points-badge" id="pontos-magia-total">[0 pts]</span>
-                            </h3>
-                            <div class="acquired-list-magias" id="magias-aprendidas">
-                                <div class="nenhuma-magia-aprendida">
-                                    <i class="fas fa-hat-wizard"></i>
-                                    <div>Nenhuma magia aprendida</div>
-                                    <small>As magias que você aprender aparecerão aqui</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- DETALHES DA MAGIA SELECIONADA -->
-                        <div class="detalhes-magia-section">
-                            <div class="detalhes-magia-content" id="detalhes-magia-content">
-                                <div class="nenhuma-magia-selecionada">
-                                    <i class="fas fa-search"></i>
-                                    <div>Selecione uma magia para ver os detalhes</div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- MODAL DE COMPRA/EDIÇÃO -->
-                <div class="modal-compra-overlay" style="display: none;">
-                    <div class="modal-compra">
-                        <!-- Conteúdo será preenchido pelo JavaScript -->
-                    </div>
-                </div>
-
+                <h2 class="dev-title">Magias</h2>
+                <p class="dev-message">
+                    Sistema completo de magias com escolas, níveis e custos de mana.
+                    Em desenvolvimento...
+                </p>
             </div>
-            <!-- NÃO COLOQUE NADA AQUI - APENAS FECHA container-principal -->
         </div>
-        <!-- FIM DA ABA MAGIA -->
-<!-- ABA EQUIPAMENTO -->
+
+        <!-- ABA EQUIPAMENTO -->
         <div id="equipamento" class="tab-content">
-            <div class="equipamento-container">
-                
-                <!-- BANNER SUPERIOR COM STATUS -->
-                <div class="equipamento-banner">
-                    <div class="banner-grid">
-                        <!-- DINHEIRO -->
-                        <div class="status-card">
-                            <div class="status-header">
-                                <i class="fas fa-coins"></i>
-                                <h4>Dinheiro</h4>
-                            </div>
-                            <div class="status-value" id="dinheiroEquipamento">$2.000</div>
-                            <div class="status-actions">
-                                <button class="btn-status" onclick="window.receberDinheiroRapido && receberDinheiroRapido()">
-                                    <i class="fas fa-plus"></i> Receber
-                                </button>
-                                <button class="btn-status" onclick="window.gastarDinheiroRapido && gastarDinheiroRapido()">
-                                    <i class="fas fa-minus"></i> Gastar
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- CARGA -->
-                        <div class="status-card">
-                            <div class="status-header">
-                                <i class="fas fa-weight-hanging"></i>
-                                <h4>Carga</h4>
-                            </div>
-                            <div class="status-value">
-                                <span id="pesoAtual">0</span>/<span id="pesoMaximo">60</span> kg
-                            </div>
-                            <div class="status-info">
-                                <span id="nivelCarga" class="carga-leve">LEVE</span>
-                                <small id="penalidadesCarga">MOV +0 / DODGE +0</small>
-                            </div>
-                        </div>
-                        
-                        <!-- MÃOS -->
-                        <div class="status-card">
-                            <div class="status-header">
-                                <i class="fas fa-hands"></i>
-                                <h4>Mãos Livres</h4>
-                            </div>
-                            <div class="status-value" id="displayMaos">
-                                <span class="mao-livre">  </span><span class="mao-livre">  </span>
-                            </div>
-                            <div class="status-info">
-                                <small>2 mãos disponíveis</small>
-                            </div>
-                        </div>
-                        
-                        <!-- MOCHILA -->
-                        <div class="status-card">
-                            <div class="status-header">
-                                <i class="fas fa-backpack"></i>
-                                <h4>Mochila</h4>
-                            </div>
-                            <div class="status-value">
-                                <span id="contadorMochila">0</span> itens
-                            </div>
-                            <div class="status-actions">
-                                <button class="btn-status" id="btn-liberar-mochila">
-                                    <i class="fas fa-suitcase"></i> Liberar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            <div class="dev-content">
+                <div class="dev-icon">
+                    <i class="fas fa-backpack"></i>
                 </div>
-                
-                <!-- SUB-ABAS DE EQUIPAMENTO -->
-                <div class="equipamento-subtabs">
-                    <div class="subtabs-container">
-                        <button class="subtab-btn active" data-subtab="catalogo">
-                            <i class="fas fa-store"></i>
-                            <span>Catálogo</span>
-                        </button>
-                        <button class="subtab-btn" data-subtab="inventario">
-                            <i class="fas fa-box-open"></i>
-                            <span>Inventário</span>
-                        </button>
-                        <button class="subtab-btn" data-subtab="deposito">
-                            <i class="fas fa-home"></i>
-                            <span>Depósito</span>
-                        </button>
-                        <button class="subtab-btn" data-subtab="criar">
-                            <i class="fas fa-plus-circle"></i>
-                            <span>Criar Item</span>
-                        </button>
-                        <button class="subtab-btn" data-subtab="financeiro">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Financeiro</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- CONTEÚDO DAS SUB-ABAS -->
-                <div class="equipamento-subcontent">
-                    
-                    <!-- SUB-ABA: CATÁLOGO -->
-                    <div id="subtab-catalogo" class="subtab-content active">
-                        <div class="catalogo-container">
-                            
-                            <!-- FILTROS DO CATÁLOGO -->
-                            <div class="catalogo-filtros">
-                                <div class="filtro-header">
-                                    <i class="fas fa-filter"></i>
-                                    <h4>Filtros</h4>
-                                </div>
-                                
-                                <div class="filtros-grid">
-                                    <!-- ERA -->
-                                    <div class="filtro-group">
-                                        <label>Era:</label>
-                                        <select id="filtro-era" class="filtro-select">
-                                            <option value="todas">Todas as Eras</option>
-                                            <option value="medieval">Medieval/Fantasia</option>
-                                            <option value="moderna">Moderna/Cyberpunk</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <!-- TIPO DE EQUIPAMENTO -->
-                                    <div class="filtro-group">
-                                        <label>Tipo:</label>
-                                        <select id="filtro-tipo" class="filtro-select">
-                                            <option value="todas">Todos os Tipos</option>
-                                            <option value="arma-cc">Armas Corpo-a-Corpo</option>
-                                            <option value="arma-dist">Armas à Distância</option>
-                                            <option value="armadura">Armaduras</option>
-                                            <option value="escudo">Escudos</option>
-                                            <option value="geral">Equipamentos Gerais</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <!-- BUSCA -->
-                                    <div class="filtro-group busca-group">
-                                        <label>Buscar:</label>
-                                        <div class="busca-input">
-                                            <i class="fas fa-search"></i>
-                                            <input type="text" id="busca-catalogo" placeholder="Nome do equipamento...">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- LISTA DE CATEGORIAS -->
-                            <div class="categorias-container">
-                                
-                                <!-- ARMAS CORPO-A-CORPO -->
-                                <div class="categoria-section" data-category="armas-cc">
-                                    <div class="categoria-header">
-                                        <i class="fas fa-gavel"></i>
-                                        <h3>Armas Corpo-a-Corpo</h3>
-                                        <span class="categoria-count" id="count-armas-cc">6</span>
-                                    </div>
-                                    <div class="table-container">
-                                        <!-- Tabela será preenchida pelo JavaScript -->
-                                        <div class="loading-categoria">
-                                            <i class="fas fa-spinner fa-spin"></i>
-                                            <span>Carregando armas...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- ARMAS À DISTÂNCIA -->
-                                <div class="categoria-section" data-category="armas-dist">
-                                    <div class="categoria-header">
-                                        <i class="fas fa-bullseye"></i>
-                                        <h3>Armas à Distância</h3>
-                                        <span class="categoria-count" id="count-armas-dist">4</span>
-                                    </div>
-                                    <div class="table-container">
-                                        <!-- Tabela será preenchida pelo JavaScript -->
-                                    </div>
-                                </div>
-                                
-                                <!-- ARMADURAS -->
-                                <div class="categoria-section" data-category="armaduras">
-                                    <div class="categoria-header">
-                                        <i class="fas fa-shield-alt"></i>
-                                        <h3>Armaduras</h3>
-                                        <span class="categoria-count" id="count-armaduras">4</span>
-                                    </div>
-                                    <div class="table-container">
-                                        <!-- Tabela será preenchida pelo JavaScript -->
-                                    </div>
-                                </div>
-                                
-                                <!-- ESCUDOS -->
-                                <div class="categoria-section" data-category="escudos">
-                                    <div class="categoria-header">
-                                        <i class="fas fa-shield-virus"></i>
-                                        <h3>Escudos</h3>
-                                        <span class="categoria-count" id="count-escudos">4</span>
-                                    </div>
-                                    <div class="table-container">
-                                        <!-- Tabela será preenchida pelo JavaScript -->
-                                    </div>
-                                </div>
-                                
-                                <!-- EQUIPAMENTOS GERAIS -->
-                                <div class="categoria-section" data-category="geral">
-                                    <div class="categoria-header">
-                                        <i class="fas fa-campground"></i>
-                                        <h3>Equipamentos Gerais</h3>
-                                        <span class="categoria-count" id="count-geral">7</span>
-                                    </div>
-                                    <div class="table-container">
-                                        <!-- Tabela será preenchida pelo JavaScript -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- SUB-ABA: INVENTÁRIO -->
-                    <div id="subtab-inventario" class="subtab-content">
-                        <div class="inventario-container">
-                            
-                            <!-- FILTROS DO INVENTÁRIO -->
-                            <div class="inventario-filtros">
-                                <div class="filtros-rapidos">
-                                    <button class="filtro-btn active" data-filtro="todos">
-                                        <i class="fas fa-list"></i> Todos
-                                    </button>
-                                    <button class="filtro-btn" data-filtro="equipados">
-                                        <i class="fas fa-tshirt"></i> Equipados
-                                    </button>
-                                    <button class="filtro-btn" data-filtro="corpo">
-                                        <i class="fas fa-user"></i> No Corpo
-                                    </button>
-                                    <button class="filtro-btn" data-filtro="mochila">
-                                        <i class="fas fa-backpack"></i> Mochila
-                                    </button>
-                                </div>
-                                
-                                <div class="inventario-info">
-                                    <span><strong id="totalItensInventario">0</strong> itens no total</span>
-                                    <span><strong id="pesoInventario">0</strong> kg de peso</span>
-                                </div>
-                            </div>
-                            
-                            <!-- LISTA DE EQUIPAMENTOS ADQUIRIDOS -->
-                            <div class="lista-inventario" id="lista-equipamentos-adquiridos">
-                                <div class="inventario-vazio">
-                                    <i class="fas fa-inbox fa-3x"></i>
-                                    <h4>Inventário Vazio</h4>
-                                    <p>Adquira equipamentos no catálogo para começar</p>
-                                    <button class="btn-ir-catalogo" onclick="window.alternarSubTab && alternarSubTab('catalogo')">
-                                        <i class="fas fa-store"></i> Ir para Catálogo
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- SUB-ABA: DEPÓSITO -->
-                    <div id="subtab-deposito" class="subtab-content">
-                        <div class="deposito-container">
-                            
-                            <!-- CABEÇALHO DO DEPÓSITO -->
-                            <div class="deposito-header">
-                                <div class="deposito-info">
-                                    <h3><i class="fas fa-home"></i> Depósito</h3>
-                                    <p>Itens guardados não contam peso e não podem ser usados</p>
-                                </div>
-                                
-                                <div class="deposito-acoes">
-                                    <button class="btn-deposito-acao" id="btn-guardar-tudo-deposito">
-                                        <i class="fas fa-upload"></i> Guardar Tudo
-                                    </button>
-                                    <button class="btn-deposito-acao" id="btn-retirar-tudo-deposito">
-                                        <i class="fas fa-download"></i> Retirar Tudo
-                                    </button>
-                                    <button class="btn-deposito-acao perigo" id="btn-limpar-deposito">
-                                        <i class="fas fa-trash"></i> Limpar Depósito
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- RESUMO DO DEPÓSITO -->
-                            <div class="deposito-resumo">
-                                <div class="resumo-card">
-                                    <i class="fas fa-boxes"></i>
-                                    <div>
-                                        <h4>Itens Guardados</h4>
-                                        <span id="contador-deposito">0 itens</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="resumo-card">
-                                    <i class="fas fa-weight-hanging"></i>
-                                    <div>
-                                        <h4>Peso Liberado</h4>
-                                        <span id="peso-liberado">0 kg</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="resumo-card">
-                                    <i class="fas fa-coins"></i>
-                                    <div>
-                                        <h4>Valor Total</h4>
-                                        <span id="valor-deposito">$0</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- LISTA DO DEPÓSITO -->
-                            <div class="lista-deposito" id="lista-deposito">
-                                <div class="deposito-vazio">
-                                    <i class="fas fa-home fa-3x"></i>
-                                    <h4>Depósito Vazio</h4>
-                                    <p>Guarde itens do seu inventário aqui</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- SUB-ABA: CRIAR ITEM -->
-                    <div id="subtab-criar" class="subtab-content">
-                        <div class="criar-container">
-                            <div class="criar-header">
-                                <h3><i class="fas fa-plus-circle"></i> Criar Item Personalizado</h3>
-                                <p>Crie equipamentos, armas, armaduras e itens mágicos personalizados</p>
-                            </div>
-                            
-                            <div class="criar-grid">
-                                <!-- FORMULÁRIO DE CRIAÇÃO -->
-                                <div class="criar-form">
-                                    <div class="form-section">
-                                        <h4><i class="fas fa-info-circle"></i> Informações Básicas</h4>
-                                        
-                                        <div class="form-group">
-                                            <label>Nome do Item:</label>
-                                            <input type="text" id="item-nome" placeholder="Ex: Espada Élfica" maxlength="50">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label>Tipo de Item:</label>
-                                            <select id="item-tipo">
-                                                <option value="geral">Equipamento Geral</option>
-                                                <option value="arma-cc">Arma Corpo-a-Corpo</option>
-                                                <option value="arma-dist">Arma à Distância</option>
-                                                <option value="armadura">Armadura</option>
-                                                <option value="escudo">Escudo</option>
-                                                <option value="consumivel">Consumível</option>
-                                                <option value="artefato">Artefato Mágico</option>
-                                                <option value="missao">Item de Missão</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group-duo">
-                                            <div class="form-group">
-                                                <label>Peso (kg):</label>
-                                                <input type="number" id="item-peso" value="1.0" step="0.1" min="0">
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Custo ($):</label>
-                                                <input type="number" id="item-custo" value="0" min="0">
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label>Era:</label>
-                                            <select id="item-era">
-                                                <option value="medieval">Medieval/Fantasia</option>
-                                                <option value="moderna">Moderna/Cyberpunk</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label>Descrição:</label>
-                                            <textarea id="item-descricao" rows="3" placeholder="Descreva o item..."></textarea>
-                                        </div>
-                                        
-                                        <div class="form-group checkbox-group">
-                                            <input type="checkbox" id="item-magico">
-                                            <label>Item Mágico?</label>
-                                        </div>
-                                        
-                                        <!-- CAMPOS MÁGICOS (OCULTOS INICIALMENTE) -->
-                                        <div id="campos-magicos" style="display: none;">
-                                            <div class="form-group">
-                                                <label>Efeito Mágico:</label>
-                                                <textarea id="item-efeito-magico" rows="2" placeholder="Descreva o efeito mágico..."></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- CAMPOS ESPECÍFICOS POR TIPO -->
-                                    <div id="campos-especificos">
-                                        <!-- Serão preenchidos dinamicamente -->
-                                    </div>
-                                    
-                                    <div class="form-actions">
-                                        <button class="btn-cancelar" onclick="window.limparFormCriacao && limparFormCriacao()">
-                                            <i class="fas fa-times"></i> Limpar
-                                        </button>
-                                        <button class="btn-confirmar" onclick="window.criarItemPersonalizado && criarItemPersonalizado()">
-                                            <i class="fas fa-check"></i> Criar Item
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <!-- PREVIEW DO ITEM -->
-                                <div class="criar-preview">
-                                    <div class="preview-header">
-                                        <h4><i class="fas fa-eye"></i> Preview do Item</h4>
-                                    </div>
-                                    <div class="preview-content" id="preview-conteudo">
-                                        <div class="preview-vazio">
-                                            <i class="fas fa-cube fa-3x"></i>
-                                            <p>As informações do item aparecerão aqui</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- SUB-ABA: FINANCEIRO (SUPER SIMPLIFICADO) -->
-                    <div id="subtab-financeiro" class="subtab-content">
-                        <div class="financeiro-ultra-simples">
-                            
-                            <!-- CABEÇALHO MÍNIMO -->
-                            <div class="financeiro-titulo">
-                                <h3><i class="fas fa-coins"></i> Dinheiro</h3>
-                                <p>Controle rápido de ouro/moedas</p>
-                            </div>
-                            
-                            <!-- SALDO GRANDE E VISÍVEL -->
-                            <div class="saldo-principal">
-                                <div class="saldo-atual">
-                                    <span>Saldo Disponível:</span>
-                                    <h2 id="dinheiro-disponivel">$0</h2>
-                                </div>
-                                
-                                <!-- BOTÕES GRANDES E CLAROS -->
-                                <div class="botoes-rapidos">
-                                    <button class="btn-receber-grande" onclick="window.receberDinheiroRapido && receberDinheiroRapido()">
-                                        <i class="fas fa-plus-circle"></i> RECEBER
-                                    </button>
-                                    <button class="btn-gastar-grande" onclick="window.gastarDinheiroRapido && gastarDinheiroRapido()">
-                                        <i class="fas fa-minus-circle"></i> GASTAR
-                                    </button>
-                                    <button class="btn-ajustar" onclick="window.ajustarDinheiroManual && ajustarDinheiroManual()">
-                                        <i class="fas fa-edit"></i> AJUSTAR
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- VALORES RÁPIDOS -->
-                            <div class="valores-rapidos">
-                                <h4>Valores Rápidos:</h4>
-                                <div class="botoes-valores">
-                                    <button onclick="window.adicionarDinheiro && adicionarDinheiro(10)">+$10</button>
-                                    <button onclick="window.adicionarDinheiro && adicionarDinheiro(50)">+$50</button>
-                                    <button onclick="window.adicionarDinheiro && adicionarDinheiro(100)">+$100</button>
-                                    <button onclick="window.removerDinheiro && removerDinheiro(10)">-$10</button>
-                                    <button onclick="window.removerDinheiro && removerDinheiro(50)">-$50</button>
-                                    <button onclick="window.removerDinheiro && removerDinheiro(100)">-$100</button>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    
-                </div><!-- FIM DO equipamento-subcontent -->
-                
-                
-                
-                <!-- MODAL SIMPLIFICADO PARA DINHEIRO -->
-                <div id="modal-dinheiro-simples" class="modal-overlay" style="display: none;">
-                    <div class="modal-simples">
-                        <div class="modal-header">
-                            <h3 id="modal-titulo">Receber Dinheiro</h3>
-                            <button onclick="window.fecharModalSimples && fecharModalSimples()">&times;</button>
-                        </div>
-                        
-                        <div class="modal-body">
-                            <div class="saldo-atual-modal">
-                                Saldo Atual: <strong id="saldo-modal-atual">$0</strong>
-                            </div>
-                            
-                            <div class="campo-valor">
-                                <label>Valor:</label>
-                                <div class="input-com-simbolo">
-                                    <span>$</span>
-                                    <input type="number" id="valor-operacao" placeholder="0" min="1" step="1" autofocus>
-                                </div>
-                            </div>
-                            
-                            <div class="campo-descricao">
-                                <label>Motivo:</label>
-                                <input type="text" id="descricao-operacao" 
-                                       placeholder="Ex: Missão, Recompensa, Compras...">
-                            </div>
-                        </div>
-                        
-                        <div class="modal-footer">
-                            <button class="btn-cancelar" onclick="window.fecharModalSimples && fecharModalSimples()">
-                                Cancelar
-                            </button>
-                            <button class="btn-confirmar" onclick="window.confirmarOperacao && confirmarOperacao()">
-                                Confirmar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- MODAL DE QUANTIDADE PARA COMPRAS -->
-                <div id="submenu-quantidade" class="modal-overlay" style="display: none;">
-                    <div class="modal-simples">
-                        <div class="modal-header">
-                            <h3 id="quantidade-titulo">Quantidade para Comprar</h3>
-                            <button onclick="window.fecharSubmenuQuantidade && fecharSubmenuQuantidade()">&times;</button>
-                        </div>
-                        
-                        <div class="modal-body">
-                            <div class="item-info-modal">
-                                <h4 id="quantidade-nome-item">Item</h4>
-                                <div class="detalhes-item-modal">
-                                    <span id="quantidade-custo-unitario">Custo: $0</span>
-                                    <span id="quantidade-peso-unitario">Peso: 0 kg</span>
-                                </div>
-                            </div>
-                            
-                            <div class="controles-quantidade-modal">
-                                <button class="btn-quantidade-modal" onclick="window.diminuirQuantidade && diminuirQuantidade()">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                
-                                <input type="number" id="input-quantidade" 
-                                       value="1" min="1" max="99">
-                                
-                                <button class="btn-quantidade-modal" onclick="window.aumentarQuantidade && aumentarQuantidade()">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="totais-modal">
-                                <div class="total-linha-modal">
-                                    <span>Custo Total:</span>
-                                    <strong id="quantidade-custo-total">$0</strong>
-                                </div>
-                                <div class="total-linha-modal">
-                                    <span>Peso Total:</span>
-                                    <strong id="quantidade-peso-total">0 kg</strong>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="modal-footer">
-                            <button class="btn-cancelar" onclick="window.fecharSubmenuQuantidade && fecharSubmenuQuantidade()">
-                                <i class="fas fa-times"></i> Cancelar
-                            </button>
-                            <button class="btn-confirmar" onclick="window.confirmarCompraQuantidade && confirmarCompraQuantidade()">
-                                <i class="fas fa-check"></i> Comprar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-               
+                <h2 class="dev-title">Equipamento</h2>
+                <p class="dev-message">
+                    Gerencie armas, armaduras, escudos, itens gerais e controle financeiro.
+                    Em desenvolvimento...
+                </p>
             </div>
         </div>
-<!-- ABA COMBATE - COMPLETA E INTEGRADA -->
-<div id="combate" class="tab-content">
-    <div class="combate-container">
-        
-        <!-- PRIMEIRA LINHA: PV E PF -->
-        <div class="combate-row linha-pv-pf">
-            <!-- CARD PV - DESIGN OTIMIZADO -->
-            <div class="card-pv">
-                <div class="card-header">
-                    <div class="header-left">
-                        <i class="fas fa-heartbeat"></i>
-                        <h3>PONTOS DE VIDA</h3>
-                    </div>
-                    <div class="header-right">
-                        <div class="controle-modificador">
-                            <span class="mod-label">Mod:</span>
-                            <button class="btn-mod minus" onclick="modPVMenos()">-</button>
-                            <input type="text" id="pvModificador" value="0" 
-                                   class="mod-input" readonly>
-                            <button class="btn-mod plus" onclick="modPVMais()">+</button>
-                        </div>
-                    </div>
+
+        <!-- ABA COMBATE -->
+        <div id="combate" class="tab-content">
+            <div class="dev-content">
+                <div class="dev-icon">
+                    <i class="fas fa-fist-raised"></i>
                 </div>
-                
-                <div class="card-content">
-                    <!-- INFO BÁSICA - LAYOUT PROPORCIONAL -->
-                    <div class="info-basica">
-                        <div class="info-box">
-                            <span class="info-label">Base</span>
-                            <span class="info-valor" id="pvBaseDisplay">10</span>
-                        </div>
-                        <div class="info-box">
-                            <span class="info-label">Máx</span>
-                            <span class="info-valor" id="pvMaxDisplay">10</span>
-                        </div>
-                        <div class="info-box">
-                            <span class="info-label">Atual</span>
-                            <input type="text" id="pvAtualDisplay" value="10" 
-                                   class="info-input" onchange="atualizarPVInput()">
-                        </div>
-                        <div class="info-box estado">
-                            <span class="info-label">Estado</span>
-                            <span class="info-estado" id="pvEstadoDisplay">Saudável</span>
-                        </div>
-                    </div>
-                    
-                    <!-- BARRA DE PV INTELIGENTE -->
-                    <div class="barra-container">
-                        <div class="barra-wrapper">
-                            <div class="barra-pv" id="barraPV">
-                                <div class="barra-fill" id="pvFill"></div>
-                                <div class="barra-texto" id="pvTexto">10/10</div>
-                            </div>
-                        </div>
-                        <div class="barra-legenda" id="pvLegenda">
-                            <span class="legenda-item verde">Saudável</span>
-                            <span class="legenda-item amarelo">Machucado</span>
-                            <span class="legenda-item laranja">Ferido</span>
-                            <span class="legenda-item vermelho">Crítico</span>
-                            <span class="legenda-item roxo">Morrendo</span>
-                            <span class="legenda-item cinza">Morto</span>
-                        </div>
-                    </div>
-                    
-                    <!-- CONTROLES RÁPIDOS -->
-                    <div class="controles-rapidos">
-                        <h4>Controle Rápido</h4>
-                        <div class="botoes-controle">
-                            <button class="btn-dano" onclick="danoPV5()">-5</button>
-                            <button class="btn-dano" onclick="danoPV2()">-2</button>
-                            <button class="btn-dano" onclick="danoPV1()">-1</button>
-                            <button class="btn-cura" onclick="curaPV1()">+1</button>
-                            <button class="btn-cura" onclick="curaPV2()">+2</button>
-                            <button class="btn-cura" onclick="curaPV5()">+5</button>
-                            <button class="btn-reset" onclick="resetPV()">
-                                <i class="fas fa-redo"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- CARD PF - DESIGN CORRIGIDO E PROPORCIONAL -->
-            <div class="card-pf">
-                <div class="card-header">
-                    <div class="header-left">
-                        <i class="fas fa-wind"></i>
-                        <h3>PONTOS DE FADIGA</h3>
-                    </div>
-                    <div class="header-right">
-                        <div class="controle-modificador">
-                            <span class="mod-label">Mod:</span>
-                            <button class="btn-mod minus" onclick="modPFMenos()">-</button>
-                            <input type="text" id="pfModificador" value="0" 
-                                   class="mod-input" readonly>
-                            <button class="btn-mod plus" onclick="modPFMais()">+</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card-content">
-                    <!-- INFO BÁSICA - MESMO LAYOUT DO PV -->
-                    <div class="info-basica">
-                        <div class="info-box">
-                            <span class="info-label">Base</span>
-                            <span class="info-valor" id="pfBaseDisplay">10</span>
-                        </div>
-                        <div class="info-box">
-                            <span class="info-label">Máx</span>
-                            <span class="info-valor" id="pfMaxDisplay">10</span>
-                        </div>
-                        <div class="info-box">
-                            <span class="info-label">Atual</span>
-                            <input type="text" id="pfAtualDisplay" value="10" 
-                                   class="info-input" onchange="atualizarPFInput()">
-                        </div>
-                        <div class="info-box estado">
-                            <span class="info-label">Estado</span>
-                            <span class="info-estado" id="pfEstadoDisplay">Normal</span>
-                        </div>
-                    </div>
-                    
-                    <!-- BARRA DE PF -->
-                    <div class="barra-container">
-                        <div class="barra-wrapper">
-                            <div class="barra-pf" id="barraPF">
-                                <div class="barra-fill" id="pfFill"></div>
-                                <div class="barra-texto" id="pfTexto">10/10</div>
-                                <!-- MARCADOR DE FADIGA (1/3) -->
-                                <div class="marcador-fadiga" style="left: 33.33%"></div>
-                            </div>
-                        </div>
-                        <div class="pf-estados">
-                            <div class="pf-estado" data-estado="normal">
-                                <div class="estado-indicador"></div>
-                                <span>Normal</span>
-                            </div>
-                            <div class="pf-estado" data-estado="fadigado">
-                                <div class="estado-indicador"></div>
-                                <span>Fadigado</span>
-                            </div>
-                            <div class="pf-estado" data-estado="exausto">
-                                <div class="estado-indicador"></div>
-                                <span>Exausto</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- CONTROLES RÁPIDOS PF -->
-                    <div class="controles-rapidos">
-                        <h4>Controle Rápido</h4>
-                        <div class="botoes-controle">
-                            <button class="btn-fadiga" onclick="fadigaPF3()">-3</button>
-                            <button class="btn-fadiga" onclick="fadigaPF1()">-1</button>
-                            <button class="btn-descanso" onclick="descansoPF1()">+1</button>
-                            <button class="btn-descanso" onclick="descansoPF3()">+3</button>
-                            <button class="btn-reset" onclick="resetPF()">
-                                <i class="fas fa-redo"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <h2 class="dev-title">Combate</h2>
+                <p class="dev-message">
+                    Controle de PV/PF, defesas, dano, resistência a dano e condições de combate.
+                    Em desenvolvimento...
+                </p>
             </div>
         </div>
-        
-        <!-- SEGUNDA LINHA: DANO E DEFESAS -->
-        <div class="combate-row linha-dano-defesas">
-            <!-- CARD DANO -->
-            <div class="card-dano">
-                <div class="card-header">
-                    <i class="fas fa-bolt"></i>
-                    <h3>DANO</h3>
+
+        <!-- ABA RESUMO -->
+        <div id="resumo" class="tab-content">
+            <div class="dev-content">
+                <div class="dev-icon">
+                    <i class="fas fa-file-alt"></i>
                 </div>
-                
-                <div class="card-content">
-                    <div class="dano-base">
-                        <div class="dano-item">
-                            <div class="dano-header">
-                                <i class="fas fa-fist-raised"></i>
-                                <h4>GDP</h4>
-                            </div>
-                            <div class="dano-valor" id="danoGdp">1d-2</div>
-                            <div class="dano-desc">Golpe de Punho</div>
-                        </div>
-                        
-                        <div class="dano-item">
-                            <div class="dano-header">
-                                <i class="fas fa-hand-rock"></i>
-                                <h4>GEB</h4>
-                            </div>
-                            <div class="dano-valor" id="danoGeb">1d</div>
-                            <div class="dano-desc">Golpe de Braço</div>
-                        </div>
-                    </div>
-                    
-                    <div class="arma-equipada">
-                        <div class="arma-header">
-                            <h4><i class="fas fa-crosshairs"></i> Arma Equipada</h4>
-                        </div>
-                        <div class="arma-info" id="armaInfo">
-                            <div class="sem-arma" id="semArma">
-                                <i class="fas fa-fist-raised"></i>
-                                <div>
-                                    <div class="arma-nome">Usando dano corporal</div>
-                                    <small>Adicione armas na aba de equipamentos</small>
-                                </div>
-                            </div>
-                            <div class="com-arma" id="comArma" style="display: none;">
-                                <div class="arma-detalhes">
-                                    <div class="arma-nome" id="armaNome">-</div>
-                                    <div class="arma-dano" id="armaDano">-</div>
-                                    <div class="arma-tipo" id="armaTipo">-</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- CARD DEFESAS COMPLETO E CORRETO -->
-            <div class="card-defesas">
-                <div class="card-header">
-                    <i class="fas fa-shield-alt"></i>
-                    <h3>DEFESAS ATIVAS</h3>
-                </div>
-                
-                <div class="card-content">
-                    <div class="defesa-lista">
-                        <!-- ESQUIVA -->
-                        <div class="defesa-item">
-                            <div class="defesa-info">
-                                <i class="fas fa-running"></i>
-                                <div>
-                                    <div class="defesa-nome">Esquiva</div>
-                                    <small>DX + HT/4 + 3</small>
-                                </div>
-                            </div>
-                            <div class="defesa-controle">
-                                <div class="defesa-modificador">
-                                    <button class="mod-btn minus">-</button>
-                                    <input type="number" id="esquivaMod" value="0" class="mod-input">
-                                    <button class="mod-btn plus">+</button>
-                                </div>
-                                <div class="defesa-valor" id="esquivaTotal">10</div>
-                            </div>
-                        </div>
-                        
-                        <!-- BLOQUEIO -->
-                        <div class="defesa-item">
-                            <div class="defesa-info">
-                                <i class="fas fa-shield-alt"></i>
-                                <div>
-                                    <div class="defesa-nome">Bloqueio</div>
-                                    <small>Escudo/2 + 3</small>
-                                </div>
-                            </div>
-                            <div class="defesa-controle">
-                                <div class="defesa-modificador">
-                                    <button class="mod-btn minus">-</button>
-                                    <input type="number" id="bloqueioMod" value="0" class="mod-input">
-                                    <button class="mod-btn plus">+</button>
-                                </div>
-                                <div class="defesa-valor" id="bloqueioTotal">11</div>
-                            </div>
-                        </div>
-                        
-                        <!-- APARAR -->
-                        <div class="defesa-item">
-                            <div class="defesa-info">
-                                <i class="fas fa-sword"></i>
-                                <div>
-                                    <div class="defesa-nome">Aparar</div>
-                                    <small>Arma/2 + 3</small>
-                                </div>
-                            </div>
-                            <div class="defesa-controle">
-                                <div class="defesa-modificador">
-                                    <button class="mod-btn minus">-</button>
-                                    <input type="number" id="apararMod" value="0" class="mod-input">
-                                    <button class="mod-btn plus">+</button>
-                                </div>
-                                <div class="defesa-valor" id="apararTotal">3</div>
-                            </div>
-                        </div>
-                        
-                        <!-- DESLOCAMENTO -->
-                        <div class="defesa-item">
-                            <div class="defesa-info">
-                                <i class="fas fa-walking"></i>
-                                <div>
-                                    <div class="defesa-nome">Deslocamento</div>
-                                    <small>(DX + HT)/4</small>
-                                </div>
-                            </div>
-                            <div class="defesa-controle">
-                                <div class="defesa-modificador">
-                                    <button class="mod-btn minus">-</button>
-                                    <input type="number" id="deslocamentoMod" value="0" class="mod-input">
-                                    <button class="mod-btn plus">+</button>
-                                </div>
-                                <div class="defesa-valor" id="deslocamentoTotal">5.00</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- BÔNUS -->
-                    <div class="defesa-bonus">
-                        <div class="bonus-grid">
-                            <div class="bonus-item">
-                                <div class="bonus-header">
-                                    <i class="fas fa-bolt"></i>
-                                    <span>Reflexos</span>
-                                </div>
-                                <input type="number" id="bonusReflexos" value="0" class="bonus-input">
-                            </div>
-                            
-                            <div class="bonus-item">
-                                <div class="bonus-header">
-                                    <i class="fas fa-shield"></i>
-                                    <span>Escudo</span>
-                                </div>
-                                <input type="number" id="bonusEscudo" value="0" class="bonus-input">
-                            </div>
-                            
-                            <div class="bonus-item">
-                                <div class="bonus-header">
-                                    <i class="fas fa-vest"></i>
-                                    <span>Capa</span>
-                                </div>
-                                <input type="number" id="bonusCapa" value="0" class="bonus-input">
-                            </div>
-                            
-                            <div class="bonus-item">
-                                <div class="bonus-header">
-                                    <i class="fas fa-star"></i>
-                                    <span>Outros</span>
-                                </div>
-                                <input type="number" id="bonusOutros" value="0" class="bonus-input">
-                            </div>
-                        </div>
-                        
-                        <div class="bonus-total">
-                            <span>Total de Bônus:</span>
-                            <span id="totalBonus">+0</span>
-                        </div>
-                    </div>
-                </div>
+                <h2 class="dev-title">Resumo</h2>
+                <p class="dev-message">
+                    Visão geral compacta de todas as informações do personagem em uma única página.
+                    Em desenvolvimento...
+                </p>
             </div>
         </div>
+    </main>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
         
-        <!-- TERCEIRA LINHA: RESISTÊNCIA A DANO -->
-        <div class="combate-row linha-rd">
-            <div class="card-rd">
-                <div class="card-header">
-                    <i class="fas fa-user-shield"></i>
-                    <h3>RESISTÊNCIA A DANO (RD)</h3>
-                    <div class="rd-total">
-                        Total: <span id="rdTotal">0</span>
-                    </div>
-                </div>
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Sistema de Abas
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remover classe active de todas as abas
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
                 
-                <div class="card-content">
-                    <div class="rd-grid">
-                        <div class="rd-parte" data-parte="cabeca">
-                            <i class="fas fa-head-side-virus"></i>
-                            <span>Cabeça</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                        
-                        <div class="rd-parte" data-parte="tronco">
-                            <i class="fas fa-user"></i>
-                            <span>Tronco</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                        
-                        <div class="rd-parte" data-parte="rosto">
-                            <i class="fas fa-heart"></i>
-                            <span>Rosto</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                        
-                        <div class="rd-parte" data-parte="crânio">
-                            <i class="fas fa-skull"></i>
-                            <span>Crânio</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                        
-                        <div class="rd-parte" data-parte="pescoco">
-                            <i class="fas fa-user-slash"></i>
-                            <span>Pescoço</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                        
-                        <div class="rd-parte" data-parte="virilha">
-                            <i class="fas fa-user-injured"></i>
-                            <span>Virilha</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                        
-                        <div class="rd-parte" data-parte="bracos">
-                            <i class="fas fa-hand-paper"></i>
-                            <span>Braços</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                        
-                        <div class="rd-parte" data-parte="pernas">
-                            <i class="fas fa-running"></i>
-                            <span>Pernas</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                        
-                        <div class="rd-parte" data-parte="maos">
-                            <i class="fas fa-hand"></i>
-                            <span>Mãos</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                        
-                        <div class="rd-parte" data-parte="pes">
-                            <i class="fas fa-shoe-prints"></i>
-                            <span>Pés</span>
-                            <input type="number" value="0" min="0" max="99" 
-                                   class="rd-input" onchange="calcularRDTotal()">
-                        </div>
-                    </div>
-                    
-                    <!-- TABELA DE REDUTORES -->
-                    <div class="redutores-container">
-                        <h4><i class="fas fa-crosshairs"></i> Penalidades para Ataque</h4>
-                        <div class="redutores-grid">
-                            <div class="redutor-item" data-local="tronco">
-                                <span>Tronco</span>
-                                <span class="redutor-valor">0</span>
-                            </div>
-                            <div class="redutor-item" data-local="orgaos">
-                                <span>Órgãos</span>
-                                <span class="redutor-valor">-3</span>
-                            </div>
-                            <div class="redutor-item" data-local="crânio">
-                                <span>Crânio</span>
-                                <span class="redutor-valor">-7</span>
-                            </div>
-                            <div class="redutor-item" data-local="pescoco">
-                                <span>Pescoço</span>
-                                <span class="redutor-valor">-5</span>
-                            </div>
-                            <div class="redutor-item" data-local="virilha">
-                                <span>Virilha</span>
-                                <span class="redutor-valor">-3</span>
-                            </div>
-                            <div class="redutor-item" data-local="olho">
-                                <span>Olho</span>
-                                <span class="redutor-valor">-9</span>
-                            </div>
-                            <div class="redutor-item" data-local="rosto">
-                                <span>Rosto</span>
-                                <span class="redutor-valor">-5</span>
-                            </div>
-                            <div class="redutor-item" data-local="bracos">
-                                <span>Braços</span>
-                                <span class="redutor-valor">-2</span>
-                            </div>
-                            <div class="redutor-item" data-local="pernas">
-                                <span>Pernas</span>
-                                <span class="redutor-valor">-2</span>
-                            </div>
-                            <div class="redutor-item" data-local="maos">
-                                <span>Mãos</span>
-                                <span class="redutor-valor">-4</span>
-                            </div>
-                            <div class="redutor-item" data-local="pes">
-                                <span>Pés</span>
-                                <span class="redutor-valor">-4</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    <!-- QUARTA LINHA: ESCUDO -->
-<div class="combate-row linha-escudo">
-    <div class="card-escudo">
-        <div class="card-header">
-            <i class="fas fa-shield"></i>
-            <h3>ESCUDO</h3>
-            <div class="escudo-status">
-                <span class="status-badge inativo" id="escudoStatus">Inativo</span>
-            </div>
-        </div>
-        
-        <div class="card-content">
-            <!-- INFORMAÇÕES BÁSICAS -->
-            <div class="escudo-info">
-                <div class="escudo-nome" id="escudoNome">Nenhum escudo equipado</div>
-                <div class="escudo-dr">
-                    <span class="dr-label">DR:</span>
-                    <span class="dr-valor" id="escudoDR">0</span>
-                </div>
-            </div>
-            
-            <!-- BARRA DE PV -->
-            <div class="escudo-pv-container">
-                <div class="pv-header">
-                    <i class="fas fa-heart"></i>
-                    <span class="pv-texto" id="escudoPVTexto">0/0</span>
-                </div>
+                // Esconder todos os conteúdos
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
                 
-                <div class="barra-pv-escudo">
-                    <div class="barra-fill" id="escudoPVFill" style="width: 0%"></div>
-                </div>
-            </div>
-            
-            <!-- CONTROLES SIMPLES - SÓ OS BOTÕES ORIGINAIS -->
-            <div class="escudo-controles">
-                <button class="btn-escudo dano-5">-5</button>
-                <button class="btn-escudo dano-1">-1</button>
-                <button class="btn-escudo cura-1">+1</button>
-                <button class="btn-escudo cura-5">+5</button>
-            </div>
-        </div>
-    </div>
-</div>
-        
-        <!-- QUINTA LINHA: CONDIÇÕES -->
-        <div class="combate-row linha-condicoes">
-            <div class="card-condicoes">
-                <div class="card-header">
-                    <i class="fas fa-clipboard-list"></i>
-                    <h3>CONDIÇÕES DE COMBATE</h3>
-                    <div class="condicoes-count">
-                        <span id="condicoesAtivas">0</span> ativas
-                    </div>
-                </div>
-                
-                <div class="card-content">
-                    <div class="condicoes-grid">
-                        <div class="condicao-item" data-condicao="inconsciente" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Inconsciente</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="machucado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Machucado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="ferido" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Ferido</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="fadigado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Fadigado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="atordoado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Atordoado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="enjoado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Enjoado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="cego" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Cego</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="surdo" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Surdo</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="paralisado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Paralisado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="envenenado" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Envenenado</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="sangrando" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Sangrando</span>
-                        </div>
-                        <div class="condicao-item" data-condicao="queimando" onclick="alternarCondicao(this)">
-                            <div class="condicao-checkbox"></div>
-                            <span>Queimando</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- ABA RESUMO - VERSÃO COMPACTA E ORGANIZADA -->
-<div id="resumo" class="tab-content">
-    <div class="resumo-container">
-        
-        <!-- ====================== -->
-        <!-- CABEÇALHO SUPER COMPACTO -->
-        <!-- ====================== -->
-        <div class="resumo-header-ultracompacto">
-            <!-- FOTO MICRO -->
-            <div class="foto-micro-wrapper" id="fotoResumoWrapper">
-                <img id="fotoResumoImg" src="" alt="F" style="display: none;">
-                <div class="foto-micro-placeholder">
-                    <i class="fas fa-user"></i>
-                </div>
-            </div>
-            
-            <!-- DADOS EM UMA LINHA -->
-            <div class="dados-micro">
-                <h3 id="resumoNome">NOVO PERSONAGEM</h3>
-                <div class="tags-micro">
-                    <span id="resumoRaca" class="tag-micro">Humano</span>
-                    <span id="resumoClasse" class="tag-micro">Guerreiro</span>
-                    <span id="resumoNivel" class="tag-micro">Novato</span>
-                </div>
-            </div>
-            
-            <!-- PONTOS MICRO -->
-            <div class="pontos-micro">
-                <div class="ponto-micro">
-                    <small>Total</small>
-                    <span id="resumoPontosTotais">150</span>
-                </div>
-                <div class="ponto-micro">
-                    <small>Gasto</small>
-                    <span id="resumoPontosGastos" class="gasto">0</span>
-                </div>
-                <div class="ponto-micro">
-                    <small>Saldo</small>
-                    <span id="resumoSaldo" class="saldo">150</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- ====================== -->
-        <!-- 3 COLUNAS FIXAS E COMPACTAS -->
-        <!-- ====================== -->
-        <div class="resumo-colunas-compactas">
-            
-            <!-- ========== COLUNA 1 ========== -->
-            <div class="coluna-compacta">
-                
-                <!-- ATRIBUTOS (FIXO) -->
-                <div class="card-atributos">
-                    <div class="card-header">
-                        <h4><i class="fas fa-dumbbell"></i> ATRIBUTOS</h4>
-                        <span class="card-pontos" id="pontosAtributos">0</span>
-                    </div>
-                    <div class="atributos-grid-micro">
-                        <div class="attr-micro">
-                            <span class="attr-label">ST</span>
-                            <span class="attr-valor" id="resumoST">10</span>
-                            <span class="attr-custo" id="custoST">0</span>
-                        </div>
-                        <div class="attr-micro">
-                            <span class="attr-label">DX</span>
-                            <span class="attr-valor" id="resumoDX">10</span>
-                            <span class="attr-custo" id="custoDX">0</span>
-                        </div>
-                        <div class="attr-micro">
-                            <span class="attr-label">IQ</span>
-                            <span class="attr-valor" id="resumoIQ">10</span>
-                            <span class="attr-custo" id="custoIQ">0</span>
-                        </div>
-                        <div class="attr-micro">
-                            <span class="attr-label">HT</span>
-                            <span class="attr-valor" id="resumoHT">10</span>
-                            <span class="attr-custo" id="custoHT">0</span>
-                        </div>
-                        <div class="attr-micro">
-                            <span class="attr-label">PV</span>
-                            <span class="attr-valor" id="resumoPV">10</span>
-                        </div>
-                        <div class="attr-micro">
-                            <span class="attr-label">PF</span>
-                            <span class="attr-valor" id="resumoPF">10</span>
-                        </div>
-                        <div class="attr-micro">
-                            <span class="attr-label">Von</span>
-                            <span class="attr-valor" id="resumoVontade">10</span>
-                        </div>
-                        <div class="attr-micro">
-                            <span class="attr-label">Per</span>
-                            <span class="attr-valor" id="resumoPercepcao">10</span>
-                        </div>
-                        <div class="attr-micro">
-                            <span class="attr-label">Des</span>
-                            <span class="attr-valor" id="resumoDeslocamento">5.0</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- CARACTERÍSTICAS (FIXO) -->
-                <div class="card-micro">
-                    <div class="card-header">
-                        <h4><i class="fas fa-user"></i> CARACTERÍSTICAS</h4>
-                    </div>
-                    <div class="micro-lista">
-                        <div class="micro-item">
-                            <span class="micro-label">Alt/Peso:</span>
-                            <span class="micro-valor" id="resumoAlturaPeso">1.70m/70kg</span>
-                        </div>
-                        <div class="micro-item">
-                            <span class="micro-label">Aparência:</span>
-                            <span class="micro-valor" id="resumoAparencia">Comum</span>
-                        </div>
-                        <div class="micro-item">
-                            <span class="micro-label">Riqueza:</span>
-                            <span class="micro-valor" id="resumoRiqueza">Média</span>
-                        </div>
-                        <div class="micro-item">
-                            <span class="micro-label">Idiomas:</span>
-                            <span class="micro-valor" id="resumoIdiomas">Comum</span>
-                        </div>
-                    </div>
-                </div>
-                
-            </div><!-- FIM COLUNA 1 -->
-            
-            <!-- ========== COLUNA 2 ========== -->
-            <div class="coluna-compacta">
-                
-                <!-- PERÍCIAS (TABELA COM SCROLL - 20 itens) -->
-                <div class="card-tabela" style="height: 380px;">
-                    <div class="card-header">
-                        <h4><i class="fas fa-graduation-cap"></i> PERÍCIAS</h4>
-                        <span class="card-pontos" id="pontosPericias">0</span>
-                    </div>
-                    <div class="tabela-micro-container">
-                        <table class="tabela-micro">
-                            <thead>
-                                <tr>
-                                    <th>PERÍCIA</th>
-                                    <th class="th-nivel">NVL</th>
-                                    <th class="th-pontos">PTS</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaPericiasResumo">
-                                <tr class="vazio">
-                                    <td colspan="3">Nenhuma perícia</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <!-- TÉCNICAS (LISTA COM SCROLL) -->
-                <div class="card-lista-micro" style="height: 200px;">
-                    <div class="card-header">
-                        <h4><i class="fas fa-tools"></i> TÉCNICAS</h4>
-                        <span class="card-pontos" id="pontosTecnicas">0</span>
-                    </div>
-                    <div class="micro-scroll-container">
-                        <div class="micro-lista-scroll" id="listaTecnicasResumo">
-                            <div class="vazio">Nenhuma técnica</div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div><!-- FIM COLUNA 2 -->
-            
-            <!-- ========== COLUNA 3 ========== -->
-            <div class="coluna-compacta">
-                
-                <!-- MAGIAS (LISTA COM SCROLL - 20 itens) -->
-                <div class="card-lista-micro" style="height: 380px;">
-                    <div class="card-header">
-                        <h4><i class="fas fa-hat-wizard"></i> MAGIAS</h4>
-                        <span class="card-pontos" id="pontosMagias">0</span>
-                    </div>
-                    <div class="magia-status-micro">
-                        <span class="magia-stat">Apt: <strong id="resumoAptidao">0</strong></span>
-                        <span class="magia-stat">Mana: <strong id="resumoMana">10/10</strong></span>
-                    </div>
-                    <div class="micro-scroll-container">
-                        <div class="micro-lista-scroll" id="listaMagiasResumo">
-                            <div class="vazio">Nenhuma magia</div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div><!-- FIM COLUNA 3 -->
-            
-        </div><!-- FIM DAS 3 COLUNAS -->
-        
-        <!-- ====================== -->
-        <!-- LINHA INFERIOR (VANTAGENS, DESVANTAGENS, EQUIPAMENTO) -->
-        <!-- ====================== -->
-        <div class="resumo-linha-inferior">
-            
-            <!-- VANTAGENS (LISTA COM SCROLL - 10 itens) -->
-            <div class="card-lista-larga" style="height: 280px;">
-                <div class="card-header">
-                    <h4><i class="fas fa-star"></i> VANTAGENS</h4>
-                    <span class="card-pontos positivo" id="pontosVantagens">+0</span>
-                </div>
-                <div class="larga-scroll-container">
-                    <div class="larga-lista" id="listaVantagensResumo">
-                        <div class="vazio">Nenhuma vantagem</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- DESVANTAGENS (LISTA COM SCROLL - 10 itens) -->
-            <div class="card-lista-larga" style="height: 280px;">
-                <div class="card-header">
-                    <h4><i class="fas fa-exclamation-triangle"></i> DESVANTAGENS</h4>
-                    <span class="card-pontos negativo" id="pontosDesvantagens">-0</span>
-                </div>
-                <div class="larga-scroll-container">
-                    <div class="larga-lista" id="listaDesvantagensResumo">
-                        <div class="vazio">Nenhuma desvantagem</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- PECULIARIDADES (LISTA COM SCROLL - 5 itens) -->
-            <div class="card-lista-larga" style="height: 280px;">
-                <div class="card-header">
-                    <h4><i class="fas fa-comment"></i> PECULIARIDADES</h4>
-                    <span class="card-pontos negativo" id="pontosPeculiaridades">-0</span>
-                </div>
-                <div class="larga-scroll-container">
-                    <div class="larga-lista" id="listaPeculiaridadesResumo">
-                        <div class="vazio">Nenhuma peculiaridade</div>
-                    </div>
-                </div>
-            </div>
-            
-        </div><!-- FIM LINHA INFERIOR -->
-        
-        <!-- ====================== -->
-        <!-- LINHA STATUS -->
-        <!-- ====================== -->
-        <div class="resumo-status-linha">
-            
-            <!-- EQUIPAMENTO -->
-            <div class="card-status">
-                <div class="card-header">
-                    <h4><i class="fas fa-backpack"></i> EQUIPAMENTO</h4>
-                </div>
-                <div class="status-content">
-                    <div class="status-item">
-                        <span class="status-label">Dinheiro:</span>
-                        <span class="status-valor dinheiro" id="resumoDinheiro">$2.000</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Carga:</span>
-                        <span class="status-valor" id="resumoCarga">0/60 kg</span>
-                    </div>
-                    <div class="equipamento-micro" id="listaEquipamentoResumo">
-                        <span class="vazio">Inventário vazio</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- COMBATE -->
-            <div class="card-status">
-                <div class="card-header">
-                    <h4><i class="fas fa-fist-raised"></i> COMBATE</h4>
-                </div>
-                <div class="status-content">
-                    <div class="combate-grid-micro">
-                        <div class="combate-micro">
-                            <span class="combate-label">Esquiva:</span>
-                            <span class="combate-valor" id="resumoEsquiva">10</span>
-                        </div>
-                        <div class="combate-micro">
-                            <span class="combate-label">Bloqueio:</span>
-                            <span class="combate-valor" id="resumoBloqueio">11</span>
-                        </div>
-                        <div class="combate-micro">
-                            <span class="combate-label">Aparar:</span>
-                            <span class="combate-valor" id="resumoAparar">3</span>
-                        </div>
-                        <div class="combate-micro">
-                            <span class="combate-label">Dano:</span>
-                            <span class="combate-valor" id="resumoDano">1d-2/1d</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- RELACIONAMENTOS -->
-            <div class="card-status">
-                <div class="card-header">
-                    <h4><i class="fas fa-users"></i> RELACIONAMENTOS</h4>
-                </div>
-                <div class="status-content">
-                    <div class="relacionamentos-micro">
-                        <div class="rel-micro">
-                            <span class="rel-label"><i class="fas fa-skull-crossbones"></i> Inimigos:</span>
-                            <span class="rel-valor" id="resumoInimigos">0</span>
-                        </div>
-                        <div class="rel-micro">
-                            <span class="rel-label"><i class="fas fa-handshake"></i> Aliados:</span>
-                            <span class="rel-valor" id="resumoAliados">0</span>
-                        </div>
-                        <div class="rel-micro">
-                            <span class="rel-label"><i class="fas fa-child"></i> Dependentes:</span>
-                            <span class="rel-valor" id="resumoDependentes">0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-        </div><!-- FIM LINHA STATUS -->
-        
-    </div>
-</div>
-</main> 
-
-    
-   
-<script>
-    // Função toggleSubmenu - ÚNICA VERSÃO
-    function toggleSubmenu(id) {
-        const submenu = document.getElementById(id);
-        const icon = submenu.previousElementSibling.querySelector('.fa-chevron-down');
-        
-        submenu.classList.toggle('active');
-        
-        if (submenu.classList.contains('active')) {
-            icon.className = 'fas fa-chevron-up';
-        } else {
-            icon.className = 'fas fa-chevron-down';
-        }
-    }
-</script>
-
-
-<!-- ATRIBUTOS (base de tudo) -->
-<script src="atributos.js"></script>
-
-<!-- COMBATE (usa atributos) -->
-<script src="pv-pf.js"></script>
-
-<!-- DASHBOARD (controle principal) -->
-<script src="dashboard.js"></script>
-
-
-
-<!-- CARACTERÍSTICAS -->
-<script src="caracteristicas-fisicas.js"></script>
-<script src="caracteristicas-altura-peso.js"></script>
-<script src="caracteristicas-aparencia.js"></script>
-<script src="caracteristicas-riqueza.js"></script>
-<script src="caracteristicas-idiomas.js"></script>
-
-<!-- VANTAGENS/DESVANTAGENS -->
-<script src="vantagens.js"></script>
-<script src="desvantagens.js"></script>
-<script src="catalogo-vantagens.js"></script>
-<script src="catalogo-desvantagens.js"></script>
-
-<!-- PERÍCIAS -->
-<script src="pericias-catalogo.js"></script>
-<script src="sistema-pericias.js"></script>
-<script src="tecnicas.js"></script>
-
-<!-- MAGIAS -->
-<script src="catalogo-magias.js"></script>
-<script src="magias.js"></script>
-
-<!-- EQUIPAMENTOS -->
-<script src="catalogo-equipamentos.js"></script>
-<script src="equipamentos.js"></script>
-<script src="sistema-escudo.js"></script>
-<script src="sistema-condicoes.js"></script>
-<script src="sistema-rd.js"></script>
-<script src="defesas.js"></script>
-<script src="sistema-dano.js"></script>
-<script src="sistema-resumo.js"></script>
-<script src="resumo-vantagens.js"></script>
-<script src="resumo-pericias.js"></script>
-<script src="resumo-magias.js"></script>
-<script src="resumo-equipamentos.js"></script>
-<script src="resumo-combate.js"></script>
-
-<!-- NO criar-personagens.html, substitua TODO o script por este: -->
-<script>
-// APENAS ESSAS 3 CONSTANTES SÃO NECESSÁRIAS
-const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// VARIÁVEL GLOBAL SIMPLES
-let personagemId = null;
-
-// FUNÇÃO ÚNICA PARA SALVAR
-async function salvarPersonagem() {
-    console.log('✅ Botão salvar clicado');
-    
-    try {
-        // 1. VERIFICAR LOGIN
-        const { data: { session }, error: sessaoErro } = await supabase.auth.getSession();
-        if (sessaoErro || !session) {
-            alert('⚠️ Faça login primeiro!');
-            window.location.href = 'login.html';
-            return;
-        }
-
-        // 2. PEGAR DADOS DO FORMULÁRIO
-        const dados = {
-            nome: document.getElementById('charName')?.value || '',
-            raca: document.getElementById('racaPersonagem')?.value || '',
-            classe: document.getElementById('classePersonagem')?.value || '',
-            nivel: parseInt(document.getElementById('nivelPersonagem')?.value) || 1,
-            forca: parseInt(document.getElementById('ST')?.value) || 10,
-            destreza: parseInt(document.getElementById('DX')?.value) || 10,
-            inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
-            saude: parseInt(document.getElementById('HT')?.value) || 10
-        };
-
-        console.log('📝 Dados coletados:', dados);
-
-        // 3. VALIDAÇÃO BÁSICA
-        if (!dados.nome.trim()) {
-            alert('❌ Digite um nome para o personagem!');
-            return;
-        }
-
-        // 4. SALVAR NO BANCO
-        let resultado;
-        const userId = session.user.id;
-        
-        if (personagemId) {
-            // EDITAR
-            console.log(`✏️ Editando personagem ID: ${personagemId}`);
-            const { data, error } = await supabase
-                .from('characters')
-                .update({
-                    ...dados,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', personagemId)
-                .eq('user_id', userId)
-                .select()
-                .single();
-            
-            if (error) throw error;
-            resultado = data;
-        } else {
-            // NOVO
-            console.log('🆕 Criando novo personagem');
-            const { data, error } = await supabase
-                .from('characters')
-                .insert([{
-                    ...dados,
-                    user_id: userId,
-                    pontos_totais: 150,
-                    pontos_gastos: 0,
-                    pontos_disponiveis: 150,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }])
-                .select()
-                .single();
-            
-            if (error) throw error;
-            resultado = data;
-            personagemId = resultado.id;
-        }
-
-        console.log('💾 Salvou no banco:', resultado);
-        alert('✅ Personagem salvo com sucesso!');
-        
-        // 5. REDIRECIONAR PARA LISTA
-        setTimeout(() => {
-            window.location.href = 'personagens.html';
-        }, 1500);
-
-    } catch (error) {
-        console.error('❌ ERRO ao salvar:', error);
-        alert('❌ Erro: ' + error.message);
-    }
-}
-
-// FUNÇÃO PARA CARREGAR SE ESTIVER EDITANDO
-async function carregarSeForEdicao() {
-    console.log('🔍 Verificando se é edição...');
-    
-    // Verificar ID na URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const idDaUrl = urlParams.get('id');
-    
-    if (!idDaUrl) {
-        console.log('➕ Modo criação - sem ID na URL');
-        return;
-    }
-
-    try {
-        // Verificar login
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        console.log(`🔍 Buscando personagem ID: ${idDaUrl}`);
-        
-        // Buscar no banco
-        const { data: personagem, error } = await supabase
-            .from('characters')
-            .select('*')
-            .eq('id', idDaUrl)
-            .eq('user_id', session.user.id)
-            .single();
-        
-        if (error || !personagem) {
-            console.warn('⚠️ Personagem não encontrado');
-            alert('Personagem não encontrado!');
-            window.location.href = 'personagens.html';
-            return;
-        }
-
-        console.log('📖 Personagem encontrado:', personagem);
-        
-        // Salvar ID globalmente
-        personagemId = idDaUrl;
-        
-        // PREENCHER FORMULÁRIO (SÓ SE OS ELEMENTOS EXISTIREM)
-        const elementos = [
-            { id: 'charName', valor: personagem.nome },
-            { id: 'racaPersonagem', valor: personagem.raca },
-            { id: 'classePersonagem', valor: personagem.classe },
-            { id: 'nivelPersonagem', valor: personagem.nivel },
-            { id: 'ST', valor: personagem.forca },
-            { id: 'DX', valor: personagem.destreza },
-            { id: 'IQ', valor: personagem.inteligencia },
-            { id: 'HT', valor: personagem.saude }
-        ];
-
-        elementos.forEach(item => {
-            const el = document.getElementById(item.id);
-            if (el && el.value !== undefined) {
-                el.value = item.valor || '';
-            }
+                // Ativar aba clicada
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
         });
 
-        // Atualizar título
-        document.title = `${personagem.nome} - Editar`;
-
-    } catch (error) {
-        console.error('❌ Erro ao carregar:', error);
-        // Não faz nada - deixa em modo criação
-    }
-}
-
-// CONFIGURAÇÃO INICIAL
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Página carregada - criarpersonagens.html');
-    
-    // 1. Configurar botão salvar
-    const btnSalvar = document.getElementById('btnSalvar');
-    if (btnSalvar) {
-        btnSalvar.addEventListener('click', salvarPersonagem);
-        console.log('✅ Botão salvar configurado');
-    } else {
-        console.warn('⚠️ Botão salvar não encontrado!');
-    }
-
-    // 2. Configurar botão voltar
-    const btnVoltar = document.getElementById('btnVoltar');
-    if (btnVoltar) {
-        btnVoltar.addEventListener('click', function() {
-            if (confirm('Voltar sem salvar?')) {
+        // Botão Sair
+        document.getElementById('btnSair').addEventListener('click', () => {
+            if (confirm('Deseja sair sem salvar?')) {
                 window.location.href = 'personagens.html';
             }
         });
-    }
 
-    // 3. Carregar dados se for edição
-    setTimeout(() => {
-        carregarSeForEdicao();
-    }, 500);
-});
-</script>
+        // Botão Salvar (simulação)
+        document.getElementById('btnSalvar').addEventListener('click', () => {
+            alert('Sistema de salvamento em desenvolvimento...');
+        });
+
+        // Botão Excluir (simulação)
+        document.getElementById('btnExcluir').addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja excluir este personagem?')) {
+                alert('Personagem excluído (simulação)');
+                window.location.href = 'personagens.html';
+            }
+        });
+
+        // Verificar se está editando ou criando novo
+        const urlParams = new URLSearchParams(window.location.search);
+        const personagemId = urlParams.get('id');
+        
+        if (personagemId) {
+            document.title = 'Editar Personagem - RPG System';
+            document.getElementById('charName').placeholder = 'Carregando...';
+            // Aqui carregaria os dados do personagem
+        }
+
+        // Verificar autenticação
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
 </body>
-</html>  
+</html>
