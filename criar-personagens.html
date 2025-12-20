@@ -3447,267 +3447,181 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let personagemId = null;
 
-// COLETOR DE DADOS
-class ColetorPersonagem {
+// GERENCIADOR DE PERSONAGEM
+class GerenciadorPersonagem {
     constructor() {
-        this.dados = {};
-    }
-
-    // FUNÇÃO QUE RESOLVE TUDO
-    limitar(texto, limite = 50) {
-        if (!texto || texto === 'undefined' || texto === 'null') return '';
-        const str = String(texto).trim();
-        return str.length > limite ? str.substring(0, limite) : str;
-    }
-
-    getValor(id, padrao = '') {
-        const el = document.getElementById(id);
-        if (!el) return padrao;
-        return el.value || el.textContent || el.innerText || padrao;
-    }
-
-    getNumero(id, padrao = 0) {
-        const valor = this.getValor(id, padrao.toString());
-        const num = parseInt(valor) || parseFloat(valor) || padrao;
-        return isNaN(num) ? padrao : num;
-    }
-
-    coletarDashboard() {
-        return {
-            nome: this.getValor('charName', 'Novo Personagem'),
-            raca: this.getValor('racaPersonagem', ''),
-            classe: this.getValor('classePersonagem', ''),
-            nivel: this.getValor('nivelPersonagem', ''),
-            descricao: this.getValor('descricaoPersonagem', ''),
-            pontos_totais: this.getNumero('pontosTotaisDashboard', 150),
-            pontos_gastos: this.getNumero('pontosGastosDashboard', 0),
-            pontos_disponiveis: this.getNumero('saldoDisponivelDashboard', 150)
+        this.dados = {
+            nome: 'Novo Personagem',
+            raca: '',
+            classe: '',
+            nivel: 1,
+            descricao: '',
+            pontos_totais: 150,
+            pontos_gastos: 0,
+            pontos_disponiveis: 150,
+            forca: 10,
+            destreza: 10,
+            inteligencia: 10,
+            saude: 10,
+            aparencia: 'Comum',
+            riqueza: 'Média',
+            renda_mensal: '$1.000',
+            altura: 1.70,
+            peso: 70,
+            pv_atual: 10,
+            pv_maximo: 10,
+            pf_atual: 10,
+            pf_maximo: 10,
+            vantagens: [],
+            desvantagens: [],
+            pericias: [],
+            magias: [],
+            equipamentos: [],
+            dinheiro: 2000,
+            peso_atual: 0,
+            peso_maximo: 60
         };
     }
 
-    coletarAtributos() {
+    // ATUALIZAR DADOS DE FORMULÁRIO
+    atualizarDeFormulario() {
+        // Atualiza apenas se os elementos existirem
+        const elementos = [
+            { id: 'charName', campo: 'nome' },
+            { id: 'racaPersonagem', campo: 'raca' },
+            { id: 'classePersonagem', campo: 'classe' },
+            { id: 'nivelPersonagem', campo: 'nivel' },
+            { id: 'descricaoPersonagem', campo: 'descricao' },
+            { id: 'ST', campo: 'forca' },
+            { id: 'DX', campo: 'destreza' },
+            { id: 'IQ', campo: 'inteligencia' },
+            { id: 'HT', campo: 'saude' }
+        ];
+
+        elementos.forEach(item => {
+            const el = document.getElementById(item.id);
+            if (el && (el.value !== undefined || el.textContent !== undefined)) {
+                const valor = el.value || el.textContent || el.innerText || '';
+                // Converter para número se o campo for numérico
+                if (['forca', 'destreza', 'inteligencia', 'saude', 'nivel'].includes(item.campo)) {
+                    this.dados[item.campo] = parseInt(valor) || 0;
+                } else {
+                    this.dados[item.campo] = valor.toString().substring(0, 200);
+                }
+            }
+        });
+    }
+
+    // OBTER DADOS PARA SALVAR
+    obterDadosParaSalvar(userId) {
+        const agora = new Date().toISOString();
+        
         return {
-            forca: this.getNumero('ST', 10),
-            destreza: this.getNumero('DX', 10),
-            inteligencia: this.getNumero('IQ', 10),
-            saude: this.getNumero('HT', 10)
+            user_id: userId,
+            nome: this.dados.nome.substring(0, 100),
+            raca: this.dados.raca.substring(0, 50),
+            classe: this.dados.classe.substring(0, 50),
+            nivel: this.dados.nivel,
+            descricao: this.dados.descricao.substring(0, 500),
+            pontos_totais: this.dados.pontos_totais,
+            pontos_gastos: this.dados.pontos_gastos,
+            pontos_disponiveis: this.dados.pontos_disponiveis,
+            forca: this.dados.forca,
+            destreza: this.dados.destreza,
+            inteligencia: this.dados.inteligencia,
+            saude: this.dados.saude,
+            aparencia: this.dados.aparencia.substring(0, 50),
+            riqueza: this.dados.riqueza.substring(0, 50),
+            renda_mensal: this.dados.renda_mensal.substring(0, 50),
+            altura: this.dados.altura,
+            peso: this.dados.peso,
+            pv_atual: this.dados.pv_atual,
+            pv_maximo: this.dados.pv_maximo,
+            pf_atual: this.dados.pf_atual,
+            pf_maximo: this.dados.pf_maximo,
+            vantagens: this.dados.vantagens,
+            total_vantagens: this.dados.vantagens.length,
+            desvantagens: this.dados.desvantagens,
+            total_desvantagens: this.dados.desvantagens.length,
+            pericias: this.dados.pericias,
+            total_pericias: this.dados.pericias.length,
+            magias: this.dados.magias,
+            total_magias: this.dados.magias.length,
+            equipamentos: this.dados.equipamentos,
+            dinheiro: this.dados.dinheiro,
+            peso_atual: this.dados.peso_atual,
+            peso_maximo: this.dados.peso_maximo,
+            status: 'Ativo',
+            created_at: !personagemId ? agora : undefined,
+            updated_at: agora
         };
     }
 
-    coletarCaracteristicas() {
-        return {
-            aparencia: {
-                descricao: this.getValor('displayAparencia', 'Comum')
-            },
-            riqueza: {
-                descricao: this.getValor('displayRiqueza', 'Média'),
-                renda: this.getValor('rendaMensal', '$1.000')
-            },
-            altura: this.getNumero('altura', 1.70),
-            peso: this.getNumero('peso', 70)
+    // CARREGAR DADOS DO BANCO
+    carregarDados(personagemData) {
+        this.dados = {
+            ...this.dados,
+            nome: personagemData.nome || 'Novo Personagem',
+            raca: personagemData.raca || '',
+            classe: personagemData.classe || '',
+            nivel: personagemData.nivel || 1,
+            descricao: personagemData.descricao || '',
+            pontos_totais: personagemData.pontos_totais || 150,
+            pontos_gastos: personagemData.pontos_gastos || 0,
+            pontos_disponiveis: personagemData.pontos_disponiveis || 150,
+            forca: personagemData.forca || 10,
+            destreza: personagemData.destreza || 10,
+            inteligencia: personagemData.inteligencia || 10,
+            saude: personagemData.saude || 10,
+            aparencia: personagemData.aparencia || 'Comum',
+            riqueza: personagemData.riqueza || 'Média',
+            renda_mensal: personagemData.renda_mensal || '$1.000',
+            altura: personagemData.altura || 1.70,
+            peso: personagemData.peso || 70,
+            pv_atual: personagemData.pv_atual || 10,
+            pv_maximo: personagemData.pv_maximo || 10,
+            pf_atual: personagemData.pf_atual || 10,
+            pf_maximo: personagemData.pf_maximo || 10,
+            vantagens: personagemData.vantagens || [],
+            desvantagens: personagemData.desvantagens || [],
+            pericias: personagemData.pericias || [],
+            magias: personagemData.magias || [],
+            equipamentos: personagemData.equipamentos || [],
+            dinheiro: personagemData.dinheiro || 2000,
+            peso_atual: personagemData.peso_atual || 0,
+            peso_maximo: personagemData.peso_maximo || 60
         };
     }
 
-    coletarCombate() {
-        return {
-            pv_atual: this.getNumero('pvAtualDisplay', 10),
-            pv_maximo: this.getNumero('pvMaxDisplay', 10),
-            pf_atual: this.getNumero('pfAtualDisplay', 10),
-            pf_maximo: this.getNumero('pfMaxDisplay', 10)
-        };
-    }
+    // PREENCHER FORMULÁRIO
+    preencherFormulario() {
+        const elementos = [
+            { id: 'charName', campo: 'nome' },
+            { id: 'racaPersonagem', campo: 'raca' },
+            { id: 'classePersonagem', campo: 'classe' },
+            { id: 'nivelPersonagem', campo: 'nivel' },
+            { id: 'descricaoPersonagem', campo: 'descricao' },
+            { id: 'ST', campo: 'forca' },
+            { id: 'DX', campo: 'destreza' },
+            { id: 'IQ', campo: 'inteligencia' },
+            { id: 'HT', campo: 'saude' }
+        ];
 
-    coletarVantagens() {
-        try {
-            if (window.exportarDadosVantagens) {
-                return window.exportarDadosVantagens();
+        elementos.forEach(item => {
+            const el = document.getElementById(item.id);
+            if (el) {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.value = this.dados[item.campo] || '';
+                } else {
+                    el.textContent = this.dados[item.campo] || '';
+                }
             }
-        } catch (e) {}
-        return { vantagens: [], peculiaridades: [], totais: { vantagens: 0, peculiaridades: 0 } };
-    }
-
-    coletarDesvantagens() {
-        try {
-            if (window.exportarDadosDesvantagens) {
-                return window.exportarDadosDesvantagens();
-            }
-        } catch (e) {}
-        return { desvantagens: [], totais: { desvantagens: 0 } };
-    }
-
-    coletarPericias() {
-        try {
-            if (window.exportarDadosPericias) {
-                return window.exportarDadosPericias();
-            }
-        } catch (e) {}
-        return { pericias: [], tecnicas: [], totais: { pericias: 0, tecnicas: 0 } };
-    }
-
-    coletarMagias() {
-        try {
-            if (window.exportarDadosMagias) {
-                return window.exportarDadosMagias();
-            }
-        } catch (e) {}
-        return { magias: [], totais: { magias: 0 } };
-    }
-
-    coletarEquipamento() {
-        try {
-            if (window.exportarDadosEquipamento) {
-                return window.exportarDadosEquipamento();
-            }
-        } catch (e) {}
-        return { inventario: [], deposito: [], equipamentos: [], totais: { dinheiro: 2000, peso: 0 } };
-    }
-
-    coletarTudo() {
-        return {
-            dashboard: this.coletarDashboard(),
-            atributos: this.coletarAtributos(),
-            caracteristicas: this.coletarCaracteristicas(),
-            combate: this.coletarCombate(),
-            vantagens: this.coletarVantagens(),
-            desvantagens: this.coletarDesvantagens(),
-            pericias: this.coletarPericias(),
-            magias: this.coletarMagias(),
-            equipamento: this.coletarEquipamento()
-        };
-    }
-
-    // SALVAR NO SUPABASE - CORRETO
-    async salvarTudoNoSupabase(session, personagemId = null) {
-        try {
-            const dados = this.coletarTudo();
-
-            const dadosParaSalvar = {
-                user_id: session.user.id,
-                
-                // DASHBOARD
-                nome: this.limitar(dados.dashboard.nome, 100),
-                raca: this.limitar(dados.dashboard.raca, 50),
-                classe: this.limitar(dados.dashboard.classe, 50),
-                nivel: this.limitar(dados.dashboard.nivel, 50),
-                descricao: dados.dashboard.descricao || '',
-                
-                // PONTOS
-                pontos_totais: dados.dashboard.pontos_totais || 150,
-                pontos_gastos: dados.dashboard.pontos_gastos || 0,
-                pontos_disponiveis: dados.dashboard.pontos_disponiveis || 150,
-                
-                // ATRIBUTOS
-                forca: dados.atributos.forca || 10,
-                destreza: dados.atributos.destreza || 10,
-                inteligencia: dados.atributos.inteligencia || 10,
-                saude: dados.atributos.saude || 10,
-                
-                // CARACTERÍSTICAS
-                aparencia: this.limitar(dados.caracteristicas.aparencia?.descricao, 50) || 'Comum',
-                riqueza: this.limitar(dados.caracteristicas.riqueza?.descricao, 50) || 'Média',
-                renda_mensal: this.limitar(dados.caracteristicas.riqueza?.renda, 50) || '$1.000',
-                altura: dados.caracteristicas.altura || 1.70,
-                peso: dados.caracteristicas.peso || 70,
-                
-                // COMBATE
-                pv_atual: dados.combate.pv_atual || 10,
-                pv_maximo: dados.combate.pv_maximo || 10,
-                pf_atual: dados.combate.pf_atual || 10,
-                pf_maximo: dados.combate.pf_maximo || 10,
-                
-                // VANTAGENS
-                vantagens: dados.vantagens.vantagens || [],
-                total_vantagens: dados.vantagens.totais?.vantagens || 0,
-                peculiaridades: dados.vantagens.peculiaridades || [],
-                total_peculiaridades: dados.vantagens.totais?.peculiaridades || 0,
-                
-                // DESVANTAGENS
-                desvantagens: dados.desvantagens.desvantagens || [],
-                total_desvantagens: dados.desvantagens.totais?.desvantagens || 0,
-                
-                // PERÍCIAS
-                pericias: dados.pericias.pericias || [],
-                total_pericias: dados.pericias.totais?.pericias || 0,
-                tecnicas: dados.pericias.tecnicas || [],
-                total_tecnicas: dados.pericias.totais?.tecnicas || 0,
-                
-                // MAGIAS
-                magias: dados.magias.magias || [],
-                total_magias: dados.magias.totais?.magias || 0,
-                mana_atual: 10,
-                mana_base: 10,
-                
-                // EQUIPAMENTO
-                equipamentos: dados.equipamento.equipamentos || [],
-                inventario: dados.equipamento.inventario || [],
-                deposito: dados.equipamento.deposito || [],
-                dinheiro: dados.equipamento.totais?.dinheiro || 2000,
-                peso_atual: dados.equipamento.totais?.peso || 0,
-                peso_maximo: 60,
-                
-                // PADRÕES
-                pv_estado: 'Saudável',
-                pf_estado: 'Normal',
-                nivel_carga: 'LEVE',
-                penalidades_carga: '',
-                escudo_nome: '',
-                status: 'Ativo',
-                updated_at: new Date().toISOString()
-            };
-
-            let resultado;
-            
-            if (personagemId) {
-                // ATUALIZAR
-                const { data, error } = await supabase
-                    .from('characters')
-                    .update(dadosParaSalvar)
-                    .eq('id', personagemId)
-                    .eq('user_id', session.user.id)
-                    .select()
-                    .single();
-                
-                if (error) throw error;
-                resultado = data;
-            } else {
-                // CRIAR
-                dadosParaSalvar.created_at = new Date().toISOString();
-                
-                const { data, error } = await supabase
-                    .from('characters')
-                    .insert([dadosParaSalvar])
-                    .select()
-                    .single();
-                
-                if (error) throw error;
-                resultado = data;
-            }
-
-            return {
-                success: true,
-                message: personagemId ? 'Personagem atualizado!' : 'Personagem criado!',
-                data: resultado,
-                personagemId: resultado.id
-            };
-
-        } catch (error) {
-            let mensagem = 'Erro ao salvar: ' + error.message;
-            
-            if (error.message.includes('value too long')) {
-                mensagem = 'Texto muito longo em algum campo. Use valores mais curtos.';
-            }
-            
-            return {
-                success: false,
-                message: mensagem,
-                error: error.message
-            };
-        }
+        });
     }
 }
 
 // FUNÇÕES PRINCIPAIS
-window.coletorPersonagem = new ColetorPersonagem();
+window.gerenciadorPersonagem = new GerenciadorPersonagem();
 
 async function verificarSessao() {
     try {
@@ -3715,7 +3629,7 @@ async function verificarSessao() {
         if (error) return { sucesso: false, mensagem: 'Erro de sessão' };
         if (session) return { sucesso: true, session: session };
         
-        return { sucesso: false, mensagem: 'Faça login', redirecionar: true };
+        return { sucesso: false, mensagem: 'Faça login para continuar', redirecionar: true };
     } catch (erro) {
         return { sucesso: false, mensagem: 'Erro de conexão' };
     }
@@ -3724,16 +3638,14 @@ async function verificarSessao() {
 async function salvarPersonagem() {
     try {
         const btnSalvar = document.getElementById('btnSalvar');
-        if (!btnSalvar) return;
-        
-        const originalHTML = btnSalvar.innerHTML;
-        btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-        btnSalvar.disabled = true;
-        
+        if (btnSalvar) {
+            btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            btnSalvar.disabled = true;
+        }
+
+        // Verificar sessão
         const verificacao = await verificarSessao();
         if (!verificacao.sucesso) {
-            btnSalvar.innerHTML = originalHTML;
-            btnSalvar.disabled = false;
             if (verificacao.redirecionar) {
                 alert(verificacao.mensagem);
                 setTimeout(() => window.location.href = 'login.html', 1500);
@@ -3742,165 +3654,112 @@ async function salvarPersonagem() {
             }
             return;
         }
+
+        // Atualizar dados do formulário
+        window.gerenciadorPersonagem.atualizarDeFormulario();
+        const dadosParaSalvar = window.gerenciadorPersonagem.obterDadosParaSalvar(verificacao.session.user.id);
+
+        let resultado;
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const idDaUrl = urlParams.get('id');
-        const idParaSalvar = window.personagemId || idDaUrl;
-        
-        const resultado = await window.coletorPersonagem.salvarTudoNoSupabase(verificacao.session, idParaSalvar);
-        
-        if (resultado.success) {
-            if (!window.personagemId && resultado.personagemId) {
-                window.personagemId = resultado.personagemId;
-                const novaUrl = `${window.location.pathname}?id=${resultado.personagemId}`;
-                window.history.replaceState({}, '', novaUrl);
-            }
+        if (personagemId) {
+            // ATUALIZAR
+            const { data, error } = await supabase
+                .from('characters')
+                .update(dadosParaSalvar)
+                .eq('id', personagemId)
+                .eq('user_id', verificacao.session.user.id)
+                .select()
+                .single();
             
+            if (error) throw error;
+            resultado = data;
+        } else {
+            // CRIAR
+            const { data, error } = await supabase
+                .from('characters')
+                .insert([dadosParaSalvar])
+                .select()
+                .single();
+            
+            if (error) throw error;
+            resultado = data;
+            personagemId = resultado.id;
+            
+            // Atualizar URL com ID
+            const novaUrl = `${window.location.pathname}?id=${personagemId}`;
+            window.history.replaceState({}, '', novaUrl);
+        }
+
+        // Feedback de sucesso
+        if (btnSalvar) {
             btnSalvar.innerHTML = '<i class="fas fa-check"></i> Salvo!';
             btnSalvar.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
             
             setTimeout(() => {
-                btnSalvar.innerHTML = originalHTML;
+                btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
                 btnSalvar.style.background = '';
                 btnSalvar.disabled = false;
             }, 2000);
-            
-        } else {
-            btnSalvar.innerHTML = originalHTML;
-            btnSalvar.disabled = false;
-            alert(resultado.message);
         }
         
+        alert(personagemId ? 'Personagem atualizado!' : 'Personagem criado!');
+        
     } catch (error) {
+        console.error('Erro ao salvar:', error);
+        
         const btnSalvar = document.getElementById('btnSalvar');
         if (btnSalvar) {
             btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
             btnSalvar.disabled = false;
         }
-        alert('Erro: ' + error.message);
+        
+        alert('Erro ao salvar: ' + (error.message || 'Verifique os dados e tente novamente'));
     }
 }
 
-// INICIALIZAÇÃO
-async function inicializarSistema() {
-    try {
-        const verificacao = await verificarSessao();
-        if (!verificacao.sucesso) {
-            if (verificacao.redirecionar) {
-                alert(verificacao.mensagem);
-                setTimeout(() => window.location.href = 'login.html', 1000);
-            } else {
-                alert(verificacao.mensagem);
-            }
-            return;
-        }
-        
-        // Navegação abas
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                tabButtons.forEach(b => b.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                const tabId = this.getAttribute('data-tab');
-                const tabContent = document.getElementById(tabId);
-                if (tabContent) tabContent.classList.add('active');
-            });
-        });
-        
-        // Verificar personagem existente
-        const urlParams = new URLSearchParams(window.location.search);
-        window.personagemId = urlParams.get('id');
-        
-        if (window.personagemId) {
-            document.title = 'Editar Personagem - RPG System';
-            await carregarPersonagemParaEdicao(window.personagemId);
-        } else {
-            document.title = 'Criar Personagem - RPG System';
-            inicializarPersonagemVazio();
-        }
-        
-        // Event listeners
-        const btnSalvar = document.getElementById('btnSalvar');
-        const btnExcluir = document.getElementById('btnExcluir');
-        const btnSair = document.getElementById('btnSair');
-        
-        if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
-        if (btnExcluir) btnExcluir.addEventListener('click', solicitarExclusao);
-        if (btnSair) btnSair.addEventListener('click', sairSemSalvar);
-        
-    } catch (error) {
-        alert('Erro ao inicializar: ' + error.message);
-    }
-}
-
-async function carregarPersonagemParaEdicao(personagemId) {
+async function carregarPersonagem(id) {
     try {
         const verificacao = await verificarSessao();
         if (!verificacao.sucesso) return;
-        
+
         const { data: personagem, error } = await supabase
             .from('characters')
             .select('*')
-            .eq('id', personagemId)
+            .eq('id', id)
             .eq('user_id', verificacao.session.user.id)
             .single();
         
-        if (error || !personagem) throw new Error('Personagem não encontrado');
+        if (error) throw new Error('Personagem não encontrado');
         
-        // Carregar dados básicos
-        document.getElementById('charName').value = personagem.nome || '';
-        document.getElementById('racaPersonagem').value = personagem.raca || '';
-        document.getElementById('classePersonagem').value = personagem.classe || '';
-        document.getElementById('nivelPersonagem').value = personagem.nivel || '';
-        document.getElementById('descricaoPersonagem').value = personagem.descricao || '';
+        personagemId = id;
+        window.gerenciadorPersonagem.carregarDados(personagem);
+        window.gerenciadorPersonagem.preencherFormulario();
         
-        // Atributos
-        if (personagem.forca) document.getElementById('ST').value = personagem.forca;
-        if (personagem.destreza) document.getElementById('DX').value = personagem.destreza;
-        if (personagem.inteligencia) document.getElementById('IQ').value = personagem.inteligencia;
-        if (personagem.saude) document.getElementById('HT').value = personagem.saude;
-        
-        // Pontos
-        if (personagem.pontos_totais) {
-            document.getElementById('pontosTotaisDashboard').value = personagem.pontos_totais;
-        }
+        document.title = `${personagem.nome} - Editar Personagem`;
         
     } catch (error) {
-        alert('Erro ao carregar: ' + error.message);
+        console.error('Erro ao carregar:', error);
+        alert('Erro ao carregar personagem: ' + error.message);
         setTimeout(() => window.location.href = 'personagens.html', 2000);
     }
 }
 
-function inicializarPersonagemVazio() {
-    document.getElementById('charName').value = 'Novo Personagem';
-    document.getElementById('ST').value = 10;
-    document.getElementById('DX').value = 10;
-    document.getElementById('IQ').value = 10;
-    document.getElementById('HT').value = 10;
-}
-
-function solicitarExclusao() {
-    if (window.personagemId) {
-        if (confirm('Excluir personagem?')) excluirPersonagem(window.personagemId);
-    } else {
-        if (confirm('Descartar personagem?')) window.location.href = 'personagens.html';
-    }
-}
-
-async function excluirPersonagem(personagemId) {
-    try {
-        const btnExcluir = document.getElementById('btnExcluir');
-        if (btnExcluir) {
-            btnExcluir.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Excluindo...';
-            btnExcluir.disabled = true;
+async function excluirPersonagem() {
+    if (!personagemId) {
+        if (confirm('Descartar este personagem sem salvar?')) {
+            window.location.href = 'personagens.html';
         }
-        
+        return;
+    }
+
+    if (!confirm('Tem certeza que deseja excluir este personagem? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+
+    try {
         const verificacao = await verificarSessao();
         if (!verificacao.sucesso) return;
-        
+
         const { error } = await supabase
             .from('characters')
             .delete()
@@ -3909,36 +3768,72 @@ async function excluirPersonagem(personagemId) {
         
         if (error) throw error;
         
-        alert('Personagem excluído!');
+        alert('Personagem excluído com sucesso!');
         setTimeout(() => window.location.href = 'personagens.html', 1000);
         
     } catch (error) {
-        alert('Erro ao excluir: ' + error.message);
-        const btnExcluir = document.getElementById('btnExcluir');
-        if (btnExcluir) {
-            btnExcluir.innerHTML = '<i class="fas fa-trash"></i> Excluir';
-            btnExcluir.disabled = false;
-        }
+        console.error('Erro ao excluir:', error);
+        alert('Erro ao excluir personagem: ' + error.message);
     }
 }
 
-function sairSemSalvar() {
-    if (confirm('Sair sem salvar?')) {
+function sair() {
+    if (confirm('Sair sem salvar as alterações?')) {
         window.location.href = 'personagens.html';
     }
 }
 
-// INICIAR
+// INICIALIZAÇÃO
+async function inicializar() {
+    try {
+        // Verificar sessão
+        const verificacao = await verificarSessao();
+        if (!verificacao.sucesso) {
+            if (verificacao.redirecionar) {
+                setTimeout(() => window.location.href = 'login.html', 1000);
+            }
+            return;
+        }
+
+        // Configurar botões
+        const btnSalvar = document.getElementById('btnSalvar');
+        const btnExcluir = document.getElementById('btnExcluir');
+        const btnSair = document.getElementById('btnSair');
+        
+        if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
+        if (btnExcluir) btnExcluir.addEventListener('click', excluirPersonagem);
+        if (btnSair) btnSair.addEventListener('click', sair);
+
+        // Verificar se é edição ou criação
+        const urlParams = new URLSearchParams(window.location.search);
+        const idDaUrl = urlParams.get('id');
+        
+        if (idDaUrl) {
+            await carregarPersonagem(idDaUrl);
+        } else {
+            document.title = 'Criar Novo Personagem';
+            // Inicializar com valores padrão no formulário
+            window.gerenciadorPersonagem.preencherFormulario();
+        }
+
+    } catch (error) {
+        console.error('Erro na inicialização:', error);
+        alert('Erro ao carregar a página: ' + error.message);
+    }
+}
+
+// INICIAR QUANDO A PÁGINA CARREGAR
 document.addEventListener('DOMContentLoaded', function() {
+    // Esperar um pouco para garantir que tudo esteja carregado
     setTimeout(() => {
-        inicializarSistema();
-    }, 500);
+        inicializar();
+    }, 300);
 });
 
-// EXPORTAÇÕES
+// EXPORTAR FUNÇÕES PARA USO EXTERNO
 window.salvarPersonagem = salvarPersonagem;
-window.coletorPersonagem = window.coletorPersonagem;
-window.verificarSessao = verificarSessao;
+window.excluirPersonagem = excluirPersonagem;
+window.carregarPersonagem = carregarPersonagem;
 </script>
 </body>
 </html>  
