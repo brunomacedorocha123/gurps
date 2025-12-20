@@ -3440,125 +3440,201 @@
 
 <!-- NO criar-personagens.html, substitua TODO o script por este: -->
 <script>
-// CONFIGURAÇÃO SUPABASE
+// APENAS ESSAS 3 CONSTANTES SÃO NECESSÁRIAS
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// FUNÇÃO PRINCIPAL - CARREGAR PERSONAGENS REAIS
-async function carregarMeusPersonagens() {
+// VARIÁVEL GLOBAL SIMPLES
+let personagemId = null;
+
+// FUNÇÃO ÚNICA PARA SALVAR
+async function salvarPersonagem() {
+    console.log('✅ Botão salvar clicado');
+    
     try {
-        // 1. Verificar login
+        // 1. VERIFICAR LOGIN
+        const { data: { session }, error: sessaoErro } = await supabase.auth.getSession();
+        if (sessaoErro || !session) {
+            alert('⚠️ Faça login primeiro!');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // 2. PEGAR DADOS DO FORMULÁRIO
+        const dados = {
+            nome: document.getElementById('charName')?.value || '',
+            raca: document.getElementById('racaPersonagem')?.value || '',
+            classe: document.getElementById('classePersonagem')?.value || '',
+            nivel: parseInt(document.getElementById('nivelPersonagem')?.value) || 1,
+            forca: parseInt(document.getElementById('ST')?.value) || 10,
+            destreza: parseInt(document.getElementById('DX')?.value) || 10,
+            inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
+            saude: parseInt(document.getElementById('HT')?.value) || 10
+        };
+
+        console.log('📝 Dados coletados:', dados);
+
+        // 3. VALIDAÇÃO BÁSICA
+        if (!dados.nome.trim()) {
+            alert('❌ Digite um nome para o personagem!');
+            return;
+        }
+
+        // 4. SALVAR NO BANCO
+        let resultado;
+        const userId = session.user.id;
+        
+        if (personagemId) {
+            // EDITAR
+            console.log(`✏️ Editando personagem ID: ${personagemId}`);
+            const { data, error } = await supabase
+                .from('characters')
+                .update({
+                    ...dados,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', personagemId)
+                .eq('user_id', userId)
+                .select()
+                .single();
+            
+            if (error) throw error;
+            resultado = data;
+        } else {
+            // NOVO
+            console.log('🆕 Criando novo personagem');
+            const { data, error } = await supabase
+                .from('characters')
+                .insert([{
+                    ...dados,
+                    user_id: userId,
+                    pontos_totais: 150,
+                    pontos_gastos: 0,
+                    pontos_disponiveis: 150,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }])
+                .select()
+                .single();
+            
+            if (error) throw error;
+            resultado = data;
+            personagemId = resultado.id;
+        }
+
+        console.log('💾 Salvou no banco:', resultado);
+        alert('✅ Personagem salvo com sucesso!');
+        
+        // 5. REDIRECIONAR PARA LISTA
+        setTimeout(() => {
+            window.location.href = 'personagens.html';
+        }, 1500);
+
+    } catch (error) {
+        console.error('❌ ERRO ao salvar:', error);
+        alert('❌ Erro: ' + error.message);
+    }
+}
+
+// FUNÇÃO PARA CARREGAR SE ESTIVER EDITANDO
+async function carregarSeForEdicao() {
+    console.log('🔍 Verificando se é edição...');
+    
+    // Verificar ID na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const idDaUrl = urlParams.get('id');
+    
+    if (!idDaUrl) {
+        console.log('➕ Modo criação - sem ID na URL');
+        return;
+    }
+
+    try {
+        // Verificar login
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
             window.location.href = 'login.html';
             return;
         }
 
-        // 2. Buscar personagens REAIS do usuário
-        const { data: personagens, error } = await supabase
+        console.log(`🔍 Buscando personagem ID: ${idDaUrl}`);
+        
+        // Buscar no banco
+        const { data: personagem, error } = await supabase
             .from('characters')
-            .select('id, nome, raca, classe, nivel, forca, destreza, inteligencia, saude, pontos_totais, pontos_gastos, created_at')
+            .select('*')
+            .eq('id', idDaUrl)
             .eq('user_id', session.user.id)
-            .order('created_at', { ascending: false });
+            .single();
         
-        if (error) throw error;
-
-        const container = document.getElementById('personagensContainer');
-        
-        // 3. Mostrar mensagem se não tiver personagens
-        if (!personagens || personagens.length === 0) {
-            document.getElementById('emptyState').style.display = 'block';
-            container.innerHTML = '';
+        if (error || !personagem) {
+            console.warn('⚠️ Personagem não encontrado');
+            alert('Personagem não encontrado!');
+            window.location.href = 'personagens.html';
             return;
         }
 
-        // 4. Mostrar personagens REAIS
-        document.getElementById('emptyState').style.display = 'none';
+        console.log('📖 Personagem encontrado:', personagem);
         
-        let html = '<div class="personagens-lista">';
-        personagens.forEach(personagem => {
-            html += `
-                <div class="personagem-item">
-                    <div class="personagem-header">
-                        <div class="personagem-nome">${personagem.nome || 'Sem nome'}</div>
-                        <div class="personagem-nivel">Nv. ${personagem.nivel || 1}</div>
-                    </div>
-                    <div class="personagem-info">
-                        <div class="info-line">
-                            <span class="info-label">Raça/Classe:</span>
-                            <span class="info-value">${personagem.raca || '?'} / ${personagem.classe || '?'}</span>
-                        </div>
-                        <div class="info-line">
-                            <span class="info-label">Atributos:</span>
-                            <span class="info-value">ST ${personagem.forca || 10} | DX ${personagem.destreza || 10} | IQ ${personagem.inteligencia || 10} | HT ${personagem.saude || 10}</span>
-                        </div>
-                        <div class="info-line">
-                            <span class="info-label">Pontos:</span>
-                            <span class="info-value">${personagem.pontos_gastos || 0}/${personagem.pontos_totais || 150}</span>
-                        </div>
-                    </div>
-                    <div class="personagem-acoes">
-                        <button class="btn-editar" onclick="editarPersonagem('${personagem.id}')">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn-excluir" onclick="excluirPersonagem('${personagem.id}', '${personagem.nome || 'este personagem'}')">
-                            <i class="fas fa-trash"></i> Excluir
-                        </button>
-                    </div>
-                </div>
-            `;
+        // Salvar ID globalmente
+        personagemId = idDaUrl;
+        
+        // PREENCHER FORMULÁRIO (SÓ SE OS ELEMENTOS EXISTIREM)
+        const elementos = [
+            { id: 'charName', valor: personagem.nome },
+            { id: 'racaPersonagem', valor: personagem.raca },
+            { id: 'classePersonagem', valor: personagem.classe },
+            { id: 'nivelPersonagem', valor: personagem.nivel },
+            { id: 'ST', valor: personagem.forca },
+            { id: 'DX', valor: personagem.destreza },
+            { id: 'IQ', valor: personagem.inteligencia },
+            { id: 'HT', valor: personagem.saude }
+        ];
+
+        elementos.forEach(item => {
+            const el = document.getElementById(item.id);
+            if (el && el.value !== undefined) {
+                el.value = item.valor || '';
+            }
         });
-        html += '</div>';
-        
-        container.innerHTML = html;
-        
+
+        // Atualizar título
+        document.title = `${personagem.nome} - Editar`;
+
     } catch (error) {
-        console.error('Erro:', error);
-        document.getElementById('personagensContainer').innerHTML = `
-            <div style="color: #e74c3c; text-align: center; padding: 50px;">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Erro ao carregar personagens: ${error.message}</p>
-            </div>
-        `;
+        console.error('❌ Erro ao carregar:', error);
+        // Não faz nada - deixa em modo criação
     }
 }
 
-// FUNÇÕES SIMPLES
-function editarPersonagem(id) {
-    window.location.href = `criar-personagens.html?id=${id}`;
-}
-
-async function excluirPersonagem(id, nome) {
-    if (!confirm(`Excluir "${nome}"?`)) return;
-    
-    try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-        
-        const { error } = await supabase
-            .from('characters')
-            .delete()
-            .eq('id', id)
-            .eq('user_id', session.user.id);
-        
-        if (error) throw error;
-        
-        alert('Personagem excluído!');
-        carregarMeusPersonagens();
-        
-    } catch (error) {
-        alert('Erro ao excluir: ' + error.message);
-    }
-}
-
-function criarNovoPersonagem() {
-    window.location.href = 'criar-personagens.html';
-}
-
-// INICIAR
+// CONFIGURAÇÃO INICIAL
 document.addEventListener('DOMContentLoaded', function() {
-    carregarMeusPersonagens();
+    console.log('🚀 Página carregada - criarpersonagens.html');
+    
+    // 1. Configurar botão salvar
+    const btnSalvar = document.getElementById('btnSalvar');
+    if (btnSalvar) {
+        btnSalvar.addEventListener('click', salvarPersonagem);
+        console.log('✅ Botão salvar configurado');
+    } else {
+        console.warn('⚠️ Botão salvar não encontrado!');
+    }
+
+    // 2. Configurar botão voltar
+    const btnVoltar = document.getElementById('btnVoltar');
+    if (btnVoltar) {
+        btnVoltar.addEventListener('click', function() {
+            if (confirm('Voltar sem salvar?')) {
+                window.location.href = 'personagens.html';
+            }
+        });
+    }
+
+    // 3. Carregar dados se for edição
+    setTimeout(() => {
+        carregarSeForEdicao();
+    }, 500);
 });
 </script>
 </body>
