@@ -3448,10 +3448,10 @@
     let personagemId = null;
 
     // ============================================
-    // SISTEMA DE COLETA COMPLETA DE TODAS AS ABAS
+    // SISTEMA DE COLETA COMPLETA - VERSÃO REAL
     // ============================================
 
-    class ColetorPersonagem {
+    class ColetorPersonagemReal {
         constructor() {
             this.dados = {};
         }
@@ -3485,6 +3485,54 @@
             if (!texto) return 0;
             const match = texto.match(/[\d.]+/);
             return match ? parseFloat(match[0]) : 0;
+        }
+
+        // COLETAR ITENS DE LISTAS REAIS
+        coletarItensLista(idContainer) {
+            const itens = [];
+            try {
+                const container = document.getElementById(idContainer);
+                if (container) {
+                    // Verificar diferentes estruturas possíveis
+                    const elementos = container.querySelectorAll('.item-adquirido, .pericia-aprendida, .magia-aprendida, .tecnica-aprendida, [data-item], li, tr');
+                    
+                    elementos.forEach(el => {
+                        // Tentar extrair nome
+                        let nome = '';
+                        let pontos = 0;
+                        let descricao = '';
+                        
+                        // Tentar diferentes seletores
+                        const nomeEl = el.querySelector('.item-nome, .pericia-nome, .magia-nome, .tecnica-nome, .nome, [data-nome], strong, b, .texto');
+                        if (nomeEl) nome = nomeEl.textContent?.trim();
+                        
+                        const pontosEl = el.querySelector('.item-pontos, .pericia-pontos, .magia-pontos, .tecnica-pontos, .pontos, [data-pontos], .custo');
+                        if (pontosEl) pontos = this.extrairPontos(pontosEl.textContent);
+                        
+                        const descEl = el.querySelector('.item-desc, .pericia-desc, .magia-desc, .tecnica-desc, .descricao, [data-desc], small');
+                        if (descEl) descricao = descEl.textContent?.trim();
+                        
+                        // Se não encontrou nome nos seletores, usar texto completo
+                        if (!nome && el.textContent) {
+                            const texto = el.textContent.trim();
+                            if (texto && !texto.includes('lista-vazia') && !texto.includes('Nenhuma')) {
+                                nome = texto.split('\n')[0] || texto;
+                            }
+                        }
+                        
+                        if (nome && nome.length > 0) {
+                            itens.push({
+                                nome: nome.substring(0, 100), // Limitar tamanho
+                                pontos: pontos,
+                                descricao: descricao.substring(0, 200) // Limitar tamanho
+                            });
+                        }
+                    });
+                }
+            } catch (error) {
+                console.warn(`⚠️ Erro ao coletar itens de ${idContainer}:`, error);
+            }
+            return itens;
         }
 
         // 1. COLETAR DASHBOARD
@@ -3534,177 +3582,76 @@
                 custo_iq: this.getNumero('custoIQ', 0),
                 custo_ht: this.getNumero('custoHT', 0),
                 
-                pontos_vida: {
-                    base: this.getNumero('PVBase', 10),
-                    bonus: this.getNumero('bonusPV', 0),
-                    total: this.getNumero('PVTotal', 10)
-                },
-                pontos_fadiga: {
-                    base: this.getNumero('PFBase', 10),
-                    bonus: this.getNumero('bonusPF', 0),
-                    total: this.getNumero('PFTotal', 10)
-                },
-                vontade: {
-                    base: this.getNumero('VontadeBase', 10),
-                    bonus: this.getNumero('bonusVontade', 0),
-                    total: this.getNumero('VontadeTotal', 10)
-                },
-                percepcao: {
-                    base: this.getNumero('PercepcaoBase', 10),
-                    bonus: this.getNumero('bonusPercepcao', 0),
-                    total: this.getNumero('PercepcaoTotal', 10)
-                },
-                deslocamento: {
-                    base: this.getDecimal('DeslocamentoBase', 5.00),
-                    bonus: this.getDecimal('bonusDeslocamento', 0),
-                    total: this.getDecimal('DeslocamentoTotal', 5.00)
-                },
+                pontos_vida: this.getNumero('PVTotal', 10),
+                pontos_fadiga: this.getNumero('PFTotal', 10),
+                vontade: this.getNumero('VontadeTotal', 10),
+                percepcao: this.getNumero('PercepcaoTotal', 10),
+                deslocamento: this.getDecimal('DeslocamentoTotal', 5.00),
                 
-                dano: {
-                    gdp: this.getValor('danoGDP', '1d-2'),
-                    geb: this.getValor('danoGEB', '1d')
-                },
+                dano_gdp: this.getValor('danoGDP', '1d-2'),
+                dano_geb: this.getValor('danoGEB', '1d'),
                 
-                carga: {
-                    nenhuma: this.getDecimal('cargaNenhuma', 10.0),
-                    leve: this.getDecimal('cargaLeve', 20.0),
-                    media: this.getDecimal('cargaMedia', 30.0),
-                    pesada: this.getDecimal('cargaPesada', 60.0),
-                    muito_pesada: this.getDecimal('cargaMuitoPesada', 100.0)
-                }
+                carga_nenhuma: this.getDecimal('cargaNenhuma', 10.0),
+                carga_leve: this.getDecimal('cargaLeve', 20.0),
+                carga_media: this.getDecimal('cargaMedia', 30.0),
+                carga_pesada: this.getDecimal('cargaPesada', 60.0),
+                carga_muito_pesada: this.getDecimal('cargaMuitoPesada', 100.0)
             };
         }
 
         // 3. COLETAR CARACTERÍSTICAS
         coletarCaracteristicas() {
             return {
-                aparencia: {
-                    nivel: this.getValor('nivelAparencia', '0'),
-                    descricao: this.getValor('displayAparencia', 'Comum'),
-                    pontos: this.getNumero('pontosAparencia', 0)
-                },
-                
-                riqueza: {
-                    nivel: this.getValor('nivelRiqueza', '0'),
-                    descricao: this.getValor('displayRiqueza', 'Média'),
-                    pontos: this.getNumero('pontosRiqueza', 0),
-                    renda: this.getValor('rendaMensal', '$1.000')
-                },
-                
-                idiomas: {
-                    materno: this.getValor('idiomaMaternoNome', 'Comum'),
-                    adicionais: [],
-                    total: this.getNumero('totalIdiomas', 0),
-                    pontos: this.getNumero('pontosIdiomas', 0)
-                },
-                
-                caracteristicas_fisicas: {
-                    selecionadas: [],
-                    pontos: this.getNumero('pontosCaracteristicas', 0)
-                },
-                
-                fisico: {
-                    altura: this.getDecimal('altura', 1.70),
-                    peso: this.getDecimal('peso', 70),
-                    status: this.getValor('statusFisico', 'Normal'),
-                    st_base: this.getNumero('stBase', 10),
-                    altura_faixa: this.getValor('alturaFaixa', '1.58m - 1.83m'),
-                    peso_faixa: this.getValor('pesoFaixa', '57.5kg - 87.5kg'),
-                    modificador: this.getValor('modificadorPeso', 'Dentro da faixa')
-                }
+                aparencia: this.getValor('displayAparencia', 'Comum'),
+                riqueza: this.getValor('displayRiqueza', 'Média'),
+                altura: this.getDecimal('altura', 1.70),
+                peso: this.getDecimal('peso', 70),
+                idioma_materno: this.getValor('idiomaMaternoNome', 'Comum')
             };
         }
 
-        // 4. COLETAR VANTAGENS/DESVANTAGENS
+        // 4. COLETAR VANTAGENS/DESVANTAGENS - DADOS REAIS
         coletarVantagensDesvantagens() {
             return {
-                vantagens: {
-                    totais: {
-                        pontos: this.getNumero('total-vantagens', 0),
-                        adquiridas: this.getNumero('total-vantagens-adquiridas', 0)
-                    },
-                    lista: []
-                },
-                
-                desvantagens: {
-                    totais: {
-                        pontos: this.getNumero('total-desvantagens', 0),
-                        adquiridas: this.getNumero('total-desvantagens-adquiridas', 0)
-                    },
-                    lista: []
-                },
+                vantagens: this.coletarItensLista('vantagens-adquiridas'),
+                desvantagens: this.coletarItensLista('desvantagens-adquiridas'),
                 
                 peculiaridades: {
                     total: this.getNumero('total-peculiaridades', 0),
                     custo: this.getNumero('custo-peculiaridades', 0),
-                    lista: []
+                    lista: this.coletarItensLista('lista-peculiaridades')
                 },
                 
+                pontos_vantagens: this.getNumero('total-vantagens', 0),
+                pontos_desvantagens: this.getNumero('total-desvantagens', 0),
                 saldo_total: this.getNumero('saldo-total-vantagens', 0)
             };
         }
 
-        // 5. COLETAR PERÍCIAS/TÉCNICAS
+        // 5. COLETAR PERÍCIAS/TÉCNICAS - DADOS REAIS
         coletarPericiasTecnicas() {
             return {
-                resumo: {
-                    dx: {
-                        quantidade: this.getNumero('qtd-dx', 0),
-                        pontos: this.getNumero('pts-dx', 0)
-                    },
-                    iq: {
-                        quantidade: this.getNumero('qtd-iq', 0),
-                        pontos: this.getNumero('pts-iq', 0)
-                    },
-                    ht: {
-                        quantidade: this.getNumero('qtd-ht', 0),
-                        pontos: this.getNumero('pts-ht', 0)
-                    },
-                    perc: {
-                        quantidade: this.getNumero('qtd-perc', 0),
-                        pontos: this.getNumero('pts-perc', 0)
-                    },
-                    total: {
-                        quantidade: this.getNumero('qtd-total', 0),
-                        pontos: this.getNumero('pts-total', 0)
-                    }
-                },
+                pericias: this.coletarItensLista('pericias-aprendidas'),
+                tecnicas: this.coletarItensLista('tecnicas-aprendidas'),
                 
-                pericias_aprendidas: [],
-                
-                tecnicas: {
-                    medias: {
-                        quantidade: this.getNumero('qtd-tecnicas-medio', 0),
-                        pontos: this.getNumero('pts-tecnicas-medio', 0)
-                    },
-                    dificeis: {
-                        quantidade: this.getNumero('qtd-tecnicas-dificil', 0),
-                        pontos: this.getNumero('pts-tecnicas-dificil', 0)
-                    },
-                    total: {
-                        quantidade: this.getNumero('qtd-tecnicas-total', 0),
-                        pontos: this.getNumero('pts-tecnicas-total', 0)
-                    },
-                    lista: []
-                },
+                resumo_dx: this.getNumero('qtd-dx', 0),
+                resumo_iq: this.getNumero('qtd-iq', 0),
+                resumo_ht: this.getNumero('qtd-ht', 0),
+                resumo_perc: this.getNumero('qtd-perc', 0),
+                resumo_total: this.getNumero('qtd-total', 0),
                 
                 pontos_total: this.getNumero('pontos-pericias-total', 0)
             };
         }
 
-        // 6. COLETAR MAGIAS
+        // 6. COLETAR MAGIAS - DADOS REAIS
         coletarMagias() {
             return {
-                status: {
-                    aptidao: this.getNumero('aptidao-magica', 0),
-                    iq_magico: this.getNumero('iq-magico', 10),
-                    mana_base: this.getNumero('mana-base', 10),
-                    mana_atual: this.getNumero('mana-atual', 10),
-                    bonus_mana: this.getNumero('bonus-mana', 0),
-                    total_gasto: this.getNumero('total-gasto-magia', 0)
-                },
+                magias: this.coletarItensLista('magias-aprendidas'),
                 
-                magias_aprendidas: [],
+                aptidao: this.getNumero('aptidao-magica', 0),
+                mana_atual: this.getNumero('mana-atual', 10),
+                mana_maxima: this.getNumero('mana-base', 10) + this.getNumero('bonus-mana', 0),
                 
                 pontos_total: this.getNumero('pontos-magia-total', 0)
             };
@@ -3713,153 +3660,103 @@
         // 7. COLETAR EQUIPAMENTO
         coletarEquipamento() {
             return {
-                status: {
-                    dinheiro: this.getValor('dinheiroEquipamento', '$2.000'),
-                    peso_atual: this.getDecimal('pesoAtual', 0),
-                    peso_maximo: this.getDecimal('pesoMaximo', 60),
-                    nivel_carga: this.getValor('nivelCarga', 'LEVE'),
-                    penalidades_carga: this.getValor('penalidadesCarga', 'MOV +0 / DODGE +0'),
-                    contador_mochila: this.getNumero('contadorMochila', 0),
-                    maos_livres: 2
-                },
+                dinheiro: this.extrairDecimal(this.getValor('dinheiroEquipamento', '$2.000')),
+                peso_atual: this.getDecimal('pesoAtual', 0),
+                peso_maximo: this.getDecimal('pesoMaximo', 60),
+                nivel_carga: this.getValor('nivelCarga', 'LEVE'),
                 
-                inventario: [],
+                inventario: this.coletarItensLista('lista-equipamentos-adquiridos'),
                 
-                deposito: {
-                    itens_guardados: this.getNumero('contador-deposito', 0),
-                    peso_liberado: this.getDecimal('peso-liberado', 0),
-                    valor_total: this.getValor('valor-deposito', '$0'),
-                    itens: []
-                },
-                
-                financeiro: {
-                    dinheiro_disponivel: this.getValor('dinheiro-disponivel', '$0')
-                }
+                pontos_total: 0
             };
         }
 
         // 8. COLETAR COMBATE
         coletarCombate() {
             return {
-                pontos_vida: {
-                    atual: this.getNumero('pvAtualDisplay', 10),
-                    maximo: this.getNumero('pvMaxDisplay', 10),
-                    estado: this.getValor('pvEstadoDisplay', 'Saudável'),
-                    modificador: this.getNumero('pvModificador', 0)
-                },
+                pontos_vida_atual: this.getNumero('pvAtualDisplay', 10),
+                pontos_vida_maximo: this.getNumero('pvMaxDisplay', 10),
+                pontos_fadiga_atual: this.getNumero('pfAtualDisplay', 10),
+                pontos_fadiga_maximo: this.getNumero('pfMaxDisplay', 10),
                 
-                pontos_fadiga: {
-                    atual: this.getNumero('pfAtualDisplay', 10),
-                    maximo: this.getNumero('pfMaxDisplay', 10),
-                    estado: this.getValor('pfEstadoDisplay', 'Normal'),
-                    modificador: this.getNumero('pfModificador', 0)
-                },
+                esquiva: this.getNumero('esquivaTotal', 10),
+                bloqueio: this.getNumero('bloqueioTotal', 11),
+                aparar: this.getNumero('apararTotal', 3),
+                deslocamento: this.getDecimal('deslocamentoTotal', 5.00),
                 
-                dano: {
-                    gdp: this.getValor('danoGdp', '1d-2'),
-                    geb: this.getValor('danoGeb', '1d'),
-                    arma_equipada: {
-                        equipada: false,
-                        usando_corporal: true
-                    }
-                },
+                dano_gdp: this.getValor('danoGdp', '1d-2'),
+                dano_geb: this.getValor('danoGeb', '1d'),
                 
-                defesas: {
-                    esquiva: {
-                        valor: this.getNumero('esquivaTotal', 10),
-                        modificador: this.getNumero('esquivaMod', 0)
-                    },
-                    bloqueio: {
-                        valor: this.getNumero('bloqueioTotal', 11),
-                        modificador: this.getNumero('bloqueioMod', 0)
-                    },
-                    aparar: {
-                        valor: this.getNumero('apararTotal', 3),
-                        modificador: this.getNumero('apararMod', 0)
-                    },
-                    deslocamento: {
-                        valor: this.getDecimal('deslocamentoTotal', 5.00),
-                        modificador: this.getDecimal('deslocamentoMod', 0)
-                    },
-                    bonus: {
-                        reflexos: this.getNumero('bonusReflexos', 0),
-                        escudo: this.getNumero('bonusEscudo', 0),
-                        capa: this.getNumero('bonusCapa', 0),
-                        outros: this.getNumero('bonusOutros', 0),
-                        total: this.getNumero('totalBonus', 0)
-                    }
-                },
-                
-                resistencia_dano: {
-                    cabeca: 0,
-                    tronco: 0,
-                    rosto: 0,
-                    cranio: 0,
-                    pescoco: 0,
-                    virilha: 0,
-                    bracos: 0,
-                    pernas: 0,
-                    maos: 0,
-                    pes: 0,
-                    total: this.getNumero('rdTotal', 0)
-                },
-                
-                escudo: {
-                    nome: this.getValor('escudoNome', 'Nenhum escudo equipado'),
-                    dr: this.getNumero('escudoDR', 0),
-                    pontos_vida: this.getValor('escudoPVTexto', '0/0'),
-                    status: this.getValor('escudoStatus', 'Inativo'),
-                    ativo: false
-                },
-                
-                condicoes: [],
-                condicoes_ativas: this.getNumero('condicoesAtivas', 0)
+                resistencia_total: this.getNumero('rdTotal', 0)
             };
         }
 
         // 9. COLETAR TUDO
         coletarTudo() {
-            console.log('🔄 Coletando dados de TODAS as abas...');
+            console.log('🔄 Coletando dados REAIS de todas as abas...');
             
             try {
-                return {
+                const dadosCompletos = {
+                    // Dados básicos sempre disponíveis
                     dashboard: this.coletarDashboard(),
                     atributos: this.coletarAtributos(),
                     caracteristicas: this.coletarCaracteristicas(),
+                    
+                    // Dados das abas específicas
                     vantagens_desvantagens: this.coletarVantagensDesvantagens(),
-                    pericias: this.coletarPericiasTecnicas(),
+                    pericias_tecnicas: this.coletarPericiasTecnicas(),
                     magias: this.coletarMagias(),
                     equipamento: this.coletarEquipamento(),
                     combate: this.coletarCombate(),
                     
+                    // Metadata
                     metadata: {
                         coletado_em: new Date().toISOString(),
-                        versao_coletor: '1.0',
-                        timestamp: Date.now()
+                        versao_coletor: '2.0',
+                        timestamp: Date.now(),
+                        total_itens_coletados: 
+                            this.coletarVantagensDesvantagens().vantagens.length +
+                            this.coletarVantagensDesvantagens().desvantagens.length +
+                            this.coletarPericiasTecnicas().pericias.length +
+                            this.coletarPericiasTecnicas().tecnicas.length +
+                            this.coletarMagias().magias.length +
+                            this.coletarEquipamento().inventario.length
                     }
                 };
+                
+                console.log('✅ Coleta REAL realizada! Resumo:', {
+                    vantagens: dadosCompletos.vantagens_desvantagens.vantagens.length,
+                    desvantagens: dadosCompletos.vantagens_desvantagens.desvantagens.length,
+                    pericias: dadosCompletos.pericias_tecnicas.pericias.length,
+                    tecnicas: dadosCompletos.pericias_tecnicas.tecnicas.length,
+                    magias: dadosCompletos.magias.magias.length,
+                    equipamentos: dadosCompletos.equipamento.inventario.length
+                });
+                
+                return dadosCompletos;
                 
             } catch (error) {
                 console.error('❌ Erro na coleta completa:', error);
                 return {
                     erro: error.message,
-                    coletado_em: new Date().toISOString()
+                    coletado_em: new Date().toISOString(),
+                    versao_coletor: '2.0-erro'
                 };
             }
         }
 
         // ============================================
-        // SALVAR DADOS COMPLETOS NO SUPABASE
+        // SALVAR NO SUPABASE - VERSÃO SIMPLIFICADA
         // ============================================
 
         async salvarTudoNoSupabase(session, personagemId = null) {
-            console.log('💾 Salvando TODOS os dados no Supabase...');
+            console.log('💾 Salvando dados REAIS no Supabase...');
             
             try {
                 // Coletar todos os dados
                 const dadosCompletos = this.coletarTudo();
                 
-                // Dados básicos que SEMPRE devem existir
+                // Dados MÍNIMOS que DEVEM funcionar
                 const dadosParaSalvar = {
                     user_id: session.user.id,
                     nome: dadosCompletos.dashboard.nome || 'Novo Personagem',
@@ -3879,41 +3776,12 @@
                     pontos_gastos: dadosCompletos.dashboard.pontos_gastos || 0,
                     pontos_disponiveis: dadosCompletos.dashboard.pontos_disponiveis || 150,
                     
-                    // Dados JSON completos
+                    // Dados COMPLETOS em JSON
                     dados_completos: dadosCompletos,
                     
                     // Timestamps
                     updated_at: new Date().toISOString()
                 };
-
-                // Tentar adicionar dados opcionais (se as colunas existirem)
-                try {
-                    // Características
-                    if (dadosCompletos.caracteristicas) {
-                        dadosParaSalvar.aparencia = dadosCompletos.caracteristicas.aparencia?.descricao || 'Comum';
-                        dadosParaSalvar.riqueza = dadosCompletos.caracteristicas.riqueza?.descricao || 'Média';
-                    }
-                    
-                    // Pontos secundários
-                    if (dadosCompletos.atributos) {
-                        dadosParaSalvar.pontos_vida = dadosCompletos.atributos.pontos_vida?.total || 10;
-                        dadosParaSalvar.pontos_fadiga = dadosCompletos.atributos.pontos_fadiga?.total || 10;
-                    }
-                    
-                    // Combate
-                    if (dadosCompletos.combate) {
-                        dadosParaSalvar.esquiva = dadosCompletos.combate.defesas?.esquiva?.valor || 10;
-                        dadosParaSalvar.bloqueio = dadosCompletos.combate.defesas?.bloqueio?.valor || 11;
-                    }
-                    
-                    // Equipamento
-                    if (dadosCompletos.equipamento) {
-                        dadosParaSalvar.dinheiro = this.extrairDecimal(dadosCompletos.equipamento.status?.dinheiro) || 2000;
-                    }
-                    
-                } catch (erroOpcional) {
-                    console.warn('⚠️ Alguns dados opcionais ignorados:', erroOpcional);
-                }
 
                 // Adicionar created_at se for novo
                 if (!personagemId) {
@@ -3927,8 +3795,6 @@
                 if (personagemId) {
                     // Atualizar existente
                     console.log(`🔄 Atualizando personagem ${personagemId}...`);
-                    
-                    // Primeiro, tentar com dados completos
                     const { data, error } = await supabase
                         .from('characters')
                         .update(dadosParaSalvar)
@@ -3938,10 +3804,10 @@
                         .single();
                     
                     if (error) {
-                        // Se falhar, tentar apenas dados básicos
-                        console.log('🔄 Tentando salvamento simplificado...');
+                        console.log('🔄 Tentando apenas dados ESSENCIAIS...');
                         
-                        const dadosMinimos = {
+                        // Tentar apenas dados essenciais
+                        const dadosEssenciais = {
                             user_id: session.user.id,
                             nome: dadosParaSalvar.nome,
                             forca: dadosParaSalvar.forca,
@@ -3953,7 +3819,7 @@
                         
                         const { data: data2, error: error2 } = await supabase
                             .from('characters')
-                            .update(dadosMinimos)
+                            .update(dadosEssenciais)
                             .eq('id', personagemId)
                             .eq('user_id', session.user.id)
                             .select()
@@ -3971,28 +3837,9 @@
                     // Criar novo
                     console.log('🆕 Criando novo personagem...');
                     
-                    const dadosCriacao = {
-                        user_id: session.user.id,
-                        nome: dadosParaSalvar.nome,
-                        raca: dadosParaSalvar.raca,
-                        classe: dadosParaSalvar.classe,
-                        nivel: dadosParaSalvar.nivel,
-                        descricao: dadosParaSalvar.descricao,
-                        forca: dadosParaSalvar.forca,
-                        destreza: dadosParaSalvar.destreza,
-                        inteligencia: dadosParaSalvar.inteligencia,
-                        saude: dadosParaSalvar.saude,
-                        pontos_totais: dadosParaSalvar.pontos_totais,
-                        pontos_gastos: dadosParaSalvar.pontos_gastos,
-                        pontos_disponiveis: dadosParaSalvar.pontos_disponiveis,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                        status: 'Ativo'
-                    };
-                    
                     const { data, error } = await supabase
                         .from('characters')
-                        .insert([dadosCriacao])
+                        .insert([dadosParaSalvar])
                         .select()
                         .single();
                     
@@ -4005,11 +3852,17 @@
                     success: true,
                     message: personagemId ? 'Personagem atualizado!' : 'Personagem criado!',
                     data: resultado,
-                    personagemId: resultado.id
+                    personagemId: resultado.id,
+                    resumo: {
+                        vantagens: dadosCompletos.vantagens_desvantagens?.vantagens?.length || 0,
+                        desvantagens: dadosCompletos.vantagens_desvantagens?.desvantagens?.length || 0,
+                        pericias: dadosCompletos.pericias_tecnicas?.pericias?.length || 0,
+                        magias: dadosCompletos.magias?.magias?.length || 0
+                    }
                 };
 
             } catch (error) {
-                console.error('❌ Erro ao salvar tudo:', error);
+                console.error('❌ Erro ao salvar:', error);
                 
                 let mensagemErro = 'Erro ao salvar: ';
                 
@@ -4018,13 +3871,14 @@
                     const coluna = colunaMatch ? colunaMatch[1] : 'desconhecida';
                     
                     mensagemErro = `Coluna "${coluna}" não existe.\n\n`;
-                    mensagemErro += 'Execute este SQL para criá-la:\n\n';
+                    mensagemErro += 'Execute este SQL:\n\n';
                     mensagemErro += `ALTER TABLE characters ADD COLUMN ${coluna} TEXT DEFAULT '';`;
                     
                 } else if (error.message.includes('permission denied')) {
                     mensagemErro = 'ERRO DE PERMISSÃO! Execute no Supabase:\n\n';
                     mensagemErro += 'GRANT ALL ON TABLE characters TO authenticated;\n';
-                    mensagemErro += 'GRANT ALL ON TABLE characters TO anon;';
+                    mensagemErro += 'GRANT ALL ON TABLE characters TO anon;\n';
+                    mensagemErro += 'ALTER TABLE characters ENABLE ROW LEVEL SECURITY;';
                     
                 } else {
                     mensagemErro += error.message;
@@ -4042,7 +3896,7 @@
     // ============================================
     // INSTANCIAR O COLETOR
     // ============================================
-    const coletorPersonagem = new ColetorPersonagem();
+    const coletorPersonagem = new ColetorPersonagemReal();
 
     // ============================================
     // FUNÇÃO DE VERIFICAÇÃO DE SESSÃO
@@ -4149,8 +4003,16 @@
                     window.history.replaceState({}, '', novaUrl);
                 }
                 
-                // Mostrar sucesso
-                alert('✅ ' + resultado.message + '\n\nTodos os dados foram salvos!');
+                // Mostrar sucesso com resumo
+                let mensagem = '✅ ' + resultado.message + '\n\n';
+                mensagem += 'Dados salvos:\n';
+                mensagem += `• ${resultado.resumo.vantagens} vantagens\n`;
+                mensagem += `• ${resultado.resumo.desvantagens} desvantagens\n`;
+                mensagem += `• ${resultado.resumo.pericias} perícias\n`;
+                mensagem += `• ${resultado.resumo.magias} magias\n`;
+                mensagem += '\nTODOS os dados foram salvos no campo "dados_completos"!';
+                
+                alert(mensagem);
                 
                 // Redirecionar
                 setTimeout(() => {
@@ -4203,20 +4065,29 @@
             
             console.log('✅ Sistema inicializado com usuário:', verificacao.session.user.email);
             
-            inicializarNavegacaoAbas();
+            // Inicializar navegação de abas (se houver)
+            if (typeof inicializarNavegacaoAbas === 'function') {
+                inicializarNavegacaoAbas();
+            }
             
+            // Obter ID da URL
             const urlParams = new URLSearchParams(window.location.search);
             personagemId = urlParams.get('id');
             
             if (personagemId) {
                 document.title = 'Editar Personagem - RPG System';
-                await carregarPersonagemParaEdicao(personagemId);
             } else {
                 document.title = 'Criar Personagem - RPG System';
             }
             
-            configurarEventListeners();
-            inicializarSistemaAbas();
+            // Configurar event listeners
+            const btnSalvar = document.getElementById('btnSalvar');
+            const btnExcluir = document.getElementById('btnExcluir');
+            const btnSair = document.getElementById('btnSair');
+            
+            if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
+            if (btnExcluir) btnExcluir.addEventListener('click', solicitarExclusao);
+            if (btnSair) btnSair.addEventListener('click', sairSemSalvar);
             
         } catch (error) {
             alert('Erro ao inicializar sistema: ' + error.message);
@@ -4227,107 +4098,6 @@
     // ============================================
     // FUNÇÕES AUXILIARES
     // ============================================
-
-    function inicializarNavegacaoAbas() {
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                tabButtons.forEach(b => b.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                
-                this.classList.add('active');
-                const tabId = this.getAttribute('data-tab');
-                const tabContent = document.getElementById(tabId);
-                
-                if (tabContent) {
-                    tabContent.classList.add('active');
-                    inicializarSistemasAba(tabId);
-                }
-            });
-        });
-    }
-
-    function inicializarSistemaAbas() {
-        const activeTab = document.querySelector('.tab-btn.active');
-        if (activeTab) {
-            const tabId = activeTab.getAttribute('data-tab');
-            inicializarSistemasAba(tabId);
-        }
-    }
-
-    function inicializarSistemasAba(abaId) {
-        setTimeout(() => {
-            switch(abaId) {
-                case 'dashboard':
-                    if (typeof window.dashboard?.inicializar === 'function') {
-                        window.dashboard.inicializar();
-                    }
-                    break;
-                case 'resumo':
-                    if (typeof sincronizarResumo === 'function') {
-                        sincronizarResumo();
-                    }
-                    break;
-            }
-        }, 100);
-    }
-
-    function configurarEventListeners() {
-        const btnSalvar = document.getElementById('btnSalvar');
-        const btnExcluir = document.getElementById('btnExcluir');
-        const btnSair = document.getElementById('btnSair');
-        
-        if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
-        if (btnExcluir) btnExcluir.addEventListener('click', solicitarExclusao);
-        if (btnSair) btnSair.addEventListener('click', sairSemSalvar);
-        
-        const charName = document.getElementById('charName');
-        if (charName) {
-            charName.addEventListener('input', function() {
-                if (typeof atualizarResumoNome === 'function') {
-                    atualizarResumoNome(this.value);
-                }
-            });
-        }
-    }
-
-    async function carregarPersonagemParaEdicao(personagemId) {
-        try {
-            const verificacao = await verificarSessao();
-            if (!verificacao.sucesso) throw new Error('Sessão inválida');
-            
-            const { data: personagem, error } = await supabase
-                .from('characters')
-                .select('*')
-                .eq('id', personagemId)
-                .eq('user_id', verificacao.session.user.id)
-                .single();
-            
-            if (error) throw error;
-            if (!personagem) throw new Error('Personagem não encontrado');
-            
-            // Carregar dados básicos
-            document.getElementById('charName').value = personagem.nome || 'Novo Personagem';
-            document.getElementById('racaPersonagem').value = personagem.raca || '';
-            document.getElementById('classePersonagem').value = personagem.classe || '';
-            document.getElementById('nivelPersonagem').value = personagem.nivel || '';
-            document.getElementById('descricaoPersonagem').value = personagem.descricao || '';
-            
-            // Carregar atributos
-            document.getElementById('ST').value = personagem.forca || 10;
-            document.getElementById('DX').value = personagem.destreza || 10;
-            document.getElementById('IQ').value = personagem.inteligencia || 10;
-            document.getElementById('HT').value = personagem.saude || 10;
-            
-            console.log('✅ Personagem carregado:', personagemId);
-            
-        } catch (error) {
-            alert('Erro ao carregar personagem: ' + error.message);
-            setTimeout(() => window.location.href = 'personagens.html', 2000);
-        }
-    }
 
     function solicitarExclusao() {
         if (personagemId) {
@@ -4375,24 +4145,6 @@
         }
     }
 
-    function sincronizarResumo() {
-        try {
-            const nomeInput = document.getElementById('charName');
-            if (nomeInput && document.getElementById('resumoNome')) {
-                document.getElementById('resumoNome').textContent = nomeInput.value || 'Novo Personagem';
-            }
-        } catch (error) {
-            console.error('Erro ao sincronizar resumo:', error);
-        }
-    }
-
-    function atualizarResumoNome(nome) {
-        const resumoNome = document.getElementById('resumoNome');
-        if (resumoNome) {
-            resumoNome.textContent = nome || 'Novo Personagem';
-        }
-    }
-
     // ============================================
     // INICIALIZAÇÃO
     // ============================================
@@ -4408,8 +4160,6 @@
     // ============================================
     window.salvarPersonagem = salvarPersonagem;
     window.coletorPersonagem = coletorPersonagem;
-    window.sincronizarResumo = sincronizarResumo;
-    window.atualizarResumoNome = atualizarResumoNome;
 
     // Limpar cache
     window.addEventListener('beforeunload', function() {
