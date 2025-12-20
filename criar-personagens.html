@@ -3455,7 +3455,6 @@
         console.log('🔐 Verificando sessão...');
         
         try {
-            // 1. Tentar obter sessão atual
             const { data: { session }, error } = await supabase.auth.getSession();
             
             if (error) {
@@ -3468,8 +3467,7 @@
                 return { sucesso: true, session: session };
             }
             
-            // 2. Se não tem sessão, tentar recuperar do localStorage
-            console.log('🔄 Nenhuma sessão ativa, verificando tokens...');
+            console.log('🔄 Nenhuma sessão ativa, tentando renovar...');
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
             
             if (refreshError) {
@@ -3486,7 +3484,6 @@
                 return { sucesso: true, session: refreshData.session };
             }
             
-            // 3. Se tudo falhar, precisa fazer login
             return { 
                 sucesso: false, 
                 mensagem: 'Você precisa estar logado para continuar.',
@@ -3532,7 +3529,6 @@
                 nivel: this.getValor('nivelPersonagem'),
                 descricao: this.getValor('descricaoPersonagem'),
                 
-                // Pontos
                 pontos_totais: this.getNumero('pontosTotaisDashboard', 150),
                 pontos_gastos: this.getNumero('pontosGastosDashboard', 0),
                 pontos_disponiveis: this.getNumero('saldoDisponivelDashboard', 150),
@@ -3549,14 +3545,12 @@
                 inteligencia: this.getNumero('IQ', 10),
                 saude: this.getNumero('HT', 10),
                 
-                // Secundários
                 pontos_vida: this.getNumero('PVTotal', 10),
                 pontos_fadiga: this.getNumero('PFTotal', 10),
                 vontade: this.getNumero('VontadeTotal', 10),
                 percepcao: this.getNumero('PercepcaoTotal', 10),
                 deslocamento: parseFloat(this.getValor('DeslocamentoTotal', '5.00')),
                 
-                // Dano
                 dano_gdp: this.getValor('danoGDP', '1d-2'),
                 dano_geb: this.getValor('danoGEB', '1d')
             };
@@ -3565,18 +3559,10 @@
         // 3. COLETAR CARACTERÍSTICAS
         coletarCaracteristicas() {
             return {
-                aparencia: {
-                    nivel: this.getValor('nivelAparencia', '0'),
-                    descricao: this.getValor('displayAparencia', 'Comum')
-                },
-                riqueza: {
-                    nivel: this.getValor('nivelRiqueza', '0'),
-                    descricao: this.getValor('displayRiqueza', 'Média'),
-                    renda: this.getValor('rendaMensal', '$1.000')
-                },
+                aparencia: this.getValor('displayAparencia', 'Comum'),
+                riqueza: this.getValor('displayRiqueza', 'Média'),
                 altura: parseFloat(this.getValor('altura', '1.70')),
-                peso: parseFloat(this.getValor('peso', '70')),
-                status_fisico: this.getValor('statusFisico', 'Normal')
+                peso: parseFloat(this.getValor('peso', '70'))
             };
         }
 
@@ -3613,30 +3599,22 @@
         coletarEquipamento() {
             return {
                 dinheiro: this.getValor('dinheiroEquipamento', '$2.000'),
-                carga: {
-                    atual: parseFloat(this.getValor('pesoAtual', '0')),
-                    maxima: parseFloat(this.getValor('pesoMaximo', '60'))
-                }
+                carga_atual: parseFloat(this.getValor('pesoAtual', '0')),
+                carga_maxima: parseFloat(this.getValor('pesoMaximo', '60'))
             };
         }
 
         // 8. COLETAR COMBATE
         coletarCombate() {
             return {
-                pontos_vida: {
-                    atual: this.getNumero('pvAtualDisplay', 10),
-                    maximo: this.getNumero('pvMaxDisplay', 10)
-                },
-                pontos_fadiga: {
-                    atual: this.getNumero('pfAtualDisplay', 10),
-                    maximo: this.getNumero('pfMaxDisplay', 10)
-                },
-                defesas: {
-                    esquiva: this.getNumero('esquivaTotal', 10),
-                    bloqueio: this.getNumero('bloqueioTotal', 11),
-                    aparar: this.getNumero('apararTotal', 3),
-                    deslocamento: parseFloat(this.getValor('deslocamentoTotal', '5.00'))
-                }
+                pontos_vida_atual: this.getNumero('pvAtualDisplay', 10),
+                pontos_vida_maximo: this.getNumero('pvMaxDisplay', 10),
+                pontos_fadiga_atual: this.getNumero('pfAtualDisplay', 10),
+                pontos_fadiga_maximo: this.getNumero('pfMaxDisplay', 10),
+                esquiva: this.getNumero('esquivaTotal', 10),
+                bloqueio: this.getNumero('bloqueioTotal', 11),
+                aparar: this.getNumero('apararTotal', 3),
+                deslocamento: parseFloat(this.getValor('deslocamentoTotal', '5.00'))
             };
         }
 
@@ -3674,7 +3652,7 @@
             console.log('💾 Iniciando salvamento...');
             
             try {
-                // 1. VERIFICAR SESSÃO ANTES DE QUALQUER COISA
+                // 1. VERIFICAR SESSÃO
                 const verificacao = await verificarSessao();
                 
                 if (!verificacao.sucesso) {
@@ -3698,7 +3676,7 @@
                 // 2. Coletar todos os dados
                 const dadosCompletos = this.coletarTudo();
                 
-                // 3. Preparar dados para salvar
+                // 3. Preparar dados para salvar - APENAS COLUNAS QUE EXISTEM
                 const dadosParaSalvar = {
                     user_id: session.user.id,
                     nome: dadosCompletos.dashboard.nome,
@@ -3707,18 +3685,17 @@
                     nivel: dadosCompletos.dashboard.nivel,
                     descricao: dadosCompletos.dashboard.descricao,
                     
-                    // Atributos
+                    // Atributos principais (colunas básicas que devem existir)
                     forca: dadosCompletos.atributos.forca,
                     destreza: dadosCompletos.atributos.destreza,
                     inteligencia: dadosCompletos.atributos.inteligencia,
                     saude: dadosCompletos.atributos.saude,
+                    
+                    // Pontos de vida/fadiga
                     pontos_vida: dadosCompletos.atributos.pontos_vida,
                     pontos_fadiga: dadosCompletos.atributos.pontos_fadiga,
-                    vontade: dadosCompletos.atributos.vontade,
-                    percepcao: dadosCompletos.atributos.percepcao,
-                    deslocamento: dadosCompletos.atributos.deslocamento,
                     
-                    // Pontos
+                    // Pontos GURPS
                     pontos_totais: dadosCompletos.dashboard.pontos_totais,
                     pontos_gastos: dadosCompletos.dashboard.pontos_gastos,
                     pontos_disponiveis: dadosCompletos.dashboard.pontos_disponiveis,
@@ -3726,13 +3703,21 @@
                     desvantagens_atuais: dadosCompletos.dashboard.desvantagens_atuais,
                     
                     // Características
-                    aparencia: dadosCompletos.caracteristicas.aparencia.descricao,
-                    riqueza: dadosCompletos.caracteristicas.riqueza.descricao,
+                    aparencia: dadosCompletos.caracteristicas.aparencia,
+                    riqueza: dadosCompletos.caracteristicas.riqueza,
                     altura: dadosCompletos.caracteristicas.altura,
                     peso: dadosCompletos.caracteristicas.peso,
                     
-                    // Dados JSON
-                    dados_completos: dadosCompletos,
+                    // Combate
+                    esquiva: dadosCompletos.combate.esquiva,
+                    bloqueio: dadosCompletos.combate.bloqueio,
+                    aparar: dadosCompletos.combate.aparar,
+                    deslocamento: dadosCompletos.combate.deslocamento,
+                    
+                    // Equipamento
+                    dinheiro: dadosCompletos.equipamento.dinheiro,
+                    carga_atual: dadosCompletos.equipamento.carga_atual,
+                    carga_maxima: dadosCompletos.equipamento.carga_maxima,
                     
                     // Timestamps
                     updated_at: new Date().toISOString()
@@ -3750,6 +3735,8 @@
                 if (personagemId) {
                     // Atualizar existente
                     console.log(`🔄 Atualizando personagem ${personagemId}...`);
+                    
+                    // Primeiro tentar atualizar normalmente
                     const { data, error } = await supabase
                         .from('characters')
                         .update(dadosParaSalvar)
@@ -3758,16 +3745,62 @@
                         .select()
                         .single();
                     
-                    if (error) throw error;
-                    resultado = data;
+                    if (error) {
+                        // Se der erro, tentar sem colunas que podem não existir
+                        console.log('🔄 Tentando salvamento simplificado...');
+                        
+                        // Dados mínimos obrigatórios
+                        const dadosMinimos = {
+                            user_id: session.user.id,
+                            nome: dadosCompletos.dashboard.nome,
+                            forca: dadosCompletos.atributos.forca,
+                            destreza: dadosCompletos.atributos.destreza,
+                            inteligencia: dadosCompletos.atributos.inteligencia,
+                            saude: dadosCompletos.atributos.saude,
+                            updated_at: new Date().toISOString()
+                        };
+                        
+                        const { data: dataMin, error: errorMin } = await supabase
+                            .from('characters')
+                            .update(dadosMinimos)
+                            .eq('id', personagemId)
+                            .eq('user_id', session.user.id)
+                            .select()
+                            .single();
+                        
+                        if (errorMin) throw errorMin;
+                        resultado = dataMin;
+                        
+                    } else {
+                        resultado = data;
+                    }
+                    
                     console.log('✅ Personagem atualizado:', resultado.id);
                     
                 } else {
                     // Criar novo
                     console.log('🆕 Criando novo personagem...');
+                    
+                    // Dados para criação
+                    const dadosCriacao = {
+                        user_id: session.user.id,
+                        nome: dadosCompletos.dashboard.nome,
+                        raca: dadosCompletos.dashboard.raca || '',
+                        classe: dadosCompletos.dashboard.classe || '',
+                        nivel: dadosCompletos.dashboard.nivel || '',
+                        descricao: dadosCompletos.dashboard.descricao || '',
+                        forca: dadosCompletos.atributos.forca,
+                        destreza: dadosCompletos.atributos.destreza,
+                        inteligencia: dadosCompletos.atributos.inteligencia,
+                        saude: dadosCompletos.atributos.saude,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                        status: 'Ativo'
+                    };
+                    
                     const { data, error } = await supabase
                         .from('characters')
-                        .insert([dadosParaSalvar])
+                        .insert([dadosCriacao])
                         .select()
                         .single();
                     
@@ -3798,13 +3831,19 @@
                     mensagemErro += "CREATE POLICY \"Acesso total\" ON characters FOR ALL USING (true);";
                     
                 } else if (error.message.includes('network') || error.message.includes('fetch')) {
-                    mensagemErro = 'Problema de conexão. Verifique sua internet e tente novamente.';
+                    mensagemErro = 'Problema de conexão. Verifique sua internet.';
                     
                 } else if (error.message.includes('JWT') || error.message.includes('auth')) {
                     mensagemErro = 'Sessão expirada. Faça login novamente.';
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 1500);
+                    
+                } else if (error.message.includes('column') && error.message.includes('does not exist')) {
+                    // Erro de coluna não existente
+                    const colunaMatch = error.message.match(/column "(.+?)"/);
+                    const coluna = colunaMatch ? colunaMatch[1] : 'desconhecida';
+                    
+                    mensagemErro = `Coluna "${coluna}" não existe na tabela.\n\n`;
+                    mensagemErro += 'Execute este SQL para criar as colunas faltantes:\n\n';
+                    mensagemErro += 'ALTER TABLE characters ADD COLUMN ' + coluna + ' TEXT DEFAULT \'\';';
                     
                 } else {
                     mensagemErro += error.message;
@@ -3823,8 +3862,7 @@
     // INSTANCIAR O SISTEMA DE SALVAMENTO
     // ============================================
     const sistemaSalvamento = new SistemaSalvamento();
-
-    // ============================================
+        // ============================================
     // FUNÇÃO PRINCIPAL DE SALVAMENTO
     // ============================================
 
@@ -4045,6 +4083,36 @@
             document.getElementById('DX').value = personagem.destreza || 10;
             document.getElementById('IQ').value = personagem.inteligencia || 10;
             document.getElementById('HT').value = personagem.saude || 10;
+            
+            // Carregar pontos do dashboard se existirem
+            if (personagem.pontos_totais) {
+                const pontosTotaisInput = document.getElementById('pontosTotaisDashboard');
+                if (pontosTotaisInput) pontosTotaisInput.value = personagem.pontos_totais;
+            }
+            
+            if (personagem.pontos_gastos) {
+                const pontosGastosSpan = document.getElementById('pontosGastosDashboard');
+                if (pontosGastosSpan) pontosGastosSpan.textContent = personagem.pontos_gastos;
+            }
+            
+            if (personagem.pontos_disponiveis) {
+                const saldoSpan = document.getElementById('saldoDisponivelDashboard');
+                if (saldoSpan) saldoSpan.textContent = personagem.pontos_disponiveis;
+            }
+            
+            // Carregar características
+            if (personagem.aparencia) {
+                const aparenciaSelect = document.getElementById('nivelAparencia');
+                if (aparenciaSelect) {
+                    // Encontrar a opção que contém o valor
+                    for (let option of aparenciaSelect.options) {
+                        if (option.text.includes(personagem.aparencia)) {
+                            aparenciaSelect.value = option.value;
+                            break;
+                        }
+                    }
+                }
+            }
             
             // Carregar foto se existir
             if (personagem.avatar_url) {
