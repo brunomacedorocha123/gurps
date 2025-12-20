@@ -15,35 +15,20 @@
         }
 
         body {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('Cris2.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff;
+            background-color: #F2E8D5;
+            color: #2B2B2B;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(255, 140, 0, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 80%, rgba(255, 69, 0, 0.1) 0%, transparent 50%);
-            z-index: -1;
+            transition: all 0.3s ease;
         }
 
         /* Header */
         .header {
-            background: rgba(30, 30, 40, 0.9);
-            padding: 15px 0;
-            border-bottom: 2px solid rgba(255, 140, 0, 0.3);
-            backdrop-filter: blur(10px);
+            background: #4A2E1B;
+            padding: 20px 0;
+            border-bottom: 3px solid #8C6A2F;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .header-content {
@@ -56,25 +41,15 @@
         }
 
         .logo h1 {
-            font-size: 2rem;
-            background: linear-gradient(45deg, #ffd700, #ff8c00, #ff4500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 2.2rem;
+            color: #F2E8D5;
+            letter-spacing: 1px;
         }
 
         .logo p {
             font-size: 0.9rem;
-            color: #ccc;
+            color: #B89B6A;
             font-style: italic;
-        }
-
-        .player-id {
-            background: rgba(255, 140, 0, 0.2);
-            padding: 8px 15px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 140, 0, 0.5);
-            font-weight: bold;
         }
 
         .user-menu {
@@ -83,46 +58,67 @@
             gap: 15px;
         }
 
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #E6D8BC;
+            padding: 8px 15px;
+            border-radius: 25px;
+            border: 1px solid #B89B6A;
+        }
+
         .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #ff8c00, #ff4500);
+            background: linear-gradient(45deg, #8C6A2F, #6B4A2D);
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #F2E8D5;
             font-weight: bold;
-            cursor: pointer;
-            position: relative;
         }
 
-        /* Botão Logout */
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .username {
+            font-weight: 600;
+            color: #4A2E1B;
+        }
+
+        .player-id {
+            font-size: 0.8rem;
+            color: #6B4A2D;
+        }
+
         .logout-btn {
-            background: rgba(231, 76, 60, 0.8);
-            color: white;
+            background: #6B4A2D;
+            color: #F2E8D5;
             border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 8px;
             font-weight: 600;
-            font-size: 0.9em;
         }
 
         .logout-btn:hover {
-            background: rgba(231, 76, 60, 1);
+            background: #8C6A2F;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
         }
 
         /* Navigation */
         .nav {
-            background: rgba(20, 20, 30, 0.8);
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 140, 0, 0.2);
+            background: #E6D8BC;
+            padding: 15px 0;
+            border-bottom: 1px solid #B89B6A;
         }
 
         .nav-content {
@@ -130,255 +126,272 @@
             margin: 0 auto;
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 20px;
             padding: 0 20px;
         }
 
         .nav-item {
-            color: #ccc;
+            color: #6B4A2D;
             text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 25px;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            font-weight: 500;
         }
 
-        .nav-item:hover, .nav-item.active {
-            background: rgba(255, 140, 0, 0.2);
-            color: #ff8c00;
+        .nav-item:hover {
+            background: #D8C6A0;
+            color: #4A2E1B;
         }
 
-        /* Main Content */
+        .nav-item.active {
+            background: #8C6A2F;
+            color: #F2E8D5;
+        }
+
+        /* Main Content - Modalidade */
         .main-content {
             max-width: 1200px;
-            margin: 30px auto;
+            margin: 40px auto;
             padding: 0 20px;
             flex: 1;
         }
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 50px;
         }
 
-        .card {
-            background: rgba(30, 30, 40, 0.7);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 140, 0, 0.2);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+        .welcome-title {
+            font-size: 2.5rem;
+            color: #4A2E1B;
+            margin-bottom: 15px;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 140, 0, 0.5);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .card h2 {
-            color: #ffd700;
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-            border-bottom: 1px solid rgba(255, 140, 0, 0.3);
-            padding-bottom: 10px;
-        }
-
-        .user-data {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .data-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .data-label {
-            color: #ccc;
-        }
-
-        .data-value {
-            color: #ff8c00;
-            font-weight: bold;
-        }
-
-        .quick-actions {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .action-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px;
-            background: rgba(255, 140, 0, 0.1);
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            border-radius: 10px;
-            color: #ff8c00;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .action-btn:hover {
-            background: rgba(255, 140, 0, 0.2);
-            transform: translateX(5px);
-        }
-
-        .action-btn i {
+        .welcome-subtitle {
             font-size: 1.2rem;
+            color: #6B4A2D;
+            max-width: 600px;
+            margin: 0 auto 30px;
         }
 
-        /* Sections */
-        .sections {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
+        /* Modalidade Selection */
+        .modality-section {
+            margin-bottom: 50px;
         }
 
-        .section-card {
-            background: rgba(30, 30, 40, 0.7);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 140, 0, 0.2);
-            backdrop-filter: blur(10px);
+        .section-title {
+            font-size: 1.8rem;
+            color: #4A2E1B;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #B89B6A;
         }
 
-        .section-header {
+        .modality-cards {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
         }
 
-        .section-header h2 {
-            color: #ffd700;
-            font-size: 1.4rem;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            background: linear-gradient(45deg, #ff8c00, #ff4500);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
+        .modality-card {
+            background: #E6D8BC;
+            border: 2px solid #B89B6A;
+            border-radius: 15px;
+            padding: 40px 30px;
+            width: 300px;
+            text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
+        .modality-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            border-color: #8C6A2F;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #888;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #555;
-        }
-
-        .empty-state p {
+        .modality-icon {
+            font-size: 3.5rem;
+            color: #8C6A2F;
             margin-bottom: 20px;
-            font-size: 1.1rem;
         }
 
-        .activity-item {
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .modality-title {
+            font-size: 1.5rem;
+            color: #4A2E1B;
+            margin-bottom: 15px;
         }
 
-        .activity-item:last-child {
-            border-bottom: none;
+        .modality-description {
+            color: #6B4A2D;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 140, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ff8c00;
+        /* Botões de Ação (escondidos inicialmente) */
+        .actions-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
-        .activity-content {
-            flex: 1;
+        .actions-section.active {
+            display: block;
+            opacity: 1;
         }
 
-        .activity-title {
-            font-weight: 600;
-            margin-bottom: 4px;
+        .actions-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
         }
 
-        .activity-date {
-            color: #888;
+        .action-card {
+            background: #E6D8BC;
+            border: 1px solid #B89B6A;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: #8C6A2F;
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            color: #8C6A2F;
+            margin-bottom: 15px;
+        }
+
+        .action-title {
+            font-size: 1.2rem;
+            color: #4A2E1B;
+            margin-bottom: 10px;
+        }
+
+        .action-description {
+            color: #6B4A2D;
             font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Botão Voltar */
+        .back-btn {
+            display: none;
+            background: #6B4A2D;
+            color: #F2E8D5;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 30px auto;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .back-btn:hover {
+            background: #8C6A2F;
+            transform: translateY(-2px);
+        }
+
+        .back-btn.active {
+            display: block;
+        }
+
+        /* Ações PC */
+        .pc-actions {
+            display: none;
+        }
+
+        .pc-actions.active {
+            display: block;
+        }
+
+        /* Ações GM */
+        .gm-actions {
+            display: none;
+        }
+
+        .gm-actions.active {
+            display: block;
         }
 
         /* Footer */
         .footer {
-            background: rgba(20, 20, 30, 0.9);
-            padding: 20px 0;
+            background: #4A2E1B;
+            padding: 25px 0;
             text-align: center;
-            margin-top: 50px;
-            border-top: 1px solid rgba(255, 140, 0, 0.2);
+            margin-top: 60px;
         }
 
         .footer p {
-            color: #888;
+            color: #B89B6A;
             font-size: 0.9rem;
         }
 
         /* Responsividade */
         @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-content {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-            
             .header-content {
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
             }
-            
+
             .user-menu {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .user-info {
                 width: 100%;
                 justify-content: center;
-                flex-wrap: wrap;
             }
-            
+
             .logout-btn {
-                padding: 6px 12px;
-                font-size: 0.8em;
+                width: 100%;
+                justify-content: center;
             }
+
+            .nav-content {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .modality-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .modality-card {
+                width: 100%;
+                max-width: 350px;
+            }
+
+            .actions-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
         }
     </style>
 </head>
@@ -390,17 +403,20 @@
                 <h1>RPG SYSTEM</h1>
                 <p>A vida imita GURPS</p>
             </div>
-            <div class="player-id">
-                ID do Jogador: <span id="playerId">#------</span>
-            </div>
             <div class="user-menu">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="username" id="userName">Carregando...</div>
+                        <div class="player-id">ID: <span id="playerId">------</span></div>
+                    </div>
+                </div>
                 <button class="logout-btn" id="logoutBtn">
                     <i class="fas fa-sign-out-alt"></i>
                     Sair
                 </button>
-                <div class="user-avatar" id="userAvatar">
-                    <i class="fas fa-user"></i>
-                </div>
             </div>
         </div>
     </header>
@@ -412,27 +428,10 @@
                 <i class="fas fa-home"></i>
                 Início
             </a>
-            <a href="personagens.html" class="nav-item">
+            <a href="guilda.html" class="nav-item">
                 <i class="fas fa-users"></i>
-                Personagens
+                Guilda
             </a>
-            <a href="campanhas.html" class="nav-item">
-                <i class="fas fa-map"></i>
-                Campanhas
-            </a>
-            <a href="ferramentas-gm.html" class="nav-item">
-                <i class="fas fa-crown"></i>
-                Ferramentas GM
-            </a>
-            <!-- No nav da home.html, adicionar: -->
-<a href="guilda.html" class="nav-item">
-    <i class="fas fa-users"></i>
-    Guilda
-</a>
-<a href="notificacoes.html" class="nav-item">
-    <i class="fas fa-bell"></i>
-    Notificações
-</a>
             <a href="minha-conta.html" class="nav-item">
                 <i class="fas fa-cog"></i>
                 Minha Conta
@@ -442,97 +441,140 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="dashboard">
-            <!-- Dados do Usuário -->
-            <div class="card">
-                <h2>Meus Dados</h2>
-                <div class="user-data">
-                    <div class="data-item">
-                        <span class="data-label">Nome:</span>
-                        <span class="data-value" id="userName">Carregando...</span>
+        <!-- Seção de Boas-vindas -->
+        <section class="welcome-section">
+            <h1 class="welcome-title">Bem-vindo ao RPG System</h1>
+            <p class="welcome-subtitle">Escolha como deseja jogar hoje. Você quer ser um Jogador (PC) ou Mestre (GM)?</p>
+        </section>
+
+        <!-- Seção de Escolha de Modalidade -->
+        <section class="modality-section" id="modalitySection">
+            <h2 class="section-title">Escolha sua Modalidade</h2>
+            <div class="modality-cards">
+                <!-- Card PC -->
+                <div class="modality-card" id="pcCard">
+                    <div class="modality-icon">
+                        <i class="fas fa-user"></i>
                     </div>
-                    <div class="data-item">
-                        <span class="data-label">ID do Jogador:</span>
-                        <span class="data-value" id="userPlayerId">#------</span>
+                    <h3 class="modality-title">Jogador (PC)</h3>
+                    <p class="modality-description">
+                        Crie e gerencie seus personagens, entre em campanhas, desenvolva suas habilidades e viva aventuras épicas.
+                    </p>
+                </div>
+
+                <!-- Card GM -->
+                <div class="modality-card" id="gmCard">
+                    <div class="modality-icon">
+                        <i class="fas fa-crown"></i>
                     </div>
-                    <div class="data-item">
-                        <span class="data-label">Membro desde:</span>
-                        <span class="data-value" id="memberSince">Carregando...</span>
+                    <h3 class="modality-title">Mestre (GM)</h3>
+                    <p class="modality-description">
+                        Crie e gerencie campanhas, controle NPCs, prepare encontros e crie histórias memoráveis para seus jogadores.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Botão Voltar -->
+        <button class="back-btn" id="backBtn">
+            <i class="fas fa-arrow-left"></i>
+            Voltar para Escolha de Modalidade
+        </button>
+
+        <!-- Seção de Ações PC (escondida inicialmente) -->
+        <section class="actions-section" id="actionsSection">
+            <h2 class="section-title" id="actionsTitle">Ações Disponíveis</h2>
+            
+            <!-- Ações para PC -->
+            <div class="pc-actions" id="pcActions">
+                <div class="actions-cards">
+                    <div class="action-card" onclick="window.location.href='personagens.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h3 class="action-title">Criar Personagem</h3>
+                        <p class="action-description">
+                            Crie um novo personagem seguindo o sistema GURPS. Defina atributos, habilidades, vantagens e desvantagens.
+                        </p>
                     </div>
-                    <div class="data-item">
-                        <span class="data-label">Status:</span>
-                        <span class="data-value">Ativo</span>
+
+                    <div class="action-card" onclick="window.location.href='meus-personagens.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="action-title">Meus Personagens</h3>
+                        <p class="action-description">
+                            Visualize e gerencie todos os seus personagens. Edite fichas, acompanhe progresso e muito mais.
+                        </p>
+                    </div>
+
+                    <div class="action-card" onclick="window.location.href='campanhas.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-map"></i>
+                        </div>
+                        <h3 class="action-title">Encontrar Campanhas</h3>
+                        <p class="action-description">
+                            Encontre campanhas disponíveis para participar. Filtre por sistema, estilo de jogo e disponibilidade.
+                        </p>
+                    </div>
+
+                    <div class="action-card" onclick="window.location.href='minhas-campanhas.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-scroll"></i>
+                        </div>
+                        <h3 class="action-title">Minhas Campanhas</h3>
+                        <p class="action-description">
+                            Acompanhe as campanhas onde você está jogando. Veja próximas sessões, anotações e progresso.
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Atalhos Rápidos -->
-            <div class="card">
-                <h2>Atalhos Rápidos</h2>
-                <div class="quick-actions">
-                    <a href="personagens.html" class="action-btn">
-                        <i class="fas fa-user-plus"></i>
-                        Criar Personagem
-                    </a>
-                    <a href="meus-personagens.html" class="action-btn">
-                        <i class="fas fa-users"></i>
-                        Meus Personagens
-                    </a>
-                    <a href="minhas-campanhas.html" class="action-btn">
-                        <i class="fas fa-map"></i>
-                        Minhas Campanhas
-                    </a>
-                    <a href="sistema-gurps.html" class="action-btn">
-                        <i class="fas fa-book"></i>
-                        Sistema GURPS
-                    </a>
-                </div>
-            </div>
-        </div>
+            <!-- Ações para GM -->
+            <div class="gm-actions" id="gmActions">
+                <div class="actions-cards">
+                    <div class="action-card" onclick="window.location.href='criar-campanha.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <h3 class="action-title">Criar Campanha</h3>
+                        <p class="action-description">
+                            Inicie uma nova campanha. Defina enredo, regras da casa, jogadores e configurações iniciais.
+                        </p>
+                    </div>
 
-        <div class="sections">
-            <!-- Personagens Ativos -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2>Personagens Ativos</h2>
-                    <a href="personagens.html" class="btn">
-                        <i class="fas fa-plus"></i> Criar Personagem
-                    </a>
-                </div>
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <p>Nenhum personagem criado ainda</p>
-                    <a href="criar-personagem.html" class="btn">Criar Primeiro Personagem</a>
-                </div>
-            </div>
+                    <div class="action-card" onclick="window.location.href='minhas-campanhas-gm.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h3 class="action-title">Minhas Campanhas (GM)</h3>
+                        <p class="action-description">
+                            Gerencie todas as suas campanhas como mestre. Controle sessões, jogadores e desenvolvimento.
+                        </p>
+                    </div>
 
-            <!-- Campanhas Ativas -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2>Campanhas Participantes</h2>
-                    <a href="campanhas.html" class="btn">
-                        <i class="fas fa-search"></i> Encontrar Campanhas
-                    </a>
-                </div>
-                <div class="empty-state">
-                    <i class="fas fa-map"></i>
-                    <p>Nenhuma campanha ativa</p>
-                    <a href="campanhas.html" class="btn">Encontrar Campanhas</a>
-                </div>
-            </div>
+                    <div class="action-card" onclick="window.location.href='ferramentas-gm.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <h3 class="action-title">Ferramentas GM</h3>
+                        <p class="action-description">
+                            Acesse ferramentas exclusivas para mestres: gerador de NPCs, encontros, tesouros e muito mais.
+                        </p>
+                    </div>
 
-            <!-- Atividades Recentes -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2>Atividades Recentes</h2>
-                </div>
-                <div class="empty-state">
-                    <i class="fas fa-history"></i>
-                    <p>Bem-vindo ao RPG System!</p>
-                    <p>Suas atividades aparecerão aqui</p>
+                    <div class="action-card" onclick="window.location.href='biblioteca-gm.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3 class="action-title">Biblioteca GM</h3>
+                        <p class="action-description">
+                            Recursos, templates, mapas e materiais para auxiliar na preparação e condução de sessões.
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -547,6 +589,54 @@
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
+        // Elementos DOM
+        const pcCard = document.getElementById('pcCard');
+        const gmCard = document.getElementById('gmCard');
+        const modalitySection = document.getElementById('modalitySection');
+        const actionsSection = document.getElementById('actionsSection');
+        const actionsTitle = document.getElementById('actionsTitle');
+        const pcActions = document.getElementById('pcActions');
+        const gmActions = document.getElementById('gmActions');
+        const backBtn = document.getElementById('backBtn');
+
+        // Selecionar modalidade PC
+        pcCard.addEventListener('click', () => {
+            modalitySection.style.display = 'none';
+            actionsSection.classList.add('active');
+            actionsTitle.textContent = 'Ações do Jogador (PC)';
+            pcActions.classList.add('active');
+            gmActions.classList.remove('active');
+            backBtn.classList.add('active');
+            
+            // Animação
+            actionsSection.classList.add('fade-in');
+        });
+
+        // Selecionar modalidade GM
+        gmCard.addEventListener('click', () => {
+            modalitySection.style.display = 'none';
+            actionsSection.classList.add('active');
+            actionsTitle.textContent = 'Ações do Mestre (GM)';
+            gmActions.classList.add('active');
+            pcActions.classList.remove('active');
+            backBtn.classList.add('active');
+            
+            // Animação
+            actionsSection.classList.add('fade-in');
+        });
+
+        // Voltar para escolha de modalidade
+        backBtn.addEventListener('click', () => {
+            modalitySection.style.display = 'block';
+            actionsSection.classList.remove('active');
+            pcActions.classList.remove('active');
+            gmActions.classList.remove('active');
+            backBtn.classList.remove('active');
+            
+            // Remover animação para próxima vez
+            actionsSection.classList.remove('fade-in');
+        });
+
         // Função de Logout
         async function handleLogout() {
             try {
@@ -557,7 +647,6 @@
                     return;
                 }
                 
-                // Redirecionar para a página de login
                 window.location.href = 'login.html';
             } catch (error) {
                 console.error('Erro no logout:', error);
@@ -588,12 +677,7 @@
             
             // Atualizar interface
             document.getElementById('userName').textContent = profile.username;
-            document.getElementById('playerId').textContent = '#' + profile.player_id;
-            document.getElementById('userPlayerId').textContent = '#' + profile.player_id;
-            
-            // Formatar data de criação
-            const createdDate = new Date(profile.created_at);
-            document.getElementById('memberSince').textContent = createdDate.toLocaleDateString('pt-BR');
+            document.getElementById('playerId').textContent = profile.player_id;
             
             // Atualizar avatar com iniciais
             const initials = profile.username.charAt(0).toUpperCase();
