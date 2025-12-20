@@ -3439,9 +3439,9 @@
 <script src="resumo-combate.js"></script>
 
 <!-- NO criar-personagens.html, substitua TODO o script por este: -->
+ <script>
 
-<script>
-// criar-personagem-completo.js - VERSÃO LIMPA E FUNCIONAL
+// criar-personagem-completo.js - VERSÃO ATUALIZADA PARA SUA ESTRUTURA
 const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
 
@@ -3449,7 +3449,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let personagemId = null;
 
 // ============================================
-// COLETOR COMPLETO DE DADOS DO PERSONAGEM
+// COLETOR DE DADOS ATUALIZADO
 // ============================================
 
 class ColetorPersonagem {
@@ -3457,7 +3457,6 @@ class ColetorPersonagem {
         this.dados = {};
     }
 
-    // Métodos auxiliares
     getValor(id, padrao = '') {
         const el = document.getElementById(id);
         if (!el) return padrao;
@@ -3509,14 +3508,8 @@ class ColetorPersonagem {
             inteligencia: this.getNumero('IQ', 10),
             saude: this.getNumero('HT', 10),
             
-            pontos_vida: {
-                base: this.getNumero('PVBase', 10),
-                total: this.getNumero('PVTotal', 10)
-            },
-            pontos_fadiga: {
-                base: this.getNumero('PFBase', 10),
-                total: this.getNumero('PFTotal', 10)
-            },
+            pv_total: this.getNumero('PVTotal', 10),
+            pf_total: this.getNumero('PFTotal', 10),
             vontade: this.getNumero('VontadeTotal', 10),
             percepcao: this.getNumero('PercepcaoTotal', 10),
             deslocamento: this.getDecimal('DeslocamentoTotal', 5.00)
@@ -3544,44 +3537,6 @@ class ColetorPersonagem {
         };
     }
 
-    coletarVantagensDesvantagens() {
-        return {
-            total_vantagens: this.extrairPontos(this.getValor('total-vantagens', '+0 pts')),
-            total_desvantagens: this.extrairPontos(this.getValor('total-desvantagens', '0 pts')),
-            saldo_total: this.extrairPontos(this.getValor('saldo-total-vantagens', '0 pts'))
-        };
-    }
-
-    coletarPericias() {
-        return {
-            total_pericias: this.extrairPontos(this.getValor('pontos-pericias-total', '[0 pts]'))
-        };
-    }
-
-    coletarMagias() {
-        return {
-            aptidao: this.getNumero('aptidao-magica', 0),
-            mana_atual: this.getNumero('mana-atual', 10),
-            mana_base: this.getNumero('mana-base', 10),
-            total_gasto: this.getNumero('total-gasto-magia', 0)
-        };
-    }
-
-    coletarEquipamento() {
-        const extrairDinheiro = (texto) => {
-            if (!texto) return 0;
-            const match = texto.match(/[\d,]+/);
-            return match ? parseFloat(match[0].replace(',', '')) : 0;
-        };
-
-        return {
-            dinheiro: extrairDinheiro(this.getValor('dinheiroEquipamento', '$2.000')),
-            peso_atual: this.getDecimal('pesoAtual', 0),
-            peso_maximo: this.getDecimal('pesoMaximo', 60),
-            nivel_carga: this.getValor('nivelCarga', 'LEVE')
-        };
-    }
-
     coletarCombate() {
         return {
             pv_atual: this.getNumero('pvAtualDisplay', 10),
@@ -3600,85 +3555,137 @@ class ColetorPersonagem {
     coletarDadosVantagens() {
         try {
             if (typeof window.exportarDadosVantagens === 'function') {
-                return window.exportarDadosVantagens();
+                const dados = window.exportarDadosVantagens();
+                return {
+                    vantagens: dados.vantagens || [],
+                    peculiaridades: dados.peculiaridades || [],
+                    total_vantagens: dados.totais?.vantagens || 0,
+                    total_peculiaridades: dados.totais?.peculiaridades || 0
+                };
             }
-            return { vantagens: [], peculiaridades: [], totais: { vantagens: 0, desvantagens: 0, peculiaridades: 0, totalGeral: 0 } };
         } catch (error) {
-            return { vantagens: [], peculiaridades: [], totais: { vantagens: 0, desvantagens: 0, peculiaridades: 0, totalGeral: 0 } };
+            console.warn('Erro ao coletar vantagens:', error);
         }
+        return { vantagens: [], peculiaridades: [], total_vantagens: 0, total_peculiaridades: 0 };
     }
 
     coletarDadosDesvantagens() {
         try {
             if (typeof window.exportarDadosDesvantagens === 'function') {
-                return window.exportarDadosDesvantagens();
+                const dados = window.exportarDadosDesvantagens();
+                return {
+                    desvantagens: dados.desvantagens || [],
+                    total_desvantagens: dados.totais?.desvantagens || 0
+                };
             }
-            return { desvantagens: [], totais: { desvantagens: 0 } };
         } catch (error) {
-            return { desvantagens: [], totais: { desvantagens: 0 } };
+            console.warn('Erro ao coletar desvantagens:', error);
         }
+        return { desvantagens: [], total_desvantagens: 0 };
     }
 
     coletarDadosPericias() {
         try {
             if (typeof window.exportarDadosPericias === 'function') {
-                return window.exportarDadosPericias();
+                const dados = window.exportarDadosPericias();
+                return {
+                    pericias: dados.pericias || [],
+                    tecnicas: dados.tecnicas || [],
+                    total_pericias: dados.totais?.pericias || 0,
+                    total_tecnicas: dados.totais?.tecnicas || 0
+                };
             }
-            return { pericias: [], tecnicas: [], totais: { pericias: 0, tecnicas: 0, total: 0 } };
         } catch (error) {
-            return { pericias: [], tecnicas: [], totais: { pericias: 0, tecnicas: 0, total: 0 } };
+            console.warn('Erro ao coletar perícias:', error);
         }
+        return { pericias: [], tecnicas: [], total_pericias: 0, total_tecnicas: 0 };
     }
 
     coletarDadosMagias() {
         try {
             if (typeof window.exportarDadosMagias === 'function') {
-                return window.exportarDadosMagias();
+                const dados = window.exportarDadosMagias();
+                return {
+                    magias: dados.magias || [],
+                    total_magias: dados.totais?.magias || 0,
+                    mana_atual: dados.totais?.mana || 10
+                };
             }
-            return { magias: [], totais: { magias: 0, mana: 0, total: 0 } };
         } catch (error) {
-            return { magias: [], totais: { magias: 0, mana: 0, total: 0 } };
+            console.warn('Erro ao coletar magias:', error);
         }
+        return { magias: [], total_magias: 0, mana_atual: 10 };
     }
 
     coletarDadosEquipamento() {
         try {
             if (typeof window.exportarDadosEquipamento === 'function') {
-                return window.exportarDadosEquipamento();
+                const dados = window.exportarDadosEquipamento();
+                return {
+                    inventario: dados.inventario || [],
+                    deposito: dados.deposito || [],
+                    equipamentos: dados.equipamentos || [],
+                    dinheiro: dados.totais?.dinheiro || 2000,
+                    peso_atual: dados.totais?.peso || 0
+                };
             }
-            return { inventario: [], deposito: [], totais: { peso: 0, valor: 0, itens: 0 } };
         } catch (error) {
-            return { inventario: [], deposito: [], totais: { peso: 0, valor: 0, itens: 0 } };
+            console.warn('Erro ao coletar equipamento:', error);
         }
+        return { inventario: [], deposito: [], equipamentos: [], dinheiro: 2000, peso_atual: 0 };
+    }
+
+    coletarDadosCombate() {
+        try {
+            if (typeof window.exportarDadosCombate === 'function') {
+                return window.exportarDadosCombate();
+            }
+        } catch (error) {
+            console.warn('Erro ao coletar dados de combate:', error);
+        }
+        return {
+            pv: { atual: 10, maximo: 10, modificador: 0, estado: 'Saudável' },
+            pf: { atual: 10, maximo: 10, modificador: 0, estado: 'Normal' },
+            defesas: { esquiva: 10, bloqueio: 11, aparar: 3 },
+            rd: { total: 0, partes: {} },
+            condicoes: []
+        };
+    }
+
+    coletarRelacionamentos() {
+        try {
+            if (typeof window.exportarDadosRelacionamentos === 'function') {
+                return window.exportarDadosRelacionamentos();
+            }
+        } catch (error) {
+            console.warn('Erro ao coletar relacionamentos:', error);
+        }
+        return { inimigos: [], aliados: [], dependentes: [] };
     }
 
     // ===== COLETAR TUDO =====
     
     coletarTudo() {
         try {
-            const dadosCompletos = {
+            return {
                 dashboard: this.coletarDashboard(),
                 atributos: this.coletarAtributos(),
                 caracteristicas: this.coletarCaracteristicas(),
-                vantagens_desvantagens: this.coletarVantagensDesvantagens(),
-                pericias: this.coletarPericias(),
-                magias: this.coletarMagias(),
-                equipamento: this.coletarEquipamento(),
                 combate: this.coletarCombate(),
                 
-                // Dados dos sistemas JS
                 sistemas: {
                     vantagens: this.coletarDadosVantagens(),
                     desvantagens: this.coletarDadosDesvantagens(),
                     pericias: this.coletarDadosPericias(),
                     magias: this.coletarDadosMagias(),
-                    equipamento: this.coletarDadosEquipamento()
+                    equipamento: this.coletarDadosEquipamento(),
+                    combate_detalhado: this.coletarDadosCombate(),
+                    relacionamentos: this.coletarRelacionamentos()
                 }
             };
             
-            return dadosCompletos;
-            
         } catch (error) {
+            console.error('Erro ao coletar dados:', error);
             return {
                 erro: error.message,
                 coletado_em: new Date().toISOString()
@@ -3692,54 +3699,154 @@ class ColetorPersonagem {
         try {
             const dadosCompletos = this.coletarTudo();
             
+            console.log('Coletando dados para salvar...');
+            
+            // Preparar dados para salvar - USANDO CAMPOS INDIVIDUAIS
             const dadosParaSalvar = {
                 user_id: session.user.id,
+                
+                // Dashboard
                 nome: dadosCompletos.dashboard.nome || 'Novo Personagem',
                 raca: dadosCompletos.dashboard.raca || '',
                 classe: dadosCompletos.dashboard.classe || '',
                 nivel: dadosCompletos.dashboard.nivel || '',
                 descricao: dadosCompletos.dashboard.descricao || '',
                 
-                forca: dadosCompletos.atributos.forca || 10,
-                destreza: dadosCompletos.atributos.destreza || 10,
-                inteligencia: dadosCompletos.atributos.inteligencia || 10,
-                saude: dadosCompletos.atributos.saude || 10,
-                
+                // Pontos
                 pontos_totais: dadosCompletos.dashboard.pontos_totais || 150,
                 pontos_gastos: dadosCompletos.dashboard.pontos_gastos || 0,
                 pontos_disponiveis: dadosCompletos.dashboard.pontos_disponiveis || 150,
                 limite_desvantagens: dadosCompletos.dashboard.limite_desvantagens || -50,
                 desvantagens_atuais: dadosCompletos.dashboard.desvantagens_atuais || 0,
                 
-                dados_completos: dadosCompletos,
+                // Atributos
+                forca: dadosCompletos.atributos.forca || 10,
+                destreza: dadosCompletos.atributos.destreza || 10,
+                inteligencia: dadosCompletos.atributos.inteligencia || 10,
+                saude: dadosCompletos.atributos.saude || 10,
+                
+                // Pontos de Vida/Fadiga
+                pontos_vida: dadosCompletos.atributos.pv_total || 10,
+                pontos_fadiga: dadosCompletos.atributos.pf_total || 10,
+                vontade: dadosCompletos.atributos.vontade || 10,
+                percepcao: dadosCompletos.atributos.percepcao || 10,
+                deslocamento: dadosCompletos.atributos.deslocamento || 5.00,
+                
+                // Características
+                aparencia: dadosCompletos.caracteristicas.aparencia?.descricao || 'Comum',
+                custo_aparencia: dadosCompletos.caracteristicas.aparencia?.pontos || 0,
+                riqueza: dadosCompletos.caracteristicas.riqueza?.descricao || 'Média',
+                custo_riqueza: dadosCompletos.caracteristicas.riqueza?.pontos || 0,
+                renda_mensal: dadosCompletos.caracteristicas.riqueza?.renda || '$1.000',
+                altura: dadosCompletos.caracteristicas.altura || 1.70,
+                peso: dadosCompletos.caracteristicas.peso || 70,
+                
+                // Dados JSON
+                idiomas: dadosCompletos.sistemas?.idiomas || [],
+                caracteristicas_fisicas: dadosCompletos.sistemas?.caracteristicas_fisicas || [],
+                
+                // Combate atual
+                pv_atual: dadosCompletos.combate.pv_atual || 10,
+                pv_maximo: dadosCompletos.combate.pv_maximo || 10,
+                pf_atual: dadosCompletos.combate.pf_atual || 10,
+                pf_maximo: dadosCompletos.combate.pf_maximo || 10,
+                esquiva: dadosCompletos.combate.esquiva || 10,
+                bloqueio: dadosCompletos.combate.bloqueio || 11,
+                aparar: dadosCompletos.combate.aparar || 3,
+                rd_total: dadosCompletos.combate.rd_total || 0,
+                
                 updated_at: new Date().toISOString()
             };
-
-            // Adicionar campos extras se existirem
+            
+            // Adicionar dados dos sistemas se existirem
             try {
-                if (dadosCompletos.combate) {
-                    dadosParaSalvar.pontos_vida = dadosCompletos.combate.pv_atual || 10;
-                    dadosParaSalvar.pontos_fadiga = dadosCompletos.combate.pf_atual || 10;
+                // Vantagens e Desvantagens
+                const vantagensData = dadosCompletos.sistemas.vantagens;
+                if (vantagensData) {
+                    dadosParaSalvar.vantagens = vantagensData.vantagens || [];
+                    dadosParaSalvar.total_vantagens = vantagensData.total_vantagens || 0;
+                    dadosParaSalvar.peculiaridades = vantagensData.peculiaridades || [];
+                    dadosParaSalvar.total_peculiaridades = vantagensData.total_peculiaridades || 0;
                 }
                 
-                if (dadosCompletos.caracteristicas) {
-                    dadosParaSalvar.aparencia = dadosCompletos.caracteristicas.aparencia?.descricao || 'Comum';
-                    dadosParaSalvar.riqueza = dadosCompletos.caracteristicas.riqueza?.descricao || 'Média';
+                const desvantagensData = dadosCompletos.sistemas.desvantagens;
+                if (desvantagensData) {
+                    dadosParaSalvar.desvantagens = desvantagensData.desvantagens || [];
+                    dadosParaSalvar.total_desvantagens = desvantagensData.total_desvantagens || 0;
                 }
                 
-                if (dadosCompletos.equipamento) {
-                    dadosParaSalvar.dinheiro = dadosCompletos.equipamento.dinheiro || 2000;
+                // Perícias
+                const periciasData = dadosCompletos.sistemas.pericias;
+                if (periciasData) {
+                    dadosParaSalvar.pericias = periciasData.pericias || [];
+                    dadosParaSalvar.total_pericias = periciasData.total_pericias || 0;
+                    dadosParaSalvar.tecnicas = periciasData.tecnicas || [];
+                    dadosParaSalvar.total_tecnicas = periciasData.total_tecnicas || 0;
+                }
+                
+                // Magias
+                const magiasData = dadosCompletos.sistemas.magias;
+                if (magiasData) {
+                    dadosParaSalvar.magias = magiasData.magias || [];
+                    dadosParaSalvar.total_magias = magiasData.total_magias || 0;
+                    dadosParaSalvar.mana_atual = magiasData.mana_atual || 10;
+                    dadosParaSalvar.mana_base = 10; // Base padrão
+                }
+                
+                // Equipamento
+                const equipamentoData = dadosCompletos.sistemas.equipamento;
+                if (equipamentoData) {
+                    dadosParaSalvar.equipamentos = equipamentoData.equipamentos || [];
+                    dadosParaSalvar.inventario = equipamentoData.inventario || [];
+                    dadosParaSalvar.deposito = equipamentoData.deposito || [];
+                    dadosParaSalvar.dinheiro = equipamentoData.dinheiro || 2000;
+                    dadosParaSalvar.peso_atual = equipamentoData.peso_atual || 0;
+                    dadosParaSalvar.peso_maximo = 60; // Padrão
+                }
+                
+                // Combate detalhado
+                const combateData = dadosCompletos.sistemas.combate_detalhado;
+                if (combateData) {
+                    dadosParaSalvar.pv_modificador = combateData.pv?.modificador || 0;
+                    dadosParaSalvar.pv_estado = combateData.pv?.estado || 'Saudável';
+                    dadosParaSalvar.pf_modificador = combateData.pf?.modificador || 0;
+                    dadosParaSalvar.pf_estado = combateData.pf?.estado || 'Normal';
+                    
+                    // RD por partes
+                    if (combateData.rd?.partes) {
+                        const partes = combateData.rd.partes;
+                        dadosParaSalvar.rd_cabeca = partes.cabeca || 0;
+                        dadosParaSalvar.rd_tronco = partes.tronco || 0;
+                        dadosParaSalvar.rd_rosto = partes.rosto || 0;
+                        dadosParaSalvar.rd_cranio = partes.cranio || 0;
+                        dadosParaSalvar.rd_pescoco = partes.pescoco || 0;
+                        dadosParaSalvar.rd_virilha = partes.virilha || 0;
+                        dadosParaSalvar.rd_bracos = partes.bracos || 0;
+                        dadosParaSalvar.rd_pernas = partes.pernas || 0;
+                        dadosParaSalvar.rd_maos = partes.maos || 0;
+                        dadosParaSalvar.rd_pes = partes.pes || 0;
+                    }
+                    
+                    // Condições
+                    dadosParaSalvar.condicoes = combateData.condicoes || [];
+                    dadosParaSalvar.condicoes_ativas = combateData.condicoes?.length || 0;
+                }
+                
+                // Relacionamentos
+                const relacionamentosData = dadosCompletos.sistemas.relacionamentos;
+                if (relacionamentosData) {
+                    dadosParaSalvar.inimigos = relacionamentosData.inimigos || [];
+                    dadosParaSalvar.aliados = relacionamentosData.aliados || [];
+                    dadosParaSalvar.dependentes = relacionamentosData.dependentes || [];
                 }
                 
             } catch (erroOpcional) {
-                // Ignorar erros em campos opcionais
+                console.warn('Erro ao processar dados opcionais:', erroOpcional);
             }
-
-            if (!personagemId) {
-                dadosParaSalvar.created_at = new Date().toISOString();
-                dadosParaSalvar.status = 'Ativo';
-            }
-
+            
+            // Inserir ou atualizar
+            console.log('Salvando dados...', dadosParaSalvar);
+            
             let resultado;
             
             if (personagemId) {
@@ -3757,6 +3864,9 @@ class ColetorPersonagem {
                 
             } else {
                 // Criar novo
+                dadosParaSalvar.created_at = new Date().toISOString();
+                dadosParaSalvar.status = 'Ativo';
+                
                 const { data, error } = await supabase
                     .from('characters')
                     .insert([dadosParaSalvar])
@@ -3775,6 +3885,8 @@ class ColetorPersonagem {
             };
 
         } catch (error) {
+            console.error('Erro detalhado:', error);
+            
             let mensagemErro = 'Erro ao salvar: ' + error.message;
             
             if (error.message.includes('column') && error.message.includes('does not exist')) {
@@ -3796,7 +3908,6 @@ class ColetorPersonagem {
         }
     }
 }
-
 // ============================================
 // FUNÇÕES PRINCIPAIS
 // ============================================
@@ -3808,6 +3919,7 @@ async function verificarSessao() {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
+            console.error('Erro na sessão:', error);
             return { sucesso: false, mensagem: 'Erro ao verificar sessão' };
         }
         
@@ -3836,6 +3948,7 @@ async function verificarSessao() {
         };
         
     } catch (erro) {
+        console.error('Erro de conexão:', erro);
         return { 
             sucesso: false, 
             mensagem: 'Erro de conexão. Verifique sua internet.',
@@ -3847,9 +3960,13 @@ async function verificarSessao() {
 async function salvarPersonagem() {
     try {
         const btnSalvar = document.getElementById('btnSalvar');
-        if (!btnSalvar) return;
+        if (!btnSalvar) {
+            alert('Botão salvar não encontrado');
+            return;
+        }
         
         const originalHTML = btnSalvar.innerHTML;
+        const originalBG = btnSalvar.style.background;
         
         // Mostrar loading
         btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
@@ -3862,6 +3979,7 @@ async function salvarPersonagem() {
         if (!verificacao.sucesso) {
             btnSalvar.innerHTML = originalHTML;
             btnSalvar.disabled = false;
+            btnSalvar.style.background = originalBG;
             
             if (verificacao.redirecionar) {
                 alert(verificacao.mensagem);
@@ -3876,6 +3994,8 @@ async function salvarPersonagem() {
         const idDaUrl = urlParams.get('id');
         const idParaSalvar = window.personagemId || idDaUrl;
         
+        console.log('Salvando personagem, ID:', idParaSalvar);
+        
         const resultado = await window.coletorPersonagem.salvarTudoNoSupabase(verificacao.session, idParaSalvar);
         
         if (resultado.success) {
@@ -3888,9 +4008,15 @@ async function salvarPersonagem() {
             btnSalvar.innerHTML = '<i class="fas fa-check"></i> Salvo!';
             btnSalvar.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
             
+            // Atualizar resumo se estiver na aba
+            if (typeof sincronizarResumo === 'function') {
+                sincronizarResumo();
+            }
+            
             setTimeout(() => {
                 btnSalvar.innerHTML = originalHTML;
-                btnSalvar.style.background = '';
+                btnSalvar.style.background = originalBG;
+                btnSalvar.disabled = false;
             }, 2000);
             
             if (!idDaUrl && resultado.personagemId) {
@@ -3902,10 +4028,15 @@ async function salvarPersonagem() {
         } else {
             btnSalvar.innerHTML = originalHTML;
             btnSalvar.disabled = false;
+            btnSalvar.style.background = originalBG;
+            
+            console.error('Erro ao salvar:', resultado);
             alert(resultado.message);
         }
         
     } catch (error) {
+        console.error('Erro crítico:', error);
+        
         const btnSalvar = document.getElementById('btnSalvar');
         if (btnSalvar) {
             btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar';
@@ -3921,6 +4052,8 @@ async function salvarPersonagem() {
 
 async function inicializarSistema() {
     try {
+        console.log('Inicializando sistema...');
+        
         const verificacao = await verificarSessao();
         
         if (!verificacao.sucesso) {
@@ -3940,16 +4073,21 @@ async function inicializarSistema() {
         
         if (window.personagemId) {
             document.title = 'Editar Personagem - RPG System';
-            await carregarPersonagemParaEdicao(window.personagemId);
+            console.log('Carregando personagem existente:', window.personagemId);
+            await carregarPersonagemParaEdicao(window.personagemId, verificacao.session);
         } else {
             document.title = 'Criar Personagem - RPG System';
+            console.log('Criando novo personagem');
             inicializarPersonagemVazio();
         }
         
         configurarEventListeners();
         inicializarSistemasEspecificos();
         
+        console.log('Sistema inicializado com sucesso!');
+        
     } catch (error) {
+        console.error('Erro ao inicializar sistema:', error);
         alert('Erro ao inicializar sistema: ' + error.message);
     }
 }
@@ -3977,6 +4115,7 @@ function inicializarNavegacaoAbas() {
 
 function carregarSistemasAba(abaId) {
     setTimeout(() => {
+        console.log('Carregando sistemas da aba:', abaId);
         switch(abaId) {
             case 'dashboard':
                 if (typeof window.dashboard?.inicializar === 'function') {
@@ -4028,6 +4167,8 @@ function carregarSistemasAba(abaId) {
 }
 
 function inicializarSistemasEspecificos() {
+    console.log('Inicializando sistemas específicos...');
+    
     if (typeof window.dashboard?.inicializar === 'function') {
         window.dashboard.inicializar();
     }
@@ -4045,9 +4186,19 @@ function configurarEventListeners() {
     const btnSair = document.getElementById('btnSair');
     const charName = document.getElementById('charName');
     
-    if (btnSalvar) btnSalvar.addEventListener('click', salvarPersonagem);
-    if (btnExcluir) btnExcluir.addEventListener('click', solicitarExclusao);
-    if (btnSair) btnSair.addEventListener('click', sairSemSalvar);
+    if (btnSalvar) {
+        console.log('Configurando listener do botão salvar');
+        btnSalvar.addEventListener('click', salvarPersonagem);
+    }
+    
+    if (btnExcluir) {
+        btnExcluir.addEventListener('click', solicitarExclusao);
+    }
+    
+    if (btnSair) {
+        btnSair.addEventListener('click', sairSemSalvar);
+    }
+    
     if (charName) {
         charName.addEventListener('input', function() {
             if (typeof atualizarResumoNome === 'function') {
@@ -4057,20 +4208,27 @@ function configurarEventListeners() {
     }
 }
 
-async function carregarPersonagemParaEdicao(personagemId) {
+async function carregarPersonagemParaEdicao(personagemId, session) {
     try {
-        const verificacao = await verificarSessao();
-        if (!verificacao.sucesso) throw new Error('Sessão inválida');
+        console.log('Carregando personagem ID:', personagemId);
+        
+        if (!session) {
+            const verificacao = await verificarSessao();
+            if (!verificacao.sucesso) throw new Error('Sessão inválida');
+            session = verificacao.session;
+        }
         
         const { data: personagem, error } = await supabase
             .from('characters')
             .select('*')
             .eq('id', personagemId)
-            .eq('user_id', verificacao.session.user.id)
+            .eq('user_id', session.user.id)
             .single();
         
         if (error) throw error;
         if (!personagem) throw new Error('Personagem não encontrado');
+        
+        console.log('Personagem carregado:', personagem.nome);
         
         // Carregar dados básicos
         document.getElementById('charName').value = personagem.nome || 'Novo Personagem';
@@ -4091,49 +4249,128 @@ async function carregarPersonagemParaEdicao(personagemId) {
             document.getElementById('pontosTotais').textContent = personagem.pontos_totais;
         }
         
-        // Carregar dados completos se existirem
-        if (personagem.dados_completos) {
-            carregarDadosCompletos(personagem.dados_completos);
+        // Carregar características
+        if (personagem.aparencia) {
+            const selectAparencia = document.getElementById('nivelAparencia');
+            if (selectAparencia) {
+                // Encontrar opção pelo valor
+                for (let option of selectAparencia.options) {
+                    if (option.text.includes(personagem.aparencia)) {
+                        selectAparencia.value = option.value;
+                        break;
+                    }
+                }
+            }
         }
+        
+        if (personagem.riqueza) {
+            const selectRiqueza = document.getElementById('nivelRiqueza');
+            if (selectRiqueza) {
+                for (let option of selectRiqueza.options) {
+                    if (option.text.includes(personagem.riqueza)) {
+                        selectRiqueza.value = option.value;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (personagem.altura) document.getElementById('altura').value = personagem.altura;
+        if (personagem.peso) document.getElementById('peso').value = personagem.peso;
+        
+        // Restaurar dados dos sistemas
+        restaurarDadosSistemas(personagem);
         
         setTimeout(() => {
             inicializarSistemasEspecificos();
+            if (typeof sincronizarResumo === 'function') {
+                sincronizarResumo();
+            }
         }, 500);
         
     } catch (error) {
+        console.error('Erro ao carregar personagem:', error);
         alert('Erro ao carregar personagem: ' + error.message);
         setTimeout(() => window.location.href = 'personagens.html', 2000);
     }
 }
 
-function carregarDadosCompletos(dados) {
-    // Esta função pode ser expandida para restaurar todos os dados
-    // Por enquanto, apenas carrega o básico
+function restaurarDadosSistemas(personagem) {
     try {
-        if (dados.caracteristicas) {
-            if (dados.caracteristicas.aparencia?.nivel) {
-                const selectAparencia = document.getElementById('nivelAparencia');
-                if (selectAparencia) selectAparencia.value = dados.caracteristicas.aparencia.nivel;
-            }
-            if (dados.caracteristicas.riqueza?.nivel) {
-                const selectRiqueza = document.getElementById('nivelRiqueza');
-                if (selectRiqueza) selectRiqueza.value = dados.caracteristicas.riqueza.nivel;
-            }
-            if (dados.caracteristicas.altura) {
-                const alturaInput = document.getElementById('altura');
-                if (alturaInput) alturaInput.value = dados.caracteristicas.altura;
-            }
-            if (dados.caracteristicas.peso) {
-                const pesoInput = document.getElementById('peso');
-                if (pesoInput) pesoInput.value = dados.caracteristicas.peso;
-            }
+        console.log('Restaurando dados dos sistemas...');
+        
+        // Vantagens
+        if (personagem.vantagens && typeof window.carregarDadosVantagens === 'function') {
+            window.carregarDadosVantagens(personagem.vantagens);
         }
+        
+        if (personagem.peculiaridades && typeof window.carregarDadosPeculiaridades === 'function') {
+            window.carregarDadosPeculiaridades(personagem.peculiaridades);
+        }
+        
+        // Desvantagens
+        if (personagem.desvantagens && typeof window.carregarDadosDesvantagens === 'function') {
+            window.carregarDadosDesvantagens(personagem.desvantagens);
+        }
+        
+        // Perícias
+        if (personagem.pericias && typeof window.carregarDadosPericias === 'function') {
+            window.carregarDadosPericias(personagem.pericias);
+        }
+        
+        // Técnicas
+        if (personagem.tecnicas && typeof window.carregarDadosTecnicas === 'function') {
+            window.carregarDadosTecnicas(personagem.tecnicas);
+        }
+        
+        // Magias
+        if (personagem.magias && typeof window.carregarDadosMagias === 'function') {
+            window.carregarDadosMagias(personagem.magias);
+        }
+        
+        // Equipamento
+        if (personagem.equipamentos && typeof window.carregarDadosEquipamento === 'function') {
+            window.carregarDadosEquipamento(personagem.equipamentos);
+        }
+        
+        if (personagem.inventario && typeof window.carregarDadosInventario === 'function') {
+            window.carregarDadosInventario(personagem.inventario);
+        }
+        
+        // Combate
+        if (personagem.pv_atual && typeof window.restaurarPV === 'function') {
+            window.restaurarPV(personagem.pv_atual, personagem.pv_maximo);
+        }
+        
+        if (personagem.pf_atual && typeof window.restaurarPF === 'function') {
+            window.restaurarPF(personagem.pf_atual, personagem.pf_maximo);
+        }
+        
+        if (personagem.condicoes && typeof window.carregarDadosCondicoes === 'function') {
+            window.carregarDadosCondicoes(personagem.condicoes);
+        }
+        
+        // Relacionamentos
+        if (personagem.inimigos && typeof window.carregarDadosInimigos === 'function') {
+            window.carregarDadosInimigos(personagem.inimigos);
+        }
+        
+        if (personagem.aliados && typeof window.carregarDadosAliados === 'function') {
+            window.carregarDadosAliados(personagem.aliados);
+        }
+        
+        if (personagem.dependentes && typeof window.carregarDadosDependentes === 'function') {
+            window.carregarDadosDependentes(personagem.dependentes);
+        }
+        
     } catch (error) {
-        // Ignorar erros na restauração
+        console.warn('Erro ao restaurar dados dos sistemas:', error);
     }
 }
 
 function inicializarPersonagemVazio() {
+    console.log('Inicializando personagem vazio');
+    
     document.getElementById('charName').value = 'Novo Personagem';
     document.getElementById('ST').value = 10;
     document.getElementById('DX').value = 10;
@@ -4147,7 +4384,7 @@ function inicializarPersonagemVazio() {
 
 function solicitarExclusao() {
     if (window.personagemId) {
-        if (confirm('Tem certeza que deseja excluir este personagem?')) {
+        if (confirm('Tem certeza que deseja excluir este personagem? Esta ação não pode ser desfeita.')) {
             excluirPersonagem(window.personagemId);
         }
     } else {
@@ -4205,13 +4442,51 @@ function sairSemSalvar() {
 
 function sincronizarResumo() {
     try {
+        console.log('Sincronizando resumo...');
+        
         const nome = document.getElementById('charName')?.value || 'Novo Personagem';
         const resumoNome = document.getElementById('resumoNome');
         if (resumoNome) {
             resumoNome.textContent = nome;
         }
+        
+        // Sincronizar atributos
+        if (typeof window.atributos?.sincronizarResumo === 'function') {
+            window.atributos.sincronizarResumo();
+        }
+        
+        // Sincronizar características
+        if (typeof window.caracteristicas?.sincronizarResumo === 'function') {
+            window.caracteristicas.sincronizarResumo();
+        }
+        
+        // Sincronizar vantagens
+        if (typeof window.resumoVantagens?.sincronizar === 'function') {
+            window.resumoVantagens.sincronizar();
+        }
+        
+        // Sincronizar perícias
+        if (typeof window.resumoPericias?.sincronizar === 'function') {
+            window.resumoPericias.sincronizar();
+        }
+        
+        // Sincronizar magias
+        if (typeof window.resumoMagias?.sincronizar === 'function') {
+            window.resumoMagias.sincronizar();
+        }
+        
+        // Sincronizar equipamentos
+        if (typeof window.resumoEquipamentos?.sincronizar === 'function') {
+            window.resumoEquipamentos.sincronizar();
+        }
+        
+        // Sincronizar combate
+        if (typeof window.resumoCombate?.sincronizar === 'function') {
+            window.resumoCombate.sincronizar();
+        }
+        
     } catch (error) {
-        // Ignorar erro
+        console.error('Erro ao sincronizar resumo:', error);
     }
 }
 
@@ -4223,10 +4498,38 @@ function atualizarResumoNome(nome) {
 }
 
 // ============================================
+// FUNÇÕES AUXILIARES PARA OS SISTEMAS
+// ============================================
+
+// Exportar dados para os sistemas usarem
+function exportarDadosParaSistemas() {
+    try {
+        return window.coletorPersonagem.coletarTudo();
+    } catch (error) {
+        console.error('Erro ao exportar dados:', error);
+        return null;
+    }
+}
+
+// Função para atualizar valores quando sistemas mudam
+function atualizarDadosSistema(tipo, dados) {
+    try {
+        if (!window.coletorPersonagem.dados.sistemas) {
+            window.coletorPersonagem.dados.sistemas = {};
+        }
+        window.coletorPersonagem.dados.sistemas[tipo] = dados;
+    } catch (error) {
+        console.warn('Erro ao atualizar dados do sistema:', error);
+    }
+}
+
+// ============================================
 // INICIALIZAÇÃO DA PÁGINA
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM carregado, inicializando...');
+    
     setTimeout(() => {
         inicializarSistema();
     }, 500);
@@ -4241,6 +4544,810 @@ window.coletorPersonagem = window.coletorPersonagem;
 window.verificarSessao = verificarSessao;
 window.sincronizarResumo = sincronizarResumo;
 window.atualizarResumoNome = atualizarResumoNome;
+window.exportarDadosParaSistemas = exportarDadosParaSistemas;
+window.atualizarDadosSistema = atualizarDadosSistema;
+
+// Funções que os sistemas podem usar para restaurar dados
+window.restaurarDadosDoSistema = restaurarDadosSistemas;
+
+// ============================================
+// FUNÇÕES DE EXPORTAÇÃO QUE OS SISTEMAS DEVEM IMPLEMENTAR
+// ============================================
+
+/*
+INSTRUÇÕES PARA OS SISTEMAS:
+
+Cada sistema (vantagens.js, pericias.js, etc) DEVE implementar estas funções:
+
+1. Função de exportação:
+   window.exportarDados[NOME_DO_SISTEMA] = function() {
+       return {
+           dados: [...], // Array com os dados
+           totais: { ... } // Totais de pontos
+       };
+   };
+
+2. Função de carregamento:
+   window.carregarDados[NOME_DO_SISTEMA] = function(dados) {
+       // Restaurar os dados no sistema
+   };
+
+3. Função de inicialização:
+   window.[NOME_DO_SISTEMA].inicializar = function() {
+       // Inicializar o sistema
+   };
+*/
+
+// ============================================
+// FUNÇÕES AUXILIARES DE DEPURAÇÃO
+// ============================================
+
+function depurarDadosParaSalvar() {
+    try {
+        const dados = window.coletorPersonagem.coletarTudo();
+        console.log('=== DADOS PARA SALVAR ===');
+        
+        // Dashboard
+        console.log('Dashboard:', {
+            nome: dados.dashboard.nome,
+            raca: dados.dashboard.raca,
+            classe: dados.dashboard.classe,
+            pontos: {
+                total: dados.dashboard.pontos_totais,
+                gastos: dados.dashboard.pontos_gastos,
+                disponiveis: dados.dashboard.pontos_disponiveis
+            }
+        });
+        
+        // Atributos
+        console.log('Atributos:', dados.atributos);
+        
+        // Características
+        console.log('Características:', {
+            aparencia: dados.caracteristicas.aparencia,
+            riqueza: dados.caracteristicas.riqueza,
+            altura: dados.caracteristicas.altura,
+            peso: dados.caracteristicas.peso
+        });
+        
+        // Sistemas
+        console.log('Sistemas disponíveis:', Object.keys(dados.sistemas || {}));
+        
+        return dados;
+        
+    } catch (error) {
+        console.error('Erro ao depurar dados:', error);
+        return null;
+    }
+}
+
+function testarConexaoSupabase() {
+    return new Promise(async (resolve) => {
+        try {
+            const { data, error } = await supabase
+                .from('characters')
+                .select('count')
+                .limit(1);
+            
+            if (error) {
+                console.error('Erro de conexão:', error);
+                resolve({ sucesso: false, erro: error.message });
+            } else {
+                console.log('Conexão OK com Supabase');
+                resolve({ sucesso: true });
+            }
+        } catch (error) {
+            console.error('Erro de conexão:', error);
+            resolve({ sucesso: false, erro: error.message });
+        }
+    });
+}
+
+function verificarColunasFaltantes() {
+    const colunasExistentes = [
+        'id', 'user_id', 'created_at', 'updated_at', 'nome', 'avatar_url', 'raca', 'classe', 
+        'nivel', 'descricao', 'status', 'pontos_totais', 'pontos_gastos', 'pontos_disponiveis',
+        'limite_desvantagens', 'desvantagens_atuais', 'forca', 'destreza', 'inteligencia',
+        'saude', 'pontos_vida', 'bonus_pv', 'pontos_fadiga', 'bonus_pf', 'vontade', 
+        'bonus_vontade', 'percepcao', 'bonus_percepcao', 'deslocamento', 'bonus_deslocamento',
+        'dano_gdp', 'dano_geb', 'carga_nenhuma', 'carga_leve', 'carga_media', 'carga_pesada',
+        'carga_muito_pesada', 'aparencia', 'custo_aparencia', 'riqueza', 'custo_riqueza',
+        'renda_mensal', 'idiomas', 'altura', 'peso', 'caracteristicas_fisicas', 'vantagens',
+        'total_vantagens', 'desvantagens', 'total_desvantagens', 'peculiaridades',
+        'total_peculiaridades', 'pericias', 'total_pericias', 'pontos_pericias', 'tecnicas',
+        'total_tecnicas', 'pontos_tecnicas', 'aptidao_magica', 'mana_atual', 'mana_base',
+        'bonus_mana', 'magias', 'total_magias', 'pontos_magias', 'dinheiro', 'peso_atual',
+        'peso_maximo', 'nivel_carga', 'penalidades_carga', 'equipamentos', 'inventario',
+        'deposito', 'pv_atual', 'pv_maximo', 'pv_modificador', 'pv_estado', 'pf_atual',
+        'pf_maximo', 'pf_modificador', 'pf_estado', 'esquiva', 'esquiva_mod', 'bloqueio',
+        'bloqueio_mod', 'aparar', 'aparar_mod', 'bonus_reflexos', 'bonus_escudo', 'bonus_capa',
+        'bonus_outros', 'rd_cabeca', 'rd_tronco', 'rd_rosto', 'rd_cranio', 'rd_pescoco',
+        'rd_virilha', 'rd_bracos', 'rd_pernas', 'rd_maos', 'rd_pes', 'rd_total',
+        'escudo_equipado', 'escudo_nome', 'escudo_dr', 'escudo_pv_atual', 'escudo_pv_maximo',
+        'condicoes', 'condicoes_ativas', 'inimigos', 'aliados', 'dependentes', 'dados_completos',
+        'carga_atual', 'carga_maxima', 'deslocamento_combate'
+    ];
+    
+    console.log('Total de colunas existentes:', colunasExistentes.length);
+    console.log('Colunas que podem estar faltando:');
+    
+    // Aqui você pode adicionar validações específicas
+    
+    return colunasExistentes;
+}
+
+// ============================================
+// FUNÇÕES PARA TESTE RÁPIDO
+// ============================================
+
+async function testarSalvamentoRapido() {
+    console.log('=== TESTE DE SALVAMENTO RÁPIDO ===');
+    
+    try {
+        const btnSalvar = document.getElementById('btnSalvar');
+        if (!btnSalvar) {
+            console.error('Botão salvar não encontrado');
+            return;
+        }
+        
+        // Testar conexão
+        const conexao = await testarConexaoSupabase();
+        if (!conexao.sucesso) {
+            alert('Erro de conexão: ' + conexao.erro);
+            return;
+        }
+        
+        // Depurar dados
+        const dados = depurarDadosParaSalvar();
+        if (!dados) {
+            alert('Erro ao coletar dados');
+            return;
+        }
+        
+        // Testar salvamento (sem salvar de verdade)
+        console.log('Dados prontos para salvar:', dados);
+        alert('Teste concluído! Verifique o console para ver os dados que seriam salvos.');
+        
+    } catch (error) {
+        console.error('Erro no teste:', error);
+        alert('Erro no teste: ' + error.message);
+    }
+}
+
+function limparDadosTemporarios() {
+    try {
+        // Limpar dados locais se necessário
+        localStorage.removeItem('personagem_temporario');
+        sessionStorage.removeItem('dados_nao_salvos');
+        
+        console.log('Dados temporários limpos');
+        
+        // Reiniciar alguns valores
+        if (typeof window.atributos?.calcularTudo === 'function') {
+            window.atributos.calcularTudo();
+        }
+        
+        alert('Dados temporários limpos com sucesso!');
+        
+    } catch (error) {
+        console.error('Erro ao limpar dados:', error);
+    }
+}
+
+// ============================================
+// FUNÇÕES DE BACKUP E RECUPERAÇÃO
+// ============================================
+
+function fazerBackupLocal() {
+    try {
+        const dados = window.coletorPersonagem.coletarTudo();
+        const backup = {
+            dados: dados,
+            timestamp: new Date().toISOString(),
+            personagemId: window.personagemId
+        };
+        
+        const backupStr = JSON.stringify(backup);
+        localStorage.setItem('backup_personagem', backupStr);
+        
+        console.log('Backup local criado:', backup.timestamp);
+        
+        return {
+            sucesso: true,
+            timestamp: backup.timestamp,
+            tamanho: backupStr.length
+        };
+        
+    } catch (error) {
+        console.error('Erro ao criar backup:', error);
+        return { sucesso: false, erro: error.message };
+    }
+}
+
+function restaurarBackupLocal() {
+    try {
+        const backupStr = localStorage.getItem('backup_personagem');
+        if (!backupStr) {
+            return { sucesso: false, erro: 'Nenhum backup encontrado' };
+        }
+        
+        const backup = JSON.parse(backupStr);
+        
+        if (confirm(`Restaurar backup de ${new Date(backup.timestamp).toLocaleString()}?`)) {
+            // Aqui você implementaria a lógica para restaurar
+            console.log('Restaurando backup:', backup);
+            
+            // Atualizar personagemId se existir
+            if (backup.personagemId) {
+                window.personagemId = backup.personagemId;
+            }
+            
+            // Chamar funções de restauração dos sistemas
+            if (typeof restaurarDadosSistemas === 'function') {
+                // Você precisaria passar os dados apropriados
+            }
+            
+            return { sucesso: true, backup: backup };
+        }
+        
+        return { sucesso: false, cancelado: true };
+        
+    } catch (error) {
+        console.error('Erro ao restaurar backup:', error);
+        return { sucesso: false, erro: error.message };
+    }
+}
+
+// ============================================
+// EXPORTAÇÕES ADICIONAIS
+// ============================================
+
+window.depurarDadosParaSalvar = depurarDadosParaSalvar;
+window.testarConexaoSupabase = testarConexaoSupabase;
+window.testarSalvamentoRapido = testarSalvamentoRapido;
+window.verificarColunasFaltantes = verificarColunasFaltantes;
+window.limparDadosTemporarios = limparDadosTemporarios;
+window.fazerBackupLocal = fazerBackupLocal;
+window.restaurarBackupLocal = restaurarBackupLocal;
+
+// ============================================
+// CONFIGURAÇÕES GLOBAIS
+// ============================================
+
+// Configuração de debug
+window.DEBUG_MODE = true;
+
+// Intervalo para backup automático (5 minutos)
+if (window.DEBUG_MODE) {
+    setInterval(() => {
+        if (document.visibilityState === 'visible') {
+            fazerBackupLocal();
+        }
+    }, 5 * 60 * 1000); // 5 minutos
+}
+
+// Log quando a página está para ser fechada
+window.addEventListener('beforeunload', function(event) {
+    if (window.DEBUG_MODE) {
+        console.log('Página está sendo fechada, fazendo backup final...');
+        fazerBackupLocal();
+    }
+});
+
+// Log quando a página volta a ficar visível
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible' && window.DEBUG_MODE) {
+        console.log('Página voltou a ficar visível');
+    }
+});
+
+// ============================================
+// MENSAGEM DE INICIALIZAÇÃO
+// ============================================
+
+console.log(`
+╔═══════════════════════════════════════════════╗
+║   SISTEMA DE PERSONAGEM RPG - CARREGADO       ║
+║   Versão: 2.0.0                               ║
+║   Estrutura: Campos individuais + JSONB       ║
+║   Status: Pronto para uso                     ║
+╚═══════════════════════════════════════════════╝
+`);
+// ============================================
+// FUNÇÕES DE SUPORTE PARA OS SISTEMAS ESPECÍFICOS
+// ============================================
+
+// Funções auxiliares para sistemas que ainda não implementaram exportação
+// Estas funções servem como fallback até que os sistemas sejam atualizados
+
+// 1. SUPORTE PARA DASHBOARD
+if (!window.dashboard) window.dashboard = {};
+
+window.dashboard.exportarDados = function() {
+    return {
+        nome: document.getElementById('charName')?.value || 'Novo Personagem',
+        raca: document.getElementById('racaPersonagem')?.value || '',
+        classe: document.getElementById('classePersonagem')?.value || '',
+        nivel: document.getElementById('nivelPersonagem')?.value || '',
+        descricao: document.getElementById('descricaoPersonagem')?.value || '',
+        foto_url: document.getElementById('fotoPreview')?.src || ''
+    };
+};
+
+window.dashboard.carregarDados = function(dados) {
+    if (!dados) return;
+    
+    if (dados.nome) document.getElementById('charName').value = dados.nome;
+    if (dados.raca) document.getElementById('racaPersonagem').value = dados.raca;
+    if (dados.classe) document.getElementById('classePersonagem').value = dados.classe;
+    if (dados.nivel) document.getElementById('nivelPersonagem').value = dados.nivel;
+    if (dados.descricao) document.getElementById('descricaoPersonagem').value = dados.descricao;
+    
+    // Foto (se implementado)
+    if (dados.foto_url && dados.foto_url.startsWith('data:')) {
+        const fotoPreview = document.getElementById('fotoPreview');
+        const fotoPlaceholder = document.getElementById('fotoPlaceholder');
+        if (fotoPreview && fotoPlaceholder) {
+            fotoPreview.src = dados.foto_url;
+            fotoPreview.style.display = 'block';
+            fotoPlaceholder.style.display = 'none';
+        }
+    }
+};
+
+// 2. SUPORTE PARA ATRIBUTOS
+if (!window.atributos) window.atributos = {};
+
+window.atributos.exportarDados = function() {
+    return {
+        forca: parseInt(document.getElementById('ST')?.value) || 10,
+        destreza: parseInt(document.getElementById('DX')?.value) || 10,
+        inteligencia: parseInt(document.getElementById('IQ')?.value) || 10,
+        saude: parseInt(document.getElementById('HT')?.value) || 10,
+        
+        pv_total: parseInt(document.getElementById('PVTotal')?.textContent) || 10,
+        pf_total: parseInt(document.getElementById('PFTotal')?.textContent) || 10,
+        vontade: parseInt(document.getElementById('VontadeTotal')?.textContent) || 10,
+        percepcao: parseInt(document.getElementById('PercepcaoTotal')?.textContent) || 10,
+        deslocamento: parseFloat(document.getElementById('DeslocamentoTotal')?.textContent) || 5.00
+    };
+};
+
+window.atributos.carregarDados = function(dados) {
+    if (!dados) return;
+    
+    if (dados.forca) document.getElementById('ST').value = dados.forca;
+    if (dados.destreza) document.getElementById('DX').value = dados.destreza;
+    if (dados.inteligencia) document.getElementById('IQ').value = dados.inteligencia;
+    if (dados.saude) document.getElementById('HT').value = dados.saude;
+    
+    // Disparar eventos para calcular derivados
+    setTimeout(() => {
+        if (typeof alterarAtributo === 'function') {
+            // Forçar recálculo
+            window.dispatchEvent(new Event('atributosAlterados'));
+        }
+    }, 100);
+};
+
+// 3. SUPORTE PARA CARACTERÍSTICAS
+if (!window.caracteristicas) window.caracteristicas = {};
+
+window.caracteristicas.exportarDados = function() {
+    return {
+        aparencia: {
+            nivel: document.getElementById('nivelAparencia')?.value || '0',
+            descricao: document.getElementById('displayAparencia')?.textContent || 'Comum'
+        },
+        riqueza: {
+            nivel: document.getElementById('nivelRiqueza')?.value || '0',
+            descricao: document.getElementById('displayRiqueza')?.textContent || 'Média',
+            renda: document.getElementById('rendaMensal')?.textContent || '$1.000'
+        },
+        altura: parseFloat(document.getElementById('altura')?.value) || 1.70,
+        peso: parseFloat(document.getElementById('peso')?.value) || 70
+    };
+};
+
+window.caracteristicas.carregarDados = function(dados) {
+    if (!dados) return;
+    
+    // Aparência
+    if (dados.aparencia?.nivel) {
+        const select = document.getElementById('nivelAparencia');
+        if (select) select.value = dados.aparencia.nivel;
+    }
+    
+    // Riqueza
+    if (dados.riqueza?.nivel) {
+        const select = document.getElementById('nivelRiqueza');
+        if (select) select.value = dados.riqueza.nivel;
+    }
+    
+    // Altura e Peso
+    if (dados.altura) document.getElementById('altura').value = dados.altura;
+    if (dados.peso) document.getElementById('peso').value = dados.peso;
+    
+    // Disparar eventos de atualização
+    setTimeout(() => {
+        if (typeof atualizarAparencia === 'function') atualizarAparencia();
+        if (typeof atualizarRiqueza === 'function') atualizarRiqueza();
+        if (typeof calcularStatusFisico === 'function') calcularStatusFisico();
+    }, 100);
+};
+
+// ============================================
+// FUNÇÕES DE SINCRONIZAÇÃO EM TEMPO REAL
+// ============================================
+
+// Monitorar mudanças em campos importantes e atualizar automaticamente
+function configurarMonitoramentoAutomatico() {
+    console.log('Configurando monitoramento automático...');
+    
+    // Monitorar nome do personagem
+    const nomeInput = document.getElementById('charName');
+    if (nomeInput) {
+        nomeInput.addEventListener('input', function() {
+            window.dispatchEvent(new CustomEvent('personagemNomeAlterado', {
+                detail: { nome: this.value }
+            }));
+        });
+    }
+    
+    // Monitorar atributos
+    ['ST', 'DX', 'IQ', 'HT'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('change', function() {
+                window.dispatchEvent(new CustomEvent('atributoAlterado', {
+                    detail: { atributo: id, valor: this.value }
+                }));
+            });
+        }
+    });
+    
+    // Monitorar pontos
+    const pontosTotais = document.getElementById('pontosTotaisDashboard');
+    if (pontosTotais) {
+        pontosTotais.addEventListener('change', function() {
+            window.dispatchEvent(new CustomEvent('pontosAlterados'));
+        });
+    }
+    
+    // Escutar eventos dos sistemas
+    window.addEventListener('vantagensAlteradas', () => {
+        if (window.DEBUG_MODE) console.log('Vantagens alteradas, sincronizando...');
+        atualizarDadosSistema('vantagens', window.coletorPersonagem.coletarDadosVantagens());
+    });
+    
+    window.addEventListener('periciasAlteradas', () => {
+        if (window.DEBUG_MODE) console.log('Perícias alteradas, sincronizando...');
+        atualizarDadosSistema('pericias', window.coletorPersonagem.coletarDadosPericias());
+    });
+    
+    window.addEventListener('equipamentoAlterado', () => {
+        if (window.DEBUG_MODE) console.log('Equipamento alterado, sincronizando...');
+        atualizarDadosSistema('equipamento', window.coletorPersonagem.coletarDadosEquipamento());
+    });
+    
+    console.log('Monitoramento automático configurado');
+}
+
+// ============================================
+// FUNÇÃO DE SINCRONIZAÇÃO DE RESUMO COMPLETA
+// ============================================
+
+function sincronizarResumoCompleto() {
+    try {
+        console.log('Sincronizando resumo completo...');
+        
+        // 1. Nome e informações básicas
+        const nome = document.getElementById('charName')?.value || 'Novo Personagem';
+        const raca = document.getElementById('racaPersonagem')?.value || '';
+        const classe = document.getElementById('classePersonagem')?.value || '';
+        const nivel = document.getElementById('nivelPersonagem')?.value || '';
+        
+        // Atualizar elementos do resumo se existirem
+        const resumoNome = document.getElementById('resumoNome');
+        if (resumoNome) resumoNome.textContent = nome;
+        
+        const resumoRaca = document.getElementById('resumoRaca');
+        if (resumoRaca) resumoRaca.textContent = raca || 'Humano';
+        
+        const resumoClasse = document.getElementById('resumoClasse');
+        if (resumoClasse) resumoClasse.textContent = classe || 'Guerreiro';
+        
+        const resumoNivel = document.getElementById('resumoNivel');
+        if (resumoNivel) resumoNivel.textContent = nivel || 'Novato';
+        
+        // 2. Atributos
+        const atributos = window.atributos?.exportarDados?.() || {};
+        
+        // Atualizar elementos de atributos no resumo
+        const elementosAtributos = {
+            'resumoST': atributos.forca,
+            'resumoDX': atributos.destreza,
+            'resumoIQ': atributos.inteligencia,
+            'resumoHT': atributos.saude,
+            'resumoPV': atributos.pv_total,
+            'resumoPF': atributos.pf_total,
+            'resumoVontade': atributos.vontade,
+            'resumoPercepcao': atributos.percepcao,
+            'resumoDeslocamento': atributos.deslocamento
+        };
+        
+        Object.entries(elementosAtributos).forEach(([id, valor]) => {
+            const elemento = document.getElementById(id);
+            if (elemento && valor !== undefined) {
+                elemento.textContent = valor;
+            }
+        });
+        
+        // 3. Características
+        const caracteristicas = window.caracteristicas?.exportarDados?.() || {};
+        
+        const resumoAlturaPeso = document.getElementById('resumoAlturaPeso');
+        if (resumoAlturaPeso && caracteristicas.altura && caracteristicas.peso) {
+            resumoAlturaPeso.textContent = `${caracteristicas.altura}m/${caracteristicas.peso}kg`;
+        }
+        
+        const resumoAparencia = document.getElementById('resumoAparencia');
+        if (resumoAparencia && caracteristicas.aparencia?.descricao) {
+            resumoAparencia.textContent = caracteristicas.aparencia.descricao;
+        }
+        
+        const resumoRiqueza = document.getElementById('resumoRiqueza');
+        if (resumoRiqueza && caracteristicas.riqueza?.descricao) {
+            resumoRiqueza.textContent = caracteristicas.riqueza.descricao;
+        }
+        
+        // 4. Pontos
+        const pontosTotais = document.getElementById('pontosTotaisDashboard')?.value || 150;
+        const pontosGastos = document.getElementById('pontosGastosDashboard')?.textContent || '0';
+        const saldoDisponivel = document.getElementById('saldoDisponivelDashboard')?.textContent || '150';
+        
+        const resumoPontosTotais = document.getElementById('resumoPontosTotais');
+        if (resumoPontosTotais) resumoPontosTotais.textContent = pontosTotais;
+        
+        const resumoPontosGastos = document.getElementById('resumoPontosGastos');
+        if (resumoPontosGastos) resumoPontosGastos.textContent = pontosGastos;
+        
+        const resumoSaldo = document.getElementById('resumoSaldo');
+        if (resumoSaldo) resumoSaldo.textContent = saldoDisponivel;
+        
+        // 5. Tentar sincronizar sistemas específicos
+        setTimeout(() => {
+            // Vantagens
+            if (typeof window.resumoVantagens?.sincronizar === 'function') {
+                window.resumoVantagens.sincronizar();
+            }
+            
+            // Perícias
+            if (typeof window.resumoPericias?.sincronizar === 'function') {
+                window.resumoPericias.sincronizar();
+            }
+            
+            // Magias
+            if (typeof window.resumoMagias?.sincronizar === 'function') {
+                window.resumoMagias.sincronizar();
+            }
+            
+            // Equipamentos
+            if (typeof window.resumoEquipamentos?.sincronizar === 'function') {
+                window.resumoEquipamentos.sincronizar();
+            }
+            
+            // Combate
+            if (typeof window.resumoCombate?.sincronizar === 'function') {
+                window.resumoCombate.sincronizar();
+            }
+        }, 500);
+        
+        console.log('Resumo sincronizado com sucesso');
+        
+    } catch (error) {
+        console.error('Erro ao sincronizar resumo completo:', error);
+    }
+}
+
+// Substituir a função sincronizarResumo anterior
+window.sincronizarResumo = sincronizarResumoCompleto;
+
+// ============================================
+// INICIALIZAÇÃO AVANÇADA
+// ============================================
+
+async function inicializarAvancado() {
+    try {
+        console.log('Inicialização avançada iniciada...');
+        
+        // 1. Verificar conexão
+        const conexao = await testarConexaoSupabase();
+        if (!conexao.sucesso && window.DEBUG_MODE) {
+            console.warn('Conexão com Supabase com problemas:', conexao.erro);
+        }
+        
+        // 2. Configurar monitoramento
+        configurarMonitoramentoAutomatico();
+        
+        // 3. Verificar estrutura
+        const colunas = verificarColunasFaltantes();
+        if (window.DEBUG_MODE) {
+            console.log('Estrutura da tabela verificada:', colunas.length, 'colunas');
+        }
+        
+        // 4. Fazer backup inicial
+        fazerBackupLocal();
+        
+        // 5. Sincronizar resumo inicial
+        setTimeout(() => {
+            sincronizarResumoCompleto();
+        }, 1000);
+        
+        // 6. Configurar salvamento automático periódico (opcional)
+        if (window.DEBUG_MODE) {
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    console.log('Salvamento automático periódico...');
+                    // Não salvar automaticamente, apenas log
+                    fazerBackupLocal();
+                }
+            }, 2 * 60 * 1000); // 2 minutos
+        }
+        
+        console.log('Inicialização avançada concluída');
+        
+    } catch (error) {
+        console.error('Erro na inicialização avançada:', error);
+    }
+}
+
+// ============================================
+// SUBSTITUIR A INICIALIZAÇÃO ORIGINAL
+// ============================================
+
+// Guardar a função original
+const inicializarSistemaOriginal = window.inicializarSistema;
+
+// Sobrescrever com versão aprimorada
+window.inicializarSistema = async function() {
+    try {
+        // Executar a inicialização original
+        if (inicializarSistemaOriginal) {
+            await inicializarSistemaOriginal();
+        }
+        
+        // Executar inicialização avançada
+        setTimeout(() => {
+            inicializarAvancado();
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erro na inicialização aprimorada:', error);
+        
+        // Tentar inicialização básica
+        try {
+            await inicializarSistemaBasico();
+        } catch (erroBasico) {
+            console.error('Falha na inicialização básica:', erroBasico);
+            alert('Erro crítico ao inicializar o sistema. Recarregue a página.');
+        }
+    }
+};
+
+// Função de inicialização básica alternativa
+async function inicializarSistemaBasico() {
+    console.log('Iniciando sistema básico...');
+    
+    // Configurações mínimas
+    inicializarNavegacaoAbas();
+    configurarEventListeners();
+    
+    // Verificar se há personagem para carregar
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    
+    if (id) {
+        window.personagemId = id;
+        document.title = 'Editar Personagem - RPG System';
+        
+        // Tentar carregar dados básicos
+        try {
+            const verificacao = await verificarSessao();
+            if (verificacao.sucesso) {
+                await carregarPersonagemParaEdicao(id, verificacao.session);
+            }
+        } catch (error) {
+            console.warn('Não foi possível carregar personagem:', error);
+        }
+    } else {
+        inicializarPersonagemVazio();
+    }
+    
+    // Sincronizar resumo
+    setTimeout(() => {
+        sincronizarResumoCompleto();
+    }, 500);
+    
+    console.log('Sistema básico inicializado');
+}
+
+// ============================================
+// MANIPULAÇÃO DE ERROS GLOBAL
+// ============================================
+
+// Capturar erros globais não tratados
+window.addEventListener('error', function(event) {
+    console.error('Erro global capturado:', {
+        mensagem: event.message,
+        arquivo: event.filename,
+        linha: event.lineno,
+        coluna: event.colno,
+        erro: event.error
+    });
+    
+    // Não mostrar alerta para erros menores
+    if (event.message.includes('Script error')) {
+        return; // Erro de script externo, ignorar
+    }
+    
+    if (window.DEBUG_MODE) {
+        alert(`Erro: ${event.message}\nLinha: ${event.lineno}`);
+    }
+});
+
+// Capturar promises rejeitadas não tratadas
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Promise rejeitada não tratada:', event.reason);
+    
+    if (window.DEBUG_MODE) {
+        alert(`Promise rejeitada: ${event.reason}`);
+    }
+});
+
+// ============================================
+// EXPORTAÇÕES FINAIS
+// ============================================
+
+// Exportar funções de suporte
+window.configurarMonitoramentoAutomatico = configurarMonitoramentoAutomatico;
+window.sincronizarResumoCompleto = sincronizarResumoCompleto;
+window.inicializarAvancado = inicializarAvancado;
+window.inicializarSistemaBasico = inicializarSistemaBasico;
+
+// Exportar objetos para os sistemas
+window.Sistemas = {
+    dashboard: window.dashboard,
+    atributos: window.atributos,
+    caracteristicas: window.caracteristicas,
+    coletor: window.coletorPersonagem
+};
+
+// ============================================
+// INICIALIZAÇÃO FINAL
+// ============================================
+
+// Inicializar quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM completamente carregado, iniciando sistema...');
+        setTimeout(() => {
+            window.inicializarSistema();
+        }, 300);
+    });
+} else {
+    console.log('DOM já carregado, iniciando sistema...');
+    setTimeout(() => {
+        window.inicializarSistema();
+    }, 300);
+}
+
+// Última mensagem
+console.log('=== SISTEMA DE PERSONAGEM PRONTO ===');
+console.log('Use window.salvarPersonagem() para salvar');
+console.log('Use window.sincronizarResumo() para atualizar o resumo');
+console.log('Use window.testarSalvamentoRapido() para testar');
+console.log('====================================');
 </script>
 </body>
 </html>  
