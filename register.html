@@ -3,10 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - RPG System</title>
+    <title>Cadastro - GURPS Tools</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        :root {
+            --primary-bg: #F2E8D5;
+            --text-color: #2B2B2B;
+            --primary-title: #4A2E1B;
+            --secondary-title: #6B4A2D;
+            --borders: #B89B6A;
+            --boxes: #E6D8BC;
+            --accent: #8C6A2F;
+            --accent-light: #B89B6A;
+            --shadow: rgba(74, 46, 27, 0.15);
+            --error: #8C1C13;
+            --success: #4A6B2D;
+        }
+        
         * { 
             margin: 0; 
             padding: 0; 
@@ -15,11 +29,8 @@
         }
         
         body { 
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-                        url('https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') 
-                        no-repeat center center fixed; 
-            background-size: cover; 
-            color: #fff; 
+            background-color: var(--primary-bg);
+            color: var(--text-color); 
             min-height: 100vh; 
             display: flex; 
             flex-direction: column; 
@@ -43,26 +54,23 @@
         }
         
         .header h1 { 
-            font-size: 3rem; 
-            background: linear-gradient(45deg, #ffd700, #ff8c00, #ff4500); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            text-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+            font-size: 2.5rem; 
+            color: var(--primary-title);
             margin-bottom: 10px;
         }
         
         .header p {
-            font-size: 1.2rem;
-            color: #ccc;
+            font-size: 1.1rem;
+            color: var(--secondary-title);
         }
         
         .form-container { 
-            background: rgba(30,30,40,0.9); 
-            border-radius: 20px; 
+            background-color: var(--boxes);
+            border-radius: 15px; 
             padding: 40px; 
             width: 100%; 
-            border: 1px solid rgba(255,140,0,0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--borders);
+            box-shadow: 0 10px 25px var(--shadow);
             animation: slideUp 0.8s ease-out;
         }
         
@@ -75,31 +83,31 @@
             display: block; 
             margin-bottom: 8px; 
             font-weight: 600; 
-            color: #ffd700; 
+            color: var(--primary-title); 
         }
         
         .form-control { 
             width: 100%; 
             padding: 15px; 
-            border: 2px solid rgba(255,140,0,0.3); 
-            border-radius: 10px; 
-            background: rgba(20,20,30,0.7); 
-            color: #fff; 
+            border: 2px solid var(--borders); 
+            border-radius: 8px; 
+            background: var(--primary-bg); 
+            color: var(--text-color); 
             transition: all 0.3s ease;
             font-size: 1rem;
         }
         
         .form-control:focus {
             outline: none;
-            border-color: #ff8c00;
-            box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(140, 106, 47, 0.2);
         }
         
         .password-strength {
             height: 5px;
             margin-top: 8px;
             border-radius: 5px;
-            background: #333;
+            background: #ddd;
             overflow: hidden;
         }
         
@@ -111,30 +119,36 @@
         
         .btn { 
             width: 100%; 
-            padding: 18px; 
-            background: linear-gradient(45deg, #ff8c00, #ff4500); 
+            padding: 15px; 
+            background-color: var(--accent);
             border: none; 
-            border-radius: 12px; 
+            border-radius: 8px; 
             color: white; 
-            font-size: 1.2rem; 
+            font-size: 1.1rem; 
             cursor: pointer; 
             transition: all 0.3s ease;
             font-weight: 600;
-            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 15px rgba(255, 69, 0, 0.4);
+            background-color: #6B4A2D;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(140, 106, 47, 0.3);
         }
         
-        .btn:active {
-            transform: translateY(-1px);
+        .btn:disabled {
+            background-color: #B89B6A;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .message { 
             padding: 15px; 
-            border-radius: 10px; 
+            border-radius: 8px; 
             margin-bottom: 20px; 
             text-align: center; 
             display: none; 
@@ -142,51 +156,54 @@
         }
         
         .message-success { 
-            background: rgba(46,125,50,0.3); 
-            color: #a5d6a7; 
-            border: 1px solid rgba(76,175,80,0.3);
+            background: rgba(106, 170, 100, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
         }
         
         .message-error { 
-            background: rgba(211,47,47,0.3); 
-            color: #ef9a9a; 
-            border: 1px solid rgba(244,67,54,0.3);
+            background: rgba(140, 28, 19, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
         }
         
         .login-link {
             text-align: center; 
             margin-top: 25px; 
-            color: #ccc;
+            color: var(--secondary-title);
             font-size: 1rem;
         }
         
         .login-link a {
-            color: #ff8c00;
+            color: var(--accent);
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.3s ease;
         }
         
         .login-link a:hover {
-            color: #ffd700;
             text-decoration: underline;
         }
         
         .player-id-display {
-            background: rgba(255, 140, 0, 0.1);
-            border: 1px dashed #ff8c00;
+            background: rgba(140, 106, 47, 0.1);
+            border: 2px dashed var(--accent);
             border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
+            padding: 20px;
+            margin-top: 25px;
             text-align: center;
             display: none;
         }
         
         .player-id {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            color: #ffd700;
+            color: var(--primary-title);
             letter-spacing: 2px;
+            margin: 10px 0;
+            padding: 10px;
+            background: var(--primary-bg);
+            border-radius: 5px;
+            border: 1px solid var(--borders);
         }
         
         @keyframes fadeIn {
@@ -197,7 +214,7 @@
         @keyframes slideUp {
             from { 
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
             to { 
                 opacity: 1;
@@ -208,13 +225,13 @@
         .loading {
             display: none;
             text-align: center;
-            margin-top: 15px;
+            margin-top: 20px;
         }
         
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
+            border: 4px solid rgba(74, 46, 27, 0.1);
             border-radius: 50%;
-            border-top: 4px solid #ff8c00;
+            border-top: 4px solid var(--accent);
             width: 30px;
             height: 30px;
             animation: spin 1s linear infinite;
@@ -226,23 +243,63 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Botão de voltar para a home */
+        .back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+
+        .back-home a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--borders);
+            background: var(--boxes);
+            transition: all 0.3s ease;
+        }
+
+        .back-home a:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
         /* Responsividade */
         @media (max-width: 600px) {
             .form-container {
-                padding: 30px 20px;
+                padding: 30px 25px;
             }
             
             .header h1 {
-                font-size: 2.5rem;
+                font-size: 2rem;
+            }
+            
+            .player-id {
+                font-size: 1.4rem;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Botão Voltar para Home -->
+    <div class="back-home">
+        <a href="index.html">
+            <i class="fas fa-arrow-left"></i>
+            Voltar para Home
+        </a>
+    </div>
+
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-dragon"></i> RPG SYSTEM</h1>
-            <p>Crie sua conta e entre na aventura</p>
+            <h1>GURPS TOOLS</h1>
+            <p>Crie sua conta gratuita</p>
         </div>
         
         <div class="form-container">
@@ -250,17 +307,17 @@
             
             <form id="registerForm">
                 <div class="form-group">
-                    <label for="username"><i class="fas fa-user"></i> Nome de Usuário</label>
-                    <input type="text" id="username" class="form-control" required placeholder="Escolha um nome épico">
+                    <label for="username">Nome de Usuário</label>
+                    <input type="text" id="username" class="form-control" required placeholder="Escolha seu nome de usuário">
                 </div>
                 
                 <div class="form-group">
-                    <label for="email"><i class="fas fa-envelope"></i> E-mail</label>
+                    <label for="email">E-mail</label>
                     <input type="email" id="email" class="form-control" required placeholder="seu@email.com">
                 </div>
                 
                 <div class="form-group">
-                    <label for="password"><i class="fas fa-lock"></i> Senha</label>
+                    <label for="password">Senha</label>
                     <input type="password" id="password" class="form-control" required minlength="6" placeholder="Mínimo 6 caracteres">
                     <div class="password-strength">
                         <div class="strength-bar" id="passwordStrength"></div>
@@ -268,7 +325,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="confirmPassword"><i class="fas fa-lock"></i> Confirmar Senha</label>
+                    <label for="confirmPassword">Confirmar Senha</label>
                     <input type="password" id="confirmPassword" class="form-control" required placeholder="Digite a senha novamente">
                 </div>
                 
@@ -278,14 +335,16 @@
                 
                 <div class="loading" id="loading">
                     <div class="spinner"></div>
-                    <p style="margin-top: 10px;">Criando sua conta...</p>
+                    <p style="margin-top: 10px; color: var(--secondary-title);">Criando sua conta...</p>
                 </div>
             </form>
             
             <div class="player-id-display" id="playerIdDisplay">
-                <p>Seu ID de Jogador:</p>
+                <p style="color: var(--secondary-title); font-weight: 600;">Seu ID de Jogador:</p>
                 <div class="player-id" id="playerId"></div>
-                <p style="margin-top: 10px; font-size: 0.9rem;">Guarde este ID! Você precisará dele para fazer login.</p>
+                <p style="margin-top: 10px; font-size: 0.9rem; color: var(--secondary-title);">
+                    <i class="fas fa-info-circle"></i> Anote este ID! Você pode precisar dele.
+                </p>
             </div>
             
             <div class="login-link">
@@ -294,13 +353,14 @@
         </div>
     </div>
 
-   <script>
+    <!-- MANTENDO TODO O JAVASCRIPT IGUAL -->
+    <script>
     const SUPABASE_URL = 'https://pujufdfhaxveuytkneqw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1anVmZGZoYXh2ZXV5dGtuZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNTkyODksImV4cCI6MjA3OTkzNTI4OX0.mzOwsmf8qIQ4HZqnXLEmq4D7M6fz4VH1YWpWP-BsFvc';
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // Verificar força da senha
+    // Verificar força da senha - MANTIDO IGUAL
     document.getElementById('password').addEventListener('input', function() {
         const password = this.value;
         const strengthBar = document.getElementById('passwordStrength');
@@ -314,20 +374,20 @@
         strengthBar.style.width = strength + '%';
         
         if (strength < 50) {
-            strengthBar.style.background = '#ff4500';
+            strengthBar.style.background = '#8C1C13';
         } else if (strength < 75) {
-            strengthBar.style.background = '#ff8c00';
+            strengthBar.style.background = '#B89B6A';
         } else {
-            strengthBar.style.background = '#32cd32';
+            strengthBar.style.background = '#4A6B2D';
         }
     });
     
-    // Gerar ID de jogador
+    // Gerar ID de jogador - MANTIDO IGUAL
     function generatePlayerId() {
         return Math.floor(100000 + Math.random() * 900000);
     }
     
-    // Submeter formulário - VERSÃO CORRIGIDA
+    // Submeter formulário - MANTIDO IGUAL
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -336,7 +396,7 @@
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
         
-        // Validações
+        // Validações - MANTIDO IGUAL
         if (password !== confirmPassword) {
             showMessage('As senhas não coincidem!', 'error');
             return;
@@ -352,12 +412,12 @@
             return;
         }
         
-        // Mostrar loading
+        // Mostrar loading - MANTIDO IGUAL
         document.getElementById('loading').style.display = 'block';
         document.querySelector('.btn').disabled = true;
         
         try {
-            // ⭐⭐ MÉTODO SIMPLIFICADO - apenas Auth ⭐⭐
+            // ⭐⭐ MÉTODO SIMPLIFICADO - apenas Auth ⭐⭐ - MANTIDO IGUAL
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email, 
                 password,
@@ -370,10 +430,10 @@
             
             if (authError) throw authError;
             
-            // ⭐⭐ AGORA VAMOS TENTAR INSERIR O PERFIL DE FORMA SIMPLES ⭐⭐
+            // ⭐⭐ AGORA VAMOS TENTAR INSERIR O PERFIL DE FORMA SIMPLES ⭐⭐ - MANTIDO IGUAL
             const playerId = generatePlayerId();
             
-            // Tentar inserir o perfil (pode falhar por RLS, mas não importa)
+            // Tentar inserir o perfil (pode falhar por RLS, mas não importa) - MANTIDO IGUAL
             try {
                 const { error: profileError } = await supabase
                     .from('profiles')
@@ -393,14 +453,14 @@
                 console.log("Erro ao criar perfil, mas continuando...");
             }
             
-            // Mensagem de sucesso
+            // Mensagem de sucesso - MANTIDO IGUAL
             showMessage('Cadastro realizado! Verifique seu e-mail para confirmar a conta. Seu perfil será criado automaticamente.', 'success');
             
-            // Mostrar ID gerado
+            // Mostrar ID gerado - MANTIDO IGUAL
             document.getElementById('playerId').textContent = playerId;
             document.getElementById('playerIdDisplay').style.display = 'block';
             
-            // Redirecionar após 5 segundos
+            // Redirecionar após 5 segundos - MANTIDO IGUAL
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 5000);
@@ -408,7 +468,7 @@
         } catch (error) {
             console.error('Erro completo:', error);
             
-            // Mensagem de erro mais amigável
+            // Mensagem de erro mais amigável - MANTIDO IGUAL
             if (error.message.includes('User already registered')) {
                 showMessage('Este e-mail já está cadastrado!', 'error');
             } else if (error.message.includes('Database error')) {
@@ -417,7 +477,7 @@
                 showMessage('Erro: ' + error.message, 'error');
             }
         } finally {
-            // Esconder loading
+            // Esconder loading - MANTIDO IGUAL
             document.getElementById('loading').style.display = 'none';
             document.querySelector('.btn').disabled = false;
         }
@@ -429,7 +489,7 @@
         messageDiv.className = `message message-${type}`;
         messageDiv.style.display = 'block';
         
-        // Rolagem suave para a mensagem
+        // Rolagem suave para a mensagem - MANTIDO IGUAL
         messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 </script>
