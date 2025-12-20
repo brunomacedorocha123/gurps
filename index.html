@@ -32,7 +32,7 @@
             min-height: 100vh;
         }
         
-        /* Header Simples */
+        /* Header */
         header {
             background-color: var(--primary-title);
             padding: 20px 0;
@@ -70,6 +70,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            text-decoration: none;
         }
         
         .btn-login {
@@ -91,71 +92,78 @@
             background-color: #6B4A2D;
         }
         
-        /* Conteúdo Principal - TUDO CENTRALIZADO */
+        /* Layout Principal - Duas Colunas */
         .main-content {
             max-width: 1200px;
             margin: 0 auto;
             padding: 40px 20px;
-            text-align: center; /* Centraliza tudo */
         }
         
-        /* Imagem da Guerreira - Centralizada */
-        .warrior-section {
-            margin: 40px 0;
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+            margin-bottom: 40px;
         }
         
+        /* Coluna da Esquerda - Texto */
+        .text-content {
+            padding: 20px;
+        }
+        
+        /* Coluna da Direita - Imagem */
+        .image-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        /* Imagem da Guerreira - Tamanho ajustado */
         .warrior-image {
-            max-width: 600px;
             width: 100%;
+            max-width: 350px;
             height: auto;
             border-radius: 10px;
             border: 5px solid var(--boxes);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            margin: 0 auto;
-            display: block;
         }
         
-        /* Textos Centralizados */
-        h1, h2, h3, p {
-            text-align: center;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
+        /* Títulos e Textos */
         h1 {
             color: var(--primary-title);
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             margin-bottom: 20px;
-            max-width: 800px;
         }
         
         h2 {
-            color: var(--secondary-title);
             font-size: 1.8rem;
+            color: var(--secondary-title);
             margin: 30px 0 15px;
-            max-width: 800px;
         }
         
         p {
             font-size: 1.1rem;
             margin-bottom: 20px;
-            max-width: 800px;
         }
         
-        /* Disclaimer Centralizado */
+        /* Disclaimer */
         .disclaimer {
             background-color: var(--boxes);
             border-radius: 10px;
-            padding: 30px;
-            border-left: 5px solid var(--accent);
-            margin: 40px auto;
-            max-width: 800px;
-            text-align: center;
+            padding: 25px;
+            border-left: 5px solid #8C1C13;
+            margin-bottom: 30px;
         }
         
         .disclaimer h2 {
             color: #8C1C13;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .highlight {
@@ -163,63 +171,65 @@
             font-weight: bold;
         }
         
-        /* Features Centralizadas */
+        /* Features */
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin: 40px 0;
-            max-width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
         }
         
         .feature {
             background-color: var(--boxes);
             border-radius: 10px;
-            padding: 25px;
+            padding: 20px;
             border-top: 4px solid var(--accent);
             text-align: center;
         }
         
         .feature-icon {
             background-color: var(--accent);
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
         
         .feature h3 {
             color: var(--primary-title);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
         }
         
-        /* CTA Centralizado */
+        /* CTA */
         .cta {
             background: linear-gradient(135deg, var(--primary-title), var(--secondary-title));
             border-radius: 15px;
-            padding: 40px;
+            padding: 35px;
             color: white;
-            margin: 50px auto;
-            max-width: 800px;
+            margin: 50px 0;
             text-align: center;
+        }
+        
+        .cta h2 {
+            color: white;
         }
         
         .btn-cta {
             background-color: var(--accent);
             color: white;
-            padding: 15px 35px;
+            padding: 12px 30px;
             font-size: 1.1rem;
-            margin-top: 20px;
+            margin-top: 15px;
+            display: inline-block;
         }
         
-        /* Footer Centralizado */
+        /* Footer */
         footer {
             background-color: var(--primary-title);
             color: #F2E8D5;
@@ -244,8 +254,12 @@
         
         /* Responsividade */
         @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
             h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
             
             h2 {
@@ -269,42 +283,48 @@
     </style>
 </head>
 <body>
-    <!-- Header Simples -->
+    <!-- Header -->
     <header>
         <div class="logo">GURPS TOOLS</div>
         <div class="logo-sub">Ferramenta Não Oficial</div>
         
         <div class="auth-buttons">
-            <button class="btn btn-login">
+            <!-- Links funcionais para suas páginas existentes -->
+            <a href="login.html" class="btn btn-login">
                 <i class="fas fa-sign-in-alt"></i> Login
-            </button>
-            <button class="btn btn-signup">
+            </a>
+            <a href="register.html" class="btn btn-signup">
                 <i class="fas fa-user-plus"></i> Cadastrar
-            </button>
+            </a>
         </div>
     </header>
     
-    <!-- Conteúdo Principal - TUDO CENTRALIZADO -->
+    <!-- Conteúdo Principal -->
     <div class="main-content">
-        <!-- Título Principal -->
-        <h1>Ferramentas para GURPS - Projeto Não Oficial</h1>
-        <p>Crie, gerencie e jogue com nossas ferramentas desenvolvidas para facilitar sua experiência com o sistema GURPS.</p>
-        
-        <!-- Imagem da Guerreira - Centralizada -->
-        <div class="warrior-section">
-            <img src="cris2.jpg" alt="Guerreira" class="warrior-image">
+        <!-- Layout de Duas Colunas -->
+        <div class="content-grid">
+            <!-- Coluna da Esquerda - Texto -->
+            <div class="text-content">
+                <h1>Ferramentas para GURPS</h1>
+                <p>Projeto não oficial criado por fãs para facilitar sua experiência com o sistema GURPS.</p>
+                
+                <div class="disclaimer">
+                    <h2><i class="fas fa-exclamation-triangle"></i> AVISO IMPORTANTE</h2>
+                    <p>Este <span class="highlight">NÃO É UM SITE OFICIAL</span> do <strong>GURPS (Generic Universal RolePlaying System)</strong> nem está associado à <strong>Steve Jackson Games</strong>.</p>
+                    <p>Este projeto é uma ferramenta independente criada por fãs para auxiliar jogadores e mestres do sistema GURPS.</p>
+                    <p>Todo o conteúdo oficial do GURPS é propriedade da Steve Jackson Games e deve ser adquirido através dos canais oficiais.</p>
+                </div>
+            </div>
+            
+            <!-- Coluna da Direita - Imagem -->
+            <div class="image-content">
+                <!-- Imagem da guerreira - tamanho ajustado -->
+                <img src="cris.jpg" alt="Guerreira" class="warrior-image">
+            </div>
         </div>
         
-        <!-- Disclaimer Centralizado -->
-        <div class="disclaimer">
-            <h2><i class="fas fa-exclamation-triangle"></i> AVISO IMPORTANTE</h2>
-            <p>Este <span class="highlight">NÃO É UM SITE OFICIAL</span> do <strong>GURPS (Generic Universal RolePlaying System)</strong> nem está associado à <strong>Steve Jackson Games</strong>.</p>
-            <p>Este projeto é uma ferramenta independente criada por fãs para auxiliar jogadores e mestres do sistema GURPS.</p>
-            <p>Todo o conteúdo oficial do GURPS é propriedade da Steve Jackson Games e deve ser adquirido através dos canais oficiais.</p>
-        </div>
-        
-        <!-- O que oferecemos - Centralizado -->
-        <h2>O que oferecemos</h2>
+        <!-- O que oferecemos -->
+        <h2 style="text-align: center;">O que oferecemos</h2>
         
         <div class="features">
             <div class="feature">
@@ -332,17 +352,17 @@
             </div>
         </div>
         
-        <!-- CTA Centralizado -->
+        <!-- CTA -->
         <div class="cta">
             <h2>Pronto para começar?</h2>
             <p>Cadastre-se gratuitamente e tenha acesso a todas as ferramentas para melhorar suas sessões de GURPS.</p>
-            <button class="btn btn-signup btn-cta">
+            <a href="register.html" class="btn btn-signup btn-cta">
                 <i class="fas fa-play-circle"></i> Começar Agora
-            </button>
+            </a>
         </div>
     </div>
     
-    <!-- Footer Centralizado -->
+    <!-- Footer -->
     <footer>
         <div class="footer-content">
             <p>GURPS Tools - Ferramenta não oficial para o sistema GURPS</p>
@@ -352,20 +372,5 @@
             </p>
         </div>
     </footer>
-    
-    <script>
-        // Interatividade simples para os botões
-        document.querySelectorAll('.btn-login').forEach(button => {
-            button.addEventListener('click', function() {
-                alert('Página de login - Em desenvolvimento');
-            });
-        });
-        
-        document.querySelectorAll('.btn-signup').forEach(button => {
-            button.addEventListener('click', function() {
-                alert('Página de cadastro - Em desenvolvimento');
-            });
-        });
-    </script>
 </body>
 </html>
