@@ -6,13 +6,11 @@
     <title>GURPS Tool - Registrar-se</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700&family=Uncial+Antiqua&display=swap" rel="stylesheet">
-    <!-- SUBSTITUI SUPABASE POR FIREBASE -->
+    <!-- FIREBASE SDKs (VERSÃO GLOBAL) -->
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
-    <!-- ADICIONA FIREBASE FIRESTORE (para salvar o código) -->
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
     <style>
-        /* SEU CSS PERMANECE IGUAL! */
         :root {
             --primary-dark: #1a1200;
             --secondary-dark: #2c2008;
@@ -37,7 +35,172 @@
                 radial-gradient(circle at 10% 20%, rgba(44, 32, 8, 0.5) 0%, transparent 20%),
                 radial-gradient(circle at 90% 80%, rgba(42, 21, 11, 0.5) 0%, transparent 20%);
         }
-        /* TODO O SEU CSS CONTINUA IGUAL... */
+        .auth-container {
+            background: linear-gradient(145deg, rgba(44, 32, 8, 0.95), rgba(26, 18, 0, 0.95));
+            padding: 40px;
+            border-radius: 15px;
+            border: 3px solid var(--wood-dark);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--accent-red), var(--primary-gold));
+        }
+        .auth-title {
+            font-family: 'Uncial Antiqua', cursive;
+            color: var(--primary-gold);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        .auth-subtitle {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--secondary-gold);
+            font-weight: bold;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(245, 245, 220, 0.1);
+            border: 2px solid var(--wood-dark);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            background-color: rgba(245, 245, 220, 0.15);
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+        .btn:hover::before {
+            left: 100%;
+        }
+        .btn-primary {
+            background: linear-gradient(145deg, var(--primary-gold), #b8941f);
+            color: var(--primary-dark);
+            border: 2px solid var(--secondary-gold);
+            box-shadow: 0 4px 0 #b8941f;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(145deg, #e6c158, #b8941f);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 0 #b8941f;
+        }
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 0 #b8941f;
+        }
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 0 #b8941f;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s;
+            text-align: left;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.success {
+            background-color: rgba(46, 92, 58, 0.3);
+            border: 1px solid var(--accent-green);
+            color: #a3d9b1;
+        }
+        .message.error {
+            background-color: rgba(139, 0, 0, 0.3);
+            border: 1px solid var(--accent-red);
+            color: #ff9e9e;
+        }
+        .message.info {
+            background-color: rgba(44, 32, 8, 0.5);
+            border: 1px solid var(--primary-gold);
+            color: var(--secondary-gold);
+        }
+        .auth-links {
+            margin-top: 25px;
+            font-size: 0.9rem;
+        }
+        .auth-links a {
+            color: var(--secondary-gold);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .auth-links a:hover {
+            color: var(--primary-gold);
+            text-decoration: underline;
+        }
+        .player-code-display {
+            font-size: 2.5rem;
+            color: var(--secondary-gold);
+            font-weight: bold;
+            letter-spacing: 5px;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
+            animation: glow 2s infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(212, 175, 55, 0.7); }
+            to { text-shadow: 0 0 20px rgba(212, 175, 55, 0.9), 0 0 30px rgba(212, 175, 55, 0.5); }
+        }
     </style>
 </head>
 <body>
@@ -78,24 +241,22 @@
 
     <script>
     // ===========================================
-    // CONFIGURAÇÃO FIREBASE (SUBSTITUI SUPABASE)
+    // SUAS CREDENCIAIS FIREBASE - gurpsroll
     // ===========================================
     
-    // COLE SUAS 3 CREDENCIAIS AQUI:
     const firebaseConfig = {
-        apiKey: "COLE_SUA_API_KEY_AQUI",
-        authDomain: "SEU-APP.firebaseapp.com",
-        projectId: "SEU-PROJECT-ID"
-        // NÃO precisa das outras linhas!
+        apiKey: "AIzaSyBoTP0oJH4q3yrc0N8sCv9ynKN53dN-UbU",
+        authDomain: "gurpsroll.firebaseapp.com",
+        projectId: "gurpsroll"
     };
     
     // Inicializa Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore(); // Banco de dados
+    const db = firebase.firestore();
     
     // ===========================================
-    // FUNÇÕES AUXILIARES (PERMANECEM QUASE IGUAIS)
+    // FUNÇÕES AUXILIARES
     // ===========================================
     
     function showMessage(text, type = 'info') {
@@ -130,17 +291,15 @@
     }
     
     // ===========================================
-    // FUNÇÃO PARA GERAR CÓDIGO ÚNICO
+    // GERAR CÓDIGO ÚNICO
     // ===========================================
     async function generateUniquePlayerCode() {
         let isUnique = false;
         let code = '';
         
         while (!isUnique) {
-            // Gera código de 7 dígitos
             code = Math.floor(1000000 + Math.random() * 9000000).toString();
             
-            // Verifica se já existe no banco
             const querySnapshot = await db.collection('player_profiles')
                 .where('player_code', '==', code)
                 .limit(1)
@@ -153,7 +312,7 @@
     }
     
     // ===========================================
-    // CADASTRO PRINCIPAL (MIGRADO PARA FIREBASE)
+    // CADASTRO PRINCIPAL
     // ===========================================
     document.getElementById('registerForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -161,7 +320,6 @@
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         
-        // Validação (mantém igual)
         if (!email || !email.includes('@')) {
             showMessage('Por favor, insira um e-mail válido.', 'error');
             return;
@@ -176,21 +334,21 @@
         showMessage('Criando sua conta de aventureiro...', 'info');
         
         try {
-            // 1. CADASTRO NO FIREBASE AUTH
+            // 1. CADASTRO NO FIREBASE
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             const user = userCredential.user;
             
-            console.log('Usuário criado no Firebase:', user.uid);
+            console.log('✅ Usuário criado:', user.uid);
             
-            // 2. ATUALIZA DISPLAY NAME (opcional)
+            // 2. ATUALIZA NOME
             await user.updateProfile({
                 displayName: email.split('@')[0]
             });
             
-            // 3. GERA CÓDIGO ÚNICO
+            // 3. GERA CÓDIGO
             const playerCode = await generateUniquePlayerCode();
             
-            // 4. SALVA PERFIL NO FIRESTORE
+            // 4. SALVA NO FIRESTORE
             const playerProfile = {
                 user_id: user.uid,
                 player_code: playerCode,
@@ -202,21 +360,21 @@
             
             await db.collection('player_profiles').doc(user.uid).set(playerProfile);
             
-            // 5. MOSTRA CÓDIGO E SUCESSO
+            // 5. MOSTRA SUCESSO
             showPlayerCode(playerCode);
             showMessage('✅ Conta criada com sucesso! Código gerado.', 'success');
             
-            // 6. VERIFICA SE EMAIL PRECISA SER CONFIRMADO
+            // 6. VERIFICA EMAIL
             if (user.emailVerified) {
-                showMessage('✅ Login automático realizado! Redirecionando...', 'success');
+                showMessage('✅ Login automático! Redirecionando...', 'success');
                 setTimeout(() => {
                     window.location.href = 'home.html';
                 }, 2000);
             } else {
-                showMessage('✅ Conta criada! Verifique seu e-mail para confirmar.', 'success');
-                showMessage('📧 Após confirmar, faça login na página de login.', 'info');
+                showMessage('✅ Conta criada! Verifique seu e-mail.', 'success');
+                showMessage('📧 Após confirmar, faça login.', 'info');
                 
-                // Adiciona botão de login
+                // Botão de login
                 setTimeout(() => {
                     const loginBtn = document.createElement('button');
                     loginBtn.innerHTML = '<i class="fas fa-dungeon"></i> Ir para Login';
@@ -230,9 +388,8 @@
             }
             
         } catch (error) {
-            console.error('Erro no Firebase:', error);
+            console.error('Erro Firebase:', error);
             
-            // Tratamento de erros específicos do Firebase
             let errorMessage = 'Erro ao criar conta';
             
             switch(error.code) {
@@ -243,7 +400,7 @@
                     errorMessage = 'E-mail inválido.';
                     break;
                 case 'auth/operation-not-allowed':
-                    errorMessage = 'Operação não permitida. Contate o suporte.';
+                    errorMessage = 'Operação não permitida.';
                     break;
                 case 'auth/weak-password':
                     errorMessage = 'Senha muito fraca. Use pelo menos 6 caracteres.';
@@ -265,9 +422,9 @@
     // INICIALIZAÇÃO
     // ===========================================
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Página de cadastro carregada com Firebase');
+        console.log('Página de cadastro carregada');
         
-        // Verificar se já está logado (Firebase)
+        // Verifica se já está logado
         auth.onAuthStateChanged((user) => {
             if (user) {
                 showMessage('Você já está logado! Redirecionando...', 'info');
@@ -277,7 +434,7 @@
             }
         });
         
-        // Foco no campo de email
+        // Foco no email
         document.getElementById('email').focus();
     });
     </script>
