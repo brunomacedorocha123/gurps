@@ -437,6 +437,28 @@
         // Foco no email
         document.getElementById('email').focus();
     });
+
+    // ===========================================
+// TESTE RÁPIDO - ADICIONE ESTAS LINHAS
+// ===========================================
+
+console.log("=== TESTE INICIAL ===");
+console.log("1. Firebase carregado?", typeof firebase !== 'undefined' ? '✅ SIM' : '❌ NÃO');
+console.log("2. Config ok?", firebaseConfig?.apiKey ? '✅ SIM' : '❌ NÃO');
+console.log("3. Auth disponível?", typeof auth?.signInWithEmailAndPassword === 'function' ? '✅ SIM' : '❌ NÃO');
+console.log("4. Firestore disponível?", typeof db?.collection === 'function' ? '✅ SIM' : '❌ NÃO');
+
+// Testa se o botão funciona
+document.getElementById('submitBtn').addEventListener('click', function() {
+    console.log("✅ BOTÃO CLICADO!");
+});
+
+// Testa se o formulário captura
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    console.log("✅ FORMULÁRIO ENVIADO!");
+    console.log("Email:", document.getElementById('email').value);
+    console.log("Senha:", document.getElementById('password').value);
+});
     </script>
 </body>
 </html>
