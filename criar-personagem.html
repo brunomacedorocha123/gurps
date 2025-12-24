@@ -903,7 +903,7 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
     </div>
 </div>
 <!-- ABA VANTAGENS/DESVANTAGENS -->
-<div id="vantagens-tab" class="tab-content">
+<div id="vantagens-tab" class="tab-content" style="display: none;">
     <div class="vantagens-container">
         
         <!-- CARD ÚNICO DE RESUMO DE PONTOS -->
@@ -996,6 +996,10 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
                     <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
                     <div class="catalogo-grid" id="catalogo-vantagens">
                         <!-- Vantagens serão carregadas via JavaScript -->
+                        <div class="catalogo-vazio">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Carregando vantagens...</p>
+                        </div>
                     </div>
                 </div>
                 
@@ -1029,9 +1033,14 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
                     <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
                     <div class="catalogo-grid" id="catalogo-desvantagens">
                         <!-- Desvantagens serão carregadas via JavaScript -->
+                        <div class="catalogo-vazio">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Carregando desvantagens...</p>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!-- FIM DA COLUNA ESQUERDA -->
             
             <!-- COLUNA DIREITA: ADQUIRIDAS -->
             <div class="coluna-adquiridas">
@@ -1059,7 +1068,7 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
                     </div>
                 </div>
                 
-                                <!-- SECÇÃO PECULIARIDADES -->
+                <!-- SECÇÃO PECULIARIDADES -->
                 <div class="secao-adquiridas">
                     <h2 class="secao-titulo">
                         <i class="fas fa-star"></i> Peculiaridades
@@ -1109,17 +1118,17 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
                             <p>Apenas peculiaridades preenchidas serão contabilizadas.</p>
                         </div>
                     </div>
-                </div> <!-- Fecha .secao-adquiridas -->
+                </div>
+                <!-- FIM DA SECÇÃO PECULIARIDADES -->
                 
-            </div> <!-- Fecha .coluna-adquiridas -->
-        </div> <!-- Fecha .vantagens-layout -->
-    </div> <!-- Fecha .vantagens-container -->
-</div> <!-- Fecha #vantagens-tab -->
-
-<!-- MODAL PARA OPÇÕES DE VANTAGEM/DESVANTAGEM -->
-<div id="opcoes-modal" class="modal">
-    <!-- ... conteúdo do modal ... -->
+            </div>
+            <!-- FIM DA COLUNA DIREITA -->
+        </div>
+        <!-- FIM DO LAYOUT PRINCIPAL -->
+    </div>
+    <!-- FIM DO CONTAINER -->
 </div>
+<!-- FIM DA ABA VANTAGENS -->
 
 <!-- MODAL PARA OPÇÕES DE VANTAGEM/DESVANTAGEM -->
 <div id="opcoes-modal" class="modal">
@@ -1151,7 +1160,7 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
         </div>
     </div>
 </div>
-
+<!-- FIM DO MODAL -->
         <!-- PERÍCIAS/TÉCNICAS -->
         <div id="pericias-tab" class="tab-content" style="display: none;">
             <div class="dev-message">
