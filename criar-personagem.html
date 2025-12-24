@@ -651,258 +651,257 @@
             </div>
         </div>
         
-       <!-- Sub-aba FÍSICAS (Peso, Altura, Características Físicas) -->
-<div id="fisicas-subtab" class="subtab-content">
-    <h2 class="secao-titulo">Características Físicas</h2>
-    
-    <div class="cards-grid fisicas-grid">
-        <!-- ===== CARD 1: ALTURA E PESO (baseado em ST) ===== -->
-        <div class="fisica-card altura-peso-card">
-            <h3><i class="fas fa-ruler-combined"></i> Altura e Peso</h3>
+        <!-- Sub-aba FÍSICAS (Peso, Altura, Características Físicas) -->
+        <div id="fisicas-subtab" class="subtab-content">
+            <h2 class="secao-titulo">Características Físicas</h2>
             
-            <div class="status-geral" style="text-align: center; margin-bottom: 20px;">
-                <div class="status-badge" id="statusFisico" style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block;">
-                    Normal
-                </div>
-                <div style="color: var(--wood-light); font-size: 0.9em; margin-top: 5px;">
-                    Baseado em ST <span id="stBase">10</span>
-                </div>
-            </div>
-            
-            <!-- Controles de Altura -->
-            <div class="controle-fisico">
-                <div class="controle-header">
-                    <span class="controle-label">
-                        <i class="fas fa-ruler-vertical"></i> Altura
-                    </span>
-                    <span class="controle-valor">
-                        <span id="alturaValor">1.70</span> m
-                    </span>
-                </div>
-                <div class="controle-botoes">
-                    <button class="btn-controle-fisico" onclick="ajustarAltura(-0.01)">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <input type="number" id="alturaInput" class="fisica-input" value="1.70" step="0.01" min="1.20" max="2.50">
-                    <button class="btn-controle-fisico" onclick="ajustarAltura(0.01)">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-                <div class="controle-faixa" id="statusAltura">
-                    Faixa normal para ST 10: 1.58m - 1.83m
-                </div>
-            </div>
-            
-            <!-- Controles de Peso -->
-            <div class="controle-fisico">
-                <div class="controle-header">
-                    <span class="controle-label">
-                        <i class="fas fa-weight-hanging"></i> Peso
-                    </span>
-                    <span class="controle-valor">
-                        <span id="pesoValor">70</span> kg
-                    </span>
-                </div>
-                <div class="controle-botoes">
-                    <button class="btn-controle-fisico" onclick="ajustarPeso(-1)">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <input type="number" id="pesoInput" class="fisica-input" value="70" step="1" min="20" max="200">
-                    <button class="btn-controle-fisico" onclick="ajustarPeso(1)">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-                <div class="controle-faixa" id="statusPeso">
-                    Faixa normal para ST 10: 57.5kg - 87.5kg
-                </div>
-            </div>
-            
-            <!-- Info de Faixa -->
-            <div class="info-faixa">
-                <div class="info-item">
-                    <span class="info-label">ST Base:</span>
-                    <span class="info-valor" id="stAtual">10</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Faixa Altura:</span>
-                    <span class="info-valor" id="alturaFaixa">1.58m - 1.83m</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Faixa Peso:</span>
-                    <span class="info-valor" id="pesoFaixa">57.5kg - 87.5kg</span>
-                </div>
-            </div>
-            
-            <!-- Desvantagens Ativas (aparece apenas quando houver) -->
-            <div id="desvantagensAtivas" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(212,175,55,0.3);">
-                <div style="color: var(--text-light); font-size: 0.9em; margin-bottom: 8px;">
-                    <i class="fas fa-exclamation-circle"></i> Desvantagens Ativas:
-                </div>
-                <div id="listaDesvantagens"></div>
-            </div>
-        </div>
-        
-        <!-- ===== CARD 2: CARACTERÍSTICAS FÍSICAS (Magro, Gordo, Nanismo, etc) ===== -->
-        <div class="fisica-card caracteristicas-card">
-            <div class="card-header">
-                <h3><i class="fas fa-user-tag"></i> Características Especiais</h3>
-                <div class="card-badge" id="pontosCaracteristicas">0 pts</div>
-            </div>
-            
-            <!-- Lista de Características Disponíveis -->
-            <div class="caracteristicas-lista">
-                <!-- Magro (-5 pts) -->
-                <div class="caracteristica-item" data-tipo="magro">
-                    <div class="caracteristica-info">
-                        <strong>Magro</strong>
-                        <small>-5 pts | Peso = 2/3 do normal. -2 ST vs derrubar, -2 Disfarce. HT máxima 14.</small>
+            <div class="cards-grid fisicas-grid">
+                <!-- ===== CARD 1: ALTURA E PESO (baseado em ST) ===== -->
+                <div class="fisica-card altura-peso-card">
+                    <h3><i class="fas fa-ruler-combined"></i> Altura e Peso</h3>
+                    
+                    <div class="status-geral" style="text-align: center; margin-bottom: 20px;">
+                        <div class="status-badge" id="statusFisico" style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block;">
+                            Normal
+                        </div>
+                        <div style="color: var(--wood-light); font-size: 0.9em; margin-top: 5px;">
+                            Baseado em ST <span id="stBase">10</span>
+                        </div>
                     </div>
-                    <button class="btn-add-caracteristica" data-tipo="magro">
-                        Adicionar
-                    </button>
+                    
+                    <!-- Controles de Altura -->
+                    <div class="controle-fisico">
+                        <div class="controle-header">
+                            <span class="controle-label">
+                                <i class="fas fa-ruler-vertical"></i> Altura
+                            </span>
+                            <span class="controle-valor">
+                                <span id="alturaValor">1.70</span> m
+                            </span>
+                        </div>
+                        <div class="controle-botoes">
+                            <button class="btn-controle-fisico" onclick="ajustarAltura(-0.01)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" id="alturaInput" class="fisica-input" value="1.70" step="0.01" min="1.20" max="2.50">
+                            <button class="btn-controle-fisico" onclick="ajustarAltura(0.01)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="controle-faixa" id="statusAltura">
+                            Faixa normal para ST 10: 1.58m - 1.83m
+                        </div>
+                    </div>
+                    
+                    <!-- Controles de Peso -->
+                    <div class="controle-fisico">
+                        <div class="controle-header">
+                            <span class="controle-label">
+                                <i class="fas fa-weight-hanging"></i> Peso
+                            </span>
+                            <span class="controle-valor">
+                                <span id="pesoValor">70</span> kg
+                            </span>
+                        </div>
+                        <div class="controle-botoes">
+                            <button class="btn-controle-fisico" onclick="ajustarPeso(-1)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" id="pesoInput" class="fisica-input" value="70" step="1" min="20" max="200">
+                            <button class="btn-controle-fisico" onclick="ajustarPeso(1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="controle-faixa" id="statusPeso">
+                            Faixa normal para ST 10: 57.5kg - 87.5kg
+                        </div>
+                    </div>
+                    
+                    <!-- Info de Faixa -->
+                    <div class="info-faixa">
+                        <div class="info-item">
+                            <span class="info-label">ST Base:</span>
+                            <span class="info-valor" id="stAtual">10</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Faixa Altura:</span>
+                            <span class="info-valor" id="alturaFaixa">1.58m - 1.83m</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Faixa Peso:</span>
+                            <span class="info-valor" id="pesoFaixa">57.5kg - 87.5kg</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Desvantagens Ativas (aparece apenas quando houver) -->
+                    <div id="desvantagensAtivas" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(212,175,55,0.3);">
+                        <div style="color: var(--text-light); font-size: 0.9em; margin-bottom: 8px;">
+                            <i class="fas fa-exclamation-circle"></i> Desvantagens Ativas:
+                        </div>
+                        <div id="listaDesvantagens"></div>
+                    </div>
                 </div>
                 
-                <!-- Acima do Peso (-1 pts) -->
-                <div class="caracteristica-item" data-tipo="acima-peso">
-                    <div class="caracteristica-info">
-                        <strong>Acima do Peso</strong>
-                        <small>-1 pts | Peso = 130% do normal. -1 Disfarce, +1 Natação, +1 ST vs derrubar.</small>
+                <!-- ===== CARD 2: CARACTERÍSTICAS FÍSICAS (Magro, Gordo, Nanismo, etc) ===== -->
+                <div class="fisica-card caracteristicas-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user-tag"></i> Características Especiais</h3>
+                        <div class="card-badge" id="pontosCaracteristicas">0 pts</div>
                     </div>
-                    <button class="btn-add-caracteristica" data-tipo="acima-peso">
-                        Adicionar
-                    </button>
+                    
+                    <!-- Lista de Características Disponíveis -->
+                    <div class="caracteristicas-lista">
+                        <!-- Magro (-5 pts) -->
+                        <div class="caracteristica-item" data-tipo="magro">
+                            <div class="caracteristica-info">
+                                <strong>Magro</strong>
+                                <small>-5 pts | Peso = 2/3 do normal. -2 ST vs derrubar, -2 Disfarce. HT máxima 14.</small>
+                            </div>
+                            <button class="btn-add-caracteristica" data-tipo="magro">
+                                Adicionar
+                            </button>
+                        </div>
+                        
+                        <!-- Acima do Peso (-1 pts) -->
+                        <div class="caracteristica-item" data-tipo="acima-peso">
+                            <div class="caracteristica-info">
+                                <strong>Acima do Peso</strong>
+                                <small>-1 pts | Peso = 130% do normal. -1 Disfarce, +1 Natação, +1 ST vs derrubar.</small>
+                            </div>
+                            <button class="btn-add-caracteristica" data-tipo="acima-peso">
+                                Adicionar
+                            </button>
+                        </div>
+                        
+                        <!-- Gordo (-3 pts) -->
+                        <div class="caracteristica-item" data-tipo="gordo">
+                            <div class="caracteristica-info">
+                                <strong>Gordo</strong>
+                                <small>-3 pts | Peso = 150% do normal. -2 Disfarce, +3 Natação, +2 ST vs derrubar. HT máxima 15.</small>
+                            </div>
+                            <button class="btn-add-caracteristica" data-tipo="gordo">
+                                Adicionar
+                            </button>
+                        </div>
+                        
+                        <!-- Muito Gordo (-5 pts) -->
+                        <div class="caracteristica-item" data-tipo="muito-gordo">
+                            <div class="caracteristica-info">
+                                <strong>Muito Gordo</strong>
+                                <small>-5 pts | Peso dobrado. -3 Disfarce, +5 Natação, +3 ST vs derrubar. HT máxima 13.</small>
+                            </div>
+                            <button class="btn-add-caracteristica" data-tipo="muito-gordo">
+                                Adicionar
+                            </button>
+                        </div>
+                        
+                        <!-- Nanismo (-15 pts) -->
+                        <div class="caracteristica-item" data-tipo="nanismo">
+                            <div class="caracteristica-info">
+                                <strong>Nanismo</strong>
+                                <small>-15 pts | Altura máxima: 1.32m. MT -1, -1 Deslocamento. -2 Disfarce/Perseguição.</small>
+                            </div>
+                            <button class="btn-add-caracteristica" data-tipo="nanismo">
+                                Adicionar
+                            </button>
+                        </div>
+                        
+                        <!-- Gigantismo (0 pts) -->
+                        <div class="caracteristica-item" data-tipo="gigantismo">
+                            <div class="caracteristica-info">
+                                <strong>Gigantismo</strong>
+                                <small>0 pts | Altura acima do máximo racial. MT +1, +1 Deslocamento. -2 Disfarce/Perseguição.</small>
+                            </div>
+                            <button class="btn-add-caracteristica" data-tipo="gigantismo">
+                                Adicionar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Características Selecionadas -->
+                    <div class="caracteristicas-selecionadas">
+                        <h4 style="color: var(--text-light); margin-bottom: 10px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 5px;">
+                            <i class="fas fa-check-circle"></i> Selecionadas
+                        </h4>
+                        <div id="caracteristicasSelecionadas" class="selecionadas-lista">
+                            <!-- Lista será preenchida pelo JavaScript -->
+                            <div style="text-align: center; color: var(--wood-light); padding: 15px; font-style: italic;">
+                                Nenhuma característica selecionada
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ===== CARD 3: CARACTERÍSTICAS VISUAIS ===== -->
+            <div class="fisica-card caracteristicas-visuais-card">
+                <h3><i class="fas fa-user-circle"></i> Características Visuais</h3>
+                
+                <div class="caracteristicas-visuais-grid">
+                    <div class="caracteristica-visual">
+                        <label><i class="fas fa-eye"></i> Cor dos Olhos:</label>
+                        <input type="text" id="corOlhos" class="visual-input" value="Castanhos" placeholder="Ex: Azuis, Verdes...">
+                    </div>
+                    
+                    <div class="caracteristica-visual">
+                        <label><i class="fas fa-cut"></i> Cabelo:</label>
+                        <input type="text" id="cabelo" class="visual-input" value="Castanho" placeholder="Cor e estilo">
+                    </div>
+                    
+                    <div class="caracteristica-visual">
+                        <label><i class="fas fa-tint"></i> Cor da Pele:</label>
+                        <input type="text" id="corPele" class="visual-input" value="Clara" placeholder="Tom da pele">
+                    </div>
+                    
+                    <div class="caracteristica-visual">
+                        <label><i class="fas fa-male"></i> Gênero:</label>
+                        <select id="genero" class="visual-select">
+                            <option value="Masculino">Masculino</option>
+                            <option value="Feminino">Feminino</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="caracteristica-visual">
+                        <label><i class="fas fa-calendar-alt"></i> Idade:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" id="idade" class="visual-input" value="25" min="0" max="150">
+                            <span style="color: var(--wood-light); align-self: center;">anos</span>
+                        </div>
+                    </div>
+                    
+                    <div class="caracteristica-visual">
+                        <label><i class="fas fa-hand-paper"></i> Mão Dominante:</label>
+                        <select id="maos" class="visual-select">
+                            <option value="Destro">Destro</option>
+                            <option value="Canhoto">Canhoto</option>
+                            <option value="Ambidestro">Ambidestro</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <!-- Gordo (-3 pts) -->
-                <div class="caracteristica-item" data-tipo="gordo">
-                    <div class="caracteristica-info">
-                        <strong>Gordo</strong>
-                        <small>-3 pts | Peso = 150% do normal. -2 Disfarce, +3 Natação, +2 ST vs derrubar. HT máxima 15.</small>
-                    </div>
-                    <button class="btn-add-caracteristica" data-tipo="gordo">
-                        Adicionar
-                    </button>
-                </div>
-                
-                <!-- Muito Gordo (-5 pts) -->
-                <div class="caracteristica-item" data-tipo="muito-gordo">
-                    <div class="caracteristica-info">
-                        <strong>Muito Gordo</strong>
-                        <small>-5 pts | Peso dobrado. -3 Disfarce, +5 Natação, +3 ST vs derrubar. HT máxima 13.</small>
-                    </div>
-                    <button class="btn-add-caracteristica" data-tipo="muito-gordo">
-                        Adicionar
-                    </button>
-                </div>
-                
-                <!-- Nanismo (-15 pts) -->
-                <div class="caracteristica-item" data-tipo="nanismo">
-                    <div class="caracteristica-info">
-                        <strong>Nanismo</strong>
-                        <small>-15 pts | Altura máxima: 1.32m. MT -1, -1 Deslocamento. -2 Disfarce/Perseguição.</small>
-                    </div>
-                    <button class="btn-add-caracteristica" data-tipo="nanismo">
-                        Adicionar
-                    </button>
-                </div>
-                
-                <!-- Gigantismo (0 pts) -->
-                <div class="caracteristica-item" data-tipo="gigantismo">
-                    <div class="caracteristica-info">
-                        <strong>Gigantismo</strong>
-                        <small>0 pts | Altura acima do máximo racial. MT +1, +1 Deslocamento. -2 Disfarce/Perseguição.</small>
-                    </div>
-                    <button class="btn-add-caracteristica" data-tipo="gigantismo">
-                        Adicionar
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Características Selecionadas -->
-            <div class="caracteristicas-selecionadas">
-                <h4 style="color: var(--text-light); margin-bottom: 10px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 5px;">
-                    <i class="fas fa-check-circle"></i> Selecionadas
-                </h4>
-                <div id="caracteristicasSelecionadas" class="selecionadas-lista">
-                    <!-- Lista será preenchida pelo JavaScript -->
-                    <div style="text-align: center; color: var(--wood-light); padding: 15px; font-style: italic;">
-                        Nenhuma característica selecionada
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- ===== CARD 3: CARACTERÍSTICAS VISUAIS ===== -->
-    <div class="fisica-card caracteristicas-visuais-card">
-        <h3><i class="fas fa-user-circle"></i> Características Visuais</h3>
-        
-        <div class="caracteristicas-visuais-grid">
-            <div class="caracteristica-visual">
-                <label><i class="fas fa-eye"></i> Cor dos Olhos:</label>
-                <input type="text" id="corOlhos" class="visual-input" value="Castanhos" placeholder="Ex: Azuis, Verdes...">
-            </div>
-            
-            <div class="caracteristica-visual">
-                <label><i class="fas fa-cut"></i> Cabelo:</label>
-                <input type="text" id="cabelo" class="visual-input" value="Castanho" placeholder="Cor e estilo">
-            </div>
-            
-            <div class="caracteristica-visual">
-                <label><i class="fas fa-tint"></i> Cor da Pele:</label>
-                <input type="text" id="corPele" class="visual-input" value="Clara" placeholder="Tom da pele">
-            </div>
-            
-            <div class="caracteristica-visual">
-                <label><i class="fas fa-male"></i> Gênero:</label>
-                <select id="genero" class="visual-select">
-                    <option value="Masculino">Masculino</option>
-                    <option value="Feminino">Feminino</option>
-                    <option value="Outro">Outro</option>
-                </select>
-            </div>
-            
-            <div class="caracteristica-visual">
-                <label><i class="fas fa-calendar-alt"></i> Idade:</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" id="idade" class="visual-input" value="25" min="0" max="150">
-                    <span style="color: var(--wood-light); align-self: center;">anos</span>
-                </div>
-            </div>
-            
-            <div class="caracteristica-visual">
-                <label><i class="fas fa-hand-paper"></i> Mão Dominante:</label>
-                <select id="maos" class="visual-select">
-                    <option value="Destro">Destro</option>
-                    <option value="Canhoto">Canhoto</option>
-                    <option value="Ambidestro">Ambidestro</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="descricao-fisica">
-            <label><i class="fas fa-file-alt"></i> Descrição Física:</label>
-            <textarea id="descricaoFisica" class="descricao-textarea" 
-                      placeholder="Descreva características marcantes: cicatrizes, tatuagens, postura, maneira de andar...">
+                <div class="descricao-fisica">
+                    <label><i class="fas fa-file-alt"></i> Descrição Física:</label>
+                    <textarea id="descricaoFisica" class="descricao-textarea" 
+                              placeholder="Descreva características marcantes: cicatrizes, tatuagens, postura, maneira de andar...">
 Este personagem possui uma estatura média, com ombros largos e postura ereta. Seus cabelos castanhos são curtos e bem cuidados, e seus olhos castanhos transmitem uma expressão determinada. Uma pequena cicatriz percorre sua testa do lado esquerdo.
-            </textarea>
-        </div>
-        
-        <div style="text-align: center; margin-top: 20px;">
-            <button class="btn-salvar" onclick="salvarCaracteristicasVisuais()">
-                <i class="fas fa-save"></i> Salcar Características
-            </button>
+                    </textarea>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn-salvar" onclick="salvarCaracteristicasVisuais()">
+                        <i class="fas fa-save"></i> Salvar Características
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mensagem de Status -->
+            <div id="statusCaracteristicasFisicas" class="status-message info">
+                <i class="fas fa-info-circle"></i> Sistema de características físicas carregado. Ajuste altura/peso baseado no ST.
+            </div>
         </div>
     </div>
-    
-      <!-- Mensagem de Status -->
-    <div id="statusCaracteristicasFisicas" class="status-message info">
-        <i class="fas fa-info-circle"></i> Sistema de características físicas carregado. Ajuste altura/peso baseado no ST.
-    </div>
-</div> 
-</div> 
-</div> >
-
+</div>
 <!-- ABA VANTAGENS/DESVANTAGENS -->
 <div id="vantagens-tab" class="tab-content">
     <div class="vantagens-container">
