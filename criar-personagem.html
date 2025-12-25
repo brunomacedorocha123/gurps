@@ -1,1395 +1,1838 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Criar Personagem - GURPS Tool</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700&family=Uncial+Antiqua&display=swap" rel="stylesheet">
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <link rel="stylesheet" href="style-atributos.css">
-  <link rel="stylesheet" href="style-caracteristicas.css">
-  <link rel="stylesheet" href="style-vantagens.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Personagem - GURPS Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700&family=Uncial+Antiqua&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style-atributos.css">
+    <link rel="stylesheet" href="style-caracteristicas.css">
+    <link rel="stylesheet" href="style-vantagens.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    :root {
-      --primary-dark: #1a1200;
-      --secondary-dark: #2c2008;
-      --primary-gold: #d4af37;
-      --secondary-gold: #f4d03f;
-      --accent-red: #8b0000;
-      --text-light: #f5f5dc;
-      --text-gold: #ffd700;
-      --wood-dark: #5d4037;
-      --wood-light: #8d6e63;
-      --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    }
+        :root {
+            --primary-dark: #1a1200;
+            --secondary-dark: #2c2008;
+            --primary-gold: #d4af37;
+            --secondary-gold: #f4d03f;
+            --accent-red: #8b0000;
+            --text-light: #f5f5dc;
+            --text-gold: #ffd700;
+            --wood-dark: #5d4037;
+            --wood-light: #8d6e63;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
 
-    body {
-      font-family: 'Cinzel', serif;
-      background-color: var(--primary-dark);
-      color: var(--text-light);
-      min-height: 100vh;
-    }
+        body {
+            font-family: 'Cinzel', serif;
+            background-color: var(--primary-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+        }
 
-    /* HEADER */
-    .header {
-      background: linear-gradient(145deg, rgba(44, 32, 8, 0.95), rgba(26, 18, 0, 0.95));
-      border-bottom: 3px solid var(--primary-gold);
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
+        /* HEADER */
+        .header {
+            background: linear-gradient(145deg, rgba(44, 32, 8, 0.95), rgba(26, 18, 0, 0.95));
+            border-bottom: 3px solid var(--primary-gold);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-    }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
 
-    .logo h1 {
-      font-family: 'Uncial Antiqua', cursive;
-      font-size: 1.8rem;
-      color: var(--text-gold);
-      white-space: nowrap;
-    }
+        .logo h1 {
+            font-family: 'Uncial Antiqua', cursive;
+            font-size: 1.8rem;
+            color: var(--text-gold);
+            white-space: nowrap;
+        }
 
-    /* ABAS */
-    .tabs-container {
-      background: rgba(44, 32, 8, 0.9);
-      padding: 10px 20px;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
+        /* ABAS */
+        .tabs-container {
+            background: rgba(44, 32, 8, 0.9);
+            padding: 10px 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
 
-    .main-tabs {
-      display: inline-flex;
-      gap: 5px;
-    }
+        .main-tabs {
+            display: inline-flex;
+            gap: 5px;
+        }
 
-    .main-tab {
-      padding: 12px 20px;
-      font-family: 'Cinzel', serif;
-      background: rgba(139, 0, 0, 0.1);
-      color: var(--text-light);
-      border: 2px solid var(--wood-light);
-      border-radius: 8px 8px 0 0;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .main-tab {
+            padding: 12px 20px;
+            font-family: 'Cinzel', serif;
+            background: rgba(139, 0, 0, 0.1);
+            color: var(--text-light);
+            border: 2px solid var(--wood-light);
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .main-tab:hover {
-      background: rgba(139, 0, 0, 0.3);
-    }
+        .main-tab:hover {
+            background: rgba(139, 0, 0, 0.3);
+        }
 
-    .main-tab.active {
-      background: rgba(42, 77, 143, 0.9);
-      border-color: var(--primary-gold);
-      border-bottom-color: transparent;
-    }
+        .main-tab.active {
+            background: rgba(42, 77, 143, 0.9);
+            border-color: var(--primary-gold);
+            border-bottom-color: transparent;
+        }
 
-    /* SUB-ABAS */
-    .sub-tabs-container {
-      background: rgba(26, 18, 0, 0.7);
-      padding: 10px 20px;
-      border-bottom: 1px solid var(--wood-dark);
-    }
+        /* SUB-ABAS */
+        .sub-tabs-container {
+            background: rgba(26, 18, 0, 0.7);
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--wood-dark);
+        }
 
-    .sub-tabs {
-      display: flex;
-      gap: 10px;
-    }
+        .sub-tabs {
+            display: flex;
+            gap: 10px;
+        }
 
-    .sub-tab {
-      padding: 8px 15px;
-      font-family: 'Cinzel', serif;
-      background: rgba(44, 32, 8, 0.5);
-      color: var(--text-light);
-      border: 1px solid var(--wood-light);
-      border-radius: 6px;
-      cursor: pointer;
-    }
+        .sub-tab {
+            padding: 8px 15px;
+            font-family: 'Cinzel', serif;
+            background: rgba(44, 32, 8, 0.5);
+            color: var(--text-light);
+            border: 1px solid var(--wood-light);
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-    .sub-tab.active {
-      background: rgba(42, 77, 143, 0.9);
-      border-color: var(--primary-gold);
-    }
+        .sub-tab.active {
+            background: rgba(42, 77, 143, 0.9);
+            border-color: var(--primary-gold);
+        }
 
-    /* CONTEÚDO */
-    .tab-content {
-      padding: 40px 20px;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
+        /* CONTEÚDO */
+        .tab-content {
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-    .dev-message {
-      background: rgba(44, 32, 8, 0.5);
-      border: 2px dashed var(--wood-light);
-      border-radius: 10px;
-      padding: 40px 20px;
-      margin-top: 20px;
-      text-align: center;
-    }
+        .dev-message {
+            background: rgba(44, 32, 8, 0.5);
+            border: 2px dashed var(--wood-light);
+            border-radius: 10px;
+            padding: 40px 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
 
-    .dev-message i {
-      font-size: 4rem;
-      color: var(--wood-light);
-      margin-bottom: 20px;
-    }
+        .dev-message i {
+            font-size: 4rem;
+            color: var(--wood-light);
+            margin-bottom: 20px;
+        }
 
-    .dev-message h2 {
-      color: var(--text-gold);
-      margin-bottom: 10px;
-    }
+        .dev-message h2 {
+            color: var(--text-gold);
+            margin-bottom: 10px;
+        }
 
-    /* BOTÕES */
-    .action-buttons {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      display: flex;
-      gap: 10px;
-    }
+        /* BOTÕES */
+        .action-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
 
-    .btn {
-      padding: 12px 25px;
-      font-family: 'Cinzel', serif;
-      background: linear-gradient(145deg, var(--primary-gold), #b8941f);
-      color: var(--primary-dark);
-      border: 2px solid var(--secondary-gold);
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .btn {
+            padding: 12px 25px;
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(145deg, var(--primary-gold), #b8941f);
+            color: var(--primary-dark);
+            border: 2px solid var(--secondary-gold);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    /* RESPONSIVO */
-    @media (max-width: 768px) {
-      .header {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .main-tabs {
-        flex-wrap: wrap;
-      }
-      
-      .action-buttons {
-        position: static;
-        margin-top: 30px;
-        justify-content: center;
-      }
-      
-      .tab-content {
-        padding: 20px 15px;
-      }
-    }
-  </style>
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .main-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .action-buttons {
+                position: static;
+                margin-top: 30px;
+                justify-content: center;
+            }
+            
+            .tab-content {
+                padding: 20px 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- HEADER -->
-  <header class="header">
-    <div class="logo" onclick="goToCharacterMode()">
-      <i class="fas fa-dragon" style="color: var(--primary-gold);"></i>
-      <h1>GURPS TOOL - Criar Personagem</h1>
-    </div>
-    <button class="btn" onclick="saveCharacter()">
-      <i class="fas fa-save"></i> Salvar
-    </button>
-  </header>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo" onclick="goToCharacterMode()">
+            <i class="fas fa-dragon" style="color: var(--primary-gold);"></i>
+            <h1>GURPS TOOL - Criar Personagem</h1>
+        </div>
+        <button class="btn" onclick="saveCharacter()">
+            <i class="fas fa-save"></i> Salvar
+        </button>
+    </header>
 
-  <!-- ABAS PRINCIPAIS -->
-  <div class="tabs-container">
-    <div class="main-tabs">
-      <div class="main-tab active" onclick="openTab('dashboard')">
-        <i class="fas fa-tachometer-alt"></i> Dashboard
-      </div>
-      <div class="main-tab" onclick="openTab('atributos')">
-        <i class="fas fa-dumbbell"></i> Atributos
-      </div>
-      <div class="main-tab" onclick="openTab('caracteristicas')">
-        <i class="fas fa-user-tag"></i> Características
-      </div>
-      <div class="main-tab" onclick="openTab('vantagens')">
-        <i class="fas fa-star"></i> Vant/Desv
-      </div>
-      <div class="main-tab" onclick="openTab('pericias')">
-        <i class="fas fa-graduation-cap"></i> Perícias/Técnicas
-      </div>
-      <div class="main-tab" onclick="openTab('magias')">
-        <i class="fas fa-hat-wizard"></i> Magias
-      </div>
-      <div class="main-tab" onclick="openTab('equipamento')">
-        <i class="fas fa-shield-alt"></i> Equipamento
-      </div>
-      <div class="main-tab" onclick="openTab('combate')">
-        <i class="fas fa-fist-raised"></i> Combate
-      </div>
-      <div class="main-tab" onclick="openTab('resumo')">
-        <i class="fas fa-scroll"></i> Resumo do PC
-      </div>
-    </div>
-  </div>
-
-  <!-- SUB-ABAS (APARECE APENAS EM CARACTERÍSTICAS) -->
-  <div id="subTabsContainer" class="sub-tabs-container" style="display: none;">
-    <div class="sub-tabs">
-      <div class="sub-tab active" onclick="openSubTab('sociais')">
-        Riqueza, Aparência e Idiomas
-      </div>
-      <div class="sub-tab" onclick="openSubTab('fisicas')">
-        Características Físicas, Peso e Altura
-      </div>
-    </div>
-  </div>
-
-  <!-- CONTEÚDO DAS ABAS -->
-  <main>
-    <!-- DASHBOARD -->
-    <div id="dashboard-tab" class="tab-content">
-      <div class="dev-message">
-        <i class="fas fa-tools"></i>
-        <h2>Dashboard - Em Desenvolvimento</h2>
-        <p>Resumo completo do personagem com estatísticas e pontos de construção</p>
-      </div>
+    <!-- ABAS PRINCIPAIS -->
+    <div class="tabs-container">
+        <div class="main-tabs">
+            <div class="main-tab active" onclick="openTab('dashboard')">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </div>
+            <div class="main-tab" onclick="openTab('atributos')">
+                <i class="fas fa-dumbbell"></i> Atributos
+            </div>
+            <div class="main-tab" onclick="openTab('caracteristicas')">
+                <i class="fas fa-user-tag"></i> Características
+            </div>
+            <div class="main-tab" onclick="openTab('vantagens')">
+                <i class="fas fa-star"></i> Vant/Desv
+            </div>
+            <div class="main-tab" onclick="openTab('pericias')">
+                <i class="fas fa-graduation-cap"></i> Perícias/Técnicas
+            </div>
+            <div class="main-tab" onclick="openTab('magias')">
+                <i class="fas fa-hat-wizard"></i> Magias
+            </div>
+            <div class="main-tab" onclick="openTab('equipamento')">
+                <i class="fas fa-shield-alt"></i> Equipamento
+            </div>
+            <div class="main-tab" onclick="openTab('combate')">
+                <i class="fas fa-fist-raised"></i> Combate
+            </div>
+            <div class="main-tab" onclick="openTab('resumo')">
+                <i class="fas fa-scroll"></i> Resumo do PC
+            </div>
+        </div>
     </div>
 
-    <!-- ATRIBUTOS -->
-    <div id="atributos-tab" class="tab-content" style="display: none;">
-      <div class="atributos-container">
-        <!-- Seção de Pontos -->
-        <div class="pontos-section">
-          <div class="ponto-card total">
-            <h3>Pontos Totais</h3>
-            <div class="ponto-valor" id="pontosTotais">150</div>
-          </div>
-          <div class="ponto-card gastos">
-            <h3>Pontos Gastos</h3>
-            <div class="ponto-valor" id="pontosGastos">0</div>
-          </div>
-          <div class="ponto-card saldo">
-            <h3>Saldo Disponível</h3>
-            <div class="ponto-valor" id="pontosSaldo">150</div>
-          </div>
+    <!-- SUB-ABAS (APARECE APENAS EM CARACTERÍSTICAS) -->
+    <div id="subTabsContainer" class="sub-tabs-container" style="display: none;">
+        <div class="sub-tabs">
+            <div class="sub-tab active" onclick="openSubTab('sociais')">
+                Riqueza, Aparência e Idiomas
+            </div>
+            <div class="sub-tab" onclick="openSubTab('fisicas')">
+                Características Físicas, Peso e Altura
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO DAS ABAS -->
+    <main>
+        <!-- DASHBOARD -->
+        <div id="dashboard-tab" class="tab-content">
+            <div class="dev-message">
+                <i class="fas fa-tools"></i>
+                <h2>Dashboard - Em Desenvolvimento</h2>
+                <p>Resumo completo do personagem com estatísticas e pontos de construção</p>
+            </div>
         </div>
 
-        <!-- Atributos Principais -->
-        <div class="atributos-principais">
-          <h2 class="secao-titulo">Atributos Principais</h2>
-          <div class="cards-grid principais-grid">
-            <!-- ST -->
-            <div class="atributo-card">
-              <div class="atributo-header">
-                <h3>FORÇA (ST)</h3>
-                <span class="custo-pontos" id="custoST">0</span>
-              </div>
-              <div class="atributo-controles">
-                <button class="btn-controle" onclick="alterarAtributo('ST', -1)">-</button>
-                <input type="number" id="ST" class="atributo-input" value="10" min="1" max="40">
-                <button class="btn-controle" onclick="alterarAtributo('ST', 1)">+</button>
-              </div>
-              <div class="atributo-desc">Custo: 10 pontos por nível</div>
-            </div>
-
-            <!-- DX -->
-            <div class="atributo-card">
-              <div class="atributo-header">
-                <h3>DESTREZA (DX)</h3>
-                <span class="custo-pontos" id="custoDX">0</span>
-              </div>
-              <div class="atributo-controles">
-                <button class="btn-controle" onclick="alterarAtributo('DX', -1)">-</button>
-                <input type="number" id="DX" class="atributo-input" value="10" min="1" max="40">
-                <button class="btn-controle" onclick="alterarAtributo('DX', 1)">+</button>
-              </div>
-              <div class="atributo-desc">Custo: 20 pontos por nível</div>
-            </div>
-
-            <!-- IQ -->
-            <div class="atributo-card">
-              <div class="atributo-header">
-                <h3>INTELIGÊNCIA (IQ)</h3>
-                <span class="custo-pontos" id="custoIQ">0</span>
-              </div>
-              <div class="atributo-controles">
-                <button class="btn-controle" onclick="alterarAtributo('IQ', -1)">-</button>
-                <input type="number" id="IQ" class="atributo-input" value="10" min="1" max="40">
-                <button class="btn-controle" onclick="alterarAtributo('IQ', 1)">+</button>
-              </div>
-              <div class="atributo-desc">Custo: 20 pontos por nível</div>
-            </div>
-
-            <!-- HT -->
-            <div class="atributo-card">
-              <div class="atributo-header">
-                <h3>VIGOR (HT)</h3>
-                <span class="custo-pontos" id="custoHT">0</span>
-              </div>
-              <div class="atributo-controles">
-                <button class="btn-controle" onclick="alterarAtributo('HT', -1)">-</button>
-                <input type="number" id="HT" class="atributo-input" value="10" min="1" max="40">
-                <button class="btn-controle" onclick="alterarAtributo('HT', 1)">+</button>
-              </div>
-              <div class="atributo-desc">Custo: 10 pontos por nível</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Atributos Secundários -->
-        <div class="atributos-secundarios">
-          <h2 class="secao-titulo">Atributos Secundários</h2>
-          <div class="cards-grid secundarios-grid">
-            <!-- PV -->
-            <div class="secundario-card">
-              <h3>PONTOS DE VIDA (PV)</h3>
-              <div class="secundario-base">
-                <span class="base-label">Base:</span>
-                <span class="base-valor" id="PVBase">10</span>
-              </div>
-              <div class="bonus-section">
-                <span class="bonus-label">Bônus/Redutor:</span>
-                <input type="number" id="bonusPV" class="bonus-input" value="0" min="-10" max="10">
-              </div>
-              <div class="secundario-total">
-                <span class="total-label">Total:</span>
-                <span class="total-valor" id="PVTotal">10</span>
-              </div>
-              <div class="secundario-desc">Baseado em ST</div>
-            </div>
-
-            <!-- PF -->
-            <div class="secundario-card">
-              <h3>PONTOS DE FADIGA (PF)</h3>
-              <div class="secundario-base">
-                <span class="base-label">Base:</span>
-                <span class="base-valor" id="PFBase">10</span>
-              </div>
-              <div class="bonus-section">
-                <span class="bonus-label">Bônus/Redutor:</span>
-                <input type="number" id="bonusPF" class="bonus-input" value="0" min="-10" max="10">
-              </div>
-              <div class="secundario-total">
-                <span class="total-label">Total:</span>
-                <span class="total-valor" id="PFTotal">10</span>
-              </div>
-              <div class="secundario-desc">Baseado em HT</div>
-            </div>
-
-            <!-- Vontade -->
-            <div class="secundario-card">
-              <h3>VONTADE</h3>
-              <div class="secundario-base">
-                <span class="base-label">Base:</span>
-                <span class="base-valor" id="VontadeBase">10</span>
-              </div>
-              <div class="bonus-section">
-                <span class="bonus-label">Bônus/Redutor:</span>
-                <input type="number" id="bonusVontade" class="bonus-input" value="0" min="-10" max="10">
-              </div>
-              <div class="secundario-total">
-                <span class="total-label">Total:</span>
-                <span class="total-valor" id="VontadeTotal">10</span>
-              </div>
-              <div class="secundario-desc">Baseado em IQ</div>
-            </div>
-
-            <!-- Percepção -->
-            <div class="secundario-card">
-              <h3>PERCEPÇÃO</h3>
-              <div class="secundario-base">
-                <span class="base-label">Base:</span>
-                <span class="base-valor" id="PercepcaoBase">10</span>
-              </div>
-              <div class="bonus-section">
-                <span class="bonus-label">Bônus/Redutor:</span>
-                <input type="number" id="bonusPercepcao" class="bonus-input" value="0" min="-10" max="10">
-              </div>
-              <div class="secundario-total">
-                <span class="total-label">Total:</span>
-                <span class="total-valor" id="PercepcaoTotal">10</span>
-              </div>
-              <div class="secundario-desc">Baseado em IQ</div>
-            </div>
-
-            <!-- Deslocamento -->
-            <div class="secundario-card">
-              <h3>DESLOCAMENTO</h3>
-              <div class="secundario-base">
-                <span class="base-label">Base:</span>
-                <span class="base-valor" id="DeslocamentoBase">5.00</span>
-              </div>
-              <div class="bonus-section">
-                <span class="bonus-label">Bônus/Redutor:</span>
-                <input type="number" id="bonusDeslocamento" class="bonus-input" value="0" min="-5" max="5" step="0.25">
-              </div>
-              <div class="secundario-total">
-                <span class="total-label">Total:</span>
-                <span class="total-valor" id="DeslocamentoTotal">5.00</span>
-              </div>
-              <div class="secundario-desc">(DX + HT) / 4</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sistema de Combate -->
-        <div class="combate-section">
-          <h2 class="secao-titulo">Sistema de Combate</h2>
-          <div class="cards-grid combate-grid">
-            <!-- Dano Base -->
-            <div class="combate-card">
-              <h3>DANO BÁSICO</h3>
-              <div class="dano-container">
-                <div class="dano-tipo">
-                  <span class="dano-label">GDP:</span>
-                  <span class="dano-valor" id="danoGDP">1d-2</span>
+        <!-- ATRIBUTOS -->
+        <div id="atributos-tab" class="tab-content" style="display: none;">
+            <div class="atributos-container">
+                <!-- Seção de Pontos -->
+                <div class="pontos-section">
+                    <div class="ponto-card total">
+                        <h3>Pontos Totais</h3>
+                        <div class="ponto-valor" id="pontosTotais">150</div>
+                    </div>
+                    <div class="ponto-card gastos">
+                        <h3>Pontos Gastos</h3>
+                        <div class="ponto-valor" id="pontosGastos">0</div>
+                    </div>
+                    <div class="ponto-card saldo">
+                        <h3>Saldo Disponível</h3>
+                        <div class="ponto-valor" id="pontosSaldo">150</div>
+                    </div>
                 </div>
-                <div class="dano-tipo">
-                  <span class="dano-label">GEB:</span>
-                  <span class="dano-valor" id="danoGEB">1d</span>
+
+                <!-- Atributos Principais -->
+                <div class="atributos-principais">
+                    <h2 class="secao-titulo">Atributos Principais</h2>
+                    <div class="cards-grid principais-grid">
+                        <!-- ST -->
+                        <div class="atributo-card">
+                            <div class="atributo-header">
+                                <h3>FORÇA (ST)</h3>
+                                <span class="custo-pontos" id="custoST">0</span>
+                            </div>
+                            <div class="atributo-controles">
+                                <button class="btn-controle" onclick="alterarAtributo('ST', -1)">-</button>
+                                <input type="number" id="ST" class="atributo-input" value="10" min="1" max="40">
+                                <button class="btn-controle" onclick="alterarAtributo('ST', 1)">+</button>
+                            </div>
+                            <div class="atributo-desc">Custo: 10 pontos por nível</div>
+                        </div>
+
+                        <!-- DX -->
+                        <div class="atributo-card">
+                            <div class="atributo-header">
+                                <h3>DESTREZA (DX)</h3>
+                                <span class="custo-pontos" id="custoDX">0</span>
+                            </div>
+                            <div class="atributo-controles">
+                                <button class="btn-controle" onclick="alterarAtributo('DX', -1)">-</button>
+                                <input type="number" id="DX" class="atributo-input" value="10" min="1" max="40">
+                                <button class="btn-controle" onclick="alterarAtributo('DX', 1)">+</button>
+                            </div>
+                            <div class="atributo-desc">Custo: 20 pontos por nível</div>
+                        </div>
+
+                        <!-- IQ -->
+                        <div class="atributo-card">
+                            <div class="atributo-header">
+                                <h3>INTELIGÊNCIA (IQ)</h3>
+                                <span class="custo-pontos" id="custoIQ">0</span>
+                            </div>
+                            <div class="atributo-controles">
+                                <button class="btn-controle" onclick="alterarAtributo('IQ', -1)">-</button>
+                                <input type="number" id="IQ" class="atributo-input" value="10" min="1" max="40">
+                                <button class="btn-controle" onclick="alterarAtributo('IQ', 1)">+</button>
+                            </div>
+                            <div class="atributo-desc">Custo: 20 pontos por nível</div>
+                        </div>
+
+                        <!-- HT -->
+                        <div class="atributo-card">
+                            <div class="atributo-header">
+                                <h3>VIGOR (HT)</h3>
+                                <span class="custo-pontos" id="custoHT">0</span>
+                            </div>
+                            <div class="atributo-controles">
+                                <button class="btn-controle" onclick="alterarAtributo('HT', -1)">-</button>
+                                <input type="number" id="HT" class="atributo-input" value="10" min="1" max="40">
+                                <button class="btn-controle" onclick="alterarAtributo('HT', 1)">+</button>
+                            </div>
+                            <div class="atributo-desc">Custo: 10 pontos por nível</div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="combate-desc">Baseado em ST</div>
-            </div>
 
-            <!-- Níveis de Carga -->
-            <div class="combate-card">
-              <h3>NÍVEIS DE CARGA</h3>
-              <div class="carga-container">
-                <div class="carga-item">
-                  <span class="carga-label">Nenhuma:</span>
-                  <span class="carga-valor" id="cargaNenhuma">10.0</span>
+                <!-- Atributos Secundários -->
+                <div class="atributos-secundarios">
+                    <h2 class="secao-titulo">Atributos Secundários</h2>
+                    <div class="cards-grid secundarios-grid">
+                        <!-- PV -->
+                        <div class="secundario-card">
+                            <h3>PONTOS DE VIDA (PV)</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="PVBase">10</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusPV" class="bonus-input" value="0" min="-10" max="10">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="PVTotal">10</span>
+                            </div>
+                            <div class="secundario-desc">Baseado em ST</div>
+                        </div>
+
+                        <!-- PF -->
+                        <div class="secundario-card">
+                            <h3>PONTOS DE FADIGA (PF)</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="PFBase">10</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusPF" class="bonus-input" value="0" min="-10" max="10">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="PFTotal">10</span>
+                            </div>
+                            <div class="secundario-desc">Baseado em HT</div>
+                        </div>
+
+                        <!-- Vontade -->
+                        <div class="secundario-card">
+                            <h3>VONTADE</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="VontadeBase">10</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusVontade" class="bonus-input" value="0" min="-10" max="10">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="VontadeTotal">10</span>
+                            </div>
+                            <div class="secundario-desc">Baseado em IQ</div>
+                        </div>
+
+                        <!-- Percepção -->
+                        <div class="secundario-card">
+                            <h3>PERCEPÇÃO</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="PercepcaoBase">10</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusPercepcao" class="bonus-input" value="0" min="-10" max="10">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="PercepcaoTotal">10</span>
+                            </div>
+                            <div class="secundario-desc">Baseado em IQ</div>
+                        </div>
+
+                        <!-- Deslocamento -->
+                        <div class="secundario-card">
+                            <h3>DESLOCAMENTO</h3>
+                            <div class="secundario-base">
+                                <span class="base-label">Base:</span>
+                                <span class="base-valor" id="DeslocamentoBase">5.00</span>
+                            </div>
+                            <div class="bonus-section">
+                                <span class="bonus-label">Bônus/Redutor:</span>
+                                <input type="number" id="bonusDeslocamento" class="bonus-input" value="0" min="-5" max="5" step="0.25">
+                            </div>
+                            <div class="secundario-total">
+                                <span class="total-label">Total:</span>
+                                <span class="total-valor" id="DeslocamentoTotal">5.00</span>
+                            </div>
+                            <div class="secundario-desc">(DX + HT) / 4</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="carga-item">
-                  <span class="carga-label">Leve:</span>
-                  <span class="carga-valor" id="cargaLeve">20.0</span>
+
+                <!-- Sistema de Combate -->
+                <div class="combate-section">
+                    <h2 class="secao-titulo">Sistema de Combate</h2>
+                    <div class="cards-grid combate-grid">
+                        <!-- Dano Base -->
+                        <div class="combate-card">
+                            <h3>DANO BÁSICO</h3>
+                            <div class="dano-container">
+                                <div class="dano-tipo">
+                                    <span class="dano-label">GDP:</span>
+                                    <span class="dano-valor" id="danoGDP">1d-2</span>
+                                </div>
+                                <div class="dano-tipo">
+                                    <span class="dano-label">GEB:</span>
+                                    <span class="dano-valor" id="danoGEB">1d</span>
+                                </div>
+                            </div>
+                            <div class="combate-desc">Baseado em ST</div>
+                        </div>
+
+                        <!-- Níveis de Carga -->
+                        <div class="combate-card">
+                            <h3>NÍVEIS DE CARGA</h3>
+                            <div class="carga-container">
+                                <div class="carga-item">
+                                    <span class="carga-label">Nenhuma:</span>
+                                    <span class="carga-valor" id="cargaNenhuma">10.0</span>
+                                </div>
+                                <div class="carga-item">
+                                    <span class="carga-label">Leve:</span>
+                                    <span class="carga-valor" id="cargaLeve">20.0</span>
+                                </div>
+                                <div class="carga-item">
+                                    <span class="carga-label">Média:</span>
+                                    <span class="carga-valor" id="cargaMedia">30.0</span>
+                                </div>
+                                <div class="carga-item">
+                                    <span class="carga-label">Pesada:</span>
+                                    <span class="carga-valor" id="cargaPesada">60.0</span>
+                                </div>
+                                <div class="carga-item">
+                                    <span class="carga-label">Muito Pesada:</span>
+                                    <span class="carga-valor" id="cargaMuitoPesada">100.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="carga-item">
-                  <span class="carga-label">Média:</span>
-                  <span class="carga-valor" id="cargaMedia">30.0</span>
+                
+                <!-- Mensagem de Status -->
+                <div id="statusAtributos" class="status-message info">
+                    <i class="fas fa-info-circle"></i> Sistema de atributos carregado. Ajuste os valores e observe os cálculos automáticos.
                 </div>
-                <div class="carga-item">
-                  <span class="carga-label">Pesada:</span>
-                  <span class="carga-valor" id="cargaPesada">60.0</span>
+            </div>
+        </div>
+
+        <!-- CARACTERÍSTICAS -->
+        <div id="caracteristicas-tab" class="tab-content" style="display: none;">
+            <!-- Conteúdo da sub-aba Sociais -->
+            <div id="sociais-subtab" class="subtab-content">
+                <div class="caracteristicas-container">
+                    <!-- Sub-aba Riqueza -->
+                    <div class="caracteristica-tab active" id="riqueza-tab">
+                        <div class="secao-riqueza">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-coins"></i> Riqueza e Status Financeiro
+                            </h2>
+                            <div class="status-riqueza">
+                                <!-- Nível de Riqueza -->
+                                <div class="nivel-riqueza">
+                                    <h3>Nível de Riqueza</h3>
+                                    <div class="niveis-container">
+                                        <div class="nivel-item" data-nivel="pobre">
+                                            <div class="nivel-titulo">Pobre</div>
+                                            <div class="nivel-custo">-25 pts</div>
+                                            <div class="nivel-desc">1/5 do padrão</div>
+                                        </div>
+                                        <div class="nivel-item" data-nivel="empobrecido">
+                                            <div class="nivel-titulo">Empobrecido</div>
+                                            <div class="nivel-custo">-15 pts</div>
+                                            <div class="nivel-desc">1/2 do padrão</div>
+                                        </div>
+                                        <div class="nivel-item ativo" data-nivel="padrao">
+                                            <div class="nivel-titulo">Padrão</div>
+                                            <div class="nivel-custo">0 pts</div>
+                                            <div class="nivel-desc">Nível básico</div>
+                                        </div>
+                                        <div class="nivel-item" data-nivel="confortavel">
+                                            <div class="nivel-titulo">Confortável</div>
+                                            <div class="nivel-custo">10 pts</div>
+                                            <div class="nivel-desc">2x o padrão</div>
+                                        </div>
+                                        <div class="nivel-item" data-nivel="rico">
+                                            <div class="nivel-titulo">Rico</div>
+                                            <div class="nivel-custo">20 pts</div>
+                                            <div class="nivel-desc">5x o padrão</div>
+                                        </div>
+                                        <div class="nivel-item" data-nivel="muito-rico">
+                                            <div class="nivel-titulo">Muito Rico</div>
+                                            <div class="nivel-custo">30 pts</div>
+                                            <div class="nivel-desc">20x o padrão</div>
+                                        </div>
+                                        <div class="nivel-item" data-nivel="filantropico">
+                                            <div class="nivel-titulo">Filantrópico</div>
+                                            <div class="nivel-custo">50 pts</div>
+                                            <div class="nivel-desc">100x o padrão</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Status Atual -->
+                                <div class="status-atual">
+                                    <h3>Status Atual</h3>
+                                    <div class="status-info">
+                                        <div class="info-item">
+                                            <span class="info-label">Renda Mensal:</span>
+                                            <span class="info-valor" id="rendaMensal">$1,000</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Fortuna:</span>
+                                            <span class="info-valor" id="fortuna">$5,000</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Custo de Vida:</span>
+                                            <span class="info-valor" id="custoVida">$700/mês</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Pontos:</span>
+                                            <span class="info-valor pontos" id="pontosRiqueza">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Gastos Iniciais -->
+                                <div class="gastos-iniciais">
+                                    <h3>Gastos Iniciais com Equipamento</h3>
+                                    <div class="gastos-controles">
+                                        <div class="controle-item">
+                                            <label>Porcentagem da Fortuna:</label>
+                                            <div class="range-container">
+                                                <input type="range" id="porcentagemFortuna" min="0" max="100" value="80" step="5">
+                                                <span id="porcentagemValor">80%</span>
+                                            </div>
+                                        </div>
+                                        <div class="controle-item">
+                                            <label>Valor Disponível:</label>
+                                            <div class="valor-disponivel" id="valorDisponivel">$4,000</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub-aba Aparência -->
+                    <div class="caracteristica-tab" id="aparencia-tab" style="display: none;">
+                        <div class="secao-aparencia">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-user"></i> Aparência Física
+                            </h2>
+                            <div class="aparencia-container">
+                                <!-- Níveis de Aparência -->
+                                <div class="niveis-aparencia">
+                                    <h3>Nível de Aparência</h3>
+                                    <div class="aparencia-grid">
+                                        <div class="aparencia-item" data-nivel="horrivel">
+                                            <div class="aparencia-icon">
+                                                <i class="fas fa-dizzy"></i>
+                                            </div>
+                                            <div class="aparencia-info">
+                                                <h4>Horrível</h4>
+                                                <div class="aparencia-custo">-16 pts</div>
+                                                <p>Reação -4, assusta crianças</p>
+                                            </div>
+                                        </div>
+                                        <div class="aparencia-item" data-nivel="feio">
+                                            <div class="aparencia-icon">
+                                                <i class="fas fa-frown"></i>
+                                            </div>
+                                            <div class="aparencia-info">
+                                                <h4>Feio</h4>
+                                                <div class="aparencia-custo">-8 pts</div>
+                                                <p>Reação -2</p>
+                                            </div>
+                                        </div>
+                                        <div class="aparencia-item ativo" data-nivel="normal">
+                                            <div class="aparencia-icon">
+                                                <i class="fas fa-meh"></i>
+                                            </div>
+                                            <div class="aparencia-info">
+                                                <h4>Normal</h4>
+                                                <div class="aparencia-custo">0 pts</div>
+                                                <p>Sem modificadores</p>
+                                            </div>
+                                        </div>
+                                        <div class="aparencia-item" data-nivel="atraente">
+                                            <div class="aparencia-icon">
+                                                <i class="fas fa-smile"></i>
+                                            </div>
+                                            <div class="aparencia-info">
+                                                <h4>Atraente</h4>
+                                                <div class="aparencia-custo">4 pts</div>
+                                                <p>Reação +1</p>
+                                            </div>
+                                        </div>
+                                        <div class="aparencia-item" data-nivel="bonito">
+                                            <div class="aparencia-icon">
+                                                <i class="fas fa-smile-beam"></i>
+                                            </div>
+                                            <div class="aparencia-info">
+                                                <h4>Bonito</h4>
+                                                <div class="aparencia-custo">12 pts</div>
+                                                <p>Reação +2</p>
+                                            </div>
+                                        </div>
+                                        <div class="aparencia-item" data-nivel="lindo">
+                                            <div class="aparencia-icon">
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <div class="aparencia-info">
+                                                <h4>Lindo</h4>
+                                                <div class="aparencia-custo">16 pts</div>
+                                                <p>Reação +3</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Descrição da Aparência -->
+                                <div class="descricao-aparencia">
+                                    <h3>Descrição Detalhada</h3>
+                                    <div class="descricao-inputs">
+                                        <div class="input-group">
+                                            <label>Cabelo:</label>
+                                            <input type="text" id="cabelo" placeholder="Cor, estilo, comprimento...">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Olhos:</label>
+                                            <input type="text" id="olhos" placeholder="Cor, formato...">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Pele:</label>
+                                            <input type="text" id="pele" placeholder="Tom, textura...">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Características Marcantes:</label>
+                                            <textarea id="caracteristicasMarcantes" placeholder="Cicatrizes, tatuagens, piercings, marcas de nascença..."></textarea>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Estilo de Vestir:</label>
+                                            <textarea id="estiloVestir" placeholder="Como costuma se vestir..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub-aba Idiomas -->
+                    <div class="caracteristica-tab" id="idiomas-tab" style="display: none;">
+                        <div class="secao-idiomas">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-language"></i> Idiomas e Alfabetização
+                            </h2>
+                            <div class="idiomas-container">
+                                <!-- Idioma Nativo -->
+                                <div class="idioma-nativo">
+                                    <h3>Idioma Nativo</h3>
+                                    <div class="idioma-selecao">
+                                        <select id="idiomaNativo">
+                                            <option value="portugues">Português (Brasil)</option>
+                                            <option value="ingles">Inglês</option>
+                                            <option value="espanhol">Espanhol</option>
+                                            <option value="frances">Francês</option>
+                                            <option value="alemao">Alemão</option>
+                                            <option value="japones">Japonês</option>
+                                            <option value="chines">Chinês</option>
+                                            <option value="russo">Russo</option>
+                                            <option value="arabe">Árabe</option>
+                                            <option value="outro">Outro</option>
+                                        </select>
+                                        <div class="idioma-info">
+                                            <p>Idioma nativo: Custo 0 pontos, alfabetizado automaticamente</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Idiomas Adicionais -->
+                                <div class="idiomas-adicionais">
+                                    <h3>Idiomas Adicionais</h3>
+                                    <div class="idiomas-lista" id="idiomasLista">
+                                        <!-- Idiomas serão adicionados aqui -->
+                                    </div>
+                                    <button class="btn-adicionar-idioma" onclick="adicionarIdioma()">
+                                        <i class="fas fa-plus"></i> Adicionar Idioma
+                                    </button>
+                                </div>
+
+                                <!-- Resumo de Pontos -->
+                                <div class="resumo-idiomas">
+                                    <h3>Resumo de Pontos</h3>
+                                    <div class="resumo-grid">
+                                        <div class="resumo-item">
+                                            <span>Idiomas:</span>
+                                            <span class="resumo-valor" id="pontosIdiomas">0</span>
+                                        </div>
+                                        <div class="resumo-item">
+                                            <span>Alfabetização:</span>
+                                            <span class="resumo-valor" id="pontosAlfabetizacao">0</span>
+                                        </div>
+                                        <div class="resumo-item total">
+                                            <span>Total:</span>
+                                            <span class="resumo-valor" id="totalIdiomas">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="carga-item">
-                  <span class="carga-label">Muito Pesada:</span>
-                  <span class="carga-valor" id="cargaMuitoPesada">100.0</span>
+            </div>
+
+            <!-- Conteúdo da sub-aba Físicas -->
+            <div id="fisicas-subtab" class="subtab-content" style="display: none;">
+                <div class="fisicas-container">
+                    <!-- Sub-aba Características Físicas -->
+                    <div class="caracteristica-tab active" id="caracteristicas-fisicas-tab">
+                        <div class="secao-caracteristicas-fisicas">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-user-md"></i> Características Físicas
+                            </h2>
+                            <div class="caracteristicas-grid">
+                                <!-- Visão -->
+                                <div class="caracteristica-item">
+                                    <div class="caracteristica-header">
+                                        <h3>Visão</h3>
+                                        <span class="caracteristica-custo" id="custoVisao">0</span>
+                                    </div>
+                                    <div class="caracteristica-opcoes">
+                                        <div class="opcao-fisica" data-tipo="visao" data-valor="miopia">
+                                            <input type="checkbox" id="miopia">
+                                            <label for="miopia">Miopia (-25 pts)</label>
+                                            <p class="opcao-desc">-6 em testes visuais a distância</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="visao" data-valor="hipermetropia">
+                                            <input type="checkbox" id="hipermetropia">
+                                            <label for="hipermetropia">Hipermetropia (-10 pts)</label>
+                                            <p class="opcao-desc">-3 em testes visuais próximos</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="visao" data-valor="visao-noturna">
+                                            <input type="checkbox" id="visao-noturna">
+                                            <label for="visao-noturna">Visão Noturna (10 pts)</label>
+                                            <p class="opcao-desc">Veja na penumbra como se fosse dia</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Audição -->
+                                <div class="caracteristica-item">
+                                    <div class="caracteristica-header">
+                                        <h3>Audição</h3>
+                                        <span class="caracteristica-custo" id="custoAudicao">0</span>
+                                    </div>
+                                    <div class="caracteristica-opcoes">
+                                        <div class="opcao-fisica" data-tipo="audicao" data-valor="surdez">
+                                            <input type="checkbox" id="surdez">
+                                            <label for="surdez">Surdez (-20 pts)</label>
+                                            <p class="opcao-desc">Completamente surdo</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="audicao" data-valor="surdez-parcial">
+                                            <input type="checkbox" id="surdez-parcial">
+                                            <label for="surdez-parcial">Surdez Parcial (-10 pts)</label>
+                                            <p class="opcao-desc">-4 em testes de audição</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="audicao" data-valor="audicao-aguçada">
+                                            <input type="checkbox" id="audicao-aguçada">
+                                            <label for="audicao-aguçada">Audição Aguçada (2 pts)</label>
+                                            <p class="opcao-desc">+2 em testes de audição</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fala -->
+                                <div class="caracteristica-item">
+                                    <div class="caracteristica-header">
+                                        <h3>Fala</h3>
+                                        <span class="caracteristica-custo" id="custoFala">0</span>
+                                    </div>
+                                    <div class="caracteristica-opcoes">
+                                        <div class="opcao-fisica" data-tipo="fala" data-valor="mudo">
+                                            <input type="checkbox" id="mudo">
+                                            <label for="mudo">Mudo (-25 pts)</label>
+                                            <p class="opcao-desc">Não pode falar</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="fala" data-valor="gago">
+                                            <input type="checkbox" id="gago">
+                                            <label for="gago">Gago (-10 pts)</label>
+                                            <p class="opcao-desc">-2 em testes sociais que envolvam fala</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="fala" data-valor="voz-melodiosa">
+                                            <input type="checkbox" id="voz-melodiosa">
+                                            <label for="voz-melodiosa">Voz Melodiosa (10 pts)</label>
+                                            <p class="opcao-desc">+2 em canto e discursos</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mobilidade -->
+                                <div class="caracteristica-item">
+                                    <div class="caracteristica-header">
+                                        <h3>Mobilidade</h3>
+                                        <span class="caracteristica-custo" id="custoMobilidade">0</span>
+                                    </div>
+                                    <div class="caracteristica-opcoes">
+                                        <div class="opcao-fisica" data-tipo="mobilidade" data-valor="manco">
+                                            <input type="checkbox" id="manco">
+                                            <label for="manco">Manco (-15 pts)</label>
+                                            <p class="opcao-desc">Movimento reduzido, -2 em acrobacias</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="mobilidade" data-valor="amputado">
+                                            <input type="checkbox" id="amputado">
+                                            <label for="amputado">Amputado (-Variable)</label>
+                                            <p class="opcao-desc">Perda de membro</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="mobilidade" data-valor="flexivel">
+                                            <input type="checkbox" id="flexivel">
+                                            <label for="flexivel">Flexível (5 pts)</label>
+                                            <p class="opcao-desc">+3 em Escape e contorcionismo</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Saúde -->
+                                <div class="caracteristica-item">
+                                    <div class="caracteristica-header">
+                                        <h3>Saúde</h3>
+                                        <span class="caracteristica-custo" id="custoSaude">0</span>
+                                    </div>
+                                    <div class="caracteristica-opcoes">
+                                        <div class="opcao-fisica" data-tipo="saude" data-valor="doente-cronico">
+                                            <input type="checkbox" id="doente-cronico">
+                                            <label for="doente-cronico">Doença Crônica (-Variable)</label>
+                                            <p class="opcao-desc">Doença persistente</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="saude" data-valor="alergia">
+                                            <input type="checkbox" id="alergia">
+                                            <label for="alergia">Alergia (-Variable)</label>
+                                            <p class="opcao-desc">Reação alérgica</p>
+                                        </div>
+                                        <div class="opcao-fisica" data-tipo="saude" data-valor="imunidade">
+                                            <input type="checkbox" id="imunidade">
+                                            <label for="imunidade">Imunidade (10 pts)</label>
+                                            <p class="opcao-desc">Imune a uma doença específica</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Resumo -->
+                                <div class="caracteristica-item resumo">
+                                    <div class="caracteristica-header">
+                                        <h3>Resumo de Pontos</h3>
+                                        <span class="caracteristica-custo" id="totalCaracteristicas">0</span>
+                                    </div>
+                                    <div class="resumo-detalhes">
+                                        <div class="detalhe-item">
+                                            <span>Visão:</span>
+                                            <span id="resumoVisao">0</span>
+                                        </div>
+                                        <div class="detalhe-item">
+                                            <span>Audição:</span>
+                                            <span id="resumoAudicao">0</span>
+                                        </div>
+                                        <div class="detalhe-item">
+                                            <span>Fala:</span>
+                                            <span id="resumoFala">0</span>
+                                        </div>
+                                        <div class="detalhe-item">
+                                            <span>Mobilidade:</span>
+                                            <span id="resumoMobilidade">0</span>
+                                        </div>
+                                        <div class="detalhe-item">
+                                            <span>Saúde:</span>
+                                            <span id="resumoSaude">0</span>
+                                        </div>
+                                        <div class="detalhe-item total">
+                                            <span>Total:</span>
+                                            <span id="resumoTotal">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub-aba Peso e Altura -->
+                    <div class="caracteristica-tab" id="peso-altura-tab" style="display: none;">
+                        <div class="secao-peso-altura">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-weight-hanging"></i> Peso e Altura
+                            </h2>
+                            <div class="peso-altura-container">
+                                <!-- Calculadora de Tamanho -->
+                                <div class="calculadora-tamanho">
+                                    <h3>Calculadora de Tamanho</h3>
+                                    <div class="calculadora-inputs">
+                                        <div class="input-group">
+                                            <label for="altura">Altura (cm):</label>
+                                            <div class="input-with-buttons">
+                                                <button class="btn-input" onclick="ajustarAltura(-5)">-5</button>
+                                                <input type="number" id="altura" value="175" min="100" max="250">
+                                                <button class="btn-input" onclick="ajustarAltura(5)">+5</button>
+                                            </div>
+                                            <span class="altura-pes">(5'9")</span>
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="peso">Peso (kg):</label>
+                                            <div class="input-with-buttons">
+                                                <button class="btn-input" onclick="ajustarPeso(-5)">-5</button>
+                                                <input type="number" id="peso" value="70" min="30" max="200">
+                                                <button class="btn-input" onclick="ajustarPeso(5)">+5</button>
+                                            </div>
+                                            <span class="peso-libras">(154 lbs)</span>
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="tamanho">Modificador de Tamanho:</label>
+                                            <input type="number" id="tamanho" value="0" min="-5" max="5" readonly>
+                                            <span class="tamanho-desc">Baseado na altura</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Gráfico IMC -->
+                                    <div class="imc-container">
+                                        <h4>Índice de Massa Corporal (IMC)</h4>
+                                        <div class="imc-bar">
+                                            <div class="imc-indicator" id="imcIndicator"></div>
+                                        </div>
+                                        <div class="imc-labels">
+                                            <span>Abaixo do peso</span>
+                                            <span>Normal</span>
+                                            <span>Sobrepeso</span>
+                                            <span>Obeso</span>
+                                        </div>
+                                        <div class="imc-valor">
+                                            <span>IMC:</span>
+                                            <span id="imcValor">22.86</span>
+                                            <span class="imc-categoria" id="imcCategoria">(Normal)</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tabela de Referência -->
+                                <div class="tabela-referencia">
+                                    <h3>Tabela de Referência</h3>
+                                    <div class="tabela-container">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Altura (cm)</th>
+                                                    <th>Peso Ideal (kg)</th>
+                                                    <th>Tamanho</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>150-160</td>
+                                                    <td>45-60</td>
+                                                    <td>-1</td>
+                                                </tr>
+                                                <tr class="ativa">
+                                                    <td>161-180</td>
+                                                    <td>61-80</td>
+                                                    <td>0</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>181-190</td>
+                                                    <td>81-95</td>
+                                                    <td>+1</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>191-210</td>
+                                                    <td>96-120</td>
+                                                    <td>+2</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>211+</td>
+                                                    <td>121+</td>
+                                                    <td>+3</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Descrição Física -->
+                                <div class="descricao-fisica">
+                                    <h3>Descrição Física</h3>
+                                    <div class="descricao-input">
+                                        <textarea id="descricaoFisica" placeholder="Descreva o físico do personagem: constituição, proporções, postura, características físicas notáveis..."></textarea>
+                                        <div class="contador-caracteres">
+                                            <span id="contadorCaracteres">0</span>/500 caracteres
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-        
-        <!-- Mensagem de Status -->
-        <div id="statusAtributos" class="status-message info">
-          <i class="fas fa-info-circle"></i> Sistema de atributos carregado. Ajuste os valores e observe os cálculos automáticos.
-        </div>
-      </div>
-    </div>
 
-    <!-- CARACTERÍSTICAS -->
-    <div id="caracteristicas-tab" class="tab-content" style="display: none;">
-      <div class="caracteristicas-container">
-        <!-- Conteúdo da aba características aqui... -->
-        <div class="dev-message">
-          <i class="fas fa-tools"></i>
-          <h2>Características - Em Desenvolvimento</h2>
-          <p>Sistema de características físicas e sociais</p>
-        </div>
-      </div>
-    </div>
+        <!-- VANTAGENS/DESVANTAGENS -->
+        <div id="vantagens-tab" class="tab-content" style="display: none;">
+            <div class="vantagens-container">
+                <!-- CARD ÚNICO DE RESUMO DE PONTOS -->
+                <div class="resumo-consolidado">
+                    <h2 class="secao-titulo">
+                        <i class="fas fa-chart-pie"></i> Resumo de Pontos
+                    </h2>
+                    <div class="ponto-card-consolidado">
+                        <div class="ponto-linha vantagens-linha">
+                            <div class="ponto-label">
+                                <i class="fas fa-crown"></i>
+                                <span>Vantagens</span>
+                            </div>
+                            <div class="ponto-valor vantagem-total">0</div>
+                            <div class="ponto-desc">Pontos Gastos</div>
+                        </div>
+                        
+                        <div class="ponto-linha desvantagens-linha">
+                            <div class="ponto-label">
+                                <i class="fas fa-skull-crossbones"></i>
+                                <span>Desvantagens</span>
+                            </div>
+                            <div class="ponto-valor desvantagem-total">0</div>
+                            <div class="ponto-desc">Pontos Ganhos</div>
+                        </div>
+                        
+                        <div class="ponto-linha peculiaridades-linha">
+                            <div class="ponto-label">
+                                <i class="fas fa-star"></i>
+                                <span>Peculiaridades</span>
+                                <span class="ponto-subinfo">(máx. 5)</span>
+                            </div>
+                            <div class="ponto-valor peculiaridades-total">0</div>
+                            <div class="ponto-desc">-1 ponto cada</div>
+                        </div>
+                        
+                        <div class="ponto-separador"></div>
+                        
+                        <div class="ponto-linha saldo-linha">
+                            <div class="ponto-label">
+                                <i class="fas fa-scale-balanced"></i>
+                                <span>Saldo Final</span>
+                            </div>
+                            <div class="ponto-valor saldo-final">0</div>
+                            <div class="ponto-desc">Total Disponível</div>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- VANTAGENS/DESVANTAGENS -->
-<div id="vantagens-tab" class="tab-content" style="display: none;">
-  <div class="vantagens-container">
-    
-    <!-- CARD ÚNICO DE RESUMO DE PONTOS -->
-    <div class="resumo-consolidado">
-      <h2 class="secao-titulo">
-        <i class="fas fa-chart-pie"></i> Resumo de Pontos
-      </h2>
-      <div class="ponto-card-consolidado">
-        <div class="ponto-linha vantagens-linha">
-          <div class="ponto-label">
-            <i class="fas fa-crown"></i>
-            <span>Vantagens</span>
-          </div>
-          <div class="ponto-valor vantagem-total">0</div>
-          <div class="ponto-desc">Pontos Gastos</div>
-        </div>
-        
-        <div class="ponto-linha desvantagens-linha">
-          <div class="ponto-label">
-            <i class="fas fa-skull-crossbones"></i>
-            <span>Desvantagens</span>
-          </div>
-          <div class="ponto-valor desvantagem-total">0</div>
-          <div class="ponto-desc">Pontos Ganhos</div>
-        </div>
-        
-        <div class="ponto-linha peculiaridades-linha">
-          <div class="ponto-label">
-            <i class="fas fa-star"></i>
-            <span>Peculiaridades</span>
-            <span class="ponto-subinfo">(máx. 5)</span>
-          </div>
-          <div class="ponto-valor peculiaridades-total">0</div>
-          <div class="ponto-desc">-1 ponto cada</div>
-        </div>
-        
-        <div class="ponto-separador"></div>
-        
-        <div class="ponto-linha saldo-linha">
-          <div class="ponto-label">
-            <i class="fas fa-scale-balanced"></i>
-            <span>Saldo Final</span>
-          </div>
-          <div class="ponto-valor saldo-final">0</div>
-          <div class="ponto-desc">Total Disponível</div>
-        </div>
-      </div>
-    </div>
+                <!-- LAYOUT PRINCIPAL (2 COLUNAS) -->
+                <div class="vantagens-layout">
+                    <!-- COLUNA ESQUERDA: CATÁLOGO -->
+                    <div class="coluna-catalogo">
+                        <div class="secao-catalogo">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-book"></i> Catálogo de Vantagens
+                            </h2>
+                            
+                            <!-- FILTROS POR CATEGORIA -->
+                            <div class="categorias-filtro">
+                                <button class="btn-categoria ativo" data-categoria="todas">
+                                    <i class="fas fa-globe"></i> Todas
+                                </button>
+                                <button class="btn-categoria" data-categoria="fisicas">
+                                    <i class="fas fa-dumbbell"></i> Físicas
+                                </button>
+                                <button class="btn-categoria" data-categoria="mentais">
+                                    <i class="fas fa-brain"></i> Mentais
+                                </button>
+                                <button class="btn-categoria" data-categoria="sobrenaturais">
+                                    <i class="fas fa-magic"></i> Sobrenaturais
+                                </button>
+                                <button class="btn-categoria" data-categoria="sociais">
+                                    <i class="fas fa-handshake"></i> Sociais
+                                </button>
+                                <button class="btn-categoria" data-categoria="supers">
+                                    <i class="fas fa-bolt"></i> Supers
+                                </button>
+                            </div>
+                            
+                            <!-- BARRA DE PESQUISA -->
+                            <div class="pesquisa-container">
+                                <div class="pesquisa-input">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="pesquisa-vantagem" placeholder="Buscar vantagem...">
+                                </div>
+                            </div>
+                            
+                            <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
+                            <div class="catalogo-grid" id="catalogo-vantagens">
+                                <!-- VANTAGENS VÃO AQUI DINAMICAMENTE -->
+                                <div class="vantagem-card" data-categoria="fisicas" data-nome="Força Aprimorada" data-pontos="10" data-desc="Aumenta a força física além do normal.">
+                                    <div class="card-header">
+                                        <h3 class="card-titulo">Força Aprimorada</h3>
+                                        <div class="card-pontos">10</div>
+                                    </div>
+                                    <div class="card-body">
+                                        <span class="card-categoria">Física</span>
+                                        <p class="card-descricao">Aumenta a força física além do normal, permitindo levantar pesos maiores e causar mais dano.</p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <span class="card-tipo">Vantagem</span>
+                                        <button class="btn-adicionar" onclick="selecionarVantagem('Força Aprimorada', 10)">
+                                            <i class="fas fa-plus"></i> Adicionar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="secao-catalogo">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-book-dead"></i> Catálogo de Desvantagens
+                            </h2>
+                            
+                            <!-- FILTROS PARA DESVANTAGENS -->
+                            <div class="categorias-filtro">
+                                <button class="btn-categoria ativo" data-categoria="todas">
+                                    <i class="fas fa-globe"></i> Todas
+                                </button>
+                                <button class="btn-categoria" data-categoria="fisicas">
+                                    <i class="fas fa-dumbbell"></i> Físicas
+                                </button>
+                                <button class="btn-categoria" data-categoria="mentais">
+                                    <i class="fas fa-brain"></i> Mentais
+                                </button>
+                                <button class="btn-categoria" data-categoria="sobrenaturais">
+                                    <i class="fas fa-magic"></i> Sobrenaturais
+                                </button>
+                                <button class="btn-categoria" data-categoria="sociais">
+                                    <i class="fas fa-handshake"></i> Sociais
+                                </button>
+                            </div>
+                            
+                            <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
+                            <div class="catalogo-grid" id="catalogo-desvantagens">
+                                <!-- DESVANTAGENS VÃO AQUI DINAMICAMENTE -->
+                                <div class="desvantagem-card" data-categoria="fisicas" data-nome="Miopia" data-pontos="-10" data-desc="Visão prejudicada para longe.">
+                                    <div class="card-header">
+                                        <h3 class="card-titulo">Miopia</h3>
+                                        <div class="card-pontos">-10</div>
+                                    </div>
+                                    <div class="card-body">
+                                        <span class="card-categoria">Física</span>
+                                        <p class="card-descricao">Dificuldade para enxergar objetos distantes, penalidade em testes visuais à distância.</p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <span class="card-tipo">Desvantagem</span>
+                                        <button class="btn-adicionar" onclick="selecionarDesvantagem('Miopia', -10)">
+                                            <i class="fas fa-plus"></i> Adicionar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- COLUNA DIREITA: ADQUIRIDAS -->
+                    <div class="coluna-adquiridas">
+                        <div class="secao-adquiridas">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-check-circle"></i> Vantagens Adquiridas
+                            </h2>
+                            <div class="adquiridas-container" id="vantagens-adquiridas">
+                                <div class="vazio-mensagem">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>Nenhuma vantagem selecionada ainda</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="secao-adquiridas">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-exclamation-triangle"></i> Desvantagens Adquiridas
+                            </h2>
+                            <div class="adquiridas-container" id="desvantagens-adquiridas">
+                                <div class="vazio-mensagem">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>Nenhuma desvantagem selecionada ainda</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- SECÇÃO PECULIARIDADES -->
+                        <div class="secao-adquiridas">
+                            <h2 class="secao-titulo">
+                                <i class="fas fa-star"></i> Peculiaridades
+                                <span class="peculiaridades-contador">(0/5)</span>
+                            </h2>
+                            <div class="peculiaridades-container">
+                                <div class="peculiaridades-desc">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>Cada peculiaridade custa -1 ponto. Máximo de 5.</p>
+                                </div>
+                                
+                                <div class="peculiaridades-inputs">
+                                    <div class="peculiaridade-input-group">
+                                        <input type="text" class="peculiaridade-input"
+                                            placeholder="Descreva sua primeira peculiaridade..."
+                                            maxlength="100"
+                                            oninput="atualizarPeculiaridade(1, this.value)">
+                                        <span class="peculiaridade-indicador">1</span>
+                                    </div>
+                                    <div class="peculiaridade-input-group">
+                                        <input type="text" class="peculiaridade-input"
+                                            placeholder="Descreva sua segunda peculiaridade..."
+                                            maxlength="100"
+                                            oninput="atualizarPeculiaridade(2, this.value)">
+                                        <span class="peculiaridade-indicador">2</span>
+                                    </div>
+                                    <div class="peculiaridade-input-group">
+                                        <input type="text" class="peculiaridade-input"
+                                            placeholder="Descreva sua terceira peculiaridade..."
+                                            maxlength="100"
+                                            oninput="atualizarPeculiaridade(3, this.value)">
+                                        <span class="peculiaridade-indicador">3</span>
+                                    </div>
+                                    <div class="peculiaridade-input-group">
+                                        <input type="text" class="peculiaridade-input"
+                                            placeholder="Descreva sua quarta peculiaridade..."
+                                            maxlength="100"
+                                            oninput="atualizarPeculiaridade(4, this.value)">
+                                        <span class="peculiaridade-indicador">4</span>
+                                    </div>
+                                    <div class="peculiaridade-input-group">
+                                        <input type="text" class="peculiaridade-input"
+                                            placeholder="Descreva sua quinta peculiaridade..."
+                                            maxlength="100"
+                                            oninput="atualizarPeculiaridade(5, this.value)">
+                                        <span class="peculiaridade-indicador">5</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="peculiaridades-aviso">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <p>Apenas peculiaridades preenchidas serão contabilizadas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- LAYOUT PRINCIPAL (2 COLUNAS) -->
-    <div class="vantagens-layout">
-      
-      <!-- COLUNA ESQUERDA: CATÁLOGO -->
-      <div class="coluna-catalogo">
-        <div class="secao-catalogo">
-          <h2 class="secao-titulo">
-            <i class="fas fa-book"></i> Catálogo de Vantagens
-          </h2>
-          
-          <!-- FILTROS POR CATEGORIA -->
-          <div class="categorias-filtro">
-            <button class="btn-categoria ativo" data-categoria="todas">
-              <i class="fas fa-globe"></i> Todas
-            </button>
-            <button class="btn-categoria" data-categoria="fisicas">
-              <i class="fas fa-dumbbell"></i> Físicas
-            </button>
-            <button class="btn-categoria" data-categoria="mentais">
-              <i class="fas fa-brain"></i> Mentais
-            </button>
-            <button class="btn-categoria" data-categoria="sobrenaturais">
-              <i class="fas fa-magic"></i> Sobrenaturais
-            </button>
-            <button class="btn-categoria" data-categoria="sociais">
-              <i class="fas fa-handshake"></i> Sociais
-            </button>
-            <button class="btn-categoria" data-categoria="supers">
-              <i class="fas fa-bolt"></i> Supers
-            </button>
-          </div>
-          
-          <!-- BARRA DE PESQUISA -->
-          <div class="pesquisa-container">
-            <div class="pesquisa-input">
-              <i class="fas fa-search"></i>
-              <input type="text" id="pesquisa-vantagem" placeholder="Buscar vantagem...">
+                <!-- MODAL PARA OPÇÕES DE VANTAGEM/DESVANTAGEM -->
+                <div id="opcoes-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="modal-titulo">Selecionar Opções</h3>
+                            <button class="modal-close" onclick="fecharModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-descricao" id="modal-descricao">
+                                <!-- Descrição será inserida aqui -->
+                            </div>
+                            
+                            <div class="opcoes-container" id="opcoes-container">
+                                <!-- Opções serão inseridas aqui -->
+                            </div>
+                            
+                            <div class="modal-resumo">
+                                <div class="resumo-pontos">
+                                    <span>Custo Total:</span>
+                                    <span class="pontos-total" id="modal-pontos-total">0</span>
+                                    <span>pontos</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn-modal btn-cancelar" onclick="fecharModal()">Cancelar</button>
+                            <button class="btn-modal btn-confirmar" onclick="confirmarSelecao()" disabled>Confirmar Seleção</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          
-          <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
-          <div class="catalogo-grid" id="catalogo-vantagens">
-            <!-- VANTAGENS VÃO AQUI DINAMICAMENTE -->
-          </div>
         </div>
-        
-        <div class="secao-catalogo">
-          <h2 class="secao-titulo">
-            <i class="fas fa-book-dead"></i> Catálogo de Desvantagens
-          </h2>
-          
-          <!-- FILTROS PARA DESVANTAGENS -->
-          <div class="categorias-filtro">
-            <button class="btn-categoria ativo" data-categoria="todas">
-              <i class="fas fa-globe"></i> Todas
-            </button>
-            <button class="btn-categoria" data-categoria="fisicas">
-              <i class="fas fa-dumbbell"></i> Físicas
-            </button>
-            <button class="btn-categoria" data-categoria="mentais">
-              <i class="fas fa-brain"></i> Mentais
-            </button>
-            <button class="btn-categoria" data-categoria="sobrenaturais">
-              <i class="fas fa-magic"></i> Sobrenaturais
-            </button>
-            <button class="btn-categoria" data-categoria="sociais">
-              <i class="fas fa-handshake"></i> Sociais
-            </button>
-          </div>
-          
-          <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
-          <div class="catalogo-grid" id="catalogo-desvantagens">
-            <!-- DESVANTAGENS VÃO AQUI DINAMICAMENTE -->
-          </div>
-        </div>
-      </div>
-      
-      <!-- COLUNA DIREITA: ADQUIRIDAS -->
-      <div class="coluna-adquiridas">
-        <div class="secao-adquiridas">
-          <h2 class="secao-titulo">
-            <i class="fas fa-check-circle"></i> Vantagens Adquiridas
-          </h2>
-          <div class="adquiridas-container" id="vantagens-adquiridas">
-            <div class="vazio-mensagem">
-              <i class="fas fa-info-circle"></i>
-              <p>Nenhuma vantagem selecionada ainda</p>
+
+        <!-- PERÍCIAS/TÉCNICAS -->
+        <div id="pericias-tab" class="tab-content" style="display: none;">
+            <div class="dev-message">
+                <i class="fas fa-tools"></i>
+                <h2>Perícias e Técnicas - Em Desenvolvimento</h2>
+                <p>Configuração de perícias, técnicas e habilidades especiais</p>
             </div>
-          </div>
         </div>
-        
-        <div class="secao-adquiridas">
-          <h2 class="secao-titulo">
-            <i class="fas fa-exclamation-triangle"></i> Desvantagens Adquiridas
-          </h2>
-          <div class="adquiridas-container" id="desvantagens-adquiridas">
-            <div class="vazio-mensagem">
-              <i class="fas fa-info-circle"></i>
-              <p>Nenhuma desvantagem selecionada ainda</p>
+
+        <!-- MAGIAS -->
+        <div id="magias-tab" class="tab-content" style="display: none;">
+            <div class="dev-message">
+                <i class="fas fa-tools"></i>
+                <h2>Magias - Em Desenvolvimento</h2>
+                <p>Gerenciamento de magias, feitiços e poderes sobrenaturais</p>
             </div>
-          </div>
         </div>
-        
-        <!-- SECÇÃO PECULIARIDADES -->
-        <div class="secao-adquiridas">
-          <h2 class="secao-titulo">
-            <i class="fas fa-star"></i> Peculiaridades
-            <span class="peculiaridades-contador">(0/5)</span>
-          </h2>
-          <div class="peculiaridades-container">
-            <div class="peculiaridades-desc">
-              <i class="fas fa-info-circle"></i>
-              <p>Cada peculiaridade custa -1 ponto. Máximo de 5.</p>
+
+        <!-- EQUIPAMENTO -->
+        <div id="equipamento-tab" class="tab-content" style="display: none;">
+            <div class="dev-message">
+                <i class="fas fa-tools"></i>
+                <h2>Equipamento - Em Desenvolvimento</h2>
+                <p>Gerenciamento de armas, armaduras, itens e inventário</p>
             </div>
-            
-            <div class="peculiaridades-inputs">
-              <div class="peculiaridade-input-group">
-                <input type="text" class="peculiaridade-input" 
-                       placeholder="Descreva sua primeira peculiaridade..."
-                       maxlength="100"
-                       oninput="atualizarPeculiaridade(1, this.value)">
-                <span class="peculiaridade-indicador">1</span>
-              </div>
-              <div class="peculiaridade-input-group">
-                <input type="text" class="peculiaridade-input" 
-                       placeholder="Descreva sua segunda peculiaridade..."
-                       maxlength="100"
-                       oninput="atualizarPeculiaridade(2, this.value)">
-                <span class="peculiaridade-indicador">2</span>
-              </div>
-              <div class="peculiaridade-input-group">
-                <input type="text" class="peculiaridade-input" 
-                       placeholder="Descreva sua terceira peculiaridade..."
-                       maxlength="100"
-                       oninput="atualizarPeculiaridade(3, this.value)">
-                <span class="peculiaridade-indicador">3</span>
-              </div>
-              <div class="peculiaridade-input-group">
-                <input type="text" class="peculiaridade-input" 
-                       placeholder="Descreva sua quarta peculiaridade..."
-                       maxlength="100"
-                       oninput="atualizarPeculiaridade(4, this.value)">
-                <span class="peculiaridade-indicador">4</span>
-              </div>
-              <div class="peculiaridade-input-group">
-                <input type="text" class="peculiaridade-input" 
-                       placeholder="Descreva sua quinta peculiaridade..."
-                       maxlength="100"
-                       oninput="atualizarPeculiaridade(5, this.value)">
-                <span class="peculiaridade-indicador">5</span>
-              </div>
+        </div>
+
+        <!-- COMBATE -->
+        <div id="combate-tab" class="tab-content" style="display: none;">
+            <div class="dev-message">
+                <i class="fas fa-tools"></i>
+                <h2>Combate - Em Desenvolvimento</h2>
+                <p>Estatísticas de combate, defesa, ataques e manobras especiais</p>
             </div>
-            
-            <div class="peculiaridades-aviso">
-              <i class="fas fa-exclamation-circle"></i>
-              <p>Apenas peculiaridades preenchidas serão contabilizadas.</p>
+        </div>
+
+        <!-- RESUMO -->
+        <div id="resumo-tab" class="tab-content" style="display: none;">
+            <div class="dev-message">
+                <i class="fas fa-tools"></i>
+                <h2>Resumo do PC - Em Desenvolvimento</h2>
+                <p>Resumo completo com todas as informações do personagem</p>
             </div>
-          </div>
         </div>
-      </div>
+    </main>
+
+    <!-- BOTÕES -->
+    <div class="action-buttons">
+        <button class="btn" onclick="saveCharacter()">
+            <i class="fas fa-save"></i> Salvar
+        </button>
+        <button class="btn" onclick="goToCharacterMode()">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </button>
     </div>
 
-    <!-- MODAL PARA OPÇÕES DE VANTAGEM/DESVANTAGEM -->
-    <div id="opcoes-modal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="modal-titulo">Selecionar Opções</h3>
-          <button class="modal-close" onclick="fecharModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="modal-descricao" id="modal-descricao">
-            <!-- Descrição será inserida aqui -->
-          </div>
-          
-          <div class="opcoes-container" id="opcoes-container">
-            <!-- Opções serão inseridas aqui -->
-          </div>
-          
-          <div class="modal-resumo">
-            <div class="resumo-pontos">
-              <span>Custo Total:</span>
-              <span class="pontos-total" id="modal-pontos-total">0</span>
-              <span>pontos</span>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-modal btn-cancelar" onclick="fecharModal()">Cancelar</button>
-          <button class="btn-modal btn-confirmar" onclick="confirmarSelecao()" disabled>Confirmar Seleção</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+    <!-- FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-    <!-- PERÍCIAS/TÉCNICAS -->
-    <div id="pericias-tab" class="tab-content" style="display: none;">
-      <div class="dev-message">
-        <i class="fas fa-tools"></i>
-        <h2>Perícias e Técnicas - Em Desenvolvimento</h2>
-        <p>Configuração de perícias, técnicas e habilidades especiais</p>
-      </div>
-    </div>
-
-    <!-- MAGIAS -->
-    <div id="magias-tab" class="tab-content" style="display: none;">
-      <div class="dev-message">
-        <i class="fas fa-tools"></i>
-        <h2>Magias - Em Desenvolvimento</h2>
-        <p>Gerenciamento de magias, feitiços e poderes sobrenaturais</p>
-      </div>
-    </div>
-
-    <!-- EQUIPAMENTO -->
-    <div id="equipamento-tab" class="tab-content" style="display: none;">
-      <div class="dev-message">
-        <i class="fas fa-tools"></i>
-        <h2>Equipamento - Em Desenvolvimento</h2>
-        <p>Gerenciamento de armas, armaduras, itens e inventário</p>
-      </div>
-    </div>
-
-    <!-- COMBATE -->
-    <div id="combate-tab" class="tab-content" style="display: none;">
-      <div class="dev-message">
-        <i class="fas fa-tools"></i>
-        <h2>Combate - Em Desenvolvimento</h2>
-        <p>Estatísticas de combate, defesa, ataques e manobras especiais</p>
-      </div>
-    </div>
-
-    <!-- RESUMO -->
-    <div id="resumo-tab" class="tab-content" style="display: none;">
-      <div class="dev-message">
-        <i class="fas fa-tools"></i>
-        <h2>Resumo do PC - Em Desenvolvimento</h2>
-        <p>Resumo completo com todas as informações do personagem</p>
-      </div>
-    </div>
-  </main>
-
-  <!-- BOTÕES -->
-  <div class="action-buttons">
-    <button class="btn" onclick="saveCharacter()">
-      <i class="fas fa-save"></i> Salvar
-    </button>
-    <button class="btn" onclick="goToCharacterMode()">
-      <i class="fas fa-arrow-left"></i> Voltar
-    </button>
-  </div>
-
-  <!-- CONTINUA NO PRÓXIMO COMENTÁRIO -->
-  <script src="atributos.js"></script>
-  <script src="caracteristicas-aparencia.js"></script>
-  <script src="caracteristicas-riqueza.js"></script>
-  <script src="caracteristicas-idiomas.js"></script>
-  <script src="caracteristicas-fisicas.js"></script>
-  <script src="caracteristicas-altura-peso.js"></script>
-  <script src="vantagens.js"></script>
-  <script src="catalogo-vantagens.js"></script>
-   <script src="desvantagens.js"></script>
+    <!-- SCRIPTS -->
+    <script src="atributos.js"></script>
+    <script src="caracteristicas-aparencia.js"></script>
+    <script src="caracteristicas-riqueza.js"></script>
+    <script src="caracteristicas-idiomas.js"></script>
+    <script src="caracteristicas-fisicas.js"></script>
+    <script src="caracteristicas-altura-peso.js"></script>
+    <script src="vantagens.js"></script>
+    <script src="catalogo-vantagens.js"></script>
+    <script src="desvantagens.js"></script>
     <script src="catalogo-desvantagens.js"></script>
-  <script>
-    // ===========================================
-    // INICIALIZAÇÃO DO FIREBASE
-    // ===========================================
-   // ===========================================
-// INICIALIZAÇÃO DO FIREBASE
-// ===========================================
-let app, auth, db;
+    
+    <script>
+        // ===========================================
+        // INICIALIZAÇÃO DO FIREBASE
+        // ===========================================
+        let app, auth, db;
 
-if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-  app = firebase.app();
-  auth = firebase.auth();
-  db = firebase.firestore();
-} else {
-  const firebaseConfig = {
-    apiKey: "AIzaSyBoTP0oJH4q3yrc0N8sCv9ynKN53dN-UbU",
-    authDomain: "gurpsroll.firebaseapp.com",
-    projectId: "gurpsroll"
-  };
-  app = firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth();
-  db = firebase.firestore();
-}
+        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+            app = firebase.app();
+            auth = firebase.auth();
+            db = firebase.firestore();
+        } else {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBoTP0oJH4q3yrc0N8sCv9ynKN53dN-UbU",
+                authDomain: "gurpsroll.firebaseapp.com",
+                projectId: "gurpsroll"
+            };
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+        }
 
-// ===========================================
-// VERIFICAÇÃO DE AUTENTICAÇÃO
-// ===========================================
-auth.onAuthStateChanged((user) => {
-  if (!user) {
-    window.location.href = 'index.html';
-  }
-});
+        // ===========================================
+        // VERIFICAÇÃO DE AUTENTICAÇÃO
+        // ===========================================
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            }
+        });
 
-// ===========================================
-// CONTROLE DAS ABAS - VERSÃO CORRIGIDA
-// ===========================================
-function openTab(tabName) {
-  console.log('Tentando abrir aba:', tabName);
-  
-  // Esconde todas as abas
-  const tabContents = document.querySelectorAll('.tab-content');
-  tabContents.forEach(tab => {
-    tab.style.display = 'none';
-  });
-  
-  // Remove classe active de todas as abas principais
-  const mainTabs = document.querySelectorAll('.main-tab');
-  mainTabs.forEach(tab => {
-    tab.classList.remove('active');
-  });
-  
-  // Ativa a aba clicada - VERSÃO MAIS ROBUSTA
-  const clickedTab = Array.from(mainTabs).find(tab => {
-    const onclickAttr = tab.getAttribute('onclick');
-    return onclickAttr && onclickAttr.includes(`openTab('${tabName}')`);
-  });
-  
-  if (clickedTab) {
-    clickedTab.classList.add('active');
-  } else {
-    console.error('Botão da aba não encontrado:', tabName);
-    // Tenta encontrar por texto aproximado (para "vantagens")
-    if (tabName === 'vantagens') {
-      const vantagemTab = Array.from(mainTabs).find(tab => 
-        tab.textContent.includes('Vant/Desv')
-      );
-      if (vantagemTab) {
-        vantagemTab.classList.add('active');
-      }
-    }
-  }
-  
-  // Mostra sub-abas apenas para Características
-  const subTabsContainer = document.getElementById('subTabsContainer');
-  if (tabName === 'caracteristicas') {
-    if (subTabsContainer) {
-      subTabsContainer.style.display = 'block';
-      // Garante que as sub-abas existem antes de mostrar
-      const sociaisSubtab = document.getElementById('sociais-subtab');
-      const fisicasSubtab = document.getElementById('fisicas-subtab');
-      if (sociaisSubtab) sociaisSubtab.style.display = 'block';
-      if (fisicasSubtab) fisicasSubtab.style.display = 'none';
-    }
-  } else {
-    if (subTabsContainer) subTabsContainer.style.display = 'none';
-  }
-  
-  // Mostra conteúdo da aba - USANDO O ID EXATO DO HTML
-  let tabId;
-  switch(tabName) {
-    case 'dashboard':
-      tabId = 'dashboard-tab';
-      break;
-    case 'atributos':
-      tabId = 'atributos-tab';
-      break;
-    case 'caracteristicas':
-      tabId = 'caracteristicas-tab';
-      break;
-    case 'vantagens':
-      tabId = 'vantagens-tab'; // ← ESTE É O ID CORRETO
-      break;
-    case 'pericias':
-      tabId = 'pericias-tab';
-      break;
-    case 'magias':
-      tabId = 'magias-tab';
-      break;
-    case 'equipamento':
-      tabId = 'equipamento-tab';
-      break;
-    case 'combate':
-      tabId = 'combate-tab';
-      break;
-    case 'resumo':
-      tabId = 'resumo-tab';
-      break;
-    default:
-      console.error('TabName desconhecido:', tabName);
-      return;
-  }
-  
-  const tabContent = document.getElementById(tabId);
-  if (tabContent) {
-    tabContent.style.display = 'block';
-    console.log('Aba mostrada:', tabId);
-    
-    // Se for a aba de vantagens, inicializa os sistemas
-    if (tabName === 'vantagens') {
-      inicializarSistemaVantagens();
-    }
-  } else {
-    console.error('Elemento não encontrado:', tabId);
-  }
-}
-
-// ===========================================
-// CONTROLE DAS SUB-ABAS
-// ===========================================
-function openSubTab(subTabName) {
-  // Remove classe active de todas as sub-abas
-  const subTabs = document.querySelectorAll('.sub-tab');
-  subTabs.forEach(tab => {
-    tab.classList.remove('active');
-  });
-  
-  // Ativa a sub-aba clicada
-  document.querySelector(`.sub-tab[onclick*="${subTabName}"]`).classList.add('active');
-  
-  // Mostra conteúdo da sub-aba
-  document.getElementById('sociais-subtab').style.display = 'none';
-  document.getElementById('fisicas-subtab').style.display = 'none';
-  document.getElementById(`${subTabName}-subtab`).style.display = 'block';
-}
-
-// ===========================================
-// FUNÇÕES DE NAVEGAÇÃO
-// ===========================================
-function goToCharacterMode() {
-  if (confirm('Deseja voltar? As alterações não salvas serão perdidas.')) {
-    window.location.href = 'modo-personagem.html';
-  }
-}
-
-function saveCharacter() {
-  alert('Função de salvar personagem em desenvolvimento. Será implementada com Firebase.');
-}
-
-// ===========================================
-// SISTEMA VANTAGENS/DESVANTAGENS
-// ===========================================
-let sistemaVantagens = null;
-let sistemaDesvantagens = null;
-let modalTipoAtual = '';
-let modalIdAtual = '';
-let opcaoSelecionada = null;
-
-function inicializarSistemaVantagens() {
-  try {
-    // Verifica se as classes estão disponíveis
-    if (typeof SistemaVantagens !== 'undefined' && typeof SistemaDesvantagens !== 'undefined') {
-      if (!sistemaVantagens) sistemaVantagens = new SistemaVantagens();
-      if (!sistemaDesvantagens) sistemaDesvantagens = new SistemaDesvantagens();
-      console.log('✅ Sistemas de Vantagens/Desvantagens inicializados');
-      
-      // Atualiza o resumo se já houver dados
-      atualizarResumoPontos();
-    } else {
-      console.warn('⚠️ Classes de Vantagens/Desvantagens não encontradas');
-    }
-  } catch (error) {
-    console.error('❌ Erro ao inicializar sistemas:', error);
-  }
-}
-
-// ===== FUNÇÕES BÁSICAS =====
-
-function atualizarResumoPontos() {
-    if (!sistemaVantagens || !sistemaDesvantagens) return;
-    
-    const pontosVantagens = sistemaVantagens.getPontosGastos();
-    const pontosDesvantagens = sistemaDesvantagens.getPontosGanhos();
-    const peculiaridadesAtivas = sistemaDesvantagens.getPeculiaridadesAtivas().length;
-    const saldo = pontosVantagens + pontosDesvantagens;
-    
-    const vantagemTotalEl = document.querySelector('.vantagem-total');
-    const desvantagemTotalEl = document.querySelector('.desvantagem-total');
-    const peculiaridadesTotalEl = document.querySelector('.peculiaridades-total');
-    const peculiaridadesContadorEl = document.querySelector('.peculiaridades-contador');
-    const saldoFinalEl = document.querySelector('.saldo-final');
-    
-    if (vantagemTotalEl) vantagemTotalEl.textContent = pontosVantagens;
-    if (desvantagemTotalEl) desvantagemTotalEl.textContent = Math.abs(pontosDesvantagens);
-    if (peculiaridadesTotalEl) peculiaridadesTotalEl.textContent = peculiaridadesAtivas;
-    if (peculiaridadesContadorEl) peculiaridadesContadorEl.textContent = `(${peculiaridadesAtivas}/5)`;
-    if (saldoFinalEl) saldoFinalEl.textContent = saldo;
-}
-
-function atualizarPeculiaridade(indice, valor) {
-    if (!sistemaDesvantagens) return;
-    
-    if (valor && valor.trim() !== '') {
-        sistemaDesvantagens.adicionarPeculiaridade(valor, indice);
-    } else {
-        sistemaDesvantagens.removerPeculiaridade(indice);
-    }
-    atualizarResumoPontos();
-}
-
-// ===== FUNÇÕES DE VANTAGENS =====
-
-function adicionarVantagem(id) {
-    if (!sistemaVantagens || !window.CatalogoVantagens) {
-        alert("Sistema de vantagens não carregado");
-        return;
-    }
-    
-    const vantagem = window.CatalogoVantagens.getPorId(id);
-    if (!vantagem) {
-        alert("Vantagem não encontrada");
-        return;
-    }
-    
-    const resultado = sistemaVantagens.adicionarSimples(vantagem);
-    if (resultado.sucesso) {
-        atualizarVantagensAdquiridas();
-        atualizarResumoPontos();
-        alert(resultado.mensagem);
-    } else {
-        alert(resultado.mensagem);
-    }
-}
-
-function mostrarOpcoesVantagem(id) {
-    if (!window.CatalogoVantagens) {
-        alert("Catálogo não carregado");
-        return;
-    }
-    
-    const vantagem = window.CatalogoVantagens.getPorId(id);
-    if (!vantagem || !vantagem.opcoes) {
-        alert("Esta vantagem não tem opções");
-        return;
-    }
-    
-    modalTipoAtual = 'vantagem';
-    modalIdAtual = id;
-    abrirModal(vantagem);
-}
-
-function atualizarVantagensAdquiridas() {
-    if (!sistemaVantagens) return;
-    
-    const container = document.getElementById('vantagens-adquiridas');
-    if (!container) return;
-    
-    const vantagens = sistemaVantagens.getVantagensSelecionadas();
-    
-    if (vantagens.length === 0) {
-        container.innerHTML = `
-            <div class="vazio-mensagem">
-                <i class="fas fa-info-circle"></i>
-                <p>Nenhuma vantagem selecionada ainda</p>
-            </div>
-        `;
-        return;
-    }
-    
-    let html = '';
-    vantagens.forEach(vantagem => {
-        html += `
-            <div class="adquirida-card vantagem-adquirida" data-id="${vantagem.id}">
-                <button class="btn-remover" onclick="removerVantagem('${vantagem.id}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="adquirida-header">
-                    <h4 class="adquirida-titulo">${vantagem.nomeCompleto || vantagem.nome}</h4>
-                    <div class="adquirida-pontos">+${vantagem.custo}</div>
-                </div>
-                <div class="adquirida-info">
-                    <span>Categoria: ${vantagem.categoria}</span>
-                </div>
-            </div>
-        `;
-    });
-    
-    container.innerHTML = html;
-}
-
-function removerVantagem(id) {
-    if (!sistemaVantagens) return;
-    
-    const resultado = sistemaVantagens.removerVantagem(id);
-    if (resultado.sucesso) {
-        atualizarVantagensAdquiridas();
-        atualizarResumoPontos();
-        alert(resultado.mensagem);
-    } else {
-        alert(resultado.mensagem);
-    }
-}
-
-// ===== FUNÇÕES DE DESVANTAGENS =====
-
-function adicionarDesvantagem(id) {
-    if (!sistemaDesvantagens || !window.CatalogoDesvantagens) {
-        alert("Sistema de desvantagens não carregado");
-        return;
-    }
-    
-    const desvantagem = window.CatalogoDesvantagens.getPorId(id);
-    if (!desvantagem) {
-        alert("Desvantagem não encontrada");
-        return;
-    }
-    
-    const resultado = sistemaDesvantagens.adicionarSimples(desvantagem);
-    if (resultado.sucesso) {
-        atualizarDesvantagensAdquiridas();
-        atualizarResumoPontos();
-        alert(resultado.mensagem);
-    } else {
-        alert(resultado.mensagem);
-    }
-}
-
-function mostrarOpcoesDesvantagem(id) {
-    if (!window.CatalogoDesvantagens) {
-        alert("Catálogo não carregado");
-        return;
-    }
-    
-    const desvantagem = window.CatalogoDesvantagens.getPorId(id);
-    if (!desvantagem || !desvantagem.opcoes) {
-        alert("Esta desvantagem não tem opções");
-        return;
-    }
-    
-    modalTipoAtual = 'desvantagem';
-    modalIdAtual = id;
-    abrirModal(desvantagem);
-}
-
-function atualizarDesvantagensAdquiridas() {
-    if (!sistemaDesvantagens) return;
-    
-    const container = document.getElementById('desvantagens-adquiridas');
-    if (!container) return;
-    
-    const desvantagens = sistemaDesvantagens.getDesvantagensSelecionadas();
-    
-    if (desvantagens.length === 0) {
-        container.innerHTML = `
-            <div class="vazio-mensagem">
-                <i class="fas fa-info-circle"></i>
-                <p>Nenhuma desvantagem selecionada ainda</p>
-            </div>
-        `;
-        return;
-    }
-    
-    let html = '';
-    desvantagens.forEach(desvantagem => {
-        const custo = Math.abs(desvantagem.custo);
-        html += `
-            <div class="adquirida-card desvantagem-adquirida" data-id="${desvantagem.id}">
-                <button class="btn-remover" onclick="removerDesvantagem('${desvantagem.id}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="adquirida-header">
-                    <h4 class="adquirida-titulo">${desvantagem.nomeCompleto || desvantagem.nome}</h4>
-                    <div class="adquirida-pontos">-${custo}</div>
-                </div>
-                <div class="adquirida-info">
-                    <span>Categoria: ${desvantagem.categoria}</span>
-                </div>
-            </div>
-        `;
-    });
-    
-    container.innerHTML = html;
-}
-
-function removerDesvantagem(id) {
-    if (!sistemaDesvantagens) return;
-    
-    const resultado = sistemaDesvantagens.removerDesvantagem(id);
-    if (resultado.sucesso) {
-        atualizarDesvantagensAdquiridas();
-        atualizarResumoPontos();
-        alert(resultado.mensagem);
-    } else {
-        alert(resultado.mensagem);
-    }
-}
-
-// ===== FUNÇÕES DO MODAL =====
-
-function abrirModal(item) {
-    if (!item) return;
-    
-    const modal = document.getElementById('opcoes-modal');
-    const titulo = document.getElementById('modal-titulo');
-    const descricao = document.getElementById('modal-descricao');
-    const container = document.getElementById('opcoes-container');
-    const pontosTotal = document.getElementById('modal-pontos-total');
-    
-    if (!modal || !titulo || !descricao || !container) return;
-    
-    titulo.textContent = item.nome;
-    descricao.innerHTML = `
-        <p><strong>Descrição:</strong> ${item.descricao}</p>
-        ${item.detalhes ? `<p><strong>Detalhes:</strong> ${item.detalhes}</p>` : ''}
-    `;
-    
-    container.innerHTML = '';
-    item.opcoes.forEach((opcao, index) => {
-        const div = document.createElement('div');
-        div.className = 'opcao-item';
-        div.innerHTML = `
-            <div class="opcao-header">
-                <h4 class="opcao-titulo">${opcao.nome}</h4>
-                <div class="opcao-pontos">${opcao.custo > 0 ? '+' : ''}${opcao.custo}</div>
-            </div>
-            <div class="opcao-descricao">${opcao.descricao}</div>
-        `;
-        div.addEventListener('click', () => selecionarOpcao(opcao, index));
-        container.appendChild(div);
-    });
-    
-    pontosTotal.textContent = '0';
-    modal.style.display = 'flex';
-    opcaoSelecionada = null;
-    atualizarBotoesModal();
-}
-
-function selecionarOpcao(opcao, index) {
-    document.querySelectorAll('.opcao-item').forEach(el => {
-        el.classList.remove('selecionada');
-    });
-    
-    const items = document.querySelectorAll('.opcao-item');
-    if (items[index]) {
-        items[index].classList.add('selecionada');
-    }
-    
-    opcaoSelecionada = opcao;
-    const pontosTotal = document.getElementById('modal-pontos-total');
-    if (pontosTotal) {
-        pontosTotal.textContent = opcao.custo;
-    }
-    atualizarBotoesModal();
-}
-
-function atualizarBotoesModal() {
-    const btnConfirmar = document.querySelector('.btn-confirmar');
-    if (btnConfirmar) {
-        btnConfirmar.disabled = !opcaoSelecionada;
-    }
-}
-
-function confirmarSelecao() {
-    if (!opcaoSelecionada) return;
-    
-    if (modalTipoAtual === 'vantagem') {
-        const vantagem = window.CatalogoVantagens.getPorId(modalIdAtual);
-        if (vantagem && sistemaVantagens) {
-            const resultado = sistemaVantagens.adicionarComOpcao(vantagem, opcaoSelecionada);
-            if (resultado.sucesso) {
-                atualizarVantagensAdquiridas();
-                atualizarResumoPontos();
-                alert(resultado.mensagem);
+        // ===========================================
+        // CONTROLE DAS ABAS
+        // ===========================================
+        function openTab(tabName) {
+            // Esconde todas as abas
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Remove classe active de todas as abas
+            const mainTabs = document.querySelectorAll('.main-tab');
+            mainTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Ativa a aba clicada
+            const clickedTab = document.querySelector(`.main-tab[onclick*="${tabName}"]`);
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            }
+            
+            // Mostra sub-abas apenas para Características
+            const subTabsContainer = document.getElementById('subTabsContainer');
+            if (tabName === 'caracteristicas') {
+                subTabsContainer.style.display = 'block';
+                // Mostra a primeira sub-aba
+                document.getElementById('sociais-subtab').style.display = 'block';
+                document.getElementById('fisicas-subtab').style.display = 'none';
+            } else {
+                subTabsContainer.style.display = 'none';
+            }
+            
+            // Mostra conteúdo da aba
+            const tabElement = document.getElementById(`${tabName}-tab`);
+            if (tabElement) {
+                tabElement.style.display = 'block';
             }
         }
-    } else if (modalTipoAtual === 'desvantagem') {
-        const desvantagem = window.CatalogoDesvantagens.getPorId(modalIdAtual);
-        if (desvantagem && sistemaDesvantagens) {
-            const resultado = sistemaDesvantagens.adicionarComOpcao(desvantagem, opcaoSelecionada);
-            if (resultado.sucesso) {
-                atualizarDesvantagensAdquiridas();
-                atualizarResumoPontos();
-                alert(resultado.mensagem);
+
+        // ===========================================
+        // CONTROLE DAS SUB-ABAS (CARACTERÍSTICAS)
+        // ===========================================
+        function openSubTab(subTabName) {
+            // Remove classe active de todas as sub-abas
+            const subTabs = document.querySelectorAll('.sub-tab');
+            subTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Ativa a sub-aba clicada
+            const clickedTab = document.querySelector(`.sub-tab[onclick*="${subTabName}"]`);
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            }
+            
+            // Mostra conteúdo da sub-aba
+            const sociaisTab = document.getElementById('sociais-subtab');
+            const fisicasTab = document.getElementById('fisicas-subtab');
+            
+            if (sociaisTab) sociaisTab.style.display = 'none';
+            if (fisicasTab) fisicasTab.style.display = 'none';
+            
+            // Se a sub-aba for 'sociais', mostra dentro da aba características
+            if (subTabName === 'sociais') {
+                const caracteristicasTab = document.getElementById('caracteristicas-tab');
+                if (caracteristicasTab) {
+                    caracteristicasTab.innerHTML = `
+                        <div id="sociais-subtab" class="subtab-content" style="display: block;">
+                            ${sociaisTab.outerHTML}
+                        </div>
+                    `;
+                }
+            } else if (subTabName === 'fisicas') {
+                const caracteristicasTab = document.getElementById('caracteristicas-tab');
+                if (caracteristicasTab) {
+                    caracteristicasTab.innerHTML = `
+                        <div id="fisicas-subtab" class="subtab-content" style="display: block;">
+                            ${fisicasTab.outerHTML}
+                        </div>
+                    `;
+                }
             }
         }
-    }
-    
-    fecharModal();
-}
 
-function fecharModal() {
-    const modal = document.getElementById('opcoes-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    modalTipoAtual = '';
-    modalIdAtual = '';
-    opcaoSelecionada = null;
-}
+        // ===========================================
+        // CONTROLE DAS SUB-ABAS DENTRO DE CARACTERÍSTICAS
+        // ===========================================
+        function openCaracteristicaTab(tabName) {
+            // Remove classe active de todas as tabs
+            const caracteristicaTabs = document.querySelectorAll('.caracteristica-tab');
+            caracteristicaTabs.forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Ativa a tab clicada
+            const tabElement = document.getElementById(`${tabName}-tab`);
+            if (tabElement) {
+                tabElement.style.display = 'block';
+            }
+            
+            // Remove classe active de todos os botões
+            const buttons = document.querySelectorAll('.btn-caracteristica');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Ativa o botão correspondente
+            const activeButton = document.querySelector(`.btn-caracteristica[onclick*="${tabName}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+        }
 
-// ===========================================
-// INICIALIZAÇÃO GERAL
-// ===========================================
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('✅ Criar Personagem - Carregado');
-  
-  // Inicializa sistemas de Vantagens/Desvantagens (se já estiverem carregados)
-  setTimeout(() => {
-    inicializarSistemaVantagens();
-  }, 500);
-  
-  // Configura eventos do modal
-  const modal = document.getElementById('opcoes-modal');
-  if (modal) {
-    modal.addEventListener('click', function(e) {
-      if (e.target === this) {
-        fecharModal();
-      }
-    });
-    
-    const btnCancelar = modal.querySelector('.btn-cancelar');
-    const btnFechar = modal.querySelector('.modal-close');
-    
-    if (btnCancelar) {
-      btnCancelar.addEventListener('click', fecharModal);
-    }
-    if (btnFechar) {
-      btnFechar.addEventListener('click', fecharModal);
-    }
-  }
-  
-  // Configura eventos dos filtros
-  document.querySelectorAll('.btn-categoria').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('ativo'));
-      this.classList.add('ativo');
-      console.log(`Filtrando por: ${this.dataset.categoria}`);
-    });
-  });
-  
-  // Inicializa com Dashboard aberto
-  openTab('dashboard');
-});
-  </script>
+        // ===========================================
+        // FUNÇÕES DE NAVEGAÇÃO
+        // ===========================================
+        function goToCharacterMode() {
+            if (confirm('Deseja voltar? As alterações não salvas serão perdidas.')) {
+                window.location.href = 'modo-personagem.html';
+            }
+        }
+
+        function saveCharacter() {
+            alert('Função de salvar personagem em desenvolvimento. Será implementada com Firebase.');
+        }
+
+        // ===========================================
+        // FUNÇÕES PARA VANTAGENS/DESVANTAGENS
+        // ===========================================
+        function selecionarVantagem(nome, pontos) {
+            alert(`Vantagem "${nome}" selecionada! (${pontos} pontos)`);
+            // Implementação real seria aqui
+        }
+
+        function selecionarDesvantagem(nome, pontos) {
+            alert(`Desvantagem "${nome}" selecionada! (${pontos} pontos)`);
+            // Implementação real seria aqui
+        }
+
+        function atualizarPeculiaridade(numero, valor) {
+            console.log(`Peculiaridade ${numero}: ${valor}`);
+            // Implementação real seria aqui
+        }
+
+        function fecharModal() {
+            const modal = document.getElementById('opcoes-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function confirmarSelecao() {
+            alert('Seleção confirmada!');
+            fecharModal();
+        }
+
+        // ===========================================
+        // FUNÇÕES PARA ALTURA E PESO
+        // ===========================================
+        function ajustarAltura(valor) {
+            const input = document.getElementById('altura');
+            if (input) {
+                let novaAltura = parseInt(input.value) + valor;
+                if (novaAltura >= parseInt(input.min) && novaAltura <= parseInt(input.max)) {
+                    input.value = novaAltura;
+                    calcularTamanho();
+                }
+            }
+        }
+
+        function ajustarPeso(valor) {
+            const input = document.getElementById('peso');
+            if (input) {
+                let novoPeso = parseInt(input.value) + valor;
+                if (novoPeso >= parseInt(input.min) && novoPeso <= parseInt(input.max)) {
+                    input.value = novoPeso;
+                    calcularIMC();
+                }
+            }
+        }
+
+        function calcularTamanho() {
+            const altura = parseInt(document.getElementById('altura').value);
+            let tamanho = 0;
+            
+            if (altura <= 160) tamanho = -1;
+            else if (altura <= 180) tamanho = 0;
+            else if (altura <= 190) tamanho = 1;
+            else if (altura <= 210) tamanho = 2;
+            else tamanho = 3;
+            
+            document.getElementById('tamanho').value = tamanho;
+            
+            // Converter para pés
+            const pes = Math.round(altura / 2.54);
+            const pesInt = Math.floor(pes / 12);
+            const polegadas = pes % 12;
+            document.querySelector('.altura-pes').textContent = `(${pesInt}'${polegadas}")`;
+            
+            // Converter peso para libras
+            const peso = parseInt(document.getElementById('peso').value);
+            const libras = Math.round(peso * 2.20462);
+            document.querySelector('.peso-libras').textContent = `(${libras} lbs)`;
+        }
+
+        function calcularIMC() {
+            const altura = parseInt(document.getElementById('altura').value) / 100; // Converter para metros
+            const peso = parseInt(document.getElementById('peso').value);
+            
+            if (altura > 0) {
+                const imc = peso / (altura * altura);
+                const imcValorElement = document.getElementById('imcValor');
+                const imcCategoriaElement = document.getElementById('imcCategoria');
+                const imcIndicator = document.getElementById('imcIndicator');
+                
+                if (imcValorElement) {
+                    imcValorElement.textContent = imc.toFixed(2);
+                }
+                
+                let categoria = "";
+                let posicao = 0;
+                
+                if (imc < 18.5) {
+                    categoria = "Abaixo do peso";
+                    posicao = 0;
+                } else if (imc < 25) {
+                    categoria = "Normal";
+                    posicao = 33;
+                } else if (imc < 30) {
+                    categoria = "Sobrepeso";
+                    posicao = 66;
+                } else {
+                    categoria = "Obeso";
+                    posicao = 100;
+                }
+                
+                if (imcCategoriaElement) {
+                    imcCategoriaElement.textContent = `(${categoria})`;
+                }
+                
+                if (imcIndicator) {
+                    imcIndicator.style.left = `${posicao}%`;
+                }
+            }
+        }
+
+        // ===========================================
+        // FUNÇÕES PARA CARACTERÍSTICAS FÍSICAS
+        // ===========================================
+        function atualizarCaracteristicaFisica(tipo, elemento) {
+            const checkbox = elemento.querySelector('input[type="checkbox"]');
+            const valor = elemento.getAttribute('data-valor');
+            const custoElement = document.getElementById(`custo${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+            
+            if (checkbox && custoElement) {
+                let custoAtual = parseInt(custoElement.textContent) || 0;
+                const pontos = parseInt(elemento.querySelector('.opcao-desc').textContent.match(/\(([-\d]+)/)[1]);
+                
+                if (checkbox.checked) {
+                    custoAtual += pontos;
+                } else {
+                    custoAtual -= pontos;
+                }
+                
+                custoElement.textContent = custoAtual;
+                atualizarResumoCaracteristicas();
+            }
+        }
+
+        function atualizarResumoCaracteristicas() {
+            const tipos = ['Visao', 'Audicao', 'Fala', 'Mobilidade', 'Saude'];
+            let total = 0;
+            
+            tipos.forEach(tipo => {
+                const custoElement = document.getElementById(`custo${tipo}`);
+                const resumoElement = document.getElementById(`resumo${tipo}`);
+                
+                if (custoElement && resumoElement) {
+                    const custo = parseInt(custoElement.textContent) || 0;
+                    resumoElement.textContent = custo;
+                    total += custo;
+                }
+            });
+            
+            document.getElementById('resumoTotal').textContent = total;
+            document.getElementById('totalCaracteristicas').textContent = total;
+        }
+
+        // ===========================================
+        // FUNÇÕES PARA IDIOMAS
+        // ===========================================
+        function adicionarIdioma() {
+            const lista = document.getElementById('idiomasLista');
+            if (lista) {
+                const novoIdioma = document.createElement('div');
+                novoIdioma.className = 'idioma-item';
+                novoIdioma.innerHTML = `
+                    <div class="idioma-info">
+                        <select class="idioma-select">
+                            <option value="ingles">Inglês</option>
+                            <option value="espanhol">Espanhol</option>
+                            <option value="frances">Francês</option>
+                            <option value="alemao">Alemão</option>
+                        </select>
+                        <select class="nivel-idioma">
+                            <option value="accented">Com sotaque (-1)</option>
+                            <option value="broken">Quebrado (-2)</option>
+                            <option value="none">Nenhum (-3)</option>
+                        </select>
+                    </div>
+                    <div class="idioma-controles">
+                        <button class="btn-remover-idioma" onclick="removerIdioma(this)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                lista.appendChild(novoIdioma);
+                atualizarPontosIdiomas();
+            }
+        }
+
+        function removerIdioma(botao) {
+            const item = botao.closest('.idioma-item');
+            if (item) {
+                item.remove();
+                atualizarPontosIdiomas();
+            }
+        }
+
+        function atualizarPontosIdiomas() {
+            // Implementação real calcularia os pontos
+            const pontos = 0; // Calcular baseado nos idiomas
+            document.getElementById('pontosIdiomas').textContent = pontos;
+            document.getElementById('totalIdiomas').textContent = pontos;
+        }
+
+        // ===========================================
+        // INICIALIZAÇÃO
+        // ===========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('GURPS Tool - Criar Personagem carregado');
+            
+            // Inicializar cálculos
+            calcularTamanho();
+            calcularIMC();
+            atualizarResumoCaracteristicas();
+            
+            // Configurar eventos para características físicas
+            document.querySelectorAll('.opcao-fisica input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const opcao = this.closest('.opcao-fisica');
+                    const tipo = opcao.getAttribute('data-tipo');
+                    atualizarCaracteristicaFisica(tipo, opcao);
+                });
+            });
+            
+            // Configurar eventos de input para altura e peso
+            const alturaInput = document.getElementById('altura');
+            const pesoInput = document.getElementById('peso');
+            
+            if (alturaInput) {
+                alturaInput.addEventListener('input', calcularTamanho);
+                alturaInput.addEventListener('input', calcularIMC);
+            }
+            
+            if (pesoInput) {
+                pesoInput.addEventListener('input', calcularIMC);
+            }
+            
+            // Configurar evento para contador de caracteres
+            const descricaoInput = document.getElementById('descricaoFisica');
+            const contador = document.getElementById('contadorCaracteres');
+            
+            if (descricaoInput && contador) {
+                descricaoInput.addEventListener('input', function() {
+                    contador.textContent = this.value.length;
+                });
+            }
+            
+            // Configurar eventos para filtros de vantagens/desvantagens
+            document.querySelectorAll('.btn-categoria').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('ativo'));
+                    this.classList.add('ativo');
+                    // Aqui você filtraria o catálogo
+                });
+            });
+            
+            // Configurar busca
+            const buscaInput = document.getElementById('pesquisa-vantagem');
+            if (buscaInput) {
+                buscaInput.addEventListener('input', function() {
+                    const termo = this.value.toLowerCase();
+                    // Aqui você filtraria o catálogo pelo termo
+                });
+            }
+            
+            // Inicializar com Dashboard aberto
+            openTab('dashboard');
+        });
+    </script>
 </body>
 </html>
