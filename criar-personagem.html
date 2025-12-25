@@ -133,9 +133,8 @@
     /* CONTEÚDO */
     .tab-content {
       padding: 40px 20px;
-      max-width: 800px;
+      max-width: 1400px;
       margin: 0 auto;
-      text-align: center;
     }
 
     .dev-message {
@@ -144,6 +143,7 @@
       border-radius: 10px;
       padding: 40px 20px;
       margin-top: 20px;
+      text-align: center;
     }
 
     .dev-message i {
@@ -194,6 +194,10 @@
         position: static;
         margin-top: 30px;
         justify-content: center;
+      }
+      
+      .tab-content {
+        padding: 20px 15px;
       }
     }
   </style>
@@ -499,406 +503,14 @@
       </div>
     </div>
 
-   <!-- CARACTERÍSTICAS -->
+    <!-- CARACTERÍSTICAS -->
     <div id="caracteristicas-tab" class="tab-content" style="display: none;">
       <div class="caracteristicas-container">
-        <!-- Sub-abas de Navegação -->
-        <div class="subtabs-navigation">
-          <button class="subtab-btn active" onclick="openSubTab('sociais')">
-            <i class="fas fa-users"></i>
-            <span>Riqueza, Aparência e Idiomas</span>
-          </button>
-          <button class="subtab-btn" onclick="openSubTab('fisicas')">
-            <i class="fas fa-ruler-combined"></i>
-            <span>Características Físicas</span>
-          </button>
-        </div>
-        
-        <!-- Sub-aba SOCIAIS (Riqueza, Aparência, Idiomas) -->
-        <div id="sociais-subtab" class="subtab-content active">
-          <h2 class="secao-titulo">Características Sociais</h2>
-          
-          <!-- Sistema de Riqueza -->
-          <div class="cards-grid">
-            <div class="riqueza-card">
-              <div class="riqueza-header">
-                <h3><i class="fas fa-coins"></i> Nível de Riqueza</h3>
-                <div class="riqueza-badge" id="pontosRiqueza">+0 pts</div>
-              </div>
-              
-              <div class="riqueza-selector">
-                <label for="nivelRiqueza">Selecione seu nível de riqueza:</label>
-                <select id="nivelRiqueza" class="riqueza-select">
-                  <option value="-25">Falido (-25 pts)</option>
-                  <option value="-15">Pobre (-15 pts)</option>
-                  <option value="-10">Batalhador (-10 pts)</option>
-                  <option value="0" selected>Médio (0 pts)</option>
-                  <option value="10">Confortável (+10 pts)</option>
-                  <option value="20">Rico (+20 pts)</option>
-                  <option value="30">Muito Rico (+30 pts)</option>
-                  <option value="50">Podre de Rico (+50 pts)</option>
-                </select>
-              </div>
-              
-              <div class="riqueza-display" id="displayRiqueza">
-                <!-- Conteúdo será gerado por JavaScript -->
-              </div>
-              
-              <div class="riqueza-renda">
-                <div class="riqueza-renda-label">Renda Mensal Estimada:</div>
-                <div class="riqueza-renda-valor" id="rendaMensal">$1,000</div>
-              </div>
-            </div>
-            
-            <!-- Sistema de Aparência -->
-            <div class="aparencia-card">
-              <div class="aparencia-header">
-                <h3><i class="fas fa-user-tie"></i> Nível de Aparência</h3>
-                <div class="aparencia-badge" id="pontosAparencia">0 pts</div>
-              </div>
-              
-              <div class="aparencia-selector">
-                <label for="nivelAparencia">Selecione seu nível de aparência:</label>
-                <select id="nivelAparencia" class="aparencia-select">
-                  <option value="-24">Horrendo (-24 pts)</option>
-                  <option value="-20">Monstruoso (-20 pts)</option>
-                  <option value="-16">Hediondo (-16 pts)</option>
-                  <option value="-8">Feio (-8 pts)</option>
-                  <option value="-4">Sem Atrativos (-4 pts)</option>
-                  <option value="0" selected>Comum (0 pts)</option>
-                  <option value="4">Atraente (+4 pts)</option>
-                  <option value="12">Elegante (+12 pts)</option>
-                  <option value="16">Muito Elegante (+16 pts)</option>
-                  <option value="20">Lindo (+20 pts)</option>
-                </select>
-              </div>
-              
-              <div class="aparencia-display" id="displayAparencia">
-                <!-- Conteúdo será gerado por JavaScript -->
-              </div>
-            </div>
-          </div>
-          
-          <!-- Sistema de Idiomas -->
-          <div class="idiomas-card">
-            <div class="idiomas-header">
-              <h3><i class="fas fa-language"></i> Idiomas</h3>
-              <div class="idiomas-badge" id="pontosIdiomas">+0 pts</div>
-            </div>
-            
-            <!-- Idioma Materno -->
-            <div class="idioma-materno">
-              <h4>Idioma Materno</h4>
-              <div class="idioma-materno-info">
-                <input type="text"
-                    id="idiomaMaternoNome"
-                    class="idioma-materno-nome"
-                    value="Comum"
-                    placeholder="Nome do idioma materno">
-                <div class="idioma-materno-nativo">Nativo (0 pts)</div>
-              </div>
-            </div>
-            
-            <!-- Adicionar Novo Idioma -->
-            <div class="adicionar-idioma">
-              <h4>Adicionar Novo Idioma</h4>
-              
-              <div class="idioma-form">
-                <input type="text"
-                    id="novoIdiomaNome"
-                    class="idioma-input"
-                    placeholder="Nome do idioma (ex: Élfico)">
-                
-                <select id="novoIdiomaFala" class="idioma-select">
-                  <option value="6" selected>Nativo (+6 pts)</option>
-                  <option value="4">Com sotaque (+4 pts)</option>
-                  <option value="2">Rudimentar (+2 pts)</option>
-                  <option value="0">Nenhum (0 pts)</option>
-                </select>
-                
-                <select id="novoIdiomaEscrita" class="idioma-select">
-                  <option value="6">Nativo (+3 pts)</option>
-                  <option value="4">Com sotaque (+2 pts)</option>
-                  <option value="2">Rudimentar (+1 pts)</option>
-                  <option value="0" selected>Nenhum (0 pts)</option>
-                </select>
-              </div>
-              
-              <div class="custo-preview">
-                Custo estimado: <strong id="custoIdiomaPreview">+6 pts</strong>
-              </div>
-              
-              <div style="text-align: center; margin-top: 15px;">
-                <button id="btnAdicionarIdioma" class="btn-adicionar">
-                  <i class="fas fa-plus-circle"></i> Adicionar Idioma
-                </button>
-              </div>
-            </div>
-            
-            <!-- Lista de Idiomas Adicionais -->
-            <div class="lista-idiomas">
-              <div class="lista-header">
-                <div class="total-idiomas">
-                  Idiomas Adicionais: <strong id="totalIdiomas">0</strong>
-                </div>
-              </div>
-              
-              <div id="listaIdiomasAdicionais" class="idiomas-lista">
-                <!-- Lista será gerada por JavaScript -->
-                <div class="empty-state">Nenhum idioma adicional adicionado</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Sub-aba FÍSICAS (Peso, Altura, Características Físicas) -->
-        <div id="fisicas-subtab" class="subtab-content">
-          <h2 class="secao-titulo">Características Físicas</h2>
-          
-          <div class="cards-grid fisicas-grid">
-            <!-- ===== CARD 1: ALTURA E PESO (baseado em ST) ===== -->
-            <div class="fisica-card altura-peso-card">
-              <h3><i class="fas fa-ruler-combined"></i> Altura e Peso</h3>
-              
-              <div class="status-geral" style="text-align: center; margin-bottom: 20px;">
-                <div class="status-badge" id="statusFisico" style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block;">
-                  Normal
-                </div>
-                <div style="color: var(--wood-light); font-size: 0.9em; margin-top: 5px;">
-                  Baseado em ST <span id="stBase">10</span>
-                </div>
-              </div>
-              
-              <!-- Controles de Altura -->
-              <div class="controle-fisico">
-                <div class="controle-header">
-                  <span class="controle-label">
-                    <i class="fas fa-ruler-vertical"></i> Altura
-                  </span>
-                  <span class="controle-valor">
-                    <span id="alturaValor">1.70</span> m
-                  </span>
-                </div>
-                <div class="controle-botoes">
-                  <button class="btn-controle-fisico" onclick="ajustarAltura(-0.01)">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                  <input type="number" id="alturaInput" class="fisica-input" value="1.70" step="0.01" min="1.20" max="2.50">
-                  <button class="btn-controle-fisico" onclick="ajustarAltura(0.01)">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
-                <div class="controle-faixa" id="statusAltura">
-                  Faixa normal para ST 10: 1.58m - 1.83m
-                </div>
-              </div>
-              
-              <!-- Controles de Peso -->
-              <div class="controle-fisico">
-                <div class="controle-header">
-                  <span class="controle-label">
-                    <i class="fas fa-weight-hanging"></i> Peso
-                  </span>
-                  <span class="controle-valor">
-                    <span id="pesoValor">70</span> kg
-                  </span>
-                </div>
-                <div class="controle-botoes">
-                  <button class="btn-controle-fisico" onclick="ajustarPeso(-1)">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                  <input type="number" id="pesoInput" class="fisica-input" value="70" step="1" min="20" max="200">
-                  <button class="btn-controle-fisico" onclick="ajustarPeso(1)">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
-                <div class="controle-faixa" id="statusPeso">
-                  Faixa normal para ST 10: 57.5kg - 87.5kg
-                </div>
-              </div>
-              
-              <!-- Info de Faixa -->
-              <div class="info-faixa">
-                <div class="info-item">
-                  <span class="info-label">ST Base:</span>
-                  <span class="info-valor" id="stAtual">10</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Faixa Altura:</span>
-                  <span class="info-valor" id="alturaFaixa">1.58m - 1.83m</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Faixa Peso:</span>
-                  <span class="info-valor" id="pesoFaixa">57.5kg - 87.5kg</span>
-                </div>
-              </div>
-              
-              <!-- Desvantagens Ativas (aparece apenas quando houver) -->
-              <div id="desvantagensAtivas" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(212,175,55,0.3);">
-                <div style="color: var(--text-light); font-size: 0.9em; margin-bottom: 8px;">
-                  <i class="fas fa-exclamation-circle"></i> Desvantagens Ativas:
-                </div>
-                <div id="listaDesvantagens"></div>
-              </div>
-            </div>
-            
-            <!-- ===== CARD 2: CARACTERÍSTICAS FÍSICAS (Magro, Gordo, Nanismo, etc) ===== -->
-            <div class="fisica-card caracteristicas-card">
-              <div class="card-header">
-                <h3><i class="fas fa-user-tag"></i> Características Especiais</h3>
-                <div class="card-badge" id="pontosCaracteristicas">0 pts</div>
-              </div>
-              
-              <!-- Lista de Características Disponíveis -->
-              <div class="caracteristicas-lista">
-                <!-- Magro (-5 pts) -->
-                <div class="caracteristica-item" data-tipo="magro">
-                  <div class="caracteristica-info">
-                    <strong>Magro</strong>
-                    <small>-5 pts | Peso = 2/3 do normal. -2 ST vs derrubar, -2 Disfarce. HT máxima 14.</small>
-                  </div>
-                  <button class="btn-add-caracteristica" data-tipo="magro">
-                    Adicionar
-                  </button>
-                </div>
-                
-                <!-- Acima do Peso (-1 pts) -->
-                <div class="caracteristica-item" data-tipo="acima-peso">
-                  <div class="caracteristica-info">
-                    <strong>Acima do Peso</strong>
-                    <small>-1 pts | Peso = 130% do normal. -1 Disfarce, +1 Natação, +1 ST vs derrubar.</small>
-                  </div>
-                  <button class="btn-add-caracteristica" data-tipo="acima-peso">
-                    Adicionar
-                  </button>
-                </div>
-                
-                <!-- Gordo (-3 pts) -->
-                <div class="caracteristica-item" data-tipo="gordo">
-                  <div class="caracteristica-info">
-                    <strong>Gordo</strong>
-                    <small>-3 pts | Peso = 150% do normal. -2 Disfarce, +3 Natação, +2 ST vs derrubar. HT máxima 15.</small>
-                  </div>
-                  <button class="btn-add-caracteristica" data-tipo="gordo">
-                    Adicionar
-                  </button>
-                </div>
-                
-                <!-- Muito Gordo (-5 pts) -->
-                <div class="caracteristica-item" data-tipo="muito-gordo">
-                  <div class="caracteristica-info">
-                    <strong>Muito Gordo</strong>
-                    <small>-5 pts | Peso dobrado. -3 Disfarce, +5 Natação, +3 ST vs derrubar. HT máxima 13.</small>
-                  </div>
-                  <button class="btn-add-caracteristica" data-tipo="muito-gordo">
-                    Adicionar
-                  </button>
-                </div>
-                
-                <!-- Nanismo (-15 pts) -->
-                <div class="caracteristica-item" data-tipo="nanismo">
-                  <div class="caracteristica-info">
-                    <strong>Nanismo</strong>
-                    <small>-15 pts | Altura máxima: 1.32m. MT -1, -1 Deslocamento. -2 Disfarce/Perseguição.</small>
-                  </div>
-                  <button class="btn-add-caracteristica" data-tipo="nanismo">
-                    Adicionar
-                  </button>
-                </div>
-                
-                <!-- Gigantismo (0 pts) -->
-                <div class="caracteristica-item" data-tipo="gigantismo">
-                  <div class="caracteristica-info">
-                    <strong>Gigantismo</strong>
-                    <small>0 pts | Altura acima do máximo racial. MT +1, +1 Deslocamento. -2 Disfarce/Perseguição.</small>
-                  </div>
-                  <button class="btn-add-caracteristica" data-tipo="gigantismo">
-                    Adicionar
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Características Selecionadas -->
-              <div class="caracteristicas-selecionadas">
-                <h4 style="color: var(--text-light); margin-bottom: 10px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 5px;">
-                  <i class="fas fa-check-circle"></i> Selecionadas
-                </h4>
-                <div id="caracteristicasSelecionadas" class="selecionadas-lista">
-                  <!-- Lista será preenchida pelo JavaScript -->
-                  <div style="text-align: center; color: var(--wood-light); padding: 15px; font-style: italic;">
-                    Nenhuma característica selecionada
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- ===== CARD 3: CARACTERÍSTICAS VISUAIS ===== -->
-          <div class="fisica-card caracteristicas-visuais-card">
-            <h3><i class="fas fa-user-circle"></i> Características Visuais</h3>
-            
-            <div class="caracteristicas-visuais-grid">
-              <div class="caracteristica-visual">
-                <label><i class="fas fa-eye"></i> Cor dos Olhos:</label>
-                <input type="text" id="corOlhos" class="visual-input" value="Castanhos" placeholder="Ex: Azuis, Verdes...">
-              </div>
-              
-              <div class="caracteristica-visual">
-                <label><i class="fas fa-cut"></i> Cabelo:</label>
-                <input type="text" id="cabelo" class="visual-input" value="Castanho" placeholder="Cor e estilo">
-              </div>
-              
-              <div class="caracteristica-visual">
-                <label><i class="fas fa-tint"></i> Cor da Pele:</label>
-                <input type="text" id="corPele" class="visual-input" value="Clara" placeholder="Tom da pele">
-              </div>
-              
-              <div class="caracteristica-visual">
-                <label><i class="fas fa-male"></i> Gênero:</label>
-                <select id="genero" class="visual-select">
-                  <option value="Masculino">Masculino</option>
-                  <option value="Feminino">Feminino</option>
-                  <option value="Outro">Outro</option>
-                </select>
-              </div>
-              
-              <div class="caracteristica-visual">
-                <label><i class="fas fa-calendar-alt"></i> Idade:</label>
-                <div style="display: flex; gap: 10px;">
-                  <input type="number" id="idade" class="visual-input" value="25" min="0" max="150">
-                  <span style="color: var(--wood-light); align-self: center;">anos</span>
-                </div>
-              </div>
-              
-              <div class="caracteristica-visual">
-                <label><i class="fas fa-hand-paper"></i> Mão Dominante:</label>
-                <select id="maos" class="visual-select">
-                  <option value="Destro">Destro</option>
-                  <option value="Canhoto">Canhoto</option>
-                  <option value="Ambidestro">Ambidestro</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="descricao-fisica">
-              <label><i class="fas fa-file-alt"></i> Descrição Física:</label>
-              <textarea id="descricaoFisica" class="descricao-textarea"
-                   placeholder="Descreva características marcantes: cicatrizes, tatuagens, postura, maneira de andar...">
-Este personagem possui uma estatura média, com ombros largos e postura ereta. Seus cabelos castanhos são curtos e bem cuidados, e seus olhos castanhos transmitem uma expressão determinada. Uma pequena cicatriz percorre sua testa do lado esquerdo.
-              </textarea>
-            </div>
-            
-            <div style="text-align: center; margin-top: 20px;">
-              <button class="btn-salvar" onclick="salvarCaracteristicasVisuais()">
-                <i class="fas fa-save"></i> Salvar Características
-              </button>
-            </div>
-          </div>
-          
-          <!-- Mensagem de Status -->
-          <div id="statusCaracteristicasFisicas" class="status-message info">
-            <i class="fas fa-info-circle"></i> Sistema de características físicas carregado. Ajuste altura/peso baseado no ST.
-          </div>
+        <!-- Conteúdo da aba características aqui... -->
+        <div class="dev-message">
+          <i class="fas fa-tools"></i>
+          <h2>Características - Em Desenvolvimento</h2>
+          <p>Sistema de características físicas e sociais</p>
         </div>
       </div>
     </div>
@@ -906,6 +518,7 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
     <!-- VANTAGENS/DESVANTAGENS -->
     <div id="vantagens-tab" class="tab-content" style="display: none;">
       <div class="vantagens-container">
+        
         <!-- CARD ÚNICO DE RESUMO DE PONTOS -->
         <div class="resumo-consolidado">
           <h2 class="secao-titulo">
@@ -955,6 +568,7 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
 
         <!-- LAYOUT PRINCIPAL (2 COLUNAS) -->
         <div class="vantagens-layout">
+          
           <!-- COLUNA ESQUERDA: CATÁLOGO -->
           <div class="coluna-catalogo">
             <div class="secao-catalogo">
@@ -994,10 +608,73 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
               
               <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
               <div class="catalogo-grid" id="catalogo-vantagens">
-                <!-- Vantagens serão carregadas via JavaScript -->
-                <div class="catalogo-vazio">
-                  <i class="fas fa-info-circle"></i>
-                  <p>Carregando vantagens...</p>
+                <!-- EXEMPLOS DE VANTAGENS -->
+                <div class="vantagem-card" data-id="ambidestria">
+                  <div class="card-header">
+                    <h3 class="card-titulo">Ambidestria</h3>
+                    <div class="card-pontos">+5</div>
+                  </div>
+                  <div class="card-body">
+                    <span class="card-categoria">Física</span>
+                    <p class="card-descricao">Capacidade de lutar e manusear igualmente bem com qualquer uma das mãos.</p>
+                  </div>
+                  <div class="card-footer">
+                    <span class="card-tipo">Vantagem</span>
+                    <button class="btn-adicionar" onclick="adicionarVantagem('ambidestria')">
+                      <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="vantagem-card" data-id="visaoNoturna">
+                  <div class="card-header">
+                    <h3 class="card-titulo">Visão Noturna</h3>
+                    <div class="card-pontos">+2</div>
+                  </div>
+                  <div class="card-body">
+                    <span class="card-categoria">Física</span>
+                    <p class="card-descricao">Veja no escuro como se estivesse em penumbra. Não funciona sob escuridão total.</p>
+                  </div>
+                  <div class="card-footer">
+                    <span class="card-tipo">Vantagem</span>
+                    <button class="btn-adicionar" onclick="adicionarVantagem('visaoNoturna')">
+                      <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="vantagem-card" data-id="abençoado">
+                  <div class="card-header">
+                    <h3 class="card-titulo">Abençoado</h3>
+                    <div class="card-pontos">+10/+20</div>
+                  </div>
+                  <div class="card-body">
+                    <span class="card-categoria">Sobrenatural</span>
+                    <p class="card-descricao">Sintonizado com um deus ou poder cósmico. Recebe visões ou presságios.</p>
+                  </div>
+                  <div class="card-footer">
+                    <span class="card-tipo">Vantagem com Opções</span>
+                    <button class="btn-adicionar" onclick="mostrarOpcoesVantagem('abençoado')">
+                      <i class="fas fa-cog"></i> Opções
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="vantagem-card" data-id="aptidaoMagica">
+                  <div class="card-header">
+                    <h3 class="card-titulo">Aptidão Mágica</h3>
+                    <div class="card-pontos">+5/+10</div>
+                  </div>
+                  <div class="card-body">
+                    <span class="card-categoria">Sobrenatural</span>
+                    <p class="card-descricao">Capacidade mágica dividida em níveis. Facilita aprendizado e uso de magias.</p>
+                  </div>
+                  <div class="card-footer">
+                    <span class="card-tipo">Vantagem com Níveis</span>
+                    <button class="btn-adicionar" onclick="mostrarNiveisVantagem('aptidaoMagica')">
+                      <i class="fas fa-sliders-h"></i> Níveis
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1024,17 +701,77 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
                 <button class="btn-categoria" data-categoria="sociais">
                   <i class="fas fa-handshake"></i> Sociais
                 </button>
-                <button class="btn-categoria" data-categoria="supers">
-                  <i class="fas fa-bolt"></i> Supers
-                </button>
               </div>
               
               <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
               <div class="catalogo-grid" id="catalogo-desvantagens">
-                <!-- Desvantagens serão carregadas via JavaScript -->
-                <div class="catalogo-vazio">
-                  <i class="fas fa-info-circle"></i>
-                  <p>Carregando desvantagens...</p>
+                <!-- EXEMPLOS DE DESVANTAGENS -->
+                <div class="desvantagem-card" data-id="alcoolismo">
+                  <div class="card-header">
+                    <h3 class="card-titulo">Alcoolismo</h3>
+                    <div class="card-pontos">-15/-20</div>
+                  </div>
+                  <div class="card-body">
+                    <span class="card-categoria">Mental</span>
+                    <p class="card-descricao">Vício em álcool. Teste de Vontade quando exposto, risco de porre e perda de atributos.</p>
+                  </div>
+                  <div class="card-footer">
+                    <span class="card-tipo">Desvantagem com Opções</span>
+                    <button class="btn-adicionar" onclick="mostrarOpcoesDesvantagem('alcoolismo')">
+                      <i class="fas fa-cog"></i> Opções
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="desvantagem-card" data-id="altruismo">
+                  <div class="card-header">
+                    <h3 class="card-titulo">Altruísmo</h3>
+                    <div class="card-pontos">-5</div>
+                  </div>
+                  <div class="card-body">
+                    <span class="card-categoria">Mental</span>
+                    <p class="card-descricao">Se sacrifica por outros, negligencia necessidades próprias. Teste de autocontrole.</p>
+                  </div>
+                  <div class="card-footer">
+                    <span class="card-tipo">Desvantagem</span>
+                    <button class="btn-adicionar" onclick="adicionarDesvantagem('altruismo')">
+                      <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="desvantagem-card" data-id="miopia">
+                  <div class="card-header">
+                    <h3 class="card-titulo">Miopia</h3>
+                    <div class="card-pontos">-10/-15</div>
+                  </div>
+                  <div class="card-body">
+                    <span class="card-categoria">Física</span>
+                    <p class="card-descricao">Visão ruim à distância. Penalidade em testes visuais além de 2 metros.</p>
+                  </div>
+                  <div class="card-footer">
+                    <span class="card-tipo">Desvantagem com Níveis</span>
+                    <button class="btn-adicionar" onclick="mostrarNiveisDesvantagem('miopia')">
+                      <i class="fas fa-sliders-h"></i> Níveis
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="desvantagem-card" data-id="pavioCurto">
+                  <div class="card-header">
+                    <h3 class="card-titulo">Pavio Curto</h3>
+                    <div class="card-pontos">-10</div>
+                  </div>
+                  <div class="card-body">
+                    <span class="card-categoria">Mental</span>
+                    <p class="card-descricao">Irrita-se facilmente, age impulsivamente. Teste de Vontade para evitar explosões.</p>
+                  </div>
+                  <div class="card-footer">
+                    <span class="card-tipo">Desvantagem</span>
+                    <button class="btn-adicionar" onclick="adicionarDesvantagem('pavioCurto')">
+                      <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1081,33 +818,38 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
                 
                 <div class="peculiaridades-inputs">
                   <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input"
-                        placeholder="Descreva sua primeira peculiaridade..."
-                        maxlength="100">
+                    <input type="text" class="peculiaridade-input" 
+                           placeholder="Descreva sua primeira peculiaridade..."
+                           maxlength="100"
+                           oninput="atualizarPeculiaridade(1, this.value)">
                     <span class="peculiaridade-indicador">1</span>
                   </div>
                   <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input"
-                        placeholder="Descreva sua segunda peculiaridade..."
-                        maxlength="100">
+                    <input type="text" class="peculiaridade-input" 
+                           placeholder="Descreva sua segunda peculiaridade..."
+                           maxlength="100"
+                           oninput="atualizarPeculiaridade(2, this.value)">
                     <span class="peculiaridade-indicador">2</span>
                   </div>
                   <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input"
-                        placeholder="Descreva sua terceira peculiaridade..."
-                        maxlength="100">
+                    <input type="text" class="peculiaridade-input" 
+                           placeholder="Descreva sua terceira peculiaridade..."
+                           maxlength="100"
+                           oninput="atualizarPeculiaridade(3, this.value)">
                     <span class="peculiaridade-indicador">3</span>
                   </div>
                   <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input"
-                        placeholder="Descreva sua quarta peculiaridade..."
-                        maxlength="100">
+                    <input type="text" class="peculiaridade-input" 
+                           placeholder="Descreva sua quarta peculiaridade..."
+                           maxlength="100"
+                           oninput="atualizarPeculiaridade(4, this.value)">
                     <span class="peculiaridade-indicador">4</span>
                   </div>
                   <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input"
-                        placeholder="Descreva sua quinta peculiaridade..."
-                        maxlength="100">
+                    <input type="text" class="peculiaridade-input" 
+                           placeholder="Descreva sua quinta peculiaridade..."
+                           maxlength="100"
+                           oninput="atualizarPeculiaridade(5, this.value)">
                     <span class="peculiaridade-indicador">5</span>
                   </div>
                 </div>
@@ -1118,6 +860,7 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
                 </div>
               </div>
             </div>
+            <!-- FIM DA SECÇÃO PECULIARIDADES -->
           </div>
         </div>
 
@@ -1126,7 +869,7 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
           <div class="modal-content">
             <div class="modal-header">
               <h3 id="modal-titulo">Selecionar Opções</h3>
-              <button class="modal-close">&times;</button>
+              <button class="modal-close" onclick="fecharModal()">&times;</button>
             </div>
             <div class="modal-body">
               <div class="modal-descricao" id="modal-descricao">
@@ -1146,11 +889,13 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn-modal btn-cancelar">Cancelar</button>
-              <button class="btn-modal btn-confirmar" disabled>Confirmar Seleção</button>
+              <button class="btn-modal btn-cancelar" onclick="fecharModal()">Cancelar</button>
+              <button class="btn-modal btn-confirmar" onclick="confirmarSelecao()" disabled>Confirmar Seleção</button>
             </div>
           </div>
         </div>
+        <!-- FIM DO MODAL -->
+        
       </div>
     </div>
 
@@ -1209,6 +954,8 @@ Este personagem possui uma estatura média, com ombros largos e postura ereta. S
       <i class="fas fa-arrow-left"></i> Voltar
     </button>
   </div>
+
+  <!-- CONTINUA NO PRÓXIMO COMENTÁRIO -->
   <script src="atributos.js"></script>
   <script src="caracteristicas-aparencia.js"></script>
   <script src="caracteristicas-riqueza.js"></script>
