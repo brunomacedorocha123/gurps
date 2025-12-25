@@ -516,388 +516,250 @@
     </div>
 
     <!-- VANTAGENS/DESVANTAGENS -->
-    <div id="vantagens-tab" class="tab-content" style="display: none;">
-      <div class="vantagens-container">
+<div id="vantagens-tab" class="tab-content" style="display: none;">
+  <div class="vantagens-container">
+    
+    <!-- CARD ÚNICO DE RESUMO DE PONTOS -->
+    <div class="resumo-consolidado">
+      <h2 class="secao-titulo">
+        <i class="fas fa-chart-pie"></i> Resumo de Pontos
+      </h2>
+      <div class="ponto-card-consolidado">
+        <div class="ponto-linha vantagens-linha">
+          <div class="ponto-label">
+            <i class="fas fa-crown"></i>
+            <span>Vantagens</span>
+          </div>
+          <div class="ponto-valor vantagem-total">0</div>
+          <div class="ponto-desc">Pontos Gastos</div>
+        </div>
         
-        <!-- CARD ÚNICO DE RESUMO DE PONTOS -->
-        <div class="resumo-consolidado">
-          <h2 class="secao-titulo">
-            <i class="fas fa-chart-pie"></i> Resumo de Pontos
-          </h2>
-          <div class="ponto-card-consolidado">
-            <div class="ponto-linha vantagens-linha">
-              <div class="ponto-label">
-                <i class="fas fa-crown"></i>
-                <span>Vantagens</span>
-              </div>
-              <div class="ponto-valor vantagem-total">0</div>
-              <div class="ponto-desc">Pontos Gastos</div>
-            </div>
-            
-            <div class="ponto-linha desvantagens-linha">
-              <div class="ponto-label">
-                <i class="fas fa-skull-crossbones"></i>
-                <span>Desvantagens</span>
-              </div>
-              <div class="ponto-valor desvantagem-total">0</div>
-              <div class="ponto-desc">Pontos Ganhos</div>
-            </div>
-            
-            <div class="ponto-linha peculiaridades-linha">
-              <div class="ponto-label">
-                <i class="fas fa-star"></i>
-                <span>Peculiaridades</span>
-                <span class="ponto-subinfo">(máx. 5)</span>
-              </div>
-              <div class="ponto-valor peculiaridades-total">0</div>
-              <div class="ponto-desc">-1 ponto cada</div>
-            </div>
-            
-            <div class="ponto-separador"></div>
-            
-            <div class="ponto-linha saldo-linha">
-              <div class="ponto-label">
-                <i class="fas fa-scale-balanced"></i>
-                <span>Saldo Final</span>
-              </div>
-              <div class="ponto-valor saldo-final">0</div>
-              <div class="ponto-desc">Total Disponível</div>
-            </div>
+        <div class="ponto-linha desvantagens-linha">
+          <div class="ponto-label">
+            <i class="fas fa-skull-crossbones"></i>
+            <span>Desvantagens</span>
           </div>
+          <div class="ponto-valor desvantagem-total">0</div>
+          <div class="ponto-desc">Pontos Ganhos</div>
         </div>
-
-        <!-- LAYOUT PRINCIPAL (2 COLUNAS) -->
-        <div class="vantagens-layout">
-          
-          <!-- COLUNA ESQUERDA: CATÁLOGO -->
-          <div class="coluna-catalogo">
-            <div class="secao-catalogo">
-              <h2 class="secao-titulo">
-                <i class="fas fa-book"></i> Catálogo de Vantagens
-              </h2>
-              
-              <!-- FILTROS POR CATEGORIA -->
-              <div class="categorias-filtro">
-                <button class="btn-categoria ativo" data-categoria="todas">
-                  <i class="fas fa-globe"></i> Todas
-                </button>
-                <button class="btn-categoria" data-categoria="fisicas">
-                  <i class="fas fa-dumbbell"></i> Físicas
-                </button>
-                <button class="btn-categoria" data-categoria="mentais">
-                  <i class="fas fa-brain"></i> Mentais
-                </button>
-                <button class="btn-categoria" data-categoria="sobrenaturais">
-                  <i class="fas fa-magic"></i> Sobrenaturais
-                </button>
-                <button class="btn-categoria" data-categoria="sociais">
-                  <i class="fas fa-handshake"></i> Sociais
-                </button>
-                <button class="btn-categoria" data-categoria="supers">
-                  <i class="fas fa-bolt"></i> Supers
-                </button>
-              </div>
-              
-              <!-- BARRA DE PESQUISA -->
-              <div class="pesquisa-container">
-                <div class="pesquisa-input">
-                  <i class="fas fa-search"></i>
-                  <input type="text" id="pesquisa-vantagem" placeholder="Buscar vantagem...">
-                </div>
-              </div>
-              
-              <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
-              <div class="catalogo-grid" id="catalogo-vantagens">
-                <!-- EXEMPLOS DE VANTAGENS -->
-                <div class="vantagem-card" data-id="ambidestria">
-                  <div class="card-header">
-                    <h3 class="card-titulo">Ambidestria</h3>
-                    <div class="card-pontos">+5</div>
-                  </div>
-                  <div class="card-body">
-                    <span class="card-categoria">Física</span>
-                    <p class="card-descricao">Capacidade de lutar e manusear igualmente bem com qualquer uma das mãos.</p>
-                  </div>
-                  <div class="card-footer">
-                    <span class="card-tipo">Vantagem</span>
-                    <button class="btn-adicionar" onclick="adicionarVantagem('ambidestria')">
-                      <i class="fas fa-plus"></i> Adicionar
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="vantagem-card" data-id="visaoNoturna">
-                  <div class="card-header">
-                    <h3 class="card-titulo">Visão Noturna</h3>
-                    <div class="card-pontos">+2</div>
-                  </div>
-                  <div class="card-body">
-                    <span class="card-categoria">Física</span>
-                    <p class="card-descricao">Veja no escuro como se estivesse em penumbra. Não funciona sob escuridão total.</p>
-                  </div>
-                  <div class="card-footer">
-                    <span class="card-tipo">Vantagem</span>
-                    <button class="btn-adicionar" onclick="adicionarVantagem('visaoNoturna')">
-                      <i class="fas fa-plus"></i> Adicionar
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="vantagem-card" data-id="abençoado">
-                  <div class="card-header">
-                    <h3 class="card-titulo">Abençoado</h3>
-                    <div class="card-pontos">+10/+20</div>
-                  </div>
-                  <div class="card-body">
-                    <span class="card-categoria">Sobrenatural</span>
-                    <p class="card-descricao">Sintonizado com um deus ou poder cósmico. Recebe visões ou presságios.</p>
-                  </div>
-                  <div class="card-footer">
-                    <span class="card-tipo">Vantagem com Opções</span>
-                    <button class="btn-adicionar" onclick="mostrarOpcoesVantagem('abençoado')">
-                      <i class="fas fa-cog"></i> Opções
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="vantagem-card" data-id="aptidaoMagica">
-                  <div class="card-header">
-                    <h3 class="card-titulo">Aptidão Mágica</h3>
-                    <div class="card-pontos">+5/+10</div>
-                  </div>
-                  <div class="card-body">
-                    <span class="card-categoria">Sobrenatural</span>
-                    <p class="card-descricao">Capacidade mágica dividida em níveis. Facilita aprendizado e uso de magias.</p>
-                  </div>
-                  <div class="card-footer">
-                    <span class="card-tipo">Vantagem com Níveis</span>
-                    <button class="btn-adicionar" onclick="mostrarNiveisVantagem('aptidaoMagica')">
-                      <i class="fas fa-sliders-h"></i> Níveis
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="secao-catalogo">
-              <h2 class="secao-titulo">
-                <i class="fas fa-book-dead"></i> Catálogo de Desvantagens
-              </h2>
-              
-              <!-- FILTROS PARA DESVANTAGENS -->
-              <div class="categorias-filtro">
-                <button class="btn-categoria ativo" data-categoria="todas">
-                  <i class="fas fa-globe"></i> Todas
-                </button>
-                <button class="btn-categoria" data-categoria="fisicas">
-                  <i class="fas fa-dumbbell"></i> Físicas
-                </button>
-                <button class="btn-categoria" data-categoria="mentais">
-                  <i class="fas fa-brain"></i> Mentais
-                </button>
-                <button class="btn-categoria" data-categoria="sobrenaturais">
-                  <i class="fas fa-magic"></i> Sobrenaturais
-                </button>
-                <button class="btn-categoria" data-categoria="sociais">
-                  <i class="fas fa-handshake"></i> Sociais
-                </button>
-              </div>
-              
-              <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
-              <div class="catalogo-grid" id="catalogo-desvantagens">
-                <!-- EXEMPLOS DE DESVANTAGENS -->
-                <div class="desvantagem-card" data-id="alcoolismo">
-                  <div class="card-header">
-                    <h3 class="card-titulo">Alcoolismo</h3>
-                    <div class="card-pontos">-15/-20</div>
-                  </div>
-                  <div class="card-body">
-                    <span class="card-categoria">Mental</span>
-                    <p class="card-descricao">Vício em álcool. Teste de Vontade quando exposto, risco de porre e perda de atributos.</p>
-                  </div>
-                  <div class="card-footer">
-                    <span class="card-tipo">Desvantagem com Opções</span>
-                    <button class="btn-adicionar" onclick="mostrarOpcoesDesvantagem('alcoolismo')">
-                      <i class="fas fa-cog"></i> Opções
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="desvantagem-card" data-id="altruismo">
-                  <div class="card-header">
-                    <h3 class="card-titulo">Altruísmo</h3>
-                    <div class="card-pontos">-5</div>
-                  </div>
-                  <div class="card-body">
-                    <span class="card-categoria">Mental</span>
-                    <p class="card-descricao">Se sacrifica por outros, negligencia necessidades próprias. Teste de autocontrole.</p>
-                  </div>
-                  <div class="card-footer">
-                    <span class="card-tipo">Desvantagem</span>
-                    <button class="btn-adicionar" onclick="adicionarDesvantagem('altruismo')">
-                      <i class="fas fa-plus"></i> Adicionar
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="desvantagem-card" data-id="miopia">
-                  <div class="card-header">
-                    <h3 class="card-titulo">Miopia</h3>
-                    <div class="card-pontos">-10/-15</div>
-                  </div>
-                  <div class="card-body">
-                    <span class="card-categoria">Física</span>
-                    <p class="card-descricao">Visão ruim à distância. Penalidade em testes visuais além de 2 metros.</p>
-                  </div>
-                  <div class="card-footer">
-                    <span class="card-tipo">Desvantagem com Níveis</span>
-                    <button class="btn-adicionar" onclick="mostrarNiveisDesvantagem('miopia')">
-                      <i class="fas fa-sliders-h"></i> Níveis
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="desvantagem-card" data-id="pavioCurto">
-                  <div class="card-header">
-                    <h3 class="card-titulo">Pavio Curto</h3>
-                    <div class="card-pontos">-10</div>
-                  </div>
-                  <div class="card-body">
-                    <span class="card-categoria">Mental</span>
-                    <p class="card-descricao">Irrita-se facilmente, age impulsivamente. Teste de Vontade para evitar explosões.</p>
-                  </div>
-                  <div class="card-footer">
-                    <span class="card-tipo">Desvantagem</span>
-                    <button class="btn-adicionar" onclick="adicionarDesvantagem('pavioCurto')">
-                      <i class="fas fa-plus"></i> Adicionar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- FIM DA COLUNA ESQUERDA -->
-          
-          <!-- COLUNA DIREITA: ADQUIRIDAS -->
-          <div class="coluna-adquiridas">
-            <div class="secao-adquiridas">
-              <h2 class="secao-titulo">
-                <i class="fas fa-check-circle"></i> Vantagens Adquiridas
-              </h2>
-              <div class="adquiridas-container" id="vantagens-adquiridas">
-                <div class="vazio-mensagem">
-                  <i class="fas fa-info-circle"></i>
-                  <p>Nenhuma vantagem selecionada ainda</p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="secao-adquiridas">
-              <h2 class="secao-titulo">
-                <i class="fas fa-exclamation-triangle"></i> Desvantagens Adquiridas
-              </h2>
-              <div class="adquiridas-container" id="desvantagens-adquiridas">
-                <div class="vazio-mensagem">
-                  <i class="fas fa-info-circle"></i>
-                  <p>Nenhuma desvantagem selecionada ainda</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- SECÇÃO PECULIARIDADES -->
-            <div class="secao-adquiridas">
-              <h2 class="secao-titulo">
-                <i class="fas fa-star"></i> Peculiaridades
-                <span class="peculiaridades-contador">(0/5)</span>
-              </h2>
-              <div class="peculiaridades-container">
-                <div class="peculiaridades-desc">
-                  <i class="fas fa-info-circle"></i>
-                  <p>Cada peculiaridade custa -1 ponto. Máximo de 5.</p>
-                </div>
-                
-                <div class="peculiaridades-inputs">
-                  <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input" 
-                           placeholder="Descreva sua primeira peculiaridade..."
-                           maxlength="100"
-                           oninput="atualizarPeculiaridade(1, this.value)">
-                    <span class="peculiaridade-indicador">1</span>
-                  </div>
-                  <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input" 
-                           placeholder="Descreva sua segunda peculiaridade..."
-                           maxlength="100"
-                           oninput="atualizarPeculiaridade(2, this.value)">
-                    <span class="peculiaridade-indicador">2</span>
-                  </div>
-                  <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input" 
-                           placeholder="Descreva sua terceira peculiaridade..."
-                           maxlength="100"
-                           oninput="atualizarPeculiaridade(3, this.value)">
-                    <span class="peculiaridade-indicador">3</span>
-                  </div>
-                  <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input" 
-                           placeholder="Descreva sua quarta peculiaridade..."
-                           maxlength="100"
-                           oninput="atualizarPeculiaridade(4, this.value)">
-                    <span class="peculiaridade-indicador">4</span>
-                  </div>
-                  <div class="peculiaridade-input-group">
-                    <input type="text" class="peculiaridade-input" 
-                           placeholder="Descreva sua quinta peculiaridade..."
-                           maxlength="100"
-                           oninput="atualizarPeculiaridade(5, this.value)">
-                    <span class="peculiaridade-indicador">5</span>
-                  </div>
-                </div>
-                
-                <div class="peculiaridades-aviso">
-                  <i class="fas fa-exclamation-circle"></i>
-                  <p>Apenas peculiaridades preenchidas serão contabilizadas.</p>
-                </div>
-              </div>
-            </div>
-            <!-- FIM DA SECÇÃO PECULIARIDADES -->
-          </div>
-        </div>
-
-        <!-- MODAL PARA OPÇÕES DE VANTAGEM/DESVANTAGEM -->
-        <div id="opcoes-modal" class="modal">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h3 id="modal-titulo">Selecionar Opções</h3>
-              <button class="modal-close" onclick="fecharModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-              <div class="modal-descricao" id="modal-descricao">
-                <!-- Descrição será inserida aqui -->
-              </div>
-              
-              <div class="opcoes-container" id="opcoes-container">
-                <!-- Opções serão inseridas aqui -->
-              </div>
-              
-              <div class="modal-resumo">
-                <div class="resumo-pontos">
-                  <span>Custo Total:</span>
-                  <span class="pontos-total" id="modal-pontos-total">0</span>
-                  <span>pontos</span>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn-modal btn-cancelar" onclick="fecharModal()">Cancelar</button>
-              <button class="btn-modal btn-confirmar" onclick="confirmarSelecao()" disabled>Confirmar Seleção</button>
-            </div>
-          </div>
-        </div>
-        <!-- FIM DO MODAL -->
         
+        <div class="ponto-linha peculiaridades-linha">
+          <div class="ponto-label">
+            <i class="fas fa-star"></i>
+            <span>Peculiaridades</span>
+            <span class="ponto-subinfo">(máx. 5)</span>
+          </div>
+          <div class="ponto-valor peculiaridades-total">0</div>
+          <div class="ponto-desc">-1 ponto cada</div>
+        </div>
+        
+        <div class="ponto-separador"></div>
+        
+        <div class="ponto-linha saldo-linha">
+          <div class="ponto-label">
+            <i class="fas fa-scale-balanced"></i>
+            <span>Saldo Final</span>
+          </div>
+          <div class="ponto-valor saldo-final">0</div>
+          <div class="ponto-desc">Total Disponível</div>
+        </div>
       </div>
     </div>
+
+    <!-- LAYOUT PRINCIPAL (2 COLUNAS) -->
+    <div class="vantagens-layout">
+      
+      <!-- COLUNA ESQUERDA: CATÁLOGO -->
+      <div class="coluna-catalogo">
+        <div class="secao-catalogo">
+          <h2 class="secao-titulo">
+            <i class="fas fa-book"></i> Catálogo de Vantagens
+          </h2>
+          
+          <!-- FILTROS POR CATEGORIA -->
+          <div class="categorias-filtro">
+            <button class="btn-categoria ativo" data-categoria="todas">
+              <i class="fas fa-globe"></i> Todas
+            </button>
+            <button class="btn-categoria" data-categoria="fisicas">
+              <i class="fas fa-dumbbell"></i> Físicas
+            </button>
+            <button class="btn-categoria" data-categoria="mentais">
+              <i class="fas fa-brain"></i> Mentais
+            </button>
+            <button class="btn-categoria" data-categoria="sobrenaturais">
+              <i class="fas fa-magic"></i> Sobrenaturais
+            </button>
+            <button class="btn-categoria" data-categoria="sociais">
+              <i class="fas fa-handshake"></i> Sociais
+            </button>
+            <button class="btn-categoria" data-categoria="supers">
+              <i class="fas fa-bolt"></i> Supers
+            </button>
+          </div>
+          
+          <!-- BARRA DE PESQUISA -->
+          <div class="pesquisa-container">
+            <div class="pesquisa-input">
+              <i class="fas fa-search"></i>
+              <input type="text" id="pesquisa-vantagem" placeholder="Buscar vantagem...">
+            </div>
+          </div>
+          
+          <!-- LISTA DE VANTAGENS DISPONÍVEIS -->
+          <div class="catalogo-grid" id="catalogo-vantagens">
+            <!-- VANTAGENS VÃO AQUI DINAMICAMENTE -->
+          </div>
+        </div>
+        
+        <div class="secao-catalogo">
+          <h2 class="secao-titulo">
+            <i class="fas fa-book-dead"></i> Catálogo de Desvantagens
+          </h2>
+          
+          <!-- FILTROS PARA DESVANTAGENS -->
+          <div class="categorias-filtro">
+            <button class="btn-categoria ativo" data-categoria="todas">
+              <i class="fas fa-globe"></i> Todas
+            </button>
+            <button class="btn-categoria" data-categoria="fisicas">
+              <i class="fas fa-dumbbell"></i> Físicas
+            </button>
+            <button class="btn-categoria" data-categoria="mentais">
+              <i class="fas fa-brain"></i> Mentais
+            </button>
+            <button class="btn-categoria" data-categoria="sobrenaturais">
+              <i class="fas fa-magic"></i> Sobrenaturais
+            </button>
+            <button class="btn-categoria" data-categoria="sociais">
+              <i class="fas fa-handshake"></i> Sociais
+            </button>
+          </div>
+          
+          <!-- LISTA DE DESVANTAGENS DISPONÍVEIS -->
+          <div class="catalogo-grid" id="catalogo-desvantagens">
+            <!-- DESVANTAGENS VÃO AQUI DINAMICAMENTE -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- COLUNA DIREITA: ADQUIRIDAS -->
+      <div class="coluna-adquiridas">
+        <div class="secao-adquiridas">
+          <h2 class="secao-titulo">
+            <i class="fas fa-check-circle"></i> Vantagens Adquiridas
+          </h2>
+          <div class="adquiridas-container" id="vantagens-adquiridas">
+            <div class="vazio-mensagem">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhuma vantagem selecionada ainda</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="secao-adquiridas">
+          <h2 class="secao-titulo">
+            <i class="fas fa-exclamation-triangle"></i> Desvantagens Adquiridas
+          </h2>
+          <div class="adquiridas-container" id="desvantagens-adquiridas">
+            <div class="vazio-mensagem">
+              <i class="fas fa-info-circle"></i>
+              <p>Nenhuma desvantagem selecionada ainda</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- SECÇÃO PECULIARIDADES -->
+        <div class="secao-adquiridas">
+          <h2 class="secao-titulo">
+            <i class="fas fa-star"></i> Peculiaridades
+            <span class="peculiaridades-contador">(0/5)</span>
+          </h2>
+          <div class="peculiaridades-container">
+            <div class="peculiaridades-desc">
+              <i class="fas fa-info-circle"></i>
+              <p>Cada peculiaridade custa -1 ponto. Máximo de 5.</p>
+            </div>
+            
+            <div class="peculiaridades-inputs">
+              <div class="peculiaridade-input-group">
+                <input type="text" class="peculiaridade-input" 
+                       placeholder="Descreva sua primeira peculiaridade..."
+                       maxlength="100"
+                       oninput="atualizarPeculiaridade(1, this.value)">
+                <span class="peculiaridade-indicador">1</span>
+              </div>
+              <div class="peculiaridade-input-group">
+                <input type="text" class="peculiaridade-input" 
+                       placeholder="Descreva sua segunda peculiaridade..."
+                       maxlength="100"
+                       oninput="atualizarPeculiaridade(2, this.value)">
+                <span class="peculiaridade-indicador">2</span>
+              </div>
+              <div class="peculiaridade-input-group">
+                <input type="text" class="peculiaridade-input" 
+                       placeholder="Descreva sua terceira peculiaridade..."
+                       maxlength="100"
+                       oninput="atualizarPeculiaridade(3, this.value)">
+                <span class="peculiaridade-indicador">3</span>
+              </div>
+              <div class="peculiaridade-input-group">
+                <input type="text" class="peculiaridade-input" 
+                       placeholder="Descreva sua quarta peculiaridade..."
+                       maxlength="100"
+                       oninput="atualizarPeculiaridade(4, this.value)">
+                <span class="peculiaridade-indicador">4</span>
+              </div>
+              <div class="peculiaridade-input-group">
+                <input type="text" class="peculiaridade-input" 
+                       placeholder="Descreva sua quinta peculiaridade..."
+                       maxlength="100"
+                       oninput="atualizarPeculiaridade(5, this.value)">
+                <span class="peculiaridade-indicador">5</span>
+              </div>
+            </div>
+            
+            <div class="peculiaridades-aviso">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>Apenas peculiaridades preenchidas serão contabilizadas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL PARA OPÇÕES DE VANTAGEM/DESVANTAGEM -->
+    <div id="opcoes-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-titulo">Selecionar Opções</h3>
+          <button class="modal-close" onclick="fecharModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-descricao" id="modal-descricao">
+            <!-- Descrição será inserida aqui -->
+          </div>
+          
+          <div class="opcoes-container" id="opcoes-container">
+            <!-- Opções serão inseridas aqui -->
+          </div>
+          
+          <div class="modal-resumo">
+            <div class="resumo-pontos">
+              <span>Custo Total:</span>
+              <span class="pontos-total" id="modal-pontos-total">0</span>
+              <span>pontos</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal btn-cancelar" onclick="fecharModal()">Cancelar</button>
+          <button class="btn-modal btn-confirmar" onclick="confirmarSelecao()" disabled>Confirmar Seleção</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
     <!-- PERÍCIAS/TÉCNICAS -->
     <div id="pericias-tab" class="tab-content" style="display: none;">
