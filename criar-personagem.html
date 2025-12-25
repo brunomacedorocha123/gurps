@@ -832,102 +832,564 @@
     // ===========================================
     // INICIALIZAÇÃO DO FIREBASE
     // ===========================================
-    let app, auth, db;
+   // ===========================================
+// INICIALIZAÇÃO DO FIREBASE
+// ===========================================
+let app, auth, db;
 
-    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-      app = firebase.app();
-      auth = firebase.auth();
-      db = firebase.firestore();
+if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+  app = firebase.app();
+  auth = firebase.auth();
+  db = firebase.firestore();
+} else {
+  const firebaseConfig = {
+    apiKey: "AIzaSyBoTP0oJH4q3yrc0N8sCv9ynKN53dN-UbU",
+    authDomain: "gurpsroll.firebaseapp.com",
+    projectId: "gurpsroll"
+  };
+  app = firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+}
+
+// ===========================================
+// VERIFICAÇÃO DE AUTENTICAÇÃO
+// ===========================================
+auth.onAuthStateChanged((user) => {
+  if (!user) {
+    window.location.href = 'index.html';
+  }
+});
+
+// ===========================================
+// CONTROLE DAS ABAS - VERSÃO CORRIGIDA
+// ===========================================
+function openTab(tabName) {
+  console.log('Tentando abrir aba:', tabName);
+  
+  // Esconde todas as abas
+  const tabContents = document.querySelectorAll('.tab-content');
+  tabContents.forEach(tab => {
+    tab.style.display = 'none';
+  });
+  
+  // Remove classe active de todas as abas principais
+  const mainTabs = document.querySelectorAll('.main-tab');
+  mainTabs.forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  // Ativa a aba clicada - VERSÃO MAIS ROBUSTA
+  const clickedTab = Array.from(mainTabs).find(tab => {
+    const onclickAttr = tab.getAttribute('onclick');
+    return onclickAttr && onclickAttr.includes(`openTab('${tabName}')`);
+  });
+  
+  if (clickedTab) {
+    clickedTab.classList.add('active');
+  } else {
+    console.error('Botão da aba não encontrado:', tabName);
+    // Tenta encontrar por texto aproximado (para "vantagens")
+    if (tabName === 'vantagens') {
+      const vantagemTab = Array.from(mainTabs).find(tab => 
+        tab.textContent.includes('Vant/Desv')
+      );
+      if (vantagemTab) {
+        vantagemTab.classList.add('active');
+      }
+    }
+  }
+  
+  // Mostra sub-abas apenas para Características
+  const subTabsContainer = document.getElementById('subTabsContainer');
+  if (tabName === 'caracteristicas') {
+    if (subTabsContainer) {
+      subTabsContainer.style.display = 'block';
+      // Garante que as sub-abas existem antes de mostrar
+      const sociaisSubtab = document.getElementById('sociais-subtab');
+      const fisicasSubtab = document.getElementById('fisicas-subtab');
+      if (sociaisSubtab) sociaisSubtab.style.display = 'block';
+      if (fisicasSubtab) fisicasSubtab.style.display = 'none';
+    }
+  } else {
+    if (subTabsContainer) subTabsContainer.style.display = 'none';
+  }
+  
+  // Mostra conteúdo da aba - USANDO O ID EXATO DO HTML
+  let tabId;
+  switch(tabName) {
+    case 'dashboard':
+      tabId = 'dashboard-tab';
+      break;
+    case 'atributos':
+      tabId = 'atributos-tab';
+      break;
+    case 'caracteristicas':
+      tabId = 'caracteristicas-tab';
+      break;
+    case 'vantagens':
+      tabId = 'vantagens-tab'; // ← ESTE É O ID CORRETO
+      break;
+    case 'pericias':
+      tabId = 'pericias-tab';
+      break;
+    case 'magias':
+      tabId = 'magias-tab';
+      break;
+    case 'equipamento':
+      tabId = 'equipamento-tab';
+      break;
+    case 'combate':
+      tabId = 'combate-tab';
+      break;
+    case 'resumo':
+      tabId = 'resumo-tab';
+      break;
+    default:
+      console.error('TabName desconhecido:', tabName);
+      return;
+  }
+  
+  const tabContent = document.getElementById(tabId);
+  if (tabContent) {
+    tabContent.style.display = 'block';
+    console.log('Aba mostrada:', tabId);
+    
+    // Se for a aba de vantagens, inicializa os sistemas
+    if (tabName === 'vantagens') {
+      inicializarSistemaVantagens();
+    }
+  } else {
+    console.error('Elemento não encontrado:', tabId);
+  }
+}
+
+// ===========================================
+// CONTROLE DAS SUB-ABAS
+// ===========================================
+function openSubTab(subTabName) {
+  // Remove classe active de todas as sub-abas
+  const subTabs = document.querySelectorAll('.sub-tab');
+  subTabs.forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  // Ativa a sub-aba clicada
+  document.querySelector(`.sub-tab[onclick*="${subTabName}"]`).classList.add('active');
+  
+  // Mostra conteúdo da sub-aba
+  document.getElementById('sociais-subtab').style.display = 'none';
+  document.getElementById('fisicas-subtab').style.display = 'none';
+  document.getElementById(`${subTabName}-subtab`).style.display = 'block';
+}
+
+// ===========================================
+// FUNÇÕES DE NAVEGAÇÃO
+// ===========================================
+function goToCharacterMode() {
+  if (confirm('Deseja voltar? As alterações não salvas serão perdidas.')) {
+    window.location.href = 'modo-personagem.html';
+  }
+}
+
+function saveCharacter() {
+  alert('Função de salvar personagem em desenvolvimento. Será implementada com Firebase.');
+}
+
+// ===========================================
+// SISTEMA VANTAGENS/DESVANTAGENS
+// ===========================================
+let sistemaVantagens = null;
+let sistemaDesvantagens = null;
+let modalTipoAtual = '';
+let modalIdAtual = '';
+let opcaoSelecionada = null;
+
+function inicializarSistemaVantagens() {
+  try {
+    // Verifica se as classes estão disponíveis
+    if (typeof SistemaVantagens !== 'undefined' && typeof SistemaDesvantagens !== 'undefined') {
+      if (!sistemaVantagens) sistemaVantagens = new SistemaVantagens();
+      if (!sistemaDesvantagens) sistemaDesvantagens = new SistemaDesvantagens();
+      console.log('✅ Sistemas de Vantagens/Desvantagens inicializados');
+      
+      // Atualiza o resumo se já houver dados
+      atualizarResumoPontos();
     } else {
-      const firebaseConfig = {
-        apiKey: "AIzaSyBoTP0oJH4q3yrc0N8sCv9ynKN53dN-UbU",
-        authDomain: "gurpsroll.firebaseapp.com",
-        projectId: "gurpsroll"
-      };
-      app = firebase.initializeApp(firebaseConfig);
-      auth = firebase.auth();
-      db = firebase.firestore();
+      console.warn('⚠️ Classes de Vantagens/Desvantagens não encontradas');
     }
+  } catch (error) {
+    console.error('❌ Erro ao inicializar sistemas:', error);
+  }
+}
 
-    // ===========================================
-    // VERIFICAÇÃO DE AUTENTICAÇÃO
-    // ===========================================
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
-        window.location.href = 'index.html';
+// ===== FUNÇÕES BÁSICAS =====
+
+function atualizarResumoPontos() {
+    if (!sistemaVantagens || !sistemaDesvantagens) return;
+    
+    const pontosVantagens = sistemaVantagens.getPontosGastos();
+    const pontosDesvantagens = sistemaDesvantagens.getPontosGanhos();
+    const peculiaridadesAtivas = sistemaDesvantagens.getPeculiaridadesAtivas().length;
+    const saldo = pontosVantagens + pontosDesvantagens;
+    
+    const vantagemTotalEl = document.querySelector('.vantagem-total');
+    const desvantagemTotalEl = document.querySelector('.desvantagem-total');
+    const peculiaridadesTotalEl = document.querySelector('.peculiaridades-total');
+    const peculiaridadesContadorEl = document.querySelector('.peculiaridades-contador');
+    const saldoFinalEl = document.querySelector('.saldo-final');
+    
+    if (vantagemTotalEl) vantagemTotalEl.textContent = pontosVantagens;
+    if (desvantagemTotalEl) desvantagemTotalEl.textContent = Math.abs(pontosDesvantagens);
+    if (peculiaridadesTotalEl) peculiaridadesTotalEl.textContent = peculiaridadesAtivas;
+    if (peculiaridadesContadorEl) peculiaridadesContadorEl.textContent = `(${peculiaridadesAtivas}/5)`;
+    if (saldoFinalEl) saldoFinalEl.textContent = saldo;
+}
+
+function atualizarPeculiaridade(indice, valor) {
+    if (!sistemaDesvantagens) return;
+    
+    if (valor && valor.trim() !== '') {
+        sistemaDesvantagens.adicionarPeculiaridade(valor, indice);
+    } else {
+        sistemaDesvantagens.removerPeculiaridade(indice);
+    }
+    atualizarResumoPontos();
+}
+
+// ===== FUNÇÕES DE VANTAGENS =====
+
+function adicionarVantagem(id) {
+    if (!sistemaVantagens || !window.CatalogoVantagens) {
+        alert("Sistema de vantagens não carregado");
+        return;
+    }
+    
+    const vantagem = window.CatalogoVantagens.getPorId(id);
+    if (!vantagem) {
+        alert("Vantagem não encontrada");
+        return;
+    }
+    
+    const resultado = sistemaVantagens.adicionarSimples(vantagem);
+    if (resultado.sucesso) {
+        atualizarVantagensAdquiridas();
+        atualizarResumoPontos();
+        alert(resultado.mensagem);
+    } else {
+        alert(resultado.mensagem);
+    }
+}
+
+function mostrarOpcoesVantagem(id) {
+    if (!window.CatalogoVantagens) {
+        alert("Catálogo não carregado");
+        return;
+    }
+    
+    const vantagem = window.CatalogoVantagens.getPorId(id);
+    if (!vantagem || !vantagem.opcoes) {
+        alert("Esta vantagem não tem opções");
+        return;
+    }
+    
+    modalTipoAtual = 'vantagem';
+    modalIdAtual = id;
+    abrirModal(vantagem);
+}
+
+function atualizarVantagensAdquiridas() {
+    if (!sistemaVantagens) return;
+    
+    const container = document.getElementById('vantagens-adquiridas');
+    if (!container) return;
+    
+    const vantagens = sistemaVantagens.getVantagensSelecionadas();
+    
+    if (vantagens.length === 0) {
+        container.innerHTML = `
+            <div class="vazio-mensagem">
+                <i class="fas fa-info-circle"></i>
+                <p>Nenhuma vantagem selecionada ainda</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    vantagens.forEach(vantagem => {
+        html += `
+            <div class="adquirida-card vantagem-adquirida" data-id="${vantagem.id}">
+                <button class="btn-remover" onclick="removerVantagem('${vantagem.id}')">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="adquirida-header">
+                    <h4 class="adquirida-titulo">${vantagem.nomeCompleto || vantagem.nome}</h4>
+                    <div class="adquirida-pontos">+${vantagem.custo}</div>
+                </div>
+                <div class="adquirida-info">
+                    <span>Categoria: ${vantagem.categoria}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function removerVantagem(id) {
+    if (!sistemaVantagens) return;
+    
+    const resultado = sistemaVantagens.removerVantagem(id);
+    if (resultado.sucesso) {
+        atualizarVantagensAdquiridas();
+        atualizarResumoPontos();
+        alert(resultado.mensagem);
+    } else {
+        alert(resultado.mensagem);
+    }
+}
+
+// ===== FUNÇÕES DE DESVANTAGENS =====
+
+function adicionarDesvantagem(id) {
+    if (!sistemaDesvantagens || !window.CatalogoDesvantagens) {
+        alert("Sistema de desvantagens não carregado");
+        return;
+    }
+    
+    const desvantagem = window.CatalogoDesvantagens.getPorId(id);
+    if (!desvantagem) {
+        alert("Desvantagem não encontrada");
+        return;
+    }
+    
+    const resultado = sistemaDesvantagens.adicionarSimples(desvantagem);
+    if (resultado.sucesso) {
+        atualizarDesvantagensAdquiridas();
+        atualizarResumoPontos();
+        alert(resultado.mensagem);
+    } else {
+        alert(resultado.mensagem);
+    }
+}
+
+function mostrarOpcoesDesvantagem(id) {
+    if (!window.CatalogoDesvantagens) {
+        alert("Catálogo não carregado");
+        return;
+    }
+    
+    const desvantagem = window.CatalogoDesvantagens.getPorId(id);
+    if (!desvantagem || !desvantagem.opcoes) {
+        alert("Esta desvantagem não tem opções");
+        return;
+    }
+    
+    modalTipoAtual = 'desvantagem';
+    modalIdAtual = id;
+    abrirModal(desvantagem);
+}
+
+function atualizarDesvantagensAdquiridas() {
+    if (!sistemaDesvantagens) return;
+    
+    const container = document.getElementById('desvantagens-adquiridas');
+    if (!container) return;
+    
+    const desvantagens = sistemaDesvantagens.getDesvantagensSelecionadas();
+    
+    if (desvantagens.length === 0) {
+        container.innerHTML = `
+            <div class="vazio-mensagem">
+                <i class="fas fa-info-circle"></i>
+                <p>Nenhuma desvantagem selecionada ainda</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    desvantagens.forEach(desvantagem => {
+        const custo = Math.abs(desvantagem.custo);
+        html += `
+            <div class="adquirida-card desvantagem-adquirida" data-id="${desvantagem.id}">
+                <button class="btn-remover" onclick="removerDesvantagem('${desvantagem.id}')">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="adquirida-header">
+                    <h4 class="adquirida-titulo">${desvantagem.nomeCompleto || desvantagem.nome}</h4>
+                    <div class="adquirida-pontos">-${custo}</div>
+                </div>
+                <div class="adquirida-info">
+                    <span>Categoria: ${desvantagem.categoria}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function removerDesvantagem(id) {
+    if (!sistemaDesvantagens) return;
+    
+    const resultado = sistemaDesvantagens.removerDesvantagem(id);
+    if (resultado.sucesso) {
+        atualizarDesvantagensAdquiridas();
+        atualizarResumoPontos();
+        alert(resultado.mensagem);
+    } else {
+        alert(resultado.mensagem);
+    }
+}
+
+// ===== FUNÇÕES DO MODAL =====
+
+function abrirModal(item) {
+    if (!item) return;
+    
+    const modal = document.getElementById('opcoes-modal');
+    const titulo = document.getElementById('modal-titulo');
+    const descricao = document.getElementById('modal-descricao');
+    const container = document.getElementById('opcoes-container');
+    const pontosTotal = document.getElementById('modal-pontos-total');
+    
+    if (!modal || !titulo || !descricao || !container) return;
+    
+    titulo.textContent = item.nome;
+    descricao.innerHTML = `
+        <p><strong>Descrição:</strong> ${item.descricao}</p>
+        ${item.detalhes ? `<p><strong>Detalhes:</strong> ${item.detalhes}</p>` : ''}
+    `;
+    
+    container.innerHTML = '';
+    item.opcoes.forEach((opcao, index) => {
+        const div = document.createElement('div');
+        div.className = 'opcao-item';
+        div.innerHTML = `
+            <div class="opcao-header">
+                <h4 class="opcao-titulo">${opcao.nome}</h4>
+                <div class="opcao-pontos">${opcao.custo > 0 ? '+' : ''}${opcao.custo}</div>
+            </div>
+            <div class="opcao-descricao">${opcao.descricao}</div>
+        `;
+        div.addEventListener('click', () => selecionarOpcao(opcao, index));
+        container.appendChild(div);
+    });
+    
+    pontosTotal.textContent = '0';
+    modal.style.display = 'flex';
+    opcaoSelecionada = null;
+    atualizarBotoesModal();
+}
+
+function selecionarOpcao(opcao, index) {
+    document.querySelectorAll('.opcao-item').forEach(el => {
+        el.classList.remove('selecionada');
+    });
+    
+    const items = document.querySelectorAll('.opcao-item');
+    if (items[index]) {
+        items[index].classList.add('selecionada');
+    }
+    
+    opcaoSelecionada = opcao;
+    const pontosTotal = document.getElementById('modal-pontos-total');
+    if (pontosTotal) {
+        pontosTotal.textContent = opcao.custo;
+    }
+    atualizarBotoesModal();
+}
+
+function atualizarBotoesModal() {
+    const btnConfirmar = document.querySelector('.btn-confirmar');
+    if (btnConfirmar) {
+        btnConfirmar.disabled = !opcaoSelecionada;
+    }
+}
+
+function confirmarSelecao() {
+    if (!opcaoSelecionada) return;
+    
+    if (modalTipoAtual === 'vantagem') {
+        const vantagem = window.CatalogoVantagens.getPorId(modalIdAtual);
+        if (vantagem && sistemaVantagens) {
+            const resultado = sistemaVantagens.adicionarComOpcao(vantagem, opcaoSelecionada);
+            if (resultado.sucesso) {
+                atualizarVantagensAdquiridas();
+                atualizarResumoPontos();
+                alert(resultado.mensagem);
+            }
+        }
+    } else if (modalTipoAtual === 'desvantagem') {
+        const desvantagem = window.CatalogoDesvantagens.getPorId(modalIdAtual);
+        if (desvantagem && sistemaDesvantagens) {
+            const resultado = sistemaDesvantagens.adicionarComOpcao(desvantagem, opcaoSelecionada);
+            if (resultado.sucesso) {
+                atualizarDesvantagensAdquiridas();
+                atualizarResumoPontos();
+                alert(resultado.mensagem);
+            }
+        }
+    }
+    
+    fecharModal();
+}
+
+function fecharModal() {
+    const modal = document.getElementById('opcoes-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    modalTipoAtual = '';
+    modalIdAtual = '';
+    opcaoSelecionada = null;
+}
+
+// ===========================================
+// INICIALIZAÇÃO GERAL
+// ===========================================
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('✅ Criar Personagem - Carregado');
+  
+  // Inicializa sistemas de Vantagens/Desvantagens (se já estiverem carregados)
+  setTimeout(() => {
+    inicializarSistemaVantagens();
+  }, 500);
+  
+  // Configura eventos do modal
+  const modal = document.getElementById('opcoes-modal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        fecharModal();
       }
     });
-
-    // ===========================================
-    // CONTROLE DAS ABAS
-    // ===========================================
-    function openTab(tabName) {
-      // Esconde todas as abas
-      const tabContents = document.querySelectorAll('.tab-content');
-      tabContents.forEach(tab => {
-        tab.style.display = 'none';
-      });
-      
-      // Remove classe active de todas as abas
-      const mainTabs = document.querySelectorAll('.main-tab');
-      mainTabs.forEach(tab => {
-        tab.classList.remove('active');
-      });
-      
-      // Ativa a aba clicada
-      document.querySelector(`.main-tab[onclick*="${tabName}"]`).classList.add('active');
-      
-      // Mostra sub-abas apenas para Características
-      const subTabsContainer = document.getElementById('subTabsContainer');
-      if (tabName === 'caracteristicas') {
-        subTabsContainer.style.display = 'block';
-        // Mostra a primeira sub-aba
-        document.getElementById('sociais-subtab').style.display = 'block';
-        document.getElementById('fisicas-subtab').style.display = 'none';
-      } else {
-        subTabsContainer.style.display = 'none';
-      }
-      
-      // Mostra conteúdo da aba
-      document.getElementById(`${tabName}-tab`).style.display = 'block';
+    
+    const btnCancelar = modal.querySelector('.btn-cancelar');
+    const btnFechar = modal.querySelector('.modal-close');
+    
+    if (btnCancelar) {
+      btnCancelar.addEventListener('click', fecharModal);
     }
-
-    // ===========================================
-    // CONTROLE DAS SUB-ABAS
-    // ===========================================
-    function openSubTab(subTabName) {
-      // Remove classe active de todas as sub-abas
-      const subTabs = document.querySelectorAll('.sub-tab');
-      subTabs.forEach(tab => {
-        tab.classList.remove('active');
-      });
-      
-      // Ativa a sub-aba clicada
-      document.querySelector(`.sub-tab[onclick*="${subTabName}"]`).classList.add('active');
-      
-      // Mostra conteúdo da sub-aba
-      document.getElementById('sociais-subtab').style.display = 'none';
-      document.getElementById('fisicas-subtab').style.display = 'none';
-      document.getElementById(`${subTabName}-subtab`).style.display = 'block';
+    if (btnFechar) {
+      btnFechar.addEventListener('click', fecharModal);
     }
-
-    // ===========================================
-    // FUNÇÕES DE NAVEGAÇÃO
-    // ===========================================
-    function goToCharacterMode() {
-      if (confirm('Deseja voltar? As alterações não salvas serão perdidas.')) {
-        window.location.href = 'modo-personagem.html';
-      }
-    }
-
-    function saveCharacter() {
-      alert('Função de salvar personagem em desenvolvimento. Será implementada com Firebase.');
-    }
-
-    // Inicializar com Dashboard aberto
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log(' Criar Personagem - Em desenvolvimento');
+  }
+  
+  // Configura eventos dos filtros
+  document.querySelectorAll('.btn-categoria').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('ativo'));
+      this.classList.add('ativo');
+      console.log(`Filtrando por: ${this.dataset.categoria}`);
     });
+  });
+  
+  // Inicializa com Dashboard aberto
+  openTab('dashboard');
+});
   </script>
 </body>
 </html>
