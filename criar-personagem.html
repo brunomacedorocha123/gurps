@@ -495,6 +495,35 @@
                 left: 10px;
             }
         }
+
+        /* === CORREÇÃO DEFINITIVA PARA OPACITY === */
+#vantagens {
+    opacity: 1 !important;
+    animation: none !important;
+}
+
+.tab-content#vantagens {
+    opacity: 1 !important;
+}
+
+#vantagens.tab-content {
+    opacity: 1 !important;
+}
+
+#vantagens.tab-content.active {
+    opacity: 1 !important;
+}
+
+/* Remover qualquer keyframe que afete opacity */
+@keyframes overrideFadeIn {
+    from { opacity: 1 !important; }
+    to { opacity: 1 !important; }
+}
+
+#vantagens {
+    animation-name: overrideFadeIn !important;
+    animation-duration: 0.001s !important;
+}
     </style>
 </head>
 <body>
@@ -1306,10 +1335,7 @@
         </div>
     </div>
 </div>
-<!-- TESTE DE DIV -->
-<div style="background: red; padding: 10px; color: white;">
-  SE ISSO APARECER, A ESTRUTURA ATÉ AQUI ESTÁ OK
-</div>
+
 
 
                <!-- ABA VANTAGENS - VERSÃO CORRIGIDA -->
