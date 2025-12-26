@@ -496,7 +496,67 @@
             }
         }
 
-    
+    /* ============================================ */
+/* CORREÇÃO DEFINITIVA DO SISTEMA DE ABAS      */
+/* SOBRESCREVE QUALQUER CSS ANTERIOR           */
+/* ============================================ */
+
+/* 1. REMOVE display: none das abas INATIVAS */
+.tab-content:not(.active) {
+    display: none !important;
+}
+
+/* 2. GARANTE que abas ATIVAS sejam visíveis */
+.tab-content.active {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* 3. CORRIGE a animação para não atrapalhar */
+.tab-content {
+    animation: fadeIn 0.3s ease forwards !important;
+    min-height: 500px;
+}
+
+/* 4. GARANTE que todas as abas específicas funcionem */
+#dashboard.tab-content.active,
+#atributos.tab-content.active,
+#caracteristicas.tab-content.active,
+#vantagens.tab-content.active,
+#pericias.tab-content.active,
+#magia.tab-content.active,
+#combate.tab-content.active,
+#equipamento.tab-content.active,
+#resumo.tab-content.active {
+    display: block !important;
+    opacity: 1 !important;
+}
+
+/* 5. CORREÇÃO DA ANIMAÇÃO fadeIn */
+@keyframes fadeIn {
+    0% { 
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% { 
+        opacity: 1 !important;  /* ⚠️ FORÇA opacity: 1 no final */
+        transform: translateY(0);
+    }
+}
+
+/* 6. REMOVE qualquer problema de z-index ou posição */
+main.main-content {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.tab-content {
+    position: relative !important;
+    z-index: 2 !important;
+}
     </style>
 </head>
 <body>
